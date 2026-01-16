@@ -48,17 +48,15 @@ const Skeleton: React.FC<SkeletonProps> = ({
           height,
           borderRadius,
           backgroundColor: baseColor,
-          overflow: 'hidden',
         },
         style,
       ]}
     >
       <Animated.View
-        style={{
-          width: '100%',
-          height: '100%',
-          transform: [{ translateX }],
-        }}
+        style={[
+          styles.animatedView,
+          { transform: [{ translateX }] }
+        ]}
       >
         <LinearGradient
           colors={[baseColor, highlightColor, baseColor]}
@@ -73,7 +71,11 @@ const Skeleton: React.FC<SkeletonProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    // Base styles
+    overflow: 'hidden',
+  },
+  animatedView: {
+    width: '100%',
+    height: '100%',
   },
 });
 

@@ -37,16 +37,34 @@ const StockItem: React.FC<StockData> = ({
   // Format price
   const formattedPrice = price.toLocaleString('es-VE', { minimumFractionDigits: 4 });
   const formattedChange = (changePercent > 0 ? '+' : '') + changePercent.toFixed(2) + '%';
+  
+  const containerStyle = [
+    styles.container,
+    { 
+      backgroundColor: theme.colors.surface,
+      borderColor: theme.dark ? 'rgba(255,255,255,0.05)' : '#F3F4F6',
+    }
+  ];
+
+  const changeColor = isPositive ? '#10B981' : isNegative ? '#EF4444' : theme.colors.onSurfaceVariant;
+  const changeTextStyle = [
+    styles.changeText,
+    { color: changeColor }
+  ];
+
+  const badgeBackgroundColor = (!isPositive && !isNegative) 
+    ? (theme.dark ? 'rgba(255,255,255,0.05)' : '#F3F4F6') 
+    : undefined;
+
+  const badgeStyle = [
+    styles.changeBadge,
+    !isPositive && !isNegative && styles.neutralBadge,
+    { backgroundColor: badgeBackgroundColor }
+  ];
 
   return (
     <TouchableOpacity 
-      style={[
-        styles.container, 
-        { 
-          backgroundColor: theme.colors.surface,
-          borderColor: theme.dark ? 'rgba(255,255,255,0.05)' : '#F3F4F6',
-        }
-      ]}
+      style={containerStyle}
       activeOpacity={0.7}
     >
       <View style={styles.leftContent}>
@@ -75,20 +93,13 @@ const StockItem: React.FC<StockData> = ({
         <Text style={[styles.price, { color: theme.colors.onSurface }]}>
           {formattedPrice}
         </Text>
-        <View style={[
-          styles.changeBadge,
-          !isPositive && !isNegative && styles.neutralBadge,
-          { backgroundColor: (!isPositive && !isNegative) ? (theme.dark ? 'rgba(255,255,255,0.05)' : '#F3F4F6') : undefined }
-        ]}>
+        <View style={badgeStyle}>
           {isPositive ? (
             <MaterialIcons name="trending-up" size={12} color="#10B981" />
           ) : isNegative ? (
             <MaterialIcons name="trending-down" size={12} color="#EF4444" />
           ) : null}
-          <Text style={[
-            styles.changeText,
-            { color: isPositive ? '#10B981' : isNegative ? '#EF4444' : theme.colors.onSurfaceVariant }
-          ]}>
+          <Text style={changeTextStyle}>
             {formattedChange}
           </Text>
         </View>

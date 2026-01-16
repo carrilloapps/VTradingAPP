@@ -55,7 +55,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
       
       <View style={styles.textContainer}>
         <Text style={[styles.subtitle, { color: theme.colors.onSurfaceVariant }]}>GLOBAL TRADING</Text>
-        <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: 'bold' }}>
+        <Text variant="titleMedium" style={[styles.greeting, { color: theme.colors.onSurface }]}>
           Hola, {userName}
         </Text>
       </View>
@@ -64,11 +64,11 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
 
   const renderSectionContent = () => (
     <View style={styles.textContainer}>
-      <Text variant="headlineSmall" style={{ fontWeight: '800', letterSpacing: -0.5, color: theme.colors.onSurface }}>
+      <Text variant="headlineSmall" style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>
         {title}
       </Text>
       {subtitle && (
-        <Text style={{ fontSize: 13, fontWeight: '500', color: theme.colors.onSurfaceVariant, marginTop: 4 }}>
+        <Text style={[styles.subtitleText, { color: theme.colors.onSurfaceVariant }]}>
           {subtitle}
         </Text>
       )}
@@ -76,8 +76,8 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   );
 
   const renderSimpleContent = () => (
-    <View style={[styles.textContainer, { alignItems: 'center', width: '100%' }]}>
-       <Text variant="titleLarge" style={{ fontWeight: '800', textAlign: 'center', color: theme.colors.onSurface }}>
+    <View style={[styles.textContainer, styles.simpleHeaderContainer]}>
+       <Text variant="titleLarge" style={[styles.simpleTitle, { color: theme.colors.onSurface }]}>
           {title}
         </Text>
     </View>
@@ -203,7 +203,27 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     borderWidth: 1,
-  }
+  },
+  greeting: {
+    fontWeight: 'bold',
+  },
+  sectionTitle: {
+    fontWeight: '800',
+    letterSpacing: -0.5,
+  },
+  subtitleText: {
+    fontSize: 13,
+    fontWeight: '500',
+    marginTop: 4,
+  },
+  simpleHeaderContainer: {
+    alignItems: 'center',
+    width: '100%',
+  },
+  simpleTitle: {
+    fontWeight: '800',
+    textAlign: 'center',
+  },
 });
 
 export default UnifiedHeader;

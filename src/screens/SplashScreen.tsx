@@ -44,7 +44,7 @@ const SplashScreen = () => {
           <Text variant="displayMedium" style={[styles.logoText, { color: theme.colors.primary }]}>
             VTrading
           </Text>
-          <Text variant="titleMedium" style={{ color: theme.colors.onSurfaceVariant, letterSpacing: 2 }}>
+          <Text variant="titleMedium" style={[styles.appText, { color: theme.colors.onSurfaceVariant }]}>
             APP
           </Text>
         </View>
@@ -60,7 +60,7 @@ const SplashScreen = () => {
           />
         </View>
 
-        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginTop: 20 }}>
+        <Text variant="bodySmall" style={[styles.loadingText, { color: theme.colors.onSurfaceVariant }]}>
           Cargando mercados...
         </Text>
       </View>
@@ -96,6 +96,12 @@ const styles = StyleSheet.create({
   lottie: {
     width: '100%',
     height: '100%',
+  },
+  appText: {
+    letterSpacing: 2,
+  },
+  loadingText: {
+    marginTop: 20,
   },
 });
 

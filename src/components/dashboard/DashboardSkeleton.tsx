@@ -19,7 +19,7 @@ const DashboardSkeleton = () => {
             <Skeleton width={32} height={32} borderRadius={16} />
           </View>
         </View>
-        <Skeleton width={180} height={28} style={{ marginTop: 8 }} />
+        <Skeleton width={180} height={28} style={styles.headerTitleSkeleton} />
       </View>
 
       {/* Market Status Skeleton */}
@@ -29,7 +29,7 @@ const DashboardSkeleton = () => {
 
       {/* Exchange Cards Skeleton */}
       <View style={styles.section}>
-        <Skeleton width="100%" height={140} borderRadius={16} style={{ marginBottom: 12 }} />
+        <Skeleton width="100%" height={140} borderRadius={16} style={styles.firstCardSkeleton} />
         <Skeleton width="100%" height={140} borderRadius={16} />
       </View>
 
@@ -37,21 +37,21 @@ const DashboardSkeleton = () => {
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
           <Skeleton width={32} height={32} borderRadius={8} />
-          <Skeleton width={150} height={20} style={{ marginLeft: 8 }} />
+          <Skeleton width={150} height={20} style={styles.sectionTitleSkeleton} />
         </View>
         
         {[1, 2, 3].map((_, index) => (
           <View key={index} style={[styles.stockItem, { borderBottomColor: theme.colors.outline }]}>
             <View style={styles.stockLeft}>
               <Skeleton width={40} height={40} borderRadius={8} />
-              <View style={{ marginLeft: 12 }}>
+              <View style={styles.stockContent}>
                 <Skeleton width={60} height={16} />
-                <Skeleton width={100} height={12} style={{ marginTop: 4 }} />
+                <Skeleton width={100} height={12} style={styles.stockSubtitleSkeleton} />
               </View>
             </View>
             <View style={styles.stockRight}>
               <Skeleton width={80} height={16} />
-              <Skeleton width={50} height={12} style={{ marginTop: 4 }} />
+              <Skeleton width={50} height={12} style={styles.stockSubtitleSkeleton} />
             </View>
           </View>
         ))}
@@ -96,7 +96,22 @@ const styles = StyleSheet.create({
   },
   stockRight: {
     alignItems: 'flex-end',
-  }
+  },
+  headerTitleSkeleton: {
+    marginTop: 8,
+  },
+  firstCardSkeleton: {
+    marginBottom: 12,
+  },
+  sectionTitleSkeleton: {
+    marginLeft: 8,
+  },
+  stockContent: {
+    marginLeft: 12,
+  },
+  stockSubtitleSkeleton: {
+    marginTop: 4,
+  },
 });
 
 export default DashboardSkeleton;

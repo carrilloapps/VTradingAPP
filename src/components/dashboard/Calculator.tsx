@@ -7,7 +7,6 @@ const Calculator: React.FC = () => {
   const theme = useTheme();
   const colors = theme.colors as any;
   const [amount, setAmount] = useState('1000');
-  const [currency, setCurrency] = useState('USD');
   const rate = 58.25; // Approximate VES rate
   const [result, setResult] = useState('');
 
@@ -44,15 +43,15 @@ const Calculator: React.FC = () => {
             value={amount}
             onChangeText={calculate}
             keyboardType="numeric"
-            style={[styles.input, { backgroundColor: 'transparent', color: theme.colors.onSurface }]}
+            style={[styles.input, styles.transparentBackground, { color: theme.colors.onSurface }]}
             underlineColor="transparent"
             textColor={theme.colors.onSurface}
             placeholderTextColor={theme.colors.onSurfaceVariant}
-            contentStyle={{ paddingHorizontal: 0, paddingVertical: 0 }}
+            contentStyle={styles.noPadding}
           />
         </View>
-        <View style={[styles.currencyBadge, { backgroundColor: 'rgba(255,255,255,0.05)', borderColor: theme.colors.outline }]}>
-          <Text style={{ color: theme.colors.onSurface, fontWeight: '700' }}>USD</Text>
+        <View style={[styles.currencyBadge, styles.badgeBackground, { borderColor: theme.colors.outline }]}>
+          <Text style={[styles.boldText, { color: theme.colors.onSurface }]}>USD</Text>
           <MaterialIcons name="keyboard-arrow-down" size={16} color={theme.colors.onSurfaceVariant} />
         </View>
       </View>
@@ -209,8 +208,21 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   button: {
-    borderRadius: 8,
-  }
+    borderRadius: 12,
+  },
+  transparentBackground: {
+    backgroundColor: 'transparent',
+  },
+  noPadding: {
+    paddingHorizontal: 0,
+    paddingVertical: 0,
+  },
+  badgeBackground: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+  },
+  boldText: {
+    fontWeight: '700',
+  },
 });
 
 export default Calculator;

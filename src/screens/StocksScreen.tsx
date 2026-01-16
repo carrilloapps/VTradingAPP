@@ -59,7 +59,7 @@ const StocksScreen = () => {
       />
 
       {/* Header */}
-      <View style={{ backgroundColor: theme.colors.background, paddingBottom: 16 }}>
+      <View style={[styles.headerContainer, { backgroundColor: theme.colors.background }]}>
         <UnifiedHeader
           variant="section"
           title="Mercados"
@@ -68,7 +68,7 @@ const StocksScreen = () => {
           rightActionIcon="refresh"
           onNotificationPress={() => {}}
           notificationCount={1}
-          style={{ paddingBottom: 0, borderBottomWidth: 0 }}
+          style={styles.headerStyle}
         />
         
         <View style={styles.searchContainer}>
@@ -85,7 +85,7 @@ const StocksScreen = () => {
 
       <ScrollView 
         style={styles.content}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         {/* Market Status */}
@@ -105,23 +105,27 @@ const StocksScreen = () => {
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filtersContent}>
             {FILTERS.map((filter) => {
               const isActive = activeFilter === filter;
+              const chipStyle = [
+                styles.chip,
+                { 
+                  backgroundColor: isActive ? theme.colors.primary : theme.colors.surface,
+                  borderColor: isActive ? theme.colors.primary : theme.colors.outline,
+                }
+              ];
+              const chipTextStyle = [
+                styles.chipText,
+                {
+                  color: isActive ? 'white' : theme.colors.onSurfaceVariant,
+                }
+              ];
+
               return (
                 <Chip
                   key={filter}
                   selected={isActive}
                   onPress={() => setStockFilters({ category: filter })}
-                  style={[
-                    styles.chip,
-                    { 
-                      backgroundColor: isActive ? theme.colors.primary : theme.colors.surface,
-                      borderColor: isActive ? theme.colors.primary : theme.colors.outline,
-                    }
-                  ]}
-                  textStyle={{
-                    color: isActive ? 'white' : theme.colors.onSurfaceVariant,
-                    fontWeight: 'bold',
-                    fontSize: 12,
-                  }}
+                  style={chipStyle}
+                  textStyle={chipTextStyle}
                   showSelectedOverlay={true}
                   accessibilityLabel={`Filtro: ${filter}`}
                   accessibilityState={{ selected: isActive }}
@@ -188,6 +192,20 @@ const styles = StyleSheet.create({
   },
   listContainer: {
     paddingHorizontal: 20,
+  },
+  headerContainer: {
+    paddingBottom: 16,
+  },
+  headerStyle: {
+    paddingBottom: 0,
+    borderBottomWidth: 0,
+  },
+  scrollContent: {
+    paddingBottom: 100,
+  },
+  chipText: {
+    fontWeight: 'bold',
+    fontSize: 12,
   },
 });
 

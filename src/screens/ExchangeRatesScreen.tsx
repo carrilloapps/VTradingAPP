@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, ActivityIndicator } from 'react-native';
-import { Text, useTheme, TouchableRipple, Chip } from 'react-native-paper';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { Text, useTheme, Chip } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import RateCard from '../components/dashboard/RateCard';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
@@ -12,7 +11,6 @@ import { useFilters } from '../context/FilterContext';
 
 const ExchangeRatesScreen = () => {
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
   const { exchangeRateFilters, setExchangeRateFilters } = useFilters();
   const { query: searchQuery, type: filterType } = exchangeRateFilters;
   
@@ -66,23 +64,9 @@ const ExchangeRatesScreen = () => {
     return result;
   }, [searchQuery, filterType, allRates]);
 
-  // Suggestions Logic
-  const suggestions = useMemo(() => {
-    if (!searchQuery || searchQuery.length < 2) return [];
-    const lower = searchQuery.toLowerCase();
-    return allRates
-      .filter(r => r.code.toLowerCase().includes(lower) || r.name.toLowerCase().includes(lower))
-      .slice(0, 3)
-      .map(r => r.name);
-  }, [searchQuery, allRates]);
-
   // Handle Search Input
   const handleSearch = (query: string) => {
     setExchangeRateFilters({ query });
-  };
-
-  const handleSuggestionPress = (suggestion: string) => {
-    setExchangeRateFilters({ query: suggestion });
   };
 
   // Group rates for display
@@ -111,12 +95,15 @@ const ExchangeRatesScreen = () => {
         onPress={() => setExchangeRateFilters({ type: value })}
         style={[
           styles.chip, 
-          isSelected ? { backgroundColor: theme.colors.primary, borderWidth: 0 } : { backgroundColor: 'transparent', borderWidth: 1, borderColor: theme.colors.outline }
+          isSelected 
+            ? [styles.chipSelected, { backgroundColor: theme.colors.primary }] 
+            : [styles.chipUnselected, { borderColor: theme.colors.outline }]
         ]}
-        textStyle={{
-          color: isSelected ? '#ffffff' : theme.colors.onSurfaceVariant,
-          fontWeight: isSelected ? '700' : '400'
-        }}
+        textStyle={
+          isSelected 
+            ? styles.chipTextSelected 
+            : [styles.chipTextUnselected, { color: theme.colors.onSurfaceVariant }]
+        }
         showSelectedOverlay={false}
         rippleColor={isSelected ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}
       >
@@ -134,7 +121,7 @@ const ExchangeRatesScreen = () => {
       />
 
       {/* Header */}
-      <View style={{ backgroundColor: theme.colors.background, paddingBottom: 16 }}>
+      <View style={[styles.headerContainer, { backgroundColor: theme.colors.background }]}>
         <UnifiedHeader
           variant="section"
           title="Tasas de Cambio"
@@ -142,10 +129,10 @@ const ExchangeRatesScreen = () => {
           onActionPress={() => loadRates()}
           onNotificationPress={() => {}}
           notificationCount={1}
-          style={{ paddingBottom: 0, borderBottomWidth: 0 }}
+          style={styles.headerStyle}
         />
         
-        <View style={{ paddingHorizontal: 20, marginTop: 8 }}>
+        <View style={styles.searchContainer}>
           <SearchBar 
             value={searchQuery}
             onChangeText={handleSearch}
@@ -156,7 +143,7 @@ const ExchangeRatesScreen = () => {
 
         {/* Filter Chips */}
         {showFilters && (
-          <View style={[styles.filterContainer, { paddingHorizontal: 20 }]}>
+          <View style={styles.filterContainer}>
             {renderChip('Todas', 'all')}
             {renderChip('Fiat', 'fiat')}
             {renderChip('Cripto', 'crypto')}
@@ -166,26 +153,26 @@ const ExchangeRatesScreen = () => {
 
       <ScrollView 
         style={styles.content}
-        contentContainerStyle={{ paddingBottom: 100 }}
+        contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         {loading && filteredRates.length === 0 ? (
           <View style={styles.centerContainer}>
             <ActivityIndicator size="large" color={theme.colors.primary} />
-            <Text style={{ marginTop: 10, color: theme.colors.onSurfaceVariant }}>Cargando tasas...</Text>
+            <Text style={[styles.messageText, { color: theme.colors.onSurfaceVariant }]}>Cargando tasas...</Text>
           </View>
         ) : error ? (
            <View style={styles.centerContainer}>
             <MaterialIcons name="error-outline" size={40} color={accentRed} />
-            <Text style={{ marginTop: 10, color: theme.colors.onSurface }}>{error}</Text>
-            <TouchableOpacity onPress={loadRates} style={{ marginTop: 10 }}>
-              <Text style={{ color: theme.colors.primary, fontWeight: 'bold' }}>Reintentar</Text>
+            <Text style={[styles.messageText, { color: theme.colors.onSurface }]}>{error}</Text>
+            <TouchableOpacity onPress={loadRates} style={styles.retryButton}>
+              <Text style={[styles.retryText, { color: theme.colors.primary }]}>Reintentar</Text>
             </TouchableOpacity>
           </View>
         ) : filteredRates.length === 0 ? (
           <View style={styles.centerContainer}>
              <MaterialIcons name="search-off" size={40} color={theme.colors.onSurfaceVariant} />
-             <Text style={{ marginTop: 10, color: theme.colors.onSurfaceVariant }}>
+             <Text style={[styles.messageText, { color: theme.colors.onSurfaceVariant }]}>
                {filterType !== 'all' 
                  ? `No hay resultados para "${filterType}"` 
                  : "No se encontraron resultados"}
@@ -299,10 +286,51 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: 12,
     gap: 8,
+    paddingHorizontal: 20,
   },
   chip: {
     marginRight: 4,
-  }
+  },
+  chipSelected: {
+    borderWidth: 0,
+  },
+  chipUnselected: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+  },
+  chipText: {
+    // Base text style if needed
+  },
+  chipTextSelected: {
+    fontWeight: '700',
+    color: '#ffffff',
+  },
+  chipTextUnselected: {
+    fontWeight: '400',
+  },
+  headerContainer: {
+    paddingBottom: 16,
+  },
+  headerStyle: {
+    paddingBottom: 0,
+    borderBottomWidth: 0,
+  },
+  searchContainer: {
+    paddingHorizontal: 20,
+    marginTop: 8,
+  },
+  scrollContent: {
+    paddingBottom: 100,
+  },
+  messageText: {
+    marginTop: 10,
+  },
+  retryButton: {
+    marginTop: 10,
+  },
+  retryText: {
+    fontWeight: 'bold',
+  },
 });
 
 export default ExchangeRatesScreen;

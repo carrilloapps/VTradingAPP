@@ -1,10 +1,8 @@
 import React from 'react';
-import { render, waitFor, act } from '@testing-library/react-native';
+import { render, waitFor } from '@testing-library/react-native';
 import HomeScreen from '../src/screens/HomeScreen';
-import { Provider as PaperProvider } from 'react-native-paper';
 import { ThemeProvider } from '../src/theme/ThemeContext';
 import { NavigationContainer } from '@react-navigation/native';
-import { CurrencyService } from '../src/services/CurrencyService';
 
 // Mock CurrencyService
 jest.mock('../src/components/dashboard/DashboardSkeleton', () => 'DashboardSkeleton');

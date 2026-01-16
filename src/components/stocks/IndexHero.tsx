@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, ImageStyle } from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
+import { View, StyleSheet } from 'react-native';
+import { Text } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
@@ -15,12 +15,9 @@ interface IndexHeroProps {
 const IndexHero: React.FC<IndexHeroProps> = ({
   value,
   changePercent,
-  isPositive,
   volume,
   opening,
 }) => {
-  const theme = useTheme();
-  
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -35,30 +32,30 @@ const IndexHero: React.FC<IndexHeroProps> = ({
         {/* Content */}
         <View style={styles.contentContainer}>
           <View style={styles.headerRow}>
-            <Text variant="labelMedium" style={{ color: 'rgba(255,255,255,0.7)', letterSpacing: 1, fontWeight: 'bold' }}>INDICE BURSÁTIL CARACAS</Text>
+            <Text variant="labelMedium" style={styles.headerText}>INDICE BURSÁTIL CARACAS</Text>
             <View style={styles.iconContainer}>
               <MaterialIcons name="show-chart" size={18} color="white" />
             </View>
           </View>
 
           <View style={styles.mainValueRow}>
-            <Text variant="displaySmall" style={{ color: 'white', fontWeight: 'bold' }}>{value}</Text>
+            <Text variant="displaySmall" style={styles.valueText}>{value}</Text>
             <View style={styles.changeBadge}>
               <MaterialIcons name="trending-up" size={16} color="#6EE7B7" />
-              <Text variant="labelLarge" style={{ color: '#6EE7B7', fontWeight: 'bold', marginLeft: 4 }}>{changePercent}</Text>
+              <Text variant="labelLarge" style={styles.changeText}>{changePercent}</Text>
             </View>
           </View>
 
           <View style={styles.statsRow}>
             <View>
-              <Text variant="labelSmall" style={{ color: 'rgba(255,255,255,0.6)', marginBottom: 4 }}>VOLUMEN</Text>
-              <Text variant="bodyMedium" style={{ color: 'white', fontWeight: 'bold' }}>
-                {volume} <Text variant="labelSmall" style={{ color: 'rgba(255,255,255,0.6)' }}>VES</Text>
+              <Text variant="labelSmall" style={styles.labelSmall}>VOLUMEN</Text>
+              <Text variant="bodyMedium" style={styles.whiteBold}>
+                {volume} <Text variant="labelSmall" style={styles.unitText}>VES</Text>
               </Text>
             </View>
-            <View style={{ alignItems: 'flex-end' }}>
-              <Text variant="labelSmall" style={{ color: 'rgba(255,255,255,0.6)', marginBottom: 4 }}>APERTURA</Text>
-              <Text variant="bodyMedium" style={{ color: 'white', fontWeight: 'bold' }}>{opening}</Text>
+            <View style={styles.rightAlign}>
+              <Text variant="labelSmall" style={styles.labelSmall}>APERTURA</Text>
+              <Text variant="bodyMedium" style={styles.whiteBold}>{opening}</Text>
             </View>
           </View>
         </View>
@@ -127,6 +124,34 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: 'rgba(255,255,255,0.1)',
     paddingTop: 16,
+  },
+  headerText: {
+    color: 'rgba(255,255,255,0.7)',
+    letterSpacing: 1,
+    fontWeight: 'bold',
+  },
+  valueText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  changeText: {
+    color: '#6EE7B7',
+    fontWeight: 'bold',
+    marginLeft: 4,
+  },
+  labelSmall: {
+    color: 'rgba(255,255,255,0.6)',
+    marginBottom: 4,
+  },
+  whiteBold: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  unitText: {
+    color: 'rgba(255,255,255,0.6)',
+  },
+  rightAlign: {
+    alignItems: 'flex-end',
   },
 });
 

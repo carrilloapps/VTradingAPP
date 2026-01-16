@@ -25,7 +25,7 @@ const UserProfileCard = () => {
       </View>
 
       <View style={styles.infoContainer}>
-        <Text variant="titleMedium" style={{ fontWeight: 'bold', color: theme.colors.onSurface }}>
+        <Text variant="titleMedium" style={[styles.userName, { color: theme.colors.onSurface }]}>
           Alejandro Rodriguez
         </Text>
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
@@ -84,7 +84,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 16,
-  }
+  },
+  userName: {
+    fontWeight: 'bold',
+  },
 });
 
 export default UserProfileCard;

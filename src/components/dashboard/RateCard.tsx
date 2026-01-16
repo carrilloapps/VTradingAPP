@@ -39,13 +39,13 @@ const RateCard: React.FC<RateCardProps> = ({
           <MaterialIcons name={iconName} size={24} color={finalIconColor} />
         </View>
         <View>
-          <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: 'bold' }}>{title}</Text>
+          <Text variant="titleMedium" style={[styles.titleText, { color: theme.colors.onSurface }]}>{title}</Text>
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{subtitle}</Text>
         </View>
       </View>
 
       <View style={styles.rightContent}>
-        <Text variant="headlineSmall" style={{ color: theme.colors.onSurface, fontWeight: 'bold' }}>
+        <Text variant="headlineSmall" style={[styles.valueText, { color: theme.colors.onSurface }]}>
           {value}
         </Text>
         <View style={styles.trendContainer}>
@@ -54,7 +54,7 @@ const RateCard: React.FC<RateCardProps> = ({
             size={16} 
             color={trendColor} 
           />
-          <Text variant="labelMedium" style={{ color: trendColor, fontWeight: 'bold', marginLeft: 2 }}>
+          <Text variant="labelMedium" style={[styles.trendText, { color: trendColor }]}>
             {isPositive ? '+' : ''}{changePercent}
           </Text>
         </View>
@@ -93,6 +93,16 @@ const styles = StyleSheet.create({
   rightContent: {
     alignItems: 'flex-end',
   },
+  titleText: {
+    fontWeight: 'bold',
+  },
+  valueText: {
+    fontWeight: 'bold',
+  },
+  trendText: {
+    fontWeight: 'bold',
+    marginLeft: 2,
+  },
   value: {
     fontSize: 17,
     fontWeight: '800',
@@ -103,10 +113,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     marginTop: 2,
-  },
-  trendText: {
-    fontSize: 12,
-    fontWeight: '700',
   },
 });
 

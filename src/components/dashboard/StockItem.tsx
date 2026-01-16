@@ -31,18 +31,18 @@ const StockItem: React.FC<StockItemProps> = ({
           <MaterialIcons name="show-chart" size={20} color={theme.colors.primary} />
         </View>
         <View>
-          <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: 'bold' }}>{symbol}</Text>
-          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{name}</Text>
+          <Text variant="titleMedium" style={[styles.symbol, { color: theme.colors.onSurface }]}>{symbol}</Text>
+          <Text variant="bodySmall" style={[styles.name, { color: theme.colors.onSurfaceVariant }]}>{name}</Text>
         </View>
       </View>
 
       <View style={styles.rightContent}>
-        <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: 'bold' }}>{value}</Text>
+        <Text variant="titleMedium" style={[styles.value, { color: theme.colors.onSurface }]}>{value}</Text>
         <View style={styles.trendContainer}>
-          <Text variant="labelSmall" style={{ color: trendColor, fontWeight: 'bold' }}>
+          <Text variant="labelSmall" style={[styles.change, { color: trendColor }]}>
             {isPositive ? '+' : ''}{change}
           </Text>
-          <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+          <Text variant="labelSmall" style={[styles.volume, { color: theme.colors.onSurfaceVariant }]}>
             Vol: {volume}
           </Text>
         </View>

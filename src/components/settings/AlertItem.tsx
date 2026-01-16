@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Text, useTheme, Switch } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
@@ -47,7 +47,7 @@ const AlertItem: React.FC<AlertItemProps> = ({
         
         <View style={styles.textContainer}>
           <View style={styles.headerRow}>
-            <Text variant="titleMedium" style={{ fontWeight: 'bold', color: theme.colors.onSurface }}>
+            <Text variant="titleMedium" style={[styles.symbolText, { color: theme.colors.onSurface }]}>
               {symbol}
             </Text>
             <View style={[styles.statusBadge, { backgroundColor: statusBg }]}>
@@ -57,7 +57,7 @@ const AlertItem: React.FC<AlertItemProps> = ({
             </View>
           </View>
           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-            Objetivo: <Text style={{ fontWeight: 'bold', color: theme.colors.onSurface }}>{target}</Text>
+            Objetivo: <Text style={[styles.targetText, { color: theme.colors.onSurface }]}>{target}</Text>
           </Text>
         </View>
       </View>
@@ -99,6 +99,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+  },
+  symbolText: {
+    fontWeight: 'bold',
+  },
+  targetText: {
+    fontWeight: 'bold',
   },
   statusBadge: {
     paddingHorizontal: 8,

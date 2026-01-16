@@ -2,11 +2,10 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import SettingsScreen from '../src/screens/SettingsScreen';
 import { Provider as PaperProvider } from 'react-native-paper';
-import { ThemeProvider } from '../src/theme/ThemeContext';
 
 // Mock dependencies
 jest.mock('react-native-safe-area-context', () => {
-  const React = require('react');
+  const ReactMock = require('react');
   const MOCK_INITIAL_METRICS = {
     frame: { x: 0, y: 0, width: 0, height: 0 },
     insets: { top: 0, left: 0, right: 0, bottom: 0 },
@@ -14,7 +13,7 @@ jest.mock('react-native-safe-area-context', () => {
   return {
     SafeAreaProvider: ({ children }: any) => children,
     SafeAreaConsumer: ({ children }: any) => children(MOCK_INITIAL_METRICS.insets),
-    SafeAreaInsetsContext: React.createContext(MOCK_INITIAL_METRICS.insets),
+    SafeAreaInsetsContext: ReactMock.createContext(MOCK_INITIAL_METRICS.insets),
     useSafeAreaInsets: () => MOCK_INITIAL_METRICS.insets,
     useSafeAreaFrame: () => MOCK_INITIAL_METRICS.frame,
     initialWindowMetrics: MOCK_INITIAL_METRICS,
@@ -42,7 +41,7 @@ describe('SettingsScreen', () => {
   };
 
   it('renders correctly', () => {
-    const { getByText, getByLabelText } = renderWithProvider(<SettingsScreen />);
+    const { getByText } = renderWithProvider(<SettingsScreen />);
     
     // Check Header
     expect(getByText('Configuración')).toBeTruthy();

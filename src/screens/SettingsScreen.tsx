@@ -76,11 +76,11 @@ const SettingsScreen = () => {
         variant="section"
         title="Configuración"
         showNotification={false}
-        style={{ borderBottomWidth: 0 }}
+        style={styles.header}
       />
 
       <ScrollView 
-        contentContainerStyle={[styles.content, { paddingBottom: 100 }]}
+        contentContainerStyle={[styles.content, styles.scrollContent]}
         showsVerticalScrollIndicator={false}
       >
         {/* User Profile */}
@@ -97,7 +97,7 @@ const SettingsScreen = () => {
               onPress={() => handleAction("Funcionalidad de Nueva Alerta en desarrollo")}
             >
               <MaterialIcons name="add" size={18} color={theme.colors.primary} />
-              <Text style={{ color: theme.colors.primary, fontWeight: '700', fontSize: 14 }}>Nueva Alerta</Text>
+              <Text style={[styles.newAlertText, { color: theme.colors.primary }]}>Nueva Alerta</Text>
             </TouchableOpacity>
           </View>
           
@@ -115,7 +115,7 @@ const SettingsScreen = () => {
               iconColor={colors.success} 
               iconBgColor={colors.successContainer} 
             />
-            <View style={{ height: 1, backgroundColor: theme.colors.outline }} />
+            <View style={[styles.separator, { backgroundColor: theme.colors.outline }]} />
             <AlertItem 
               symbol="CANTV"
               status="Baja"
@@ -143,7 +143,7 @@ const SettingsScreen = () => {
                 <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
                   <MaterialIcons name="notifications" size={20} color={theme.colors.onSurfaceVariant} />
                 </View>
-                <Text variant="bodyLarge" style={{ fontWeight: '500', color: theme.colors.onSurface }}>Notificaciones Push</Text>
+                <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Notificaciones Push</Text>
               </View>
               <Switch 
                 value={pushEnabled} 
@@ -155,7 +155,7 @@ const SettingsScreen = () => {
               />
             </View>
 
-            <View style={{ height: 1, backgroundColor: theme.colors.outline }} />
+            <View style={[styles.separator, { backgroundColor: theme.colors.outline }]} />
 
             {/* Appearance */}
             <View style={styles.prefContent}>
@@ -163,7 +163,7 @@ const SettingsScreen = () => {
                 <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
                   <MaterialIcons name="palette" size={20} color={theme.colors.onSurfaceVariant} />
                 </View>
-                <Text variant="bodyLarge" style={{ fontWeight: '500', color: theme.colors.onSurface }}>Apariencia</Text>
+                <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Apariencia</Text>
               </View>
               <ThemeSelector currentTheme={themeMode} onSelect={setThemeMode} />
             </View>
@@ -189,10 +189,10 @@ const SettingsScreen = () => {
           </View>
           
           <View style={styles.footer}>
-            <Text style={{ fontSize: 12, color: theme.colors.onSurfaceVariant, fontWeight: '500' }}>
+            <Text style={[styles.footerText, { color: theme.colors.onSurfaceVariant }]}>
               {appName} v{appVersion} (BUILD {buildNumber}) {__DEV__ ? 'DEBUG' : ''}
             </Text>
-            <Text style={{ fontSize: 10, color: theme.colors.onSurfaceVariant, marginTop: 4, opacity: 0.7 }}>
+            <Text style={[styles.footerSubText, { color: theme.colors.onSurfaceVariant }]}>
               {DeviceInfo.getDeviceId()} | {DeviceInfo.getSystemName()} {DeviceInfo.getSystemVersion()}
             </Text>
           </View>
@@ -269,6 +269,31 @@ const styles = StyleSheet.create({
   footer: {
     marginTop: 32,
     alignItems: 'center',
+  },
+  header: {
+    borderBottomWidth: 0,
+  },
+  scrollContent: {
+    paddingBottom: 100,
+  },
+  newAlertText: {
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  separator: {
+    height: 1,
+  },
+  prefText: {
+    fontWeight: '500',
+  },
+  footerText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  footerSubText: {
+    fontSize: 10,
+    marginTop: 4,
+    opacity: 0.7,
   },
 });
 

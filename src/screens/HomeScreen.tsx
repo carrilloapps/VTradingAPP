@@ -104,7 +104,7 @@ const HomeScreen = () => {
               <MaterialIcons name="analytics" size={20} color={theme.colors.primary} />
             </View>
             <Text variant="titleMedium" style={[styles.titleMedium, { color: theme.colors.onSurface }]}>
-              Acciones Más Negociadas
+              Acciones más negociadas
             </Text>
           </View>
           

@@ -47,13 +47,13 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
             )}
           </View>
           <View>
-            <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: 'bold' }}>{title}</Text>
+            <Text variant="titleMedium" style={[{ color: theme.colors.onSurface }, styles.titleText]}>{title}</Text>
             <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{subtitle}</Text>
             <View style={styles.valueContainer}>
-              <Text variant="headlineSmall" style={{ color: theme.colors.onSurface, fontWeight: 'bold' }}>
+              <Text variant="headlineSmall" style={[{ color: theme.colors.onSurface }, styles.valueText]}>
                 {value}
               </Text>
-              <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant, marginLeft: 4, marginBottom: 4 }}>
+              <Text variant="labelMedium" style={[{ color: theme.colors.onSurfaceVariant }, styles.currencyText]}>
                 {currency}
               </Text>
             </View>
@@ -66,7 +66,7 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
             size={16} 
             color={trendColor} 
           />
-          <Text variant="labelMedium" style={{ color: trendColor, fontWeight: 'bold', marginLeft: 2 }}>
+          <Text variant="labelMedium" style={[{ color: trendColor }, styles.trendText]}>
             {isPositive ? '+' : ''}{changePercent}
           </Text>
         </View>
@@ -101,6 +101,20 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     marginBottom: 16,
+  },
+  titleText: {
+    fontWeight: 'bold',
+  },
+  valueText: {
+    fontWeight: 'bold',
+  },
+  currencyText: {
+    marginLeft: 4,
+    marginBottom: 4,
+  },
+  trendText: {
+    fontWeight: 'bold',
+    marginLeft: 2,
   },
   leftContent: {
     flexDirection: 'row',
@@ -154,10 +168,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-  },
-  trendText: {
-    fontSize: 11,
-    fontWeight: '700',
   },
   chartContainer: {
     height: 48,

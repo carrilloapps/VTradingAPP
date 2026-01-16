@@ -10,13 +10,13 @@ const PromoCard: React.FC = () => {
       backgroundColor: theme.colors.primaryContainer, 
       borderColor: theme.colors.outline,
     }]}>
-      <Text style={[styles.title, { color: '#ffffff' }]}>
+      <Text style={styles.titleText}>
         ¿Necesitas cambiar divisas?
       </Text>
-      <Text style={[styles.description, { color: 'rgba(255,255,255,0.8)' }]}>
+      <Text style={styles.descriptionText}>
         Usa nuestra calculadora integrada para conversiones exactas.
       </Text>
-      <TouchableOpacity style={[styles.button, { backgroundColor: theme.colors.primary, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)' }]}>
+      <TouchableOpacity style={[styles.button, { backgroundColor: theme.colors.primary }]}>
         <Text style={styles.buttonText}>Calculadora</Text>
       </TouchableOpacity>
     </View>
@@ -33,21 +33,25 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
   },
-  title: {
+  titleText: {
     fontSize: 13,
     fontWeight: '700',
     marginBottom: 4,
+    color: '#ffffff',
   },
-  description: {
+  descriptionText: {
     fontSize: 12,
     marginBottom: 16,
     textAlign: 'center',
     lineHeight: 18,
+    color: 'rgba(255,255,255,0.8)',
   },
   button: {
     paddingHorizontal: 24,
     paddingVertical: 10,
     borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
   },
   buttonText: {
     color: '#FFFFFF',

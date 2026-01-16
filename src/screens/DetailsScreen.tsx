@@ -1,27 +1,27 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, ScrollView, Animated, Easing, TouchableOpacity } from 'react-native';
-import { Text, useTheme, Button, Card, ProgressBar, Surface } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import { View, StyleSheet, ScrollView, Animated, Easing } from 'react-native';
+import { Text, useTheme, Button, ProgressBar, Surface } from 'react-native-paper';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const FeatureItem = ({ icon, title, description, theme }: any) => (
-  <Surface style={[styles.featureItem, { backgroundColor: theme.colors.elevation.level1 }]} elevation={1}>
-    <View style={[styles.featureIconBox, { backgroundColor: theme.dark ? 'rgba(16, 185, 129, 0.1)' : '#E6FFFA' }]}>
-      <MaterialIcons name={icon} size={24} color={theme.colors.primary} />
-    </View>
-    <View style={styles.featureText}>
-      <Text variant="titleSmall" style={{ fontWeight: 'bold', color: theme.colors.onSurface }}>{title}</Text>
-      <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{description}</Text>
-    </View>
-  </Surface>
-);
+const FeatureItem = ({ icon, title, description, theme }: any) => {
+  const iconBgColor = theme.dark ? 'rgba(16, 185, 129, 0.1)' : '#E6FFFA';
+  
+  return (
+    <Surface style={[styles.featureItem, { backgroundColor: theme.colors.elevation.level1 }]} elevation={1}>
+      <View style={[styles.featureIconBox, { backgroundColor: iconBgColor }]}>
+        <MaterialIcons name={icon} size={24} color={theme.colors.primary} />
+      </View>
+      <View style={styles.featureText}>
+        <Text variant="titleSmall" style={[styles.featureTitle, { color: theme.colors.onSurface }]}>{title}</Text>
+        <Text variant="bodySmall" style={[styles.featureDescription, { color: theme.colors.onSurfaceVariant }]}>{description}</Text>
+      </View>
+    </Surface>
+  );
+};
 
 const DetailsScreen = () => {
-  const navigation = useNavigation();
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
   const [notified, setNotified] = useState(false);
   const [progress, setProgress] = useState(0);
 
@@ -76,7 +76,7 @@ const DetailsScreen = () => {
         useNativeDriver: true,
       })
     ).start();
-  }, []);
+  }, [fadeAnim, pulseAnim, rotateAnim]);
 
   const spin = rotateAnim.interpolate({
     inputRange: [0, 1],
@@ -89,14 +89,14 @@ const DetailsScreen = () => {
         variant="section" 
         title="Billetera" 
         showNotification={false}
-        style={{ borderBottomWidth: 0 }}
+        style={styles.headerStyle}
       />
       
       <ScrollView 
-        contentContainerStyle={[styles.content, { paddingBottom: 100 }]}
+        contentContainerStyle={[styles.content, styles.scrollContent]}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View style={{ opacity: fadeAnim, alignItems: 'center' }}>
+        <Animated.View style={[styles.animatedView, { opacity: fadeAnim }]}>
           
           {/* Hero Section */}
           <View style={styles.heroSection}>
@@ -125,8 +125,8 @@ const DetailsScreen = () => {
           {/* Progress Section */}
           <View style={styles.progressSection}>
             <View style={styles.progressHeader}>
-              <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>Progreso de desarrollo</Text>
-              <Text variant="labelMedium" style={{ color: theme.colors.primary, fontWeight: 'bold' }}>
+              <Text variant="labelMedium" style={[styles.progressLabel, { color: theme.colors.onSurfaceVariant }]}>Progreso de desarrollo</Text>
+              <Text variant="labelMedium" style={[styles.progressText, { color: theme.colors.primary }]}>
                 {Math.round(progress * 100)}%
               </Text>
             </View>
@@ -165,12 +165,12 @@ const DetailsScreen = () => {
               onPress={() => setNotified(!notified)}
               icon={notified ? "check" : "bell-ring"}
               style={styles.button}
-              contentStyle={{ height: 48 }}
+              contentStyle={styles.buttonContent}
             >
               {notified ? "Te avisaremos" : "Notificarme del lanzamiento"}
             </Button>
             {!notified && (
-               <Text variant="bodySmall" style={{ marginTop: 12, color: theme.colors.outline }}>
+               <Text variant="bodySmall" style={[styles.notificationText, { color: theme.colors.outline }]}>
                  Recibirás una notificación cuando esté listo.
                </Text>
             )}
@@ -289,6 +289,33 @@ const styles = StyleSheet.create({
   button: {
     width: '100%',
     borderRadius: 12,
+  },
+  featureTitle: {
+    fontWeight: 'bold',
+  },
+  headerStyle: {
+    borderBottomWidth: 0,
+  },
+  scrollContent: {
+    paddingBottom: 100,
+  },
+  animatedView: {
+    alignItems: 'center',
+  },
+  progressText: {
+    fontWeight: 'bold',
+  },
+  buttonContent: {
+    height: 48,
+  },
+  notificationText: {
+    marginTop: 12,
+  },
+  featureDescription: {
+    marginTop: 2,
+  },
+  progressLabel: {
+    marginBottom: 4,
   },
 });
 

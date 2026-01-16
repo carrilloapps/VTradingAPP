@@ -1,10 +1,10 @@
 import React from 'react';
-import { View } from 'react-native';
 import { NavigationContainer, DefaultTheme as NavDefaultTheme, DarkTheme as NavDarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTheme } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import SplashScreen from '../screens/SplashScreen';
 import HomeScreen from '../screens/HomeScreen';
@@ -13,6 +13,8 @@ import SettingsScreen from '../screens/SettingsScreen';
 import ExchangeRatesScreen from '../screens/ExchangeRatesScreen';
 import StocksScreen from '../screens/StocksScreen';
 import { useThemeContext } from '../theme/ThemeContext';
+
+/* eslint-disable react/no-unstable-nested-components */
 
 // Root Stack that includes Splash
 const RootStack = createNativeStackNavigator();
@@ -29,8 +31,6 @@ function HomeStackScreen() {
   );
 }
 
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
 // Tabs Principales
 const Tab = createBottomTabNavigator();
 
@@ -40,36 +40,7 @@ function MainTabNavigator() {
 
   return (
     <Tab.Navigator
-        screenOptions={({ route }) => ({
-          tabBarIcon: ({ focused, color, size }) => {
-            let iconName;
-
-            if (route.name === 'Home') {
-              iconName = 'home';
-            } else if (route.name === 'Rates') {
-              iconName = 'show-chart'; // or monitoring/currency_exchange if available in MaterialIcons
-            } else if (route.name === 'Markets') {
-              iconName = 'bar-chart';
-            } else if (route.name === 'Wallet') {
-               iconName = 'account-balance-wallet';
-            } else if (route.name === 'Settings') {
-              iconName = 'settings';
-            }
-
-            return (
-              <View style={{
-                backgroundColor: focused ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
-                padding: 4,
-                borderRadius: 20,
-                width: 64, 
-                height: 32,
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}>
-                 <MaterialIcons name={iconName as string} size={24} color={color} />
-              </View>
-            );
-          },
+        screenOptions={{
           tabBarActiveTintColor: theme.colors.primary,
           tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
           tabBarStyle: {
@@ -85,13 +56,52 @@ function MainTabNavigator() {
             backgroundColor: theme.colors.surface,
           },
           headerTintColor: theme.colors.onSurface,
-        })}
+        }}
       >
-        <Tab.Screen name="Home" component={HomeStackScreen} options={{ headerShown: false }} />
-        <Tab.Screen name="Rates" component={ExchangeRatesScreen} options={{ headerShown: false, title: 'Tasas' }} />
-        <Tab.Screen name="Markets" component={StocksScreen} options={{ headerShown: false, title: 'Acciones' }} />
-        <Tab.Screen name="Wallet" component={DetailsScreen} options={{ headerShown: false, title: 'Billetera' }} />
-        <Tab.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false, title: 'Configuración' }} />
+        <Tab.Screen 
+          name="Home" 
+          component={HomeStackScreen} 
+          options={{ 
+            headerShown: false,
+            tabBarIcon: ({ color }) => <MaterialIcons name="home" size={24} color={color} />
+          }} 
+        />
+        <Tab.Screen 
+          name="Rates" 
+          component={ExchangeRatesScreen} 
+          options={{ 
+            headerShown: false, 
+            title: 'Tasas',
+            tabBarIcon: ({ color }) => <MaterialIcons name="show-chart" size={24} color={color} />
+          }} 
+        />
+        <Tab.Screen 
+          name="Markets" 
+          component={StocksScreen} 
+          options={{ 
+            headerShown: false, 
+            title: 'Acciones',
+            tabBarIcon: ({ color }) => <MaterialIcons name="bar-chart" size={24} color={color} />
+          }} 
+        />
+        <Tab.Screen 
+          name="Wallet" 
+          component={DetailsScreen} 
+          options={{ 
+            headerShown: false, 
+            title: 'Billetera',
+            tabBarIcon: ({ color }) => <MaterialIcons name="account-balance-wallet" size={24} color={color} />
+          }} 
+        />
+        <Tab.Screen 
+          name="Settings" 
+          component={SettingsScreen} 
+          options={{ 
+            headerShown: false, 
+            title: 'Configuración',
+            tabBarIcon: ({ color }) => <MaterialIcons name="settings" size={24} color={color} />
+          }} 
+        />
       </Tab.Navigator>
   );
 }

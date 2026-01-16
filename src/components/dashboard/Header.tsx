@@ -28,22 +28,21 @@ const Header: React.FC<HeaderProps> = ({ userName, avatarUrl, notificationCount 
         <TouchableOpacity style={styles.avatarContainer}>
           <Image 
             source={{ uri: avatarUrl }} 
-            style={[styles.avatar as ImageStyle, { borderColor: 'rgba(255,255,255,0.1)' }]} 
+            style={[styles.avatar as ImageStyle, styles.avatarBorder]} 
           />
           <View style={[styles.statusDot, { backgroundColor: accentGreen, borderColor: theme.colors.background }]} />
         </TouchableOpacity>
         
         <View style={styles.textContainer}>
           <Text style={[styles.subtitle, { color: theme.colors.onSurfaceVariant }]}>GLOBAL TRADING</Text>
-          <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: 'bold' }}>
+          <Text variant="titleMedium" style={[{ color: theme.colors.onSurface }, styles.greetingText]}>
             Hola, {userName}
           </Text>
         </View>
       </View>
 
       <TouchableOpacity 
-        style={[styles.iconButton, { 
-          backgroundColor: 'rgba(255,255,255,0.05)',
+        style={[styles.iconButton, styles.iconButtonBackground, { 
           borderColor: theme.colors.outline
         }]}
       >
@@ -93,10 +92,19 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 10,
-    fontWeight: '700',
+    fontWeight: 'bold',
     textTransform: 'uppercase',
     letterSpacing: 1,
     marginBottom: 2,
+  },
+  avatarBorder: {
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  greetingText: {
+    fontWeight: 'bold',
+  },
+  iconButtonBackground: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
   },
   iconButton: {
     width: 40,

@@ -24,14 +24,19 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const [isFocused, setIsFocused] = useState(false);
 
   const showSuggestions = isFocused && suggestions.length > 0 && value && value.length > 0;
+  
+  const containerStyle = [
+    styles.container,
+    { 
+      backgroundColor: theme.colors.elevation.level2,
+      borderColor: isFocused ? theme.colors.primary : 'transparent',
+      borderWidth: 1
+    }
+  ];
 
   return (
     <View style={styles.wrapper}>
-      <View style={[styles.container, { 
-        backgroundColor: theme.colors.elevation.level2,
-        borderColor: isFocused ? theme.colors.primary : 'transparent',
-        borderWidth: 1
-      }]}>
+      <View style={containerStyle}>
         <MaterialIcons 
           name="search" 
           size={20} 
@@ -76,7 +81,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                   setIsFocused(false);
                 }}
               >
-                <MaterialIcons name="history" size={16} color={theme.colors.onSurfaceVariant} style={{ marginRight: 8 }} />
+                <MaterialIcons name="history" size={16} color={theme.colors.onSurfaceVariant} style={styles.suggestionIcon} />
                 <Text style={{ color: theme.colors.onSurface }}>{item}</Text>
               </TouchableOpacity>
             )}
@@ -127,7 +132,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 12,
     borderBottomWidth: StyleSheet.hairlineWidth,
-  }
+  },
+  suggestionIcon: {
+    marginRight: 8,
+  },
 });
 
 export default SearchBar;

@@ -7,74 +7,88 @@ interface ThemeSelectorProps {
   onSelect: (theme: 'light' | 'dark' | 'system') => void;
 }
 
+interface ThemeOptionProps {
+  mode: 'light' | 'dark' | 'system';
+  label: string;
+  renderPreview: () => React.ReactNode;
+  currentTheme: 'light' | 'dark' | 'system';
+  onSelect: (theme: 'light' | 'dark' | 'system') => void;
+}
+
+const ThemeOption: React.FC<ThemeOptionProps> = ({ 
+  mode, 
+  label, 
+  renderPreview,
+  currentTheme,
+  onSelect
+}) => {
+  const theme = useTheme();
+  const isSelected = currentTheme === mode;
+  const borderColor = isSelected ? theme.colors.primary : theme.colors.outline;
+  const bg = isSelected ? theme.colors.primaryContainer : 'transparent';
+  const borderWidth = isSelected ? 2 : 1;
+
+  return (
+    <TouchableOpacity 
+      onPress={() => onSelect(mode)}
+      style={[styles.optionBtn, { borderColor, backgroundColor: bg, borderWidth }]}
+    >
+      {renderPreview()}
+      <Text style={[
+        styles.label, 
+        { color: isSelected ? theme.colors.primary : theme.colors.onSurfaceVariant },
+        isSelected && styles.selectedLabel
+      ]}>
+        {label}
+      </Text>
+      {isSelected && (
+        <View style={[styles.checkDot, { backgroundColor: theme.colors.primary }]} />
+      )}
+    </TouchableOpacity>
+  );
+};
+
 const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onSelect }) => {
   const theme = useTheme();
-
-  const Option = ({ 
-    mode, 
-    label, 
-    renderPreview 
-  }: { 
-    mode: 'light' | 'dark' | 'system'; 
-    label: string;
-    renderPreview: () => React.ReactNode;
-  }) => {
-    const isSelected = currentTheme === mode;
-    const borderColor = isSelected ? theme.colors.primary : theme.colors.outline;
-    const bg = isSelected ? theme.colors.primaryContainer : 'transparent';
-    const borderWidth = isSelected ? 2 : 1;
-
-    return (
-      <TouchableOpacity 
-        onPress={() => onSelect(mode)}
-        style={[styles.optionBtn, { borderColor, backgroundColor: bg, borderWidth }]}
-      >
-        {renderPreview()}
-        <Text style={[styles.label, { 
-          color: isSelected ? theme.colors.primary : theme.colors.onSurfaceVariant,
-          fontWeight: isSelected ? '700' : '500'
-        }]}>
-          {label}
-        </Text>
-        {isSelected && (
-          <View style={[styles.checkDot, { backgroundColor: theme.colors.primary }]} />
-        )}
-      </TouchableOpacity>
-    );
-  };
 
   return (
     <View style={styles.container}>
       {/* Light */}
-      <Option 
+      <ThemeOption 
         mode="light" 
         label="Claro" 
+        currentTheme={currentTheme}
+        onSelect={onSelect}
         renderPreview={() => (
-          <View style={[styles.previewBox, { backgroundColor: '#f2f5f8', borderColor: '#E2E8F0' }]}>
-             <View style={{ height: '100%', width: '100%', backgroundColor: '#ffffff', borderRadius: 2 }} />
+          <View style={[styles.previewBox, styles.lightPreview]}>
+             <View style={styles.lightPreviewInner} />
           </View>
         )} 
       />
 
       {/* Dark */}
-      <Option 
+      <ThemeOption 
         mode="dark" 
         label="Oscuro" 
+        currentTheme={currentTheme}
+        onSelect={onSelect}
         renderPreview={() => (
-          <View style={[styles.previewBox, { backgroundColor: '#0e1720', borderColor: '#243647' }]}>
-            <View style={{ height: '100%', width: '100%', backgroundColor: '#16212e', borderRadius: 2 }} />
+          <View style={[styles.previewBox, styles.darkPreview]}>
+            <View style={styles.darkPreviewInner} />
           </View>
         )} 
       />
 
       {/* System */}
-      <Option 
+      <ThemeOption 
         mode="system" 
         label="Sistema" 
+        currentTheme={currentTheme}
+        onSelect={onSelect}
         renderPreview={() => (
-          <View style={[styles.previewBox, { borderColor: theme.colors.outline, overflow: 'hidden', flexDirection: 'row' }]}>
-            <View style={{ flex: 1, backgroundColor: '#f2f5f8' }} />
-            <View style={{ flex: 1, backgroundColor: '#0e1720' }} />
+          <View style={[styles.previewBox, styles.systemPreview, { borderColor: theme.colors.outline }]}>
+            <View style={styles.systemLeft} />
+            <View style={styles.systemRight} />
           </View>
         )} 
       />
@@ -99,13 +113,50 @@ const styles = StyleSheet.create({
   },
   previewBox: {
     width: '100%',
-    height: 32,
+    height: 40,
     borderRadius: 4,
     borderWidth: 1,
     padding: 2,
+    marginBottom: 8,
+  },
+  lightPreview: {
+    backgroundColor: '#f2f5f8',
+    borderColor: '#E2E8F0',
+  },
+  lightPreviewInner: {
+    height: '100%',
+    width: '100%',
+    backgroundColor: '#ffffff',
+    borderRadius: 2,
+  },
+  darkPreview: {
+    backgroundColor: '#0e1720',
+    borderColor: '#243647',
+  },
+  darkPreviewInner: {
+    height: '100%',
+    width: '100%',
+    backgroundColor: '#16212e',
+    borderRadius: 2,
+  },
+  systemPreview: {
+    overflow: 'hidden',
+    flexDirection: 'row',
+  },
+  systemLeft: {
+    flex: 1,
+    backgroundColor: '#f2f5f8',
+  },
+  systemRight: {
+    flex: 1,
+    backgroundColor: '#0e1720',
   },
   label: {
     fontSize: 12,
+    fontWeight: '500',
+  },
+  selectedLabel: {
+    fontWeight: '700',
   },
   checkDot: {
     position: 'absolute',

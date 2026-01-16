@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
@@ -38,13 +38,15 @@ const MenuButton: React.FC<MenuButtonProps> = ({
         styles.container, 
         { 
           backgroundColor: theme.colors.elevation.level1,
-          borderTopWidth: hasTopBorder ? 1 : 0,
+        },
+        hasTopBorder && styles.topBorder,
+        hasTopBorder && {
           borderTopColor: theme.colors.outline,
         }
       ]}
     >
       <MaterialIcons name={icon} size={24} color={iconColor} />
-      <Text style={[styles.label, { color: textColor, fontWeight: isDanger ? '700' : '500' }]}>
+      <Text style={[styles.label, { color: textColor }, isDanger && styles.boldLabel]}>
         {label}
       </Text>
       {showChevron && !isDanger && (
@@ -64,6 +66,13 @@ const styles = StyleSheet.create({
   label: {
     flex: 1,
     fontSize: 16,
+    fontWeight: '500',
+  },
+  boldLabel: {
+    fontWeight: '700',
+  },
+  topBorder: {
+    borderTopWidth: 1,
   }
 });
 
