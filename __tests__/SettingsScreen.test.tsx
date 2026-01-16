@@ -66,8 +66,15 @@ describe('SettingsScreen', () => {
     expect(getByText('Seguridad y Privacidad')).toBeTruthy();
     expect(getByText('Cerrar Sesión')).toBeTruthy();
     
-    // Check Footer
-    expect(getByText(/Finanzas VE v/)).toBeTruthy();
+    // Check Footer (Wait for effect)
+    // We expect "Finanzas VE v1.0.0 (100)"
+  });
+
+  it('renders app info values correctly', async () => {
+    const { findByText } = renderWithProvider(<SettingsScreen />);
+    
+    // Check for the footer string format
+    expect(await findByText(/Finanzas VE v1.0.0 \(100\)/)).toBeTruthy();
   });
 
   it('toggles alerts', () => {

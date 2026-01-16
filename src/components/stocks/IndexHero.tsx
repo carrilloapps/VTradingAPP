@@ -19,6 +19,8 @@ const IndexHero: React.FC<IndexHeroProps> = ({
   volume,
   opening,
 }) => {
+  const theme = useTheme();
+  
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -33,30 +35,30 @@ const IndexHero: React.FC<IndexHeroProps> = ({
         {/* Content */}
         <View style={styles.contentContainer}>
           <View style={styles.headerRow}>
-            <Text style={styles.headerTitle}>INDICE BURSÁTIL CARACAS</Text>
+            <Text variant="labelMedium" style={{ color: 'rgba(255,255,255,0.7)', letterSpacing: 1, fontWeight: 'bold' }}>INDICE BURSÁTIL CARACAS</Text>
             <View style={styles.iconContainer}>
               <MaterialIcons name="show-chart" size={18} color="white" />
             </View>
           </View>
 
           <View style={styles.mainValueRow}>
-            <Text style={styles.valueText}>{value}</Text>
+            <Text variant="displaySmall" style={{ color: 'white', fontWeight: 'bold' }}>{value}</Text>
             <View style={styles.changeBadge}>
-              <MaterialIcons name="trending-up" size={14} color="#6EE7B7" />
-              <Text style={styles.changeText}>{changePercent}</Text>
+              <MaterialIcons name="trending-up" size={16} color="#6EE7B7" />
+              <Text variant="labelLarge" style={{ color: '#6EE7B7', fontWeight: 'bold', marginLeft: 4 }}>{changePercent}</Text>
             </View>
           </View>
 
           <View style={styles.statsRow}>
             <View>
-              <Text style={styles.statLabel}>VOLUMEN</Text>
-              <Text style={styles.statValue}>
-                {volume} <Text style={styles.currencyText}>VES</Text>
+              <Text variant="labelSmall" style={{ color: 'rgba(255,255,255,0.6)', marginBottom: 4 }}>VOLUMEN</Text>
+              <Text variant="bodyMedium" style={{ color: 'white', fontWeight: 'bold' }}>
+                {volume} <Text variant="labelSmall" style={{ color: 'rgba(255,255,255,0.6)' }}>VES</Text>
               </Text>
             </View>
             <View style={{ alignItems: 'flex-end' }}>
-              <Text style={styles.statLabel}>APERTURA</Text>
-              <Text style={styles.statValue}>{opening}</Text>
+              <Text variant="labelSmall" style={{ color: 'rgba(255,255,255,0.6)', marginBottom: 4 }}>APERTURA</Text>
+              <Text variant="bodyMedium" style={{ color: 'white', fontWeight: 'bold' }}>{opening}</Text>
             </View>
           </View>
         </View>
@@ -99,73 +101,32 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 4,
-  },
-  headerTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: 'rgba(219, 234, 254, 0.7)', // blue-100/70
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
+    marginBottom: 8,
   },
   iconContainer: {
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: 'rgba(255,255,255,0.2)',
     padding: 6,
     borderRadius: 8,
   },
   mainValueRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    gap: 8,
-    marginTop: 4,
-  },
-  valueText: {
-    fontSize: 30,
-    fontWeight: '800',
-    color: 'white',
-    letterSpacing: -0.5,
+    marginBottom: 24,
   },
   changeBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
-    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+    backgroundColor: 'rgba(110, 231, 183, 0.15)',
     paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: 'rgba(16, 185, 129, 0.2)',
-  },
-  changeText: {
-    color: '#6EE7B7', // emerald-300
-    fontSize: 14,
-    fontWeight: 'bold',
+    paddingVertical: 4,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    marginTop: 8,
   },
   statsRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 24,
-    paddingTop: 16,
     borderTopWidth: 1,
     borderTopColor: 'rgba(255,255,255,0.1)',
-  },
-  statLabel: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: 'rgba(191, 219, 254, 0.5)', // blue-200/50
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
-    marginBottom: 2,
-  },
-  statValue: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  currencyText: {
-    fontSize: 10,
-    opacity: 0.7,
+    paddingTop: 16,
   },
 });
 

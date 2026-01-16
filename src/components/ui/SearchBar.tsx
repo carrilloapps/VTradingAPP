@@ -28,7 +28,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
   return (
     <View style={styles.wrapper}>
       <View style={[styles.container, { 
-        backgroundColor: theme.dark ? 'rgba(255, 255, 255, 0.05)' : '#F1F5F9',
+        backgroundColor: theme.colors.elevation.level2,
         borderColor: isFocused ? theme.colors.primary : 'transparent',
         borderWidth: 1
       }]}>
@@ -40,7 +40,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         <TextInput
           style={[styles.input, { color: theme.colors.onSurface }]}
           placeholder={placeholder}
-          placeholderTextColor={(theme.colors.onSurfaceVariant as string) + '99'}
+          placeholderTextColor={theme.colors.onSurfaceDisabled}
           value={value}
           onChangeText={onChangeText}
           onFocus={() => setIsFocused(true)}

@@ -73,11 +73,16 @@ Se ha desarrollado un componente maestro reutilizable `UnifiedHeader.tsx` que en
   - Título "Mercado" y subtítulo "Acciones y CEDEARs" alineados.
 
 ### SettingsScreen (Ajustes)
-- **Antes:** Título simple sin header formal, pegado al borde superior en algunos dispositivos.
-- **Después:** Implementación de `UnifiedHeader` (variant="simple").
+- **Antes:** Título simple sin header formal, opciones estáticas, falta de información de versión.
+- **Después:** 
+  - Implementación de `UnifiedHeader` (variant="section" para consistencia con secciones principales).
+  - **Información de App simplificada:** Muestra Versión y Build en el pie de página de forma discreta, tal como se solicitó.
+  - **Interactividad:** Todos los interruptores (Switches) y botones ahora responden con feedback visual (Snackbar/Alertas).
+  - **Seguridad:** Confirmación antes de cerrar sesión.
 - **Mejoras:**
-  - Título "Ajustes" con la misma jerarquía visual que otras secciones.
-  - Espaciado correcto con la barra de estado.
+  - Título "Configuración" alineado.
+  - Feedback inmediato al usuario.
+  - Diseño limpio sin redundancia de información técnica.
 
 ### DetailsScreen (Billetera/Detalles)
 - **Antes:** Sin header personalizado (usaba el default de React Navigation o ninguno).

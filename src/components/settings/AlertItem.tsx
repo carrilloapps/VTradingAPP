@@ -25,19 +25,20 @@ const AlertItem: React.FC<AlertItemProps> = ({
   iconBgColor
 }) => {
   const theme = useTheme();
+  const colors = theme.colors as any;
   
   const statusColor = status === 'Sube' 
-    ? (theme.dark ? '#4ade80' : '#16a34a') // green-400 / green-600
-    : (theme.dark ? '#fb7185' : '#e11d48'); // rose-400 / rose-600
+    ? colors.success
+    : colors.error;
     
   const statusBg = status === 'Sube'
-    ? (theme.dark ? 'rgba(74, 222, 128, 0.2)' : '#dcfce7') // green-900/30 / green-100
-    : (theme.dark ? 'rgba(251, 113, 133, 0.2)' : '#ffe4e6'); // rose-900/30 / rose-100
+    ? colors.successContainer
+    : colors.errorContainer;
 
   return (
     <View style={[styles.container, { 
       backgroundColor: theme.colors.elevation.level1,
-      borderBottomColor: theme.colors.outlineVariant,
+      borderBottomColor: theme.colors.outline,
     }]}>
       <View style={styles.leftContent}>
         <View style={[styles.iconContainer, { backgroundColor: iconBgColor }]}>

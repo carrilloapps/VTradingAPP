@@ -100,7 +100,7 @@ const HomeScreen = () => {
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <View style={[styles.sectionIcon, { backgroundColor: 'rgba(59, 130, 246, 0.2)' }]}>
+            <View style={[styles.sectionIcon, { backgroundColor: theme.colors.primaryContainer }]}>
               {/* Using a simple view as placeholder for icon if needed */}
             </View>
           </View>

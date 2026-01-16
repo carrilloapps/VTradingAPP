@@ -21,13 +21,14 @@ const MenuButton: React.FC<MenuButtonProps> = ({
   hasTopBorder = false
 }) => {
   const theme = useTheme();
+  const colors = theme.colors as any;
   
   const textColor = isDanger 
-    ? (theme.dark ? '#ef4444' : '#cf4848') 
+    ? colors.danger
     : theme.colors.onSurface;
     
   const iconColor = isDanger 
-    ? (theme.dark ? '#ef4444' : '#cf4848') 
+    ? colors.danger
     : theme.colors.onSurfaceVariant;
 
   return (
@@ -38,7 +39,7 @@ const MenuButton: React.FC<MenuButtonProps> = ({
         { 
           backgroundColor: theme.colors.elevation.level1,
           borderTopWidth: hasTopBorder ? 1 : 0,
-          borderTopColor: theme.colors.outlineVariant,
+          borderTopColor: theme.colors.outline,
         }
       ]}
     >

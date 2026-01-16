@@ -28,22 +28,22 @@ const StockItem: React.FC<StockItemProps> = ({
   return (
     <TouchableOpacity style={[styles.container, { borderBottomColor: theme.colors.outline }]}>
       <View style={styles.leftContent}>
-        <View style={[styles.iconContainer, { backgroundColor: 'rgba(255,255,255,0.05)' }]}>
-          <MaterialIcons name="show-chart" size={20} color={theme.colors.onSurface} />
+        <View style={[styles.iconContainer, { backgroundColor: theme.colors.elevation.level2 }]}>
+          <MaterialIcons name="show-chart" size={20} color={theme.colors.primary} />
         </View>
         <View>
-          <Text style={[styles.symbol, { color: theme.colors.onSurface }]}>{symbol}</Text>
-          <Text style={[styles.name, { color: theme.colors.onSurfaceVariant }]}>{name}</Text>
+          <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: 'bold' }}>{symbol}</Text>
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{name}</Text>
         </View>
       </View>
 
       <View style={styles.rightContent}>
-        <Text style={[styles.value, { color: theme.colors.onSurface }]}>{value}</Text>
+        <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: 'bold' }}>{value}</Text>
         <View style={styles.trendContainer}>
-          <Text style={[styles.change, { color: trendColor }]}>
+          <Text variant="labelSmall" style={{ color: trendColor, fontWeight: 'bold' }}>
             {isPositive ? '+' : ''}{change}
           </Text>
-          <Text style={[styles.volume, { color: theme.colors.onSurfaceVariant }]}>
+          <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
             Vol: {volume}
           </Text>
         </View>

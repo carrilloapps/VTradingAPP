@@ -3,36 +3,64 @@ import {
   MD3DarkTheme as DefaultDarkTheme,
 } from 'react-native-paper';
 
-// Definición de colores personalizados del diseño
+// Definición de colores personalizados del diseño (basados en ajustes.html)
 const customColors = {
-  primary: '#3B82F6',
-  backgroundDark: '#0A0F14',
-  surfaceDark: '#161D26',
-  surfaceAccent: '#1E293B',
-  accentGreen: '#10B981',
-  accentRed: '#EF4444',
-  textSecondary: '#94A3B8',
+  primary: '#0e4981',
+  primaryDark: '#083056',
+  secondary: '#243647',
+  backgroundLight: '#f2f5f8',
+  backgroundDark: '#0e1720',
+  surfaceDark: '#16212e',
+  textSecondary: '#93aec8',
+  danger: '#cf4848',
+  
+  // Semantic colors for Light Mode
+  successLight: '#15803d', // green-700
+  successBgLight: '#dcfce7', // green-100
+  errorLight: '#e11d48', // rose-600
+  errorBgLight: '#ffe4e6', // rose-100
+  infoLight: '#1d4ed8', // blue-700
+  infoBgLight: '#dbeafe', // blue-100
+  neutralLight: '#475569', // slate-600
+  neutralBgLight: '#f1f5f9', // slate-100
+  
+  // Semantic colors for Dark Mode
+  successDark: '#4ade80', // green-400
+  successBgDark: 'rgba(34, 197, 94, 0.2)', // green-500/20
+  errorDark: '#fb7185', // rose-400
+  errorBgDark: 'rgba(225, 29, 72, 0.3)', // rose-900/30
+  infoDark: '#60a5fa', // blue-400
+  infoBgDark: 'rgba(59, 130, 246, 0.2)', // blue-500/20
+  neutralDark: '#cbd5e1', // slate-300
+  neutralBgDark: '#334155', // slate-700
 };
 
-// Tema Claro Personalizado (Adaptado para mantener coherencia, aunque el diseño es dark-first)
+// Tema Claro Personalizado
 export const LightTheme = {
   ...DefaultLightTheme,
   colors: {
     ...DefaultLightTheme.colors,
     primary: customColors.primary,
     onPrimary: '#ffffff',
-    primaryContainer: '#DBEAFE', // Azul claro
-    secondary: customColors.surfaceAccent,
-    background: '#F8FAFC', // Slate 50
+    primaryContainer: '#DBEAFE',
+    secondary: customColors.secondary,
+    background: customColors.backgroundLight,
     surface: '#ffffff',
     surfaceVariant: '#E2E8F0',
     onSurface: '#0F172A',
     onSurfaceVariant: '#64748B',
-    error: customColors.accentRed,
+    error: customColors.errorLight,
+    errorContainer: customColors.errorBgLight,
     outline: '#E2E8F0',
-    // Custom properties
-    accentGreen: customColors.accentGreen,
-    accentRed: customColors.accentRed,
+    
+    // Extensiones semánticas (disponibles vía theme.colors.extension...)
+    success: customColors.successLight,
+    successContainer: customColors.successBgLight,
+    info: customColors.infoLight,
+    infoContainer: customColors.infoBgLight,
+    neutral: customColors.neutralLight,
+    neutralContainer: customColors.neutralBgLight,
+    danger: customColors.danger,
   },
 };
 
@@ -43,17 +71,32 @@ export const DarkTheme = {
     ...DefaultDarkTheme.colors,
     primary: customColors.primary,
     onPrimary: '#ffffff',
-    primaryContainer: '#1D4ED8',
-    secondary: customColors.surfaceAccent,
+    primaryContainer: customColors.primaryDark,
+    secondary: customColors.secondary,
     background: customColors.backgroundDark,
     surface: customColors.surfaceDark,
-    surfaceVariant: customColors.surfaceAccent,
+    surfaceVariant: customColors.surfaceDark,
     onSurface: '#ffffff',
     onSurfaceVariant: customColors.textSecondary,
-    error: customColors.accentRed,
+    error: customColors.errorDark,
+    errorContainer: customColors.errorBgDark,
     outline: 'rgba(255, 255, 255, 0.05)', // border-white/5
-    // Custom properties for easy access
-    accentGreen: customColors.accentGreen,
-    accentRed: customColors.accentRed,
+    elevation: {
+      level0: 'transparent',
+      level1: customColors.surfaceDark,
+      level2: customColors.surfaceDark,
+      level3: customColors.surfaceDark,
+      level4: customColors.surfaceDark,
+      level5: customColors.surfaceDark,
+    },
+    
+    // Extensiones semánticas
+    success: customColors.successDark,
+    successContainer: customColors.successBgDark,
+    info: customColors.infoDark,
+    infoContainer: customColors.infoBgDark,
+    neutral: customColors.neutralDark,
+    neutralContainer: customColors.neutralBgDark,
+    danger: customColors.danger,
   },
 };

@@ -9,7 +9,7 @@ const UserProfileCard = () => {
   return (
     <View style={[styles.container, { 
       backgroundColor: theme.colors.elevation.level1,
-      borderColor: theme.dark ? 'rgba(255,255,255,0.05)' : theme.colors.outline,
+      borderColor: theme.colors.outline,
     }]}>
       <View style={styles.avatarContainer}>
         <Image 

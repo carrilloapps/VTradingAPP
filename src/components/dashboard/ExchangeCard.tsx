@@ -38,7 +38,7 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
     <Surface style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
       <View style={styles.header}>
         <View style={styles.leftContent}>
-          <View style={[styles.iconContainer, { borderColor: 'rgba(255,255,255,0.1)' }]}>
+          <View style={[styles.iconContainer, { borderColor: theme.colors.outline }]}>
             {iconUrl ? (
               <Image source={{ uri: iconUrl }} style={styles.iconImage} />
             ) : (
@@ -49,12 +49,12 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
           </View>
           <View>
             <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: 'bold' }}>{title}</Text>
-            <Text style={[styles.subtitle, { color: theme.colors.onSurfaceVariant }]}>{subtitle}</Text>
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{subtitle}</Text>
             <View style={styles.valueContainer}>
-              <Text variant="headlineSmall" style={[styles.value, { color: theme.colors.onSurface }]}>
+              <Text variant="headlineSmall" style={{ color: theme.colors.onSurface, fontWeight: 'bold' }}>
                 {value}
               </Text>
-              <Text style={[styles.currency, { color: theme.colors.onSurfaceVariant }]}>
+              <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant, marginLeft: 4, marginBottom: 4 }}>
                 {currency}
               </Text>
             </View>
@@ -64,10 +64,10 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
         <View style={styles.trendContainer}>
           <MaterialIcons 
             name={isPositive ? "trending-up" : "trending-down"} 
-            size={14} 
+            size={16} 
             color={trendColor} 
           />
-          <Text style={[styles.trendText, { color: trendColor }]}>
+          <Text variant="labelMedium" style={{ color: trendColor, fontWeight: 'bold', marginLeft: 2 }}>
             {isPositive ? '+' : ''}{changePercent}
           </Text>
         </View>

@@ -34,28 +34,28 @@ const RateCard: React.FC<RateCardProps> = ({
   const finalIconColor = iconColor || theme.colors.primary;
 
   return (
-    <Surface style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
+    <Surface style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outlineVariant }]}>
       <View style={styles.leftContent}>
         <View style={[styles.iconContainer, { backgroundColor: finalIconBgColor }]}>
           <MaterialIcons name={iconName} size={24} color={finalIconColor} />
         </View>
         <View>
-          <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: 'bold', fontSize: 16 }}>{title}</Text>
-          <Text style={[styles.subtitle, { color: theme.colors.onSurfaceVariant }]}>{subtitle}</Text>
+          <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: 'bold' }}>{title}</Text>
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{subtitle}</Text>
         </View>
       </View>
 
       <View style={styles.rightContent}>
-        <Text variant="headlineSmall" style={[styles.value, { color: theme.colors.onSurface }]}>
+        <Text variant="headlineSmall" style={{ color: theme.colors.onSurface, fontWeight: 'bold' }}>
           {value}
         </Text>
         <View style={styles.trendContainer}>
           <MaterialIcons 
             name={isPositive ? "trending-up" : "trending-down"} 
-            size={14} 
+            size={16} 
             color={trendColor} 
           />
-          <Text style={[styles.trendText, { color: trendColor }]}>
+          <Text variant="labelMedium" style={{ color: trendColor, fontWeight: 'bold', marginLeft: 2 }}>
             {isPositive ? '+' : ''}{changePercent}
           </Text>
         </View>

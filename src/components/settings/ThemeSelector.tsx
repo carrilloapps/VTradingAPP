@@ -20,8 +20,8 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onSelect })
     renderPreview: () => React.ReactNode;
   }) => {
     const isSelected = currentTheme === mode;
-    const borderColor = isSelected ? theme.colors.primary : (theme.dark ? theme.colors.outlineVariant : '#e2e8f0');
-    const bg = isSelected ? (theme.dark ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.05)') : 'transparent';
+    const borderColor = isSelected ? theme.colors.primary : theme.colors.outline;
+    const bg = isSelected ? theme.colors.primaryContainer : 'transparent';
     const borderWidth = isSelected ? 2 : 1;
 
     return (
@@ -50,8 +50,8 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onSelect })
         mode="light" 
         label="Claro" 
         renderPreview={() => (
-          <View style={[styles.previewBox, { backgroundColor: '#f1f5f9', borderColor: '#cbd5e1' }]}>
-             <View style={{ height: '100%', width: '100%', backgroundColor: '#f8fafc', borderRadius: 2 }} />
+          <View style={[styles.previewBox, { backgroundColor: '#f2f5f8', borderColor: '#E2E8F0' }]}>
+             <View style={{ height: '100%', width: '100%', backgroundColor: '#ffffff', borderRadius: 2 }} />
           </View>
         )} 
       />
@@ -61,8 +61,8 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onSelect })
         mode="dark" 
         label="Oscuro" 
         renderPreview={() => (
-          <View style={[styles.previewBox, { backgroundColor: '#1e293b', borderColor: '#475569' }]}>
-            <View style={{ height: '100%', width: '100%', backgroundColor: '#0f172a', borderRadius: 2 }} />
+          <View style={[styles.previewBox, { backgroundColor: '#0e1720', borderColor: '#243647' }]}>
+            <View style={{ height: '100%', width: '100%', backgroundColor: '#16212e', borderRadius: 2 }} />
           </View>
         )} 
       />
@@ -72,9 +72,9 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onSelect })
         mode="system" 
         label="Sistema" 
         renderPreview={() => (
-          <View style={[styles.previewBox, { borderColor: '#94a3b8', overflow: 'hidden', flexDirection: 'row' }]}>
-            <View style={{ flex: 1, backgroundColor: '#f8fafc' }} />
-            <View style={{ flex: 1, backgroundColor: '#0f172a' }} />
+          <View style={[styles.previewBox, { borderColor: theme.colors.outline, overflow: 'hidden', flexDirection: 'row' }]}>
+            <View style={{ flex: 1, backgroundColor: '#f2f5f8' }} />
+            <View style={{ flex: 1, backgroundColor: '#0e1720' }} />
           </View>
         )} 
       />
