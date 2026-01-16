@@ -11,6 +11,7 @@ import HomeScreen from '../screens/HomeScreen';
 import DetailsScreen from '../screens/DetailsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import ExchangeRatesScreen from '../screens/ExchangeRatesScreen';
+import StocksScreen from '../screens/StocksScreen';
 import { useThemeContext } from '../theme/ThemeContext';
 
 // Root Stack that includes Splash
@@ -88,9 +89,9 @@ function MainTabNavigator() {
       >
         <Tab.Screen name="Home" component={HomeStackScreen} options={{ headerShown: false }} />
         <Tab.Screen name="Rates" component={ExchangeRatesScreen} options={{ headerShown: false, title: 'Tasas' }} />
-        <Tab.Screen name="Markets" component={DetailsScreen} options={{ title: 'Mercados' }} />
-        <Tab.Screen name="Wallet" component={DetailsScreen} options={{ title: 'Billetera' }} />
-        <Tab.Screen name="Settings" component={SettingsScreen} options={{ title: 'Configuración' }} />
+        <Tab.Screen name="Markets" component={StocksScreen} options={{ headerShown: false, title: 'Acciones' }} />
+        <Tab.Screen name="Wallet" component={DetailsScreen} options={{ headerShown: false, title: 'Billetera' }} />
+        <Tab.Screen name="Settings" component={SettingsScreen} options={{ headerShown: false, title: 'Configuración' }} />
       </Tab.Navigator>
   );
 }

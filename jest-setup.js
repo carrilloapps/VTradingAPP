@@ -1,6 +1,8 @@
 
 jest.mock('react-native-safe-area-context', () => require('react-native-safe-area-context/jest/mock').default);
 
+jest.mock('react-native-linear-gradient', () => 'LinearGradient');
+
 jest.mock('react-native-vector-icons/MaterialCommunityIcons', () => 'Icon');
 
 jest.mock('@react-native-async-storage/async-storage', () =>

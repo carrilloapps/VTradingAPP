@@ -1,0 +1,96 @@
+import React from 'react';
+import { render, fireEvent } from '@testing-library/react-native';
+import SettingsScreen from '../src/screens/SettingsScreen';
+import { Provider as PaperProvider } from 'react-native-paper';
+import { ThemeProvider } from '../src/theme/ThemeContext';
+
+// Mock dependencies
+jest.mock('react-native-safe-area-context', () => {
+  const React = require('react');
+  const MOCK_INITIAL_METRICS = {
+    frame: { x: 0, y: 0, width: 0, height: 0 },
+    insets: { top: 0, left: 0, right: 0, bottom: 0 },
+  };
+  return {
+    SafeAreaProvider: ({ children }: any) => children,
+    SafeAreaConsumer: ({ children }: any) => children(MOCK_INITIAL_METRICS.insets),
+    SafeAreaInsetsContext: React.createContext(MOCK_INITIAL_METRICS.insets),
+    useSafeAreaInsets: () => MOCK_INITIAL_METRICS.insets,
+    useSafeAreaFrame: () => MOCK_INITIAL_METRICS.frame,
+    initialWindowMetrics: MOCK_INITIAL_METRICS,
+  };
+});
+
+jest.mock('react-native-vector-icons/MaterialIcons', () => 'Icon');
+
+// Mock ThemeContext
+jest.mock('../src/theme/ThemeContext', () => ({
+  useThemeContext: () => ({
+    themeMode: 'system',
+    setThemeMode: jest.fn(),
+    isDark: false,
+  }),
+}));
+
+describe('SettingsScreen', () => {
+  const renderWithProvider = (component: React.ReactElement) => {
+    return render(
+      <PaperProvider>
+        {component}
+      </PaperProvider>
+    );
+  };
+
+  it('renders correctly', () => {
+    const { getByText, getByLabelText } = renderWithProvider(<SettingsScreen />);
+    
+    // Check Header
+    expect(getByText('Configuración')).toBeTruthy();
+    
+    // Check User Profile
+    expect(getByText('Alejandro Rodriguez')).toBeTruthy();
+    expect(getByText('PRO')).toBeTruthy();
+    
+    // Check Alerts Section
+    expect(getByText('ALERTAS ACTIVAS')).toBeTruthy();
+    expect(getByText('USD/VES')).toBeTruthy();
+    expect(getByText('CANTV')).toBeTruthy();
+    
+    // Check Preferences Section
+    expect(getByText('PREFERENCIAS')).toBeTruthy();
+    expect(getByText('Notificaciones Push')).toBeTruthy();
+    expect(getByText('Apariencia')).toBeTruthy();
+    
+    // Check Account Section
+    expect(getByText('CUENTA')).toBeTruthy();
+    expect(getByText('Seguridad y Privacidad')).toBeTruthy();
+    expect(getByText('Cerrar Sesión')).toBeTruthy();
+    
+    // Check Footer
+    expect(getByText(/Finanzas VE v/)).toBeTruthy();
+  });
+
+  it('toggles alerts', () => {
+    const { getAllByRole } = renderWithProvider(<SettingsScreen />);
+    
+    // Assuming AlertItem uses Switch which has role 'switch' or we can find by other means
+    // Since AlertItem implementation might use custom switch or paper Switch
+    // Let's check the code of AlertItem in previous turn. 
+    // It used: <Switch value={isActive} onValueChange={onToggle} color={theme.colors.primary} />
+    
+    const switches = getAllByRole('switch');
+    // We expect at least 3 switches: 2 for alerts, 1 for push notifications
+    expect(switches.length).toBeGreaterThanOrEqual(3);
+    
+    // Toggle first alert
+    fireEvent(switches[0], 'valueChange', false);
+    // State change is internal to SettingsScreen for now (mock state), so we verify it doesn't crash
+  });
+
+  it('renders theme selector', () => {
+    const { getByText } = renderWithProvider(<SettingsScreen />);
+    expect(getByText('Claro')).toBeTruthy();
+    expect(getByText('Oscuro')).toBeTruthy();
+    expect(getByText('Sistema')).toBeTruthy();
+  });
+});

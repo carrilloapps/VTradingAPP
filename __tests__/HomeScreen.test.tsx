@@ -1,9 +1,40 @@
 import React from 'react';
-import { render, waitFor } from '@testing-library/react-native';
+import { render, waitFor, act } from '@testing-library/react-native';
 import HomeScreen from '../src/screens/HomeScreen';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { ThemeProvider } from '../src/theme/ThemeContext';
 import { NavigationContainer } from '@react-navigation/native';
+import { CurrencyService } from '../src/services/CurrencyService';
+
+// Mock CurrencyService
+jest.mock('../src/components/dashboard/DashboardSkeleton', () => 'DashboardSkeleton');
+
+jest.mock('../src/services/CurrencyService', () => ({
+  CurrencyService: {
+    getRates: jest.fn(() => Promise.resolve([
+      {
+        id: '1',
+        code: 'USD',
+        name: 'Dólar Estadounidense (BCV)',
+        value: 36.58,
+        changePercent: 0.14,
+        type: 'fiat',
+        iconName: 'account-balance',
+        lastUpdated: new Date().toISOString(),
+      },
+      {
+        id: '4',
+        code: 'BTC',
+        name: 'Bitcoin',
+        value: 2345901.00,
+        changePercent: 2.45,
+        type: 'crypto',
+        iconName: 'currency-bitcoin',
+        lastUpdated: new Date().toISOString(),
+      }
+    ])),
+  },
+}));
 
 // Helper to wrap component with necessary providers
 const renderWithProviders = (component: React.ReactNode) => {
@@ -19,6 +50,7 @@ const renderWithProviders = (component: React.ReactNode) => {
 describe('HomeScreen', () => {
   it('renders correctly with user greeting', async () => {
     const { getByText } = renderWithProviders(<HomeScreen />);
+    
     await waitFor(() => {
       expect(getByText(/Hola, Carlos/i)).toBeTruthy();
     });
@@ -26,6 +58,7 @@ describe('HomeScreen', () => {
 
   it('renders market status', async () => {
     const { getByText } = renderWithProviders(<HomeScreen />);
+    
     await waitFor(() => {
       expect(getByText('MERCADO ABIERTO')).toBeTruthy();
     });
@@ -33,6 +66,7 @@ describe('HomeScreen', () => {
 
   it('renders exchange cards', async () => {
     const { getByText } = renderWithProviders(<HomeScreen />);
+    
     await waitFor(() => {
       expect(getByText('Dólar MEP')).toBeTruthy();
       expect(getByText('Bitcoin')).toBeTruthy();
@@ -41,6 +75,7 @@ describe('HomeScreen', () => {
 
   it('renders calculator section', async () => {
     const { getByText } = renderWithProviders(<HomeScreen />);
+    
     await waitFor(() => {
       expect(getByText('Calculadora Rápida')).toBeTruthy();
     });

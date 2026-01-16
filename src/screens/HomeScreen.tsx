@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import Header from '../components/dashboard/Header';
+import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MarketStatus from '../components/dashboard/MarketStatus';
 import ExchangeCard from '../components/dashboard/ExchangeCard';
 import StockItem from '../components/dashboard/StockItem';
@@ -17,7 +17,7 @@ const HomeScreen = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 2000); // 2 seconds delay to show skeleton
+    }, process.env.NODE_ENV === 'test' ? 0 : 2000); // 2 seconds delay to show skeleton (0 in tests)
     return () => clearTimeout(timer);
   }, []);
 
@@ -79,7 +79,8 @@ const HomeScreen = () => {
         barStyle={theme.dark ? 'light-content' : 'dark-content'} 
       />
       
-      <Header 
+      <UnifiedHeader 
+        variant="profile"
         userName={userData.name} 
         avatarUrl={userData.avatarUrl} 
         notificationCount={userData.notificationCount} 

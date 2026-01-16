@@ -1,16 +1,20 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Text, useTheme, TouchableRipple, Chip } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import RateCard from '../components/dashboard/RateCard';
+import UnifiedHeader from '../components/ui/UnifiedHeader';
 import SearchBar from '../components/ui/SearchBar';
 import PromoCard from '../components/dashboard/PromoCard';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
+import { useFilters } from '../context/FilterContext';
 
 const ExchangeRatesScreen = () => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const { exchangeRateFilters, setExchangeRateFilters } = useFilters();
+  const { query: searchQuery, type: filterType } = exchangeRateFilters;
   
   // Custom colors
   const accentGreen = (theme.colors as any).accentGreen || '#10B981';
@@ -18,11 +22,8 @@ const ExchangeRatesScreen = () => {
 
   // State
   const [loading, setLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
-  const [filterType, setFilterType] = useState<'all' | 'fiat' | 'crypto'>('all');
   const [allRates, setAllRates] = useState<CurrencyRate[]>([]);
-  const [filteredRates, setFilteredRates] = useState<CurrencyRate[]>([]);
   const [error, setError] = useState<string | null>(null);
 
   // Fetch data
@@ -32,7 +33,6 @@ const ExchangeRatesScreen = () => {
       setError(null);
       const rates = await CurrencyService.getRates();
       setAllRates(rates);
-      // Initial filter application handled by effect
     } catch (err) {
       setError('Error al cargar las tasas de cambio');
       console.error(err);
@@ -46,7 +46,7 @@ const ExchangeRatesScreen = () => {
   }, [loadRates]);
 
   // Combined Filter Logic
-  useEffect(() => {
+  const filteredRates = useMemo(() => {
     let result = allRates;
 
     // 1. Text Search
@@ -63,12 +63,26 @@ const ExchangeRatesScreen = () => {
       result = result.filter(r => r.type === filterType);
     }
 
-    setFilteredRates(result);
+    return result;
   }, [searchQuery, filterType, allRates]);
+
+  // Suggestions Logic
+  const suggestions = useMemo(() => {
+    if (!searchQuery || searchQuery.length < 2) return [];
+    const lower = searchQuery.toLowerCase();
+    return allRates
+      .filter(r => r.code.toLowerCase().includes(lower) || r.name.toLowerCase().includes(lower))
+      .slice(0, 3)
+      .map(r => r.name);
+  }, [searchQuery, allRates]);
 
   // Handle Search Input
   const handleSearch = (query: string) => {
-    setSearchQuery(query);
+    setExchangeRateFilters({ query });
+  };
+
+  const handleSuggestionPress = (suggestion: string) => {
+    setExchangeRateFilters({ query: suggestion });
   };
 
   // Group rates for display
@@ -98,44 +112,18 @@ const ExchangeRatesScreen = () => {
       />
 
       {/* Header */}
-      <View style={[styles.header, { 
-        backgroundColor: theme.colors.background,
-        paddingTop: insets.top + 10,
-        borderBottomColor: theme.colors.outline,
-      }]}>
-        <View style={styles.headerTop}>
-          <View>
-            <Text variant="headlineSmall" style={{ fontWeight: '800', letterSpacing: -0.5, color: theme.colors.onSurface }}>
-              Tasas de Cambio
-            </Text>
-            <Text style={{ fontSize: 13, fontWeight: '500', color: theme.colors.onSurfaceVariant }}>
-              Mercado en vivo • VES
-            </Text>
-          </View>
-          <View style={styles.headerIcons}>
-            <TouchableRipple 
-              onPress={() => loadRates()} 
-              style={[styles.iconButton, { backgroundColor: theme.dark ? '#1a2a3a' : '#F1F5F9' }]}
-              borderless
-              rippleColor="rgba(0, 0, 0, .1)"
-            >
-              <MaterialIcons name="refresh" size={22} color={theme.colors.onSurfaceVariant} />
-            </TouchableRipple>
-            <TouchableRipple 
-              onPress={() => {}} 
-              style={[styles.iconButton, { backgroundColor: theme.dark ? '#1a2a3a' : '#F1F5F9' }]}
-              borderless
-              rippleColor="rgba(0, 0, 0, .1)"
-            >
-              <View>
-                <MaterialIcons name="notifications" size={22} color={theme.colors.onSurfaceVariant} />
-                <View style={[styles.badge, { backgroundColor: accentRed, borderColor: theme.colors.background }]} />
-              </View>
-            </TouchableRipple>
-          </View>
-        </View>
+      <View style={{ backgroundColor: theme.colors.background, paddingBottom: 16 }}>
+        <UnifiedHeader
+          variant="section"
+          title="Tasas de Cambio"
+          subtitle="Mercado en vivo • VES"
+          onActionPress={() => loadRates()}
+          onNotificationPress={() => {}}
+          notificationCount={1}
+          style={{ paddingBottom: 0, borderBottomWidth: 0 }}
+        />
         
-        <View style={{ marginTop: 20 }}>
+        <View style={{ paddingHorizontal: 20, marginTop: 8 }}>
           <SearchBar 
             value={searchQuery}
             onChangeText={handleSearch}
@@ -146,28 +134,34 @@ const ExchangeRatesScreen = () => {
 
         {/* Filter Chips */}
         {showFilters && (
-          <View style={styles.filterContainer}>
+          <View style={[styles.filterContainer, { paddingHorizontal: 20 }]}>
             <Chip 
               selected={filterType === 'all'} 
-              onPress={() => setFilterType('all')}
+              onPress={() => setExchangeRateFilters({ type: 'all' })}
               style={styles.chip}
               showSelectedOverlay
+              accessibilityLabel="Filtro: Todas"
+              accessibilityState={{ selected: filterType === 'all' }}
             >
               Todas
             </Chip>
             <Chip 
               selected={filterType === 'fiat'} 
-              onPress={() => setFilterType('fiat')}
+              onPress={() => setExchangeRateFilters({ type: 'fiat' })}
               style={styles.chip}
               showSelectedOverlay
+              accessibilityLabel="Filtro: Fiat"
+              accessibilityState={{ selected: filterType === 'fiat' }}
             >
               Fiat
             </Chip>
             <Chip 
               selected={filterType === 'crypto'} 
-              onPress={() => setFilterType('crypto')}
+              onPress={() => setExchangeRateFilters({ type: 'crypto' })}
               style={styles.chip}
               showSelectedOverlay
+              accessibilityLabel="Filtro: Cripto"
+              accessibilityState={{ selected: filterType === 'crypto' }}
             >
               Cripto
             </Chip>
