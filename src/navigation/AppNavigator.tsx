@@ -10,6 +10,7 @@ import SplashScreen from '../screens/SplashScreen';
 import HomeScreen from '../screens/HomeScreen';
 import DetailsScreen from '../screens/DetailsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import ExchangeRatesScreen from '../screens/ExchangeRatesScreen';
 import { useThemeContext } from '../theme/ThemeContext';
 
 // Root Stack that includes Splash
@@ -44,6 +45,8 @@ function MainTabNavigator() {
 
             if (route.name === 'Home') {
               iconName = 'home';
+            } else if (route.name === 'Rates') {
+              iconName = 'show-chart'; // or monitoring/currency_exchange if available in MaterialIcons
             } else if (route.name === 'Markets') {
               iconName = 'bar-chart';
             } else if (route.name === 'Wallet') {
@@ -84,6 +87,7 @@ function MainTabNavigator() {
         })}
       >
         <Tab.Screen name="Home" component={HomeStackScreen} options={{ headerShown: false }} />
+        <Tab.Screen name="Rates" component={ExchangeRatesScreen} options={{ headerShown: false, title: 'Tasas' }} />
         <Tab.Screen name="Markets" component={DetailsScreen} options={{ title: 'Mercados' }} />
         <Tab.Screen name="Wallet" component={DetailsScreen} options={{ title: 'Billetera' }} />
         <Tab.Screen name="Settings" component={SettingsScreen} options={{ title: 'Configuración' }} />
