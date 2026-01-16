@@ -1,0 +1,80 @@
+import React, { useEffect, useRef } from 'react';
+import { View, StyleSheet, Animated, ViewStyle } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
+import { useTheme } from 'react-native-paper';
+
+interface SkeletonProps {
+  width?: number | string;
+  height?: number | string;
+  borderRadius?: number;
+  style?: ViewStyle;
+}
+
+const Skeleton: React.FC<SkeletonProps> = ({ 
+  width = '100%', 
+  height = 20, 
+  borderRadius = 4, 
+  style 
+}) => {
+  const theme = useTheme();
+  const animatedValue = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const animation = Animated.loop(
+      Animated.timing(animatedValue, {
+        toValue: 1,
+        duration: 1500,
+        useNativeDriver: true,
+      })
+    );
+    animation.start();
+    return () => animation.stop();
+  }, [animatedValue]);
+
+  const translateX = animatedValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-300, 300], // Adjust based on width if needed, but this covers most
+  });
+
+  const baseColor = theme.dark ? '#333333' : '#E1E9EE';
+  const highlightColor = theme.dark ? '#444444' : '#F2F8FC';
+
+  return (
+    <View
+      style={[
+        styles.container,
+        {
+          width,
+          height,
+          borderRadius,
+          backgroundColor: baseColor,
+          overflow: 'hidden',
+        },
+        style,
+      ]}
+    >
+      <Animated.View
+        style={{
+          width: '100%',
+          height: '100%',
+          transform: [{ translateX }],
+        }}
+      >
+        <LinearGradient
+          colors={[baseColor, highlightColor, baseColor]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={StyleSheet.absoluteFill}
+        />
+      </Animated.View>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    // Base styles
+  },
+});
+
+export default Skeleton;

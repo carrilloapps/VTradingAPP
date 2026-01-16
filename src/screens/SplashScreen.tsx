@@ -1,0 +1,102 @@
+import React, { useEffect, useRef } from 'react';
+import { View, StyleSheet, Animated } from 'react-native';
+import LottieView from 'lottie-react-native';
+import { useTheme, Text } from 'react-native-paper';
+import { CommonActions, useNavigation } from '@react-navigation/native';
+
+const SplashScreen = () => {
+  const theme = useTheme();
+  const navigation = useNavigation();
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const lottieRef = useRef<LottieView>(null);
+
+  useEffect(() => {
+    // Start animation explicitly if needed, though autoPlay handles it
+    if (lottieRef.current) {
+      lottieRef.current.play();
+    }
+
+    // Wait for 3 seconds then navigate
+    const timer = setTimeout(() => {
+      // Fade out animation
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }).start(() => {
+        // Reset stack to Home
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Main' }],
+          })
+        );
+      });
+    }, 2500);
+
+    return () => clearTimeout(timer);
+  }, [navigation, fadeAnim]);
+
+  return (
+    <Animated.View style={[styles.container, { backgroundColor: theme.colors.background, opacity: fadeAnim }]}>
+      <View style={styles.content}>
+        <View style={styles.logoContainer}>
+          <Text variant="displayMedium" style={[styles.logoText, { color: theme.colors.primary }]}>
+            VTrading
+          </Text>
+          <Text variant="titleMedium" style={{ color: theme.colors.onSurfaceVariant, letterSpacing: 2 }}>
+            APP
+          </Text>
+        </View>
+        
+        <View style={styles.lottieContainer}>
+          <LottieView
+            ref={lottieRef}
+            source={require('../assets/animations/splash.json')}
+            autoPlay
+            loop
+            style={styles.lottie}
+            resizeMode="contain"
+          />
+        </View>
+
+        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginTop: 20 }}>
+          Cargando mercados...
+        </Text>
+      </View>
+    </Animated.View>
+  );
+};
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  content: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  logoText: {
+    fontWeight: '900',
+    letterSpacing: -1,
+  },
+  lottieContainer: {
+    width: 200,
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  lottie: {
+    width: '100%',
+    height: '100%',
+  },
+});
+
+export default SplashScreen;
