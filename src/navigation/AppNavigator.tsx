@@ -27,11 +27,14 @@ function HomeStackScreen() {
   );
 }
 
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 // Tabs Principales
 const Tab = createBottomTabNavigator();
 
 function MainTabNavigator() {
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
     <Tab.Navigator
@@ -68,8 +71,8 @@ function MainTabNavigator() {
           tabBarStyle: {
             backgroundColor: theme.colors.surface,
             borderTopColor: theme.colors.outline,
-            height: 60,
-            paddingBottom: 8,
+            height: 60 + insets.bottom,
+            paddingBottom: insets.bottom + 8,
             paddingTop: 8,
             elevation: 8,
           },

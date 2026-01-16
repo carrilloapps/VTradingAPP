@@ -62,7 +62,8 @@ const HomeScreen = () => {
     return (
       <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <StatusBar 
-          backgroundColor={theme.colors.background} 
+          backgroundColor="transparent" 
+          translucent
           barStyle={theme.dark ? 'light-content' : 'dark-content'} 
         />
         <DashboardSkeleton />
@@ -73,7 +74,8 @@ const HomeScreen = () => {
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar 
-        backgroundColor={theme.colors.background} 
+        backgroundColor="transparent"
+        translucent 
         barStyle={theme.dark ? 'light-content' : 'dark-content'} 
       />
       

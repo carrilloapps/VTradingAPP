@@ -1,6 +1,7 @@
 import React from 'react';
-import { View, StyleSheet, Image, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Image, TouchableOpacity, ImageStyle } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 interface HeaderProps {
@@ -11,6 +12,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ userName, avatarUrl, notificationCount = 0 }) => {
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
   
   // Custom theme colors fallback
   const accentGreen = (theme.colors as any).accentGreen || '#10B981';
@@ -19,13 +21,14 @@ const Header: React.FC<HeaderProps> = ({ userName, avatarUrl, notificationCount 
   return (
     <View style={[styles.container, { 
       backgroundColor: theme.colors.background,
-      borderBottomColor: theme.colors.outline 
+      borderBottomColor: theme.colors.outline,
+      paddingTop: insets.top + 10, // Add safe area + minimal padding
     }]}>
       <View style={styles.userInfo}>
         <TouchableOpacity style={styles.avatarContainer}>
           <Image 
             source={{ uri: avatarUrl }} 
-            style={[styles.avatar, { borderColor: 'rgba(255,255,255,0.1)' }]} 
+            style={[styles.avatar as ImageStyle, { borderColor: 'rgba(255,255,255,0.1)' }]} 
           />
           <View style={[styles.statusDot, { backgroundColor: accentGreen, borderColor: theme.colors.background }]} />
         </TouchableOpacity>
@@ -86,7 +89,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   textContainer: {
-    flexDirection: 'col',
+    flexDirection: 'column',
   },
   subtitle: {
     fontSize: 10,
