@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Alert } from 'react-native';
 import { Text, useTheme, Switch, Snackbar } from 'react-native-paper';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import DeviceInfo from 'react-native-device-info';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
@@ -15,14 +14,13 @@ import MenuButton from '../components/settings/MenuButton';
 const SettingsScreen = () => {
   const theme = useTheme();
   const colors = theme.colors as any;
-  const insets = useSafeAreaInsets();
   const { themeMode, setThemeMode } = useThemeContext();
   
   // App Info State
   const [appName, setAppName] = useState('');
   const [appVersion, setAppVersion] = useState('');
   const [buildNumber, setBuildNumber] = useState('');
-  const [buildDate, setBuildDate] = useState('');
+  // const [buildDate, setBuildDate] = useState('');
   
   // Feedback State
   const [snackbarVisible, setSnackbarVisible] = useState(false);
@@ -41,13 +39,9 @@ const SettingsScreen = () => {
       const version = DeviceInfo.getVersion();
       const build = DeviceInfo.getBuildNumber();
       // Using last update time as a proxy for build date/install date
-      const lastUpdate = await DeviceInfo.getLastUpdateTime(); 
-      const date = new Date(lastUpdate).toLocaleDateString();
-      
       setAppName(name);
       setAppVersion(version);
       setBuildNumber(build);
-      setBuildDate(date);
     };
     
     loadAppInfo();

@@ -9,16 +9,16 @@ interface MarketStatusProps {
 
 const MarketStatus: React.FC<MarketStatusProps> = ({ isOpen, updatedAt }) => {
   const theme = useTheme();
-  const accentGreen = (theme.colors as any).accentGreen || '#10B981';
+  const colors = theme.colors as any;
 
   return (
     <View style={styles.container}>
       <View style={[styles.statusBadge, { 
-        backgroundColor: `${accentGreen}1A`, // 10% opacity
-        borderColor: `${accentGreen}33` // 20% opacity
+        backgroundColor: colors.successContainer,
+        borderColor: colors.success
       }]}>
-        <View style={[styles.dot, { backgroundColor: accentGreen }]} />
-        <Text style={[styles.statusText, { color: accentGreen }]}>
+        <View style={[styles.dot, { backgroundColor: colors.success }]} />
+        <Text style={[styles.statusText, { color: colors.success }]}>
           {isOpen ? 'MERCADO ABIERTO' : 'MERCADO CERRADO'}
         </Text>
       </View>

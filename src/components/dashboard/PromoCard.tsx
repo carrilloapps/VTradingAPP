@@ -7,16 +7,16 @@ const PromoCard: React.FC = () => {
 
   return (
     <View style={[styles.container, { 
-      backgroundColor: theme.colors.primaryContainer, // primary/5 or primary/10 approx
-      borderColor: 'rgba(59, 130, 246, 0.1)',
+      backgroundColor: theme.colors.primaryContainer, 
+      borderColor: theme.colors.outline,
     }]}>
-      <Text style={[styles.title, { color: theme.colors.primary }]}>
+      <Text style={[styles.title, { color: '#ffffff' }]}>
         ¿Necesitas cambiar divisas?
       </Text>
-      <Text style={[styles.description, { color: theme.colors.onSurfaceVariant }]}>
+      <Text style={[styles.description, { color: 'rgba(255,255,255,0.8)' }]}>
         Usa nuestra calculadora integrada para conversiones exactas.
       </Text>
-      <TouchableOpacity style={[styles.button, { backgroundColor: theme.colors.primary }]}>
+      <TouchableOpacity style={[styles.button, { backgroundColor: theme.colors.primary, borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)' }]}>
         <Text style={styles.buttonText}>Calculadora</Text>
       </TouchableOpacity>
     </View>

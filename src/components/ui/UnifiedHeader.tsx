@@ -34,20 +34,21 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   style,
 }) => {
   const theme = useTheme();
+  const colors = theme.colors as any;
   const insets = useSafeAreaInsets();
   
   // Custom theme colors fallback
-  const accentGreen = (theme.colors as any).accentGreen || '#10B981';
-  const accentRed = (theme.colors as any).accentRed || '#EF4444';
+  const accentGreen = colors.success;
+  const accentRed = colors.error;
 
-  const buttonBgColor = theme.dark ? '#1a2a3a' : '#F1F5F9';
+  const buttonBgColor = theme.colors.elevation.level1;
 
   const renderProfileContent = () => (
     <View style={styles.userInfo}>
       <TouchableOpacity style={styles.avatarContainer}>
         <Image 
           source={{ uri: avatarUrl }} 
-          style={[styles.avatar as ImageStyle, { borderColor: 'rgba(255,255,255,0.1)' }]} 
+          style={[styles.avatar as ImageStyle, { borderColor: theme.colors.outline }]} 
         />
         <View style={[styles.statusDot, { backgroundColor: accentGreen, borderColor: theme.colors.background }]} />
       </TouchableOpacity>

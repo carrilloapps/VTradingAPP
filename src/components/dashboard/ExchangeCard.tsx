@@ -30,15 +30,14 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
   iconColor = '#F3BA2F'
 }) => {
   const theme = useTheme();
-  const accentGreen = (theme.colors as any).accentGreen || '#10B981';
-  const accentRed = (theme.colors as any).accentRed || '#EF4444';
-  const trendColor = isPositive ? accentGreen : accentRed;
+  const colors = theme.colors as any;
+  const trendColor = isPositive ? colors.success : colors.error;
 
   return (
     <Surface style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
       <View style={styles.header}>
         <View style={styles.leftContent}>
-          <View style={[styles.iconContainer, { borderColor: theme.colors.outline }]}>
+          <View style={[styles.iconContainer, { borderColor: theme.colors.outline, backgroundColor: theme.colors.elevation.level1 }]}>
             {iconUrl ? (
               <Image source={{ uri: iconUrl }} style={styles.iconImage} />
             ) : (
@@ -116,7 +115,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(255,255,255,0.05)',
   },
   iconImage: {
     width: 32,

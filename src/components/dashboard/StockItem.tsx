@@ -21,9 +21,8 @@ const StockItem: React.FC<StockItemProps> = ({
   volume
 }) => {
   const theme = useTheme();
-  const accentGreen = (theme.colors as any).accentGreen || '#10B981';
-  const accentRed = (theme.colors as any).accentRed || '#EF4444';
-  const trendColor = isPositive ? accentGreen : accentRed;
+  const colors = theme.colors as any;
+  const trendColor = isPositive ? colors.success : colors.error;
 
   return (
     <TouchableOpacity style={[styles.container, { borderBottomColor: theme.colors.outline }]}>

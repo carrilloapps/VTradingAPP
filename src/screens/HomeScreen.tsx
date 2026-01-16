@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar } from 'react-native';
-import { useTheme } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
+import { useTheme, Text } from 'react-native-paper';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MarketStatus from '../components/dashboard/MarketStatus';
 import ExchangeCard from '../components/dashboard/ExchangeCard';
@@ -17,7 +17,7 @@ const HomeScreen = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-    }, process.env.NODE_ENV === 'test' ? 0 : 2000); // 2 seconds delay to show skeleton (0 in tests)
+    }, 2000); // 2 seconds delay to show skeleton
     return () => clearTimeout(timer);
   }, []);
 
@@ -101,8 +101,11 @@ const HomeScreen = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <View style={[styles.sectionIcon, { backgroundColor: theme.colors.primaryContainer }]}>
-              {/* Using a simple view as placeholder for icon if needed */}
+              <MaterialIcons name="analytics" size={20} color={theme.colors.primary} />
             </View>
+            <Text variant="titleMedium" style={[styles.titleMedium, { color: theme.colors.onSurface }]}>
+              Acciones Más Negociadas
+            </Text>
           </View>
           
           {stocksData.map((stock, index) => (
@@ -142,6 +145,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 8,
     // Add icon inside if needed
+  },
+  titleMedium: {
+    fontWeight: 'bold',
   }
 });
 

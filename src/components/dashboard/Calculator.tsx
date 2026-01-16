@@ -5,16 +5,30 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 const Calculator: React.FC = () => {
   const theme = useTheme();
+  const colors = theme.colors as any;
   const [amount, setAmount] = useState('1000');
   const [currency, setCurrency] = useState('USD');
-  const rate = 350.50; // Example rate
+  const rate = 58.25; // Approximate VES rate
+  const [result, setResult] = useState('');
+
+  const calculate = (val: string) => {
+    setAmount(val);
+    if (!val) {
+      setResult('');
+      return;
+    }
+    const num = parseFloat(val);
+    if (isNaN(num)) return;
+    
+    setResult((num * rate).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outline }]}>
       <View style={styles.header}>
         <View style={styles.headerLeft}>
-          <View style={[styles.iconContainer, { backgroundColor: 'rgba(59, 130, 246, 0.2)' }]}>
-            <MaterialIcons name="calculate" size={16} color={theme.colors.primary} />
+          <View style={[styles.iconContainer, { backgroundColor: colors.infoContainer }]}>
+            <MaterialIcons name="calculate" size={16} color={colors.info} />
           </View>
           <Text style={[styles.title, { color: theme.colors.onSurface }]}>Calculadora Rápida</Text>
         </View>
@@ -28,11 +42,12 @@ const Calculator: React.FC = () => {
           <Text style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Monto a Invertir</Text>
           <TextInput
             value={amount}
-            onChangeText={setAmount}
+            onChangeText={calculate}
             keyboardType="numeric"
             style={[styles.input, { backgroundColor: 'transparent', color: theme.colors.onSurface }]}
             underlineColor="transparent"
             textColor={theme.colors.onSurface}
+            placeholderTextColor={theme.colors.onSurfaceVariant}
             contentStyle={{ paddingHorizontal: 0, paddingVertical: 0 }}
           />
         </View>
@@ -50,18 +65,19 @@ const Calculator: React.FC = () => {
       </View>
 
       <View style={styles.resultRow}>
-        <Text style={[styles.resultLabel, { color: theme.colors.onSurfaceVariant }]}>Estimado en ARS</Text>
+        <Text style={[styles.resultLabel, { color: theme.colors.onSurfaceVariant }]}>Estimado en VES</Text>
         <View style={styles.resultValueContainer}>
-          <Text style={[styles.resultSymbol, { color: theme.colors.primary }]}>$</Text>
+          <Text style={[styles.resultSymbol, { color: theme.colors.primary }]}>Bs.</Text>
           <Text style={[styles.resultValue, { color: theme.colors.onSurface }]}>
-            {(parseFloat(amount || '0') * rate).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
+            {result || (parseFloat(amount || '0') * rate).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </Text>
         </View>
       </View>
 
-      <View style={[styles.rateInfo, { backgroundColor: 'rgba(59, 130, 246, 0.1)' }]}>
-        <Text style={[styles.rateText, { color: theme.colors.primary }]}>
-          Cotización actual: 1 USD = ${rate.toFixed(2)} ARS
+
+      <View style={[styles.rateInfo, { backgroundColor: colors.infoContainer }]}>
+        <Text style={[styles.rateText, { color: colors.info }]}>
+          Cotización actual: 1 USD = {rate.toLocaleString('es-VE', { minimumFractionDigits: 2 })} VES
         </Text>
       </View>
 
@@ -119,15 +135,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   label: {
-    fontSize: 10,
-    fontWeight: '600',
+    fontSize: 11,
+    fontWeight: '700',
     textTransform: 'uppercase',
     marginBottom: 4,
   },
   input: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '700',
-    height: 24,
+    height: 28,
     padding: 0,
   },
   currencyBadge: {

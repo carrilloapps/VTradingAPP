@@ -17,8 +17,8 @@ const ExchangeRatesScreen = () => {
   const { query: searchQuery, type: filterType } = exchangeRateFilters;
   
   // Custom colors
-  const accentGreen = (theme.colors as any).accentGreen || '#10B981';
-  const accentRed = (theme.colors as any).accentRed || '#EF4444';
+  const colors = theme.colors as any;
+  const accentRed = colors.error;
 
   // State
   const [loading, setLoading] = useState(true);
@@ -98,10 +98,32 @@ const ExchangeRatesScreen = () => {
       changePercent={`${Math.abs(rate.changePercent)}%`}
       isPositive={rate.changePercent >= 0}
       iconName={rate.iconName || 'attach-money'}
-      iconBgColor={rate.type === 'crypto' ? undefined : (theme.dark ? '#1a2a3a' : '#F1F5F9')}
-      iconColor={rate.type === 'crypto' ? undefined : (theme.dark ? '#cbd5e1' : '#475569')}
+      iconBgColor={rate.type === 'crypto' ? undefined : colors.infoContainer}
+      iconColor={rate.type === 'crypto' ? undefined : colors.info}
     />
   );
+
+  const renderChip = (label: string, value: 'all' | 'fiat' | 'crypto') => {
+    const isSelected = filterType === value;
+    return (
+      <Chip 
+        selected={isSelected} 
+        onPress={() => setExchangeRateFilters({ type: value })}
+        style={[
+          styles.chip, 
+          isSelected ? { backgroundColor: theme.colors.primary, borderWidth: 0 } : { backgroundColor: 'transparent', borderWidth: 1, borderColor: theme.colors.outline }
+        ]}
+        textStyle={{
+          color: isSelected ? '#ffffff' : theme.colors.onSurfaceVariant,
+          fontWeight: isSelected ? '700' : '400'
+        }}
+        showSelectedOverlay={false}
+        rippleColor={isSelected ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}
+      >
+        {label}
+      </Chip>
+    );
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -135,36 +157,9 @@ const ExchangeRatesScreen = () => {
         {/* Filter Chips */}
         {showFilters && (
           <View style={[styles.filterContainer, { paddingHorizontal: 20 }]}>
-            <Chip 
-              selected={filterType === 'all'} 
-              onPress={() => setExchangeRateFilters({ type: 'all' })}
-              style={styles.chip}
-              showSelectedOverlay
-              accessibilityLabel="Filtro: Todas"
-              accessibilityState={{ selected: filterType === 'all' }}
-            >
-              Todas
-            </Chip>
-            <Chip 
-              selected={filterType === 'fiat'} 
-              onPress={() => setExchangeRateFilters({ type: 'fiat' })}
-              style={styles.chip}
-              showSelectedOverlay
-              accessibilityLabel="Filtro: Fiat"
-              accessibilityState={{ selected: filterType === 'fiat' }}
-            >
-              Fiat
-            </Chip>
-            <Chip 
-              selected={filterType === 'crypto'} 
-              onPress={() => setExchangeRateFilters({ type: 'crypto' })}
-              style={styles.chip}
-              showSelectedOverlay
-              accessibilityLabel="Filtro: Cripto"
-              accessibilityState={{ selected: filterType === 'crypto' }}
-            >
-              Cripto
-            </Chip>
+            {renderChip('Todas', 'all')}
+            {renderChip('Fiat', 'fiat')}
+            {renderChip('Cripto', 'crypto')}
           </View>
         )}
       </View>
@@ -203,8 +198,8 @@ const ExchangeRatesScreen = () => {
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
                   <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>OFICIAL & FIAT</Text>
-                  <View style={[styles.tag, { backgroundColor: 'rgba(16, 185, 129, 0.1)' }]}>
-                    <Text style={[styles.tagText, { color: accentGreen }]}>ACTUALIZADO</Text>
+                  <View style={[styles.tag, { backgroundColor: colors.successContainer }]}>
+                    <Text style={[styles.tagText, { color: colors.success }]}>ACTUALIZADO</Text>
                   </View>
                 </View>
                 {officialRates.map(renderRateCard)}

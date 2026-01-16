@@ -1,9 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ScrollView, StatusBar } from 'react-native';
 import { Text, useTheme, Chip } from 'react-native-paper';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import MarketStatus from '../components/stocks/MarketStatus';
 import IndexHero from '../components/stocks/IndexHero';
 import StockItem, { StockData } from '../components/stocks/StockItem';
@@ -23,7 +21,6 @@ const FILTERS = ['Todos', 'Banca', 'Industria', 'Servicios', 'Seguros'];
 
 const StocksScreen = () => {
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
   const { stockFilters, setStockFilters } = useFilters();
   const { query: searchQuery, category: activeFilter } = stockFilters;
   const [showFilters, setShowFilters] = useState(false);

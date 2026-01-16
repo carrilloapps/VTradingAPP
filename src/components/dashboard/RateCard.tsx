@@ -25,16 +25,15 @@ const RateCard: React.FC<RateCardProps> = ({
   iconColor
 }) => {
   const theme = useTheme();
-  const accentGreen = (theme.colors as any).accentGreen || '#10B981';
-  const accentRed = (theme.colors as any).accentRed || '#EF4444';
-  const trendColor = isPositive ? accentGreen : accentRed;
+  const colors = theme.colors as any;
+  const trendColor = isPositive ? colors.success : colors.error;
   
   // Default icon colors if not provided
-  const finalIconBgColor = iconBgColor || (theme.dark ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.1)');
-  const finalIconColor = iconColor || theme.colors.primary;
+  const finalIconBgColor = iconBgColor || colors.infoContainer;
+  const finalIconColor = iconColor || colors.info;
 
   return (
-    <Surface style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outlineVariant }]}>
+    <Surface style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
       <View style={styles.leftContent}>
         <View style={[styles.iconContainer, { backgroundColor: finalIconBgColor }]}>
           <MaterialIcons name={iconName} size={24} color={finalIconColor} />
