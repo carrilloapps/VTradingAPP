@@ -1,11 +1,12 @@
-import React from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity } from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { Text, useTheme, TouchableRipple, Chip } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import RateCard from '../components/dashboard/RateCard';
 import SearchBar from '../components/ui/SearchBar';
 import PromoCard from '../components/dashboard/PromoCard';
+import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
 
 const ExchangeRatesScreen = () => {
   const theme = useTheme();
@@ -15,61 +16,78 @@ const ExchangeRatesScreen = () => {
   const accentGreen = (theme.colors as any).accentGreen || '#10B981';
   const accentRed = (theme.colors as any).accentRed || '#EF4444';
 
-  const officialRates = [
-    {
-      title: 'USD / VES',
-      subtitle: 'Banco Central de Venezuela',
-      value: '36,58',
-      changePercent: '0.14%',
-      isPositive: true,
-      iconName: 'account-balance',
-      iconBgColor: theme.dark ? 'rgba(59, 130, 246, 0.2)' : 'rgba(59, 130, 246, 0.1)',
-      iconColor: theme.colors.primary,
-    },
-    {
-      title: 'EUR / VES',
-      subtitle: 'Tasa Oficial Euro',
-      value: '39,42',
-      changePercent: '0.05%',
-      isPositive: false,
-      iconName: 'euro',
-      iconBgColor: theme.dark ? '#1a2a3a' : '#F1F5F9',
-      iconColor: theme.dark ? '#cbd5e1' : '#475569',
-    }
-  ];
+  // State
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [filterType, setFilterType] = useState<'all' | 'fiat' | 'crypto'>('all');
+  const [allRates, setAllRates] = useState<CurrencyRate[]>([]);
+  const [filteredRates, setFilteredRates] = useState<CurrencyRate[]>([]);
+  const [error, setError] = useState<string | null>(null);
 
-  const cryptoRates = [
-    {
-      title: 'USDT / VES',
-      subtitle: 'Tether (P2P Average)',
-      value: '38,12',
-      changePercent: '1.12%',
-      isPositive: true,
-      iconName: 'monetization-on',
-      iconBgColor: 'rgba(38, 161, 123, 0.1)',
-      iconColor: '#26A17B',
-    },
-    {
-      title: 'BTC / VES',
-      subtitle: 'Bitcoin',
-      value: '2.345.901',
-      changePercent: '2.45%',
-      isPositive: true,
-      iconName: 'currency-bitcoin',
-      iconBgColor: 'rgba(247, 147, 26, 0.1)',
-      iconColor: '#F7931A',
-    },
-    {
-      title: 'ETH / VES',
-      subtitle: 'Ethereum',
-      value: '120.452',
-      changePercent: '0.82%',
-      isPositive: false,
-      iconName: 'diamond',
-      iconBgColor: 'rgba(98, 126, 234, 0.1)',
-      iconColor: '#627EEA',
+  // Fetch data
+  const loadRates = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const rates = await CurrencyService.getRates();
+      setAllRates(rates);
+      // Initial filter application handled by effect
+    } catch (err) {
+      setError('Error al cargar las tasas de cambio');
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-  ];
+  }, []);
+
+  useEffect(() => {
+    loadRates();
+  }, [loadRates]);
+
+  // Combined Filter Logic
+  useEffect(() => {
+    let result = allRates;
+
+    // 1. Text Search
+    if (searchQuery) {
+      const lower = searchQuery.toLowerCase();
+      result = result.filter(r => 
+        r.code.toLowerCase().includes(lower) || 
+        r.name.toLowerCase().includes(lower)
+      );
+    }
+
+    // 2. Type Filter
+    if (filterType !== 'all') {
+      result = result.filter(r => r.type === filterType);
+    }
+
+    setFilteredRates(result);
+  }, [searchQuery, filterType, allRates]);
+
+  // Handle Search Input
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  // Group rates for display
+  const officialRates = filteredRates.filter(r => r.type === 'fiat');
+  const cryptoRates = filteredRates.filter(r => r.type === 'crypto');
+
+  const renderRateCard = (rate: CurrencyRate) => (
+    <RateCard 
+      key={rate.id}
+      title={`${rate.code} / VES`}
+      subtitle={rate.name}
+      value={rate.value.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+      changePercent={`${Math.abs(rate.changePercent)}%`}
+      isPositive={rate.changePercent >= 0}
+      iconName={rate.iconName || 'attach-money'}
+      iconBgColor={rate.type === 'crypto' ? undefined : (theme.dark ? '#1a2a3a' : '#F1F5F9')}
+      iconColor={rate.type === 'crypto' ? undefined : (theme.dark ? '#cbd5e1' : '#475569')}
+    />
+  );
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -81,7 +99,7 @@ const ExchangeRatesScreen = () => {
 
       {/* Header */}
       <View style={[styles.header, { 
-        backgroundColor: theme.colors.background, // or transparent with blur if possible
+        backgroundColor: theme.colors.background,
         paddingTop: insets.top + 10,
         borderBottomColor: theme.colors.outline,
       }]}>
@@ -95,19 +113,66 @@ const ExchangeRatesScreen = () => {
             </Text>
           </View>
           <View style={styles.headerIcons}>
-            <TouchableOpacity style={[styles.iconButton, { backgroundColor: theme.dark ? '#1a2a3a' : '#F1F5F9' }]}>
-              <MaterialIcons name="history" size={22} color={theme.colors.onSurfaceVariant} />
-            </TouchableOpacity>
-            <TouchableOpacity style={[styles.iconButton, { backgroundColor: theme.dark ? '#1a2a3a' : '#F1F5F9' }]}>
-              <MaterialIcons name="notifications" size={22} color={theme.colors.onSurfaceVariant} />
-              <View style={[styles.badge, { backgroundColor: accentRed, borderColor: theme.colors.background }]} />
-            </TouchableOpacity>
+            <TouchableRipple 
+              onPress={() => loadRates()} 
+              style={[styles.iconButton, { backgroundColor: theme.dark ? '#1a2a3a' : '#F1F5F9' }]}
+              borderless
+              rippleColor="rgba(0, 0, 0, .1)"
+            >
+              <MaterialIcons name="refresh" size={22} color={theme.colors.onSurfaceVariant} />
+            </TouchableRipple>
+            <TouchableRipple 
+              onPress={() => {}} 
+              style={[styles.iconButton, { backgroundColor: theme.dark ? '#1a2a3a' : '#F1F5F9' }]}
+              borderless
+              rippleColor="rgba(0, 0, 0, .1)"
+            >
+              <View>
+                <MaterialIcons name="notifications" size={22} color={theme.colors.onSurfaceVariant} />
+                <View style={[styles.badge, { backgroundColor: accentRed, borderColor: theme.colors.background }]} />
+              </View>
+            </TouchableRipple>
           </View>
         </View>
         
         <View style={{ marginTop: 20 }}>
-          <SearchBar />
+          <SearchBar 
+            value={searchQuery}
+            onChangeText={handleSearch}
+            placeholder="Buscar moneda o token..."
+            onFilterPress={() => setShowFilters(!showFilters)}
+          />
         </View>
+
+        {/* Filter Chips */}
+        {showFilters && (
+          <View style={styles.filterContainer}>
+            <Chip 
+              selected={filterType === 'all'} 
+              onPress={() => setFilterType('all')}
+              style={styles.chip}
+              showSelectedOverlay
+            >
+              Todas
+            </Chip>
+            <Chip 
+              selected={filterType === 'fiat'} 
+              onPress={() => setFilterType('fiat')}
+              style={styles.chip}
+              showSelectedOverlay
+            >
+              Fiat
+            </Chip>
+            <Chip 
+              selected={filterType === 'crypto'} 
+              onPress={() => setFilterType('crypto')}
+              style={styles.chip}
+              showSelectedOverlay
+            >
+              Cripto
+            </Chip>
+          </View>
+        )}
       </View>
 
       <ScrollView 
@@ -115,33 +180,57 @@ const ExchangeRatesScreen = () => {
         contentContainerStyle={{ paddingBottom: 100 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Section: Oficial BCV */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>OFICIAL BCV</Text>
-            <View style={[styles.tag, { backgroundColor: 'rgba(16, 185, 129, 0.1)' }]}>
-              <Text style={[styles.tagText, { color: accentGreen }]}>ACTUALIZADO</Text>
-            </View>
+        {loading && filteredRates.length === 0 ? (
+          <View style={styles.centerContainer}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+            <Text style={{ marginTop: 10, color: theme.colors.onSurfaceVariant }}>Cargando tasas...</Text>
           </View>
-          
-          {officialRates.map((rate, index) => (
-            <RateCard key={index} {...rate} />
-          ))}
-        </View>
-
-        {/* Section: Cripto & Paralelo */}
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>CRIPTO & PARALELO</Text>
+        ) : error ? (
+           <View style={styles.centerContainer}>
+            <MaterialIcons name="error-outline" size={40} color={accentRed} />
+            <Text style={{ marginTop: 10, color: theme.colors.onSurface }}>{error}</Text>
+            <TouchableOpacity onPress={loadRates} style={{ marginTop: 10 }}>
+              <Text style={{ color: theme.colors.primary, fontWeight: 'bold' }}>Reintentar</Text>
+            </TouchableOpacity>
           </View>
-          
-          {cryptoRates.map((rate, index) => (
-            <RateCard key={index} {...rate} />
-          ))}
-        </View>
+        ) : filteredRates.length === 0 ? (
+          <View style={styles.centerContainer}>
+             <MaterialIcons name="search-off" size={40} color={theme.colors.onSurfaceVariant} />
+             <Text style={{ marginTop: 10, color: theme.colors.onSurfaceVariant }}>
+               {filterType !== 'all' 
+                 ? `No hay resultados para "${filterType}"` 
+                 : "No se encontraron resultados"}
+             </Text>
+          </View>
+        ) : (
+          <>
+            {/* Section: Oficial BCV */}
+            {officialRates.length > 0 && (
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>OFICIAL & FIAT</Text>
+                  <View style={[styles.tag, { backgroundColor: 'rgba(16, 185, 129, 0.1)' }]}>
+                    <Text style={[styles.tagText, { color: accentGreen }]}>ACTUALIZADO</Text>
+                  </View>
+                </View>
+                {officialRates.map(renderRateCard)}
+              </View>
+            )}
 
-        {/* Promo Card */}
-        <PromoCard />
+            {/* Section: Cripto & Paralelo */}
+            {cryptoRates.length > 0 && (
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>CRIPTO & PARALELO</Text>
+                </View>
+                {cryptoRates.map(renderRateCard)}
+              </View>
+            )}
+
+            {/* Promo Card */}
+            <PromoCard />
+          </>
+        )}
 
       </ScrollView>
     </View>
@@ -155,7 +244,6 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 20,
     paddingBottom: 16,
-    // borderBottomWidth: 1, // Optional: if we want separation line
   },
   headerTop: {
     flexDirection: 'row',
@@ -173,16 +261,16 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    position: 'relative',
+    overflow: 'hidden', // Required for Ripple
   },
   badge: {
     position: 'absolute',
-    top: 10,
-    right: 10,
+    top: -2,
+    right: -2,
     width: 8,
     height: 8,
     borderRadius: 4,
-    borderWidth: 2,
+    borderWidth: 1,
   },
   content: {
     flex: 1,
@@ -213,6 +301,19 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textTransform: 'uppercase',
   },
+  centerContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 50,
+  },
+  filterContainer: {
+    flexDirection: 'row',
+    marginTop: 12,
+    gap: 8,
+  },
+  chip: {
+    marginRight: 4,
+  }
 });
 
 export default ExchangeRatesScreen;

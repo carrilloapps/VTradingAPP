@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TextInput, StyleSheet } from 'react-native';
+import { View, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
@@ -7,12 +7,14 @@ interface SearchBarProps {
   placeholder?: string;
   value?: string;
   onChangeText?: (text: string) => void;
+  onFilterPress?: () => void;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({ 
   placeholder = "Buscar moneda o token...",
   value,
-  onChangeText
+  onChangeText,
+  onFilterPress
 }) => {
   const theme = useTheme();
 
@@ -29,7 +31,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
         value={value}
         onChangeText={onChangeText}
       />
-      <MaterialIcons name="tune" size={18} color={theme.colors.onSurfaceVariant} />
+      {onFilterPress && (
+        <TouchableOpacity onPress={onFilterPress} style={styles.filterButton}>
+          <MaterialIcons name="tune" size={20} color={theme.colors.primary} />
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -50,6 +56,9 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     paddingVertical: 0, // Fix alignment on Android
   },
+  filterButton: {
+    padding: 4,
+  }
 });
 
 export default SearchBar;
