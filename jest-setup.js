@@ -29,6 +29,7 @@ jest.mock('@react-navigation/native', () => {
     useNavigation: () => ({
       navigate: jest.fn(),
       goBack: jest.fn(),
+      dispatch: jest.fn(),
     }),
   };
 });
@@ -59,15 +60,30 @@ messagingFn.AuthorizationStatus = {
 jest.mock('@react-native-firebase/messaging', () => messagingFn);
 
 jest.mock('@react-native-firebase/auth', () => {
-  return () => ({
+  const authFn = () => ({
     onAuthStateChanged: jest.fn(() => jest.fn()),
     currentUser: { uid: 'test-user', email: 'test@example.com' },
     signInWithEmailAndPassword: jest.fn(),
     createUserWithEmailAndPassword: jest.fn(),
     signOut: jest.fn(),
     sendPasswordResetEmail: jest.fn(),
+    signInWithCredential: jest.fn(),
+    signInAnonymously: jest.fn(),
   });
+  authFn.GoogleAuthProvider = {
+    credential: jest.fn(),
+  };
+  return authFn;
 });
+
+jest.mock('@react-native-google-signin/google-signin', () => ({
+  GoogleSignin: {
+    configure: jest.fn(),
+    hasPlayServices: jest.fn(() => Promise.resolve(true)),
+    signIn: jest.fn(() => Promise.resolve({ data: { idToken: 'mock-google-token' } })),
+    signOut: jest.fn(),
+  },
+}));
 
 jest.mock('@react-native-firebase/in-app-messaging', () => {
   return () => ({
@@ -126,6 +142,7 @@ jest.mock('@react-native-firebase/perf', () => {
       setHttpResponseCode: jest.fn(),
       setRequestPayloadSize: jest.fn(),
       setResponsePayloadSize: jest.fn(),
+      setResponseContentType: jest.fn(),
     })),
   });
 });

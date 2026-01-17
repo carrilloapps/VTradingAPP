@@ -12,7 +12,14 @@ import DetailsScreen from '../screens/DetailsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import ExchangeRatesScreen from '../screens/ExchangeRatesScreen';
 import StocksScreen from '../screens/StocksScreen';
+import AdvancedCalculatorScreen from '../screens/AdvancedCalculatorScreen';
 import { useThemeContext } from '../theme/ThemeContext';
+import { useAuth } from '../context/AuthContext';
+import { analyticsService } from '../services/firebase/AnalyticsService';
+
+import LoginScreen from '../screens/auth/LoginScreen';
+import RegisterScreen from '../screens/auth/RegisterScreen';
+import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
 
 /* eslint-disable react/no-unstable-nested-components */
 
@@ -27,7 +34,21 @@ function HomeStackScreen() {
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
       <HomeStack.Screen name="HomeMain" component={HomeScreen} />
       <HomeStack.Screen name="Details" component={DetailsScreen} options={{ headerShown: true, title: 'Detalles' }} />
+      <HomeStack.Screen name="AdvancedCalculator" component={AdvancedCalculatorScreen} options={{ headerShown: false, animation: 'default' }} />
     </HomeStack.Navigator>
+  );
+}
+
+// Auth Stack
+const AuthStack = createNativeStackNavigator();
+
+function AuthNavigator() {
+  return (
+    <AuthStack.Navigator screenOptions={{ headerShown: false }}>
+      <AuthStack.Screen name="Login" component={LoginScreen} />
+      <AuthStack.Screen name="Register" component={RegisterScreen} />
+      <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+    </AuthStack.Navigator>
   );
 }
 
@@ -106,11 +127,10 @@ function MainTabNavigator() {
   );
 }
 
-import { analyticsService } from '../services/firebase/AnalyticsService';
-
 const AppNavigator = () => {
   const theme = useTheme();
   const { isDark } = useThemeContext();
+  const { user, isLoading } = useAuth();
   const routeNameRef = React.useRef<string | undefined>(undefined);
   const navigationRef = React.useRef<any>(null);
   
@@ -126,6 +146,10 @@ const AppNavigator = () => {
       primary: theme.colors.primary,
     },
   };
+
+  if (isLoading) {
+    return <SplashScreen />;
+  }
 
   return (
     <NavigationContainer
@@ -146,8 +170,11 @@ const AppNavigator = () => {
       }}
     >
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
-        <RootStack.Screen name="Splash" component={SplashScreen} />
-        <RootStack.Screen name="Main" component={MainTabNavigator} />
+        {user ? (
+          <RootStack.Screen name="Main" component={MainTabNavigator} />
+        ) : (
+          <RootStack.Screen name="Auth" component={AuthNavigator} />
+        )}
       </RootStack.Navigator>
     </NavigationContainer>
   );

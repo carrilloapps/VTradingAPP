@@ -2,11 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import LottieView from 'lottie-react-native';
 import { useTheme, Text } from 'react-native-paper';
-import { CommonActions, useNavigation } from '@react-navigation/native';
 
 const SplashScreen = () => {
   const theme = useTheme();
-  const navigation = useNavigation();
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const lottieRef = useRef<LottieView>(null);
 
@@ -15,27 +13,7 @@ const SplashScreen = () => {
     if (lottieRef.current) {
       lottieRef.current.play();
     }
-
-    // Wait for 3 seconds then navigate
-    const timer = setTimeout(() => {
-      // Fade out animation
-      Animated.timing(fadeAnim, {
-        toValue: 0,
-        duration: 500,
-        useNativeDriver: true,
-      }).start(() => {
-        // Reset stack to Home
-        navigation.dispatch(
-          CommonActions.reset({
-            index: 0,
-            routes: [{ name: 'Main' }],
-          })
-        );
-      });
-    }, 2500);
-
-    return () => clearTimeout(timer);
-  }, [navigation, fadeAnim]);
+  }, []);
 
   return (
     <Animated.View style={[styles.container, { backgroundColor: theme.colors.background, opacity: fadeAnim }]}>

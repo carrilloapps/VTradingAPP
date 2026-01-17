@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider } from './src/theme/ThemeContext';
 import { FilterProvider } from './src/context/FilterContext';
+import { AuthProvider } from './src/context/AuthContext';
+import { ToastProvider } from './src/context/ToastContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { fcmService } from './src/services/firebase/FCMService';
 import { inAppMessagingService } from './src/services/firebase/InAppMessagingService';
@@ -55,9 +57,13 @@ function App(): React.JSX.Element {
   return (
     <SafeAreaProvider>
       <ThemeProvider>
-        <FilterProvider>
-          <AppNavigator />
-        </FilterProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <FilterProvider>
+              <AppNavigator />
+            </FilterProvider>
+          </AuthProvider>
+        </ToastProvider>
       </ThemeProvider>
     </SafeAreaProvider>
   );

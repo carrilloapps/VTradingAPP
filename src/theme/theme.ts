@@ -7,6 +7,7 @@ import {
 const customColors = {
   primary: '#0e4981',
   primaryDark: '#083056',
+  primaryLight: '#a5c8ea', // Light variant for Dark Mode Primary
   secondary: '#243647',
   backgroundLight: '#f2f5f8',
   backgroundDark: '#0e1720',
@@ -33,6 +34,8 @@ const customColors = {
   infoBgDark: 'rgba(59, 130, 246, 0.2)', // blue-500/20
   neutralDark: '#cbd5e1', // slate-300
   neutralBgDark: '#334155', // slate-700
+  warning: '#eab308', // yellow-500
+  warningDark: '#facc15', // yellow-400
 };
 
 // Tema Claro Personalizado
@@ -43,7 +46,15 @@ export const LightTheme = {
     primary: customColors.primary,
     onPrimary: '#ffffff',
     primaryContainer: '#DBEAFE',
+    onPrimaryContainer: customColors.primary,
     secondary: customColors.secondary,
+    onSecondary: '#ffffff',
+    secondaryContainer: customColors.neutralBgLight,
+    onSecondaryContainer: customColors.secondary,
+    tertiary: customColors.secondary,
+    onTertiary: '#ffffff',
+    tertiaryContainer: customColors.neutralBgLight,
+    onTertiaryContainer: customColors.secondary,
     background: customColors.backgroundLight,
     surface: '#ffffff',
     surfaceVariant: '#E2E8F0',
@@ -61,6 +72,7 @@ export const LightTheme = {
     neutral: customColors.neutralLight,
     neutralContainer: customColors.neutralBgLight,
     danger: customColors.danger,
+    warning: customColors.warning,
   },
 };
 
@@ -69,10 +81,18 @@ export const DarkTheme = {
   ...DefaultDarkTheme,
   colors: {
     ...DefaultDarkTheme.colors,
-    primary: customColors.primary,
-    onPrimary: '#ffffff',
+    primary: customColors.primaryLight,
+    onPrimary: customColors.primaryDark,
     primaryContainer: customColors.primaryDark,
+    onPrimaryContainer: customColors.primaryLight,
     secondary: customColors.secondary,
+    onSecondary: '#ffffff',
+    secondaryContainer: customColors.neutralBgDark,
+    onSecondaryContainer: '#ffffff',
+    tertiary: customColors.secondary,
+    onTertiary: '#ffffff',
+    tertiaryContainer: customColors.neutralBgDark,
+    onTertiaryContainer: '#ffffff',
     background: customColors.backgroundDark,
     surface: customColors.surfaceDark,
     surfaceVariant: customColors.surfaceDark,
@@ -83,11 +103,11 @@ export const DarkTheme = {
     outline: 'rgba(255, 255, 255, 0.05)', // border-white/5
     elevation: {
       level0: 'transparent',
-      level1: customColors.surfaceDark,
-      level2: customColors.surfaceDark,
-      level3: customColors.surfaceDark,
-      level4: customColors.surfaceDark,
-      level5: customColors.surfaceDark,
+      level1: '#16212e', // surfaceDark
+      level2: '#1c2a3b', // slightly lighter
+      level3: '#233348', // even lighter
+      level4: '#2b3d54',
+      level5: '#324661',
     },
     
     // Extensiones semánticas
@@ -98,5 +118,6 @@ export const DarkTheme = {
     neutral: customColors.neutralDark,
     neutralContainer: customColors.neutralBgDark,
     danger: customColors.danger,
+    warning: customColors.warningDark,
   },
 };

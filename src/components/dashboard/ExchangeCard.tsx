@@ -31,7 +31,18 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
 }) => {
   const theme = useTheme();
   const colors = theme.colors as any;
-  const trendColor = isPositive ? colors.success : colors.error;
+  
+  // Determine if neutral (0.00% or explicitly marked as such via prop if we added one, 
+  // but checking the string value is also a safe fallback for display logic)
+  const isNeutral = changePercent.includes('0.00') || changePercent === '0%' || changePercent === '+0.00%' || changePercent === '0.00%';
+  
+  const trendColor = isNeutral 
+    ? theme.colors.onSurfaceVariant 
+    : (isPositive ? colors.success : colors.error);
+
+  const trendIcon = isNeutral 
+    ? "remove" 
+    : (isPositive ? "trending-up" : "trending-down");
 
   return (
     <Surface style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
@@ -62,12 +73,12 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
 
         <View style={styles.trendContainer}>
           <MaterialIcons 
-            name={isPositive ? "trending-up" : "trending-down"} 
+            name={trendIcon} 
             size={16} 
             color={trendColor} 
           />
           <Text variant="labelMedium" style={[{ color: trendColor }, styles.trendText]}>
-            {isPositive ? '+' : ''}{changePercent}
+            {isNeutral ? '' : (isPositive ? '+' : '')}{changePercent}
           </Text>
         </View>
       </View>

@@ -1,18 +1,19 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { Text, useTheme, Chip } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import RateCard from '../components/dashboard/RateCard';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import SearchBar from '../components/ui/SearchBar';
-import PromoCard from '../components/dashboard/PromoCard';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
 import { useFilters } from '../context/FilterContext';
+import { useToast } from '../context/ToastContext';
 
 const ExchangeRatesScreen = () => {
   const theme = useTheme();
   const { exchangeRateFilters, setExchangeRateFilters } = useFilters();
   const { query: searchQuery, type: filterType } = exchangeRateFilters;
+  const { showToast } = useToast();
   
   // Custom colors
   const colors = theme.colors as any;
@@ -20,54 +21,48 @@ const ExchangeRatesScreen = () => {
 
   // State
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [allRates, setAllRates] = useState<CurrencyRate[]>([]);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch data
-  const loadRates = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const rates = await CurrencyService.getRates();
-      setAllRates(rates);
-    } catch (err) {
-      setError('Error al cargar las tasas de cambio');
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
+  // Subscription and Data Loading
   useEffect(() => {
-    loadRates();
-  }, [loadRates]);
+    const unsubscribe = CurrencyService.subscribe((data) => {
+      setAllRates(data);
+      setLoading(false);
+      setError(null);
+    });
 
-  // Combined Filter Logic
-  const filteredRates = useMemo(() => {
-    let result = allRates;
+    // Initial Fetch
+    CurrencyService.getRates().catch(err => {
+      console.error(err);
+      setError('Error al cargar las tasas de cambio');
+      showToast('Error de conexión', 'error');
+      setLoading(false);
+    });
 
-    // 1. Text Search
-    if (searchQuery) {
-      const lower = searchQuery.toLowerCase();
-      result = result.filter(r => 
-        r.code.toLowerCase().includes(lower) || 
-        r.name.toLowerCase().includes(lower)
-      );
-    }
+    return () => unsubscribe();
+  }, [showToast]);
 
-    // 2. Type Filter
-    if (filterType !== 'all') {
-      result = result.filter(r => r.type === filterType);
-    }
+  const onRefresh = useCallback(async () => {
+      setRefreshing(true);
+      try {
+          await CurrencyService.getRates(true);
+      } catch (err) {
+          showToast('Error al actualizar', 'error');
+      } finally {
+          setRefreshing(false);
+      }
+  }, [showToast]);
 
-    return result;
-  }, [searchQuery, filterType, allRates]);
-
-  // Handle Search Input
-  const handleSearch = (query: string) => {
-    setExchangeRateFilters({ query });
-  };
+  const loadRates = useCallback(() => {
+      setLoading(true);
+      CurrencyService.getRates(true).catch(err => {
+          showToast('Error al recargar', 'error');
+          setLoading(false);
+      });
+  }, [showToast]);
 
   // Group rates for display
   const officialRates = filteredRates.filter(r => r.type === 'fiat');
@@ -155,17 +150,20 @@ const ExchangeRatesScreen = () => {
         style={styles.content}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.colors.primary]} />
+        }
       >
-        {loading && filteredRates.length === 0 ? (
+        {loading && !refreshing && filteredRates.length === 0 ? (
           <View style={styles.centerContainer}>
             <ActivityIndicator size="large" color={theme.colors.primary} />
             <Text style={[styles.messageText, { color: theme.colors.onSurfaceVariant }]}>Cargando tasas...</Text>
           </View>
-        ) : error ? (
+        ) : error && filteredRates.length === 0 ? (
            <View style={styles.centerContainer}>
             <MaterialIcons name="error-outline" size={40} color={accentRed} />
             <Text style={[styles.messageText, { color: theme.colors.onSurface }]}>{error}</Text>
-            <TouchableOpacity onPress={loadRates} style={styles.retryButton}>
+            <TouchableOpacity onPress={() => loadRates()} style={styles.retryButton}>
               <Text style={[styles.retryText, { color: theme.colors.primary }]}>Reintentar</Text>
             </TouchableOpacity>
           </View>
@@ -202,12 +200,15 @@ const ExchangeRatesScreen = () => {
                 {cryptoRates.map(renderRateCard)}
               </View>
             )}
-
-            {/* Promo Card */}
-            <PromoCard />
+            
+            {/* Fallback if we have rates but they don't match categories (shouldn't happen with current logic but good safety) */}
+            {officialRates.length === 0 && cryptoRates.length === 0 && filteredRates.length > 0 && (
+                 <View style={styles.section}>
+                    {filteredRates.map(renderRateCard)}
+                 </View>
+            )}
           </>
         )}
-
       </ScrollView>
     </View>
   );
@@ -217,79 +218,74 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
+  headerContainer: {
+    paddingBottom: 10,
+    zIndex: 1,
+  },
+  headerStyle: {
     paddingHorizontal: 20,
-    paddingBottom: 16,
+    paddingTop: 10,
+    marginBottom: 10,
   },
-  headerTop: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 5,
+  searchContainer: {
+    paddingHorizontal: 20,
   },
-  headerIcons: {
+  filterContainer: {
     flexDirection: 'row',
+    paddingHorizontal: 20,
+    marginTop: 12,
     gap: 8,
-  },
-  iconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    overflow: 'hidden', // Required for Ripple
-  },
-  badge: {
-    position: 'absolute',
-    top: -2,
-    right: -2,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    borderWidth: 1,
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
+  },
+  scrollContent: {
+    paddingTop: 20,
+    paddingBottom: 100, // Extra space for FAB or Bottom Tab
+  },
+  centerContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 100,
+  },
+  messageText: {
+    marginTop: 16,
+    fontSize: 16,
+  },
+  retryButton: {
+    marginTop: 16,
+    padding: 10,
+  },
+  retryText: {
+    fontWeight: 'bold',
   },
   section: {
-    marginTop: 24,
+    marginBottom: 24,
+    paddingHorizontal: 20,
   },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 12,
-    paddingHorizontal: 4,
   },
   sectionTitle: {
-    fontSize: 15,
+    fontSize: 12,
     fontWeight: 'bold',
-    letterSpacing: 0.5,
+    letterSpacing: 1,
   },
   tag: {
     paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 12,
+    paddingVertical: 4,
+    borderRadius: 4,
   },
   tagText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: 'bold',
-    textTransform: 'uppercase',
-  },
-  centerContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingTop: 50,
-  },
-  filterContainer: {
-    flexDirection: 'row',
-    marginTop: 12,
-    gap: 8,
-    paddingHorizontal: 20,
   },
   chip: {
-    marginRight: 4,
+    marginRight: 0,
   },
   chipSelected: {
     borderWidth: 0,
@@ -298,38 +294,12 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     borderWidth: 1,
   },
-  chipText: {
-    // Base text style if needed
-  },
   chipTextSelected: {
-    fontWeight: '700',
     color: '#ffffff',
+    fontWeight: 'bold',
   },
   chipTextUnselected: {
-    fontWeight: '400',
-  },
-  headerContainer: {
-    paddingBottom: 16,
-  },
-  headerStyle: {
-    paddingBottom: 0,
-    borderBottomWidth: 0,
-  },
-  searchContainer: {
-    paddingHorizontal: 20,
-    marginTop: 8,
-  },
-  scrollContent: {
-    paddingBottom: 100,
-  },
-  messageText: {
-    marginTop: 10,
-  },
-  retryButton: {
-    marginTop: 10,
-  },
-  retryText: {
-    fontWeight: 'bold',
+    // color handled in prop
   },
 });
 

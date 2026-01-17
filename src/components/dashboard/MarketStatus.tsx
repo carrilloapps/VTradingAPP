@@ -1,31 +1,52 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 interface MarketStatusProps {
   isOpen: boolean;
   updatedAt: string;
+  onRefresh?: () => void;
+  showBadge?: boolean;
+  style?: any;
 }
 
-const MarketStatus: React.FC<MarketStatusProps> = ({ isOpen, updatedAt }) => {
+const MarketStatus: React.FC<MarketStatusProps> = ({ isOpen, updatedAt, onRefresh, showBadge = true, style }) => {
   const theme = useTheme();
   const colors = theme.colors as any;
 
   return (
-    <View style={styles.container}>
-      <View style={[styles.statusBadge, { 
-        backgroundColor: colors.successContainer,
-        borderColor: colors.success
-      }]}>
-        <View style={[styles.dot, { backgroundColor: colors.success }]} />
-        <Text style={[styles.statusText, { color: colors.success }]}>
-          {isOpen ? 'MERCADO ABIERTO' : 'MERCADO CERRADO'}
-        </Text>
-      </View>
+    <View style={[styles.container, style, !showBadge && { justifyContent: 'flex-end' }]}>
+      {showBadge && (
+        <View style={[styles.statusBadge, { 
+          backgroundColor: colors.successContainer,
+          borderColor: colors.success
+        }]}>
+          <View style={[styles.dot, { backgroundColor: colors.success }]} />
+          <Text style={[styles.statusText, { color: colors.success }]}>
+            {isOpen ? 'MERCADO ABIERTO' : 'MERCADO CERRADO'}
+          </Text>
+        </View>
+      )}
       
-      <Text style={[styles.timeText, { color: theme.colors.onSurfaceVariant }]}>
-        Actualizado: {updatedAt}
-      </Text>
+      <TouchableOpacity 
+        onPress={onRefresh} 
+        disabled={!onRefresh}
+        style={styles.refreshContainer}
+        activeOpacity={0.6}
+      >
+        <Text style={[styles.timeText, { color: theme.colors.onSurfaceVariant }]}>
+          Actualizado: {updatedAt}
+        </Text>
+        {onRefresh && (
+          <MaterialIcons 
+            name="refresh" 
+            size={14} 
+            color={theme.colors.onSurfaceVariant} 
+            style={{ marginLeft: 4 }}
+          />
+        )}
+      </TouchableOpacity>
     </View>
   );
 };
@@ -57,6 +78,10 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '700',
     letterSpacing: 0.5,
+  },
+  refreshContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   timeText: {
     fontSize: 10,

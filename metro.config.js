@@ -1,4 +1,5 @@
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
+const path = require('path');
 
 /**
  * Metro configuration
@@ -6,6 +7,45 @@ const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
  *
  * @type {import('@react-native/metro-config').MetroConfig}
  */
-const config = {};
+const defaultConfig = getDefaultConfig(__dirname);
+const { assetExts, sourceExts } = defaultConfig.resolver;
 
-module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+const config = {
+  resolver: {
+    assetExts: assetExts.filter((ext) => ext !== 'svg'),
+    sourceExts: [...sourceExts, 'svg'],
+    // Ensure we resolve react-native fields first to avoid issues with some packages
+    mainFields: ['react-native', 'browser', 'main'],
+    
+    // Fix for @react-native-firebase/app "invalid package.json" warnings
+    resolveRequest: (context, moduleName, platform) => {
+      // Check if this is a request for the problematic firebase internal modules
+      if (moduleName.startsWith('@react-native-firebase/app/lib/internal/') || 
+          moduleName.startsWith('@react-native-firebase/app/lib/common/')) {
+        
+        try {
+           // We map the requested path to the physical location in dist/module with .js extension
+           // This bypasses the broken "exports" mapping in the package.json
+           const relativePath = moduleName.replace('@react-native-firebase/app/lib/', '');
+           const filePath = path.resolve(
+             __dirname, 
+             'node_modules/@react-native-firebase/app/dist/module', 
+             relativePath + '.js'
+           );
+           
+           return {
+             filePath,
+             type: 'sourceFile',
+           };
+        } catch (e) {
+           // Fallback to default resolution if anything goes wrong
+        }
+      }
+      
+      // Default resolution for everything else
+      return context.resolveRequest(context, moduleName, platform);
+    },
+  },
+};
+
+module.exports = mergeConfig(defaultConfig, config);
