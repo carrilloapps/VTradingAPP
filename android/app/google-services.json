@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "33026454370",
+    "project_id": "vtrading-prod",
+    "storage_bucket": "vtrading-prod.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:33026454370:android:fd783870ae02a5b7b0323b",
+        "android_client_info": {
+          "package_name": "com.vtradingapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbp_PdPgr516n-hGXwDikpcLla3DHU41Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

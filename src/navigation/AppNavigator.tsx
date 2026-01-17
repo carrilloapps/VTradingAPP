@@ -106,9 +106,13 @@ function MainTabNavigator() {
   );
 }
 
+import { analyticsService } from '../services/firebase/AnalyticsService';
+
 const AppNavigator = () => {
   const theme = useTheme();
   const { isDark } = useThemeContext();
+  const routeNameRef = React.useRef<string | undefined>(undefined);
+  const navigationRef = React.useRef<any>(null);
   
   const navigationTheme = isDark ? NavDarkTheme : NavDefaultTheme;
   const themeWithPaper = {
@@ -124,7 +128,23 @@ const AppNavigator = () => {
   };
 
   return (
-    <NavigationContainer theme={themeWithPaper}>
+    <NavigationContainer
+      ref={navigationRef}
+      theme={themeWithPaper}
+      onReady={() => {
+        routeNameRef.current = navigationRef.current.getCurrentRoute().name;
+      }}
+      onStateChange={async () => {
+        const previousRouteName = routeNameRef.current;
+        const currentRoute = navigationRef.current.getCurrentRoute();
+        const currentRouteName = currentRoute.name;
+
+        if (previousRouteName !== currentRouteName) {
+          await analyticsService.logScreenView(currentRouteName, currentRouteName);
+        }
+        routeNameRef.current = currentRouteName;
+      }}
+    >
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
         <RootStack.Screen name="Splash" component={SplashScreen} />
         <RootStack.Screen name="Main" component={MainTabNavigator} />

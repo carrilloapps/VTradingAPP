@@ -32,3 +32,106 @@ jest.mock('@react-navigation/native', () => {
     }),
   };
 });
+
+const messagingMock = {
+  hasPermission: jest.fn(() => Promise.resolve(true)),
+  requestPermission: jest.fn(() => Promise.resolve(1)), // AuthorizationStatus.AUTHORIZED
+  getToken: jest.fn(() => Promise.resolve('mock-token')),
+  onTokenRefresh: jest.fn(() => jest.fn()),
+  onMessage: jest.fn(() => jest.fn()),
+  setBackgroundMessageHandler: jest.fn(),
+  onNotificationOpenedApp: jest.fn(() => jest.fn()),
+  getInitialNotification: jest.fn(() => Promise.resolve(null)),
+  subscribeToTopic: jest.fn(),
+  unsubscribeFromTopic: jest.fn(),
+};
+
+const messagingFn = () => messagingMock;
+
+// Add statics
+messagingFn.AuthorizationStatus = {
+  AUTHORIZED: 1,
+  DENIED: 0,
+  NOT_DETERMINED: -1,
+  PROVISIONAL: 2,
+};
+
+jest.mock('@react-native-firebase/messaging', () => messagingFn);
+
+jest.mock('@react-native-firebase/auth', () => {
+  return () => ({
+    onAuthStateChanged: jest.fn(() => jest.fn()),
+    currentUser: { uid: 'test-user', email: 'test@example.com' },
+    signInWithEmailAndPassword: jest.fn(),
+    createUserWithEmailAndPassword: jest.fn(),
+    signOut: jest.fn(),
+    sendPasswordResetEmail: jest.fn(),
+  });
+});
+
+jest.mock('@react-native-firebase/in-app-messaging', () => {
+  return () => ({
+    setMessagesDisplaySuppressed: jest.fn(),
+    triggerEvent: jest.fn(),
+  });
+});
+
+jest.mock('@react-native-firebase/analytics', () => {
+  return () => ({
+    logEvent: jest.fn(),
+    logScreenView: jest.fn(),
+    setUserProperty: jest.fn(),
+    setUserId: jest.fn(),
+  });
+});
+
+jest.mock('@react-native-firebase/app-check', () => {
+  const appCheckMock = {
+    newReactNativeFirebaseAppCheckProvider: jest.fn(() => ({
+      configure: jest.fn(),
+    })),
+    initializeAppCheck: jest.fn(),
+    getToken: jest.fn(() => Promise.resolve({ token: 'mock-app-check-token' })),
+  };
+  return {
+    firebase: {
+      appCheck: () => appCheckMock,
+    },
+  };
+});
+
+jest.mock('@react-native-firebase/remote-config', () => {
+  return () => ({
+    setDefaults: jest.fn(),
+    fetchAndActivate: jest.fn(() => Promise.resolve(true)),
+    setConfigSettings: jest.fn(),
+    getValue: jest.fn((key) => ({
+      asString: () => 'mock-string',
+      asNumber: () => 123,
+      asBoolean: () => true,
+    })),
+  });
+});
+
+jest.mock('@react-native-firebase/perf', () => {
+  return () => ({
+    startTrace: jest.fn(() => Promise.resolve({
+      stop: jest.fn(),
+      putAttribute: jest.fn(),
+    })),
+    newHttpMetric: jest.fn(() => Promise.resolve({
+      start: jest.fn(),
+      stop: jest.fn(),
+      putAttribute: jest.fn(),
+      setHttpResponseCode: jest.fn(),
+      setRequestPayloadSize: jest.fn(),
+      setResponsePayloadSize: jest.fn(),
+    })),
+  });
+});
+
+jest.mock('@react-native-firebase/app-distribution', () => {
+  return () => ({
+    checkForUpdate: jest.fn(),
+  });
+});
