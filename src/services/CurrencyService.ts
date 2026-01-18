@@ -241,7 +241,7 @@ export class CurrencyService {
                 const usdtRate: CurrencyRate = {
                     id: 'usdt_p2p',
                     code: 'USDT',
-                    name: 'USDT/VES • TETHER',
+                    name: 'USDT/VES • Tether',
                     value: usdtValue,
                     changePercent: changePercent !== null ? changePercent : 0,
                     type: 'crypto',

@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Text, useTheme, TextInput, Button, IconButton } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { CurrencyService, CurrencyRate } from '../../services/CurrencyService';
 import { useToast } from '../../context/ToastContext';
 import CurrencyPickerModal from './CurrencyPickerModal';
+import CurrencySelectorButton from './CurrencySelectorButton';
 import { AppConfig } from '../../constants/AppConfig';
 
 const CurrencyConverter: React.FC = () => {
@@ -222,18 +222,12 @@ const CurrencyConverter: React.FC = () => {
         
         {/* FROM */}
         <View style={styles.row}>
-            <TouchableOpacity 
-                style={[styles.currencyButton, themeStyles.currencyButton]}
-                onPress={() => { setShowFromPicker(true); }}
-            >
-                {fromCurrency && (
-                    <View style={[styles.iconPlaceholder, themeStyles.iconPlaceholder]}>
-                        <MaterialIcons name={fromCurrency.iconName || 'attach-money'} size={18} color={theme.colors.onSurface} />
-                    </View>
-                )}
-                <Text variant="titleMedium" style={[styles.boldText, themeStyles.textPrimary]}>{fromCurrency?.code || 'SEL'}</Text>
-                <MaterialIcons name="keyboard-arrow-down" size={24} color={theme.colors.onSurfaceVariant} style={themeStyles.icon} />
-            </TouchableOpacity>
+            <CurrencySelectorButton 
+                currencyCode={fromCurrency?.code || 'SEL'}
+                iconName={fromCurrency?.iconName || 'attach-money'}
+                onPress={() => setShowFromPicker(true)}
+                style={{zIndex: 10}}
+            />
             
             <TextInput 
                 value={amount}
@@ -271,20 +265,11 @@ const CurrencyConverter: React.FC = () => {
 
         {/* TO */}
         <View style={styles.row}>
-            <TouchableOpacity 
-                style={[styles.currencyButton, themeStyles.currencyButton]}
-                onPress={() => { setShowToPicker(true); }}
-                accessibilityLabel={`Seleccionar moneda de destino. Valor actual: ${toCurrency?.code || 'No seleccionada'}`}
-                accessibilityRole="button"
-            >
-                {toCurrency && (
-                    <View style={[styles.iconPlaceholder, themeStyles.iconPlaceholder]}>
-                        <MaterialIcons name={toCurrency.iconName || 'attach-money'} size={18} color={theme.colors.onSurface} />
-                    </View>
-                )}
-                <Text variant="titleMedium" style={[styles.boldText, themeStyles.textPrimary]}>{toCurrency?.code || 'SEL'}</Text>
-                <MaterialIcons name="keyboard-arrow-down" size={24} color={theme.colors.onSurfaceVariant} style={themeStyles.icon} />
-            </TouchableOpacity>
+            <CurrencySelectorButton 
+                currencyCode={toCurrency?.code || 'SEL'}
+                iconName={toCurrency?.iconName || 'attach-money'}
+                onPress={() => setShowToPicker(true)}
+            />
             
             <View style={themeStyles.resultContainer}>
                 <Text 

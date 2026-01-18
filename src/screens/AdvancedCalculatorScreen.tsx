@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
 import { useToast } from '../context/ToastContext';
 import CurrencyPickerModal from '../components/dashboard/CurrencyPickerModal';
+import CurrencySelectorButton from '../components/dashboard/CurrencySelectorButton';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MarketStatus from '../components/dashboard/MarketStatus';
 import { AppConfig } from '../constants/AppConfig';
@@ -378,18 +379,11 @@ const AdvancedCalculatorScreen = () => {
               </View>
 
               <View style={styles.inputRow}>
-                  <TouchableOpacity 
-                    style={[styles.currencySelector, styles.currencySelectorBtn]}
-                    onPress={() => { setPickerMode('base'); setPickerVisible(true); }}
-                  >
-                      {baseCurrency.iconName && (
-                          <MaterialIcons name={baseCurrency.iconName} size={28} color={theme.colors.onSurface} style={styles.iconRight} />
-                      )}
-                      <Text variant="headlineMedium" style={[styles.mainCurrencyText, themeStyles.textPrimary]}>
-                          {baseCurrency.code}
-                      </Text>
-                      <MaterialIcons name="arrow-drop-down" size={24} color={theme.colors.onSurfaceVariant} />
-                  </TouchableOpacity>
+                  <CurrencySelectorButton 
+                      currencyCode={baseCurrency.code}
+                      iconName={baseCurrency.iconName || 'attach-money'}
+                      onPress={() => { setPickerMode('base'); setPickerVisible(true); }}
+                  />
                   
                   <RNTextInput 
                       value={baseAmount}

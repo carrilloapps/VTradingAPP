@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, ActivityIndicator, RefreshControl, SafeAreaView } from 'react-native';
+import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, ActivityIndicator, RefreshControl, SafeAreaView, Platform } from 'react-native';
 import { Text, useTheme, Chip } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import RateCard from '../components/dashboard/RateCard';
@@ -53,7 +53,9 @@ const ExchangeRatesScreen = () => {
   // Subscription and Data Loading
   useEffect(() => {
     const unsubscribe = CurrencyService.subscribe((data) => {
-      setAllRates(data);
+      // Filter out VES (Base Currency) as showing VES/VES = 1 is redundant
+      const displayRates = data.filter(r => r.code !== 'VES');
+      setAllRates(displayRates);
       setLoading(false);
       setError(null);
     });
@@ -245,6 +247,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     paddingBottom: 10,
     zIndex: 1,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   headerStyle: {
     paddingHorizontal: 20,
