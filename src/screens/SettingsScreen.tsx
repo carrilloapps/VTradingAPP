@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Alert } from 'react-native';
+import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity } from 'react-native';
 import { Text, useTheme, Switch, Snackbar } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import DeviceInfo from 'react-native-device-info';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
+import CustomDialog from '../components/ui/CustomDialog';
 import { useThemeContext } from '../theme/ThemeContext';
 
 import UserProfileCard from '../components/settings/UserProfileCard';
@@ -25,6 +26,7 @@ const SettingsScreen = () => {
   // Feedback State
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
 
   // Mock State
   const [alerts, setAlerts] = useState({
@@ -53,14 +55,13 @@ const SettingsScreen = () => {
   };
 
   const handleLogout = () => {
-    Alert.alert(
-      "Cerrar Sesión",
-      "¿Estás seguro que deseas cerrar tu sesión actual?",
-      [
-        { text: "Cancelar", style: "cancel" },
-        { text: "Salir", style: "destructive", onPress: () => handleAction("Sesión cerrada correctamente") }
-      ]
-    );
+    setShowLogoutDialog(true);
+  };
+
+  const confirmLogout = () => {
+    setShowLogoutDialog(false);
+    handleAction("Sesión cerrada correctamente");
+    // Aquí iría la lógica real de logout
   };
 
   return (
@@ -208,6 +209,17 @@ const SettingsScreen = () => {
       >
         <Text style={{ color: theme.colors.inverseOnSurface }}>{snackbarMessage}</Text>
       </Snackbar>
+
+      <CustomDialog
+        visible={showLogoutDialog}
+        onDismiss={() => setShowLogoutDialog(false)}
+        title="Cerrar Sesión"
+        content="¿Estás seguro que deseas cerrar tu sesión actual?"
+        onConfirm={confirmLogout}
+        confirmLabel="Salir"
+        cancelLabel="Cancelar"
+        isDestructive
+      />
     </View>
   );
 };

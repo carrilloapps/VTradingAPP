@@ -39,6 +39,12 @@ Para futuros modales o listas de selección:
 
 Para mantener la consistencia en la visualización de tendencias de mercado en `HomeScreen` y otros dashboards:
 
+*   **Estilo Visual Hero (Gradient):**
+    *   Las tarjetas destacadas (`ExchangeCard` en carrusel principal) deben usar un fondo con **LinearGradient**.
+    *   **Colores Estándar:** `['#0e4981', '#0b3a67', '#082f54']` (Azul corporativo profundo).
+    *   **Decoración:** Incluir un `blurCircle` (círculo difuminado) en la esquina superior derecha para profundidad visual.
+    *   **Bordes:** Usar `borderRadius: theme.roundness * 3` y `borderWidth: 0`.
+
 *   **Líneas de Tendencia (Charts):**
     *   **Variación 0%:** Si el cambio porcentual es 0 (o "0.00%"), se debe renderizar una **línea recta horizontal** centrada.
         *   Path SVG: `M0 20 L 100 20` (asumiendo viewBox 0 0 100 40).

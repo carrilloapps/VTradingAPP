@@ -12,6 +12,7 @@ Para garantizar una experiencia visual correcta y funcional tanto en **Android**
 *   **Implementación en Pantallas:**
     *   **Contenedor Raíz:** Usar `View` estándar (no `SafeAreaView`) con `flex: 1`. El `UnifiedHeader` se encargará de proteger el área superior.
     *   **StatusBar:** Debe configurarse como `translucent` y `backgroundColor="transparent"` para permitir que el diseño fluya correctamente detrás de la barra de estado, delegando el espaciado al Header.
+    *   **Unificación Visual:** `ExchangeRatesScreen` y `StocksScreen` deben compartir exactamente el mismo layout de encabezado (Título grande alineado a la izquierda, botón de acción secundario a la derecha) para mantener la coherencia al navegar entre pestañas.
 
 ### Patrón de Diseño para Encabezados (Header Pattern)
 Para mantener la consistencia entre pantallas principales (ej. `StocksScreen`, `ExchangeRatesScreen`), seguir esta estructura estricta:

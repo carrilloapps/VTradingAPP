@@ -57,24 +57,13 @@ const Tab = createBottomTabNavigator();
 function MainTabNavigator() {
   return (
     <Tab.Navigator
+        initialRouteName="Home"
         tabBar={(props) => <ModernTabBar {...props} />}
         screenOptions={{
           headerShown: false,
           tabBarShowLabel: false,
         }}
       >
-        <Tab.Screen 
-          name="Rates" 
-          component={ExchangeRatesScreen} 
-          options={{ 
-            title: 'Tasas',
-            tabBarIcon: ({ color }) => (
-              <View style={{ width: 24, height: 24, alignItems: 'center', justifyContent: 'center' }}>
-                <MaterialCommunityIcons name="currency-usd" size={24} color={color} />
-              </View>
-            )
-          }} 
-        />
         <Tab.Screen 
           name="Markets" 
           component={StocksScreen} 
@@ -83,6 +72,18 @@ function MainTabNavigator() {
             tabBarIcon: ({ color }) => (
               <View style={{ width: 24, height: 24, alignItems: 'center', justifyContent: 'center' }}>
                 <MaterialCommunityIcons name="chart-line" size={24} color={color} />
+              </View>
+            )
+          }} 
+        />
+        <Tab.Screen 
+          name="Rates" 
+          component={ExchangeRatesScreen} 
+          options={{ 
+            title: 'Tasas',
+            tabBarIcon: ({ color }) => (
+              <View style={{ width: 24, height: 24, alignItems: 'center', justifyContent: 'center' }}>
+                <MaterialCommunityIcons name="currency-usd" size={24} color={color} />
               </View>
             )
           }} 
