@@ -51,12 +51,12 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         ]}
         textStyle={
           isSelected 
-            ? styles.chipTextSelected 
+            ? [styles.chipTextSelected, { color: theme.colors.onPrimary }]
             : [styles.chipTextUnselected, { color: theme.colors.onSurfaceVariant }]
         }
-        selectedColor="white"
+        selectedColor={theme.colors.onPrimary}
         showSelectedOverlay={true}
-        rippleColor={isSelected ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}
+        rippleColor={isSelected ? undefined : 'rgba(0,0,0,0.1)'}
       >
         {option.label}
       </Chip>
@@ -111,7 +111,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   chipTextSelected: {
-    color: '#ffffff',
     fontWeight: 'bold',
     fontSize: 12,
   },
