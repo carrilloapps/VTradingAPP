@@ -32,6 +32,13 @@ const HomeScreen = () => {
       if (usdRate) homeRates.push(usdRate);
       if (usdtRate) homeRates.push(usdtRate);
       
+      const getPath = (percent: number | null | undefined) => {
+        if (percent === null || percent === undefined || Math.abs(percent) === 0) return 'M0 20 L 100 20';
+        // Smoother curves for dual display
+        if (percent > 0) return 'M0 30 C 30 30, 50 10, 100 5'; 
+        return 'M0 10 C 30 10, 50 30, 100 35';
+      };
+
       // Transform rates to ExchangeCard format
       const featured = homeRates.map(rate => ({
         title: rate.name,
@@ -40,15 +47,15 @@ const HomeScreen = () => {
         currency: 'Bs',
         changePercent: rate.changePercent !== null ? `${rate.changePercent.toFixed(2)}%` : '0.00%', 
         isPositive: rate.changePercent !== null ? rate.changePercent >= 0 : true,
-        chartPath: rate.changePercent !== null 
-             ? (rate.changePercent >= 0 ? 'M0 20 Q 25 35 50 15 T 100 5' : 'M0 10 Q 25 5 50 25 T 100 35')
-             : 'M0 20 L 100 20',
+        chartPath: getPath(rate.changePercent),
         iconSymbol: rate.iconName === 'euro' ? '€' : '$',
         iconColor: rate.type === 'crypto' ? '#F7931A' : undefined,
         buyValue: rate.buyValue?.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES }),
         sellValue: rate.sellValue?.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES }),
         buyChangePercent: rate.buyChangePercent !== undefined ? `${rate.buyChangePercent > 0 ? '+' : ''}${rate.buyChangePercent.toFixed(2)}%` : undefined,
         sellChangePercent: rate.sellChangePercent !== undefined ? `${rate.sellChangePercent > 0 ? '+' : ''}${rate.sellChangePercent.toFixed(2)}%` : undefined,
+        buyChartPath: getPath(rate.buyChangePercent),
+        sellChartPath: getPath(rate.sellChangePercent),
       }));
       setFeaturedRates(featured);
   }, []);

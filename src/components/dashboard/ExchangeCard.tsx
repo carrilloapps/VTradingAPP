@@ -19,6 +19,8 @@ export interface ExchangeCardProps {
   sellValue?: string;
   buyChangePercent?: string;
   sellChangePercent?: string;
+  buyChartPath?: string;
+  sellChartPath?: string;
 }
 
 const ExchangeCard: React.FC<ExchangeCardProps> = ({
@@ -35,7 +37,9 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
   buyValue,
   sellValue,
   buyChangePercent,
-  sellChangePercent
+  sellChangePercent,
+  buyChartPath,
+  sellChartPath
 }) => {
   const theme = useTheme();
   const colors = theme.colors as any;
@@ -47,6 +51,15 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
   const trendColor = isNeutral 
     ? theme.colors.onSurfaceVariant 
     : (isPositive ? colors.success : colors.error);
+
+  const getTrendColor = (percentStr?: string) => {
+      if (!percentStr) return theme.colors.onSurfaceVariant;
+      if (percentStr.includes('0.00') || percentStr === '0%' || percentStr === '+0.00%') return theme.colors.onSurfaceVariant;
+      return percentStr.includes('-') ? colors.error : colors.success;
+  };
+
+  const buyColor = getTrendColor(buyChangePercent);
+  const sellColor = getTrendColor(sellChangePercent);
 
   const trendIcon = isNeutral 
     ? "trending-flat" 
@@ -133,14 +146,39 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
 
       <View style={styles.chartContainer}>
         <Svg height="40" width="100%" viewBox="0 0 100 40" preserveAspectRatio="none">
-          <Path
-            d={chartPath}
-            fill="none"
-            stroke={trendColor}
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
+          {buyValue && sellValue && buyChartPath && sellChartPath ? (
+            <>
+              {/* Buy Line */}
+              <Path
+                d={buyChartPath}
+                fill="none"
+                stroke={buyColor}
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                opacity={0.8}
+              />
+              {/* Sell Line */}
+              <Path
+                d={sellChartPath}
+                fill="none"
+                stroke={sellColor}
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                opacity={0.8}
+              />
+            </>
+          ) : (
+            <Path
+              d={chartPath}
+              fill="none"
+              stroke={trendColor}
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          )}
         </Svg>
       </View>
     </Surface>
