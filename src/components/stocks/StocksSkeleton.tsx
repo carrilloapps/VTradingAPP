@@ -4,7 +4,7 @@ import { useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Skeleton from '../ui/Skeleton';
 
-const DashboardSkeleton = () => {
+const StocksSkeleton = () => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const r = theme.roundness;
@@ -13,35 +13,31 @@ const DashboardSkeleton = () => {
     <View style={[styles.container, { paddingTop: insets.top + 20 }]}>
       {/* Header Skeleton */}
       <View style={styles.header}>
-        <View style={styles.headerTop}>
-          <Skeleton width={120} height={20} />
-          <View style={styles.headerIcons}>
-            <Skeleton width={32} height={32} borderRadius={r * 4} />
-            <Skeleton width={32} height={32} borderRadius={r * 4} />
-          </View>
+        <Skeleton width={150} height={28} />
+        <View style={styles.headerRight}>
+          <Skeleton width={32} height={32} borderRadius={r * 4} />
+          <Skeleton width={32} height={32} borderRadius={r * 4} />
         </View>
-        <Skeleton width={180} height={28} style={styles.headerTitleSkeleton} />
+      </View>
+      
+      {/* Search Bar Skeleton */}
+      <View style={styles.searchBar}>
+        <Skeleton width="100%" height={48} borderRadius={r * 3} />
       </View>
 
       {/* Market Status Skeleton */}
       <View style={styles.section}>
-        <Skeleton width="100%" height={48} borderRadius={r * 3} />
+        <Skeleton width="100%" height={40} borderRadius={r * 3} />
       </View>
 
-      {/* Exchange Cards Skeleton */}
-      <View style={styles.section}>
-        <Skeleton width="100%" height={140} borderRadius={r * 4} style={styles.firstCardSkeleton} />
-        <Skeleton width="100%" height={140} borderRadius={r * 4} />
+      {/* Index Hero Skeleton */}
+      <View style={styles.heroSection}>
+        <Skeleton width="100%" height={180} borderRadius={16} />
       </View>
 
       {/* Stocks List Skeleton */}
-      <View style={styles.section}>
-        <View style={styles.sectionHeader}>
-          <Skeleton width={32} height={32} borderRadius={r * 2} />
-          <Skeleton width={150} height={20} style={styles.sectionTitleSkeleton} />
-        </View>
-        
-        {[1, 2, 3].map((_, index) => (
+      <View style={styles.listSection}>
+        {[1, 2, 3, 4, 5].map((_, index) => (
           <View 
             key={index} 
             style={[
@@ -49,8 +45,8 @@ const DashboardSkeleton = () => {
               { 
                 backgroundColor: theme.colors.elevation.level1,
                 borderColor: theme.dark ? 'transparent' : theme.colors.outline,
-                borderRadius: r * 6,
-                // Match StockItem elevation/shadow
+                borderRadius: r * 6, // Matches StockItem styling
+                // Enhanced shadow for light mode
                 shadowColor: '#000',
                 shadowOffset: { width: 0, height: 2 },
                 shadowOpacity: theme.dark ? 0 : 0.05,
@@ -62,13 +58,13 @@ const DashboardSkeleton = () => {
             <View style={styles.stockLeft}>
               <Skeleton width={48} height={48} borderRadius={r * 4} />
               <View style={styles.stockContent}>
-                <Skeleton width={80} height={16} />
-                <Skeleton width={50} height={12} style={styles.stockSubtitleSkeleton} />
+                <Skeleton width={100} height={16} />
+                <Skeleton width={40} height={12} style={styles.stockSubtitleSkeleton} />
               </View>
             </View>
             <View style={styles.stockRight}>
-              <Skeleton width={80} height={16} />
-              <Skeleton width={40} height={12} style={styles.stockSubtitleSkeleton} />
+              <Skeleton width={70} height={16} />
+              <Skeleton width={50} height={16} style={styles.stockBadgeSkeleton} borderRadius={r * 3} />
             </View>
           </View>
         ))}
@@ -82,30 +78,31 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   header: {
-    marginBottom: 24,
-  },
-  headerTop: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 16,
   },
-  headerIcons: {
+  headerRight: {
     flexDirection: 'row',
     gap: 12,
   },
+  searchBar: {
+    marginBottom: 20,
+  },
   section: {
+    marginBottom: 16,
+  },
+  heroSection: {
     marginBottom: 24,
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 16,
+  listSection: {
+    gap: 12,
   },
   stockItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 16,
-    marginBottom: 12,
     borderWidth: 1, // Will be overridden by inline style for dark mode
   },
   stockLeft: {
@@ -115,22 +112,18 @@ const styles = StyleSheet.create({
   stockRight: {
     alignItems: 'flex-end',
     justifyContent: 'center',
-  },
-  headerTitleSkeleton: {
-    marginTop: 8,
-  },
-  firstCardSkeleton: {
-    marginBottom: 12,
-  },
-  sectionTitleSkeleton: {
-    marginLeft: 8,
+    gap: 4,
   },
   stockContent: {
     marginLeft: 16,
+    justifyContent: 'center',
   },
   stockSubtitleSkeleton: {
-    marginTop: 4,
+    marginTop: 6,
+  },
+  stockBadgeSkeleton: {
+    marginTop: 6,
   },
 });
 
-export default DashboardSkeleton;
+export default StocksSkeleton;

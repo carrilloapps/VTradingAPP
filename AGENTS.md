@@ -17,6 +17,7 @@ Este proyecto utiliza documentación distribuida para mantener el contexto cerca
 ## Índice de Documentación
 *   **Tema y Estilos:** [src/theme/AGENTS.md](src/theme/AGENTS.md)
 *   **Componentes Dashboard:** [src/components/dashboard/AGENTS.md](src/components/dashboard/AGENTS.md)
+*   **Componentes Stocks:** [src/components/stocks/AGENTS.md](src/components/stocks/AGENTS.md)
 *   **Componentes UI (Globales):** [src/components/ui/AGENTS.md](src/components/ui/AGENTS.md)
 *   **Pantallas (Screens):** [src/screens/AGENTS.md](src/screens/AGENTS.md)
 *   **Servicios:** [src/services/AGENTS.md](src/services/AGENTS.md)

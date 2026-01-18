@@ -67,3 +67,20 @@ Para mantener la consistencia en la visualización de tendencias de mercado en `
 ## Estándares de Componentes
 *   Los componentes deben ser puramente presentacionales siempre que sea posible.
 *   Evitar lógica de negocio compleja (cálculos de tasas, fetch de datos) dentro de los componentes visuales (`ExchangeCard`, `RateCard`). Pasar estos datos como props.
+
+## Estados de Carga (Skeleton Loading)
+
+Se han implementado esqueletos de carga específicos para mantener la fidelidad visual durante la obtención de datos.
+
+### DashboardSkeleton
+Usado en `HomeScreen` para la sección de Mercado Bursátil y otras listas de resumen.
+*   **Sincronización:** Los ítems del esqueleto replican exactamente el estilo de `StockItem` y `ExchangeCard`.
+*   **Light Mode:** Incluye `elevation: 2` y bordes `theme.colors.outline` para evitar que la UI "salte" o cambie de forma al cargar el contenido real.
+
+### WalletSkeleton
+Usado en `DetailsScreen` (Billetera/Detalles).
+*   **Estructura:**
+    1.  **Header & Hero:** Icono circular grande, estado y balances.
+    2.  **Progress Section:** Barra de progreso de límites.
+    3.  **Feature List:** Lista de opciones (Recargar, Retirar, etc.).
+*   **Estilo:** Respeta los `borderRadius` (r*3) y la elevación de los `FeatureItem` reales.
