@@ -1,16 +1,54 @@
 # Estándares de Pantallas (Screens)
 
-## Manejo de Safe Area y Status Bar
+## Manejo de Safe Area y Headers Unificados
 
-Para garantizar una visualización correcta en dispositivos con `StatusBar` translúcida (especialmente en Android):
+Para garantizar una experiencia visual correcta y funcional tanto en **Android** como en **iOS** (incluyendo dispositivos con Notch, Dynamic Island o Status Bar translúcida):
 
-*   **Contenedor Principal:** Usar `SafeAreaView` como contenedor raíz.
-*   **Android Translucent:** Si se usa `translucent={true}` en el `StatusBar`, el contenido puede quedar detrás de la barra de estado.
-    *   **Solución:** Añadir `paddingTop` condicional en el contenedor del header o contenido superior.
-    *   ```typescript
-        paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0
-        ```
-    *   Esto asegura que el header respete el área de notificaciones sin romper el diseño "edge-to-edge" en iOS.
+*   **Solución Universal (`UnifiedHeader`):**
+    *   Este componente implementa internamente `useSafeAreaInsets()` de `react-native-safe-area-context`.
+    *   Aplica automáticamente el padding superior necesario (`insets.top`) según el dispositivo y la plataforma.
+    *   **Regla de Oro:** No usar lógica condicional de plataforma (`Platform.OS`) para márgenes o paddings superiores. Confiar en los insets calculados automáticamente.
+
+*   **Implementación en Pantallas:**
+    *   **Contenedor Raíz:** Usar `View` estándar (no `SafeAreaView`) con `flex: 1`. El `UnifiedHeader` se encargará de proteger el área superior.
+    *   **StatusBar:** Debe configurarse como `translucent` y `backgroundColor="transparent"` para permitir que el diseño fluya correctamente detrás de la barra de estado, delegando el espaciado al Header.
+
+### Patrón de Diseño para Encabezados (Header Pattern)
+Para mantener la consistencia entre pantallas principales (ej. `StocksScreen`, `ExchangeRatesScreen`), seguir esta estructura estricta:
+
+```tsx
+// Estructura JSX
+<View style={[styles.headerContainer, { backgroundColor: theme.colors.background }]}>
+  <UnifiedHeader
+    variant="section"
+    title="Título Sección"
+    subtitle="Subtítulo opcional"
+    onActionPress={handleReload}
+    rightActionIcon="refresh" // Icono estandarizado para recarga
+    style={styles.headerStyle}
+  />
+  
+  <View style={styles.searchContainer}>
+    <SearchBar ... />
+  </View>
+</View>
+
+// Estilos Estandarizados
+const styles = StyleSheet.create({
+  headerContainer: {
+    paddingBottom: 16, // Espaciado consistente antes del contenido
+    // No usar zIndex a menos que sea estrictamente necesario para sombras
+  },
+  headerStyle: {
+    paddingBottom: 0,      // Eliminar padding interno inferior
+    borderBottomWidth: 0,  // Eliminar borde si hay elementos debajo (como SearchBar)
+  },
+  searchContainer: {
+    paddingHorizontal: 20,
+    marginTop: 8,          // Separación estándar del título
+  }
+});
+```
 
 ## Lógica de Presentación de Datos
 

@@ -149,6 +149,7 @@ const ExchangeRatesScreen = () => {
           title="Tasas de Cambio"
           subtitle="Mercado en vivo • VES"
           onActionPress={() => loadRates()}
+          rightActionIcon="refresh"
           onNotificationPress={() => {}}
           notificationCount={1}
           style={styles.headerStyle}
@@ -249,15 +250,15 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerContainer: {
-    paddingBottom: 10,
-    zIndex: 1,
+    paddingBottom: 16,
   },
   headerStyle: {
-    paddingHorizontal: 20,
-    marginBottom: 10,
+    paddingBottom: 0,
+    borderBottomWidth: 0,
   },
   searchContainer: {
     paddingHorizontal: 20,
+    marginTop: 8,
   },
   filterContainer: {
     flexDirection: 'row',
