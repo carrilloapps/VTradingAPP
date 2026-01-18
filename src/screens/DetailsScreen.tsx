@@ -8,7 +8,23 @@ const FeatureItem = ({ icon, title, description, theme }: any) => {
   const iconBgColor = theme.dark ? 'rgba(16, 185, 129, 0.1)' : '#E6FFFA';
   
   return (
-    <Surface style={[styles.featureItem, { backgroundColor: theme.colors.elevation.level1 }]} elevation={1}>
+    <Surface 
+      style={[
+        styles.featureItem, 
+        { 
+          backgroundColor: theme.colors.elevation.level1,
+          borderColor: theme.dark ? 'transparent' : theme.colors.outline,
+          borderWidth: theme.dark ? 0 : 1,
+          // Enhanced shadow for light mode
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: theme.dark ? 0 : 0.05,
+          shadowRadius: 3,
+          elevation: theme.dark ? 1 : 2,
+        }
+      ]} 
+      elevation={theme.dark ? 1 : 2}
+    >
       <View style={[styles.featureIconBox, { backgroundColor: iconBgColor }]}>
         <MaterialIcons name={icon} size={24} color={theme.colors.primary} />
       </View>

@@ -69,7 +69,15 @@ export const LightTheme = {
     onSurfaceVariant: '#64748B',
     error: customColors.errorLight,
     errorContainer: customColors.errorBgLight,
-    outline: '#E2E8F0',
+    outline: '#CBD5E1', // slate-300 for better visibility in light mode
+    elevation: {
+      level0: 'transparent',
+      level1: '#ffffff',
+      level2: '#f8fafc', // slate-50
+      level3: '#f1f5f9', // slate-100
+      level4: '#e2e8f0', // slate-200
+      level5: '#cbd5e1', // slate-300
+    },
     
     // Extensiones semánticas (disponibles vía theme.colors.extension...)
     success: customColors.successLight,

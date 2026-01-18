@@ -92,12 +92,20 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
             placeholder="Buscar moneda o país..." 
             onChangeText={setSearchQuery} 
             value={searchQuery} 
-            style={[styles.searchBar, { borderRadius: theme.roundness * 3, borderColor: theme.colors.outline }]}
+            style={[
+                styles.searchBar, 
+                { 
+                    borderRadius: theme.roundness * 3, 
+                    borderColor: theme.colors.outline,
+                    borderWidth: 1, // Ensure border is visible in light mode
+                    backgroundColor: theme.dark ? theme.colors.elevation.level2 : theme.colors.surface,
+                }
+            ]}
             inputStyle={themeStyles.searchBarInput}
             iconColor={theme.colors.onSurfaceVariant}
             placeholderTextColor={theme.colors.onSurfaceVariant}
             mode="bar"
-            elevation={0}
+            elevation={theme.dark ? 0 : 1} // Slight elevation for light mode
         />
 
         <SectionList

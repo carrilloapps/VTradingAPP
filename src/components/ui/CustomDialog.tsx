@@ -32,6 +32,13 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
         style={{ 
           backgroundColor: theme.colors.elevation.level3, 
           borderRadius: 28, // Material 3 standard
+          borderColor: theme.dark ? 'transparent' : theme.colors.outline,
+          borderWidth: theme.dark ? 0 : 1,
+          elevation: 5, // Ensure dialog pops out
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.15,
+          shadowRadius: 8,
         }}
       >
         <Dialog.Title style={{ 

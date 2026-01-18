@@ -83,6 +83,8 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
     },
     iconButton: {
       backgroundColor: buttonBgColor,
+      borderWidth: 1,
+      borderColor: theme.dark ? 'transparent' : theme.colors.outline,
     },
     badge: {
       backgroundColor: accentRed,

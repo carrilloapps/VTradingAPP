@@ -42,7 +42,11 @@ const StockItem: React.FC<StockData> = ({
     styles.container,
     { 
       backgroundColor: theme.colors.surface,
-      borderColor: theme.dark ? 'rgba(255,255,255,0.05)' : '#F3F4F6',
+      borderColor: theme.dark ? 'rgba(255,255,255,0.05)' : theme.colors.outline,
+      // Enhanced shadow for light mode
+      shadowOpacity: theme.dark ? 0.3 : 0.08,
+      shadowColor: theme.dark ? '#000' : '#1e293b', // slate-800 shadow for better depth
+      elevation: theme.dark ? 1 : 3,
     }
   ];
 
