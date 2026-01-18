@@ -2,11 +2,10 @@ import React from 'react';
 import { Text, Platform, View } from 'react-native';
 import { NavigationContainer, DefaultTheme as NavDefaultTheme, DarkTheme as NavDarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-import SplashScreen from '../screens/SplashScreen';
 import HomeScreen from '../screens/HomeScreen';
 import DetailsScreen from '../screens/DetailsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -52,16 +51,18 @@ function AuthNavigator() {
 }
 
 // Tabs Principales
-const Tab = createBottomTabNavigator();
+const Tab = createMaterialTopTabNavigator();
 
 function MainTabNavigator() {
   return (
     <Tab.Navigator
         initialRouteName="Home"
+        tabBarPosition="bottom"
         tabBar={(props) => <ModernTabBar {...props} />}
         screenOptions={{
-          headerShown: false,
+          swipeEnabled: true,
           tabBarShowLabel: false,
+          tabBarIndicatorStyle: { height: 0 }, // Hide default indicator
         }}
       >
         <Tab.Screen 
@@ -155,10 +156,6 @@ const AppNavigator = () => {
       primary: theme.colors.primary,
     },
   };
-
-  if (isLoading) {
-    return <SplashScreen />;
-  }
 
   return (
     <NavigationContainer

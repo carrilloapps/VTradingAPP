@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, ActivityIndicator, RefreshControl, LayoutAnimation, Platform, UIManager } from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
+import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, RefreshControl, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { Text } from 'react-native-paper';
+import LottieView from 'lottie-react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import RateCard from '../components/dashboard/RateCard';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
@@ -9,15 +10,16 @@ import FilterSection from '../components/ui/FilterSection';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
 import { useFilters } from '../context/FilterContext';
 import { useToast } from '../context/ToastContext';
+import { useAppTheme } from '../theme/useAppTheme';
 
 const ExchangeRatesScreen = () => {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const { exchangeRateFilters, setExchangeRateFilters } = useFilters();
   const { query: searchQuery, type: filterType } = exchangeRateFilters;
   const { showToast } = useToast();
   
   // Custom colors
-  const colors = theme.colors as any;
+  const colors = theme.colors;
   const accentRed = colors.error;
 
   // State
@@ -166,13 +168,19 @@ const ExchangeRatesScreen = () => {
           }}
           visible={showFilters}
           mode="wrap"
-          style={{ marginTop: 4 }}
+          style={{ marginTop: theme.spacing.xs }}
         />
 
         {loading && !refreshing && filteredRates.length === 0 ? (
           <View style={styles.centerContainer}>
-            <ActivityIndicator size="large" color={theme.colors.primary} />
-            <Text style={[styles.messageText, { color: theme.colors.onSurfaceVariant }]}>Cargando tasas...</Text>
+            <LottieView
+              source={require('../assets/animations/splash.json')}
+              autoPlay
+              loop
+              style={{ width: 120, height: 120 }}
+              resizeMode="contain"
+            />
+            <Text style={[styles.messageText, { color: theme.colors.onSurfaceVariant, marginTop: 0 }]}>Cargando tasas...</Text>
           </View>
         ) : error && filteredRates.length === 0 ? (
            <View style={styles.centerContainer}>

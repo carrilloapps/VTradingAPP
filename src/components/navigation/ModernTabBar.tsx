@@ -1,10 +1,10 @@
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, TouchableOpacity, Animated, Dimensions, Platform } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTheme } from 'react-native-paper';
-import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { MaterialTopTabBarProps } from '@react-navigation/material-top-tabs';
 
-const ModernTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigation }) => {
+const ModernTabBar: React.FC<MaterialTopTabBarProps> = ({ state, descriptors, navigation }) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   // Create animated values for each tab
@@ -117,8 +117,7 @@ const ModernTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
                   <Animated.View style={{ transform: [{ scale }, { translateY: iconTranslateY }] }}>
                     {IconComponent && IconComponent({ 
                       focused: isFocused, 
-                      color: iconColor, 
-                      size: 24 
+                      color: iconColor
                     })}
                   </Animated.View>
                 </Animated.View>

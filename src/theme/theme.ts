@@ -44,10 +44,60 @@ const customColors = {
   skeletonHighlightDark: '#2b3d54', // Matches elevation level 4
 };
 
+// Sistema de espaciado centralizado
+export const spacing = {
+  xs: 4,
+  s: 8,
+  m: 12,
+  l: 16,
+  xl: 20,
+  xxl: 24,
+};
+
+// Extendemos el tipo de Theme de React Native Paper
+declare global {
+  namespace ReactNativePaper {
+    interface ThemeColors {
+      success: string;
+      successContainer: string;
+      info: string;
+      infoContainer: string;
+      neutral: string;
+      neutralContainer: string;
+      danger: string;
+      warning: string;
+      skeleton: string;
+      skeletonHighlight: string;
+    }
+
+    // Add this for MD3
+    interface MD3Colors {
+        success: string;
+        successContainer: string;
+        info: string;
+        infoContainer: string;
+        neutral: string;
+        neutralContainer: string;
+        danger: string;
+        warning: string;
+        skeleton: string;
+        skeletonHighlight: string;
+    }
+
+    interface Theme {
+      spacing: typeof spacing;
+    }
+    interface MD3Theme {
+      spacing: typeof spacing;
+    }
+  }
+}
+
 // Tema Claro Personalizado
 export const LightTheme = {
   ...DefaultLightTheme,
   roundness: 4,
+  spacing,
   colors: {
     ...DefaultLightTheme.colors,
     primary: customColors.primary,
@@ -97,6 +147,7 @@ export const LightTheme = {
 export const DarkTheme = {
   ...DefaultDarkTheme,
   roundness: 4,
+  spacing,
   colors: {
     ...DefaultDarkTheme.colors,
     primary: customColors.primaryLight,

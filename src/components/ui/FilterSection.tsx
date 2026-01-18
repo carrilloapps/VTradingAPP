@@ -1,6 +1,7 @@
 import React from 'react';
 import { ScrollView, View, StyleSheet, Platform, UIManager, StyleProp, ViewStyle } from 'react-native';
-import { Chip, useTheme } from 'react-native-paper';
+import { Chip } from 'react-native-paper';
+import { useAppTheme } from '../../theme/useAppTheme';
 
 // Enable LayoutAnimation for Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
@@ -29,7 +30,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   visible = true,
   style,
 }) => {
-  const theme = useTheme();
+  const theme = useAppTheme();
 
   if (!visible) return null;
 
@@ -73,7 +74,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         horizontal 
         showsHorizontalScrollIndicator={false} 
         contentContainerStyle={styles.scrollContent}
-        style={[styles.container, style]}
+        style={[{ marginTop: theme.spacing.m }, style]}
       >
         {content}
       </ScrollView>
@@ -81,16 +82,13 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   }
 
   return (
-    <View style={[styles.wrapContainer, styles.container, style]}>
+    <View style={[styles.wrapContainer, { marginTop: theme.spacing.m }, style]}>
       {content}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    marginTop: 12,
-  },
   scrollContent: {
     paddingHorizontal: 20,
     gap: 8,

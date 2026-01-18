@@ -53,3 +53,15 @@ Para garantizar la consistencia visual y la mantenibilidad del código, se estab
     *   **Razón:** En modo oscuro, `primary` puede ser un color pastel claro (para reducir fatiga visual), mientras que en modo claro es oscuro. `onPrimary` cambia dinámicamente (Negro/Blanco) para garantizar la legibilidad en ambos casos.
     *   ❌ Incorrecto: `color: 'white'` (Falla en modo oscuro si primary es claro).
     *   ✅ Correcto: `color: theme.colors.onPrimary`.
+
+### 7. Sistema de Espaciado (Spacing)
+*   **Centralización:** Todo espaciado (padding, margin, gap) que no sea estructural (flex: 1) debe utilizar las variables definidas en `theme.spacing`.
+*   **Escala:**
+    *   `xs` (4px): Espaciado mínimo, ajustes finos (ej. gap entre filtro y header).
+    *   `s` (8px): Espaciado pequeño, gap entre elementos relacionados.
+    *   `m` (12px): Espaciado medio, márgenes estándar de componentes.
+    *   `l` (16px): Padding de contenedores, separación de secciones.
+    *   `xl` (20px): Padding horizontal de pantallas, gap header-contenido.
+    *   `xxl` (24px): Separación mayor entre bloques grandes.
+*   ❌ Incorrecto: `marginTop: 4`, `padding: 20`
+*   ✅ Correcto: `marginTop: theme.spacing.xs`, `padding: theme.spacing.xl`
