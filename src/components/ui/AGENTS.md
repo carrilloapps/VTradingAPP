@@ -93,6 +93,7 @@ Componente unificado para mostrar opciones de filtrado en formato de "Chips". So
     *   `scroll`: Lista horizontal desplazable (Ideal para muchas categorías, ej. Stocks).
     *   `wrap`: Lista que se ajusta al ancho disponible (Ideal para pocas opciones, ej. Tasas de cambio).
 *   **Estilo Unificado:** Chips con bordes ligeros en estado inactivo y fondo sólido (Primary) en estado activo.
+*   **Contraste Accesible:** En estado activo, utiliza `theme.colors.onPrimary` para texto e iconos, asegurando legibilidad en ambos temas (Claro/Oscuro).
 
 ### Props
 | Prop | Tipo | Requerido | Descripción |
@@ -102,6 +103,7 @@ Componente unificado para mostrar opciones de filtrado en formato de "Chips". So
 | `onSelect` | `(value: string) => void` | Sí | Callback al seleccionar una opción. |
 | `mode` | `'scroll' \| 'wrap'` | No | Modo de visualización. Default: `'scroll'`. |
 | `visible` | `boolean` | No | Controla si el componente se renderiza. Default: `true`. |
+| `style` | `StyleProp<ViewStyle>` | No | Estilos personalizados para el contenedor (ej. márgenes). |
 
 ## SearchBar (Barra de Búsqueda Universal)
 

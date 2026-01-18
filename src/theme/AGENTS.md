@@ -46,3 +46,10 @@ Para garantizar la consistencia visual y la mantenibilidad del código, se estab
         *   Dialogs/Modals: `theme.colors.elevation.level3`
 *   **Prohibido:** El uso de sombras (`elevation` > 0) para denotar profundidad. La profundidad se denota exclusivamente mediante bordes y niveles de color de superficie.
 *   **Excepción:** Botones flotantes (FAB) pueden mantener elevación si es crítico para la UX, pero deben evaluarse caso por caso.
+
+### 6. Contraste y Accesibilidad de Color
+*   **Estados Activos (Primary):** Cuando un elemento (Botón, Chip, Icono Activo) utiliza `theme.colors.primary` como color de fondo:
+    *   **Contenido (Texto/Icono):** DEBE usar obligatoriamente `theme.colors.onPrimary`.
+    *   **Razón:** En modo oscuro, `primary` puede ser un color pastel claro (para reducir fatiga visual), mientras que en modo claro es oscuro. `onPrimary` cambia dinámicamente (Negro/Blanco) para garantizar la legibilidad en ambos casos.
+    *   ❌ Incorrecto: `color: 'white'` (Falla en modo oscuro si primary es claro).
+    *   ✅ Correcto: `color: theme.colors.onPrimary`.

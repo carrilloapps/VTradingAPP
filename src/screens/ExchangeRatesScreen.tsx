@@ -166,6 +166,7 @@ const ExchangeRatesScreen = () => {
           }}
           visible={showFilters}
           mode="wrap"
+          style={{ marginTop: 4 }}
         />
 
         {loading && !refreshing && filteredRates.length === 0 ? (

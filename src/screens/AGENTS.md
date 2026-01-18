@@ -82,6 +82,13 @@ const styles = StyleSheet.create({
 });
 ```
 
+### Estándares de Espaciado (Spacing Standards)
+Para mantener una armonía visual entre pantallas:
+
+*   **Espacio Header-Contenido:** El espacio visual entre el Input de Búsqueda y el primer elemento del contenido desplazable (ej. `MarketStatus`, `FilterSection`) debe ser de aproximadamente **20px**.
+    *   Esto se logra combinando `headerContainer.paddingBottom: 16` con el margen superior del primer componente.
+    *   Si el primer componente es `FilterSection`, usar la prop `style={{ marginTop: 4 }}` para ajustar el margen por defecto (12px) y alcanzar el total de 20px.
+
 ## Lógica de Presentación de Datos
 
 ### Listados de Tasas de Cambio
