@@ -11,6 +11,7 @@ interface RequestOptions {
   headers?: Record<string, string>;
   params?: Record<string, string | number | boolean>;
   useCache?: boolean;
+  updateCache?: boolean; // Force update cache even if useCache is false
   cacheTTL?: number; // in milliseconds
 }
 
@@ -91,7 +92,7 @@ class ApiClient {
       const data = await response.json();
 
       // 7. Save to Cache
-      if (options.useCache) {
+      if (options.useCache || options.updateCache) {
         try {
           const cacheItem: CacheItem<T> = {
             data,

@@ -66,8 +66,8 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
             )}
           </View>
           <View>
-            <Text variant="titleMedium" style={[{ color: theme.colors.onSurface }, styles.titleText]}>{title}</Text>
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{subtitle}</Text>
+            <Text variant="labelMedium" style={[{ color: theme.colors.onSurfaceVariant, textTransform: 'uppercase', letterSpacing: 0.5 }, styles.titleText]}>{title}</Text>
+            {subtitle ? <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{subtitle}</Text> : null}
             <View style={styles.valueContainer}>
               {buyValue && sellValue ? (
                   <View style={styles.dualContainer}>
@@ -78,7 +78,7 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
                             <Text variant="bodySmall" style={{color: theme.colors.onSurfaceVariant, marginLeft: 4}}>{currency}</Text>
                           </View>
                           {buyChangePercent && (
-                              <Text variant="labelSmall" style={{color: buyChangePercent.includes('-') ? colors.error : colors.success}}>
+                              <Text variant="labelSmall" style={{color: buyChangePercent.includes('-') ? colors.error : buyChangePercent.includes('0.00') ? theme.colors.onSurfaceVariant : colors.success}}>
                                   {buyChangePercent}
                               </Text>
                           )}
@@ -91,26 +91,27 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
                             <Text variant="bodySmall" style={{color: theme.colors.onSurfaceVariant, marginLeft: 4}}>{currency}</Text>
                           </View>
                            {sellChangePercent && (
-                              <Text variant="labelSmall" style={{color: sellChangePercent.includes('-') ? colors.error : colors.success}}>
+                              <Text variant="labelSmall" style={{color: sellChangePercent.includes('-') ? colors.error : sellChangePercent.includes('0.00') ? theme.colors.onSurfaceVariant : colors.success}}>
                                   {sellChangePercent}
                               </Text>
                           )}
                       </View>
                   </View>
               ) : (
-                <>
-                  <Text variant="headlineSmall" style={[{ color: theme.colors.onSurface }, styles.valueText]}>
+                <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
+                  <Text variant="headlineMedium" style={[{ color: theme.colors.onSurface, fontWeight: 'bold' }, styles.valueText]}>
                     {value}
                   </Text>
-                  <Text variant="labelMedium" style={[{ color: theme.colors.onSurfaceVariant }, styles.currencyText]}>
+                  <Text variant="titleMedium" style={[{ color: theme.colors.onSurfaceVariant, marginLeft: 4, fontWeight: '600' }, styles.currencyText]}>
                     {currency}
                   </Text>
-                </>
+                </View>
               )}
             </View>
           </View>
         </View>
 
+        {!(buyValue && sellValue) && (
         <View style={styles.trendContainer}>
           {changePercent !== '' && (
           <MaterialIcons 
@@ -123,6 +124,7 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
             {isNeutral ? '' : (isPositive ? '+' : '')}{changePercent}
           </Text>
         </View>
+        )}
       </View>
 
       <View style={styles.chartContainer}>
@@ -152,8 +154,8 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 16,
+    alignItems: 'center', // Align items to center vertically
+    marginBottom: 4,
   },
   titleText: {
     fontWeight: 'bold',
@@ -175,22 +177,22 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   iconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     overflow: 'hidden',
     borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   iconImage: {
-    width: 32,
-    height: 32,
+    width: 40,
+    height: 40,
     transform: [{ scale: 1.1 }], // scale-110 from tailwind
   },
   symbolIcon: {
-    width: 32,
-    height: 32,
+    width: 40,
+    height: 40,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -229,7 +231,7 @@ const styles = StyleSheet.create({
   dualContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: 0,
   },
   separator: {
     width: 1,

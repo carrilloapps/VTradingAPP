@@ -21,6 +21,7 @@ export interface CurrencyRate {
 interface ApiRate {
   currency: string;
   rate: number;
+  changePercent?: number; // Provided by API for official rates
 }
 
 interface BinanceP2PData {
@@ -58,9 +59,9 @@ type CurrencyListener = (rates: CurrencyRate[]) => void;
 export class CurrencyService {
   private static listeners: CurrencyListener[] = [];
   private static currentRates: CurrencyRate[] = [];
-  private static previousRates: Map<string, number> = new Map(); // Cache for change calculation
+  // previousRates removed as requested to avoid manual calculation logic
   private static lastFetch: number = 0;
-  private static CACHE_DURATION = 60 * 1000; // 1 minute in-memory throttle
+  private static CACHE_DURATION = 0; // Disable in-memory cache
 
   /**
    * Suscribe a listener to rate updates
@@ -145,8 +146,8 @@ export class CurrencyService {
                 'Accept': '*/*',
                 'X-API-Key': 'admin_key'
             },
-            useCache: !forceRefresh, // Only use disk cache if not forcing refresh
-            cacheTTL: 5 * 60 * 1000 // 5 minutes disk cache
+            useCache: false, // Disable cache as requested
+            cacheTTL: 0
         });
 
         if (!response || !response.rates) {
@@ -162,22 +163,36 @@ export class CurrencyService {
              // Standardize names and icons based on currency code
              // This is purely UI mapping, not data mocking
              switch(apiRate.currency) {
-                 case 'EUR': name = 'Euro (BCV)'; iconName = 'euro'; break;
-                 case 'USD': name = 'USD DIVISA • BCV'; iconName = 'attach-money'; break;
-                 case 'CNY': name = 'Yuan (BCV)'; iconName = 'currency-yuan'; break;
-                 case 'RUB': name = 'Rublo (BCV)'; iconName = 'currency-ruble'; break;
-                 case 'TRY': name = 'Lira (BCV)'; iconName = 'account-balance'; break;
-                 case 'GBP': name = 'Libra Esterlina'; iconName = 'currency-pound'; break;
-                 case 'JPY': name = 'Yen Japonés'; iconName = 'currency-yen'; break;
+                 case 'EUR': name = 'EUR/VES • BCV'; iconName = 'euro'; break;
+                 case 'USD': name = 'USD/VES • BCV'; iconName = 'attach-money'; break;
+                 case 'CNY': name = 'CNY/VES • BCV'; iconName = 'currency-yuan'; break;
+                 case 'RUB': name = 'RUB/VES • BCV'; iconName = 'currency-ruble'; break;
+                 case 'TRY': name = 'TRY/VES • BCV'; iconName = 'account-balance'; break;
+                 case 'GBP': name = 'GBP/VES • BCV'; iconName = 'currency-pound'; break;
+                 case 'JPY': name = 'JPY/VES • BCV'; iconName = 'currency-yen'; break;
                  default: iconName = 'attach-money';
              }
+
+             // Calculate change from previous fetch OR use API provided value
+             let changePercent: number | null = null;
+             
+             if (apiRate.changePercent !== undefined) {
+                 changePercent = apiRate.changePercent;
+             } else {
+                 changePercent = 0; // Default to 0 if not provided
+             }
+             
+             // Ensure changePercent is never null for numbers we want to display
+             if (changePercent === null) changePercent = 0;
+             
+             // No cache update needed
 
              return {
                  id: String(index),
                  code: apiRate.currency,
                  name: name,
                  value: apiRate.rate,
-                 changePercent: null, 
+                 changePercent: changePercent, 
                  type: type,
                  iconName: iconName,
                  lastUpdated: response.publicationDate || new Date().toISOString()
@@ -208,7 +223,7 @@ export class CurrencyService {
                 const usdtRate: CurrencyRate = {
                     id: 'usdt_p2p',
                     code: 'USDT',
-                    name: 'Binance • Paralelo',
+                    name: 'USDT/VES • TETHER',
                     value: usdtValue,
                     changePercent: changePercent !== null && changePercent !== undefined ? Number(changePercent.toFixed(2)) : null,
                     type: 'crypto',
@@ -234,7 +249,7 @@ export class CurrencyService {
              rates.unshift({
                 id: 'ves_base',
                 code: 'VES',
-                name: 'Bolívar Digital',
+                name: 'Bolívar',
                 value: 1,
                 changePercent: null,
                 type: 'fiat',
@@ -285,20 +300,14 @@ export class CurrencyService {
         // Update state and notify
         // Calculate percentage changes based on previous cache if API returns 0
         rates.forEach(rate => {
-            const prevValue = this.previousRates.get(rate.code);
+            // No previousRates map used anymore
             
-            // If API didn't provide change (0 or null) but we have history
-            if ((rate.changePercent === 0 || rate.changePercent === null) && prevValue && prevValue !== 0) {
-                // Calculate change: ((New - Old) / Old) * 100
-                const change = ((rate.value - prevValue) / prevValue) * 100;
-                // Only update if difference is significant (e.g. > 0.0001%) to avoid floating point noise
-                if (Math.abs(change) > 0.0001) {
-                    rate.changePercent = Number(change.toFixed(2));
-                }
+            // If API didn't provide change, it stays as 0 or null
+            if ((rate.changePercent === 0 || rate.changePercent === null)) {
+                 // Do nothing, keep it as is
             }
 
-            // Update cache for next time
-            this.previousRates.set(rate.code, rate.value);
+            // No cache update
         });
 
         this.currentRates = rates;
@@ -312,9 +321,12 @@ export class CurrencyService {
         trace.putAttribute('error', 'true');
         
         // If we have stale data in memory, return it but warn
-        // Even if forceRefresh is true, we fallback to stale data on error to maintain UX
         if (this.currentRates.length > 0) {
             console.warn('Returning stale in-memory data due to fetch error');
+            // Notify listeners even with stale data so the UI "Last Updated" time refreshes,
+            // confirming to the user that a check was performed (even if data didn't change/fetch failed)
+            // Use a shallow copy to ensure React state updates trigger even if content is identical
+            this.notifyListeners([...this.currentRates]);
             return this.currentRates;
         }
         

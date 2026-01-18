@@ -35,10 +35,10 @@ const HomeScreen = () => {
       // Transform rates to ExchangeCard format
       const featured = homeRates.map(rate => ({
         title: rate.name,
-        subtitle: `${rate.code}/${AppConfig.BASE_CURRENCY}`,
+        subtitle: '',
         value: rate.value.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES }),
-        currency: AppConfig.BASE_CURRENCY,
-        changePercent: rate.changePercent !== null ? `${rate.changePercent.toFixed(2)}%` : '', 
+        currency: 'Bs',
+        changePercent: rate.changePercent !== null ? `${rate.changePercent.toFixed(2)}%` : '0.00%', 
         isPositive: rate.changePercent !== null ? rate.changePercent >= 0 : true,
         chartPath: rate.changePercent !== null 
              ? (rate.changePercent >= 0 ? 'M0 20 Q 25 35 50 15 T 100 5' : 'M0 10 Q 25 5 50 25 T 100 35')
@@ -76,6 +76,7 @@ const HomeScreen = () => {
     try {
         await CurrencyService.getRates(true);
         showToast('Tasas actualizadas', 'success');
+        setLastRefreshTime(new Date()); // Force update time immediately on success
     } catch (error) {
         console.error(error);
         showToast('Error al actualizar tasas', 'error');
