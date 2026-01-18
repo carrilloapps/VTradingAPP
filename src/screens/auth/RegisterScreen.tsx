@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView, StatusBar } from 'react-native';
 import { Text, TextInput, Button, useTheme, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
@@ -97,6 +97,11 @@ const RegisterScreen = ({ navigation }: any) => {
       ]}
       keyboardShouldPersistTaps="handled"
     >
+      <StatusBar 
+        backgroundColor="transparent" 
+        translucent 
+        barStyle={theme.dark ? 'light-content' : 'dark-content'} 
+      />
       <TouchableOpacity 
         onPress={() => navigation.goBack()} 
         style={styles.backButton}

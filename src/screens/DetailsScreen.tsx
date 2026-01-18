@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, ScrollView, Animated, Easing } from 'react-native';
+import { View, StyleSheet, ScrollView, Animated, Easing, StatusBar } from 'react-native';
 import { Text, useTheme, Button, ProgressBar, Surface } from 'react-native-paper';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -85,6 +85,11 @@ const DetailsScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <StatusBar 
+        backgroundColor="transparent"
+        translucent 
+        barStyle={theme.dark ? 'light-content' : 'dark-content'} 
+      />
       <UnifiedHeader 
         variant="section" 
         title="Billetera" 

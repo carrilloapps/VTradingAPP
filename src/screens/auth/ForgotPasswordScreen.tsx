@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, StatusBar } from 'react-native';
 import { Text, TextInput, Button, useTheme, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
@@ -63,8 +63,13 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
         themeStyles.contentContainer
       ]}
     >
+      <StatusBar 
+        backgroundColor="transparent" 
+        translucent 
+        barStyle={theme.dark ? 'light-content' : 'dark-content'} 
+      />
       <TouchableOpacity 
-        onPress={() => navigation.goBack()} 
+        onPress={() => navigation.goBack()}  
         style={styles.backButton}
       >
         <MaterialIcons name="arrow-back" size={24} color={theme.colors.onSurface} />
