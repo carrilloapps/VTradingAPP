@@ -3,6 +3,7 @@ import { View, StyleSheet, Image } from 'react-native';
 import { Text, useTheme, Surface } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Svg, { Path } from 'react-native-svg';
+import LinearGradient from 'react-native-linear-gradient';
 
 export interface ExchangeCardProps {
   title: string;
@@ -49,13 +50,13 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
   const isNeutral = changePercent === '' || changePercent.includes('0.00') || changePercent === '0%' || changePercent === '+0.00%' || changePercent === '0.00%';
   
   const trendColor = isNeutral 
-    ? theme.colors.onSurfaceVariant 
-    : (isPositive ? colors.success : colors.error);
+    ? 'rgba(255, 255, 255, 0.7)' 
+    : (isPositive ? '#6EE7B7' : '#F87171');
 
   const getTrendColor = (percentStr?: string) => {
-      if (!percentStr) return theme.colors.onSurfaceVariant;
-      if (percentStr.includes('0.00') || percentStr === '0%' || percentStr === '+0.00%') return theme.colors.onSurfaceVariant;
-      return percentStr.includes('-') ? colors.error : colors.success;
+      if (!percentStr) return 'rgba(255, 255, 255, 0.7)';
+      if (percentStr.includes('0.00') || percentStr === '0%' || percentStr === '+0.00%') return 'rgba(255, 255, 255, 0.7)';
+      return percentStr.includes('-') ? '#F87171' : '#6EE7B7';
   };
 
   const buyColor = getTrendColor(buyChangePercent);
@@ -66,14 +67,24 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
     : (isPositive ? "trending-up" : "trending-down");
 
   return (
-    <Surface style={[styles.card, { 
-      backgroundColor: theme.colors.surface, 
-      borderColor: theme.colors.outline,
-      borderRadius: theme.roundness * 3 
-    }]}>
-      <View style={styles.header}>
+    <LinearGradient
+      colors={['#0e4981', '#0b3a67', '#082f54']}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+      style={[styles.card, { 
+        borderRadius: theme.roundness * 3,
+        // Remove border for cleaner look with gradient, or keep it subtle
+        borderWidth: 0,
+        overflow: 'hidden', // Ensure gradient respects border radius
+        position: 'relative'
+      }]}
+    >
+      {/* Background Blur Effect Circle */}
+      <View style={styles.blurCircle} />
+      
+      <View style={[styles.header, { position: 'relative', zIndex: 1 }]}>
         <View style={styles.leftContent}>
-          <View style={[styles.iconContainer, { borderColor: theme.colors.outline, backgroundColor: theme.colors.elevation.level1, borderRadius: theme.roundness * 5 }]}>
+          <View style={[styles.iconContainer, { borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: theme.roundness * 5 }]}>
             {iconUrl ? (
               <Image source={{ uri: iconUrl }} style={styles.iconImage} />
             ) : (
@@ -83,32 +94,32 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
             )}
           </View>
           <View>
-            <Text variant="labelMedium" style={[{ color: theme.colors.onSurfaceVariant, textTransform: 'uppercase', letterSpacing: 0.5 }, styles.titleText]}>{title}</Text>
-            {subtitle ? <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{subtitle}</Text> : null}
+            <Text variant="labelMedium" style={[{ color: 'rgba(255, 255, 255, 0.7)', textTransform: 'uppercase', letterSpacing: 0.5 }, styles.titleText]}>{title}</Text>
+            {subtitle ? <Text variant="bodySmall" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>{subtitle}</Text> : null}
             <View style={styles.valueContainer}>
               {buyValue && sellValue ? (
                   <View style={styles.dualContainer}>
                       <View>
-                          <Text variant="labelSmall" style={{color: theme.colors.onSurfaceVariant, marginBottom: 2}}>COMPRA</Text>
+                          <Text variant="labelSmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginBottom: 2}}>COMPRA</Text>
                           <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
-                            <Text variant="titleLarge" style={[{ color: theme.colors.onSurface, fontWeight: 'bold' }]}>{buyValue}</Text>
-                            <Text variant="bodySmall" style={{color: theme.colors.onSurfaceVariant, marginLeft: 4}}>{currency}</Text>
+                            <Text variant="titleLarge" style={[{ color: '#FFFFFF', fontWeight: 'bold' }]}>{buyValue}</Text>
+                            <Text variant="bodySmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginLeft: 4}}>{currency}</Text>
                           </View>
                           {buyChangePercent && (
-                              <Text variant="labelSmall" style={{color: buyChangePercent.includes('-') ? colors.error : buyChangePercent.includes('0.00') ? theme.colors.onSurfaceVariant : colors.success}}>
+                              <Text variant="labelSmall" style={{color: buyChangePercent.includes('-') ? '#F87171' : buyChangePercent.includes('0.00') ? 'rgba(255, 255, 255, 0.7)' : '#6EE7B7'}}>
                                   {buyChangePercent}
                               </Text>
                           )}
                       </View>
-                      <View style={[styles.separator, {backgroundColor: theme.colors.outlineVariant}]} />
+                      <View style={styles.divider} />
                       <View>
-                          <Text variant="labelSmall" style={{color: theme.colors.onSurfaceVariant, marginBottom: 2}}>VENTA</Text>
+                          <Text variant="labelSmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginBottom: 2}}>VENTA</Text>
                           <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
-                            <Text variant="titleLarge" style={[{ color: theme.colors.onSurface, fontWeight: 'bold' }]}>{sellValue}</Text>
-                            <Text variant="bodySmall" style={{color: theme.colors.onSurfaceVariant, marginLeft: 4}}>{currency}</Text>
+                            <Text variant="titleLarge" style={[{ color: '#FFFFFF', fontWeight: 'bold' }]}>{sellValue}</Text>
+                            <Text variant="bodySmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginLeft: 4}}>{currency}</Text>
                           </View>
-                           {sellChangePercent && (
-                              <Text variant="labelSmall" style={{color: sellChangePercent.includes('-') ? colors.error : sellChangePercent.includes('0.00') ? theme.colors.onSurfaceVariant : colors.success}}>
+                          {sellChangePercent && (
+                              <Text variant="labelSmall" style={{color: sellChangePercent.includes('-') ? '#F87171' : sellChangePercent.includes('0.00') ? 'rgba(255, 255, 255, 0.7)' : '#6EE7B7'}}>
                                   {sellChangePercent}
                               </Text>
                           )}
@@ -116,37 +127,28 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
                   </View>
               ) : (
                 <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
-                  <Text variant="headlineMedium" style={[{ color: theme.colors.onSurface, fontWeight: 'bold' }, styles.valueText]}>
-                    {value}
-                  </Text>
-                  <Text variant="titleMedium" style={[{ color: theme.colors.onSurfaceVariant, marginLeft: 4, fontWeight: '600' }, styles.currencyText]}>
-                    {currency}
-                  </Text>
+                  <Text variant="headlineMedium" style={[styles.valueText, { color: '#FFFFFF' }]}>{value}</Text>
+                  <Text variant="titleMedium" style={[styles.currencyText, { color: 'rgba(255, 255, 255, 0.7)' }]}>{currency}</Text>
                 </View>
               )}
             </View>
           </View>
         </View>
-
-        {!(buyValue && sellValue) && (
-        <View style={styles.trendContainer}>
-          {changePercent !== '' && (
-          <MaterialIcons 
-            name={trendIcon} 
-            size={16} 
-            color={trendColor} 
-          />
-          )}
-          <Text variant="labelMedium" style={[{ color: trendColor }, styles.trendText]}>
-            {(isPositive && !isNeutral ? '+' : '')}{changePercent}
-          </Text>
+        
+        <View style={{alignItems: 'flex-end', position: 'relative', zIndex: 1}}>
+            {/* Trend Indicator */}
+            {!buyValue && (
+                <View style={{flexDirection: 'row', alignItems: 'center', backgroundColor: isNeutral ? 'rgba(255,255,255,0.1)' : (isPositive ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'), paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12}}>
+                    <MaterialIcons name={trendIcon} size={16} color={trendColor} />
+                    <Text variant="labelMedium" style={[styles.trendText, { color: trendColor }]}>{changePercent}</Text>
+                </View>
+            )}
         </View>
-        )}
       </View>
 
-      <View style={styles.chartContainer}>
-        <Svg height="40" width="100%" viewBox="0 0 100 40" preserveAspectRatio="none">
-          {buyValue && sellValue && buyChartPath && sellChartPath ? (
+      <View style={{ height: 60, marginTop: 8, position: 'relative', zIndex: 1 }}>
+        <Svg height="100%" width="100%" viewBox="0 0 100 40" preserveAspectRatio="none">
+          {buyChartPath && sellChartPath ? (
             <>
               {/* Buy Line */}
               <Path
@@ -181,7 +183,7 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
           )}
         </Svg>
       </View>
-    </Surface>
+    </LinearGradient>
   );
 };
 
@@ -277,7 +279,23 @@ const styles = StyleSheet.create({
     width: 1,
     height: 24,
     marginHorizontal: 16,
-  }
+  },
+  divider: {
+    width: 1,
+    height: 30,
+    marginHorizontal: 16,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  blurCircle: {
+    position: 'absolute',
+    top: -50,
+    right: -50,
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    zIndex: 0,
+  },
 });
 
 export default ExchangeCard;
