@@ -100,13 +100,13 @@ const StocksScreen = () => {
   const handleSuggestionPress = (suggestion: string) => setStockFilters({ query: suggestion });
 
   const renderHeader = () => (
-      <View>
+      <View style={styles.headerContainer}>
         {/* Market Status */}
         <MarketStatus 
             isOpen={isMarketOpen} 
             updatedAt={new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} 
             onRefresh={onRefresh}
-            style={{ paddingTop: 8 }}
+            style={{ paddingTop: 8, paddingBottom: 8, paddingHorizontal: 5 }}
         />
 
         {/* Index Hero */}
