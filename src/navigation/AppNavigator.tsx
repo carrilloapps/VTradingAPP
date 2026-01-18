@@ -1,10 +1,10 @@
 import React from 'react';
+import { Text, Platform, View } from 'react-native';
 import { NavigationContainer, DefaultTheme as NavDefaultTheme, DarkTheme as NavDarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { useTheme } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import SplashScreen from '../screens/SplashScreen';
 import HomeScreen from '../screens/HomeScreen';
@@ -20,8 +20,7 @@ import { analyticsService } from '../services/firebase/AnalyticsService';
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
-
-/* eslint-disable react/no-unstable-nested-components */
+import ModernTabBar from '../components/navigation/ModernTabBar';
 
 // Root Stack that includes Splash
 const RootStack = createNativeStackNavigator();
@@ -34,7 +33,7 @@ function HomeStackScreen() {
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
       <HomeStack.Screen name="HomeMain" component={HomeScreen} />
       <HomeStack.Screen name="Details" component={DetailsScreen} options={{ headerShown: true, title: 'Detalles' }} />
-      <HomeStack.Screen name="AdvancedCalculator" component={AdvancedCalculatorScreen} options={{ headerShown: false, animation: 'default' }} />
+      <HomeStack.Screen name="AdvancedCalculator" component={AdvancedCalculatorScreen} options={{ headerShown: false, animation: 'slide_from_bottom' }} />
     </HomeStack.Navigator>
   );
 }
@@ -56,71 +55,80 @@ function AuthNavigator() {
 const Tab = createBottomTabNavigator();
 
 function MainTabNavigator() {
-  const theme = useTheme();
-  const insets = useSafeAreaInsets();
-
   return (
     <Tab.Navigator
+        tabBar={(props) => <ModernTabBar {...props} />}
         screenOptions={{
-          tabBarActiveTintColor: theme.colors.primary,
-          tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
-          tabBarStyle: {
-            backgroundColor: theme.colors.surface,
-            borderTopColor: theme.colors.outline,
-            height: 60 + insets.bottom,
-            paddingBottom: insets.bottom + 8,
-            paddingTop: 8,
-            elevation: 8,
-          },
+          headerShown: false,
           tabBarShowLabel: false,
-          headerStyle: {
-            backgroundColor: theme.colors.surface,
-          },
-          headerTintColor: theme.colors.onSurface,
         }}
       >
-        <Tab.Screen 
-          name="Home" 
-          component={HomeStackScreen} 
-          options={{ 
-            headerShown: false,
-            tabBarIcon: ({ color }) => <MaterialIcons name="home" size={24} color={color} />
-          }} 
-        />
         <Tab.Screen 
           name="Rates" 
           component={ExchangeRatesScreen} 
           options={{ 
-            headerShown: false, 
             title: 'Tasas',
-            tabBarIcon: ({ color }) => <MaterialIcons name="show-chart" size={24} color={color} />
+            tabBarIcon: ({ color }) => (
+              <View style={{ width: 24, height: 24, alignItems: 'center', justifyContent: 'center' }}>
+                <MaterialCommunityIcons name="currency-usd" size={24} color={color} />
+              </View>
+            )
           }} 
         />
         <Tab.Screen 
           name="Markets" 
           component={StocksScreen} 
           options={{ 
-            headerShown: false, 
             title: 'Acciones',
-            tabBarIcon: ({ color }) => <MaterialIcons name="bar-chart" size={24} color={color} />
+            tabBarIcon: ({ color }) => (
+              <View style={{ width: 24, height: 24, alignItems: 'center', justifyContent: 'center' }}>
+                <MaterialCommunityIcons name="chart-line" size={24} color={color} />
+              </View>
+            )
+          }} 
+        />
+        <Tab.Screen 
+          name="Home" 
+          component={HomeStackScreen} 
+          options={{ 
+            tabBarIcon: ({ color }) => (
+              <View style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ 
+                  color: color, 
+                  fontSize: 22, 
+                  fontWeight: '900',
+                  fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
+                  includeFontPadding: false,
+                  textAlign: 'center',
+                }}>
+                  Bs
+                </Text>
+              </View>
+            )
           }} 
         />
         <Tab.Screen 
           name="Wallet" 
           component={DetailsScreen} 
           options={{ 
-            headerShown: false, 
             title: 'Billetera',
-            tabBarIcon: ({ color }) => <MaterialIcons name="account-balance-wallet" size={24} color={color} />
+            tabBarIcon: ({ color }) => (
+              <View style={{ width: 24, height: 24, alignItems: 'center', justifyContent: 'center' }}>
+                <MaterialCommunityIcons name="wallet" size={24} color={color} />
+              </View>
+            )
           }} 
         />
         <Tab.Screen 
           name="Settings" 
           component={SettingsScreen} 
           options={{ 
-            headerShown: false, 
             title: 'Configuración',
-            tabBarIcon: ({ color }) => <MaterialIcons name="settings" size={24} color={color} />
+            tabBarIcon: ({ color }) => (
+              <View style={{ width: 24, height: 24, alignItems: 'center', justifyContent: 'center' }}>
+                <MaterialCommunityIcons name="cog" size={24} color={color} />
+              </View>
+            )
           }} 
         />
       </Tab.Navigator>
