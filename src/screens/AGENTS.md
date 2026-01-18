@@ -22,3 +22,9 @@ Para garantizar una visualización correcta en dispositivos con `StatusBar` tran
 ### Estados de Carga y Error
 *   Gestionar estados de `loading`, `error` y `empty` (sin resultados) de forma visualmente distinta.
 *   Usar `RefreshControl` en `ScrollView` para permitir recarga manual.
+
+## Composición y Reutilización
+*   **No duplicar UI:** Las pantallas deben actuar principalmente como orquestadores de datos y contenedores de layout.
+*   **Componentes Reutilizables:** Si un elemento de UI (como un selector de moneda, una tarjeta de resumen, o un botón de acción específico) aparece en más de una pantalla (ej. `CalculatorScreen` y `AdvancedCalculatorScreen`), **debe** extraerse a un componente compartido en `src/components/`.
+    *   *Ejemplo:* `CurrencySelectorButton` se usa tanto en la calculadora simple como en la avanzada.
+*   **Consistencia:** Usar los componentes compartidos garantiza que los cambios de diseño se propaguen automáticamente a todas las pantallas.

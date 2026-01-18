@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, ActivityIndicator, RefreshControl, SafeAreaView, Platform } from 'react-native';
+import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { Text, useTheme, Chip } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import RateCard from '../components/dashboard/RateCard';
@@ -54,7 +54,7 @@ const ExchangeRatesScreen = () => {
   useEffect(() => {
     const unsubscribe = CurrencyService.subscribe((data) => {
       // Filter out VES (Base Currency) as showing VES/VES = 1 is redundant
-      const displayRates = data.filter(r => r.code !== 'VES');
+      const displayRates = data.filter(r => r.code !== 'VES' && r.code !== 'Bs');
       setAllRates(displayRates);
       setLoading(false);
       setError(null);
@@ -93,6 +93,7 @@ const ExchangeRatesScreen = () => {
   // Group rates for display
   const officialRates = filteredRates.filter(r => r.type === 'fiat');
   const cryptoRates = filteredRates.filter(r => r.type === 'crypto');
+  const otherRates = filteredRates.filter(r => r.type !== 'fiat' && r.type !== 'crypto');
 
   const renderRateCard = (rate: CurrencyRate) => (
     <RateCard 
@@ -134,7 +135,7 @@ const ExchangeRatesScreen = () => {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar 
         backgroundColor="transparent"
         translucent
@@ -227,16 +228,19 @@ const ExchangeRatesScreen = () => {
               </View>
             )}
             
-            {/* Fallback if we have rates but they don't match categories (shouldn't happen with current logic but good safety) */}
-            {officialRates.length === 0 && cryptoRates.length === 0 && filteredRates.length > 0 && (
+            {/* Section: Others */}
+            {otherRates.length > 0 && (
                  <View style={styles.section}>
-                    {filteredRates.map(renderRateCard)}
+                    <View style={styles.sectionHeader}>
+                      <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>OTRAS</Text>
+                    </View>
+                    {otherRates.map(renderRateCard)}
                  </View>
             )}
           </>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 };
 
@@ -247,7 +251,6 @@ const styles = StyleSheet.create({
   headerContainer: {
     paddingBottom: 10,
     zIndex: 1,
-    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
   },
   headerStyle: {
     paddingHorizontal: 20,

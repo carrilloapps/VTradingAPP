@@ -88,9 +88,6 @@ export class CurrencyService {
     this.listeners.forEach(listener => listener(rates));
   }
 
-  /**
-   * Helper to safely parse percentage from API response
-   */
   private static parsePercentage(val: any): number {
     if (val === null || val === undefined) return 0;
     const num = Number(val);

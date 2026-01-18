@@ -33,7 +33,7 @@ const HomeScreen = () => {
       if (usdtRate) homeRates.push(usdtRate);
       
       const getPath = (percent: number | null | undefined) => {
-        if (percent === null || percent === undefined || Math.abs(percent) === 0) return 'M0 20 L 100 20';
+        if (percent === null || percent === undefined || Math.abs(percent) < 0.01) return 'M0 20 L 100 20';
         // Smoother curves for dual display
         if (percent > 0) return 'M0 30 C 30 30, 50 10, 100 5'; 
         return 'M0 10 C 30 10, 50 30, 100 35';
