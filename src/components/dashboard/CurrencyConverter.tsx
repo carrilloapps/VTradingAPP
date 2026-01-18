@@ -199,6 +199,12 @@ const CurrencyConverter: React.FC = () => {
     if (isNaN(val)) return '0,00';
 
     // Logic: Convert FROM -> VES -> TO
+    // Important: rates are price in VES.
+    // 1 USD = 36.5 VES (value = 36.5)
+    // 1 EUR = 40.0 VES (value = 40.0)
+    // To convert USD -> EUR:
+    // USD amount * USD rate / EUR rate
+    // 100 * 36.5 / 40.0 = 91.25 EUR
     const amountInVES = val * fromCurrency.value;
     const result = amountInVES / toCurrency.value;
 
@@ -207,6 +213,7 @@ const CurrencyConverter: React.FC = () => {
 
   const exchangeRate = useMemo(() => {
     if (!fromCurrency || !toCurrency) return '0.00';
+    // Calculate rate: 1 FROM = X TO
     const rate = fromCurrency.value / toCurrency.value;
     return rate.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES });
   }, [fromCurrency, toCurrency]);

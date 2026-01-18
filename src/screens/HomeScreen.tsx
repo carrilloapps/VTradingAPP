@@ -2,12 +2,13 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, RefreshControl, TouchableOpacity } from 'react-native';
 import { useTheme, Text } from 'react-native-paper';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
-import MarketStatus from '../components/dashboard/MarketStatus';
+import MarketStatus from '../components/ui/MarketStatus';
 import ExchangeCard, { ExchangeCardProps } from '../components/dashboard/ExchangeCard';
-import StockItem, { StockItemProps } from '../components/dashboard/StockItem';
+import StockItem from '../components/stocks/StockItem';
 import Calculator from '../components/dashboard/Calculator';
 import DashboardSkeleton from '../components/dashboard/DashboardSkeleton';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
+import { StocksService, StockData } from '../services/StocksService';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { AppConfig } from '../constants/AppConfig';
@@ -20,8 +21,10 @@ const HomeScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [rates, setRates] = useState<CurrencyRate[]>([]);
+  const [stocks, setStocks] = useState<StockData[]>([]);
   const [featuredRates, setFeaturedRates] = useState<ExchangeCardProps[]>([]);
   const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
+  const [isMarketOpen, setIsMarketOpen] = useState(false);
 
   const processRates = useCallback((data: CurrencyRate[]) => {
       // Prioritize USD and USDT for the Home Screen
@@ -40,53 +43,94 @@ const HomeScreen = () => {
       };
 
       // Transform rates to ExchangeCard format
-      const featured = homeRates.map(rate => ({
-        title: rate.name,
-        subtitle: '',
-        value: rate.value.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES }),
-        currency: 'Bs',
-        changePercent: rate.changePercent !== null ? `${rate.changePercent.toFixed(2)}%` : '0.00%', 
-        isPositive: rate.changePercent !== null ? rate.changePercent >= 0 : true,
-        chartPath: getPath(rate.changePercent),
-        iconSymbol: rate.iconName === 'euro' ? '€' : '$',
-        iconColor: rate.type === 'crypto' ? '#F7931A' : undefined,
-        buyValue: rate.buyValue?.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES }),
-        sellValue: rate.sellValue?.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES }),
-        buyChangePercent: rate.buyChangePercent !== undefined ? `${rate.buyChangePercent > 0 ? '+' : ''}${rate.buyChangePercent.toFixed(2)}%` : undefined,
-        sellChangePercent: rate.sellChangePercent !== undefined ? `${rate.sellChangePercent > 0 ? '+' : ''}${rate.sellChangePercent.toFixed(2)}%` : undefined,
-        buyChartPath: getPath(rate.buyChangePercent),
-        sellChartPath: getPath(rate.sellChangePercent),
-      }));
+      const featured = homeRates.map(rate => {
+        // Handle potential NaN or invalid values for value
+        let displayValue = '0,00';
+        try {
+            if (rate.value && !isNaN(Number(rate.value))) {
+                displayValue = Number(rate.value).toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES });
+            }
+        } catch (e) {
+            console.warn('Error formatting value', e);
+        }
+
+        // Handle potential undefined/null for buy/sell
+        let displayBuyValue = undefined;
+        let displaySellValue = undefined;
+        
+        if (rate.buyValue !== undefined && !isNaN(Number(rate.buyValue))) {
+             displayBuyValue = Number(rate.buyValue).toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES });
+        }
+        
+        if (rate.sellValue !== undefined && !isNaN(Number(rate.sellValue))) {
+             displaySellValue = Number(rate.sellValue).toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES });
+        }
+
+        return {
+            title: rate.name,
+            subtitle: '',
+            value: displayValue,
+            currency: 'Bs',
+            changePercent: rate.changePercent !== null ? `${rate.changePercent.toFixed(2)}%` : '0.00%', 
+            isPositive: rate.changePercent !== null ? rate.changePercent >= 0 : true,
+            chartPath: getPath(rate.changePercent),
+            iconSymbol: rate.iconName === 'euro' ? '€' : '$',
+            iconColor: rate.type === 'crypto' ? '#F7931A' : undefined,
+            buyValue: displayBuyValue,
+            sellValue: displaySellValue,
+            buyChangePercent: rate.buyChangePercent !== undefined ? `${rate.buyChangePercent > 0 ? '+' : ''}${rate.buyChangePercent.toFixed(2)}%` : undefined,
+            sellChangePercent: rate.sellChangePercent !== undefined ? `${rate.sellChangePercent > 0 ? '+' : ''}${rate.sellChangePercent.toFixed(2)}%` : undefined,
+            buyChartPath: getPath(rate.buyChangePercent),
+            sellChartPath: getPath(rate.sellChangePercent),
+        };
+      });
       setFeaturedRates(featured);
   }, []);
 
   useEffect(() => {
-    const unsubscribe = CurrencyService.subscribe((data) => {
+    const unsubscribeRates = CurrencyService.subscribe((data) => {
         setRates(data);
         processRates(data);
         setLoading(false);
         setLastRefreshTime(new Date());
     });
+    
+    const unsubscribeStocks = StocksService.subscribe((data) => {
+        setStocks(data.slice(0, 3)); // Only take top 3 for Home
+        setIsMarketOpen(StocksService.isMarketOpen());
+    });
 
     // Initial fetch
-    CurrencyService.getRates().catch(error => {
+    Promise.all([
+        CurrencyService.getRates(),
+        StocksService.getStocks()
+    ]).then(() => {
+        setIsMarketOpen(StocksService.isMarketOpen());
+    }).catch(error => {
         console.error(error);
-        showToast('Error al actualizar tasas', 'error');
+        showToast('Error al actualizar datos', 'error');
         setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+        unsubscribeRates();
+        unsubscribeStocks();
+    };
   }, [processRates, showToast]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-        await CurrencyService.getRates(true);
-        showToast('Tasas actualizadas', 'success');
+        await Promise.all([
+            CurrencyService.getRates(true),
+            StocksService.getStocks(true)
+        ]);
+        setIsMarketOpen(StocksService.isMarketOpen());
+        showToast('Datos actualizados', 'success');
         setLastRefreshTime(new Date()); // Force update time immediately on success
     } catch (error) {
         console.error(error);
-        showToast('Error al actualizar tasas', 'error');
+        showToast('Error al actualizar', 'error');
     } finally {
         setRefreshing(false);
     }
@@ -105,12 +149,6 @@ const HomeScreen = () => {
     notificationCount: 3, // Mock for now
     isPremium: !!(user && !user.isAnonymous) // Only registered users are Premium
   };
-
-  const stocksData: StockItemProps[] = [
-    { symbol: 'BOLSA DE CARACAS', name: 'Banco Provincial', value: '14.50 Bs', change: '2.4%', isPositive: true, iconName: 'account-balance' },
-    { symbol: 'TELECOMUNICACIONES', name: 'CANTV Clase D', value: '3.85 Bs', change: '-0.8%', isPositive: false, iconName: 'wifi-tethering' },
-    { symbol: 'FONDO DE VALORES', name: 'Fondo de Valores', value: '0.92 Bs', change: '1.2%', isPositive: true, iconName: 'pie-chart' }
-  ];
 
   const themeStyles = useMemo(() => ({
     container: { backgroundColor: theme.colors.background },
@@ -156,7 +194,7 @@ const HomeScreen = () => {
         }
       >
         <MarketStatus 
-            isOpen={true} 
+            isOpen={isMarketOpen} 
             updatedAt={lastUpdated} 
             onRefresh={() => {
                 onRefresh();
@@ -184,8 +222,13 @@ const HomeScreen = () => {
             </TouchableOpacity>
           </View>
           
-          {stocksData.map((stock, index) => (
-            <StockItem key={index} {...stock} />
+          {stocks.map((stock) => (
+            <StockItem 
+              key={stock.id}
+              {...stock}
+              value={`${stock.price.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`}
+              change={`${stock.changePercent > 0 ? '+' : ''}${stock.changePercent.toFixed(2)}%`}
+            />
           ))}
         </View>
 

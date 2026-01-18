@@ -1,22 +1,16 @@
-import React, { useState, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar } from 'react-native';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { View, StyleSheet, StatusBar, RefreshControl, FlatList, ActivityIndicator } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
-import MarketStatus from '../components/stocks/MarketStatus';
+import MarketStatus from '../components/ui/MarketStatus';
 import IndexHero from '../components/stocks/IndexHero';
-import StockItem, { StockData } from '../components/stocks/StockItem';
+import StockItem from '../components/stocks/StockItem';
 import SearchBar from '../components/ui/SearchBar';
 import FilterSection from '../components/ui/FilterSection';
 import { useFilters } from '../context/FilterContext';
-
-// Mock Data based on the HTML template
-const MOCK_STOCKS: StockData[] = [
-  { id: '1', symbol: 'BNC', name: 'Banco Nal. de Crédito', price: 0.0035, changePercent: 2.10, initials: 'BNC', color: 'emerald' },
-  { id: '2', symbol: 'MVZ.A', name: 'Mercantil Serv. Fin.', price: 145.50, changePercent: -0.50, initials: 'MVZ', color: 'blue' },
-  { id: '3', symbol: 'TDV.D', name: 'CANTV Clase D', price: 3.20, changePercent: 0.00, initials: 'CTV', color: 'orange' },
-  { id: '4', symbol: 'RST', name: 'Ron Santa Teresa', price: 4.85, changePercent: 0.80, initials: 'RST', color: 'amber' },
-  { id: '5', symbol: 'FVI.B', name: 'Fdo. Valores Inm.', price: 12.00, changePercent: 5.40, initials: 'FVI', color: 'indigo' },
-];
+import { StocksService, StockData } from '../services/StocksService';
+import { useToast } from '../context/ToastContext';
+import StocksSkeleton from '../components/stocks/StocksSkeleton';
 
 const FILTERS = ['Todos', 'Banca', 'Industria', 'Servicios', 'Seguros'];
 
@@ -24,10 +18,65 @@ const StocksScreen = () => {
   const theme = useTheme();
   const { stockFilters, setStockFilters } = useFilters();
   const { query: searchQuery, category: activeFilter } = stockFilters;
+  const { showToast } = useToast();
+
+  const [stocks, setStocks] = useState<StockData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [indexData, setIndexData] = useState<any>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [isMarketOpen, setIsMarketOpen] = useState(false);
+
+  useEffect(() => {
+    const unsubscribe = StocksService.subscribe((data) => {
+        setStocks(data);
+        setIsMarketOpen(StocksService.isMarketOpen());
+        setLoading(false);
+    });
+
+    const loadData = async () => {
+        try {
+            await StocksService.getStocks();
+            const idx = await StocksService.getMarketIndex();
+            setIndexData(idx);
+            setIsMarketOpen(StocksService.isMarketOpen());
+        } catch (error) {
+            console.error(error);
+            showToast('Error cargando datos del mercado', 'error');
+            setLoading(false);
+        }
+    };
+
+    loadData();
+
+    return () => unsubscribe();
+  }, [showToast]);
+
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+        await StocksService.getStocks(true);
+        const idx = await StocksService.getMarketIndex();
+        setIndexData(idx);
+        setIsMarketOpen(StocksService.isMarketOpen());
+        showToast('Mercado actualizado', 'success');
+    } catch (error) {
+        showToast('Error actualizando mercado', 'error');
+    } finally {
+        setRefreshing(false);
+    }
+  }, [showToast]);
+
+  const handleLoadMore = async () => {
+      if (loadingMore) return;
+      setLoadingMore(true);
+      await StocksService.loadMore();
+      setLoadingMore(false);
+  };
 
   // Filter Logic
   const filteredStocks = useMemo(() => {
-    return MOCK_STOCKS.filter(stock => {
+    return stocks.filter(stock => {
       const matchesSearch = stock.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             stock.symbol.toLowerCase().includes(searchQuery.toLowerCase());
       // For now, filter category is mocked since data doesn't have category field
@@ -36,19 +85,78 @@ const StocksScreen = () => {
       
       return matchesSearch && matchesCategory;
     });
-  }, [searchQuery, activeFilter]);
+  }, [stocks, searchQuery, activeFilter]);
 
   const suggestions = useMemo(() => {
     if (!searchQuery || searchQuery.length < 2) return [];
     const lower = searchQuery.toLowerCase();
-    return MOCK_STOCKS
+    return stocks
       .filter(s => s.name.toLowerCase().includes(lower) || s.symbol.toLowerCase().includes(lower))
       .slice(0, 3)
       .map(s => s.symbol);
-  }, [searchQuery]);
+  }, [stocks, searchQuery]);
 
   const handleSearch = (text: string) => setStockFilters({ query: text });
   const handleSuggestionPress = (suggestion: string) => setStockFilters({ query: suggestion });
+
+  const renderHeader = () => (
+      <View>
+        {/* Market Status */}
+        <MarketStatus 
+            isOpen={isMarketOpen} 
+            updatedAt={new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} 
+            onRefresh={onRefresh}
+            style={{ paddingTop: 8 }}
+        />
+
+        {/* Index Hero */}
+        {indexData && (
+            <IndexHero 
+            value={indexData.value}
+            changePercent={indexData.changePercent}
+            isPositive={indexData.isPositive}
+            volume={indexData.volume}
+            opening={indexData.opening}
+            />
+        )}
+
+        {/* Filters */}
+        <FilterSection
+          options={FILTERS.map(f => ({ label: f, value: f }))}
+          selectedValue={activeFilter}
+          onSelect={(value) => setStockFilters({ category: value })}
+          mode="scroll"
+        />
+
+        {/* Stock List Header */}
+        <View style={styles.listHeader}>
+          <Text style={[styles.listHeaderTitle, { color: theme.colors.onSurfaceVariant }]}>EMPRESA / TICKER</Text>
+          <Text style={[styles.listHeaderTitle, { color: theme.colors.onSurfaceVariant }]}>PRECIO & VARIACIÓN</Text>
+        </View>
+      </View>
+  );
+
+  const renderFooter = () => {
+      if (!loadingMore) return <View style={{ height: 100 }} />;
+      return (
+          <View style={styles.loaderFooter}>
+              <ActivityIndicator size="small" color={theme.colors.primary} />
+          </View>
+      );
+  };
+
+  if (loading && !refreshing && stocks.length === 0) {
+      return (
+          <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+            <StatusBar 
+                backgroundColor="transparent"
+                translucent
+                barStyle={theme.dark ? 'light-content' : 'dark-content'} 
+            />
+            <StocksSkeleton />
+          </View>
+      );
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -64,7 +172,7 @@ const StocksScreen = () => {
           variant="section"
           title="Mercados"
           subtitle="Acciones y CEDEARs"
-          onActionPress={() => {}} // Optional action
+          onActionPress={onRefresh}
           rightActionIcon="refresh"
           onNotificationPress={() => {}}
           notificationCount={1}
@@ -83,45 +191,23 @@ const StocksScreen = () => {
         </View>
       </View>
 
-      <ScrollView 
-        style={styles.content}
-        contentContainerStyle={styles.scrollContent}
+      <FlatList
+        data={filteredStocks}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <StockItem {...item} />}
+        ListHeaderComponent={renderHeader}
+        ListFooterComponent={renderFooter}
+        contentContainerStyle={[styles.scrollContent, { paddingHorizontal: 20 }]}
         showsVerticalScrollIndicator={false}
-      >
-        {/* Market Status */}
-        <MarketStatus isOpen={true} time="10:30 AM" />
-
-        {/* Index Hero */}
-        <IndexHero 
-          value="55.230,12"
-          changePercent="1,2%"
-          isPositive={true}
-          volume="12.5M"
-          opening="54.575,20"
-        />
-
-        {/* Filters */}
-        <FilterSection
-          options={FILTERS.map(f => ({ label: f, value: f }))}
-          selectedValue={activeFilter}
-          onSelect={(value) => setStockFilters({ category: value })}
-          mode="scroll"
-        />
-
-        {/* Stock List Header */}
-        <View style={styles.listHeader}>
-          <Text style={[styles.listHeaderTitle, { color: theme.colors.onSurfaceVariant }]}>EMPRESA / TICKER</Text>
-          <Text style={[styles.listHeaderTitle, { color: theme.colors.onSurfaceVariant }]}>PRECIO & VARIACIÓN</Text>
-        </View>
-
-        {/* Stock List */}
-        <View style={styles.listContainer}>
-          {filteredStocks.map((stock) => (
-            <StockItem key={stock.id} {...stock} />
-          ))}
-        </View>
-
-      </ScrollView>
+        refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.colors.primary]} />
+        }
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.5}
+        initialNumToRender={10}
+        windowSize={5}
+        style={styles.content}
+      />
     </View>
   );
 };
@@ -149,19 +235,21 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: 1.5,
   },
-  listContainer: {
-    paddingHorizontal: 20,
-  },
   headerContainer: {
-    paddingBottom: 16,
+    paddingBottom: 8,
   },
   headerStyle: {
     paddingBottom: 0,
     borderBottomWidth: 0,
   },
   scrollContent: {
-    paddingBottom: 100,
+    paddingBottom: 20, // Reduced as footer handles spacing
   },
+  loaderFooter: {
+      paddingVertical: 20,
+      alignItems: 'center',
+      marginBottom: 80
+  }
 });
 
 export default StocksScreen;

@@ -8,7 +8,7 @@ import { useToast } from '../context/ToastContext';
 import CurrencyPickerModal from '../components/dashboard/CurrencyPickerModal';
 import CurrencySelectorButton from '../components/dashboard/CurrencySelectorButton';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
-import MarketStatus from '../components/dashboard/MarketStatus';
+import MarketStatus from '../components/ui/MarketStatus';
 import { AppConfig } from '../constants/AppConfig';
 
 // --- Components ---

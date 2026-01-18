@@ -55,7 +55,9 @@ const IndexHero: React.FC<IndexHeroProps> = ({
             </View>
             <View style={styles.rightAlign}>
               <Text variant="labelSmall" style={styles.labelSmall}>APERTURA</Text>
-              <Text variant="bodyMedium" style={styles.whiteBold}>{opening}</Text>
+              <Text variant="bodyMedium" style={styles.whiteBold}>
+                {opening} <Text variant="labelSmall" style={styles.unitText}>Bs</Text>
+              </Text>
             </View>
           </View>
         </View>
@@ -66,7 +68,6 @@ const IndexHero: React.FC<IndexHeroProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 20,
     paddingVertical: 12,
   },
   card: {
@@ -75,6 +76,7 @@ const styles = StyleSheet.create({
     position: 'relative',
     overflow: 'hidden',
     elevation: 0,
+    marginHorizontal: 0, // Ensure no extra margin
   },
   blurCircle: {
     position: 'absolute',

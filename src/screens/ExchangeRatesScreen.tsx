@@ -103,7 +103,7 @@ const ExchangeRatesScreen = () => {
       key={rate.id}
       title={`${rate.code} / VES`}
       subtitle={rate.name}
-      value={rate.value.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+      value={`${rate.value.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`}
       changePercent={rate.changePercent !== null ? `${Math.abs(rate.changePercent).toFixed(2)}%` : ''}
       isPositive={rate.changePercent !== null ? rate.changePercent >= 0 : true}
       iconName={rate.iconName || 'attach-money'}
@@ -205,7 +205,7 @@ const ExchangeRatesScreen = () => {
             {officialRates.length > 0 && (
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
-                  <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>OFICIAL & FIAT</Text>
+                  <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>FIAT & CRYPTO</Text>
                   <View style={[styles.tag, { backgroundColor: colors.successContainer }]}>
                     <Text style={[styles.tagText, { color: colors.success }]}>ACTUALIZADO</Text>
                   </View>

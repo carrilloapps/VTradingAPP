@@ -74,9 +74,13 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         horizontal 
         showsHorizontalScrollIndicator={false} 
         contentContainerStyle={styles.scrollContent}
-        style={[{ marginTop: theme.spacing.m }, style]}
+        style={[{ marginTop: theme.spacing.m, marginLeft: -20, marginRight: -20 }, style]}
       >
+        {/* Add left spacer for initial padding that scrolls */}
+        <View style={{ width: 20 }} /> 
         {content}
+        {/* Add right spacer for final padding that scrolls */}
+        <View style={{ width: 20 }} />
       </ScrollView>
     );
   }
@@ -90,13 +94,13 @@ const FilterSection: React.FC<FilterSectionProps> = ({
 
 const styles = StyleSheet.create({
   scrollContent: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
     gap: 8,
   },
   wrapContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
     gap: 8,
   },
   chip: {

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
@@ -9,8 +9,13 @@ export interface StockData {
   name: string;
   price: number;
   changePercent: number;
-  initials: string;
-  color: string; // 'emerald' | 'blue' | 'orange' | 'amber' | 'indigo'
+  initials?: string;
+  color?: string; // 'emerald' | 'blue' | 'orange' | 'amber' | 'indigo'
+  iconUrl?: string; // Optional icon URL
+  value?: string; // Optional pre-formatted value for dashboard compatibility
+  change?: string; // Optional pre-formatted change for dashboard compatibility
+  isPositive?: boolean; // Optional for dashboard compatibility
+  iconName?: string; // Optional for dashboard compatibility
 }
 
 const colorMap: Record<string, { bg: string; text: string; darkBg: string; darkText: string }> = {
@@ -28,15 +33,36 @@ const StockItem: React.FC<StockData> = ({
   changePercent,
   initials,
   color,
+  iconUrl,
+  value,
+  change,
+  isPositive: propIsPositive,
 }) => {
   const theme = useTheme();
-  const colors = colorMap[color] || colorMap.emerald;
-  const isPositive = changePercent > 0;
-  const isNegative = changePercent < 0;
+  const colors = colorMap[color || 'emerald'] || colorMap.emerald;
   
-  // Format price
-  const formattedPrice = price.toLocaleString('es-VE', { minimumFractionDigits: 4 });
-  const formattedChange = (changePercent > 0 ? '+' : '') + changePercent.toFixed(2) + '%';
+  const isPositive = propIsPositive !== undefined ? propIsPositive : (changePercent > 0);
+  const isNegative = propIsPositive !== undefined ? !propIsPositive : (changePercent < 0);
+  const isNeutral = !isPositive && !isNegative;
+  
+  // Format price - Use prop 'value' if available (dashboard), otherwise format 'price'
+  const formattedPrice = value || `${price.toLocaleString('es-VE', { minimumFractionDigits: 4 })} Bs`;
+  
+  let formattedChange = change;
+  if (!formattedChange) {
+      if (isNeutral) {
+          formattedChange = '= ' + Math.abs(changePercent).toFixed(2) + '%';
+      } else {
+          formattedChange = (isPositive ? '+' : '') + changePercent.toFixed(2) + '%';
+      }
+  } else if (isNeutral && !change?.startsWith('=')) {
+      // Ensure dashboard formatted string has = if neutral
+      // This is tricky if 'change' is pre-formatted as "0.00%". 
+      // We'll trust the logic below for rendering style, but text might need adjustment if passed from dashboard.
+      if (change === '0.00%' || change === '0,00%') {
+          formattedChange = '= ' + change;
+      }
+  }
   
   const containerStyle = [
     styles.container,
@@ -72,21 +98,29 @@ const StockItem: React.FC<StockData> = ({
       <View style={styles.leftContent}>
         <View style={[
           styles.iconBox, 
-          { backgroundColor: theme.dark ? colors.darkBg : colors.bg }
+          { backgroundColor: '#FFFFFF' }
         ]}>
-          <Text style={[
-            styles.initials, 
-            { color: theme.dark ? colors.darkText : colors.text }
-          ]}>
-            {initials}
-          </Text>
+          {iconUrl ? (
+            <Image 
+              source={{ uri: iconUrl }} 
+              style={styles.iconImage} 
+              resizeMode="contain"
+            />
+          ) : (
+            <Text style={[
+              styles.initials, 
+              { color: theme.dark ? colors.darkText : colors.text }
+            ]}>
+              {initials || symbol.substring(0, 3)}
+            </Text>
+          )}
         </View>
-        <View>
-          <Text style={[styles.name, { color: theme.colors.onSurface }]} numberOfLines={1}>
-            {name}
-          </Text>
-          <Text style={[styles.symbol, { color: theme.colors.onSurfaceVariant }]}>
+        <View style={styles.textContainer}>
+          <Text style={[styles.primaryText, { color: theme.colors.onSurface }]} numberOfLines={1}>
             {symbol}
+          </Text>
+          <Text style={[styles.secondaryText, { color: theme.colors.onSurfaceVariant }]} numberOfLines={1}>
+            {name}
           </Text>
         </View>
       </View>
@@ -125,40 +159,50 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 16,
     flex: 1,
+    marginRight: 16, // Ensure space between text and price
+  },
+  textContainer: {
+    flex: 1,
   },
   iconBox: {
     width: 44,
     height: 44,
-    borderRadius: 16,
+    borderRadius: 22,
     justifyContent: 'center',
     alignItems: 'center',
+    overflow: 'hidden', // Ensure image respects radius
+  },
+  iconImage: {
+    width: '80%',
+    height: '80%',
   },
   initials: {
     fontSize: 11,
     fontWeight: '800',
   },
-  name: {
+  primaryText: {
     fontSize: 14,
     fontWeight: 'bold',
     marginBottom: 2,
   },
-  symbol: {
+  secondaryText: {
     fontSize: 11,
     fontWeight: 'bold',
   },
   rightContent: {
     alignItems: 'flex-end',
+    minWidth: 80, // Prevent layout shift on small price changes
+    gap: 4,
   },
   price: {
-    fontSize: 15,
-    fontWeight: '800',
+    fontSize: 13,
+    fontWeight: 'bold',
     letterSpacing: -0.5,
   },
   changeBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 2,
-    marginTop: 2,
   },
   neutralBadge: {
     paddingHorizontal: 6,

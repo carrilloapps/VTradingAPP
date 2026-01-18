@@ -4,6 +4,7 @@ import { Text, useTheme, Searchbar } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { CurrencyRate } from '../../services/CurrencyService';
 import { BottomSheetModal } from '../ui/BottomSheetModal';
+import { AppConfig } from '../../constants/AppConfig';
 
 export interface CurrencyPickerModalProps {
   visible: boolean;
@@ -135,15 +136,24 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
                                 color={isSelected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant} 
                              />
                         </View>
-                        <View style={styles.pickerItemContent}>
-                            <Text variant="titleMedium" style={[{ fontWeight: isSelected ? '700' : '400'}, themeStyles.textPrimary]}>{item.code}</Text>
-                            <Text variant="bodySmall" style={themeStyles.textSecondary}>{item.name}</Text>
+                        <View style={styles.textContainer}>
+                            <Text variant="titleMedium" style={[{ fontWeight: isSelected ? '700' : '400'}, themeStyles.textPrimary]}>
+                                {item.code}
+                            </Text>
+                            <Text variant="bodySmall" style={themeStyles.textSecondary} numberOfLines={1}>
+                                {item.name}
+                            </Text>
                         </View>
-                        {isSelected && (
-                            <View style={[styles.checkBadge, themeStyles.checkBadge]}>
-                                <MaterialIcons name="check" size={16} color={theme.colors.primary} />
-                            </View>
-                        )}
+                        <View style={styles.rightContainer}>
+                            <Text variant="titleMedium" style={[styles.priceText, { color: theme.colors.onSurface }]}>
+                                {item.value.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs
+                            </Text>
+                            {isSelected && (
+                                <View style={styles.checkContainer}>
+                                    <MaterialIcons name="check-circle" size={16} color={theme.colors.primary} />
+                                </View>
+                            )}
+                        </View>
                     </TouchableOpacity>
                 );
             }}
@@ -190,6 +200,23 @@ const styles = StyleSheet.create({
     },
     pickerItemContent: {
         flex: 1,
+    },
+    textContainer: {
+        flex: 1,
+        justifyContent: 'center',
+    },
+    rightContainer: {
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+        minWidth: 80,
+        marginLeft: 16,
+    },
+    priceText: {
+        fontWeight: 'bold',
+        marginBottom: 2,
+    },
+    checkContainer: {
+        marginTop: 2,
     },
     checkBadge: {
         width: 24,

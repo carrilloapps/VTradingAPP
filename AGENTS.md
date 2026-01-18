@@ -3,6 +3,7 @@
 Este proyecto utiliza documentación distribuida para mantener el contexto cerca del código relevante. Por favor, consulta los archivos `AGENTS.md` en los directorios específicos para detalles de implementación.
 
 ## Principios Globales de Desarrollo
+*   **Validación Obligatoria:** Antes de considerar una tarea completada, **siempre ejecuta `npx tsc`** y corrige cualquier error de compilación. No entregar código que no compile.
 *   **Reutilización Primero:** Antes de crear un nuevo componente UI, verifica si ya existe uno similar. Si encuentras código duplicado (ej. selectores, tarjetas, botones con estilos específicos) en múltiples pantallas, **debes** refactorizarlo en un componente reutilizable dentro de `src/components/`.
 *   **Centralización de Estilos:** Todos los valores de estilo (colores, roundness, espaciados) deben provenir de `src/theme/theme.ts`.
 *   **Estilo de Tarjetas (Cards):** Todas las tarjetas deben usar un diseño "Flat" (Plano) sin elevación (`elevation: 0`), con bordes ligeros (`theme.colors.outline`, `borderWidth: 1`) y esquinas redondeadas estándar (`borderRadius: theme.roundness * 6` = 24px).

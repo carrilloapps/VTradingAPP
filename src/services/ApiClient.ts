@@ -61,6 +61,7 @@ class ApiClient {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
+      'X-API-Key': 'admin_key', // Default API Key as requested
       ...options.headers,
     };
 

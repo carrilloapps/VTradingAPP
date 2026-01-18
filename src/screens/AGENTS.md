@@ -91,10 +91,11 @@ Para mantener una armonía visual entre pantallas:
 
 ## Lógica de Presentación de Datos
 
-### Listados de Tasas de Cambio
+### Listados de Tasas y Acciones
 *   **Filtrado de Moneda Base:** Al mostrar listados completos de tasas (ej. `ExchangeRatesScreen`), se debe **filtrar explícitamente** la moneda base (VES) si el servicio la devuelve.
     *   Mostrar "VES/VES = 1" es redundante y aporta poco valor al usuario final en una vista de lista.
     *   *Implementación:* `const displayRates = data.filter(r => r.code !== 'VES');`
+*   **Servicios de Datos:** Utilizar `CurrencyService` y `StocksService` para obtener datos, evitando lógica de fetch directa en las pantallas.
 
 ### Estados de Carga y Error
 *   Gestionar estados de `loading`, `error` y `empty` (sin resultados) de forma visualmente distinta.

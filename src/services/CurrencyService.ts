@@ -1,6 +1,5 @@
 import { apiClient } from './ApiClient';
 import { performanceService } from './firebase/PerformanceService';
-import { AppConfig } from '../constants/AppConfig';
 
 export interface CurrencyRate {
   id: string;
@@ -18,47 +17,49 @@ export interface CurrencyRate {
 }
 
 // API Response Interfaces
-interface ApiRate {
+interface ApiRateItem {
   currency: string;
-  rate: number;
-  changePercent?: number; // Provided by API for official rates
+  source: string;
+  rate: {
+    average: number;
+    buy: number;
+    sell: number;
+  };
+  date: string;
+  previousDate: string | null;
+  change: {
+    value: number;
+    percent: number;
+    direction: string;
+  };
 }
 
-interface BinanceP2PData {
+interface ApiCryptoItem {
+  currency: string;
+  source: string;
+  rate: {
+    buy: number;
+    sell: number;
+  };
+  date: string;
+  previousDate: string | null;
+  change: {
     buy: {
-        currentAvg: number;
-        previousAvg: number;
-        difference: number;
-        percentage: number;
-        direction: string;
-        count?: number;
-        startTime?: string;
-        endTime?: string;
+      value: number;
+      percent: number;
+      direction: string;
     };
     sell: {
-        currentAvg: number;
-        previousAvg: number;
-        difference: number;
-        percentage: number;
-        direction: string;
-        count?: number;
-        startTime?: string;
-        endTime?: string;
+      value: number;
+      percent: number;
+      direction: string;
     };
-    windowMinutes?: number;
-}
-
-interface BinanceAd {
-    price: number;
-    [key: string]: any;
+  };
 }
 
 interface ApiRatesResponse {
-  source: string;
-  rates: ApiRate[];
-  publicationDate: string;
-  binanceP2P?: BinanceP2PData;
-  timestamp: string;
+  rates: ApiRateItem[];
+  crypto: ApiCryptoItem[];
 }
 
 type CurrencyListener = (rates: CurrencyRate[]) => void;
@@ -96,53 +97,6 @@ export class CurrencyService {
   }
 
   /**
-   * Helper to fetch average price from Binance P2P for a specific asset
-   */
-  private static async fetchBinanceP2PPrice(asset: string): Promise<{ value: number; changePercent: number } | null> {
-    try {
-        // Fetch BUY and SELL orders in parallel
-        // Note: We use page=1, rows=10 as requested
-        const [buyResponse, sellResponse] = await Promise.all([
-            apiClient.get<BinanceAd[]>('api/binance', {
-                params: { asset, fiat: AppConfig.BASE_CURRENCY, tradeType: 'BUY', rows: 10, page: 1 },
-                headers: { 'X-API-Key': 'admin_key' },
-                useCache: false 
-            }),
-            apiClient.get<BinanceAd[]>('api/binance', {
-                params: { asset, fiat: AppConfig.BASE_CURRENCY, tradeType: 'SELL', rows: 10, page: 1 },
-                headers: { 'X-API-Key': 'admin_key' },
-                useCache: false
-            })
-        ]);
-
-        const calculateAverage = (ads: BinanceAd[]) => {
-            if (!ads || !Array.isArray(ads) || ads.length === 0) return 0;
-            const sum = ads.reduce((acc, ad) => acc + Number(ad.price), 0);
-            return sum / ads.length;
-        };
-
-        const buyAvg = calculateAverage(buyResponse);
-        const sellAvg = calculateAverage(sellResponse);
-
-        if (buyAvg === 0 && sellAvg === 0) return null;
-
-        // Average of averages (Buy & Sell)
-        let finalValue = 0;
-        if (buyAvg > 0 && sellAvg > 0) {
-            finalValue = (buyAvg + sellAvg) / 2;
-        } else {
-            finalValue = buyAvg > 0 ? buyAvg : sellAvg;
-        }
-
-        return { value: finalValue, changePercent: 0 };
-
-    } catch (error) {
-        console.warn(`Error fetching P2P data for ${asset}:`, error);
-        return null;
-    }
-  }
-
-  /**
    * Obtiene tasas de cambio desde la API con caché y monitoreo.
    * Si forceRefresh es true, ignora el caché y busca datos frescos.
    */
@@ -155,108 +109,95 @@ export class CurrencyService {
     const trace = await performanceService.startTrace('get_currency_rates_service');
     try {
         // We use apiClient's cache as a fallback, but here we manage application state
+        // Header 'X-API-Key' is now handled by ApiClient default
         const response = await apiClient.get<ApiRatesResponse>('api/rates', {
             headers: {
                 'Accept': '*/*',
-                'X-API-Key': 'admin_key'
             },
             params: forceRefresh ? { _t: Date.now() } : undefined, // Force fresh data from server
             useCache: false, // Disable cache as requested
             cacheTTL: 0
         });
 
-        if (!response || !response.rates) {
+        if (!response || (!response.rates && !response.crypto)) {
             throw new Error("Invalid API Response structure");
         }
 
-        // Map API response to Internal Model
-        const rates: CurrencyRate[] = response.rates.map((apiRate, index) => {
-             let name = apiRate.currency;
-             let type: 'fiat' | 'crypto' = 'fiat';
-             let iconName = 'attach-money';
+        const rates: CurrencyRate[] = [];
 
-             // Standardize names and icons based on currency code
-             // This is purely UI mapping, not data mocking
-             switch(apiRate.currency) {
-                 case 'EUR': name = 'EUR/VES • BCV'; iconName = 'euro'; break;
-                 case 'USD': name = 'USD/VES • BCV'; iconName = 'attach-money'; break;
-                 case 'CNY': name = 'CNY/VES • BCV'; iconName = 'currency-yuan'; break;
-                 case 'RUB': name = 'RUB/VES • BCV'; iconName = 'currency-ruble'; break;
-                 case 'TRY': name = 'TRY/VES • BCV'; iconName = 'account-balance'; break;
-                 case 'GBP': name = 'GBP/VES • BCV'; iconName = 'currency-pound'; break;
-                 case 'JPY': name = 'JPY/VES • BCV'; iconName = 'currency-yen'; break;
-                 default: iconName = 'attach-money';
-             }
+        // 1. Process FIAT Rates
+        if (response.rates) {
+            response.rates.forEach((apiRate, index) => {
+                 let name = apiRate.currency;
+                 let iconName = 'attach-money';
+    
+                 // Standardize names and icons based on currency code
+                 const sourceLabel = apiRate.source || 'BCV';
+                 name = `${apiRate.currency}/VES • ${sourceLabel}`;
 
-             // Calculate change from previous fetch OR use API provided value
-             let changePercent: number | null = null;
-             
-             if (apiRate.changePercent !== undefined) {
-                 changePercent = CurrencyService.parsePercentage(apiRate.changePercent);
-             } else {
-                 changePercent = 0; // Default to 0 if not provided
-             }
-             
-             // Ensure changePercent is never null for numbers we want to display
-             if (changePercent === null) changePercent = 0;
-             
-             // No cache update needed
+                 switch(apiRate.currency) {
+                     case 'EUR': iconName = 'euro'; break;
+                     case 'USD': iconName = 'attach-money'; break;
+                     case 'CNY': iconName = 'currency-yuan'; break;
+                     case 'RUB': iconName = 'currency-ruble'; break;
+                     case 'TRY': iconName = 'account-balance'; break;
+                     case 'GBP': iconName = 'currency-pound'; break;
+                     case 'JPY': iconName = 'currency-yen'; break;
+                     default: iconName = 'attach-money';
+                 }
+    
+                 rates.push({
+                     id: String(index),
+                     code: apiRate.currency,
+                     name: name,
+                     value: apiRate.rate.average,
+                     changePercent: CurrencyService.parsePercentage(apiRate.change.percent), 
+                     type: 'fiat',
+                     iconName: iconName,
+                     lastUpdated: apiRate.date || new Date().toISOString(),
+                     buyValue: apiRate.rate.buy,
+                     sellValue: apiRate.rate.sell
+                 });
+            });
+        }
 
-             return {
-                 id: String(index),
-                 code: apiRate.currency,
-                 name: name,
-                 value: apiRate.rate,
-                 changePercent: changePercent, 
-                 type: type,
-                 iconName: iconName,
-                 lastUpdated: response.publicationDate || new Date().toISOString()
-             };
-        });
-        
-        // Add Binance P2P USDT data if available (Real Data from API)
-        if (response.binanceP2P) {
-            const sellData = response.binanceP2P.sell;
-            const buyData = response.binanceP2P.buy;
-            
-            let usdtValue = 0;
-            let changePercent: number | null = null;
+        // 2. Process Crypto Rates
+        if (response.crypto) {
+            response.crypto.forEach((cryptoItem) => {
+                let name = cryptoItem.currency;
+                let iconName = 'currency-bitcoin';
+                
+                const sourceLabel = cryptoItem.source || 'P2P';
+                
+                switch(cryptoItem.currency) {
+                    case 'USDT': name = `Tether • ${sourceLabel}`; iconName = 'currency-bitcoin'; break;
+                    case 'BTC': name = `Bitcoin • ${sourceLabel}`; iconName = 'currency-bitcoin'; break;
+                    case 'ETH': name = `Ethereum • ${sourceLabel}`; iconName = 'diamond'; break;
+                    case 'USDC': name = `USD Coin • ${sourceLabel}`; iconName = 'attach-money'; break;
+                    case 'BNB': name = `Binance Coin • ${sourceLabel}`; iconName = 'verified-user'; break;
+                    default: name = `${cryptoItem.currency} • ${sourceLabel}`; iconName = 'currency-bitcoin';
+                }
 
-            if (sellData && buyData) {
-                // Calculate average between buy and sell as requested
-                usdtValue = (sellData.currentAvg + buyData.currentAvg) / 2;
-                changePercent = CurrencyService.parsePercentage(sellData.percentage); 
-            } else if (sellData) {
-                usdtValue = sellData.currentAvg;
-                changePercent = CurrencyService.parsePercentage(sellData.percentage);
-            } else if (buyData) {
-                usdtValue = buyData.currentAvg;
-                changePercent = CurrencyService.parsePercentage(buyData.percentage);
-            }
+                // Calculate average value
+                const avgValue = (cryptoItem.rate.buy + cryptoItem.rate.sell) / 2;
+                // Calculate average change percent
+                const avgChange = (cryptoItem.change.buy.percent + cryptoItem.change.sell.percent) / 2;
 
-            if (usdtValue > 0) {
-                const usdtRate: CurrencyRate = {
-                    id: 'usdt_p2p',
-                    code: 'USDT',
-                    name: 'USDT/VES • Tether',
-                    value: usdtValue,
-                    changePercent: changePercent !== null ? changePercent : 0,
+                rates.push({
+                    id: `${cryptoItem.currency.toLowerCase()}_p2p`,
+                    code: cryptoItem.currency,
+                    name: name,
+                    value: avgValue,
+                    changePercent: CurrencyService.parsePercentage(avgChange),
                     type: 'crypto',
-                    iconName: 'currency-bitcoin',
-                    lastUpdated: response.timestamp || new Date().toISOString()
-                };
-
-                if (buyData) {
-                    usdtRate.buyValue = buyData.currentAvg;
-                    usdtRate.buyChangePercent = CurrencyService.parsePercentage(buyData.percentage);
-                }
-                if (sellData) {
-                    usdtRate.sellValue = sellData.currentAvg;
-                    usdtRate.sellChangePercent = CurrencyService.parsePercentage(sellData.percentage);
-                }
-
-                rates.push(usdtRate);
-            }
+                    iconName: iconName,
+                    lastUpdated: cryptoItem.date || new Date().toISOString(),
+                    buyValue: cryptoItem.rate.buy,
+                    sellValue: cryptoItem.rate.sell,
+                    buyChangePercent: CurrencyService.parsePercentage(cryptoItem.change.buy.percent),
+                    sellChangePercent: CurrencyService.parsePercentage(cryptoItem.change.sell.percent)
+                });
+            });
         }
         
         // Ensure VES exists as base currency for calculations
@@ -273,58 +214,6 @@ export class CurrencyService {
              });
         }
 
-        // Fetch additional crypto rates from Binance P2P (BTC, ETH, USDC, etc.)
-        const extraCryptos = [
-            { code: 'BTC', name: 'Bitcoin', icon: 'currency-bitcoin' },
-            { code: 'ETH', name: 'Ethereum', icon: 'diamond' }, 
-            { code: 'USDC', name: 'USD Coin', icon: 'attach-money' },
-            { code: 'BNB', name: 'Binance Coin', icon: 'verified-user' },
-            { code: 'USDT', name: 'Dólar (Tether)', icon: 'currency-bitcoin' } // Fallback/Alternative
-        ];
-
-        // Fetch in parallel but don't fail the whole request if one fails
-        const cryptoResults = await Promise.all(
-            extraCryptos.map(async (crypto) => {
-                // Optimization: Don't fetch if already exists (e.g. USDT from api/rates)
-                if (rates.find(r => r.code === crypto.code)) return null;
-
-                const data = await this.fetchBinanceP2PPrice(crypto.code);
-                if (data) {
-                    return {
-                        id: `${crypto.code.toLowerCase()}_p2p`,
-                        code: crypto.code,
-                        name: crypto.name,
-                        value: data.value,
-                        changePercent: data.changePercent,
-                        type: 'crypto' as const,
-                        iconName: crypto.icon,
-                        lastUpdated: new Date().toISOString()
-                    };
-                }
-                return null;
-            })
-        );
-
-        // Add valid results to rates list
-        cryptoResults.forEach(rate => {
-            if (rate && !rates.find(r => r.code === rate.code)) {
-                rates.push(rate);
-            }
-        });
-
-        // Update state and notify
-        // Calculate percentage changes based on previous cache if API returns 0
-        rates.forEach(rate => {
-            // No previousRates map used anymore
-            
-            // If API didn't provide change, it stays as 0 or null
-            if ((rate.changePercent === 0 || rate.changePercent === null)) {
-                 // Do nothing, keep it as is
-            }
-
-            // No cache update
-        });
-
         this.currentRates = rates;
         this.lastFetch = Date.now();
         this.notifyListeners(rates);
@@ -338,14 +227,10 @@ export class CurrencyService {
         // If we have stale data in memory, return it but warn
         if (this.currentRates.length > 0) {
             console.warn('Returning stale in-memory data due to fetch error');
-            // Notify listeners even with stale data so the UI "Last Updated" time refreshes,
-            // confirming to the user that a check was performed (even if data didn't change/fetch failed)
-            // Use a shallow copy to ensure React state updates trigger even if content is identical
             this.notifyListeners([...this.currentRates]);
             return this.currentRates;
         }
         
-        // Propagate error to let UI handle "No Data" state
         throw error;
     } finally {
         await performanceService.stopTrace(trace);
