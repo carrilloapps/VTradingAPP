@@ -15,6 +15,10 @@ export interface ExchangeCardProps {
   iconUrl?: string;
   iconSymbol?: string;
   iconColor?: string; // For symbol background
+  buyValue?: string;
+  sellValue?: string;
+  buyChangePercent?: string;
+  sellChangePercent?: string;
 }
 
 const ExchangeCard: React.FC<ExchangeCardProps> = ({
@@ -27,7 +31,11 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
   chartPath,
   iconUrl,
   iconSymbol,
-  iconColor = '#F3BA2F'
+  iconColor = '#F3BA2F',
+  buyValue,
+  sellValue,
+  buyChangePercent,
+  sellChangePercent
 }) => {
   const theme = useTheme();
   const colors = theme.colors as any;
@@ -61,12 +69,44 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
             <Text variant="titleMedium" style={[{ color: theme.colors.onSurface }, styles.titleText]}>{title}</Text>
             <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{subtitle}</Text>
             <View style={styles.valueContainer}>
-              <Text variant="headlineSmall" style={[{ color: theme.colors.onSurface }, styles.valueText]}>
-                {value}
-              </Text>
-              <Text variant="labelMedium" style={[{ color: theme.colors.onSurfaceVariant }, styles.currencyText]}>
-                {currency}
-              </Text>
+              {buyValue && sellValue ? (
+                  <View style={styles.dualContainer}>
+                      <View>
+                          <Text variant="labelSmall" style={{color: theme.colors.onSurfaceVariant, marginBottom: 2}}>COMPRA</Text>
+                          <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
+                            <Text variant="titleLarge" style={[{ color: theme.colors.onSurface, fontWeight: 'bold' }]}>{buyValue}</Text>
+                            <Text variant="bodySmall" style={{color: theme.colors.onSurfaceVariant, marginLeft: 4}}>{currency}</Text>
+                          </View>
+                          {buyChangePercent && (
+                              <Text variant="labelSmall" style={{color: buyChangePercent.includes('-') ? colors.error : colors.success}}>
+                                  {buyChangePercent}
+                              </Text>
+                          )}
+                      </View>
+                      <View style={[styles.separator, {backgroundColor: theme.colors.outlineVariant}]} />
+                      <View>
+                          <Text variant="labelSmall" style={{color: theme.colors.onSurfaceVariant, marginBottom: 2}}>VENTA</Text>
+                          <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
+                            <Text variant="titleLarge" style={[{ color: theme.colors.onSurface, fontWeight: 'bold' }]}>{sellValue}</Text>
+                            <Text variant="bodySmall" style={{color: theme.colors.onSurfaceVariant, marginLeft: 4}}>{currency}</Text>
+                          </View>
+                           {sellChangePercent && (
+                              <Text variant="labelSmall" style={{color: sellChangePercent.includes('-') ? colors.error : colors.success}}>
+                                  {sellChangePercent}
+                              </Text>
+                          )}
+                      </View>
+                  </View>
+              ) : (
+                <>
+                  <Text variant="headlineSmall" style={[{ color: theme.colors.onSurface }, styles.valueText]}>
+                    {value}
+                  </Text>
+                  <Text variant="labelMedium" style={[{ color: theme.colors.onSurfaceVariant }, styles.currencyText]}>
+                    {currency}
+                  </Text>
+                </>
+              )}
             </View>
           </View>
         </View>
@@ -185,6 +225,16 @@ const styles = StyleSheet.create({
   chartContainer: {
     height: 48,
     width: '100%',
+  },
+  dualContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  separator: {
+    width: 1,
+    height: 24,
+    marginHorizontal: 16,
   }
 });
 

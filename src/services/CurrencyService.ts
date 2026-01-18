@@ -11,6 +11,10 @@ export interface CurrencyRate {
   type: 'fiat' | 'crypto';
   iconName?: string;
   lastUpdated: string;
+  buyValue?: number;
+  sellValue?: number;
+  buyChangePercent?: number;
+  sellChangePercent?: number;
 }
 
 // API Response Interfaces
@@ -159,7 +163,7 @@ export class CurrencyService {
              // This is purely UI mapping, not data mocking
              switch(apiRate.currency) {
                  case 'EUR': name = 'Euro (BCV)'; iconName = 'euro'; break;
-                 case 'USD': name = 'Dólar (BCV)'; iconName = 'attach-money'; break;
+                 case 'USD': name = 'USD DIVISA • BCV'; iconName = 'attach-money'; break;
                  case 'CNY': name = 'Yuan (BCV)'; iconName = 'currency-yuan'; break;
                  case 'RUB': name = 'Rublo (BCV)'; iconName = 'currency-ruble'; break;
                  case 'TRY': name = 'Lira (BCV)'; iconName = 'account-balance'; break;
@@ -195,19 +199,33 @@ export class CurrencyService {
             } else if (sellData) {
                 usdtValue = sellData.currentAvg;
                 changePercent = sellData.percentage;
+            } else if (buyData) {
+                usdtValue = buyData.currentAvg;
+                changePercent = buyData.percentage;
             }
 
             if (usdtValue > 0) {
-                rates.push({
+                const usdtRate: CurrencyRate = {
                     id: 'usdt_p2p',
                     code: 'USDT',
-                    name: 'Dólar (Tether)',
+                    name: 'Binance • Paralelo',
                     value: usdtValue,
-                    changePercent: changePercent,
+                    changePercent: changePercent !== null && changePercent !== undefined ? Number(changePercent.toFixed(2)) : null,
                     type: 'crypto',
                     iconName: 'currency-bitcoin',
                     lastUpdated: response.timestamp || new Date().toISOString()
-                });
+                };
+
+                if (buyData) {
+                    usdtRate.buyValue = buyData.currentAvg;
+                    usdtRate.buyChangePercent = Number(buyData.percentage.toFixed(2));
+                }
+                if (sellData) {
+                    usdtRate.sellValue = sellData.currentAvg;
+                    usdtRate.sellChangePercent = Number(sellData.percentage.toFixed(2));
+                }
+
+                rates.push(usdtRate);
             }
         }
         

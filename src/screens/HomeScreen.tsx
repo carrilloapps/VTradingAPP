@@ -25,18 +25,12 @@ const HomeScreen = () => {
 
   const processRates = useCallback((data: CurrencyRate[]) => {
       // Prioritize USD and USDT for the Home Screen
-      const usdRate = data.find(r => r.code === 'USD');
-      const cryptoRates = data.filter(r => r.type === 'crypto' || r.code === 'USDT'); // USDT + other cryptos
-      
       const homeRates: CurrencyRate[] = [];
+      const usdRate = data.find(r => r.code === 'USD');
+      const usdtRate = data.find(r => r.code === 'USDT');
+
       if (usdRate) homeRates.push(usdRate);
-      
-      // Add cryptos, ensuring no duplicates if USDT is in both
-      cryptoRates.forEach(rate => {
-          if (!homeRates.find(r => r.code === rate.code)) {
-              homeRates.push(rate);
-          }
-      });
+      if (usdtRate) homeRates.push(usdtRate);
       
       // Transform rates to ExchangeCard format
       const featured = homeRates.map(rate => ({
@@ -50,7 +44,11 @@ const HomeScreen = () => {
              ? (rate.changePercent >= 0 ? 'M0 20 Q 25 35 50 15 T 100 5' : 'M0 10 Q 25 5 50 25 T 100 35')
              : 'M0 20 L 100 20',
         iconSymbol: rate.iconName === 'euro' ? '€' : '$',
-        iconColor: rate.type === 'crypto' ? '#F7931A' : undefined
+        iconColor: rate.type === 'crypto' ? '#F7931A' : undefined,
+        buyValue: rate.buyValue?.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES }),
+        sellValue: rate.sellValue?.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES }),
+        buyChangePercent: rate.buyChangePercent !== undefined ? `${rate.buyChangePercent > 0 ? '+' : ''}${rate.buyChangePercent.toFixed(2)}%` : undefined,
+        sellChangePercent: rate.sellChangePercent !== undefined ? `${rate.sellChangePercent > 0 ? '+' : ''}${rate.sellChangePercent.toFixed(2)}%` : undefined,
       }));
       setFeaturedRates(featured);
   }, []);
