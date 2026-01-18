@@ -254,7 +254,6 @@ const styles = StyleSheet.create({
   },
   headerStyle: {
     paddingHorizontal: 20,
-    paddingTop: 10,
     marginBottom: 10,
   },
   searchContainer: {
