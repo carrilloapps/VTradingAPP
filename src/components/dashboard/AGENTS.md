@@ -22,7 +22,7 @@ Se ha realizado una refactorización visual del modal de selección de divisas (
 3.  **Barra de Búsqueda (Searchbar):**
     *   Se añadió `marginHorizontal: 20`.
     *   Se definió una altura explícita de `50` y `borderRadius: 12` para coincidir con la estética redondeada de la app.
-    *   Se eliminó la elevación (`elevation: 0`) para un look más limpio y plano ("flat").
+    *   Se eliminó la elevación (`elevation: 0`) para un look más limpio y plano ("flat"), reemplazándola con un borde (`borderWidth: 1`, `borderColor: theme.colors.outline`).
 
 4.  **Tipografía y Feedback Visual:**
     *   El código de la moneda seleccionada ahora se muestra con `fontWeight: '700'` (bold).

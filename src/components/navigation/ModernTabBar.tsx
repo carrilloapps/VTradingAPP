@@ -29,9 +29,10 @@ const ModernTabBar: React.FC<BottomTabBarProps> = ({ state, descriptors, navigat
       <View style={[
         styles.barBackground,
         { 
-          backgroundColor: theme.colors.surface,
+          backgroundColor: theme.colors.elevation.level1,
           paddingBottom: insets.bottom,
           height: 60 + insets.bottom,
+          borderColor: theme.colors.outline,
         }
       ]}>
         <View style={styles.content}>
@@ -139,7 +140,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    borderTopWidth: 1,
+    borderWidth: 1,
     // Ensure the elevated button is visible
     overflow: 'visible',
     shadowOpacity: 0,

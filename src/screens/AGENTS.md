@@ -12,41 +12,72 @@ Para garantizar una experiencia visual correcta y funcional tanto en **Android**
 *   **Implementación en Pantallas:**
     *   **Contenedor Raíz:** Usar `View` estándar (no `SafeAreaView`) con `flex: 1`. El `UnifiedHeader` se encargará de proteger el área superior.
     *   **StatusBar:** Debe configurarse como `translucent` y `backgroundColor="transparent"` para permitir que el diseño fluya correctamente detrás de la barra de estado, delegando el espaciado al Header.
-    *   **Unificación Visual:** `ExchangeRatesScreen` y `StocksScreen` deben compartir exactamente el mismo layout de encabezado (Título grande alineado a la izquierda, botón de acción secundario a la derecha) para mantener la coherencia al navegar entre pestañas.
+    *   **Unificación Visual:** `ExchangeRatesScreen` y `StocksScreen` deben compartir exactamente el mismo layout de encabezado y estructura de contenido.
+    *   **Ubicación de Filtros:** Los componentes de filtro (como `FilterSection`) deben ubicarse **dentro del ScrollView de contenido**, no fijos en el header. Esto evita problemas de espaciado y permite que los filtros se desplacen con la lista.
 
 ### Patrón de Diseño para Encabezados (Header Pattern)
 Para mantener la consistencia entre pantallas principales (ej. `StocksScreen`, `ExchangeRatesScreen`), seguir esta estructura estricta:
 
 ```tsx
 // Estructura JSX
-<View style={[styles.headerContainer, { backgroundColor: theme.colors.background }]}>
-  <UnifiedHeader
-    variant="section"
-    title="Título Sección"
-    subtitle="Subtítulo opcional"
-    onActionPress={handleReload}
-    rightActionIcon="refresh" // Icono estandarizado para recarga
-    style={styles.headerStyle}
-  />
-  
-  <View style={styles.searchContainer}>
-    <SearchBar ... />
+<View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+  {/* Header Fijo */}
+  <View style={[styles.headerContainer, { backgroundColor: theme.colors.background }]}>
+    <UnifiedHeader
+      variant="section"
+      title="Título Sección"
+      subtitle="Subtítulo"
+      onActionPress={handleReload}
+      rightActionIcon="refresh"
+      style={styles.headerStyle}
+    />
+    
+    <View style={styles.searchContainer}>
+      <SearchBar 
+        value={query}
+        onChangeText={setQuery}
+        placeholder="..."
+        // Icono de filtro condicional:
+        // Pasar undefined para ocultar el icono (ej. StocksScreen)
+        // Pasar función para mostrarlo (ej. ExchangeRatesScreen)
+        onFilterPress={showFiltersToggle ? handleToggle : undefined}
+      />
+    </View>
   </View>
+
+  {/* Contenido Scrollable */}
+  <ScrollView 
+    style={styles.content} 
+    contentContainerStyle={styles.scrollContent}
+  >
+    {/* Filtros dentro del scroll */}
+    <FilterSection 
+      options={...} 
+      visible={showFilters} 
+      mode="wrap" // o "scroll"
+    />
+    
+    {/* Lista de Datos */}
+    {data.map(...)}
+  </ScrollView>
 </View>
 
 // Estilos Estandarizados
 const styles = StyleSheet.create({
   headerContainer: {
     paddingBottom: 16, // Espaciado consistente antes del contenido
-    // No usar zIndex a menos que sea estrictamente necesario para sombras
   },
   headerStyle: {
-    paddingBottom: 0,      // Eliminar padding interno inferior
-    borderBottomWidth: 0,  // Eliminar borde si hay elementos debajo (como SearchBar)
+    paddingBottom: 0,
+    borderBottomWidth: 0,
   },
   searchContainer: {
     paddingHorizontal: 20,
-    marginTop: 8,          // Separación estándar del título
+    marginTop: 8,
+  },
+  scrollContent: {
+    paddingBottom: 100, // Espacio para FAB o TabBar
+    // NO usar paddingTop aquí para evitar huecos extraños
   }
 });
 ```

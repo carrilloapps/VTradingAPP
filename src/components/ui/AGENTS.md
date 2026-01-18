@@ -103,5 +103,22 @@ Componente unificado para mostrar opciones de filtrado en formato de "Chips". So
 | `mode` | `'scroll' \| 'wrap'` | No | Modo de visualización. Default: `'scroll'`. |
 | `visible` | `boolean` | No | Controla si el componente se renderiza. Default: `true`. |
 
+## SearchBar (Barra de Búsqueda Universal)
+
+Componente estandarizado para inputs de búsqueda con soporte opcional para acciones de filtro y sugerencias.
+
+### Características Clave
+*   **Estilo Flat:** Utiliza `elevation: 0`, `borderWidth: 1` y colores del tema para integrarse con el estándar de diseño plano.
+*   **Filtro Condicional:** El icono de filtro ("tune") **solo se renderiza si se proporciona la prop `onFilterPress`**.
+    *   Si `onFilterPress` es `undefined`, el icono no ocupa espacio ni se muestra.
+*   **Sugerencias:** Soporte integrado para mostrar una lista desplegable de sugerencias.
+
+### Props Destacadas
+| Prop | Tipo | Descripción |
+|---|---|---|
+| `onFilterPress` | `() => void` | **Opcional.** Callback para el botón de filtro. Si se omite, el botón se oculta. |
+| `suggestions` | `string[]` | Lista de sugerencias a mostrar al escribir. |
+| `onSuggestionPress` | `(item: string) => void` | Callback al seleccionar una sugerencia. |
+
 ---
 *Última actualización: 20 de Enero de 2026*

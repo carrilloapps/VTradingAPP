@@ -33,3 +33,16 @@ Para garantizar la consistencia visual y la mantenibilidad del código, se estab
 *   **Única fuente de verdad** para colores, radios y tipografía.
 *   Si se necesita un nuevo color semántico (ej. `skeletonDark`), agregarlo aquí, no en el componente.
 *   Usar `theme.roundness` como unidad base para bordes (multiplicadores 3, 4, 5).
+
+### 5. Diseño Plano Universal (Universal Flat Design)
+*   **Regla Global:** Todas las superficies elevadas (Cards, Dialogs, Modals, SearchBars, BottomSheet, TabBar) deben seguir un diseño "Flat" (Plano).
+*   **Estilos Obligatorios:**
+    *   `elevation: 0` (Android)
+    *   `shadowOpacity: 0` (iOS)
+    *   `borderWidth: 1`
+    *   `borderColor: theme.colors.outline`
+    *   `backgroundColor`:
+        *   Cards/Inputs: `theme.colors.elevation.level1` (o `surface`)
+        *   Dialogs/Modals: `theme.colors.elevation.level3`
+*   **Prohibido:** El uso de sombras (`elevation` > 0) para denotar profundidad. La profundidad se denota exclusivamente mediante bordes y niveles de color de superficie.
+*   **Excepción:** Botones flotantes (FAB) pueden mantener elevación si es crítico para la UX, pero deben evaluarse caso por caso.
