@@ -1,4 +1,4 @@
-import { CurrencyService, CurrencyRate } from '../../src/services/CurrencyService';
+import { CurrencyService } from '../../src/services/CurrencyService';
 import { apiClient } from '../../src/services/ApiClient';
 import { performanceService } from '../../src/services/firebase/PerformanceService';
 
@@ -37,14 +37,16 @@ describe('CurrencyService', () => {
       useCache: true
     }));
 
-    expect(rates).toHaveLength(2);
-    expect(rates[0].code).toBe('EUR');
-    expect(rates[0].value).toBe(55.45);
-    expect(rates[0].name).toBe('Euro');
+    expect(rates).toHaveLength(3); // VES + 2 mocked rates
+    expect(rates[0].code).toBe('VES');
     
-    expect(rates[1].code).toBe('USD');
-    expect(rates[1].value).toBe(36.58);
-    expect(rates[1].name).toBe('Dólar BCV');
+    expect(rates[1].code).toBe('EUR');
+    expect(rates[1].value).toBe(55.45);
+    expect(rates[1].name).toBe('Euro (BCV)');
+    
+    expect(rates[2].code).toBe('USD');
+    expect(rates[2].value).toBe(36.58);
+    expect(rates[2].name).toBe('Dólar (BCV)');
 
     expect(performanceService.startTrace).toHaveBeenCalledWith('get_currency_rates_service');
     expect(performanceService.stopTrace).toHaveBeenCalledWith(traceMock);
@@ -56,7 +58,8 @@ describe('CurrencyService', () => {
     const traceMock = { putAttribute: jest.fn(), stop: jest.fn() };
     (performanceService.startTrace as jest.Mock).mockResolvedValue(traceMock);
 
-    const rates = await CurrencyService.getRates();
+    // Force refresh to bypass in-memory cache and trigger error
+    const rates = await CurrencyService.getRates(true);
 
     expect(rates).toBeDefined();
     expect(rates.length).toBeGreaterThan(0); // Should return mock rates

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
+import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, ActivityIndicator, RefreshControl, SafeAreaView } from 'react-native';
 import { Text, useTheme, Chip } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import RateCard from '../components/dashboard/RateCard';
@@ -26,6 +26,30 @@ const ExchangeRatesScreen = () => {
   const [allRates, setAllRates] = useState<CurrencyRate[]>([]);
   const [error, setError] = useState<string | null>(null);
 
+  const handleSearch = (text: string) => {
+    setExchangeRateFilters({ query: text });
+  };
+
+  const filteredRates = useMemo(() => {
+    let result = allRates;
+
+    // Filter by type
+    if (filterType !== 'all') {
+      result = result.filter(r => r.type === filterType);
+    }
+
+    // Filter by query
+    if (searchQuery) {
+      const lowerQuery = searchQuery.toLowerCase();
+      result = result.filter(r => 
+        r.code.toLowerCase().includes(lowerQuery) || 
+        r.name.toLowerCase().includes(lowerQuery)
+      );
+    }
+
+    return result;
+  }, [allRates, filterType, searchQuery]);
+
   // Subscription and Data Loading
   useEffect(() => {
     const unsubscribe = CurrencyService.subscribe((data) => {
@@ -49,7 +73,7 @@ const ExchangeRatesScreen = () => {
       setRefreshing(true);
       try {
           await CurrencyService.getRates(true);
-      } catch (err) {
+      } catch {
           showToast('Error al actualizar', 'error');
       } finally {
           setRefreshing(false);
@@ -58,7 +82,7 @@ const ExchangeRatesScreen = () => {
 
   const loadRates = useCallback(() => {
       setLoading(true);
-      CurrencyService.getRates(true).catch(err => {
+      CurrencyService.getRates(true).catch(() => {
           showToast('Error al recargar', 'error');
           setLoading(false);
       });
@@ -74,8 +98,8 @@ const ExchangeRatesScreen = () => {
       title={`${rate.code} / VES`}
       subtitle={rate.name}
       value={rate.value.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-      changePercent={`${Math.abs(rate.changePercent)}%`}
-      isPositive={rate.changePercent >= 0}
+      changePercent={rate.changePercent !== null ? `${Math.abs(rate.changePercent).toFixed(2)}%` : ''}
+      isPositive={rate.changePercent !== null ? rate.changePercent >= 0 : true}
       iconName={rate.iconName || 'attach-money'}
       iconBgColor={rate.type === 'crypto' ? undefined : colors.infoContainer}
       iconColor={rate.type === 'crypto' ? undefined : colors.info}
@@ -108,7 +132,7 @@ const ExchangeRatesScreen = () => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar 
         backgroundColor="transparent"
         translucent
@@ -210,7 +234,7 @@ const ExchangeRatesScreen = () => {
           </>
         )}
       </ScrollView>
-    </View>
+    </SafeAreaView>
   );
 };
 

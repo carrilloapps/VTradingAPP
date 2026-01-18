@@ -4,7 +4,37 @@ jest.mock('react-native-safe-area-context', () => require('react-native-safe-are
 
 jest.mock('react-native-linear-gradient', () => 'LinearGradient');
 
-jest.mock('react-native-vector-icons/MaterialCommunityIcons', () => 'Icon');
+jest.mock('react-native-vector-icons', () => ({
+  createIconSet: () => 'Icon',
+  createIconSetFromIcoMoon: () => 'Icon',
+  createIconSetFromFontello: () => 'Icon',
+}));
+
+jest.mock('react-native-vector-icons/MaterialCommunityIcons', () => {
+  const Icon = () => 'Icon';
+  Icon.default = Icon;
+  return Icon;
+});
+jest.mock('react-native-vector-icons/MaterialIcons', () => {
+  const Icon = () => 'Icon';
+  Icon.default = Icon;
+  return Icon;
+});
+jest.mock('react-native-vector-icons/Ionicons', () => {
+  const Icon = () => 'Icon';
+  Icon.default = Icon;
+  return Icon;
+});
+jest.mock('react-native-vector-icons/Feather', () => {
+  const Icon = () => 'Icon';
+  Icon.default = Icon;
+  return Icon;
+});
+jest.mock('react-native-vector-icons/FontAwesome', () => {
+  const Icon = () => 'Icon';
+  Icon.default = Icon;
+  return Icon;
+});
 
 jest.mock('react-native-device-info', () => {
   return {

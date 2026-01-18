@@ -22,12 +22,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { showToast } = useToast();
 
   useEffect(() => {
-    const unsubscribe = authService.onAuthStateChanged((user) => {
-      setUser(user);
+    const unsubscribe = authService.onAuthStateChanged((authUser) => {
+      setUser(authUser);
       if (isLoading) setIsLoading(false);
     });
     return unsubscribe;
-  }, []);
+  }, [isLoading]);
 
   const signIn = async (email: string, pass: string) => {
     try {

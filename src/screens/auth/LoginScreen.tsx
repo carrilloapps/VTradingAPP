@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Text, TextInput, Button, useTheme, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
@@ -9,6 +9,38 @@ const LoginScreen = ({ navigation }: any) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const { signIn, googleSignIn, signInAnonymously, isLoading } = useAuth();
+
+  const themeStyles = React.useMemo(() => ({
+    container: {
+      backgroundColor: theme.colors.background,
+    },
+    title: {
+      color: theme.colors.primary,
+      marginTop: 10,
+      fontWeight: 'bold' as const,
+    },
+    subtitle: {
+      color: theme.colors.onSurfaceVariant,
+    },
+    linkText: {
+      color: theme.colors.primary,
+    },
+    dividerLine: {
+      backgroundColor: theme.colors.outline,
+    },
+    dividerText: {
+      marginHorizontal: 10,
+      color: theme.colors.onSurfaceVariant,
+    },
+    footerText: {
+      color: theme.colors.onSurface,
+    },
+    registerText: {
+      color: theme.colors.primary,
+      fontWeight: 'bold' as const,
+      marginLeft: 5,
+    },
+  }), [theme]);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -38,7 +70,7 @@ const LoginScreen = ({ navigation }: any) => {
     if (validate()) {
       try {
         await signIn(email, password);
-      } catch (e) {
+      } catch {
         // Error handled in context
       }
     }
@@ -48,8 +80,8 @@ const LoginScreen = ({ navigation }: any) => {
     <ScrollView 
       contentContainerStyle={[
         styles.container, 
+        themeStyles.container,
         { 
-          backgroundColor: theme.colors.background,
           paddingTop: insets.top + 20,
           paddingBottom: insets.bottom + 20
         }
@@ -58,10 +90,10 @@ const LoginScreen = ({ navigation }: any) => {
     >
       <View style={styles.header}>
         <MaterialIcons name="candlestick-chart" size={60} color={theme.colors.primary} />
-        <Text variant="headlineMedium" style={{ color: theme.colors.primary, marginTop: 10, fontWeight: 'bold' }}>
+        <Text variant="headlineMedium" style={themeStyles.title}>
           VTradingAPP
         </Text>
-        <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
+        <Text variant="bodyLarge" style={themeStyles.subtitle}>
           Inicia sesión para continuar
         </Text>
       </View>
@@ -106,7 +138,7 @@ const LoginScreen = ({ navigation }: any) => {
           onPress={() => navigation.navigate('ForgotPassword')}
           style={styles.forgotPassword}
         >
-          <Text variant="bodyMedium" style={{ color: theme.colors.primary }}>
+          <Text variant="bodyMedium" style={themeStyles.linkText}>
             ¿Olvidaste tu contraseña?
           </Text>
         </TouchableOpacity>
@@ -122,9 +154,9 @@ const LoginScreen = ({ navigation }: any) => {
         </Button>
 
         <View style={styles.divider}>
-          <View style={[styles.line, { backgroundColor: theme.colors.outline }]} />
-          <Text style={{ marginHorizontal: 10, color: theme.colors.onSurfaceVariant }}>O</Text>
-          <View style={[styles.line, { backgroundColor: theme.colors.outline }]} />
+          <View style={[styles.line, themeStyles.dividerLine]} />
+          <Text style={themeStyles.dividerText}>O</Text>
+          <View style={[styles.line, themeStyles.dividerLine]} />
         </View>
 
         <Button 
@@ -149,11 +181,11 @@ const LoginScreen = ({ navigation }: any) => {
       </View>
 
       <View style={styles.footer}>
-        <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
+        <Text variant="bodyMedium" style={themeStyles.footerText}>
           ¿No tienes una cuenta?
         </Text>
         <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-          <Text variant="bodyMedium" style={{ color: theme.colors.primary, fontWeight: 'bold', marginLeft: 5 }}>
+          <Text variant="bodyMedium" style={themeStyles.registerText}>
             Regístrate
           </Text>
         </TouchableOpacity>

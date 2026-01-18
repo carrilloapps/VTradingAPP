@@ -1,16 +1,16 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, RefreshControl } from 'react-native';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { View, StyleSheet, ScrollView, StatusBar, RefreshControl, TouchableOpacity } from 'react-native';
 import { useTheme, Text } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MarketStatus from '../components/dashboard/MarketStatus';
-import ExchangeCard from '../components/dashboard/ExchangeCard';
-import StockItem from '../components/dashboard/StockItem';
+import ExchangeCard, { ExchangeCardProps } from '../components/dashboard/ExchangeCard';
+import StockItem, { StockItemProps } from '../components/dashboard/StockItem';
 import Calculator from '../components/dashboard/Calculator';
 import DashboardSkeleton from '../components/dashboard/DashboardSkeleton';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
+import { AppConfig } from '../constants/AppConfig';
 
 const HomeScreen = () => {
   const theme = useTheme();
@@ -20,27 +20,35 @@ const HomeScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [rates, setRates] = useState<CurrencyRate[]>([]);
-  const [featuredRates, setFeaturedRates] = useState<any[]>([]);
+  const [featuredRates, setFeaturedRates] = useState<ExchangeCardProps[]>([]);
   const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
 
   const processRates = useCallback((data: CurrencyRate[]) => {
       // Prioritize USD and USDT for the Home Screen
       const usdRate = data.find(r => r.code === 'USD');
-      const usdtRate = data.find(r => r.code === 'USDT');
+      const cryptoRates = data.filter(r => r.type === 'crypto' || r.code === 'USDT'); // USDT + other cryptos
       
-      const homeRates = [];
+      const homeRates: CurrencyRate[] = [];
       if (usdRate) homeRates.push(usdRate);
-      if (usdtRate) homeRates.push(usdtRate);
+      
+      // Add cryptos, ensuring no duplicates if USDT is in both
+      cryptoRates.forEach(rate => {
+          if (!homeRates.find(r => r.code === rate.code)) {
+              homeRates.push(rate);
+          }
+      });
       
       // Transform rates to ExchangeCard format
       const featured = homeRates.map(rate => ({
         title: rate.name,
-        subtitle: `${rate.code}/VES`,
-        value: rate.value.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-        currency: 'VES',
-        changePercent: `${rate.changePercent > 0 ? '+' : ''}${rate.changePercent.toFixed(2)}%`,
-        isPositive: rate.changePercent >= 0,
-        chartPath: rate.changePercent >= 0 ? 'M0 20 Q 25 35 50 15 T 100 5' : 'M0 10 Q 25 5 50 25 T 100 35',
+        subtitle: `${rate.code}/${AppConfig.BASE_CURRENCY}`,
+        value: rate.value.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES }),
+        currency: AppConfig.BASE_CURRENCY,
+        changePercent: rate.changePercent !== null ? `${rate.changePercent.toFixed(2)}%` : '', 
+        isPositive: rate.changePercent !== null ? rate.changePercent >= 0 : true,
+        chartPath: rate.changePercent !== null 
+             ? (rate.changePercent >= 0 ? 'M0 20 Q 25 35 50 15 T 100 5' : 'M0 10 Q 25 5 50 25 T 100 35')
+             : 'M0 20 L 100 20',
         iconSymbol: rate.iconName === 'euro' ? '€' : '$',
         iconColor: rate.type === 'crypto' ? '#F7931A' : undefined
       }));
@@ -69,7 +77,7 @@ const HomeScreen = () => {
     setRefreshing(true);
     try {
         await CurrencyService.getRates(true);
-        // State update happens via subscription
+        showToast('Tasas actualizadas', 'success');
     } catch (error) {
         console.error(error);
         showToast('Error al actualizar tasas', 'error');
@@ -88,18 +96,26 @@ const HomeScreen = () => {
   const userData = {
     name: user?.displayName || user?.email?.split('@')[0] || 'Usuario',
     avatarUrl: user?.photoURL || 'https://i.pravatar.cc/150?u=user',
-    notificationCount: 3 // Mock for now
+    notificationCount: 3, // Mock for now
+    isPremium: !!(user && !user.isAnonymous) // Only registered users are Premium
   };
 
-  const stocksData = [
-    { symbol: 'GGAL', name: 'Grupo Financiero Galicia', value: '$2.450,00', change: '2.4%', isPositive: true, volume: '1.2M' },
-    { symbol: 'YPF', name: 'YPF Sociedad Anónima', value: '$18.230,00', change: '0.5%', isPositive: false, volume: '850K' },
-    { symbol: 'PAMP', name: 'Pampa Energía S.A.', value: '$1.890,50', change: '1.8%', isPositive: true, volume: '540K' }
+  const stocksData: StockItemProps[] = [
+    { symbol: 'BOLSA DE CARACAS', name: 'Banco Provincial', value: '14.50 Bs', change: '2.4%', isPositive: true, iconName: 'account-balance' },
+    { symbol: 'TELECOMUNICACIONES', name: 'CANTV Clase D', value: '3.85 Bs', change: '-0.8%', isPositive: false, iconName: 'wifi-tethering' },
+    { symbol: 'FONDO DE VALORES', name: 'Fondo de Valores', value: '0.92 Bs', change: '1.2%', isPositive: true, iconName: 'pie-chart' }
   ];
+
+  const themeStyles = useMemo(() => ({
+    container: { backgroundColor: theme.colors.background },
+    emptyText: { color: theme.colors.onSurfaceVariant },
+    sectionTitle: { color: theme.colors.onSurface },
+    linkText: { color: theme.colors.primary }
+  }), [theme]);
 
   if (loading) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={[styles.container, themeStyles.container]}>
         <StatusBar 
           backgroundColor="transparent" 
           translucent
@@ -111,7 +127,7 @@ const HomeScreen = () => {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={[styles.container, themeStyles.container]}>
       <StatusBar 
         backgroundColor="transparent"
         translucent 
@@ -122,7 +138,8 @@ const HomeScreen = () => {
         variant="profile"
         userName={userData.name} 
         avatarUrl={userData.avatarUrl} 
-        notificationCount={userData.notificationCount} 
+        notificationCount={userData.notificationCount}
+        isPremium={userData.isPremium} 
       />
 
       <ScrollView 
@@ -136,8 +153,7 @@ const HomeScreen = () => {
             isOpen={true} 
             updatedAt={lastUpdated} 
             onRefresh={() => {
-                setRefreshing(true);
-                loadData();
+                onRefresh();
             }}
         />
 
@@ -146,7 +162,7 @@ const HomeScreen = () => {
             <ExchangeCard key={index} {...item} />
           ))}
           {featuredRates.length === 0 && (
-             <Text style={{ textAlign: 'center', marginVertical: 20, color: theme.colors.onSurfaceVariant }}>
+             <Text style={[styles.emptyText, themeStyles.emptyText]}>
                No hay tasas disponibles
              </Text>
           )}
@@ -154,12 +170,12 @@ const HomeScreen = () => {
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <View style={[styles.sectionIcon, { backgroundColor: theme.colors.primaryContainer }]}>
-              <MaterialIcons name="analytics" size={20} color={theme.colors.primary} />
-            </View>
-            <Text variant="titleMedium" style={[styles.titleMedium, { color: theme.colors.onSurface }]}>
-              Acciones más negociadas
+            <Text variant="headlineSmall" style={[styles.titleMedium, themeStyles.sectionTitle]}>
+              Mercado Bursátil
             </Text>
+            <TouchableOpacity onPress={() => showToast('Ver todo', 'info')}>
+                <Text variant="labelLarge" style={[styles.linkText, themeStyles.linkText]}>VER TODO</Text>
+            </TouchableOpacity>
           </View>
           
           {stocksData.map((stock, index) => (
@@ -189,7 +205,9 @@ const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    justifyContent: 'space-between',
+    marginBottom: 16,
+    marginTop: 8,
   },
   sectionIcon: {
     width: 32,
@@ -198,9 +216,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: 8,
-    // Add icon inside if needed
   },
   titleMedium: {
+    fontWeight: 'bold',
+    fontSize: 20,
+  },
+  emptyText: {
+    textAlign: 'center', 
+    marginVertical: 20,
+  },
+  linkText: {
     fontWeight: 'bold',
   }
 });

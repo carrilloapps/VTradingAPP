@@ -6,25 +6,77 @@ import { useNavigation } from '@react-navigation/native';
 import { CurrencyService, CurrencyRate } from '../../services/CurrencyService';
 import { useToast } from '../../context/ToastContext';
 import CurrencyPickerModal from './CurrencyPickerModal';
-
-interface ConversionHistory {
-  id: string;
-  fromCode: string;
-  toCode: string;
-  fromAmount: string;
-  toAmount: string;
-  date: Date;
-}
+import { AppConfig } from '../../constants/AppConfig';
 
 const CurrencyConverter: React.FC = () => {
   const theme = useTheme();
-  const colors = theme.colors as any;
   const navigation = useNavigation();
   const { showToast } = useToast();
 
+  const themeStyles = React.useMemo(() => ({
+    currencyButton: {
+      backgroundColor: theme.colors.elevation.level2,
+    },
+    iconPlaceholder: {
+      backgroundColor: theme.colors.elevation.level4,
+    },
+    textPrimary: {
+      color: theme.colors.onSurface,
+    },
+    textSecondary: {
+      color: theme.colors.onSurfaceVariant,
+    },
+    input: {
+      color: theme.colors.onSurface,
+      backgroundColor: 'transparent', 
+      textAlign: 'right' as const,
+    },
+    inputContent: {
+        color: theme.colors.onSurface,
+        fontSize: 32, 
+        fontWeight: 'bold' as const, 
+        textAlign: 'right' as const
+    },
+    swapButton: {
+        borderWidth: 1, 
+        borderColor: theme.colors.outline
+    },
+    resultContainer: {
+        flex: 1, 
+        alignItems: 'flex-end' as const, 
+        paddingRight: 16, 
+        justifyContent: 'center' as const
+    },
+    calculateButton: {
+        marginTop: 24, 
+        borderRadius: 100, 
+        height: 56, 
+        justifyContent: 'center' as const
+    },
+    calculateButtonContent: {
+        height: 56
+    },
+    calculateButtonLabel: {
+        fontSize: 18, 
+        fontWeight: 'bold' as const
+    },
+    rateText: {
+        color: theme.colors.onSurface, 
+        fontWeight: 'bold' as const, 
+        fontSize: 14
+    },
+    rateLabel: {
+        color: theme.colors.onSurfaceVariant, 
+        fontWeight: '500' as const
+    },
+    icon: {
+        marginLeft: 4
+    }
+  }), [theme]);
+
   // State
   const [rates, setRates] = useState<CurrencyRate[]>([]);
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true); // Unused
   
   const [amount, setAmount] = useState('1');
   const [fromCurrency, setFromCurrency] = useState<CurrencyRate | null>(null);
@@ -89,23 +141,13 @@ const CurrencyConverter: React.FC = () => {
   const [showFromPicker, setShowFromPicker] = useState(false);
   const [showToPicker, setShowToPicker] = useState(false);
   
-  const [history, setHistory] = useState<ConversionHistory[]>([]);
+  // const [history, setHistory] = useState<ConversionHistory[]>([]); // Unused
 
   // Load Rates
   useEffect(() => {
     const unsubscribe = CurrencyService.subscribe((data) => {
       setRates(data);
-      setLoading(false);
-
-      // Set defaults if not set
-      if (!fromCurrency && data.length > 0) {
-          const usd = data.find(r => r.code === 'USD');
-          if (usd) setFromCurrency(usd);
-      }
-      if (!toCurrency && data.length > 0) {
-          const ves = data.find(r => r.code === 'VES');
-          if (ves) setToCurrency(ves);
-      }
+      // setLoading(false);
     });
 
     // Trigger initial fetch
@@ -113,6 +155,20 @@ const CurrencyConverter: React.FC = () => {
 
     return () => unsubscribe();
   }, []); // Run once on mount
+
+  // Set defaults when rates are loaded
+  useEffect(() => {
+      if (rates.length > 0) {
+          if (!fromCurrency) {
+              const usd = rates.find(r => r.code === 'USD');
+              if (usd) setFromCurrency(usd);
+          }
+          if (!toCurrency) {
+              const ves = rates.find(r => r.code === AppConfig.BASE_CURRENCY);
+              if (ves) setToCurrency(ves);
+          }
+      }
+  }, [rates, fromCurrency, toCurrency]);
 
   // Conversion Logic
   const convertedValue = useMemo(() => {
@@ -128,13 +184,13 @@ const CurrencyConverter: React.FC = () => {
     const amountInVES = val * fromCurrency.value;
     const result = amountInVES / toCurrency.value;
 
-    return result.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+    return result.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES });
   }, [amount, fromCurrency, toCurrency]);
 
   const exchangeRate = useMemo(() => {
     if (!fromCurrency || !toCurrency) return '0.00';
     const rate = fromCurrency.value / toCurrency.value;
-    return rate.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+    return rate.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES });
   }, [fromCurrency, toCurrency]);
 
   const handleSwap = () => {
@@ -144,44 +200,31 @@ const CurrencyConverter: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <View style={{ alignItems: 'flex-end', marginBottom: 8 }}>
-        <Button 
-            icon="calculator" 
-            mode="text" 
-            compact
-            onPress={() => navigation.navigate('AdvancedCalculator' as never)}
-            textColor={theme.colors.primary}
-            labelStyle={{ fontWeight: 'bold' }}
-        >
-            Ampliar
-        </Button>
-      </View>
-
       {/* Input Section */}
         
         {/* FROM */}
         <View style={styles.row}>
             <TouchableOpacity 
-                style={[styles.currencyButton, { backgroundColor: theme.colors.elevation.level2 }]}
+                style={[styles.currencyButton, themeStyles.currencyButton]}
                 onPress={() => { setShowFromPicker(true); }}
             >
                 {fromCurrency && (
-                    <View style={[styles.iconPlaceholder, { width: 28, height: 28, borderRadius: 14, marginRight: 8, backgroundColor: theme.colors.elevation.level4 }]}>
+                    <View style={[styles.iconPlaceholder, themeStyles.iconPlaceholder]}>
                         <MaterialIcons name={fromCurrency.iconName || 'attach-money'} size={18} color={theme.colors.onSurface} />
                     </View>
                 )}
-                <Text variant="titleMedium" style={{fontWeight: 'bold', color: theme.colors.onSurface}}>{fromCurrency?.code || 'SEL'}</Text>
-                <MaterialIcons name="keyboard-arrow-down" size={24} color={theme.colors.onSurfaceVariant} style={{ marginLeft: 4 }} />
+                <Text variant="titleMedium" style={[styles.boldText, themeStyles.textPrimary]}>{fromCurrency?.code || 'SEL'}</Text>
+                <MaterialIcons name="keyboard-arrow-down" size={24} color={theme.colors.onSurfaceVariant} style={themeStyles.icon} />
             </TouchableOpacity>
             
             <TextInput 
                 value={amount}
                 onChangeText={handleAmountChange}
                 keyboardType="numeric"
-                style={[styles.input, { backgroundColor: 'transparent', textAlign: 'right' }]}
+                style={[styles.input, themeStyles.input]}
                 underlineColor={theme.colors.onSurfaceVariant}
                 activeUnderlineColor={theme.colors.primary}
-                contentStyle={{ fontSize: 32, fontWeight: 'bold', color: theme.colors.onSurface, textAlign: 'right' }}
+                contentStyle={themeStyles.inputContent}
                 placeholder="0"
                 placeholderTextColor={theme.colors.onSurfaceVariant}
                 accessibilityLabel="Cantidad a convertir"
@@ -192,8 +235,8 @@ const CurrencyConverter: React.FC = () => {
         {/* SWAP & RATE */}
         <View style={styles.swapContainer}>
             <View style={styles.rateDisplay}>
-                 <Text variant="bodySmall" style={{color: theme.colors.onSurfaceVariant, fontWeight: '500'}}>
-                    1 {fromCurrency?.code} ≈ <Text style={{color: theme.colors.onSurface, fontWeight: 'bold', fontSize: 14}}>{exchangeRate}</Text> {toCurrency?.code}
+                 <Text variant="bodySmall" style={themeStyles.rateLabel}>
+                    1 {fromCurrency?.code} ≈ <Text style={themeStyles.rateText}>{exchangeRate}</Text> {toCurrency?.code}
                  </Text>
             </View>
             <IconButton 
@@ -204,31 +247,31 @@ const CurrencyConverter: React.FC = () => {
                 size={24}
                 onPress={handleSwap}
                 accessibilityLabel="Intercambiar monedas"
-                style={{ borderWidth: 1, borderColor: theme.colors.outline }}
+                style={themeStyles.swapButton}
             />
         </View>
 
         {/* TO */}
         <View style={styles.row}>
             <TouchableOpacity 
-                style={[styles.currencyButton, { backgroundColor: theme.colors.elevation.level2 }]}
+                style={[styles.currencyButton, themeStyles.currencyButton]}
                 onPress={() => { setShowToPicker(true); }}
                 accessibilityLabel={`Seleccionar moneda de destino. Valor actual: ${toCurrency?.code || 'No seleccionada'}`}
                 accessibilityRole="button"
             >
                 {toCurrency && (
-                    <View style={[styles.iconPlaceholder, { width: 28, height: 28, borderRadius: 14, marginRight: 8, backgroundColor: theme.colors.elevation.level4 }]}>
+                    <View style={[styles.iconPlaceholder, themeStyles.iconPlaceholder]}>
                         <MaterialIcons name={toCurrency.iconName || 'attach-money'} size={18} color={theme.colors.onSurface} />
                     </View>
                 )}
-                <Text variant="titleMedium" style={{fontWeight: 'bold', color: theme.colors.onSurface}}>{toCurrency?.code || 'SEL'}</Text>
-                <MaterialIcons name="keyboard-arrow-down" size={24} color={theme.colors.onSurfaceVariant} style={{ marginLeft: 4 }} />
+                <Text variant="titleMedium" style={[styles.boldText, themeStyles.textPrimary]}>{toCurrency?.code || 'SEL'}</Text>
+                <MaterialIcons name="keyboard-arrow-down" size={24} color={theme.colors.onSurfaceVariant} style={themeStyles.icon} />
             </TouchableOpacity>
             
-            <View style={{ flex: 1, alignItems: 'flex-end', paddingRight: 16, justifyContent: 'center' }}>
+            <View style={themeStyles.resultContainer}>
                 <Text 
                     variant="displaySmall" 
-                    style={{fontWeight: 'bold', color: theme.colors.onSurface}}
+                    style={[styles.boldText, themeStyles.textPrimary]}
                     numberOfLines={1}
                     adjustsFontSizeToFit
                     minimumFontScale={0.5}
@@ -241,9 +284,9 @@ const CurrencyConverter: React.FC = () => {
         <Button 
             mode="contained" 
             onPress={() => { /* Optional: Calculate action or just visual feedback */ }} 
-            style={{marginTop: 24, borderRadius: 100, height: 56, justifyContent: 'center'}}
-            contentStyle={{ height: 56 }}
-            labelStyle={{ fontSize: 18, fontWeight: 'bold' }}
+            style={themeStyles.calculateButton}
+            contentStyle={themeStyles.calculateButtonContent}
+            labelStyle={themeStyles.calculateButtonLabel}
             buttonColor={theme.colors.primary}
             textColor={theme.colors.onPrimary}
         >
@@ -306,13 +349,16 @@ const styles = StyleSheet.create({
       flex: 1,
   },
   iconPlaceholder: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
+      width: 28, 
+      height: 28, 
+      borderRadius: 14, 
+      marginRight: 8,
       alignItems: 'center',
       justifyContent: 'center',
-      marginRight: 16,
   },
+  boldText: {
+      fontWeight: 'bold',
+  }
 });
 
 export default CurrencyConverter;

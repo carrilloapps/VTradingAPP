@@ -5,7 +5,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { CurrencyRate } from '../../services/CurrencyService';
 import { BottomSheetModal } from '../ui/BottomSheetModal';
 
-interface CurrencyPickerModalProps {
+export interface CurrencyPickerModalProps {
   visible: boolean;
   onDismiss: () => void;
   onSelect: (currency: CurrencyRate) => void;
@@ -23,11 +23,42 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
   selectedCurrencyCode,
   rates,
   title = "Seleccionar divisa",
-  favorites = ['USD', 'VES', 'EUR', 'USDT', 'BTC'],
+  favorites = ['USD', 'USDT', 'VES'],
   excludedCodes = []
 }) => {
   const theme = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
+
+  const themeStyles = React.useMemo(() => ({
+    searchBarInput: {
+      color: theme.colors.onSurface,
+    },
+    sectionHeader: {
+      color: theme.colors.onSurfaceVariant,
+    },
+    pickerItem: {
+      borderBottomColor: theme.colors.outline,
+    },
+    pickerItemSelected: {
+      backgroundColor: 'rgba(30, 41, 59, 0.6)',
+      borderBottomColor: 'transparent',
+    },
+    iconPlaceholderNormal: {
+      backgroundColor: theme.colors.elevation.level4,
+    },
+    iconPlaceholderSelected: {
+      backgroundColor: theme.colors.primary,
+    },
+    checkBadge: {
+      backgroundColor: theme.colors.elevation.level2,
+    },
+    textPrimary: {
+      color: theme.colors.onSurface,
+    },
+    textSecondary: {
+      color: theme.colors.onSurfaceVariant,
+    },
+  }), [theme]);
 
   const sections = useMemo(() => {
       const lowerQuery = searchQuery.toLowerCase();
@@ -60,7 +91,7 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
             onChangeText={setSearchQuery} 
             value={searchQuery} 
             style={styles.searchBar}
-            inputStyle={{ color: theme.colors.onSurface }}
+            inputStyle={themeStyles.searchBarInput}
             iconColor={theme.colors.onSurfaceVariant}
             placeholderTextColor={theme.colors.onSurfaceVariant}
             mode="bar"
@@ -68,108 +99,75 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
 
         <SectionList
             sections={sections}
-            keyExtractor={item => item.code}
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 24 }}
-            renderSectionHeader={({ section: { title } }) => (
-                <Text variant="labelSmall" style={[styles.sectionHeader, { color: theme.colors.onSurfaceVariant }]}>
-                    {title}
-                </Text>
-            )}
+            keyExtractor={(item) => item.code}
             renderItem={({ item }) => {
                 const isSelected = selectedCurrencyCode === item.code;
-                const isZero = Math.abs(item.changePercent) < 0.001;
-                const isPositive = item.changePercent > 0;
-                
-                let trendColor = theme.colors.onSurfaceVariant;
-                
-                if (!isZero) {
-                    trendColor = isPositive ? theme.colors.success : theme.colors.error;
-                }
-                
                 return (
-                <TouchableOpacity 
-                    style={[
-                        styles.pickerItem, 
-                        { borderBottomColor: theme.colors.outline },
-                        isSelected && { 
-                            backgroundColor: 'rgba(30, 41, 59, 0.6)', // Full width highlight
-                            borderBottomColor: 'transparent',
-                        }
-                    ]} 
-                    onPress={() => { onSelect(item); onDismiss(); }}
-                >
-                    <View style={[
-                        styles.iconPlaceholder, 
-                        { 
-                            backgroundColor: isSelected ? theme.colors.primary : theme.colors.elevation.level4,
-                        }
-                    ]}>
-                        <MaterialIcons 
-                            name={item.iconName || 'attach-money'} 
-                            size={24} 
-                            color={isSelected ? '#ffffff' : theme.colors.onSurface} 
-                        />
-                         {isSelected && (
-                            <View style={{
-                                position: 'absolute',
-                                bottom: -2,
-                                right: -2,
-                                backgroundColor: theme.colors.elevation.level2,
-                                borderRadius: 10,
-                            }}>
-                                <MaterialIcons 
-                                    name="check-circle" 
-                                    size={16} 
-                                    color="#38bdf8" 
-                                />
+                    <TouchableOpacity 
+                        onPress={() => {
+                            onSelect(item);
+                            onDismiss();
+                        }}
+                        style={[
+                            styles.pickerItem, 
+                            themeStyles.pickerItem,
+                            isSelected && themeStyles.pickerItemSelected
+                        ]}
+                    >
+                        <View style={[
+                            styles.iconPlaceholder, 
+                            isSelected ? themeStyles.iconPlaceholderSelected : themeStyles.iconPlaceholderNormal
+                        ]}>
+                             <MaterialIcons 
+                                name={item.iconName || 'attach-money'} 
+                                size={24} 
+                                color={isSelected ? '#fff' : theme.colors.onSurfaceVariant} 
+                             />
+                        </View>
+                        <View style={styles.pickerItemContent}>
+                            <Text variant="titleMedium" style={themeStyles.textPrimary}>{item.code}</Text>
+                            <Text variant="bodySmall" style={themeStyles.textSecondary}>{item.name}</Text>
+                        </View>
+                        {isSelected && (
+                            <View style={[styles.checkBadge, themeStyles.checkBadge]}>
+                                <MaterialIcons name="check" size={16} color={theme.colors.primary} />
                             </View>
                         )}
-                    </View>
-                    <View style={{flex: 1}}>
-                        <Text variant="titleMedium" style={{fontWeight: 'bold', color: theme.colors.onSurface}}>
-                            {item.code}
-                        </Text>
-                        <Text variant="bodySmall" style={{color: theme.colors.onSurfaceVariant}}>{item.name}</Text>
-                    </View>
-                    <View style={{alignItems: 'flex-end'}}>
-                        <Text variant="titleMedium" style={{fontWeight: 'bold', color: theme.colors.onSurface}}>
-                            {item.value.toLocaleString('es-VE', { maximumFractionDigits: 2 })}
-                        </Text>
-                        <View style={{flexDirection: 'row', alignItems: 'center', gap: 4}}>
-                            {!isZero && (
-                                <MaterialIcons 
-                                    name={isPositive ? "arrow-drop-up" : "arrow-drop-down"} 
-                                    size={16} 
-                                    color={trendColor} 
-                                />
-                            )}
-                            <Text variant="labelSmall" style={{color: trendColor, fontWeight: 'bold'}}>
-                                {isZero ? '0.00%' : `${isPositive ? '+' : ''}${item.changePercent.toFixed(2)}%`}
-                            </Text>
-                        </View>
-                    </View>
-                </TouchableOpacity>
-            )}}
+                    </TouchableOpacity>
+                );
+            }}
+            renderSectionHeader={({ section: { title } }) => (
+                <Text style={[styles.sectionHeader, themeStyles.sectionHeader]}>{title}</Text>
+            )}
+            stickySectionHeadersEnabled={false}
+            contentContainerStyle={{ paddingBottom: 20 }}
         />
     </BottomSheetModal>
   );
 };
 
 const styles = StyleSheet.create({
-  searchBar: {
-      marginBottom: 16,
-      backgroundColor: 'rgba(0,0,0,0.2)', // Darker background for search bar
-      elevation: 0,
-      height: 48,
-      marginHorizontal: 24, // Align with modal header and content padding
-  },
-  pickerItem: {
+    searchBar: {
+        marginBottom: 16,
+        backgroundColor: 'transparent',
+        borderWidth: 1,
+        borderColor: 'rgba(128,128,128, 0.2)',
+    },
+    sectionHeader: {
+        fontSize: 12,
+        fontWeight: 'bold',
+        marginTop: 16,
+        marginBottom: 8,
+        letterSpacing: 1,
+    },
+    pickerItem: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: 12,
-        paddingHorizontal: 24, // Consistent horizontal padding for items
-        borderBottomWidth: 0.5,
+        paddingHorizontal: 8,
+        borderBottomWidth: 1,
+        borderRadius: 12,
+        marginBottom: 4,
     },
     iconPlaceholder: {
         width: 40,
@@ -179,14 +177,16 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         marginRight: 16,
     },
-    sectionHeader: {
-        marginTop: 16,
-        marginBottom: 8,
-        fontWeight: 'bold',
-        letterSpacing: 1.5,
-        fontSize: 11,
-        paddingHorizontal: 24, // Align headers with content
-    }
+    pickerItemContent: {
+        flex: 1,
+    },
+    checkBadge: {
+        width: 24,
+        height: 24,
+        borderRadius: 12,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
 });
 
 export default CurrencyPickerModal;

@@ -4,7 +4,7 @@ import { Text, useTheme, Surface } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Svg, { Path } from 'react-native-svg';
 
-interface ExchangeCardProps {
+export interface ExchangeCardProps {
   title: string;
   subtitle: string;
   value: string;
@@ -34,7 +34,7 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
   
   // Determine if neutral (0.00% or explicitly marked as such via prop if we added one, 
   // but checking the string value is also a safe fallback for display logic)
-  const isNeutral = changePercent.includes('0.00') || changePercent === '0%' || changePercent === '+0.00%' || changePercent === '0.00%';
+  const isNeutral = changePercent === '' || changePercent.includes('0.00') || changePercent === '0%' || changePercent === '+0.00%' || changePercent === '0.00%';
   
   const trendColor = isNeutral 
     ? theme.colors.onSurfaceVariant 
@@ -72,11 +72,13 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
         </View>
 
         <View style={styles.trendContainer}>
+          {changePercent !== '' && (
           <MaterialIcons 
             name={trendIcon} 
             size={16} 
             color={trendColor} 
           />
+          )}
           <Text variant="labelMedium" style={[{ color: trendColor }, styles.trendText]}>
             {isNeutral ? '' : (isPositive ? '+' : '')}{changePercent}
           </Text>

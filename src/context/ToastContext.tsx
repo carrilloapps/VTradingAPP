@@ -40,7 +40,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setToast((prev) => ({ ...prev, visible: false }));
   }, []);
 
-  const getToastColor = () => {
+  const getToastColor = useCallback(() => {
     switch (toast.type) {
       case 'success':
         return theme.colors.primary; // Or a specific success color
@@ -52,7 +52,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       default:
         return theme.colors.inverseSurface;
     }
-  };
+  }, [toast.type, theme]);
 
   const getIcon = () => {
     switch (toast.type) {
@@ -63,6 +63,17 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  const themeStyles = React.useMemo(() => ({
+    snackbar: {
+      backgroundColor: getToastColor(),
+      borderRadius: 8,
+      marginBottom: 20,
+    },
+    text: {
+      color: theme.colors.inverseOnSurface
+    }
+  }), [getToastColor, theme]);
+
   return (
     <ToastContext.Provider value={{ showToast, hideToast }}>
       {children}
@@ -70,11 +81,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         visible={toast.visible}
         onDismiss={hideToast}
         duration={3000}
-        style={{ 
-          backgroundColor: getToastColor(),
-          borderRadius: 8,
-          marginBottom: 20,
-        }}
+        style={themeStyles.snackbar}
         action={toast.action ? {
           label: toast.action.label,
           onPress: () => {
@@ -95,7 +102,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             color={theme.colors.inverseOnSurface} 
             style={styles.icon}
           />
-          <Text style={{ color: theme.colors.inverseOnSurface }}>{toast.message}</Text>
+          <Text style={themeStyles.text}>{toast.message}</Text>
         </View>
       </Snackbar>
     </ToastContext.Provider>

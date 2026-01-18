@@ -10,6 +10,28 @@ const RegisterScreen = ({ navigation }: any) => {
   const insets = useSafeAreaInsets();
   const { signUp, isLoading } = useAuth();
 
+  const themeStyles = React.useMemo(() => ({
+    container: {
+      backgroundColor: theme.colors.background,
+    },
+    title: {
+      color: theme.colors.primary,
+      fontWeight: 'bold' as const,
+    },
+    subtitle: {
+      color: theme.colors.onSurfaceVariant,
+      marginTop: 10,
+    },
+    footerText: {
+      color: theme.colors.onSurface,
+    },
+    loginText: {
+      color: theme.colors.primary,
+      fontWeight: 'bold' as const,
+      marginLeft: 5,
+    },
+  }), [theme]);
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -57,7 +79,7 @@ const RegisterScreen = ({ navigation }: any) => {
         await signUp(email, password);
         // Navigation might be handled by AuthState change, but if not:
         // navigation.navigate('Login'); // Or auto-login logic
-      } catch (e) {
+      } catch {
         // Error handled in context
       }
     }
@@ -67,8 +89,8 @@ const RegisterScreen = ({ navigation }: any) => {
     <ScrollView 
       contentContainerStyle={[
         styles.container, 
+        themeStyles.container,
         { 
-          backgroundColor: theme.colors.background,
           paddingTop: insets.top + 20,
           paddingBottom: insets.bottom + 20
         }
@@ -83,10 +105,10 @@ const RegisterScreen = ({ navigation }: any) => {
       </TouchableOpacity>
 
       <View style={styles.header}>
-        <Text variant="headlineMedium" style={{ color: theme.colors.primary, fontWeight: 'bold' }}>
+        <Text variant="headlineMedium" style={themeStyles.title}>
           Crear Cuenta
         </Text>
-        <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant, marginTop: 10 }}>
+        <Text variant="bodyLarge" style={themeStyles.subtitle}>
           Regístrate para comenzar a operar
         </Text>
       </View>
@@ -159,11 +181,11 @@ const RegisterScreen = ({ navigation }: any) => {
       </View>
 
       <View style={styles.footer}>
-        <Text variant="bodyMedium" style={{ color: theme.colors.onSurface }}>
+        <Text variant="bodyMedium" style={themeStyles.footerText}>
           ¿Ya tienes una cuenta?
         </Text>
         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-          <Text variant="bodyMedium" style={{ color: theme.colors.primary, fontWeight: 'bold', marginLeft: 5 }}>
+          <Text variant="bodyMedium" style={themeStyles.loginText}>
             Inicia Sesión
           </Text>
         </TouchableOpacity>

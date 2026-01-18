@@ -12,10 +12,13 @@ interface UnifiedHeaderProps {
   subtitle?: string;
   userName?: string;
   avatarUrl?: string;
+  isPremium?: boolean;
   notificationCount?: number;
   onActionPress?: () => void;
   onNotificationPress?: () => void;
+  onBackPress?: () => void;
   rightActionIcon?: string;
+  notificationIcon?: string;
   showNotification?: boolean;
   style?: ViewStyle;
 }
@@ -27,9 +30,12 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   userName,
   avatarUrl,
   notificationCount = 0,
+  isPremium = false,
   onActionPress,
   onNotificationPress,
+  onBackPress,
   rightActionIcon = 'refresh',
+  notificationIcon = 'notifications',
   showNotification = true,
   style,
 }) => {
@@ -43,19 +49,62 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
 
   const buttonBgColor = theme.colors.elevation.level1;
 
+  const themeStyles = React.useMemo(() => ({
+    container: {
+      backgroundColor: theme.colors.background,
+      borderBottomColor: theme.colors.outline,
+    },
+    avatar: {
+      borderColor: theme.colors.outline,
+    },
+    statusDot: {
+      backgroundColor: accentGreen,
+      borderColor: theme.colors.background,
+    },
+    subtitlePremium: {
+      color: '#FFD700',
+      fontWeight: 'bold' as const,
+    },
+    subtitleDefault: {
+      color: theme.colors.onSurfaceVariant,
+      fontWeight: 'normal' as const,
+    },
+    greeting: {
+      color: theme.colors.onSurface,
+    },
+    sectionTitle: {
+      color: theme.colors.onSurface,
+    },
+    subtitleText: {
+      color: theme.colors.onSurfaceVariant,
+    },
+    simpleTitle: {
+      color: theme.colors.onSurface,
+    },
+    iconButton: {
+      backgroundColor: buttonBgColor,
+    },
+    badge: {
+      backgroundColor: accentRed,
+      borderColor: theme.colors.background,
+    }
+  }), [theme, accentGreen, accentRed, buttonBgColor]);
+
   const renderProfileContent = () => (
     <View style={styles.userInfo}>
       <TouchableOpacity style={styles.avatarContainer}>
         <Image 
           source={{ uri: avatarUrl }} 
-          style={[styles.avatar as ImageStyle, { borderColor: theme.colors.outline }]} 
+          style={[styles.avatar as ImageStyle, themeStyles.avatar]} 
         />
-        <View style={[styles.statusDot, { backgroundColor: accentGreen, borderColor: theme.colors.background }]} />
+        <View style={[styles.statusDot, themeStyles.statusDot]} />
       </TouchableOpacity>
       
       <View style={styles.textContainer}>
-        <Text style={[styles.subtitle, { color: theme.colors.onSurfaceVariant }]}>GLOBAL TRADING</Text>
-        <Text variant="titleMedium" style={[styles.greeting, { color: theme.colors.onSurface }]}>
+        <Text style={[styles.subtitle, isPremium ? themeStyles.subtitlePremium : themeStyles.subtitleDefault]}>
+          {isPremium ? 'PLAN PREMIUM' : 'PLAN GRATUITO'}
+        </Text>
+        <Text variant="titleMedium" style={[styles.greeting, themeStyles.greeting]}>
           Hola, {userName}
         </Text>
       </View>
@@ -64,11 +113,11 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
 
   const renderSectionContent = () => (
     <View style={styles.textContainer}>
-      <Text variant="headlineSmall" style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>
+      <Text variant="headlineSmall" style={[styles.sectionTitle, themeStyles.sectionTitle]}>
         {title}
       </Text>
       {subtitle && (
-        <Text style={[styles.subtitleText, { color: theme.colors.onSurfaceVariant }]}>
+        <Text style={[styles.subtitleText, themeStyles.subtitleText]}>
           {subtitle}
         </Text>
       )}
@@ -77,33 +126,41 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
 
   const renderSimpleContent = () => (
     <View style={[styles.textContainer, styles.simpleHeaderContainer]}>
-       <Text variant="titleLarge" style={[styles.simpleTitle, { color: theme.colors.onSurface }]}>
+       <Text variant="titleLarge" style={[styles.simpleTitle, themeStyles.simpleTitle]}>
           {title}
         </Text>
     </View>
   );
 
   return (
-    <View style={[styles.container, { 
-      backgroundColor: theme.colors.background,
-      borderBottomColor: theme.colors.outline,
+    <View style={[styles.container, themeStyles.container, { 
       paddingTop: insets.top + 10,
     }, style]}>
       
       {/* Left Content */}
       <View style={styles.leftContent}>
+        {onBackPress && (
+          <TouchableRipple
+            onPress={onBackPress}
+            style={[styles.iconButton, themeStyles.iconButton, { marginRight: 8 }]}
+            borderless
+            rippleColor="rgba(0, 0, 0, .1)"
+          >
+            <MaterialIcons name="arrow-back" size={22} color={theme.colors.onSurface} />
+          </TouchableRipple>
+        )}
         {variant === 'profile' && renderProfileContent()}
         {variant === 'section' && renderSectionContent()}
         {variant === 'simple' && renderSimpleContent()}
       </View>
 
       {/* Right Content (Actions) */}
-      {variant !== 'simple' && (
+      {(variant !== 'simple' || onActionPress || showNotification) && (
         <View style={styles.rightContent}>
           {onActionPress && (
             <TouchableRipple 
               onPress={onActionPress} 
-              style={[styles.iconButton, { backgroundColor: buttonBgColor }]}
+              style={[styles.iconButton, themeStyles.iconButton]}
               borderless
               rippleColor="rgba(0, 0, 0, .1)"
             >
@@ -114,14 +171,14 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
           {showNotification && (
             <TouchableRipple 
               onPress={onNotificationPress || (() => {})} 
-              style={[styles.iconButton, { backgroundColor: buttonBgColor }]}
+              style={[styles.iconButton, themeStyles.iconButton]}
               borderless
               rippleColor="rgba(0, 0, 0, .1)"
             >
               <View>
-                <MaterialIcons name="notifications" size={22} color={theme.colors.onSurfaceVariant} />
-                {notificationCount > 0 && (
-                  <View style={[styles.badge, { backgroundColor: accentRed, borderColor: theme.colors.background }]} />
+                <MaterialIcons name={notificationIcon} size={22} color={theme.colors.onSurfaceVariant} />
+                {notificationCount > 0 && notificationIcon === 'notifications' && (
+                  <View style={[styles.badge, themeStyles.badge]} />
                 )}
               </View>
             </TouchableRipple>

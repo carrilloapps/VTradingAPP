@@ -15,15 +15,31 @@ const MarketStatus: React.FC<MarketStatusProps> = ({ isOpen, updatedAt, onRefres
   const theme = useTheme();
   const colors = theme.colors as any;
 
+  const themeStyles = React.useMemo(() => ({
+    statusBadge: {
+      backgroundColor: colors.successContainer,
+      borderColor: colors.success,
+    },
+    dot: {
+      backgroundColor: colors.success,
+    },
+    statusText: {
+      color: colors.success,
+    },
+    timeText: {
+      color: theme.colors.onSurfaceVariant,
+    },
+    refreshIcon: {
+      marginLeft: 4,
+    }
+  }), [theme, colors]);
+
   return (
-    <View style={[styles.container, style, !showBadge && { justifyContent: 'flex-end' }]}>
+    <View style={[styles.container, style, !showBadge && styles.justifyEnd]}>
       {showBadge && (
-        <View style={[styles.statusBadge, { 
-          backgroundColor: colors.successContainer,
-          borderColor: colors.success
-        }]}>
-          <View style={[styles.dot, { backgroundColor: colors.success }]} />
-          <Text style={[styles.statusText, { color: colors.success }]}>
+        <View style={[styles.statusBadge, themeStyles.statusBadge]}>
+          <View style={[styles.dot, themeStyles.dot]} />
+          <Text style={[styles.statusText, themeStyles.statusText]}>
             {isOpen ? 'MERCADO ABIERTO' : 'MERCADO CERRADO'}
           </Text>
         </View>
@@ -35,7 +51,7 @@ const MarketStatus: React.FC<MarketStatusProps> = ({ isOpen, updatedAt, onRefres
         style={styles.refreshContainer}
         activeOpacity={0.6}
       >
-        <Text style={[styles.timeText, { color: theme.colors.onSurfaceVariant }]}>
+        <Text style={[styles.timeText, themeStyles.timeText]}>
           Actualizado: {updatedAt}
         </Text>
         {onRefresh && (
@@ -43,7 +59,7 @@ const MarketStatus: React.FC<MarketStatusProps> = ({ isOpen, updatedAt, onRefres
             name="refresh" 
             size={14} 
             color={theme.colors.onSurfaceVariant} 
-            style={{ marginLeft: 4 }}
+            style={themeStyles.refreshIcon}
           />
         )}
       </TouchableOpacity>
@@ -59,6 +75,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 24,
     paddingBottom: 16,
+  },
+  justifyEnd: {
+    justifyContent: 'flex-end',
   },
   statusBadge: {
     flexDirection: 'row',

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, StyleSheet, SafeAreaView, TouchableOpacity, FlatList, TextInput as RNTextInput, StatusBar, Platform, Keyboard, RefreshControl } from 'react-native';
-import { Text, useTheme, Button, IconButton, Appbar, TouchableRipple } from 'react-native-paper';
+import { View, StyleSheet, TouchableOpacity, FlatList, TextInput as RNTextInput, StatusBar, Keyboard, RefreshControl, Platform } from 'react-native';
+import { Text, useTheme, TouchableRipple } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
@@ -8,27 +8,35 @@ import { useToast } from '../context/ToastContext';
 import CurrencyPickerModal from '../components/dashboard/CurrencyPickerModal';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MarketStatus from '../components/dashboard/MarketStatus';
+import { AppConfig } from '../constants/AppConfig';
 
 // --- Components ---
-const KeypadButton = ({ label, icon, onPress, theme, isAction = false, isDestructive = false, testID }: { label?: string, icon?: string, onPress: () => void, theme: any, isAction?: boolean, isDestructive?: boolean, testID?: string }) => {
-    const getBackgroundColor = () => {
-        if (isDestructive) return theme.colors.errorContainer;
-        if (isAction) return theme.colors.secondaryContainer;
-        return undefined;
-    };
+const KeypadButton = ({ label, icon, onPress, isAction = false, isDestructive = false, testID }: { label?: string, icon?: string, onPress: () => void, isAction?: boolean, isDestructive?: boolean, testID?: string }) => {
+    const theme = useTheme();
 
-    const getContentColor = () => {
+    const buttonStyle = useMemo(() => {
+        let backgroundColor;
+        if (isDestructive) backgroundColor = theme.colors.errorContainer;
+        if (isAction) backgroundColor = theme.colors.secondaryContainer;
+        
+        return {
+            backgroundColor
+        };
+    }, [isDestructive, isAction, theme]);
+
+    const contentColor = useMemo(() => {
         if (isDestructive) return theme.colors.error;
         if (isAction) return theme.colors.onSecondaryContainer;
         return theme.colors.onSurface;
-    };
+    }, [isDestructive, isAction, theme]);
+
+    const textStyle = useMemo(() => ({
+        color: contentColor
+    }), [contentColor]);
 
     return (
     <TouchableRipple 
-        style={[
-            styles.keypadButton, 
-            { backgroundColor: getBackgroundColor() }
-        ]}
+        style={[styles.keypadButton, buttonStyle]}
         onPress={onPress}
         rippleColor={isDestructive ? theme.colors.error : theme.colors.onSurfaceVariant}
         borderless={true}
@@ -36,39 +44,40 @@ const KeypadButton = ({ label, icon, onPress, theme, isAction = false, isDestruc
     >
         <View style={styles.centerContent}>
             {icon ? (
-                <MaterialIcons name={icon} size={28} color={getContentColor()} />
+                <MaterialIcons name={icon} size={28} color={contentColor} />
             ) : (
-                <Text style={[
-                    styles.keypadText, 
-                    { color: getContentColor() }
-                ]}>{label}</Text>
+                <Text style={[styles.keypadText, textStyle]}>{label}</Text>
             )}
         </View>
     </TouchableRipple>
 )};
 
-const Keypad = ({ onKeyPress, onDelete, theme }: { onKeyPress: (key: string) => void, onDelete: () => void, theme: any }) => {
+const Keypad = ({ onKeyPress, onDelete, theme }: { onKeyPress: (val: string) => void, onDelete: () => void, theme: any }) => {
+    const containerStyle = useMemo(() => ({
+        backgroundColor: theme.colors.elevation.level1
+    }), [theme]);
+
     return (
-        <View style={[styles.keypadContainer, { backgroundColor: theme.colors.elevation.level1 }]}>
+        <View style={[styles.keypadContainer, containerStyle]}>
             <View style={styles.keypadRow}>
-                <KeypadButton label="7" onPress={() => onKeyPress('7')} theme={theme} />
-                <KeypadButton label="8" onPress={() => onKeyPress('8')} theme={theme} />
-                <KeypadButton label="9" onPress={() => onKeyPress('9')} theme={theme} />
+                <KeypadButton label="7" onPress={() => onKeyPress('7')} />
+                <KeypadButton label="8" onPress={() => onKeyPress('8')} />
+                <KeypadButton label="9" onPress={() => onKeyPress('9')} />
             </View>
             <View style={styles.keypadRow}>
-                <KeypadButton label="4" onPress={() => onKeyPress('4')} theme={theme} />
-                <KeypadButton label="5" onPress={() => onKeyPress('5')} theme={theme} />
-                <KeypadButton label="6" onPress={() => onKeyPress('6')} theme={theme} />
+                <KeypadButton label="4" onPress={() => onKeyPress('4')} />
+                <KeypadButton label="5" onPress={() => onKeyPress('5')} />
+                <KeypadButton label="6" onPress={() => onKeyPress('6')} />
             </View>
             <View style={styles.keypadRow}>
-                <KeypadButton label="1" onPress={() => onKeyPress('1')} theme={theme} />
-                <KeypadButton label="2" onPress={() => onKeyPress('2')} theme={theme} />
-                <KeypadButton label="3" onPress={() => onKeyPress('3')} theme={theme} />
+                <KeypadButton label="1" onPress={() => onKeyPress('1')} />
+                <KeypadButton label="2" onPress={() => onKeyPress('2')} />
+                <KeypadButton label="3" onPress={() => onKeyPress('3')} />
             </View>
             <View style={styles.keypadRow}>
-                <KeypadButton label="," onPress={() => onKeyPress(',')} theme={theme} />
-                <KeypadButton label="0" onPress={() => onKeyPress('0')} theme={theme} />
-                <KeypadButton icon="backspace" onPress={onDelete} theme={theme} isDestructive testID="btn-backspace" />
+                <KeypadButton label="," onPress={() => onKeyPress(',')} />
+                <KeypadButton label="0" onPress={() => onKeyPress('0')} />
+                <KeypadButton icon="backspace" onPress={onDelete} isDestructive testID="btn-backspace" />
             </View>
         </View>
     );
@@ -87,7 +96,8 @@ const AdvancedCalculatorScreen = () => {
 
   // --- State ---
   const [rates, setRates] = useState<CurrencyRate[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  // loading removed as unused
   const [refreshing, setRefreshing] = useState(false);
   
   // Base Currency State
@@ -95,20 +105,20 @@ const AdvancedCalculatorScreen = () => {
   const [baseAmount, setBaseAmount] = useState('1'); 
   
   // Target Currencies List (Codes)
-  const [targetCodes, setTargetCodes] = useState<string[]>(['VES', 'EUR', 'USDT', 'BTC', 'COP']);
+  const [targetCodes, setTargetCodes] = useState<string[]>(['VES', 'USDT']);
   
   // Picker State
   const [pickerVisible, setPickerVisible] = useState(false);
   const [pickerMode, setPickerMode] = useState<'base' | 'add'>('base');
 
   // Input State
-  const [isInputFocused, setIsInputFocused] = useState(false);
+  // const [isInputFocused, setIsInputFocused] = useState(false); // Removed unused variable
 
   // --- Data Loading ---
   useEffect(() => {
     const unsubscribe = CurrencyService.subscribe((data) => {
       setRates(data);
-      setLoading(false);
+      setRefreshing(false);
     });
     CurrencyService.getRates().catch(console.error);
     return () => unsubscribe();
@@ -133,8 +143,10 @@ const AdvancedCalculatorScreen = () => {
       const rateObj = rates.find(r => r.code === code);
       if (!rateObj) return null;
 
-      const amountInUSD = amountVal / baseCurrency.value; 
-      const targetValue = amountInUSD * rateObj.value;
+      // Logic fixed: Rates are "Price in Base Currency (VES)"
+      // Formula: Amount * (BaseValue / TargetValue)
+      // Example: 1 USDT (454) -> VES (1). 1 * (454 / 1) = 454.
+      const targetValue = amountVal * (baseCurrency.value / rateObj.value);
 
       return {
         code,
@@ -271,7 +283,7 @@ const AdvancedCalculatorScreen = () => {
     try {
         await CurrencyService.getRates(true);
         showToast('Tasas actualizadas', 'success');
-    } catch (error) {
+    } catch {
         showToast('Error al actualizar', 'error');
     } finally {
         setRefreshing(false);
@@ -294,8 +306,31 @@ const AdvancedCalculatorScreen = () => {
       return [];
   }, [pickerMode, baseCurrencyCode, targetCodes]);
 
+  const themeStyles = useMemo(() => ({
+    container: { backgroundColor: theme.colors.background },
+    targetRow: {
+        backgroundColor: theme.colors.elevation.level1,
+        borderColor: theme.colors.outline,
+    },
+    iconBox: { backgroundColor: theme.colors.elevation.level3 },
+    textPrimary: { color: theme.colors.onSurface },
+    textSecondary: { color: theme.colors.onSurfaceVariant },
+    nameBadge: { backgroundColor: theme.colors.elevation.level3 },
+    nameText: { color: theme.colors.onSurfaceVariant },
+    warningText: { color: (theme.colors as any).warning },
+    successText: { color: (theme.colors as any).success },
+    errorContainer: { 
+        backgroundColor: theme.colors.errorContainer,
+        borderColor: theme.colors.background
+    },
+    addButton: {
+        borderColor: theme.colors.outline,
+    },
+    addIcon: { backgroundColor: theme.colors.secondaryContainer },
+  }), [theme]);
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={[styles.container, themeStyles.container]}>
       <StatusBar 
         backgroundColor="transparent"
         translucent 
@@ -307,35 +342,34 @@ const AdvancedCalculatorScreen = () => {
         variant="simple" 
         title="Calculadora"
         style={styles.header}
+        onBackPress={() => navigation.goBack()}
+        onActionPress={onRefresh}
+        rightActionIcon="refresh"
+        onNotificationPress={() => showToast('Historial próximamente', 'info')}
+        notificationIcon="history"
+        showNotification={true}
       />
       
-      {/* Absolute Back Button to overlay UnifiedHeader */}
-      <View style={styles.topNavigation}>
-         <Appbar.BackAction 
-            onPress={() => navigation.goBack()} 
-            color={theme.colors.onSurface}
-         />
-         <View style={{flex: 1}} />
-         <IconButton icon="refresh" onPress={onRefresh} iconColor={theme.colors.onSurface} />
-         <IconButton icon="history" onPress={() => showToast('Historial próximamente', 'info')} iconColor={theme.colors.onSurface} />
-      </View>
-
-      <View style={{flex: 1}}>
+      <View style={styles.flex1}>
           {/* Main Base Input */}
           <View style={styles.baseContainer}>
               <View style={styles.inputHeader}>
-                  <Text variant="labelMedium" style={{color: theme.colors.onSurfaceVariant}}>
+                  <Text variant="labelMedium" style={themeStyles.textSecondary}>
                       MONEDA BASE
                   </Text>
                   {/* Source Label Added */}
-                  <View style={{flex: 1, alignItems: 'center'}}>
-                      <Text variant="labelSmall" style={{color: theme.colors.primary, fontWeight: 'bold', opacity: 0.8}}>
+                  <View style={styles.sourceLabelContainer}>
+                      <Text variant="labelSmall" style={[styles.sourceLabel, { color: theme.colors.primary }]}>
                           {getSourceLabel(baseCurrency.code).toUpperCase()}
                       </Text>
                   </View>
 
-                  <TouchableOpacity onPress={() => setBaseAmount('1')}>
-                      <Text variant="labelMedium" style={{color: theme.colors.error, fontWeight: 'bold'}}>
+                  <TouchableOpacity onPress={() => {
+                      setBaseAmount('1');
+                      setTargetCodes([]);
+                      showToast('Calculadora reiniciada', 'info');
+                  }}>
+                      <Text variant="labelMedium" style={[styles.clearText, { color: theme.colors.error }]}>
                           LIMPIAR
                       </Text>
                   </TouchableOpacity>
@@ -343,13 +377,13 @@ const AdvancedCalculatorScreen = () => {
 
               <View style={styles.inputRow}>
                   <TouchableOpacity 
-                    style={[styles.currencySelector, { backgroundColor: 'transparent' }]}
+                    style={[styles.currencySelector, styles.currencySelectorBtn]}
                     onPress={() => { setPickerMode('base'); setPickerVisible(true); }}
                   >
                       {baseCurrency.iconName && (
-                          <MaterialIcons name={baseCurrency.iconName} size={28} color={theme.colors.onSurface} style={{marginRight: 8}} />
+                          <MaterialIcons name={baseCurrency.iconName} size={28} color={theme.colors.onSurface} style={styles.iconRight} />
                       )}
-                      <Text variant="headlineMedium" style={{fontWeight: 'bold', color: theme.colors.onSurface}}>
+                      <Text variant="headlineMedium" style={[styles.mainCurrencyText, themeStyles.textPrimary]}>
                           {baseCurrency.code}
                       </Text>
                       <MaterialIcons name="arrow-drop-down" size={24} color={theme.colors.onSurfaceVariant} />
@@ -382,7 +416,7 @@ const AdvancedCalculatorScreen = () => {
                   updatedAt={rates.length > 0 ? new Date(rates[0].lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
                   onRefresh={onRefresh}
                   showBadge={false}
-                  style={{ paddingHorizontal: 0, paddingVertical: 0, marginTop: 4, paddingBottom: 0, paddingTop: 0 }}
+                  style={styles.marketStatusOverride}
               />
           </View>
 
@@ -390,8 +424,8 @@ const AdvancedCalculatorScreen = () => {
           <FlatList
               data={targetRows}
               keyExtractor={item => item.code}
-              style={{flex: 1}}
-              contentContainerStyle={{ padding: 16, paddingBottom: 20 }}
+              style={styles.flex1}
+              contentContainerStyle={styles.listContent}
               showsVerticalScrollIndicator={false}
               refreshControl={
                   <RefreshControl
@@ -402,54 +436,43 @@ const AdvancedCalculatorScreen = () => {
                   />
               }
               renderItem={({ item }) => (
-                  <View style={[
-                      styles.targetRow, 
-                      { 
-                          backgroundColor: theme.colors.elevation.level1,
-                          borderColor: theme.colors.outline,
-                      }
-                  ]}>
+                  <View style={[styles.targetRow, themeStyles.targetRow]}>
                       {/* Left Side: Icon */}
-                      <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level3 }]}>
+                      <View style={[styles.iconBox, themeStyles.iconBox]}>
                             <MaterialIcons name={item.rateObj.iconName || 'attach-money'} size={24} color={theme.colors.primary} />
                       </View>
 
                       {/* Middle: Code & Name */}
-                      <View style={{marginLeft: 16, flex: 1}}>
-                          <View style={{flexDirection: 'row', alignItems: 'center', marginBottom: 4}}>
-                              <Text variant="titleMedium" style={{fontWeight: '900', color: theme.colors.onSurface, marginRight: 8}}>
+                      <View style={styles.middleCol}>
+                          <View style={styles.codeRow}>
+                              <Text variant="titleMedium" style={[styles.codeText, themeStyles.textPrimary]}>
                                   {item.code}
                               </Text>
-                              <View style={{
-                                  backgroundColor: theme.colors.elevation.level3,
-                                  paddingHorizontal: 6,
-                                  paddingVertical: 2,
-                                  borderRadius: 4,
-                              }}>
-                                  <Text style={{fontSize: 10, fontWeight: 'bold', color: theme.colors.onSurfaceVariant, textTransform: 'uppercase'}}>
+                              <View style={[styles.nameBadge, themeStyles.nameBadge]}>
+                                  <Text style={[styles.nameText, themeStyles.nameText]}>
                                       {item.name}
                                   </Text>
                               </View>
                           </View>
-                          <Text variant="bodySmall" style={{color: theme.colors.onSurfaceVariant}}>
-                              1 {baseCurrency.code} = {(item.rateObj.value / baseCurrency.value).toLocaleString('es-VE', {maximumFractionDigits: 4})} {item.code}
+                          <Text variant="bodySmall" style={themeStyles.textSecondary}>
+                              1 {baseCurrency.code} = {(baseCurrency.value / item.rateObj.value).toLocaleString(AppConfig.DEFAULT_LOCALE, {minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES})} {item.code}
                           </Text>
                       </View>
 
                       {/* Right Side: Value & Label */}
-                      <View style={{alignItems: 'flex-end', justifyContent: 'center'}}>
+                      <View style={styles.rightCol}>
                           <Text 
                             variant="headlineSmall" 
-                            style={{fontWeight: 'bold', color: theme.colors.onSurface}}
+                            style={[styles.valueText, themeStyles.textPrimary]}
                             numberOfLines={1}
                             adjustsFontSizeToFit
                           >
-                              {item.value.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                              {item.value.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES })}
                           </Text>
-                          <Text variant="labelSmall" style={{
-                              color: item.rateObj.type === 'crypto' ? theme.colors.warning : theme.colors.success, 
-                              fontWeight: 'bold'
-                          }}>
+                          <Text variant="labelSmall" style={[
+                              styles.labelText,
+                              item.rateObj.type === 'crypto' ? themeStyles.warningText : themeStyles.successText
+                          ]}>
                               {item.rateObj.type === 'crypto' ? 'Cripto activo' : 'Conversión directa'}
                           </Text>
                       </View>
@@ -458,19 +481,7 @@ const AdvancedCalculatorScreen = () => {
                       <TouchableOpacity 
                           onPress={() => removeCurrency(item.code)} 
                           hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
-                          style={{
-                              position: 'absolute',
-                              top: -8,
-                              right: -8,
-                              backgroundColor: theme.colors.errorContainer,
-                              borderRadius: 12,
-                              width: 24,
-                              height: 24,
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              borderWidth: 2,
-                              borderColor: theme.colors.background
-                          }}
+                          style={[styles.closeButton, themeStyles.errorContainer]}
                       >
                           <MaterialIcons name="close" size={14} color={theme.colors.error} />
                       </TouchableOpacity>
@@ -479,36 +490,12 @@ const AdvancedCalculatorScreen = () => {
               ListFooterComponent={
                   <TouchableOpacity 
                     onPress={() => { setPickerMode('add'); setPickerVisible(true); }}
-                    style={{ 
-                        marginTop: 16, 
-                        borderWidth: 1,
-                        borderColor: theme.colors.outline, 
-                        borderStyle: 'dashed',
-                        borderRadius: 100, // Pill
-                        paddingVertical: 14,
-                        flexDirection: 'row',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        backgroundColor: 'transparent'
-                    }}
+                    style={[styles.addButton, themeStyles.addButton]}
                   >
-                      <View style={{
-                          width: 24, 
-                          height: 24, 
-                          borderRadius: 12, 
-                          backgroundColor: theme.colors.secondaryContainer,
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          marginRight: 10
-                      }}>
+                      <View style={[styles.addIcon, themeStyles.addIcon]}>
                         <MaterialIcons name="add" size={18} color={theme.colors.onSecondaryContainer} />
                       </View>
-                      <Text style={{
-                          color: theme.colors.onSurfaceVariant, 
-                          fontWeight: 'bold', 
-                          letterSpacing: 1,
-                          fontSize: 12
-                      }}>
+                      <Text style={[styles.addText, themeStyles.textSecondary]}>
                           AÑADIR OTRA DIVISA
                       </Text>
                   </TouchableOpacity>
@@ -536,20 +523,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  header: {
-    // Adjusted to work with UnifiedHeader
-    zIndex: 1,
+  flex1: {
+    flex: 1,
   },
-  topNavigation: {
-      position: 'absolute',
-      top: Platform.OS === 'android' ? StatusBar.currentHeight : 44, // Approximate safe area top
-      left: 0,
-      right: 0,
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 8,
-      zIndex: 2,
-      height: 56, // Standard header height
+  header: {
+    zIndex: 1,
   },
   baseContainer: {
       paddingHorizontal: 20,
@@ -560,6 +538,17 @@ const styles = StyleSheet.create({
       flexDirection: 'row',
       justifyContent: 'space-between',
       marginBottom: 12,
+  },
+  sourceLabelContainer: {
+      flex: 1,
+      alignItems: 'center',
+  },
+  sourceLabel: {
+      fontWeight: 'bold',
+      opacity: 0.8,
+  },
+  clearText: {
+      fontWeight: 'bold',
   },
   inputRow: {
       flexDirection: 'row',
@@ -574,6 +563,15 @@ const styles = StyleSheet.create({
       paddingVertical: 10,
       borderRadius: 16,
   },
+  currencySelectorBtn: {
+      backgroundColor: 'transparent',
+  },
+  iconRight: {
+      marginRight: 8,
+  },
+  mainCurrencyText: {
+      fontWeight: 'bold',
+  },
   mainInput: {
       fontWeight: 'bold',
       textAlign: 'right',
@@ -582,13 +580,16 @@ const styles = StyleSheet.create({
       padding: 0, 
       includeFontPadding: false,
   },
-  actionButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingVertical: 10,
-      borderRadius: 12,
-      marginTop: 16,
+  marketStatusOverride: {
+      paddingHorizontal: 0, 
+      paddingVertical: 0, 
+      marginTop: 4, 
+      paddingBottom: 0, 
+      paddingTop: 0 
+  },
+  listContent: {
+      padding: 16, 
+      paddingBottom: 20 
   },
   targetRow: {
       flexDirection: 'row',
@@ -607,12 +608,73 @@ const styles = StyleSheet.create({
       alignItems: 'center',
       justifyContent: 'center',
   },
-  pickerItem: {
-      flexDirection: 'row',
+  middleCol: {
+      marginLeft: 16, 
+      flex: 1,
+  },
+  codeRow: {
+      flexDirection: 'row', 
+      alignItems: 'center', 
+      marginBottom: 4,
+  },
+  codeText: {
+      fontWeight: '900', 
+      marginRight: 8,
+  },
+  nameBadge: {
+      paddingHorizontal: 6,
+      paddingVertical: 2,
+      borderRadius: 4,
+  },
+  nameText: {
+      fontSize: 10, 
+      fontWeight: 'bold', 
+      textTransform: 'uppercase',
+  },
+  rightCol: {
+      alignItems: 'flex-end', 
+      justifyContent: 'center',
+  },
+  valueText: {
+      fontWeight: 'bold',
+  },
+  labelText: {
+      fontWeight: 'bold',
+  },
+  closeButton: {
+      position: 'absolute',
+      top: -8,
+      right: -8,
+      borderRadius: 12,
+      width: 24,
+      height: 24,
       alignItems: 'center',
-      paddingVertical: 12,
-      paddingHorizontal: 24,
-      borderBottomWidth: StyleSheet.hairlineWidth,
+      justifyContent: 'center',
+      borderWidth: 2,
+  },
+  addButton: {
+      marginTop: 16, 
+      borderWidth: 1,
+      borderStyle: 'dashed',
+      borderRadius: 100,
+      paddingVertical: 14,
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: 'transparent',
+  },
+  addIcon: {
+      width: 24, 
+      height: 24, 
+      borderRadius: 12, 
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginRight: 10,
+  },
+  addText: {
+      fontWeight: 'bold', 
+      letterSpacing: 1,
+      fontSize: 12,
   },
   keypadContainer: {
       paddingBottom: Platform.OS === 'ios' ? 34 : 16,
@@ -638,7 +700,7 @@ const styles = StyleSheet.create({
       justifyContent: 'center',
       alignItems: 'center',
       borderRadius: 16,
-      backgroundColor: 'transparent', // Or slight overlay if needed
+      backgroundColor: 'transparent',
   },
   keypadText: {
       fontSize: 28,

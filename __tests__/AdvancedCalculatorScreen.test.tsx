@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
+import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import AdvancedCalculatorScreen from '../src/screens/AdvancedCalculatorScreen';
 import { Provider as PaperProvider } from 'react-native-paper';
 
@@ -37,10 +37,10 @@ jest.mock('react-native-vector-icons/MaterialIcons', () => 'Icon');
 
 // Mock CurrencyService
 const mockRates = [
-  { code: 'USD', value: 1, name: 'Dollar', iconName: 'attach-money' },
-  { code: 'VES', value: 36.5, name: 'Bolivar', iconName: 'attach-money' },
-  { code: 'EUR', value: 1.1, name: 'Euro', iconName: 'euro' },
-  { code: 'USDT', value: 1.01, name: 'Tether', iconName: 'attach-money' },
+  { code: 'USD', value: 36.5, name: 'Dollar', iconName: 'attach-money', changePercent: 0.1 },
+  { code: 'VES', value: 1, name: 'Bolivar', iconName: 'attach-money', changePercent: -0.5 },
+  { code: 'EUR', value: 40.0, name: 'Euro', iconName: 'euro', changePercent: 0.0 },
+  { code: 'USDT', value: 37.0, name: 'Tether', iconName: 'attach-money', changePercent: 0.05 },
 ];
 
 jest.mock('../src/services/CurrencyService', () => ({
@@ -106,7 +106,7 @@ describe('AdvancedCalculatorScreen', () => {
     
     // Check Target List (initial targets)
     expect(getByText('VES')).toBeTruthy();
-    expect(getByText('EUR')).toBeTruthy();
+    expect(getByText('USDT')).toBeTruthy();
   });
 
   it('handles keypad input correctly', async () => {
@@ -144,13 +144,13 @@ describe('AdvancedCalculatorScreen', () => {
   });
 
   it('updates conversions when base amount changes', async () => {
-    const { getByText, getByTestId } = renderScreen();
+    const { getByText, getAllByText, getByTestId } = renderScreen();
     
     // 1 USD = 36.5 VES
     // We expect to see 36,50 (or similar formatting)
     // Using regex to be locale-agnostic or flexible
     await waitFor(() => {
-       expect(getByText(/36[,.]50/)).toBeTruthy();
+       expect(getAllByText(/36[,.]50/).length).toBeGreaterThan(0);
     });
     
     // Change input to 10
@@ -162,7 +162,7 @@ describe('AdvancedCalculatorScreen', () => {
     
     // 10 USD = 365.0 VES
     await waitFor(() => {
-        expect(getByText(/365[,.]00/)).toBeTruthy();
+        expect(getAllByText(/365[,.]00/).length).toBeGreaterThan(0);
     });
   });
 

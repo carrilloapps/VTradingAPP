@@ -9,6 +9,7 @@ interface CacheItem<T> {
 
 interface RequestOptions {
   headers?: Record<string, string>;
+  params?: Record<string, string | number | boolean>;
   useCache?: boolean;
   cacheTTL?: number; // in milliseconds
 }
@@ -21,7 +22,16 @@ class ApiClient {
   }
 
   async get<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-    const url = `${this.baseUrl}${endpoint}`;
+    let url = `${this.baseUrl}${endpoint}`;
+    
+    // Append query params if present
+    if (options.params) {
+        const queryString = Object.entries(options.params)
+            .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+            .join('&');
+        url += (url.includes('?') ? '&' : '?') + queryString;
+    }
+
     const cacheKey = `api_cache_${url}`;
     
     // 1. Check Cache
@@ -107,7 +117,7 @@ class ApiClient {
                 const { data } = JSON.parse(cached) as CacheItem<T>;
                 return data;
             }
-        } catch (e) { /* ignore */ }
+        } catch { /* ignore */ }
       }
       
       throw error;

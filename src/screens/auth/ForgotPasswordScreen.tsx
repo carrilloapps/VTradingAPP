@@ -10,6 +10,24 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
   const insets = useSafeAreaInsets();
   const { resetPassword } = useAuth();
 
+  const themeStyles = React.useMemo(() => ({
+    container: {
+      backgroundColor: theme.colors.background,
+    },
+    title: {
+      color: theme.colors.primary,
+      fontWeight: 'bold' as const,
+    },
+    subtitle: {
+      color: theme.colors.onSurfaceVariant,
+      marginTop: 10,
+    },
+    contentContainer: {
+      paddingTop: insets.top + 20,
+      paddingBottom: insets.bottom + 20
+    }
+  }), [theme, insets]);
+
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -29,7 +47,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
       try {
         await resetPassword(email);
         navigation.goBack();
-      } catch (e) {
+      } catch {
         // Error handled in context
       } finally {
         setLoading(false);
@@ -41,11 +59,8 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
     <View 
       style={[
         styles.container, 
-        { 
-          backgroundColor: theme.colors.background,
-          paddingTop: insets.top + 20,
-          paddingBottom: insets.bottom + 20
-        }
+        themeStyles.container,
+        themeStyles.contentContainer
       ]}
     >
       <TouchableOpacity 
@@ -56,10 +71,10 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
       </TouchableOpacity>
 
       <View style={styles.header}>
-        <Text variant="headlineMedium" style={{ color: theme.colors.primary, fontWeight: 'bold' }}>
+        <Text variant="headlineMedium" style={themeStyles.title}>
           Recuperar Contraseña
         </Text>
-        <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant, marginTop: 10 }}>
+        <Text variant="bodyLarge" style={themeStyles.subtitle}>
           Ingresa tu correo electrónico y te enviaremos las instrucciones para restablecer tu contraseña.
         </Text>
       </View>

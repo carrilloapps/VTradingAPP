@@ -29,6 +29,21 @@ export const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
 }) => {
     const theme = useTheme();
 
+    const themeStyles = React.useMemo(() => ({
+        container: {
+            backgroundColor: theme.colors.elevation.level2,
+            borderColor: theme.colors.outline,
+            height: height as any,
+        },
+        handleBar: {
+            backgroundColor: theme.colors.outline,
+        },
+        title: {
+            fontWeight: 'bold' as const,
+            color: theme.colors.onSurface,
+        }
+    }), [theme, height]);
+
     return (
         <Modal 
             visible={visible} 
@@ -49,23 +64,19 @@ export const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
                     behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                     style={[
                         styles.container, 
-                        { 
-                            backgroundColor: theme.colors.elevation.level2, 
-                            height: height as any,
-                            borderColor: theme.colors.outline
-                        },
+                        themeStyles.container,
                         style
                     ]}
                 >
                     {/* Handle Bar */}
                     <View style={styles.handleContainer}>
-                        <View style={[styles.handleBar, { backgroundColor: theme.colors.outline }]} />
+                        <View style={[styles.handleBar, themeStyles.handleBar]} />
                     </View>
 
                     {/* Header */}
                     <View style={styles.header}>
                         {title && (
-                            <Text variant="headlineSmall" style={{fontWeight: 'bold', color: theme.colors.onSurface}}>
+                            <Text variant="headlineSmall" style={themeStyles.title}>
                                 {title}
                             </Text>
                         )}
@@ -74,7 +85,7 @@ export const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
                             size={24} 
                             iconColor={theme.colors.onSurfaceVariant}
                             onPress={onClose} 
-                            style={{ margin: 0 }}
+                            style={styles.closeButton}
                         />
                     </View>
 
@@ -100,6 +111,10 @@ const styles = StyleSheet.create({
         paddingTop: 8,
         paddingBottom: 0,
         overflow: 'hidden', // Ensure content doesn't bleed out of rounded corners
+        borderWidth: 1, // Added borderWidth since borderColor was present but no width
+    },
+    closeButton: {
+        margin: 0,
     },
     handleContainer: {
         alignItems: 'center',

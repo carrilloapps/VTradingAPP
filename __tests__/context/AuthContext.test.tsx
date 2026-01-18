@@ -74,4 +74,29 @@ describe('AuthContext', () => {
       expect(mockSignIn).toHaveBeenCalledWith('test@test.com', '123456');
     });
   });
+
+  it('handles logout interaction', async () => {
+      mockOnAuthStateChanged.mockImplementation((callback) => {
+        callback({ email: 'test@example.com' } as any); 
+        return () => {};
+      });
+  
+      const { getByText } = render(
+        <ToastProvider>
+          <AuthProvider>
+            <TestComponent />
+          </AuthProvider>
+        </ToastProvider>
+      );
+  
+      await waitFor(() => {
+         expect(getByText('Logout')).toBeTruthy();
+      });
+  
+      fireEvent.press(getByText('Logout'));
+  
+      await waitFor(() => {
+        expect(mockSignOut).toHaveBeenCalled();
+      });
+    });
 });

@@ -73,7 +73,7 @@ describe('SettingsScreen', () => {
     const { findByText } = renderWithProvider(<SettingsScreen />);
     
     // Check for the footer string format
-    expect(await findByText(/Finanzas VE v1.0.0 \(100\)/)).toBeTruthy();
+    expect(await findByText(/Finanzas VE v1.0.0 \(BUILD 100\)/)).toBeTruthy();
   });
 
   it('toggles alerts', () => {

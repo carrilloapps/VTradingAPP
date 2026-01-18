@@ -37,8 +37,18 @@ class AppCheckService {
     try {
       const result = await firebase.appCheck().getToken();
       return result.token;
-    } catch (error) {
-      console.error('[AppCheck] Error getting token:', error);
+    } catch (error: any) {
+      // Handle "API not enabled" or configuration errors gracefully
+      const message = error.message || '';
+      if (message.includes('App Check API has not been used') || message.includes('403')) {
+         if (__DEV__) {
+             console.warn('[AppCheck] API no habilitada en Firebase Console. Se omite App Check en modo desarrollo.');
+         }
+         return undefined;
+      }
+      
+      // Log as warning instead of error to avoid RedBox/interruptions
+      console.warn('[AppCheck] Error obteniendo token:', message);
       return undefined;
     }
   }
