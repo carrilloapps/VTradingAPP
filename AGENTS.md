@@ -12,7 +12,7 @@ Este proyecto utiliza documentación distribuida para mantener el contexto cerca
 *   **Barra de Navegación (Tab Bar):**
     *   Se utiliza `ModernTabBar` como componente estándar para la navegación inferior.
     *   **Estilo:** Diseño limpio sin bordes superiores (`borderTopWidth: 0`), con elevación/sombra suave y animaciones de escala/elevación en la pestaña activa.
-    *   **Iconografía:** Se estandariza el uso de `MaterialCommunityIcons` para todas las pestañas (`currency-usd`, `chart-line`, `wallet`, `cog`) para mayor consistencia y profesionalismo.
+    *   **Iconografía:** Se estandariza el uso de `MaterialCommunityIcons` para todas las pestañas (`currency-usd`, `candlestick`, `wallet`, `cog`) para mayor consistencia y profesionalismo.
     *   **Tab Central (Home):** El tab de inicio se posiciona en el centro. Para la representación de "Bolívares", se utiliza un icono tipográfico personalizado ("Bs") centrado en un contenedor `View` de 32x32 para evitar deformaciones.
     *   **Alineación de Iconos:** Todos los iconos de la barra de navegación deben estar envueltos en un `View` con dimensiones fijas (ej. 24x24) y alineación centrada (`justifyContent: 'center'`, `alignItems: 'center'`) para evitar distorsiones visuales en las animaciones.
 

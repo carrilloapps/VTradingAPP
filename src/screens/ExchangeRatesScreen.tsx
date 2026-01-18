@@ -94,9 +94,20 @@ const ExchangeRatesScreen = () => {
   }, [showToast]);
 
   // Group rates for display
-  const officialRates = filteredRates.filter(r => r.type === 'fiat');
-  const cryptoRates = filteredRates.filter(r => r.type === 'crypto');
-  const otherRates = filteredRates.filter(r => r.type !== 'fiat' && r.type !== 'crypto');
+  const officialRates = useMemo(() => {
+    const rates = filteredRates.filter(r => r.type === 'fiat');
+    return rates.sort((a, b) => {
+      // Priority: USD first, then EUR
+      if (a.code === 'USD') return -1;
+      if (b.code === 'USD') return 1;
+      if (a.code === 'EUR') return -1;
+      if (b.code === 'EUR') return 1;
+      return 0; // Keep original order for others
+    });
+  }, [filteredRates]);
+
+  const cryptoRates = useMemo(() => filteredRates.filter(r => r.type === 'crypto'), [filteredRates]);
+  const otherRates = useMemo(() => filteredRates.filter(r => r.type !== 'fiat' && r.type !== 'crypto'), [filteredRates]);
 
   const renderRateCard = (rate: CurrencyRate) => (
     <RateCard 
@@ -168,7 +179,11 @@ const ExchangeRatesScreen = () => {
           }}
           visible={showFilters}
           mode="wrap"
-          style={{ marginTop: theme.spacing.xs }}
+          style={{ 
+            marginTop: 8,
+            paddingHorizontal: 20,
+            marginBottom: 16
+          }}
         />
 
         {loading && !refreshing && filteredRates.length === 0 ? (
@@ -205,7 +220,7 @@ const ExchangeRatesScreen = () => {
             {officialRates.length > 0 && (
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
-                  <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>FIAT & CRYPTO</Text>
+                  <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>Tasa oficial del BCV</Text>
                   <View style={[styles.tag, { backgroundColor: colors.successContainer }]}>
                     <Text style={[styles.tagText, { color: colors.success }]}>ACTUALIZADO</Text>
                   </View>
@@ -218,7 +233,7 @@ const ExchangeRatesScreen = () => {
             {cryptoRates.length > 0 && (
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
-                  <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>CRIPTO & PARALELO</Text>
+                  <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>Criptomoneda / Stablecoins</Text>
                 </View>
                 {cryptoRates.map(renderRateCard)}
               </View>
@@ -245,7 +260,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerContainer: {
-    paddingBottom: 16,
+    paddingBottom: 8,
   },
   headerStyle: {
     paddingBottom: 0,
@@ -292,6 +307,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: 'bold',
     letterSpacing: 1,
+    textTransform: 'uppercase',
   },
   tag: {
     paddingHorizontal: 8,
