@@ -28,14 +28,14 @@ const StockItem: React.FC<StockItemProps> = ({
     container: {
       backgroundColor: theme.colors.elevation.level1,
       borderRadius: theme.roundness * 6,
-      borderWidth: theme.dark ? 0 : 1,
+      borderWidth: 1,
       borderColor: theme.colors.outline,
-      // Enhanced shadow for light mode
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: theme.dark ? 0 : 0.05,
-      shadowRadius: 3,
-      elevation: theme.dark ? 0 : 2,
+      // Flat style
+      shadowColor: 'transparent',
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0,
+      shadowRadius: 0,
+      elevation: 0,
     },
     iconContainer: {
       backgroundColor: theme.colors.elevation.level3,

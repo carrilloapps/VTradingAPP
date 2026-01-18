@@ -51,19 +51,15 @@ const WalletSkeleton = () => {
             <View 
                 key={index} 
                 style={[
-                    styles.featureItem, 
-                    { 
-                        backgroundColor: theme.colors.elevation.level1,
-                        borderColor: theme.dark ? 'transparent' : theme.colors.outline,
-                        borderWidth: theme.dark ? 0 : 1,
-                        borderRadius: r * 3, // Assuming feature item radius
-                        shadowColor: '#000',
-                        shadowOffset: { width: 0, height: 2 },
-                        shadowOpacity: theme.dark ? 0 : 0.05,
-                        shadowRadius: 3,
-                        elevation: theme.dark ? 0 : 2,
-                    }
-                ]}
+                        styles.featureItem, 
+                        { 
+                            backgroundColor: theme.colors.elevation.level1,
+                            borderColor: theme.colors.outline,
+                            borderWidth: 1,
+                            borderRadius: r * 6, // Matches new standard
+                            elevation: 0,
+                        }
+                    ]}
             >
                 <Skeleton width={40} height={40} borderRadius={r * 2} />
                 <View style={styles.featureText}>

@@ -24,7 +24,7 @@ const IndexHero: React.FC<IndexHeroProps> = ({
         colors={['#0e4981', '#0b3a67', '#082f54']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={styles.card}
+        style={[styles.card, { borderColor: 'rgba(255,255,255,0.15)', borderWidth: 1 }]}
       >
         {/* Background Blur Effect Circle */}
         <View style={styles.blurCircle} />
@@ -70,15 +70,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   card: {
-    borderRadius: 16,
+    borderRadius: 24, // Matches standard
     padding: 24,
     position: 'relative',
     overflow: 'hidden',
-    elevation: 8,
-    shadowColor: '#0e4981',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    elevation: 0,
   },
   blurCircle: {
     position: 'absolute',

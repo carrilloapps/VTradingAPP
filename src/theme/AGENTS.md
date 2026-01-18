@@ -16,6 +16,7 @@ Para garantizar la consistencia visual y la mantenibilidad del código, se estab
     *   `borderRadius: theme.roundness * 3` (12px) -> Estándar para tarjetas y contenedores pequeños.
     *   `borderRadius: theme.roundness * 4` (16px) -> Estándar para modales y contenedores grandes.
     *   `borderRadius: theme.roundness * 5` (20px) -> **OBLIGATORIO** para elementos circulares (avatares, iconos de moneda) de tamaño estándar (40px).
+    *   `borderRadius: theme.roundness * 6` (24px) -> **ESTÁNDAR GLOBAL** para Tarjetas (Cards) y contenedores principales (Dashboard, Stocks, etc.).
 
 ### 3. Componentes de React Native Paper
 *   Priorizar el uso de componentes de `react-native-paper` (`Text`, `Surface`, `Button`, `IconButton`) sobre los nativos de `react-native` (`View`, `Text` básico) cuando se requiera integración con el tema.

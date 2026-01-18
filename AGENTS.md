@@ -5,6 +5,7 @@ Este proyecto utiliza documentación distribuida para mantener el contexto cerca
 ## Principios Globales de Desarrollo
 *   **Reutilización Primero:** Antes de crear un nuevo componente UI, verifica si ya existe uno similar. Si encuentras código duplicado (ej. selectores, tarjetas, botones con estilos específicos) en múltiples pantallas, **debes** refactorizarlo en un componente reutilizable dentro de `src/components/`.
 *   **Centralización de Estilos:** Todos los valores de estilo (colores, roundness, espaciados) deben provenir de `src/theme/theme.ts`.
+*   **Estilo de Tarjetas (Cards):** Todas las tarjetas deben usar un diseño "Flat" (Plano) sin elevación (`elevation: 0`), con bordes ligeros (`theme.colors.outline`, `borderWidth: 1`) y esquinas redondeadas estándar (`borderRadius: theme.roundness * 6` = 24px).
 
 ## Estándares de Navegación y UI Global
 *   **Barra de Navegación (Tab Bar):**

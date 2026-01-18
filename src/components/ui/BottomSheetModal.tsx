@@ -33,13 +33,14 @@ export const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
         container: {
             backgroundColor: theme.colors.elevation.level2,
             borderColor: theme.colors.outline,
+            borderWidth: 1, // Ensure border
             height: height as any,
-            // Enhanced shadow for light mode
-            shadowColor: '#000',
-            shadowOffset: { width: 0, height: -2 }, // Shadow upwards
-            shadowOpacity: theme.dark ? 0 : 0.1,
-            shadowRadius: 4,
-            elevation: theme.dark ? 0 : 5,
+            // Flat style
+            shadowColor: 'transparent',
+            shadowOffset: { width: 0, height: 0 },
+            shadowOpacity: 0,
+            shadowRadius: 0,
+            elevation: 0,
         },
         handleBar: {
             backgroundColor: theme.colors.outline,

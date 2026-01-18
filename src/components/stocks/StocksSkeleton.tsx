@@ -44,14 +44,9 @@ const StocksSkeleton = () => {
               styles.stockItem, 
               { 
                 backgroundColor: theme.colors.elevation.level1,
-                borderColor: theme.dark ? 'transparent' : theme.colors.outline,
-                borderRadius: r * 6, // Matches StockItem styling
-                // Enhanced shadow for light mode
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: theme.dark ? 0 : 0.05,
-                shadowRadius: 3,
-                elevation: theme.dark ? 0 : 2,
+                borderColor: theme.colors.outline,
+                borderRadius: r * 6,
+                elevation: 0,
               }
             ]}
           >

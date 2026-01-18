@@ -253,15 +253,11 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   cardContainer: {
-    borderRadius: 16,
+    borderRadius: 24, // Matches standard
     borderWidth: 1,
     overflow: 'hidden',
-    // Shadow for light mode card effect
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    // Flat style
+    elevation: 0,
   },
   prefRow: {
     flexDirection: 'row',

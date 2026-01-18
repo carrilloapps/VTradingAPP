@@ -47,7 +47,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    borderRadius: 16,
+    // Use dynamic radius in component, or standardize here if possible. 
+    // Since we can't access theme in StyleSheet, we'll override in inline styles or just use a standard large value.
+    // However, the user wants "theme.roundness * 6" which is 24.
+    borderRadius: 24, 
     borderWidth: 1,
     gap: 16,
   },

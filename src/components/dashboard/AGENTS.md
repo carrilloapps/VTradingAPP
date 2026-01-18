@@ -43,7 +43,7 @@ Para mantener la consistencia en la visualización de tendencias de mercado en `
     *   Las tarjetas destacadas (`ExchangeCard` en carrusel principal) deben usar un fondo con **LinearGradient**.
     *   **Colores Estándar:** `['#0e4981', '#0b3a67', '#082f54']` (Azul corporativo profundo).
     *   **Decoración:** Incluir un `blurCircle` (círculo difuminado) en la esquina superior derecha para profundidad visual.
-    *   **Bordes:** Usar `borderRadius: theme.roundness * 3` y `borderWidth: 0`.
+    *   **Bordes:** Usar `borderRadius: theme.roundness * 6` (24px) y `borderWidth: 1` con `borderColor: 'rgba(255,255,255,0.15)'`.
 
 *   **Líneas de Tendencia (Charts):**
     *   **Variación 0%:** Si el cambio porcentual es 0 (o "0.00%"), se debe renderizar una **línea recta horizontal** centrada.
@@ -75,7 +75,7 @@ Se han implementado esqueletos de carga específicos para mantener la fidelidad 
 ### DashboardSkeleton
 Usado en `HomeScreen` para la sección de Mercado Bursátil y otras listas de resumen.
 *   **Sincronización:** Los ítems del esqueleto replican exactamente el estilo de `StockItem` y `ExchangeCard`.
-*   **Light Mode:** Incluye `elevation: 2` y bordes `theme.colors.outline` para evitar que la UI "salte" o cambie de forma al cargar el contenido real.
+*   **Light Mode:** Incluye `elevation: 0` (Flat Style) y bordes `theme.colors.outline` para evitar que la UI "salte" o cambie de forma al cargar el contenido real.
 
 ### WalletSkeleton
 Usado en `DetailsScreen` (Billetera/Detalles).
@@ -83,4 +83,4 @@ Usado en `DetailsScreen` (Billetera/Detalles).
     1.  **Header & Hero:** Icono circular grande, estado y balances.
     2.  **Progress Section:** Barra de progreso de límites.
     3.  **Feature List:** Lista de opciones (Recargar, Retirar, etc.).
-*   **Estilo:** Respeta los `borderRadius` (r*3) y la elevación de los `FeatureItem` reales.
+*   **Estilo:** Respeta los `borderRadius` (r*6) y el estilo plano (sin elevación) de los `FeatureItem` reales.

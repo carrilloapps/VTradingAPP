@@ -13,17 +13,12 @@ const FeatureItem = ({ icon, title, description, theme }: any) => {
         styles.featureItem, 
         { 
           backgroundColor: theme.colors.elevation.level1,
-          borderColor: theme.dark ? 'transparent' : theme.colors.outline,
-          borderWidth: theme.dark ? 0 : 1,
-          // Enhanced shadow for light mode
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: theme.dark ? 0 : 0.05,
-          shadowRadius: 3,
-          elevation: theme.dark ? 1 : 2,
+          borderColor: theme.colors.outline,
+          borderWidth: 1,
+          elevation: 0,
         }
       ]} 
-      elevation={theme.dark ? 1 : 2}
+      elevation={0}
     >
       <View style={[styles.featureIconBox, { backgroundColor: iconBgColor }]}>
         <MaterialIcons name={icon} size={24} color={theme.colors.primary} />
@@ -288,7 +283,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 24, // Matches standard
     marginBottom: 12,
     gap: 16,
   },

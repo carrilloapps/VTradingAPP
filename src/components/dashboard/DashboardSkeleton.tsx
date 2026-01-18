@@ -48,14 +48,9 @@ const DashboardSkeleton = () => {
               styles.stockItem, 
               { 
                 backgroundColor: theme.colors.elevation.level1,
-                borderColor: theme.dark ? 'transparent' : theme.colors.outline,
+                borderColor: theme.colors.outline,
                 borderRadius: r * 6,
-                // Match StockItem elevation/shadow
-                shadowColor: '#000',
-                shadowOffset: { width: 0, height: 2 },
-                shadowOpacity: theme.dark ? 0 : 0.05,
-                shadowRadius: 3,
-                elevation: theme.dark ? 0 : 2,
+                elevation: 0,
               }
             ]}
           >

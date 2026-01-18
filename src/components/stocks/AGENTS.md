@@ -20,8 +20,7 @@ Este componente replica la estructura exacta de `StocksScreen` mientras se carga
 *   **Sincronización Visual:**
     *   **StockItem Skeleton:** Usa las mismas dimensiones, padding y `borderRadius` que el componente `StockItem` real.
     *   **Elevación y Bordes:**
-        *   **Light Mode:** Aplica `elevation: 2`, `shadowOpacity: 0.05` y borde `theme.colors.outline` para coincidir con el estilo de tarjeta física.
-        *   **Dark Mode:** Elimina bordes y usa `elevation: 0` con fondo `elevation.level1`.
+        *   **Global (Light/Dark):** Aplica `elevation: 0` (Flat), borde `theme.colors.outline` (o transparente en dark mode si se prefiere, pero el estándar es mantener borde sutil) y fondo `theme.colors.elevation.level1`.
     *   **Animación:** Utiliza el componente base `Skeleton` (gradiente animado) para indicar actividad.
 
 ### Componentes Relacionados

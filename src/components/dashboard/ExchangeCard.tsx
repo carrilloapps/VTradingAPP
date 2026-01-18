@@ -72,9 +72,10 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={[styles.card, { 
-        borderRadius: theme.roundness * 3,
-        // Remove border for cleaner look with gradient, or keep it subtle
-        borderWidth: 0,
+        borderRadius: theme.roundness * 6,
+        // Flat style with subtle border for gradient
+        borderColor: 'rgba(255,255,255,0.15)',
+        borderWidth: 1,
         overflow: 'hidden', // Ensure gradient respects border radius
         position: 'relative'
       }]}

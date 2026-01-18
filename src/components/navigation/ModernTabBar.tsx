@@ -137,16 +137,13 @@ const styles = StyleSheet.create({
   },
   barBackground: {
     flexDirection: 'row',
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    borderTopWidth: 1,
     // Ensure the elevated button is visible
     overflow: 'visible',
-    borderTopWidth: 0,
+    shadowOpacity: 0,
+    elevation: 0,
   },
   content: {
     flex: 1,
@@ -170,11 +167,8 @@ const styles = StyleSheet.create({
   },
   activeCircle: {
     borderRadius: 25,
-    elevation: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
+    elevation: 0,
+    shadowOpacity: 0,
   }
 });
 

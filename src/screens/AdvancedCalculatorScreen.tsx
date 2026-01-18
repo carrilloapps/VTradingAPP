@@ -55,7 +55,8 @@ const KeypadButton = ({ label, icon, onPress, isAction = false, isDestructive = 
 
 const Keypad = ({ onKeyPress, onDelete, theme }: { onKeyPress: (val: string) => void, onDelete: () => void, theme: any }) => {
     const containerStyle = useMemo(() => ({
-        backgroundColor: theme.colors.elevation.level1
+        backgroundColor: theme.colors.elevation.level1,
+        borderColor: theme.colors.outline,
     }), [theme]);
 
     return (
@@ -678,13 +679,14 @@ const styles = StyleSheet.create({
       paddingBottom: Platform.OS === 'ios' ? 34 : 16,
       paddingTop: 8,
       paddingHorizontal: 8,
-      borderTopLeftRadius: 24,
-      borderTopRightRadius: 24,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: -2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 8,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderTopWidth: 1,
+    borderLeftWidth: 1,
+    borderRightWidth: 1,
+    borderColor: 'rgba(121, 116, 126, 0.2)', // theme.colors.outline fallback or use theme in component
+    elevation: 0,
+    shadowOpacity: 0,
   },
   keypadRow: {
       flexDirection: 'row',

@@ -105,7 +105,7 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
             iconColor={theme.colors.onSurfaceVariant}
             placeholderTextColor={theme.colors.onSurfaceVariant}
             mode="bar"
-            elevation={theme.dark ? 0 : 1} // Slight elevation for light mode
+            elevation={0} // Flat style
         />
 
         <SectionList

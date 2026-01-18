@@ -31,12 +31,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
       backgroundColor: theme.dark ? theme.colors.elevation.level2 : theme.colors.surface,
       borderColor: isFocused ? theme.colors.primary : theme.colors.outline,
       borderWidth: 1,
-      // Enhanced shadow for light mode
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: theme.dark ? 0 : 0.05,
-      shadowRadius: 3,
-      elevation: theme.dark ? 0 : 2,
+      // Flat style
+      shadowColor: 'transparent',
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0,
+      shadowRadius: 0,
+      elevation: 0,
     }
   ];
 
@@ -74,7 +74,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
       </View>
 
       {showSuggestions && (
-        <View style={[styles.suggestionsContainer, { backgroundColor: theme.colors.elevation.level3 }]}>
+        <View style={[
+          styles.suggestionsContainer, 
+          { 
+            backgroundColor: theme.colors.elevation.level3,
+            borderColor: theme.colors.outline 
+          }
+        ]}>
           <FlatList
             data={suggestions}
             keyExtractor={(item, index) => index.toString()}
@@ -125,13 +131,22 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     borderRadius: 12,
-    elevation: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    elevation: 0,
+    shadowColor: 'transparent',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
     maxHeight: 200,
     zIndex: 1001,
+    borderWidth: 1,
+    borderColor: '#E0E0E0', // Or theme color if available, but StyleSheet doesn't have theme. Will use default outline color or similar.
+    // Since we can't access theme here easily without inline styles, I will rely on inline override if possible, 
+    // or just assume a safe default. But wait, I can't put theme in StyleSheet.
+    // I should check if I can move this to inline style or if it's already using theme somewhere.
+    // The component uses `theme` hook. I should move this styling to inline or `themeStyles` if I want to use theme colors.
+    // However, looking at the code, `suggestionsContainer` is used in:
+    // <View style={[styles.suggestionsContainer, { backgroundColor: theme.colors.elevation.level3 }]}>
+    // I can add borderColor there.
   },
   suggestionItem: {
     flexDirection: 'row',

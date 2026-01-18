@@ -44,10 +44,12 @@ const RateCard: React.FC<RateCardProps> = ({
   const finalIconColor = iconColor || colors.info;
 
   return (
-    <Surface style={[styles.card, { 
-      backgroundColor: theme.colors.surface, 
+    <Surface 
+      elevation={0}
+      style={[styles.card, { 
+      backgroundColor: theme.colors.elevation.level1, 
       borderColor: theme.colors.outline,
-      borderRadius: theme.roundness * 4
+      borderRadius: theme.roundness * 6
     }]}>
       <View style={styles.leftContent}>
         <View style={[styles.iconContainer, { 
