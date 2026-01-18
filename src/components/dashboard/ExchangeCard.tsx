@@ -49,14 +49,18 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
     : (isPositive ? colors.success : colors.error);
 
   const trendIcon = isNeutral 
-    ? "remove" 
+    ? "trending-flat" 
     : (isPositive ? "trending-up" : "trending-down");
 
   return (
-    <Surface style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
+    <Surface style={[styles.card, { 
+      backgroundColor: theme.colors.surface, 
+      borderColor: theme.colors.outline,
+      borderRadius: theme.roundness * 3 
+    }]}>
       <View style={styles.header}>
         <View style={styles.leftContent}>
-          <View style={[styles.iconContainer, { borderColor: theme.colors.outline, backgroundColor: theme.colors.elevation.level1 }]}>
+          <View style={[styles.iconContainer, { borderColor: theme.colors.outline, backgroundColor: theme.colors.elevation.level1, borderRadius: theme.roundness * 5 }]}>
             {iconUrl ? (
               <Image source={{ uri: iconUrl }} style={styles.iconImage} />
             ) : (
@@ -121,7 +125,7 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
           />
           )}
           <Text variant="labelMedium" style={[{ color: trendColor }, styles.trendText]}>
-            {isNeutral ? '' : (isPositive ? '+' : '')}{changePercent}
+            {(isPositive && !isNeutral ? '+' : '')}{changePercent}
           </Text>
         </View>
         )}
@@ -145,7 +149,6 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 16,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
@@ -179,7 +182,6 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: 40,
     height: 40,
-    borderRadius: 20,
     overflow: 'hidden',
     borderWidth: 1,
     justifyContent: 'center',

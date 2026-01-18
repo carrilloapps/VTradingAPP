@@ -7,6 +7,7 @@ import Skeleton from '../ui/Skeleton';
 const DashboardSkeleton = () => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
+  const r = theme.roundness;
 
   return (
     <View style={[styles.container, { paddingTop: insets.top + 20 }]}>
@@ -15,8 +16,8 @@ const DashboardSkeleton = () => {
         <View style={styles.headerTop}>
           <Skeleton width={120} height={20} />
           <View style={styles.headerIcons}>
-            <Skeleton width={32} height={32} borderRadius={16} />
-            <Skeleton width={32} height={32} borderRadius={16} />
+            <Skeleton width={32} height={32} borderRadius={r * 4} />
+            <Skeleton width={32} height={32} borderRadius={r * 4} />
           </View>
         </View>
         <Skeleton width={180} height={28} style={styles.headerTitleSkeleton} />
@@ -24,26 +25,26 @@ const DashboardSkeleton = () => {
 
       {/* Market Status Skeleton */}
       <View style={styles.section}>
-        <Skeleton width="100%" height={48} borderRadius={12} />
+        <Skeleton width="100%" height={48} borderRadius={r * 3} />
       </View>
 
       {/* Exchange Cards Skeleton */}
       <View style={styles.section}>
-        <Skeleton width="100%" height={140} borderRadius={16} style={styles.firstCardSkeleton} />
-        <Skeleton width="100%" height={140} borderRadius={16} />
+        <Skeleton width="100%" height={140} borderRadius={r * 4} style={styles.firstCardSkeleton} />
+        <Skeleton width="100%" height={140} borderRadius={r * 4} />
       </View>
 
       {/* Stocks List Skeleton */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Skeleton width={32} height={32} borderRadius={8} />
+          <Skeleton width={32} height={32} borderRadius={r * 2} />
           <Skeleton width={150} height={20} style={styles.sectionTitleSkeleton} />
         </View>
         
         {[1, 2, 3].map((_, index) => (
           <View key={index} style={[styles.stockItem, { borderBottomColor: theme.colors.outline }]}>
             <View style={styles.stockLeft}>
-              <Skeleton width={40} height={40} borderRadius={8} />
+              <Skeleton width={40} height={40} borderRadius={r * 2} />
               <View style={styles.stockContent}>
                 <Skeleton width={60} height={16} />
                 <Skeleton width={100} height={12} style={styles.stockSubtitleSkeleton} />

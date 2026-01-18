@@ -12,7 +12,8 @@ const Calculator: React.FC = () => {
   const themeStyles = React.useMemo(() => ({
     container: {
         backgroundColor: theme.colors.elevation.level1, 
-        borderColor: theme.colors.outline 
+        borderColor: theme.colors.outline,
+        borderRadius: theme.roundness * 6
     },
     title: {
         fontWeight: 'bold' as const, 
@@ -49,7 +50,6 @@ const Calculator: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 24, // More rounded corners to match modern UI
     padding: 20, // Slightly more padding
     borderWidth: 1,
     marginTop: 24,

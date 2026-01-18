@@ -16,9 +16,11 @@ const CurrencyConverter: React.FC = () => {
   const themeStyles = React.useMemo(() => ({
     currencyButton: {
       backgroundColor: theme.colors.elevation.level2,
+      borderRadius: theme.roundness * 6, // 24px
     },
     iconPlaceholder: {
       backgroundColor: theme.colors.elevation.level4,
+      borderRadius: theme.roundness * 3.5, // 14px
     },
     textPrimary: {
       color: theme.colors.onSurface,
@@ -49,7 +51,7 @@ const CurrencyConverter: React.FC = () => {
     },
     calculateButton: {
         marginTop: 24, 
-        borderRadius: 100, 
+        borderRadius: theme.roundness * 25, // 100px (Circle)
         height: 56, 
         justifyContent: 'center' as const
     },
@@ -143,11 +145,10 @@ const CurrencyConverter: React.FC = () => {
   
   // const [history, setHistory] = useState<ConversionHistory[]>([]); // Unused
 
-  // Load Rates
+  // Load Rates and Sync Selection
   useEffect(() => {
     const unsubscribe = CurrencyService.subscribe((data) => {
       setRates(data);
-      // setLoading(false);
     });
 
     // Trigger initial fetch
@@ -156,19 +157,36 @@ const CurrencyConverter: React.FC = () => {
     return () => unsubscribe();
   }, []); // Run once on mount
 
-  // Set defaults when rates are loaded
+  // Update selected currencies when rates change (to keep values fresh)
   useEffect(() => {
       if (rates.length > 0) {
-          if (!fromCurrency) {
+          // Sync fromCurrency
+          if (fromCurrency) {
+              const updatedFrom = rates.find(r => r.code === fromCurrency.code);
+              // Update if value changed or object reference is different (to ensure latest data)
+              if (updatedFrom && updatedFrom !== fromCurrency) {
+                  setFromCurrency(updatedFrom);
+              }
+          } else {
+              // Default: USD
               const usd = rates.find(r => r.code === 'USD');
               if (usd) setFromCurrency(usd);
           }
-          if (!toCurrency) {
+
+          // Sync toCurrency
+          if (toCurrency) {
+              const updatedTo = rates.find(r => r.code === toCurrency.code);
+              // Update if value changed or object reference is different
+              if (updatedTo && updatedTo !== toCurrency) {
+                  setToCurrency(updatedTo);
+              }
+          } else {
+              // Default: VES
               const ves = rates.find(r => r.code === AppConfig.BASE_CURRENCY);
               if (ves) setToCurrency(ves);
           }
       }
-  }, [rates, fromCurrency, toCurrency]);
+  }, [rates]); // Only run when rates array changes
 
   // Conversion Logic
   const convertedValue = useMemo(() => {
@@ -243,7 +261,7 @@ const CurrencyConverter: React.FC = () => {
                 icon="swap-vertical" 
                 mode="contained" 
                 containerColor={theme.colors.elevation.level3} 
-                iconColor="#ffffff"
+                iconColor={theme.colors.onSurface}
                 size={24}
                 onPress={handleSwap}
                 accessibilityLabel="Intercambiar monedas"
@@ -328,10 +346,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 8,
     paddingVertical: 6,
-    borderRadius: 24, // Pill shape
     minWidth: 120,
     justifyContent: 'space-between',
-    backgroundColor: 'rgba(255,255,255,0.05)',
     zIndex: 10,
   },
   input: {
@@ -351,7 +367,6 @@ const styles = StyleSheet.create({
   iconPlaceholder: {
       width: 28, 
       height: 28, 
-      borderRadius: 14, 
       marginRight: 8,
       alignItems: 'center',
       justifyContent: 'center',

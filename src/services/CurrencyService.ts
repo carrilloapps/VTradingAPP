@@ -31,6 +31,9 @@ interface BinanceP2PData {
         difference: number;
         percentage: number;
         direction: string;
+        count?: number;
+        startTime?: string;
+        endTime?: string;
     };
     sell: {
         currentAvg: number;
@@ -38,7 +41,11 @@ interface BinanceP2PData {
         difference: number;
         percentage: number;
         direction: string;
+        count?: number;
+        startTime?: string;
+        endTime?: string;
     };
+    windowMinutes?: number;
 }
 
 interface BinanceAd {
@@ -79,6 +86,16 @@ export class CurrencyService {
 
   private static notifyListeners(rates: CurrencyRate[]) {
     this.listeners.forEach(listener => listener(rates));
+  }
+
+  /**
+   * Helper to safely parse percentage from API response
+   */
+  private static parsePercentage(val: any): number {
+    if (val === null || val === undefined) return 0;
+    const num = Number(val);
+    if (isNaN(num)) return 0;
+    return Number(num.toFixed(2));
   }
 
   /**
@@ -146,6 +163,7 @@ export class CurrencyService {
                 'Accept': '*/*',
                 'X-API-Key': 'admin_key'
             },
+            params: forceRefresh ? { _t: Date.now() } : undefined, // Force fresh data from server
             useCache: false, // Disable cache as requested
             cacheTTL: 0
         });
@@ -177,7 +195,7 @@ export class CurrencyService {
              let changePercent: number | null = null;
              
              if (apiRate.changePercent !== undefined) {
-                 changePercent = apiRate.changePercent;
+                 changePercent = CurrencyService.parsePercentage(apiRate.changePercent);
              } else {
                  changePercent = 0; // Default to 0 if not provided
              }
@@ -210,13 +228,13 @@ export class CurrencyService {
             if (sellData && buyData) {
                 // Calculate average between buy and sell as requested
                 usdtValue = (sellData.currentAvg + buyData.currentAvg) / 2;
-                changePercent = sellData.percentage; 
+                changePercent = CurrencyService.parsePercentage(sellData.percentage); 
             } else if (sellData) {
                 usdtValue = sellData.currentAvg;
-                changePercent = sellData.percentage;
+                changePercent = CurrencyService.parsePercentage(sellData.percentage);
             } else if (buyData) {
                 usdtValue = buyData.currentAvg;
-                changePercent = buyData.percentage;
+                changePercent = CurrencyService.parsePercentage(buyData.percentage);
             }
 
             if (usdtValue > 0) {
@@ -225,7 +243,7 @@ export class CurrencyService {
                     code: 'USDT',
                     name: 'USDT/VES • TETHER',
                     value: usdtValue,
-                    changePercent: changePercent !== null && changePercent !== undefined ? Number(changePercent.toFixed(2)) : null,
+                    changePercent: changePercent !== null ? changePercent : 0,
                     type: 'crypto',
                     iconName: 'currency-bitcoin',
                     lastUpdated: response.timestamp || new Date().toISOString()
@@ -233,11 +251,11 @@ export class CurrencyService {
 
                 if (buyData) {
                     usdtRate.buyValue = buyData.currentAvg;
-                    usdtRate.buyChangePercent = Number(buyData.percentage.toFixed(2));
+                    usdtRate.buyChangePercent = CurrencyService.parsePercentage(buyData.percentage);
                 }
                 if (sellData) {
                     usdtRate.sellValue = sellData.currentAvg;
-                    usdtRate.sellChangePercent = Number(sellData.percentage.toFixed(2));
+                    usdtRate.sellChangePercent = CurrencyService.parsePercentage(sellData.percentage);
                 }
 
                 rates.push(usdtRate);

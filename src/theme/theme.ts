@@ -36,11 +36,18 @@ const customColors = {
   neutralBgDark: '#334155', // slate-700
   warning: '#eab308', // yellow-500
   warningDark: '#facc15', // yellow-400
+
+  // Skeleton Colors
+  skeletonLight: '#E1E9EE',
+  skeletonHighlightLight: '#F2F8FC',
+  skeletonDark: '#1c2a3b', // Matches elevation level 2
+  skeletonHighlightDark: '#2b3d54', // Matches elevation level 4
 };
 
 // Tema Claro Personalizado
 export const LightTheme = {
   ...DefaultLightTheme,
+  roundness: 4,
   colors: {
     ...DefaultLightTheme.colors,
     primary: customColors.primary,
@@ -73,12 +80,15 @@ export const LightTheme = {
     neutralContainer: customColors.neutralBgLight,
     danger: customColors.danger,
     warning: customColors.warning,
+    skeleton: customColors.skeletonLight,
+    skeletonHighlight: customColors.skeletonHighlightLight,
   },
 };
 
 // Tema Oscuro Personalizado (Coincide con el diseño HTML)
 export const DarkTheme = {
   ...DefaultDarkTheme,
+  roundness: 4,
   colors: {
     ...DefaultDarkTheme.colors,
     primary: customColors.primaryLight,
@@ -119,5 +129,7 @@ export const DarkTheme = {
     neutralContainer: customColors.neutralBgDark,
     danger: customColors.danger,
     warning: customColors.warningDark,
+    skeleton: customColors.skeletonDark,
+    skeletonHighlight: customColors.skeletonHighlightDark,
   },
 };

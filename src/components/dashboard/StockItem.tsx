@@ -27,9 +27,11 @@ const StockItem: React.FC<StockItemProps> = ({
   const themeStyles = React.useMemo(() => ({
     container: {
       backgroundColor: theme.colors.elevation.level1,
+      borderRadius: theme.roundness * 6,
     },
     iconContainer: {
       backgroundColor: theme.colors.elevation.level3,
+      borderRadius: theme.roundness * 4,
     },
     textContainer: {
       flex: 1,
@@ -77,7 +79,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
     marginBottom: 12,
-    borderRadius: 24, // High border radius as per screenshot
     // No border bottom
   },
   leftContent: {
@@ -89,7 +90,6 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: 48,
     height: 48,
-    borderRadius: 16, // Soft square
     alignItems: 'center',
     justifyContent: 'center',
   },

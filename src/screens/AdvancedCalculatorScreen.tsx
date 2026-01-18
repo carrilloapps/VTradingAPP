@@ -99,6 +99,7 @@ const AdvancedCalculatorScreen = () => {
   const [isInputFocused, setIsInputFocused] = useState(false);
   // loading removed as unused
   const [refreshing, setRefreshing] = useState(false);
+  const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
   
   // Base Currency State
   const [baseCurrencyCode, setBaseCurrencyCode] = useState('USD');
@@ -119,6 +120,7 @@ const AdvancedCalculatorScreen = () => {
     const unsubscribe = CurrencyService.subscribe((data) => {
       setRates(data);
       setRefreshing(false);
+      setLastRefreshTime(new Date()); // Update time on any data change (manual or pushed)
     });
     CurrencyService.getRates().catch(console.error);
     return () => unsubscribe();
@@ -413,7 +415,9 @@ const AdvancedCalculatorScreen = () => {
               </View>
               <MarketStatus 
                   isOpen={true} 
-                  updatedAt={rates.length > 0 ? new Date(rates[0].lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--'}
+                  updatedAt={lastRefreshTime 
+                    ? lastRefreshTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+                    : (rates.length > 0 ? new Date(rates[0].lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '--:--')}
                   onRefresh={onRefresh}
                   showBadge={false}
                   style={styles.marketStatusOverride}

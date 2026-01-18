@@ -36,8 +36,9 @@ const Skeleton: React.FC<SkeletonProps> = ({
     outputRange: [-300, 300], // Adjust based on width if needed, but this covers most
   });
 
-  const baseColor = theme.dark ? '#333333' : '#E1E9EE';
-  const highlightColor = theme.dark ? '#444444' : '#F2F8FC';
+  const colors = theme.colors as any;
+  const baseColor = colors.skeleton;
+  const highlightColor = colors.skeletonHighlight;
 
   return (
     <View

@@ -44,9 +44,16 @@ const RateCard: React.FC<RateCardProps> = ({
   const finalIconColor = iconColor || colors.info;
 
   return (
-    <Surface style={[styles.card, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outline }]}>
+    <Surface style={[styles.card, { 
+      backgroundColor: theme.colors.surface, 
+      borderColor: theme.colors.outline,
+      borderRadius: theme.roundness * 4
+    }]}>
       <View style={styles.leftContent}>
-        <View style={[styles.iconContainer, { backgroundColor: finalIconBgColor }]}>
+        <View style={[styles.iconContainer, { 
+          backgroundColor: finalIconBgColor,
+          borderRadius: theme.roundness * 4
+        }]}>
           <MaterialIcons name={iconName} size={24} color={finalIconColor} />
         </View>
         <View>
@@ -76,7 +83,6 @@ const RateCard: React.FC<RateCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    borderRadius: 16,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
@@ -93,7 +99,6 @@ const styles = StyleSheet.create({
   iconContainer: {
     width: 48,
     height: 48,
-    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
   },

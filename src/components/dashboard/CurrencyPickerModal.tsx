@@ -37,20 +37,22 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
       color: theme.colors.onSurfaceVariant,
     },
     pickerItem: {
-      borderBottomColor: theme.colors.outline,
+      borderRadius: theme.roundness * 3, // 12px
     },
     pickerItemSelected: {
-      backgroundColor: 'rgba(30, 41, 59, 0.6)',
-      borderBottomColor: 'transparent',
+      backgroundColor: theme.colors.secondaryContainer,
     },
     iconPlaceholderNormal: {
       backgroundColor: theme.colors.elevation.level4,
+      borderRadius: theme.roundness * 5, // 20px
     },
     iconPlaceholderSelected: {
       backgroundColor: theme.colors.primary,
+      borderRadius: theme.roundness * 5, // 20px
     },
     checkBadge: {
       backgroundColor: theme.colors.elevation.level2,
+      borderRadius: theme.roundness * 3, // 12px
     },
     textPrimary: {
       color: theme.colors.onSurface,
@@ -90,11 +92,12 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
             placeholder="Buscar moneda o país..." 
             onChangeText={setSearchQuery} 
             value={searchQuery} 
-            style={styles.searchBar}
+            style={[styles.searchBar, { borderRadius: theme.roundness * 3, borderColor: theme.colors.outline }]}
             inputStyle={themeStyles.searchBarInput}
             iconColor={theme.colors.onSurfaceVariant}
             placeholderTextColor={theme.colors.onSurfaceVariant}
             mode="bar"
+            elevation={0}
         />
 
         <SectionList
@@ -121,11 +124,11 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
                              <MaterialIcons 
                                 name={item.iconName || 'attach-money'} 
                                 size={24} 
-                                color={isSelected ? '#fff' : theme.colors.onSurfaceVariant} 
+                                color={isSelected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant} 
                              />
                         </View>
                         <View style={styles.pickerItemContent}>
-                            <Text variant="titleMedium" style={themeStyles.textPrimary}>{item.code}</Text>
+                            <Text variant="titleMedium" style={[{ fontWeight: isSelected ? '700' : '400'}, themeStyles.textPrimary]}>{item.code}</Text>
                             <Text variant="bodySmall" style={themeStyles.textSecondary}>{item.name}</Text>
                         </View>
                         {isSelected && (
@@ -140,7 +143,7 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
                 <Text style={[styles.sectionHeader, themeStyles.sectionHeader]}>{title}</Text>
             )}
             stickySectionHeadersEnabled={false}
-            contentContainerStyle={{ paddingBottom: 20 }}
+            contentContainerStyle={{ paddingBottom: 24 }}
         />
     </BottomSheetModal>
   );
@@ -149,30 +152,30 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
 const styles = StyleSheet.create({
     searchBar: {
         marginBottom: 16,
+        marginHorizontal: 20,
         backgroundColor: 'transparent',
         borderWidth: 1,
-        borderColor: 'rgba(128,128,128, 0.2)',
+        height: 50,
     },
     sectionHeader: {
         fontSize: 12,
         fontWeight: 'bold',
-        marginTop: 16,
+        marginTop: 20,
         marginBottom: 8,
+        marginHorizontal: 24,
         letterSpacing: 1,
     },
     pickerItem: {
         flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: 12,
-        paddingHorizontal: 8,
-        borderBottomWidth: 1,
-        borderRadius: 12,
+        paddingHorizontal: 16,
+        marginHorizontal: 16,
         marginBottom: 4,
     },
     iconPlaceholder: {
         width: 40,
         height: 40,
-        borderRadius: 20,
         alignItems: 'center',
         justifyContent: 'center',
         marginRight: 16,
@@ -183,7 +186,6 @@ const styles = StyleSheet.create({
     checkBadge: {
         width: 24,
         height: 24,
-        borderRadius: 12,
         alignItems: 'center',
         justifyContent: 'center',
     },
