@@ -83,5 +83,25 @@ Este componente es un bloque de construcción ("primitive") que renderiza una vi
 ### Estrategia de Implementación
 No usar `Skeleton` directamente en las pantallas. En su lugar, crear componentes "Skeleton" dedicados (ej. `DashboardSkeleton`, `WalletSkeleton`) que compongan múltiples primitivos `Skeleton` para replicar la estructura exacta del layout final.
 
+## FilterSection (Selector de Filtros)
+
+Componente unificado para mostrar opciones de filtrado en formato de "Chips". Soporta modos de scroll horizontal y envoltura (wrap).
+
+### Características
+*   **Animaciones:** Soporte integrado para `LayoutAnimation` al seleccionar.
+*   **Modos de Visualización:** 
+    *   `scroll`: Lista horizontal desplazable (Ideal para muchas categorías, ej. Stocks).
+    *   `wrap`: Lista que se ajusta al ancho disponible (Ideal para pocas opciones, ej. Tasas de cambio).
+*   **Estilo Unificado:** Chips con bordes ligeros en estado inactivo y fondo sólido (Primary) en estado activo.
+
+### Props
+| Prop | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `options` | `FilterOption[]` | Sí | Array de objetos `{ label: string, value: string }`. |
+| `selectedValue` | `string` | Sí | Valor actualmente seleccionado. |
+| `onSelect` | `(value: string) => void` | Sí | Callback al seleccionar una opción. |
+| `mode` | `'scroll' \| 'wrap'` | No | Modo de visualización. Default: `'scroll'`. |
+| `visible` | `boolean` | No | Controla si el componente se renderiza. Default: `true`. |
+
 ---
 *Última actualización: 20 de Enero de 2026*

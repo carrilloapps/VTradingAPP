@@ -1,11 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar } from 'react-native';
-import { Text, useTheme, Chip } from 'react-native-paper';
+import { Text, useTheme } from 'react-native-paper';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MarketStatus from '../components/stocks/MarketStatus';
 import IndexHero from '../components/stocks/IndexHero';
 import StockItem, { StockData } from '../components/stocks/StockItem';
 import SearchBar from '../components/ui/SearchBar';
+import FilterSection from '../components/ui/FilterSection';
 import { useFilters } from '../context/FilterContext';
 
 // Mock Data based on the HTML template
@@ -23,7 +24,6 @@ const StocksScreen = () => {
   const theme = useTheme();
   const { stockFilters, setStockFilters } = useFilters();
   const { query: searchQuery, category: activeFilter } = stockFilters;
-  const [showFilters, setShowFilters] = useState(false);
 
   // Filter Logic
   const filteredStocks = useMemo(() => {
@@ -76,7 +76,7 @@ const StocksScreen = () => {
             value={searchQuery}
             onChangeText={handleSearch}
             placeholder="Buscar empresa o ticker..."
-            onFilterPress={() => setShowFilters(!showFilters)}
+            onFilterPress={undefined}
             suggestions={suggestions}
             onSuggestionPress={handleSuggestionPress}
           />
@@ -101,41 +101,12 @@ const StocksScreen = () => {
         />
 
         {/* Filters */}
-        <View style={styles.filtersContainer}>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filtersContent}>
-            {FILTERS.map((filter) => {
-              const isActive = activeFilter === filter;
-              const chipStyle = [
-                styles.chip,
-                { 
-                  backgroundColor: isActive ? theme.colors.primary : theme.colors.surface,
-                  borderColor: isActive ? theme.colors.primary : theme.colors.outline,
-                }
-              ];
-              const chipTextStyle = [
-                styles.chipText,
-                {
-                  color: isActive ? 'white' : theme.colors.onSurfaceVariant,
-                }
-              ];
-
-              return (
-                <Chip
-                  key={filter}
-                  selected={isActive}
-                  onPress={() => setStockFilters({ category: filter })}
-                  style={chipStyle}
-                  textStyle={chipTextStyle}
-                  showSelectedOverlay={true}
-                  accessibilityLabel={`Filtro: ${filter}`}
-                  accessibilityState={{ selected: isActive }}
-                >
-                  {filter}
-                </Chip>
-              );
-            })}
-          </ScrollView>
-        </View>
+        <FilterSection
+          options={FILTERS.map(f => ({ label: f, value: f }))}
+          selectedValue={activeFilter}
+          onSelect={(value) => setStockFilters({ category: value })}
+          mode="scroll"
+        />
 
         {/* Stock List Header */}
         <View style={styles.listHeader}>
@@ -166,18 +137,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginTop: 8,
   },
-  filtersContainer: {
-    marginTop: 12,
-  },
-  filtersContent: {
-    paddingHorizontal: 20,
-    gap: 8,
-  },
-  chip: {
-    height: 36,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
   listHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -202,10 +161,6 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingBottom: 100,
-  },
-  chipText: {
-    fontWeight: 'bold',
-    fontSize: 12,
   },
 });
 

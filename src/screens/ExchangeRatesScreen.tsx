@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
-import { Text, useTheme, Chip } from 'react-native-paper';
+import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, ActivityIndicator, RefreshControl, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { Text, useTheme } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import RateCard from '../components/dashboard/RateCard';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import SearchBar from '../components/ui/SearchBar';
+import FilterSection from '../components/ui/FilterSection';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
 import { useFilters } from '../context/FilterContext';
 import { useToast } from '../context/ToastContext';
@@ -109,31 +110,6 @@ const ExchangeRatesScreen = () => {
     />
   );
 
-  const renderChip = (label: string, value: 'all' | 'fiat' | 'crypto') => {
-    const isSelected = filterType === value;
-    return (
-      <Chip 
-        selected={isSelected} 
-        onPress={() => setExchangeRateFilters({ type: value })}
-        style={[
-          styles.chip, 
-          isSelected 
-            ? [styles.chipSelected, { backgroundColor: theme.colors.primary }] 
-            : [styles.chipUnselected, { borderColor: theme.colors.outline }]
-        ]}
-        textStyle={
-          isSelected 
-            ? styles.chipTextSelected 
-            : [styles.chipTextUnselected, { color: theme.colors.onSurfaceVariant }]
-        }
-        showSelectedOverlay={false}
-        rippleColor={isSelected ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)'}
-      >
-        {label}
-      </Chip>
-    );
-  };
-
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar 
@@ -160,18 +136,12 @@ const ExchangeRatesScreen = () => {
             value={searchQuery}
             onChangeText={handleSearch}
             placeholder="Buscar moneda o token..."
-            onFilterPress={() => setShowFilters(!showFilters)}
+            onFilterPress={() => {
+              LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+              setShowFilters(!showFilters);
+            }}
           />
         </View>
-
-        {/* Filter Chips */}
-        {showFilters && (
-          <View style={styles.filterContainer}>
-            {renderChip('Todas', 'all')}
-            {renderChip('Fiat', 'fiat')}
-            {renderChip('Cripto', 'crypto')}
-          </View>
-        )}
       </View>
 
       <ScrollView 
@@ -182,6 +152,22 @@ const ExchangeRatesScreen = () => {
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.colors.primary]} />
         }
       >
+        {/* Filter Chips */}
+        <FilterSection 
+          options={[
+            { label: 'Todas', value: 'all' },
+            { label: 'Fiat', value: 'fiat' },
+            { label: 'Cripto', value: 'crypto' },
+          ]}
+          selectedValue={filterType}
+          onSelect={(value) => {
+            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+            setExchangeRateFilters({ type: value as any });
+          }}
+          visible={showFilters}
+          mode="wrap"
+        />
+
         {loading && !refreshing && filteredRates.length === 0 ? (
           <View style={styles.centerContainer}>
             <ActivityIndicator size="large" color={theme.colors.primary} />
@@ -260,17 +246,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginTop: 8,
   },
-  filterContainer: {
-    flexDirection: 'row',
-    paddingHorizontal: 20,
-    marginTop: 12,
-    gap: 8,
-  },
   content: {
     flex: 1,
   },
   scrollContent: {
-    paddingTop: 20,
     paddingBottom: 100, // Extra space for FAB or Bottom Tab
   },
   centerContainer: {
@@ -313,23 +292,6 @@ const styles = StyleSheet.create({
   tagText: {
     fontSize: 10,
     fontWeight: 'bold',
-  },
-  chip: {
-    marginRight: 0,
-  },
-  chipSelected: {
-    borderWidth: 0,
-  },
-  chipUnselected: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-  },
-  chipTextSelected: {
-    color: '#ffffff',
-    fontWeight: 'bold',
-  },
-  chipTextUnselected: {
-    // color handled in prop
   },
 });
 
