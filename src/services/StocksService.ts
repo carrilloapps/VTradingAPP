@@ -18,8 +18,15 @@ interface ApiStock {
   symbol: string;
   name: string;
   price: number;
-  changePercent: number;
-  volume?: number;
+  changePercent?: number;
+  change?: {
+    amount: number;
+    percent: number;
+  };
+  volume?: number | {
+      shares: number;
+      amount: number;
+  };
   openingPrice?: number;
   meta?: {
     iconUrl?: string;
@@ -86,6 +93,64 @@ export class StocksService {
     return colors[Math.abs(hash) % colors.length];
   }
 
+  private static parsePrice(val: any): number {
+    if (val === null || val === undefined) return 0;
+    if (typeof val === 'number') return val;
+    if (typeof val === 'string') {
+        // Handle comma as decimal separator
+        const normalized = val.replace(',', '.');
+        const num = Number(normalized);
+        return isNaN(num) ? 0 : num;
+    }
+    return 0;
+  }
+
+  private static mapStock(item: ApiStock): StockData {
+    let changePercent = 0;
+    if (item.changePercent !== undefined) {
+        changePercent = this.parsePrice(item.changePercent);
+    } else if (item.change && item.change.percent !== undefined) {
+        changePercent = this.parsePrice(item.change.percent);
+    }
+
+    let volumeStr: string | undefined;
+    if (typeof item.volume === 'number') {
+        volumeStr = `${(item.volume / 1000).toFixed(1)}k`;
+    } else if (item.volume && typeof item.volume === 'object' && item.volume.amount) {
+         volumeStr = `${(item.volume.amount / 1000).toFixed(1)}k`;
+    }
+
+    return {
+      id: item.symbol,
+      symbol: item.symbol,
+      name: item.name,
+      price: this.parsePrice(item.price),
+      changePercent: changePercent,
+      initials: item.symbol.substring(0, 3),
+      color: this.getColorForStock(item.symbol),
+      volume: volumeStr,
+      opening: this.parsePrice(item.openingPrice),
+      iconUrl: item.meta?.iconUrl
+    };
+  }
+
+  /**
+    * Fetch all stocks for autocomplete (limit 500)
+    */
+   static async getAllStocks(): Promise<StockData[]> {
+     try {
+       const response = await apiClient.get<ApiStocksResponse>('api/bvc/market', {
+           params: { page: 1, limit: 500 },
+           useCache: false
+       });
+       const rawList = response.data || response.stocks || [];
+       return rawList.map(item => this.mapStock(item));
+     } catch (error) {
+      console.error('Error fetching all stocks:', error);
+      return [];
+    }
+  }
+
   /**
    * Fetch stocks with pagination support
    */
@@ -130,18 +195,7 @@ export class StocksService {
           this.currentPage = response.pagination.page;
       }
 
-      const newStocks: StockData[] = rawList.map((item, index) => ({
-        id: item.symbol, // Use symbol as ID for stability
-        symbol: item.symbol,
-        name: item.name,
-        price: item.price,
-        changePercent: item.changePercent || 0, // Ensure not undefined
-        initials: item.symbol.substring(0, 3),
-        color: this.getColorForStock(item.symbol),
-        volume: item.volume ? `${(item.volume / 1000).toFixed(1)}k` : undefined,
-        opening: item.openingPrice,
-        iconUrl: item.meta?.iconUrl
-      }));
+      const newStocks: StockData[] = rawList.map((item, index) => this.mapStock(item));
 
       if (page === 1) {
           this.currentStocks = newStocks;

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity, FlatList } from 'react-native';
-import { Button, TextInput, Text, SegmentedButtons, useTheme, ActivityIndicator, IconButton, Icon } from 'react-native-paper';
+import { View, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
+import { TextInput, Text, useTheme, ActivityIndicator, IconButton, Icon } from 'react-native-paper';
 import { CurrencyService } from '../../services/CurrencyService';
 import { StocksService } from '../../services/StocksService';
 import UniversalDialog from '../ui/UniversalDialog';
@@ -39,7 +39,7 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
       // Fetch data in parallel
       const [rates, stocks] = await Promise.all([
         CurrencyService.getRates(),
-        StocksService.getStocks()
+        StocksService.getAllStocks()
       ]);
 
       const prices: Record<string, number> = {};
@@ -93,9 +93,16 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
     setSymbol(selected);
     setShowDropdown(false);
     // Auto-set current price as target suggestion if empty
-    if (!target && symbolPrices[selected]) {
+    if (!target && symbolPrices[selected] !== undefined) {
       setTarget(symbolPrices[selected].toFixed(2));
     }
+  };
+
+  const getCurrencyPrefix = (sym: string) => {
+      if (!sym) return '';
+      if (sym.endsWith('/USD') || sym.endsWith('/USDT')) return '$ ';
+      if (sym.endsWith('/EUR')) return '€ ';
+      return 'Bs. ';
   };
 
   const filteredSymbols = availableSymbols.filter(s => 
@@ -111,10 +118,10 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
         <View style={styles.actionButtonsContainer}>
           <TouchableOpacity 
             onPress={onDismiss} 
-            style={[styles.actionButton, { backgroundColor: theme.colors.surfaceVariant }]}
+            style={[styles.actionButton, { backgroundColor: 'transparent', borderWidth: 1, borderColor: theme.colors.outline }]}
             activeOpacity={0.8}
           >
-            <Text style={[styles.actionButtonText, { color: theme.colors.onSurfaceVariant }]}>CANCELAR</Text>
+            <Text style={[styles.actionButtonText, { color: theme.colors.onSurface }]}>CANCELAR</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
@@ -129,7 +136,7 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
     >
       <View style={styles.formContainer}>
         {/* Symbol Input */}
-        <View style={styles.inputGroup}>
+        <View style={[styles.inputGroup, { zIndex: 100 }]}>
           <Text variant="labelMedium" style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Activo</Text>
           <View style={styles.autocompleteContainer}>
             <TextInput
@@ -179,7 +186,11 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
                        <View>
                          <Text variant="bodyMedium" style={{ fontWeight: 'bold' }}>{item}</Text>
                          <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                           Actual: {symbolPrices[item]?.toFixed(2)}
+                           Actual: {getCurrencyPrefix(item)}{
+                             symbolPrices[item] !== undefined && !isNaN(symbolPrices[item]) 
+                               ? symbolPrices[item].toFixed(2) 
+                               : 'N/A'
+                           }
                          </Text>
                        </View>
                        <IconButton icon="arrow-top-left" size={16} />
@@ -261,13 +272,7 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
             underlineColor="transparent"
             activeUnderlineColor="transparent"
             textColor={theme.colors.onSurface}
-            left={<TextInput.Affix text={
-                symbolPrices[symbol] 
-                    ? (symbol.endsWith('/USD') || symbol.endsWith('/USDT') ? '$ ' 
-                        : symbol.endsWith('/EUR') ? '€ ' 
-                        : 'Bs. ') 
-                    : ''
-            } />}
+            left={<TextInput.Affix text={symbolPrices[symbol] ? getCurrencyPrefix(symbol) : ''} />}
             right={
                 loadingSymbols ? <TextInput.Icon icon={() => <ActivityIndicator size={16} />} /> :
                 symbol ? <TextInput.Icon icon="close" onPress={() => setSymbol('')} /> :
@@ -276,7 +281,7 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
           />
           {symbolPrices[symbol] && (
             <Text variant="bodySmall" style={{ marginTop: 4, color: theme.colors.primary }}>
-                Precio actual: {symbolPrices[symbol].toFixed(2)}
+                Precio actual: {getCurrencyPrefix(symbol)}{symbolPrices[symbol].toFixed(2)}
             </Text>
           )}
         </View>
@@ -284,7 +289,7 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
         {/* Disclaimer / Summary */}
         {target && !isNaN(Number(target)) ? (
            <Text style={{ textAlign: 'center', color: theme.colors.onSurfaceVariant, fontSize: 13 }}>
-             Se te notificará cuando el precio sea <Text style={{ fontWeight: 'bold', color: theme.colors.onSurface }}>{condition === 'above' ? 'mayor' : 'menor'}</Text> a <Text style={{ fontWeight: 'bold', color: theme.colors.onSurface }}>{target}</Text>.
+             Se te notificará cuando el precio sea <Text style={{ fontWeight: 'bold', color: theme.colors.onSurface }}>{condition === 'above' ? 'mayor' : 'menor'}</Text> a <Text style={{ fontWeight: 'bold', color: theme.colors.onSurface }}>{getCurrencyPrefix(symbol)}{target}</Text>.
            </Text>
         ) : null}
 
@@ -315,7 +320,7 @@ const styles = StyleSheet.create({
   },
   autocompleteContainer: {
     position: 'relative',
-    zIndex: 10,
+    zIndex: 1000,
   },
   dropdown: {
     position: 'absolute',
@@ -325,8 +330,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 12,
     height: 160, // Fixed height instead of max-height to ensure scroll area is stable
-    zIndex: 1000,
-    elevation: 4,
+    zIndex: 2000,
+    elevation: 100, // High elevation for Android touch events
+    backgroundColor: 'white', // Ensure it has a background to capture touches (overridden by theme)
   },
   dropdownItem: {
     padding: 12,
