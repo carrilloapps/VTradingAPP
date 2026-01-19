@@ -1,4 +1,4 @@
-import { getAnalytics, logEvent, logScreenView, setUserProperty, setUserId } from '@react-native-firebase/analytics';
+import { getAnalytics, logEvent, setUserProperty, setUserId } from '@react-native-firebase/analytics';
 
 class AnalyticsService {
   /**
@@ -15,10 +15,11 @@ class AnalyticsService {
 
   /**
    * Log a screen view
+   * NOTE: logScreenView is deprecated, using logEvent('screen_view') instead
    */
   async logScreenView(screenName: string, screenClass?: string): Promise<void> {
     try {
-      await logScreenView(getAnalytics(), {
+      await logEvent(getAnalytics(), 'screen_view', {
         screen_name: screenName,
         screen_class: screenClass || screenName,
       });
