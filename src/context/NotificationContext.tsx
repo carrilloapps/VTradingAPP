@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { AppState, AppStateStatus } from 'react-native';
 import { storageService, StoredNotification } from '../services/StorageService';
 import { fcmService } from '../services/firebase/FCMService';
-import { useNavigation } from '@react-navigation/native';
+import { navigationRef } from '../navigation/NavigationRef';
 
 interface NotificationContextType {
   notifications: StoredNotification[];
@@ -29,7 +29,6 @@ export const useNotifications = () => useContext(NotificationContext);
 export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<StoredNotification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const navigation = useNavigation<any>(); // Using any to avoid complex navigation types for now
 
   // Load initial notifications
   useEffect(() => {
@@ -87,16 +86,15 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       if (remoteMessage) {
         console.log('Notification caused app to open from quit state:', remoteMessage);
         // Navigate to Notifications Screen
-        // Note: Navigation might not be ready yet, but usually is inside AppNavigator context
-        // We might need a slight delay or check navigation readiness
         setTimeout(() => {
-             navigation.navigate('MainTab', { screen: 'Home', params: { screen: 'Notifications' } }); 
-             // Wait, NotificationsScreen is NOT in MainTab, it's usually in HomeStack or just a root screen?
-             // Let's check AppNavigator again.
-             // NotificationsScreen is imported but I don't see it in the stacks I read earlier.
-             // Ah, I missed where it is added. I read line 1-100.
-             // Let me check AppNavigator fully to know the route.
-        }, 500);
+             if (navigationRef.isReady()) {
+                 try {
+                     navigationRef.navigate('Notifications');
+                 } catch (e) {
+                     console.log('Navigation to Notifications failed (possibly unauthenticated)', e);
+                 }
+             }
+        }, 1000);
       }
     });
 
@@ -104,7 +102,13 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     const unsubscribeOpened = fcmService.onNotificationOpenedApp(remoteMessage => {
       console.log('Notification caused app to open from background state:', remoteMessage);
        // Navigate to Notifications Screen
-       navigation.navigate('Notifications'); // Assuming route name is 'Notifications'
+       if (navigationRef.isReady()) {
+           try {
+               navigationRef.navigate('Notifications');
+           } catch (e) {
+               console.log('Navigation to Notifications failed', e);
+           }
+       }
     });
 
     // 3. Foreground State
@@ -131,7 +135,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       unsubscribeOpened();
       unsubscribeMessage();
     };
-  }, [addNotification, navigation]);
+  }, [addNotification]);
 
   return (
     <NotificationContext.Provider value={{

@@ -65,8 +65,8 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
 
       // Process Stocks
       stocks.forEach(s => {
-        // Stocks are typically in VES, add /VES suffix for consistency
-        prices[`${s.symbol}/VES`] = s.price;
+        // Stocks are listed by symbol directly (e.g., CANTV, BNC)
+        prices[s.symbol] = s.price;
       });
 
       setSymbolPrices(prices);

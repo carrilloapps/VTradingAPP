@@ -1,14 +1,7 @@
 import React from 'react';
-import { ScrollView, View, StyleSheet, Platform, UIManager, StyleProp, ViewStyle } from 'react-native';
+import { ScrollView, View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { Chip } from 'react-native-paper';
 import { useAppTheme } from '../../theme/useAppTheme';
-
-// Enable LayoutAnimation for Android (Old Architecture only)
-if (Platform.OS === 'android' && !(globalThis as any).nativeFabricUIManager) {
-  if (UIManager.setLayoutAnimationEnabledExperimental) {
-    UIManager.setLayoutAnimationEnabledExperimental(true);
-  }
-}
 
 export interface FilterOption {
   label: string;

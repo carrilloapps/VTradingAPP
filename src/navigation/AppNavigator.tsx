@@ -21,6 +21,7 @@ import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
 import ModernTabBar from '../components/navigation/ModernTabBar';
+import { navigationRef } from './NavigationRef';
 
 // Root Stack that includes Splash
 const RootStack = createNativeStackNavigator();
@@ -142,7 +143,6 @@ const AppNavigator = () => {
   const { isDark } = useThemeContext();
   const { user, isLoading } = useAuth();
   const routeNameRef = React.useRef<string | undefined>(undefined);
-  const navigationRef = React.useRef<any>(null);
   
   const navigationTheme = isDark ? NavDarkTheme : NavDefaultTheme;
   const themeWithPaper = {
@@ -162,14 +162,14 @@ const AppNavigator = () => {
       ref={navigationRef}
       theme={themeWithPaper}
       onReady={() => {
-        routeNameRef.current = navigationRef.current.getCurrentRoute().name;
+        routeNameRef.current = navigationRef.current?.getCurrentRoute()?.name;
       }}
       onStateChange={async () => {
         const previousRouteName = routeNameRef.current;
-        const currentRoute = navigationRef.current.getCurrentRoute();
-        const currentRouteName = currentRoute.name;
+        const currentRoute = navigationRef.current?.getCurrentRoute();
+        const currentRouteName = currentRoute?.name;
 
-        if (previousRouteName !== currentRouteName) {
+        if (previousRouteName !== currentRouteName && currentRouteName) {
           await analyticsService.logScreenView(currentRouteName, currentRouteName);
         }
         routeNameRef.current = currentRouteName;

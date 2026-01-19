@@ -1,7 +1,16 @@
 import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { Platform, UIManager } from 'react-native';
 import { ThemeProvider } from './src/theme/ThemeContext';
+
+// Enable LayoutAnimation for Android (Old Architecture only)
+if (Platform.OS === 'android' && !(globalThis as any).nativeFabricUIManager) {
+  if (UIManager.setLayoutAnimationEnabledExperimental) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+  }
+}
+
 import { FilterProvider } from './src/context/FilterContext';
 import { AuthProvider } from './src/context/AuthContext';
 import { ToastProvider } from './src/context/ToastContext';

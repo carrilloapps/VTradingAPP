@@ -59,10 +59,7 @@ class StorageService {
       const data = await AsyncStorage.getItem(KEYS.ALERTS);
       // Return default mocks if empty for demo purposes, or empty array
       if (!data) {
-        return [
-          { id: '1', symbol: 'USD/VES', target: '40.50', condition: 'above', isActive: true, iconName: 'currency-exchange' },
-          { id: '2', symbol: 'CANTV', target: '3.20', condition: 'below', isActive: false, iconName: 'show-chart' },
-        ];
+        return [];
       }
       return JSON.parse(data);
     } catch (e) {

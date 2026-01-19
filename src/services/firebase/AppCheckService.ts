@@ -54,8 +54,12 @@ class AppCheckService {
       }
       
       // Prevent rapid retries if we are hitting "Too many attempts"
-      if (this.errorCount > 3 && Date.now() - this.lastErrorTime < 60000) {
-          return undefined; // Backoff for 1 minute
+      // Exponential backoff: 1min, 2min, 4min, etc. capped at 1 hour
+      const backoffTime = Math.min(60000 * Math.pow(2, this.errorCount - 3), 3600000);
+      
+      if (this.errorCount > 3 && Date.now() - this.lastErrorTime < backoffTime) {
+          if (__DEV__) console.log(`[AppCheck] Backing off for ${backoffTime/1000}s`);
+          return undefined; 
       }
 
       const result = await getToken(this.appCheckInstance);

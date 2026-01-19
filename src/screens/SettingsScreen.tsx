@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Alert, Platform } from 'react-native';
-import { Text, useTheme, Switch, Snackbar } from 'react-native-paper';
+import { Text, useTheme, Switch, Snackbar, Button } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import DeviceInfo from 'react-native-device-info';
 import messaging from '@react-native-firebase/messaging';
@@ -189,13 +189,16 @@ const SettingsScreen = () => {
   };
 
   const saveNewAlert = async (symbol: string, target: string, condition: 'above' | 'below') => {
+      // Determine icon based on symbol type (Currency pair has /, Stock doesn't)
+      const iconName = symbol.includes('/') ? 'currency-exchange' : 'show-chart';
+
       const newAlert: UserAlert = {
           id: Date.now().toString(),
           symbol: symbol,
           target: target,
           condition: condition,
           isActive: true,
-          iconName: 'notifications-active' // Default icon
+          iconName: iconName
       };
       
       const updated = [...alerts, newAlert];
@@ -254,8 +257,42 @@ const SettingsScreen = () => {
           
           <View style={[styles.cardContainer, { borderColor: theme.colors.outline, backgroundColor: theme.colors.elevation.level1 }]}>
             {alerts.length === 0 ? (
-                <View style={{ padding: 16, alignItems: 'center' }}>
-                    <Text style={{ color: theme.colors.onSurfaceVariant }}>No tienes alertas activas</Text>
+                <View style={{ padding: 24, alignItems: 'center', justifyContent: 'center' }}>
+                    <View style={{ 
+                        width: 56, 
+                        height: 56, 
+                        borderRadius: 28, 
+                        backgroundColor: theme.colors.elevation.level2,
+                        alignItems: 'center', 
+                        justifyContent: 'center',
+                        marginBottom: 16
+                    }}>
+                        <MaterialIcons name="add-alert" size={32} color={theme.colors.primary} />
+                    </View>
+                    <Text style={{ 
+                        fontSize: 16, 
+                        fontWeight: 'bold', 
+                        color: theme.colors.onSurface,
+                        marginBottom: 8 
+                    }}>
+                        Crea tu primera alerta
+                    </Text>
+                    <Text style={{ 
+                        fontSize: 14, 
+                        color: theme.colors.onSurfaceVariant, 
+                        textAlign: 'center',
+                        lineHeight: 20
+                    }}>
+                        Recibe notificaciones instantáneas cuando las tasas o acciones alcancen el precio que te interesa.
+                    </Text>
+                    <Button 
+                        mode="outlined" 
+                        onPress={handleAddAlert}
+                        style={{ marginTop: 16, borderColor: theme.colors.outline }}
+                        textColor={theme.colors.primary}
+                    >
+                        Crear Alerta
+                    </Button>
                 </View>
             ) : (
                 alerts.map((alert, index) => (
