@@ -8,6 +8,7 @@ import UnifiedHeader from '../components/ui/UnifiedHeader';
 import SearchBar from '../components/ui/SearchBar';
 import FilterSection from '../components/ui/FilterSection';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
+import { StocksService } from '../services/StocksService';
 import { useFilters } from '../context/FilterContext';
 import { useToast } from '../context/ToastContext';
 import { useAppTheme } from '../theme/useAppTheme';
@@ -28,6 +29,7 @@ const ExchangeRatesScreen = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [allRates, setAllRates] = useState<CurrencyRate[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [isMarketOpen, setIsMarketOpen] = useState(StocksService.isMarketOpen());
 
   const handleSearch = (text: string) => {
     setExchangeRateFilters({ query: text });
@@ -63,21 +65,35 @@ const ExchangeRatesScreen = () => {
       setError(null);
     });
 
+    // Subscribe to Stocks for Market Status
+    const unsubscribeStocks = StocksService.subscribe(() => {
+        setIsMarketOpen(StocksService.isMarketOpen());
+    });
+
     // Initial Fetch
-    CurrencyService.getRates().catch(err => {
+    Promise.all([
+        CurrencyService.getRates(),
+        StocksService.getStocks()
+    ]).catch(err => {
       console.error(err);
       setError('Error al cargar las tasas de cambio');
       showToast('Error de conexión', 'error');
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+        unsubscribe();
+        unsubscribeStocks();
+    };
   }, [showToast]);
 
   const onRefresh = useCallback(async () => {
       setRefreshing(true);
       try {
-          await CurrencyService.getRates(true);
+          await Promise.all([
+             CurrencyService.getRates(true),
+             StocksService.getStocks(true)
+          ]);
       } catch {
           showToast('Error al actualizar', 'error');
       } finally {
@@ -147,7 +163,7 @@ const ExchangeRatesScreen = () => {
         <UnifiedHeader
           variant="section"
           title="Tasas de Cambio"
-          subtitle="Mercado en vivo • VES"
+          subtitle={isMarketOpen ? "Mercado abierto (Tiempo real)" : "Mercado BCV cerrado • P2P activo (Tiempo real)"}
           onActionPress={() => loadRates()}
           rightActionIcon="refresh"
           onNotificationPress={() => {}}
@@ -182,6 +198,7 @@ const ExchangeRatesScreen = () => {
             { label: 'Todas', value: 'all' },
             { label: 'Fiat', value: 'fiat' },
             { label: 'Cripto', value: 'crypto' },
+            { label: 'Fronterizo', value: 'border' },
           ]}
           selectedValue={filterType}
           onSelect={(value) => {
@@ -232,8 +249,14 @@ const ExchangeRatesScreen = () => {
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
                   <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>Tasa oficial del BCV</Text>
-                  <View style={[styles.tag, { backgroundColor: colors.successContainer }]}>
-                    <Text style={[styles.tagText, { color: colors.success }]}>ACTUALIZADO</Text>
+                  <View style={[styles.tag, { 
+                      backgroundColor: isMarketOpen ? colors.successContainer : colors.secondaryContainer 
+                  }]}>
+                    <Text style={[styles.tagText, { 
+                        color: isMarketOpen ? colors.success : colors.onSecondaryContainer 
+                    }]}>
+                        {isMarketOpen ? 'ACTUALIZADO' : 'ACTUALIZADO (P2P)'}
+                    </Text>
                   </View>
                 </View>
                 {officialRates.map(renderRateCard)}
@@ -244,7 +267,7 @@ const ExchangeRatesScreen = () => {
             {borderRates.length > 0 && (
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
-                  <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>Mercado Fronterizo</Text>
+                  <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>Mercado Fronterizo (P2P)</Text>
                 </View>
                 {borderRates.map(renderRateCard)}
               </View>
