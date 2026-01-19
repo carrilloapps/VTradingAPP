@@ -65,6 +65,7 @@ Monitoreo de rendimiento de red y trazas personalizadas.
 
 - **Servicio**: `src/services/firebase/PerformanceService.ts`.
 - **Integración**: Automática para red nativa. Trazas manuales en `CurrencyService.ts`.
+- **Configuración**: Habilitado explícitamente en `firebase.json` (`perf_auto_collection_enabled`).
 
 ### 8. App Distribution
 
@@ -73,7 +74,29 @@ Verificación de actualizaciones para testers.
 - **Servicio**: `src/services/firebase/AppDistributionService.ts`.
 - **Uso**: Se verifica al iniciar la app si hay nuevas versiones (solo release).
 
+### 9. In-App Messaging
+
+Mensajes dentro de la aplicación para campañas de marketing o avisos.
+
+- **Servicio**: `src/services/firebase/InAppMessagingService.ts`.
+- **Uso**: Configurado para mostrar mensajes automáticamente (supresión deshabilitada).
+
 ## Configuración Técnica
+
+### Archivo de Configuración Global (firebase.json)
+
+Se ha creado un archivo `firebase.json` en la raíz del proyecto para controlar explícitamente la inicialización de los servicios:
+
+```json
+{
+  "react-native": {
+    "perf_auto_collection_enabled": true,
+    "analytics_auto_collection_enabled": true,
+    "messaging_auto_init_enabled": true,
+    "crashlytics_auto_collection_enabled": true
+  }
+}
+```
 
 ### Android
 
