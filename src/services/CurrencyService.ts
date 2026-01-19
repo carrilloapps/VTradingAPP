@@ -21,16 +21,26 @@ interface ApiRateItem {
   currency: string;
   source: string;
   rate: {
-    average: number;
-    buy: number;
-    sell: number;
+    average?: number;
+    buy?: number;
+    sell?: number;
   };
   date: string;
   previousDate: string | null;
   change: {
-    value: number;
-    percent: number;
-    direction: string;
+    value?: number;
+    percent?: number;
+    direction?: string;
+    buy?: {
+      value: number;
+      percent: number;
+      direction: string;
+    };
+    sell?: {
+      value: number;
+      percent: number;
+      direction: string;
+    };
   };
 }
 
@@ -181,20 +191,44 @@ export class CurrencyService {
                  switch(apiRate.currency) {
                      case 'EUR': iconName = 'euro'; break;
                      case 'USD': iconName = 'attach-money'; break;
+                     case 'CNY': iconName = 'currency-yuan'; break;
+                     case 'RUB': iconName = 'currency-ruble'; break;
+                     case 'TRY': iconName = 'account-balance'; break;
+                     case 'GBP': iconName = 'currency-pound'; break;
+                     case 'JPY': iconName = 'currency-yen'; break;
                      default: iconName = 'attach-money';
+                 }
+
+                 // Calculate values if average is missing (common in P2P/Border rates)
+                 const buy = CurrencyService.parseRate(apiRate.rate?.buy);
+                 const sell = CurrencyService.parseRate(apiRate.rate?.sell);
+                 const avgValue = apiRate.rate?.average 
+                    ? CurrencyService.parseRate(apiRate.rate.average) 
+                    : (buy + sell) / 2;
+
+                 // Calculate change percent
+                 let changePercent = 0;
+                 if (apiRate.change?.percent !== undefined) {
+                    changePercent = CurrencyService.parsePercentage(apiRate.change.percent);
+                 } else {
+                    const buyPercent = apiRate.change?.buy?.percent || 0;
+                    const sellPercent = apiRate.change?.sell?.percent || 0;
+                    changePercent = CurrencyService.parsePercentage((buyPercent + sellPercent) / 2);
                  }
     
                  rates.push({
                      id: `border_${index}`,
                      code: apiRate.currency,
                      name: name,
-                     value: CurrencyService.parseRate(apiRate.rate?.average),
-                     changePercent: CurrencyService.parsePercentage(apiRate.change?.percent), 
+                     value: avgValue,
+                     changePercent: changePercent, 
                      type: 'border',
                      iconName: iconName,
                      lastUpdated: apiRate.date || new Date().toISOString(),
-                     buyValue: CurrencyService.parseRate(apiRate.rate?.buy),
-                     sellValue: CurrencyService.parseRate(apiRate.rate?.sell)
+                     buyValue: buy,
+                     sellValue: sell,
+                     buyChangePercent: apiRate.change?.buy?.percent ? CurrencyService.parsePercentage(apiRate.change.buy.percent) : undefined,
+                     sellChangePercent: apiRate.change?.sell?.percent ? CurrencyService.parsePercentage(apiRate.change.sell.percent) : undefined
                  });
             });
         }
