@@ -1,11 +1,14 @@
-import perf, { FirebasePerformanceTypes } from '@react-native-firebase/perf';
+import { getPerformance, trace as createTrace, httpMetric } from '@react-native-firebase/perf';
+import { FirebasePerformanceTypes } from '@react-native-firebase/perf';
 
 class PerformanceService {
   /**
    * Start a custom trace
    */
   async startTrace(traceName: string): Promise<FirebasePerformanceTypes.Trace> {
-    const trace = await perf().startTrace(traceName);
+    const perf = getPerformance();
+    const trace = createTrace(perf, traceName);
+    await trace.start();
     return trace;
   }
 
@@ -20,7 +23,8 @@ class PerformanceService {
    * Track an API call manually (if needed)
    */
   async trackApiCall(url: string, method: string, responseCode: number, duration: number, requestPayloadSize: number, responsePayloadSize: number): Promise<void> {
-      const metric = await perf().newHttpMetric(url, method as FirebasePerformanceTypes.HttpMethod);
+      const perf = getPerformance();
+      const metric = httpMetric(perf, url, method as FirebasePerformanceTypes.HttpMethod);
       await metric.start();
       metric.putAttribute('response_code', responseCode.toString());
       metric.setHttpResponseCode(responseCode);

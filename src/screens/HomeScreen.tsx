@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, RefreshControl, TouchableOpacity } from 'react-native';
 import { useTheme, Text } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MarketStatus from '../components/ui/MarketStatus';
 import ExchangeCard, { ExchangeCardProps } from '../components/dashboard/ExchangeCard';
@@ -15,6 +16,7 @@ import { AppConfig } from '../constants/AppConfig';
 
 const HomeScreen = () => {
   const theme = useTheme();
+  const navigation = useNavigation<any>();
   const { user } = useAuth();
   const { showToast } = useToast();
   
@@ -144,8 +146,9 @@ const HomeScreen = () => {
 
   // User Data from Auth
   const userData = {
-    name: user?.displayName || user?.email?.split('@')[0] || 'Usuario',
-    avatarUrl: user?.photoURL || 'https://i.pravatar.cc/150?u=user',
+    name: user?.displayName || user?.email?.split('@')[0] || 'Invitado',
+    avatarUrl: user?.photoURL,
+    email: user?.email,
     notificationCount: 3, // Mock for now
     isPremium: !!(user && !user.isAnonymous) // Only registered users are Premium
   };
@@ -182,8 +185,10 @@ const HomeScreen = () => {
         variant="profile"
         userName={userData.name} 
         avatarUrl={userData.avatarUrl} 
+        email={userData.email}
         notificationCount={userData.notificationCount}
         isPremium={userData.isPremium} 
+        onProfilePress={() => navigation.navigate('Settings')}
       />
 
       <ScrollView 

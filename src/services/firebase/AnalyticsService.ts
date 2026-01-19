@@ -1,4 +1,4 @@
-import analytics from '@react-native-firebase/analytics';
+import { getAnalytics, logEvent, logScreenView, setUserProperty, setUserId } from '@react-native-firebase/analytics';
 
 class AnalyticsService {
   /**
@@ -6,7 +6,7 @@ class AnalyticsService {
    */
   async logEvent(name: string, params?: Record<string, any>): Promise<void> {
     try {
-      await analytics().logEvent(name, params);
+      await logEvent(getAnalytics(), name, params);
       console.log(`[Analytics] Event logged: ${name}`, params);
     } catch (error) {
       console.error(`[Analytics] Error logging event ${name}:`, error);
@@ -18,7 +18,7 @@ class AnalyticsService {
    */
   async logScreenView(screenName: string, screenClass?: string): Promise<void> {
     try {
-      await analytics().logScreenView({
+      await logScreenView(getAnalytics(), {
         screen_name: screenName,
         screen_class: screenClass || screenName,
       });
@@ -33,7 +33,7 @@ class AnalyticsService {
    */
   async setUserProperty(name: string, value: string): Promise<void> {
     try {
-      await analytics().setUserProperty(name, value);
+      await setUserProperty(getAnalytics(), name, value);
     } catch (error) {
       console.error(`[Analytics] Error setting user property ${name}:`, error);
     }
@@ -44,7 +44,7 @@ class AnalyticsService {
    */
   async setUserId(userId: string | null): Promise<void> {
     try {
-      await analytics().setUserId(userId);
+      await setUserId(getAnalytics(), userId);
     } catch (error) {
       console.error(`[Analytics] Error setting user ID:`, error);
     }

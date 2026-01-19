@@ -1,52 +1,61 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Text, useTheme, Switch, Snackbar } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import DeviceInfo from 'react-native-device-info';
+import messaging from '@react-native-firebase/messaging';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import CustomDialog from '../components/ui/CustomDialog';
 import { useThemeContext } from '../theme/ThemeContext';
+import { useAuth } from '../context/AuthContext';
+import { storageService, UserAlert } from '../services/StorageService';
 
 import UserProfileCard from '../components/settings/UserProfileCard';
 import AlertItem from '../components/settings/AlertItem';
 import ThemeSelector from '../components/settings/ThemeSelector';
 import MenuButton from '../components/settings/MenuButton';
+import ProfileEditDialog from '../components/settings/ProfileEditDialog';
+import AddAlertDialog from '../components/settings/AddAlertDialog';
 
 const SettingsScreen = () => {
   const theme = useTheme();
   const colors = theme.colors as any;
   const { themeMode, setThemeMode } = useThemeContext();
+  const { user, signOut, resetPassword } = useAuth();
   
   // App Info State
   const [appName, setAppName] = useState('');
   const [appVersion, setAppVersion] = useState('');
   const [buildNumber, setBuildNumber] = useState('');
-  // const [buildDate, setBuildDate] = useState('');
   
   // Feedback State
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [showSecurityDialog, setShowSecurityDialog] = useState(false);
+  const [showEditProfileDialog, setShowEditProfileDialog] = useState(false);
+  const [showAddAlertDialog, setShowAddAlertDialog] = useState(false);
 
-  // Mock State
-  const [alerts, setAlerts] = useState({
-    usd: true,
-    cantv: false,
-  });
+  // Functional State
+  const [alerts, setAlerts] = useState<UserAlert[]>([]);
   const [pushEnabled, setPushEnabled] = useState(true);
 
   useEffect(() => {
-    const loadAppInfo = async () => {
-      const name = DeviceInfo.getApplicationName();
-      const version = DeviceInfo.getVersion();
-      const build = DeviceInfo.getBuildNumber();
-      // Using last update time as a proxy for build date/install date
-      setAppName(name);
-      setAppVersion(version);
-      setBuildNumber(build);
+    const loadData = async () => {
+        // App Info
+        setAppName(DeviceInfo.getApplicationName());
+        setAppVersion(DeviceInfo.getVersion());
+        setBuildNumber(DeviceInfo.getBuildNumber());
+
+        // Settings & Alerts
+        const settings = await storageService.getSettings();
+        setPushEnabled(settings.pushEnabled);
+        
+        const savedAlerts = await storageService.getAlerts();
+        setAlerts(savedAlerts);
     };
     
-    loadAppInfo();
+    loadData();
   }, []);
 
   const handleAction = (message: string) => {
@@ -58,10 +67,152 @@ const SettingsScreen = () => {
     setShowLogoutDialog(true);
   };
 
-  const confirmLogout = () => {
+  const confirmLogout = async () => {
     setShowLogoutDialog(false);
-    handleAction("Sesión cerrada correctamente");
-    // Aquí iría la lógica real de logout
+    try {
+        await signOut();
+        // Navigation will handle the switch to AuthStack automatically via Context
+    } catch (error) {
+        handleAction("Error al cerrar sesión");
+    }
+  };
+
+  const handleEditProfile = () => {
+    setShowEditProfileDialog(true);
+  };
+
+  const saveProfileName = async (newName: string) => {
+    try {
+      if (user) {
+        await user.updateProfile({ displayName: newName });
+        await user.reload();
+        handleAction("Perfil actualizado correctamente");
+      }
+    } catch (error) {
+      handleAction("Error al actualizar el perfil");
+      console.error(error);
+    }
+  };
+
+  const confirmSecurityAction = async () => {
+    setShowSecurityDialog(false);
+    try {
+        if (user?.email) {
+            await resetPassword(user.email);
+        }
+    } catch (error) {
+        // Error handling is done in resetPassword usually, but if it throws, we catch here
+    }
+  };
+
+  const togglePush = async (value: boolean) => {
+      setPushEnabled(value);
+      await storageService.saveSettings({ pushEnabled: value });
+      handleAction(`Notificaciones ${value ? 'habilitadas' : 'deshabilitadas'}`);
+  };
+
+  const getTopicName = (symbol: string) => {
+    // Topic por Símbolo (ej. ticker_usd_ves)
+    // El backend enviará actualizaciones de precio a este topic
+    // La app filtrará localmente si cumple la condición (target)
+    const safeSymbol = symbol.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+    return `ticker_${safeSymbol}`;
+  };
+
+  const toggleAlert = async (id: string, value: boolean) => {
+      const alert = alerts.find(a => a.id === id);
+      if (alert) {
+        // Nos suscribimos al ticker del par, no a la condición específica
+        const topic = getTopicName(alert.symbol);
+        try {
+            if (value) {
+                await messaging().subscribeToTopic(topic);
+                console.log(`Subscribed to ${topic}`);
+            } else {
+                // Solo desuscribir si no hay otras alertas activas para el mismo símbolo
+                const otherActiveAlerts = alerts.filter(a => 
+                    a.id !== id && a.symbol === alert.symbol && a.isActive
+                );
+                
+                if (otherActiveAlerts.length === 0) {
+                    await messaging().unsubscribeFromTopic(topic);
+                    console.log(`Unsubscribed from ${topic}`);
+                }
+            }
+        } catch (err) {
+            console.error('FCM Topic Error:', err);
+        }
+      }
+
+      const updated = alerts.map(a => a.id === id ? { ...a, isActive: value } : a);
+      setAlerts(updated);
+      await storageService.saveAlerts(updated);
+      handleAction(`Alerta ${value ? 'activada' : 'desactivada'}`);
+  };
+
+  const deleteAlert = async (id: string) => {
+      const alert = alerts.find(a => a.id === id);
+      if (alert && alert.isActive) {
+        const topic = getTopicName(alert.symbol);
+        try {
+             // Solo desuscribir si no hay otras alertas activas para el mismo símbolo
+             const otherActiveAlerts = alerts.filter(a => 
+                a.id !== id && a.symbol === alert.symbol && a.isActive
+            );
+            
+            if (otherActiveAlerts.length === 0) {
+                await messaging().unsubscribeFromTopic(topic);
+                console.log(`Unsubscribed from ${topic}`);
+            }
+        } catch (err) {
+            console.error('FCM Topic Error:', err);
+        }
+      }
+
+      const updated = alerts.filter(a => a.id !== id);
+      setAlerts(updated);
+      await storageService.saveAlerts(updated);
+      handleAction('Alerta eliminada');
+  };
+
+  const handleAddAlert = () => {
+      if (alerts.length >= 5) {
+        // Use a simple alert or toast if CustomDialog isn't easily accessible here for simple warnings
+        // But I should use handleAction for feedback or a proper dialog. 
+        // Since I can't easily pop a dialog without state, I'll use a simple alert for now or just ignore.
+        // Better: Show a toast/snackbar via handleAction? No, handleAction seems to be a debug thing? 
+        // Wait, handleAction uses Toast.
+        Alert.alert('Límite Alcanzado', 'Solo puedes tener un máximo de 5 alertas activas.');
+         return;
+      }
+      setShowAddAlertDialog(true);
+  };
+
+  const saveNewAlert = async (symbol: string, target: string, condition: 'above' | 'below') => {
+      const newAlert: UserAlert = {
+          id: Date.now().toString(),
+          symbol: symbol,
+          target: target,
+          condition: condition,
+          isActive: true,
+          iconName: 'notifications-active' // Default icon
+      };
+      
+      const updated = [...alerts, newAlert];
+      setAlerts(updated);
+      await storageService.saveAlerts(updated);
+      
+      // Subscribe to FCM topic
+      // Solo necesitamos suscribirnos al ticker (topic) del símbolo
+      const topic = getTopicName(symbol);
+      try {
+          await messaging().subscribeToTopic(topic);
+          console.log(`Subscribed to ${topic}`);
+      } catch (err) {
+          console.error('FCM Topic Error:', err);
+      }
+
+      handleAction(`Alerta creada para ${symbol}`);
   };
 
   return (
@@ -86,7 +237,7 @@ const SettingsScreen = () => {
       >
         {/* User Profile */}
         <View style={styles.section}>
-          <UserProfileCard />
+          <UserProfileCard user={user} onEdit={handleEditProfile} />
         </View>
 
         {/* Alerts Section */}
@@ -94,8 +245,9 @@ const SettingsScreen = () => {
           <View style={styles.sectionHeaderRow}>
             <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>ALERTAS ACTIVAS</Text>
             <TouchableOpacity 
-              style={styles.addButton}
-              onPress={() => handleAction("Funcionalidad de Nueva Alerta en desarrollo")}
+              style={[styles.addButton, alerts.length >= 5 && { opacity: 0.5 }]}
+              onPress={handleAddAlert}
+              disabled={alerts.length >= 5}
             >
               <MaterialIcons name="add" size={18} color={theme.colors.primary} />
               <Text style={[styles.newAlertText, { color: theme.colors.primary }]}>Nueva Alerta</Text>
@@ -103,33 +255,30 @@ const SettingsScreen = () => {
           </View>
           
           <View style={[styles.cardContainer, { borderColor: theme.colors.outline, backgroundColor: theme.colors.elevation.level1 }]}>
-            <AlertItem 
-              symbol="USD/VES"
-              status="Sube"
-              target="40.50"
-              isActive={alerts.usd}
-              onToggle={(v) => {
-                setAlerts(p => ({ ...p, usd: v }));
-                handleAction(`Alerta USD/VES ${v ? 'activada' : 'desactivada'}`);
-              }}
-              iconName="currency-exchange"
-              iconColor={colors.success} 
-              iconBgColor={colors.successContainer} 
-            />
-            <View style={[styles.separator, { backgroundColor: theme.colors.outline }]} />
-            <AlertItem 
-              symbol="CANTV"
-              status="Baja"
-              target="3.20"
-              isActive={alerts.cantv}
-              onToggle={(v) => {
-                setAlerts(p => ({ ...p, cantv: v }));
-                handleAction(`Alerta CANTV ${v ? 'activada' : 'desactivada'}`);
-              }}
-              iconName="show-chart"
-              iconColor={colors.info} 
-              iconBgColor={colors.infoContainer} 
-            />
+            {alerts.length === 0 ? (
+                <View style={{ padding: 16, alignItems: 'center' }}>
+                    <Text style={{ color: theme.colors.onSurfaceVariant }}>No tienes alertas activas</Text>
+                </View>
+            ) : (
+                alerts.map((alert, index) => (
+                    <React.Fragment key={alert.id}>
+                        <AlertItem 
+                          symbol={alert.symbol}
+                          status={alert.condition === 'above' ? 'Sube' : 'Baja'}
+                          target={alert.target}
+                          isActive={alert.isActive}
+                          onToggle={(v) => toggleAlert(alert.id, v)}
+                          onDelete={() => deleteAlert(alert.id)}
+                          iconName={alert.iconName || 'show-chart'}
+                          iconColor={alert.condition === 'above' ? colors.success : colors.error} 
+                          iconBgColor={alert.condition === 'above' ? colors.successContainer : colors.errorContainer} 
+                        />
+                        {index < alerts.length - 1 && (
+                            <View style={[styles.separator, { backgroundColor: theme.colors.outline }]} />
+                        )}
+                    </React.Fragment>
+                ))
+            )}
           </View>
         </View>
 
@@ -148,10 +297,7 @@ const SettingsScreen = () => {
               </View>
               <Switch 
                 value={pushEnabled} 
-                onValueChange={(v) => {
-                  setPushEnabled(v);
-                  handleAction(`Notificaciones ${v ? 'habilitadas' : 'deshabilitadas'}`);
-                }} 
+                onValueChange={togglePush} 
                 color={theme.colors.primary} 
               />
             </View>
@@ -219,6 +365,29 @@ const SettingsScreen = () => {
         confirmLabel="Salir"
         cancelLabel="Cancelar"
         isDestructive
+      />
+
+      <CustomDialog
+        visible={showSecurityDialog}
+        onDismiss={() => setShowSecurityDialog(false)}
+        title="Restablecer Contraseña"
+        content={`¿Deseas enviar un correo de restablecimiento de contraseña a ${user?.email}?`}
+        onConfirm={confirmSecurityAction}
+        confirmLabel="Enviar"
+        cancelLabel="Cancelar"
+      />
+
+      <ProfileEditDialog
+        visible={showEditProfileDialog}
+        onDismiss={() => setShowEditProfileDialog(false)}
+        currentName={user?.displayName || ''}
+        onSave={saveProfileName}
+      />
+
+      <AddAlertDialog
+        visible={showAddAlertDialog}
+        onDismiss={() => setShowAddAlertDialog(false)}
+        onSave={saveNewAlert}
       />
     </View>
   );

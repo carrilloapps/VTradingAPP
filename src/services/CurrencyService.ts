@@ -349,4 +349,43 @@ export class CurrencyService {
     if (amount < 0) throw new Error("Amount cannot be negative");
     return amount * rateValue;
   }
+
+  /**
+   * Returns available target currencies based on business rules for a given source currency.
+   * Rules:
+   * 1. VES/Bs -> All currencies allowed.
+   * 2. Fiat (BCV) -> VES/Bs OR Crypto allowed.
+   * 3. Border -> VES/Bs OR Stablecoins (USDT, USDC, DAI, FDUSD) allowed.
+   * 4. Crypto -> VES/Bs, Border OR Crypto allowed.
+   */
+  static getAvailableTargetRates(source: CurrencyRate, allRates: CurrencyRate[]): CurrencyRate[] {
+    // Rule 1: VES -> All
+    if (source.code === 'VES' || source.code === 'Bs') return allRates;
+
+    // Rule 2: BCV (Fiat) -> VES or Crypto
+    if (source.type === 'fiat') {
+        return allRates.filter(r => r.code === 'VES' || r.code === 'Bs' || r.type === 'crypto');
+    }
+
+    // Rule 3: Border -> VES or Stablecoins
+    if (source.type === 'border') {
+        return allRates.filter(r => 
+            r.code === 'VES' || 
+            r.code === 'Bs' || 
+            (r.type === 'crypto' && STABLECOINS.includes(r.code))
+        );
+    }
+
+    // Rule 4: Crypto -> VES, Border or Crypto
+    if (source.type === 'crypto') {
+        return allRates.filter(r => 
+            r.code === 'VES' || 
+            r.code === 'Bs' || 
+            r.type === 'border' ||
+            r.type === 'crypto'
+        );
+    }
+
+    return allRates;
+  }
 }

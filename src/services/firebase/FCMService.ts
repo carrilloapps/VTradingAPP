@@ -13,7 +13,8 @@ import {
   RemoteMessage,
   Messaging
 } from '@react-native-firebase/messaging';
-import { PermissionsAndroid, Platform } from 'react-native';
+import { PermissionsAndroid, Platform, Appearance } from 'react-native';
+import DeviceInfo from 'react-native-device-info';
 
 class FCMService {
   private messaging: Messaging;
@@ -101,7 +102,42 @@ class FCMService {
           console.error(`Error subscribing to topic ${topic}:`, error);
       }
   }
-  
+
+  /**
+   * Subscribe to demographic topics for targeted notifications
+   * Captures: Build, OS, Theme, OS Version, App Version, Install Cohort
+   */
+  async subscribeToDemographics(): Promise<void> {
+    try {
+      const buildNumber = DeviceInfo.getBuildNumber();
+      const appVersion = DeviceInfo.getVersion();
+      const systemVersion = DeviceInfo.getSystemVersion();
+      const colorScheme = Appearance.getColorScheme() || 'light';
+      const date = new Date();
+      // Cohort: Year_Month (e.g. cohort_2024_05)
+      const cohort = `cohort_${date.getFullYear()}_${String(date.getMonth() + 1).padStart(2, '0')}`;
+
+      // Sanitize function to ensure valid FCM topic format
+      const sanitize = (str: string) => str.replace(/[^a-zA-Z0-9-_.~%]/g, '_').toLowerCase();
+
+      const topics = [
+        `build_${sanitize(buildNumber)}`,
+        `os_${sanitize(Platform.OS)}`,
+        `theme_${sanitize(colorScheme)}`,
+        `os_ver_${sanitize(systemVersion)}`,
+        `app_ver_${sanitize(appVersion)}`,
+        sanitize(cohort)
+      ];
+
+      console.log('Subscribing to demographic topics:', topics);
+
+      // Subscribe in parallel
+      await Promise.all(topics.map(topic => this.subscribeToTopic(topic)));
+    } catch (error) {
+      console.error('Error subscribing to demographics:', error);
+    }
+  }
+
   /**
    * Unsubscribe from a topic
    */

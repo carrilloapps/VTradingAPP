@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Text, useTheme, Switch } from 'react-native-paper';
+import { Text, useTheme, Switch, IconButton } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 interface AlertItemProps {
@@ -9,6 +9,7 @@ interface AlertItemProps {
   target: string;
   isActive: boolean;
   onToggle: (value: boolean) => void;
+  onDelete: () => void;
   iconName: string;
   iconColor: string;
   iconBgColor: string;
@@ -20,6 +21,7 @@ const AlertItem: React.FC<AlertItemProps> = ({
   target, 
   isActive, 
   onToggle,
+  onDelete,
   iconName,
   iconColor,
   iconBgColor
@@ -62,11 +64,19 @@ const AlertItem: React.FC<AlertItemProps> = ({
         </View>
       </View>
 
-      <Switch 
-        value={isActive} 
-        onValueChange={onToggle}
-        color={theme.colors.primary}
-      />
+      <View style={styles.actions}>
+        <Switch 
+          value={isActive} 
+          onValueChange={onToggle}
+          color={theme.colors.primary}
+        />
+        <IconButton
+          icon="delete-outline"
+          size={20}
+          iconColor={theme.colors.error}
+          onPress={onDelete}
+        />
+      </View>
     </View>
   );
 };
@@ -83,6 +93,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 12,
     flex: 1,
+  },
+  actions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
   iconContainer: {
     width: 40,

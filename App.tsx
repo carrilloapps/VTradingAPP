@@ -10,6 +10,7 @@ import { inAppMessagingService } from './src/services/firebase/InAppMessagingSer
 import { appCheckService } from './src/services/firebase/AppCheckService';
 import { remoteConfigService } from './src/services/firebase/RemoteConfigService';
 import { appDistributionService } from './src/services/firebase/AppDistributionService';
+import NotificationController from './src/components/ui/NotificationController';
 
 function App(): React.JSX.Element {
   useEffect(() => {
@@ -30,15 +31,11 @@ function App(): React.JSX.Element {
       const hasPermission = await fcmService.requestUserPermission();
       if (hasPermission) {
         await fcmService.getFCMToken();
+        await fcmService.subscribeToDemographics();
       }
     };
 
     initializeFirebase();
-
-    // Foreground listener
-    const unsubscribe = fcmService.onMessage(async remoteMessage => {
-      console.log('A new FCM message arrived!', remoteMessage);
-    });
 
     // Background/Quit state handlers
     fcmService.onNotificationOpenedApp(remoteMessage => {
@@ -51,7 +48,7 @@ function App(): React.JSX.Element {
       }
     });
 
-    return unsubscribe;
+    // Note: Foreground listener is now handled by NotificationController inside the Context
   }, []);
 
   return (
@@ -61,6 +58,7 @@ function App(): React.JSX.Element {
           <AuthProvider>
             <FilterProvider>
               <AppNavigator />
+              <NotificationController />
             </FilterProvider>
           </AuthProvider>
         </ToastProvider>

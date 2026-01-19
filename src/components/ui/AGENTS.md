@@ -2,6 +2,51 @@
 
 Este documento registra los estándares y documentación para los componentes UI globales ubicados en `src/components/ui/`.
 
+## TopToast (Notificaciones In-App)
+
+`TopToast` es un componente de notificación visual diseñado para aparecer en la parte superior de la pantalla ("Toast Superior"). Se utiliza para alertas críticas, actualizaciones de estado y notificaciones push recibidas mientras la app está en primer plano.
+
+### ¿Cuándo usarlo?
+*   Notificaciones Push recibidas en primer plano (ej. Alertas de Precio).
+*   Feedback de operaciones exitosas que requieren alta visibilidad (ej. "Orden Ejecutada").
+*   Alertas de error de sistema.
+
+### Integración (Context API)
+El componente se gestiona globalmente a través de `ToastContext`. No se debe instanciar manualmente. Usar el hook `useToast()`.
+
+```typescript
+import { useToast } from '../context/ToastContext';
+
+const MyComponent = () => {
+  const { showToast } = useToast();
+
+  const handleAlert = () => {
+    // Notificación Simple (Bottom/Default)
+    showToast("Mensaje simple");
+
+    // Notificación Superior (TopToast)
+    showToast("Precio de BTC alcanzó $50k", {
+        type: 'alert',
+        position: 'top',
+        title: 'Alerta de Precio',
+        duration: 5000
+    });
+  };
+};
+```
+
+### Tipos de Toast (`type`)
+*   `info`: (Default) Azul/Neutro. Información general.
+*   `success`: Verde. Operaciones exitosas.
+*   `error`: Rojo. Errores críticos.
+*   `warning`: Naranja. Advertencias.
+*   `alert`: Amarillo/Dorado. Específico para alertas de precio/sistema.
+
+### Arquitectura de Notificaciones
+El sistema utiliza `NotificationController` (dentro de `App.tsx`) para escuchar mensajes de Firebase (FCM) en primer plano y disparar automáticamente `TopToast`.
+
+---
+
 ## CustomDialog (Reemplazo de Alert)
 
 `CustomDialog` es un componente reutilizable diseñado para reemplazar las alertas nativas (`Alert.alert`) y ofrecer una experiencia visual consistente con el tema de la aplicación (Material Design 3 via React Native Paper).

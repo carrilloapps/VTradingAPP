@@ -140,34 +140,7 @@ const AdvancedCalculatorScreen = () => {
       const sourceRate = baseCurrency;
       if (!sourceRate) return rates;
 
-      // Rule 1: VES -> All
-      if (sourceRate.code === 'VES' || sourceRate.code === 'Bs') return rates;
-
-      // Rule 2: BCV (Fiat) -> VES only
-      if (sourceRate.type === 'fiat') {
-          return rates.filter(r => r.code === 'VES' || r.code === 'Bs' || r.type === 'crypto');
-      }
-
-      // Rule 3: Border -> VES or Stablecoins (USDT, USDC, DAI, FDUSD)
-      if (sourceRate.type === 'border') {
-          return rates.filter(r => 
-              r.code === 'VES' || 
-              r.code === 'Bs' || 
-              (r.type === 'crypto' && STABLECOINS.includes(r.code))
-          );
-      }
-
-      // Rule 4: Crypto -> VES, Border or Crypto
-      if (sourceRate.type === 'crypto') {
-          return rates.filter(r => 
-              r.code === 'VES' || 
-              r.code === 'Bs' || 
-              r.type === 'border' ||
-              r.type === 'crypto'
-          );
-      }
-
-      return rates;
+      return CurrencyService.getAvailableTargetRates(sourceRate, rates);
   }, [rates, pickerMode, baseCurrency]);
 
   const getSourceLabel = (code: string) => {
@@ -307,17 +280,7 @@ const AdvancedCalculatorScreen = () => {
       setBaseCurrencyCode(currency.code);
       
       // Calculate valid targets for new base
-      let validTargets = rates; // Default All
-      if (currency.code !== 'VES' && currency.code !== 'Bs') {
-          if (currency.type === 'fiat') {
-              validTargets = rates.filter(r => r.code === 'VES' || r.code === 'Bs' || r.type === 'crypto');
-          } else if (currency.type === 'border') {
-              validTargets = rates.filter(r => r.code === 'VES' || r.code === 'Bs' || (r.type === 'crypto' && STABLECOINS.includes(r.code)));
-          } else if (currency.type === 'crypto') {
-              validTargets = rates.filter(r => r.code === 'VES' || r.code === 'Bs' || r.type === 'border' || r.type === 'crypto');
-          }
-      }
-      
+      const validTargets = CurrencyService.getAvailableTargetRates(currency, rates);
       const validCodes = validTargets.map(r => r.code);
 
       // Filter existing targets to remove invalid ones

@@ -1,4 +1,15 @@
-import auth, { FirebaseAuthTypes } from '@react-native-firebase/auth';
+import { 
+  getAuth, 
+  onAuthStateChanged, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signInWithCredential, 
+  signInAnonymously, 
+  signOut,
+  GoogleAuthProvider,
+  FirebaseAuthTypes,
+  sendPasswordResetEmail
+} from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 class AuthService {
@@ -13,14 +24,14 @@ class AuthService {
    * Listen to auth state changes
    */
   onAuthStateChanged(callback: (user: FirebaseAuthTypes.User | null) => void): () => void {
-    return auth().onAuthStateChanged(callback);
+    return onAuthStateChanged(getAuth(), callback);
   }
 
   /**
    * Get current user
    */
   getCurrentUser(): FirebaseAuthTypes.User | null {
-    return auth().currentUser;
+    return getAuth().currentUser;
   }
 
   /**
@@ -28,7 +39,7 @@ class AuthService {
    */
   async signInWithEmail(email: string, password: string): Promise<FirebaseAuthTypes.UserCredential> {
     try {
-      return await auth().signInWithEmailAndPassword(email, password);
+      return await signInWithEmailAndPassword(getAuth(), email, password);
     } catch (error: any) {
       console.error('Error signing in:', error);
       throw this.handleError(error);
@@ -40,7 +51,7 @@ class AuthService {
    */
   async signUpWithEmail(email: string, password: string): Promise<FirebaseAuthTypes.UserCredential> {
     try {
-      return await auth().createUserWithEmailAndPassword(email, password);
+      return await createUserWithEmailAndPassword(getAuth(), email, password);
     } catch (error: any) {
       console.error('Error signing up:', error);
       throw this.handleError(error);
@@ -63,10 +74,10 @@ class AuthService {
       }
 
       // Create a Google credential with the token
-      const googleCredential = auth.GoogleAuthProvider.credential(idToken);
+      const googleCredential = GoogleAuthProvider.credential(idToken);
 
       // Sign-in the user with the credential
-      return await auth().signInWithCredential(googleCredential);
+      return await signInWithCredential(getAuth(), googleCredential);
     } catch (error: any) {
       console.error('Error signing in with Google:', error);
       throw this.handleError(error);
@@ -78,7 +89,7 @@ class AuthService {
    */
   async signInAnonymously(): Promise<FirebaseAuthTypes.UserCredential> {
     try {
-      return await auth().signInAnonymously();
+      return await signInAnonymously(getAuth());
     } catch (error: any) {
       console.error('Error signing in anonymously:', error);
       throw this.handleError(error);
@@ -91,7 +102,7 @@ class AuthService {
   async signOut(): Promise<void> {
     try {
       // Sign out from Google as well if signed in
-      const currentUser = auth().currentUser;
+      const currentUser = getAuth().currentUser;
       if (currentUser?.providerData.some(p => p.providerId === 'google.com')) {
           try {
              await GoogleSignin.signOut();
@@ -99,7 +110,7 @@ class AuthService {
              console.warn("Google sign out error", e);
           }
       }
-      await auth().signOut();
+      await signOut(getAuth());
     } catch (error: any) {
       console.error('Error signing out:', error);
       throw this.handleError(error);
@@ -111,7 +122,7 @@ class AuthService {
    */
   async sendPasswordResetEmail(email: string): Promise<void> {
     try {
-      await auth().sendPasswordResetEmail(email);
+      await sendPasswordResetEmail(getAuth(), email);
     } catch (error: any) {
       console.error('Error sending password reset email:', error);
       throw this.handleError(error);

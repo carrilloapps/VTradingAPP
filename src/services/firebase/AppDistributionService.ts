@@ -1,4 +1,4 @@
-import appDistribution from '@react-native-firebase/app-distribution';
+import { getAppDistribution, checkForUpdate } from '@react-native-firebase/app-distribution';
 
 class AppDistributionService {
   /**
@@ -7,7 +7,8 @@ class AppDistributionService {
   async checkForUpdate(): Promise<void> {
     try {
       if (!__DEV__) { // Only check in release builds usually
-        await appDistribution().checkForUpdate();
+        const appDistribution = getAppDistribution();
+        await checkForUpdate(appDistribution);
       }
     } catch (error) {
       console.error('[AppDistribution] Error checking for update:', error);

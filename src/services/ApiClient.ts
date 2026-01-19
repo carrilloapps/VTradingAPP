@@ -1,5 +1,5 @@
 import { appCheckService } from './firebase/AppCheckService';
-import perf from '@react-native-firebase/perf';
+import { getPerformance, httpMetric, FirebasePerformanceTypes } from '@react-native-firebase/perf';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface CacheItem<T> {
@@ -53,7 +53,8 @@ class ApiClient {
     }
 
     // 2. Setup Performance Monitoring
-    const metric = await perf().newHttpMetric(url, 'GET');
+    const perf = getPerformance();
+    const metric = httpMetric(perf, url, 'GET');
     await metric.start();
 
     // 3. Setup Headers

@@ -127,10 +127,12 @@ const CurrencyConverter: React.FC = () => {
       if (numericOnly.length > 9) {
           showToast(
               "Límite alcanzado. Para cálculos más complejos, utilice nuestra calculadora de divisas avanzada", 
-              'info', 
-              { 
-                  label: 'Ir a Avanzada', 
-                  onPress: () => navigation.navigate('AdvancedCalculator' as never) 
+              {
+                  type: 'info', 
+                  action: { 
+                      label: 'Ir a Avanzada', 
+                      onPress: () => navigation.navigate('AdvancedCalculator' as never) 
+                  }
               }
           );
           return;
@@ -160,38 +162,7 @@ const CurrencyConverter: React.FC = () => {
   // Filter available target rates based on business rules
   const availableToRates = useMemo(() => {
       if (!fromCurrency) return rates;
-
-      // Rule 1: VES -> All
-      if (fromCurrency.code === 'VES' || fromCurrency.code === 'Bs') return rates;
-
-      // Rule 2: BCV (Fiat) -> VES only
-      // "La tasa de cambio BCV es oficial exclusivamente para venezuela"
-      if (fromCurrency.type === 'fiat') {
-          return rates.filter(r => r.code === 'VES' || r.code === 'Bs' || r.type === 'crypto');
-      }
-
-      // Rule 3: Border -> VES or Stablecoins (USDT, USDC, DAI, FDUSD)
-      // "si elijo COP, solo deberia poder cambiar a USDT, USDC, DAI, FDUSD (es decir stablecoins) y VES"
-      if (fromCurrency.type === 'border') {
-          return rates.filter(r => 
-              r.code === 'VES' || 
-              r.code === 'Bs' || 
-              (r.type === 'crypto' && STABLECOINS.includes(r.code))
-          );
-      }
-
-      // Rule 4: Crypto -> VES, Border or Crypto
-      // Implicit reciprocity for P2P markets
-      if (fromCurrency.type === 'crypto') {
-          return rates.filter(r => 
-              r.code === 'VES' || 
-              r.code === 'Bs' || 
-              r.type === 'border' ||
-              r.type === 'crypto'
-          );
-      }
-
-      return rates;
+      return CurrencyService.getAvailableTargetRates(fromCurrency, rates);
   }, [fromCurrency, rates]);
 
   // Update selected currencies when rates change (to keep values fresh)

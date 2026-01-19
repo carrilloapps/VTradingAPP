@@ -87,17 +87,15 @@ Usado en `DetailsScreen` (Billetera/Detalles).
 
 ## Lógica de Negocio de Conversión (CurrencyConverter)
 
-Para garantizar la coherencia financiera y evitar pares de conversión ilógicos, `CurrencyConverter` implementa las siguientes reglas estrictas de filtrado (`availableToRates`):
+Para garantizar la consistencia en toda la aplicación, `CurrencyConverter` delega la validación de pares de conversión a **`CurrencyService.getAvailableTargetRates`**.
 
-1.  **Origen VES/Bs:** Permite conversión a **TODAS** las divisas disponibles.
-2.  **Origen Fiat (ej. BCV, USD):**
-    *   Permite conversión a **VES/Bs** (Tasa Oficial/Paralela).
-    *   Permite conversión a **Cripto** (incluyendo Stablecoins y volátiles).
-    *   *Rationale:* BCV es oficial solo para Venezuela, pero es útil comparar contra referencias cripto.
-3.  **Origen Fronterizo (ej. COP, PEN):**
-    *   Permite conversión a **VES/Bs**.
-    *   Permite conversión a **Stablecoins** (USDT, USDC, DAI, FDUSD) definidas en `CurrencyService`.
-    *   **Restricción:** NO permite conversión directa a otras divisas Fiat (ej. COP -> USD) ni criptos volátiles.
+Esto asegura que las reglas de negocio (ej. evitar COP -> USD, permitir BCV -> USDT) sean idénticas tanto en el convertidor simple como en la calculadora avanzada.
+
+**Reglas aplicadas (ver `src/services/AGENTS.md` para detalle completo):**
+1.  **Origen VES/Bs:** -> Todas.
+2.  **Origen Fiat:** -> VES o Cripto.
+3.  **Origen Fronterizo:** -> VES o Stablecoins.
+4.  **Origen Cripto:** -> VES, Frontera o Cripto.
 4.  **Origen Cripto:**
     *   Permite conversión a **VES/Bs**.
     *   Permite conversión a **Fronterizo**.

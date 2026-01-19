@@ -1,8 +1,9 @@
-import React from 'react';
-import { View, StyleSheet, Image, TouchableOpacity, ImageStyle, ViewStyle } from 'react-native';
-import { Text, useTheme, TouchableRipple } from 'react-native-paper';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
+import { Text, useTheme, TouchableRipple, Avatar } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { md5 } from '../../utils/md5';
 
 export type HeaderVariant = 'profile' | 'section' | 'simple';
 
@@ -11,12 +12,14 @@ interface UnifiedHeaderProps {
   title?: string;
   subtitle?: string;
   userName?: string;
-  avatarUrl?: string;
+  avatarUrl?: string | null;
+  email?: string | null;
   isPremium?: boolean;
   notificationCount?: number;
   onActionPress?: () => void;
   onNotificationPress?: () => void;
   onBackPress?: () => void;
+  onProfilePress?: () => void;
   rightActionIcon?: string;
   notificationIcon?: string;
   showNotification?: boolean;
@@ -29,11 +32,13 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   subtitle,
   userName,
   avatarUrl,
+  email,
   notificationCount = 0,
   isPremium = false,
   onActionPress,
   onNotificationPress,
   onBackPress,
+  onProfilePress,
   rightActionIcon = 'refresh',
   notificationIcon = 'notifications',
   showNotification = true,
@@ -42,6 +47,13 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   const theme = useTheme();
   const colors = theme.colors as any;
   const insets = useSafeAreaInsets();
+  
+  const [imageError, setImageError] = useState(false);
+
+  // Reset error state when identity changes
+  useEffect(() => {
+    setImageError(false);
+  }, [avatarUrl, email]);
   
   // Custom theme colors fallback
   const accentGreen = colors.success;
@@ -56,6 +68,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
     },
     avatar: {
       borderColor: theme.colors.outline,
+      backgroundColor: 'transparent',
     },
     statusDot: {
       backgroundColor: accentGreen,
@@ -92,15 +105,59 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
     }
   }), [theme, accentGreen, accentRed, buttonBgColor]);
 
-  const renderProfileContent = () => (
-    <View style={styles.userInfo}>
-      <TouchableOpacity style={styles.avatarContainer}>
-        <Image 
+  const getInitials = (name: string) => {
+    return name
+      .trim()
+      .split(/\s+/)
+      .map((n) => n[0])
+      .join('')
+      .substring(0, 2)
+      .toUpperCase();
+  };
+
+  const renderAvatar = () => {
+    // 1. If user has a photoURL (e.g. Google Sign In), use it.
+    if (avatarUrl) {
+      return (
+        <Avatar.Image 
+          size={44} 
           source={{ uri: avatarUrl }} 
-          style={[styles.avatar as ImageStyle, themeStyles.avatar]} 
+          style={[styles.avatar as ViewStyle, themeStyles.avatar]}
         />
+      );
+    }
+
+    // 2. If user has email, try Gravatar (unless it errored previously)
+    if (email && !imageError) {
+      const hash = md5(email.trim().toLowerCase());
+      const gravatarUrl = `https://www.gravatar.com/avatar/${hash}?d=404`;
+      return (
+        <Avatar.Image 
+          size={44} 
+          source={{ uri: gravatarUrl }} 
+          onError={() => setImageError(true)}
+          style={[styles.avatar as ViewStyle, themeStyles.avatar]}
+        />
+      );
+    }
+
+    // 3. Fallback: Initials
+    return (
+      <Avatar.Text 
+        size={44} 
+        label={getInitials(userName || 'User')} 
+        style={[styles.avatar as ViewStyle, { backgroundColor: theme.colors.primaryContainer, borderColor: theme.colors.outline }]}
+        color={theme.colors.onPrimaryContainer}
+      />
+    );
+  };
+
+  const renderProfileContent = () => (
+    <TouchableOpacity onPress={onProfilePress} style={styles.userInfo} activeOpacity={0.7}>
+      <View style={styles.avatarContainer}>
+        {renderAvatar()}
         <View style={[styles.statusDot, themeStyles.statusDot]} />
-      </TouchableOpacity>
+      </View>
       
       <View style={styles.textContainer}>
         <Text style={[styles.subtitle, isPremium ? themeStyles.subtitlePremium : themeStyles.subtitleDefault]}>
@@ -110,7 +167,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
           Hola, {userName}
         </Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 
   const renderSectionContent = () => (

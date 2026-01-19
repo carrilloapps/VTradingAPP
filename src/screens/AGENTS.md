@@ -98,6 +98,21 @@ Para mantener una armonía visual entre pantallas:
 *   **Servicios de Datos:** Utilizar `CurrencyService` y `StocksService` para obtener datos, evitando lógica de fetch directa en las pantallas.
 
 ### Estados de Carga y Error
+*   Utilizar skeletons que repliquen la estructura exacta de las tarjetas (ver `DashboardSkeleton` en `src/components/dashboard/AGENTS.md`).
+
+## AdvancedCalculatorScreen
+*   **Lógica de Conversión:** Utiliza `CurrencyService.getAvailableTargetRates` para determinar las divisas destino válidas según la base seleccionada, manteniendo consistencia con `CurrencyConverter`.
+*   **Selector de Divisas:** Implementa filtrado dinámico en tiempo real. Si se cambia la base, se valida y ajusta automáticamente la lista de destinos seleccionados.
+
+## SettingsScreen
+*   **Funcionalidad Completa:**
+    *   **Perfil:** Integración con `AuthContext` para mostrar/editar nombre y correo. Diálogo de edición funcional.
+    *   **Seguridad:** Reseteo de contraseña vía Firebase Auth.
+    *   **Preferencias:** Toggle de notificaciones y gestión de alertas persistentes vía `StorageService`.
+    *   **Tema:** Selector de tema (Claro/Oscuro/Sistema) integrado con `ThemeContext` y persistencia.
+    *   **Cierre de Sesión:** Diálogo de confirmación antes de logout.
+*   Gestionar estados de `loading`, `error` y `empty` (sin resultados) de forma visualmente distinta.
+*   Usar `RefreshControl` en `ScrollView` para permitir recarga manual.
 
 ## Calculadora Avanzada (AdvancedCalculatorScreen)
 
@@ -115,11 +130,33 @@ Mantiene paridad lógica con `CurrencyConverter`, aplicando restricciones dinám
 
 3.  **Reutilización de Constantes:**
     *   Utiliza `STABLECOINS` importado de `CurrencyService` para definir qué criptomonedas son válidas para cruces con monedas fronterizas.
-*   Gestionar estados de `loading`, `error` y `empty` (sin resultados) de forma visualmente distinta.
-*   Usar `RefreshControl` en `ScrollView` para permitir recarga manual.
 
 ## Composición y Reutilización
 *   **No duplicar UI:** Las pantallas deben actuar principalmente como orquestadores de datos y contenedores de layout.
 *   **Componentes Reutilizables:** Si un elemento de UI (como un selector de moneda, una tarjeta de resumen, o un botón de acción específico) aparece en más de una pantalla (ej. `CalculatorScreen` y `AdvancedCalculatorScreen`), **debe** extraerse a un componente compartido en `src/components/`.
     *   *Ejemplo:* `CurrencySelectorButton` se usa tanto en la calculadora simple como en la avanzada.
 *   **Consistencia:** Usar los componentes compartidos garantiza que los cambios de diseño se propaguen automáticamente a todas las pantallas.
+
+## Pantalla de Configuración (SettingsScreen)
+Funcionalidad completa de gestión de cuenta y preferencias del usuario.
+
+### Funcionalidades Implementadas
+1.  **Gestión de Cuenta:**
+    *   **Datos Dinámicos:** Muestra nombre, correo y avatar del usuario autenticado (AuthContext).
+    *   **Edición de Perfil:** Permite actualizar el nombre visible (`displayName`) mediante `ProfileEditDialog`.
+    *   **Seguridad:** Permite enviar correo de restablecimiento de contraseña (`resetPassword`) para usuarios registrados.
+    *   **Cierre de Sesión:** Diálogo de confirmación con acción segura de `signOut`.
+    *   **Validación:** Restringe acciones de seguridad/edición para usuarios anónimos.
+
+2.  **Preferencias Persistentes:**
+    *   Usa `StorageService` (AsyncStorage) para persistir preferencias locales.
+    *   **Notificaciones Push:** Toggle funcional persistente.
+    *   **Apariencia:** Selector de tema (Claro/Oscuro/Sistema) integrado con `ThemeContext` y persistencia.
+
+3.  **Gestión de Alertas:**
+    *   Listado de alertas de usuario persistentes.
+    *   Capacidad de activar/desactivar alertas individualmente.
+    *   Simulación de creación de nuevas alertas (funcionalidad base persistente).
+
+4.  **Información de App:**
+    *   Muestra versión real, build number y device info usando `react-native-device-info`.

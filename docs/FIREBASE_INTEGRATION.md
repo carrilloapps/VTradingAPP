@@ -16,6 +16,13 @@ Se ha implementado el servicio de mensajería en la nube para notificaciones pus
     - Manejo de mensajes en primer plano (`onMessage`).
     - Manejo de mensajes en segundo plano/quit (`setBackgroundMessageHandler` en `index.js`).
     - Manejo de apertura de notificaciones (`onNotificationOpenedApp`, `getInitialNotification`).
+    - **Suscripción Automática a Topics**: Permite segmentación masiva por demografía técnica:
+        - `build_<number>` (Ej. `build_10`)
+        - `os_<platform>` (Ej. `os_android`)
+        - `theme_<mode>` (Ej. `theme_dark`)
+        - `os_ver_<version>` (Ej. `os_ver_13`)
+        - `app_ver_<version>` (Ej. `app_ver_1_0_0`)
+        - `cohort_<YYYY_MM>` (Ej. `cohort_2025_01`)
 
 ### 2. Authentication
 
@@ -79,6 +86,7 @@ Verificación de actualizaciones para testers.
 - **Dependencias**:
     - `@react-native-firebase/app`
     - `@react-native-firebase/messaging`
+    - `@notifee/react-native` (Para notificaciones locales en background)
     - `@react-native-firebase/auth`
     - `@react-native-firebase/in-app-messaging`
     - `@react-native-firebase/analytics`
@@ -90,6 +98,24 @@ Verificación de actualizaciones para testers.
 ### iOS
 
 - Se requiere ejecutar `pod install` en la carpeta `ios` para vincular las dependencias nativas.
+
+## Migración a API Modular (v22+)
+
+Para cumplir con los cambios futuros de React Native Firebase v22, todos los servicios han sido migrados a la API modular.
+**Regla Estricta**: No utilizar APIs con namespace (ej. `auth()`, `firestore()`). Usar siempre las funciones modulares importadas.
+
+Ejemplo Incorrecto (Namespace):
+```typescript
+import auth from '@react-native-firebase/auth';
+await auth().signInWithEmailAndPassword(email, password);
+```
+
+Ejemplo Correcto (Modular):
+```typescript
+import { getAuth, signInWithEmailAndPassword } from '@react-native-firebase/auth';
+const auth = getAuth();
+await signInWithEmailAndPassword(auth, email, password);
+```
 - Asegúrese de que `GoogleService-Info.plist` esté incluido en el proyecto de Xcode.
 
 ## Uso en la Aplicación
@@ -107,6 +133,7 @@ useEffect(() => {
     const hasPermission = await fcmService.requestUserPermission();
     if (hasPermission) {
       await fcmService.getFCMToken();
+      await fcmService.subscribeToDemographics();
     }
   };
   initializeFirebase();
