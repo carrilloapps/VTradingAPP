@@ -26,6 +26,7 @@ const TopToast: React.FC<TopToastProps> = ({
   duration = 4000,
 }) => {
   const theme = useTheme();
+  const themeColors = theme.colors as any;
   const insets = useSafeAreaInsets();
   const translateY = useRef(new Animated.Value(-200)).current;
   const opacity = useRef(new Animated.Value(0)).current;
@@ -77,9 +78,9 @@ const TopToast: React.FC<TopToastProps> = ({
   const getColors = () => {
     switch (type) {
       case 'success':
-        return { bg: theme.colors.elevation.level3, border: theme.colors.primary, icon: theme.colors.primary };
+        return { bg: themeColors.successContainer, border: themeColors.success, icon: themeColors.success };
       case 'error':
-        return { bg: theme.colors.errorContainer, border: theme.colors.error, icon: theme.colors.error };
+        return { bg: themeColors.errorContainer, border: themeColors.error, icon: themeColors.error };
       case 'alert':
         return { bg: theme.colors.surfaceVariant, border: '#FFD700', icon: '#FFD700' }; // Gold/Yellow
       case 'warning':

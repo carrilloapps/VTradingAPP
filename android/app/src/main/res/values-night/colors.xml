@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="notification_color">#a5c8ea</color> <!-- Light Blue for Dark Mode visibility -->
+</resources>

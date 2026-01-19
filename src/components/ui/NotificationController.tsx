@@ -49,8 +49,11 @@ const NotificationController: React.FC = () => {
           }
 
           if (triggered) {
-             showToast(`${symbol} llegó a ${currentPrice}`, {
-                 title: `¡Alerta de Precio!`,
+             const actionVerb = alert.condition === 'above' ? 'subió' : 'bajó';
+             const emoji = alert.condition === 'above' ? '📈' : '📉';
+             
+             showToast(`El precio ${actionVerb} de los ${targetPrice}`, {
+                 title: `Alerta: ${symbol} ${emoji} a ${currentPrice}`,
                  type: 'alert', // Uses the new Gold/Yellow style
                  position: 'top',
                  duration: 6000
