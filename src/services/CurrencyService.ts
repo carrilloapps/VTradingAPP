@@ -206,6 +206,17 @@ export class CurrencyService {
                     ? CurrencyService.parseRate(apiRate.rate.average) 
                     : (buy + sell) / 2;
 
+                 // Handle Border Rate Inversion (Tasas Fronterizas are usually Foreign/VES)
+                 // We need value in VES (Price of 1 Unit of Foreign Currency in VES) for the calculator logic.
+                 // All border rates from API seem to be based on VES (Foreign/VES).
+                 let finalValue = avgValue;
+                 let finalBuy = buy;
+                 let finalSell = sell;
+
+                 if (avgValue > 0) finalValue = 1 / avgValue;
+                 if (buy > 0) finalBuy = 1 / buy;
+                 if (sell > 0) finalSell = 1 / sell;
+                 
                  // Calculate change percent
                  let changePercent = 0;
                  if (apiRate.change?.percent !== undefined) {
@@ -220,13 +231,13 @@ export class CurrencyService {
                      id: `border_${index}`,
                      code: apiRate.currency,
                      name: name,
-                     value: avgValue,
+                     value: finalValue,
                      changePercent: changePercent, 
                      type: 'border',
                      iconName: iconName,
                      lastUpdated: apiRate.date || new Date().toISOString(),
-                     buyValue: buy,
-                     sellValue: sell,
+                     buyValue: finalBuy,
+                     sellValue: finalSell,
                      buyChangePercent: apiRate.change?.buy?.percent ? CurrencyService.parsePercentage(apiRate.change.buy.percent) : undefined,
                      sellChangePercent: apiRate.change?.sell?.percent ? CurrencyService.parsePercentage(apiRate.change.sell.percent) : undefined
                  });

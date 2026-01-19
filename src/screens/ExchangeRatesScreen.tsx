@@ -255,7 +255,7 @@ const ExchangeRatesScreen = () => {
                     <Text style={[styles.tagText, { 
                         color: isMarketOpen ? colors.success : colors.onSecondaryContainer 
                     }]}>
-                        {isMarketOpen ? 'ACTUALIZADO' : 'ACTUALIZADO (P2P)'}
+                        {isMarketOpen ? 'ACTUALIZADO' : 'ACTUALIZADO SOLO P2P'}
                     </Text>
                   </View>
                 </View>
