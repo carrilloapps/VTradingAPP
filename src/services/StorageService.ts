@@ -7,6 +7,7 @@ const KEYS = {
 
 export interface AppSettings {
   pushEnabled: boolean;
+  newsSubscription?: boolean;
 }
 
 export interface UserAlert {

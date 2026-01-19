@@ -4,6 +4,9 @@ import { Text, useTheme, Button, ProgressBar, Surface } from 'react-native-paper
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
+import { storageService } from '../services/StorageService';
+import { fcmService } from '../services/firebase/FCMService';
+
 const FeatureItem = ({ icon, title, description, theme }: any) => {
   const iconBgColor = theme.dark ? 'rgba(16, 185, 129, 0.1)' : '#E6FFFA';
   
@@ -33,8 +36,24 @@ const FeatureItem = ({ icon, title, description, theme }: any) => {
 
 const DetailsScreen = () => {
   const theme = useTheme();
-  const [notified, setNotified] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
   const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const loadSubscription = async () => {
+      try {
+        const settings = await storageService.getSettings();
+        setIsSubscribed(settings.newsSubscription ?? false);
+      } catch (e) {
+        console.error('Failed to load subscription state', e);
+      } finally {
+        setIsLoadingSubscription(false);
+      }
+    };
+
+    loadSubscription();
+  }, []);
 
   // Animations
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -93,6 +112,24 @@ const DetailsScreen = () => {
     inputRange: [0, 1],
     outputRange: ['0deg', '360deg'],
   });
+
+  const handleToggleSubscription = async () => {
+    const newState = !isSubscribed;
+    setIsSubscribed(newState);
+
+    try {
+      if (newState) {
+        await fcmService.subscribeToTopic('news_updates');
+      } else {
+        await fcmService.unsubscribeFromTopic('news_updates');
+      }
+      await storageService.saveSettings({ newsSubscription: newState });
+    } catch (e) {
+      console.error('Failed to toggle subscription', e);
+      // Revert state on error
+      setIsSubscribed(!newState);
+    }
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -175,17 +212,19 @@ const DetailsScreen = () => {
           {/* Action Button */}
           <View style={styles.actionContainer}>
             <Button 
-              mode={notified ? "outlined" : "contained"}
-              onPress={() => setNotified(!notified)}
-              icon={notified ? "check" : "bell-ring"}
+              mode={isSubscribed ? "outlined" : "contained"}
+              onPress={handleToggleSubscription}
+              loading={isLoadingSubscription}
+              disabled={isLoadingSubscription}
+              icon={isSubscribed ? "bell-off" : "bell-ring"}
               style={styles.button}
               contentStyle={styles.buttonContent}
             >
-              {notified ? "Te avisaremos" : "Notificarme del lanzamiento"}
+              {isSubscribed ? "Desactivar notificaciones" : "Suscribirme a noticias"}
             </Button>
-            {!notified && (
+            {!isSubscribed && (
                <Text variant="bodySmall" style={[styles.notificationText, { color: theme.colors.outline }]}>
-                 Recibirás una notificación cuando esté listo.
+                 Recibirás una notificación cuando publiquemos novedades.
                </Text>
             )}
           </View>
