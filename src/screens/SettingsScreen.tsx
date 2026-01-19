@@ -227,8 +227,6 @@ const SettingsScreen = () => {
       <UnifiedHeader
         variant="section"
         title="Configuración"
-        showNotification={false}
-        style={styles.header}
       />
 
       <ScrollView 
@@ -399,6 +397,7 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 0,
+    paddingTop: 20,
   },
   section: {
     paddingHorizontal: 20,
@@ -452,9 +451,6 @@ const styles = StyleSheet.create({
   footer: {
     marginTop: 32,
     alignItems: 'center',
-  },
-  header: {
-    borderBottomWidth: 0,
   },
   scrollContent: {
     paddingBottom: 100,

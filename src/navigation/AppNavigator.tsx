@@ -33,7 +33,6 @@ function HomeStackScreen() {
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
       <HomeStack.Screen name="HomeMain" component={HomeScreen} />
       <HomeStack.Screen name="Details" component={DetailsScreen} options={{ headerShown: true, title: 'Detalles' }} />
-      <HomeStack.Screen name="AdvancedCalculator" component={AdvancedCalculatorScreen} options={{ headerShown: false, animation: 'slide_from_bottom' }} />
     </HomeStack.Navigator>
   );
 }
@@ -111,13 +110,13 @@ function MainTabNavigator() {
           }} 
         />
         <Tab.Screen 
-          name="Wallet" 
+          name="Discover" 
           component={DetailsScreen} 
           options={{ 
-            title: 'Billetera',
+            title: 'Descubre',
             tabBarIcon: ({ color }) => (
               <View style={{ width: 24, height: 24, alignItems: 'center', justifyContent: 'center' }}>
-                <MaterialCommunityIcons name="wallet" size={24} color={color} />
+                <MaterialCommunityIcons name="compass-outline" size={24} color={color} />
               </View>
             )
           }} 
@@ -186,6 +185,14 @@ const AppNavigator = () => {
               options={{ 
                 headerShown: false,
                 animation: 'default',
+              }} 
+            />
+            <RootStack.Screen 
+              name="AdvancedCalculator" 
+              component={AdvancedCalculatorScreen} 
+              options={{ 
+                headerShown: false, 
+                animation: 'default' 
               }} 
             />
           </>

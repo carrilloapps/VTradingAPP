@@ -103,9 +103,7 @@ const DetailsScreen = () => {
       />
       <UnifiedHeader 
         variant="section" 
-        title="Billetera" 
-        showNotification={false}
-        style={styles.headerStyle}
+        title="Descubre" 
       />
       
       <ScrollView 
@@ -118,23 +116,23 @@ const DetailsScreen = () => {
           <View style={styles.heroSection}>
             <View style={styles.iconContainer}>
               <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-                <MaterialIcons name="account-balance-wallet" size={80} color={theme.colors.primary} />
+                <MaterialIcons name="explore" size={80} color={theme.colors.primary} />
               </Animated.View>
               <Animated.View style={[styles.gearIcon, { transform: [{ rotate: spin }] }]}>
-                <MaterialIcons name="settings" size={32} color={theme.colors.tertiary} />
+                <MaterialIcons name="build" size={32} color={theme.colors.tertiary} />
               </Animated.View>
             </View>
 
             <View style={[styles.statusBadge, { borderColor: theme.colors.outline }]}>
               <View style={styles.blinkingDot} />
-              <Text style={[styles.statusText, { color: theme.colors.onSurfaceVariant }]}>EN DESARROLLO</Text>
+              <Text style={[styles.statusText, { color: theme.colors.onSurfaceVariant }]}>EN CONSTRUCCIÓN</Text>
             </View>
 
             <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.onSurface }]}>
-              Tu Billetera Digital
+              Noticias & finanzas
             </Text>
             <Text variant="bodyLarge" style={[styles.description, { color: theme.colors.onSurfaceVariant }]}>
-              Estamos construyendo una experiencia financiera completa para que gestiones tus activos con total libertad.
+              Próximamente encontrarás aquí las mejores noticias financieras y aplicaciones recomendadas para potenciar tu trading.
             </Text>
           </View>
 
@@ -155,21 +153,21 @@ const DetailsScreen = () => {
               Lo que vendrá
             </Text>
             <FeatureItem 
-              icon="swap-horiz" 
-              title="Transferencias Inmediatas" 
-              description="Envía y recibe dinero al instante entre cuentas."
+              icon="newspaper" 
+              title="Noticias en Tiempo Real" 
+              description="Mantente informado con las últimas novedades del mercado financiero."
               theme={theme}
             />
             <FeatureItem 
-              icon="qr-code-scanner" 
-              title="Pago Móvil & QR" 
-              description="Paga en comercios escaneando códigos QR."
+              icon="apps" 
+              title="Apps Recomendadas" 
+              description="Selección curada de las mejores herramientas y billeteras."
               theme={theme}
             />
             <FeatureItem 
-              icon="currency-bitcoin" 
-              title="Custodia Cripto" 
-              description="Almacena y gestiona tus criptoactivos seguros."
+              icon="trending-up" 
+              title="Oportunidades" 
+              description="Análisis y señales para mejorar tus decisiones de inversión."
               theme={theme}
             />
           </View>

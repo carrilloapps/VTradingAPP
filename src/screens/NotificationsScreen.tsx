@@ -125,6 +125,7 @@ const NotificationsScreen: React.FC = () => {
           onBackPress={() => navigation.goBack()}
           onActionPress={() => { /* Navigate to Archive? */ }}
           rightActionIcon="archive"
+          showNotification={false}
           style={{ paddingHorizontal: 0, paddingTop: insets.top }}
         />
 
