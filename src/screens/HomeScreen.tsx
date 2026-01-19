@@ -189,6 +189,7 @@ const HomeScreen = () => {
         notificationCount={userData.notificationCount}
         isPremium={userData.isPremium} 
         onProfilePress={() => navigation.navigate('Settings')}
+        onNotificationPress={() => navigation.navigate('Notifications')}
       />
 
       <ScrollView 

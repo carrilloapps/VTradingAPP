@@ -12,6 +12,7 @@ import SettingsScreen from '../screens/SettingsScreen';
 import ExchangeRatesScreen from '../screens/ExchangeRatesScreen';
 import StocksScreen from '../screens/StocksScreen';
 import AdvancedCalculatorScreen from '../screens/AdvancedCalculatorScreen';
+import NotificationsScreen from '../screens/NotificationsScreen';
 import { useThemeContext } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { analyticsService } from '../services/firebase/AnalyticsService';
@@ -177,7 +178,17 @@ const AppNavigator = () => {
     >
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
         {user ? (
-          <RootStack.Screen name="Main" component={MainTabNavigator} />
+          <>
+            <RootStack.Screen name="Main" component={MainTabNavigator} />
+            <RootStack.Screen 
+              name="Notifications" 
+              component={NotificationsScreen}
+              options={{ 
+                headerShown: false,
+                animation: 'default',
+              }} 
+            />
+          </>
         ) : (
           <RootStack.Screen name="Auth" component={AuthNavigator} />
         )}
