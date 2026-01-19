@@ -16,6 +16,7 @@ import ThemeSelector from '../components/settings/ThemeSelector';
 import MenuButton from '../components/settings/MenuButton';
 import ProfileEditDialog from '../components/settings/ProfileEditDialog';
 import AddAlertDialog from '../components/settings/AddAlertDialog';
+import LogoutDialog from '../components/settings/LogoutDialog';
 
 const SettingsScreen = () => {
   const theme = useTheme();
@@ -391,15 +392,10 @@ const SettingsScreen = () => {
         <Text style={{ color: theme.colors.inverseOnSurface }}>{snackbarMessage}</Text>
       </Snackbar>
 
-      <CustomDialog
+      <LogoutDialog
         visible={showLogoutDialog}
         onDismiss={() => setShowLogoutDialog(false)}
-        title="Cerrar Sesión"
-        content="¿Estás seguro que deseas cerrar tu sesión actual?"
         onConfirm={confirmLogout}
-        confirmLabel="Salir"
-        cancelLabel="Cancelar"
-        isDestructive
       />
 
       <CustomDialog

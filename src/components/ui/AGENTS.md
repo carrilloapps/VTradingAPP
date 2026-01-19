@@ -169,3 +169,73 @@ Componente estandarizado para inputs de búsqueda con soporte opcional para acci
 
 ---
 *Última actualización: 20 de Enero de 2026*
+
+## UniversalDialog
+
+`UniversalDialog` es el componente base para todos los diálogos de la aplicación, diseñado para seguir estrictamente el estándar "Flat Design" y coincidir visualmente con las maquetas HTML de referencia.
+
+### Características
+*   **Diseño Plano (Flat):** Sin elevación (`elevation: 0`), bordes de 1px (`borderColor: theme.colors.outline`).
+*   **Bordes Redondeados:** Radio de 24px (`theme.roundness * 6`).
+*   **Adaptabilidad:** Soporta `SafeAreaInsets` y `KeyboardAvoidingView` automáticamente.
+*   **Encabezado Unificado:** Título opcional y botón de cierre circular estándar.
+
+### Uso
+Utilizar como contenedor ("wrapper") para crear diálogos específicos (ej. `AddAlertDialog`).
+
+```typescript
+<UniversalDialog
+  visible={visible}
+  onDismiss={onDismiss}
+  title="Título del Diálogo"
+  actions={
+    // Botones de acción personalizados
+    <Button onPress={onDismiss}>Cancelar</Button>
+  }
+>
+  {/* Contenido del diálogo */}
+  <View>...</View>
+</UniversalDialog>
+```
+
+## LogoutDialog (Diálogo de Cierre de Sesión)
+
+Componente especializado para la confirmación de cierre de sesión, que implementa un diseño visual único y de alto impacto (Icono rojo grande, mensaje centrado).
+
+### Diseño
+Replica fielmente el diseño de `dialogo.html`:
+*   Icono de "Logout" rojo sobre fondo rojo suave.
+*   Botón principal de peligro ("Cerrar Sesión") y botón secundario "Cancelar".
+*   Bordes extra redondeados (40px) y fondo con transparencia/blur simulado.
+
+### Implementación
+
+```typescript
+import LogoutDialog from '../components/settings/LogoutDialog';
+
+// ...
+
+<LogoutDialog
+  visible={showLogoutDialog}
+  onDismiss={() => setShowLogoutDialog(false)}
+  onConfirm={handleLogout}
+/>
+```
+
+## GenericDeleteDialog (Confirmación de Eliminación)
+
+Componente genérico para confirmar acciones destructivas (eliminar elementos), siguiendo el mismo patrón visual de alto impacto que `LogoutDialog`.
+
+### Props
+| Prop | Tipo | Requerido | Descripción |
+|---|---|---|---|
+| `visible` | `boolean` | Sí | Controla la visibilidad. |
+| `onDismiss` | `() => void` | Sí | Callback al cancelar. |
+| `onConfirm` | `() => void` | Sí | Callback al confirmar la eliminación. |
+| `title` | `string` | No | Título del diálogo (Default: "Confirmar eliminación"). |
+| `description` | `string` | No | Mensaje descriptivo (Default: "Esta acción no se puede deshacer..."). |
+| `entityName` | `string` | No | Nombre del elemento a eliminar para personalizar el mensaje. |
+
+### Uso
+Recomendado para reemplazar `Alert.alert` en acciones de borrado.
+
