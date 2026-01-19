@@ -5,6 +5,7 @@ import { ThemeProvider } from './src/theme/ThemeContext';
 import { FilterProvider } from './src/context/FilterContext';
 import { AuthProvider } from './src/context/AuthContext';
 import { ToastProvider } from './src/context/ToastContext';
+import { NotificationProvider } from './src/context/NotificationContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { fcmService } from './src/services/firebase/FCMService';
 import { inAppMessagingService } from './src/services/firebase/InAppMessagingService';
@@ -58,10 +59,12 @@ function App(): React.JSX.Element {
         <ThemeProvider>
           <ToastProvider>
             <AuthProvider>
-              <FilterProvider>
-                <AppNavigator />
-                <NotificationController />
-              </FilterProvider>
+              <NotificationProvider>
+                <FilterProvider>
+                  <AppNavigator />
+                  <NotificationController />
+                </FilterProvider>
+              </NotificationProvider>
             </AuthProvider>
           </ToastProvider>
         </ThemeProvider>

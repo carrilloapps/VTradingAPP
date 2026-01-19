@@ -3,6 +3,7 @@ import { View, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
 import { Text, useTheme, TouchableRipple, Avatar } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import NotificationButton from './NotificationButton';
 import { md5 } from '../../utils/md5';
 
 export type HeaderVariant = 'profile' | 'section' | 'simple';
@@ -228,19 +229,9 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
           )}
 
           {showNotification && (
-            <TouchableRipple 
-              onPress={onNotificationPress || (() => {})} 
-              style={[styles.iconButton, themeStyles.iconButton]}
-              borderless
-              rippleColor="rgba(0, 0, 0, .1)"
-            >
-              <View>
-                <MaterialIcons name={notificationIcon} size={22} color={theme.colors.onSurfaceVariant} />
-                {notificationCount > 0 && notificationIcon === 'notifications' && (
-                  <View style={[styles.badge, themeStyles.badge]} />
-                )}
-              </View>
-            </TouchableRipple>
+            <NotificationButton 
+              icon={notificationIcon}
+            />
           )}
         </View>
       )}

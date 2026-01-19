@@ -10,45 +10,7 @@ import { useAppTheme } from '../theme/useAppTheme';
 import SearchBar from '../components/ui/SearchBar';
 import FilterSection, { FilterOption } from '../components/ui/FilterSection';
 import NotificationCard, { NotificationData } from '../components/notifications/NotificationCard';
-
-// Mock Data
-const MOCK_NOTIFICATIONS: NotificationData[] = [
-  {
-    id: '1',
-    type: 'price_alert',
-    title: 'Alerta de Precio: USD BCV',
-    message: 'La tasa oficial ha subido a 36.24 Bs (+0.12% hoy).',
-    timestamp: '9:41 AM',
-    isRead: false,
-    trend: 'up',
-  },
-  {
-    id: '2',
-    type: 'market_news',
-    title: 'Mercado de Valores',
-    message: 'Las acciones de Banco Provincial han superado el volumen promedio de hoy.',
-    timestamp: 'Hace 2h',
-    isRead: false,
-    trend: 'up',
-  },
-  {
-    id: '3',
-    type: 'system',
-    title: 'Mantenimiento de Red',
-    message: 'Se realizarán ajustes técnicos en la plataforma entre las 2:00 AM y 4:00 AM.',
-    timestamp: '8:15 AM',
-    isRead: false,
-  },
-  {
-    id: '4',
-    type: 'price_alert',
-    title: 'Alerta de Precio: USDT Paralelo',
-    message: 'La tasa de Binance ha bajado a 37.50 Bs (-0.05% hoy).',
-    timestamp: 'Ayer',
-    isRead: true,
-    trend: 'down',
-  },
-];
+import { useNotifications } from '../context/NotificationContext';
 
 const FILTER_OPTIONS: FilterOption[] = [
   { label: 'Todas', value: 'all' },
@@ -61,12 +23,12 @@ const NotificationsScreen: React.FC = () => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const { notifications, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
 
   // State
   const [activeTab, setActiveTab] = useState<'unread' | 'read'>('unread');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
-  const [notifications, setNotifications] = useState<NotificationData[]>(MOCK_NOTIFICATIONS);
 
   // Filter Logic
   const filteredNotifications = useMemo(() => {
@@ -89,17 +51,17 @@ const NotificationsScreen: React.FC = () => {
 
   // Actions
   const handleArchive = (id: string) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
-    // In a real app, this might move to a separate "Archived" list or delete it
+    deleteNotification(id);
   };
 
   const handleMarkAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    markAllAsRead();
   };
 
   const handleNotificationPress = (id: string) => {
-    // Mark as read and navigate?
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+    markAsRead(id);
+    // Future: Navigate to specific detail based on type
+    // e.g., if (type === 'price_alert') navigation.navigate('Details', { ... })
   };
 
   return (
