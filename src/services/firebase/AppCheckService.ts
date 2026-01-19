@@ -36,32 +36,45 @@ class AppCheckService {
     }
   }
 
+  private lastErrorTime: number = 0;
+  private errorCount: number = 0;
+
   /**
    * Get App Check token
    */
   async getToken(): Promise<string | undefined> {
     try {
       if (!this.appCheckInstance) {
-        // Try to get instance if initialized previously, or re-initialize?
-        // initializeAppCheck is idempotent-ish (returns existing if exists)?
-        // But we need the provider config.
-        // Assuming initialize() is called at app start.
-        // If not, we can try to initialize here or warn.
-        // For now, let's try to get it via initializeAppCheck with same config or assume initialized.
-        // Actually, if we call initializeAppCheck again, it returns the promise of the instance.
-        // But we need the provider.
-        console.warn('[AppCheck] Instance not initialized. Call initialize() first.');
+        // Suppress warning if repeated too frequently
+        if (Date.now() - this.lastErrorTime > 60000) {
+            console.warn('[AppCheck] Instance not initialized. Call initialize() first.');
+            this.lastErrorTime = Date.now();
+        }
         return undefined;
       }
       
+      // Prevent rapid retries if we are hitting "Too many attempts"
+      if (this.errorCount > 3 && Date.now() - this.lastErrorTime < 60000) {
+          return undefined; // Backoff for 1 minute
+      }
+
       const result = await getToken(this.appCheckInstance);
+      this.errorCount = 0; // Reset on success
       return result.token;
     } catch (error: any) {
+      this.lastErrorTime = Date.now();
+      this.errorCount++;
+
       // Handle "API not enabled" or configuration errors gracefully
       const message = error.message || '';
-      if (message.includes('App Check API has not been used') || message.includes('403')) {
-         if (__DEV__) {
-             console.warn('[AppCheck] API no habilitada en Firebase Console. Se omite App Check en modo desarrollo.');
+      
+      // Silence expected development errors or quota exceeded
+      if (message.includes('App Check API has not been used') || 
+          message.includes('403') || 
+          message.includes('Too many attempts')) {
+         
+         if (__DEV__ && this.errorCount === 1) { // Only warn once per backoff period
+             console.warn('[AppCheck] Warning: App Check skipped (API not enabled or quota exceeded).');
          }
          return undefined;
       }
