@@ -157,7 +157,8 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
               placeholderTextColor={theme.colors.onSurfaceVariant}
               right={
                 loadingSymbols ? <TextInput.Icon icon={() => <ActivityIndicator size={16} />} /> :
-                symbol ? <TextInput.Icon icon="close" onPress={() => setSymbol('')} /> : null
+                symbol ? <TextInput.Icon icon="close" onPress={() => setSymbol('')} /> :
+                <TextInput.Icon icon="refresh" onPress={loadSymbols} />
               }
             />
             
@@ -166,8 +167,9 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
                  <FlatList
                     data={filteredSymbols}
                     keyExtractor={(item) => item}
-                    keyboardShouldPersistTaps="handled"
-                    style={{ maxHeight: 150 }}
+                    keyboardShouldPersistTaps="always"
+                    style={{ flex: 1 }}
+                    contentContainerStyle={{ flexGrow: 1 }}
                     nestedScrollEnabled={true}
                     renderItem={({ item }) => (
                      <TouchableOpacity
@@ -259,7 +261,18 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
             underlineColor="transparent"
             activeUnderlineColor="transparent"
             textColor={theme.colors.onSurface}
-            left={<TextInput.Affix text={symbolPrices[symbol] ? (symbol.includes('/') ? '' : 'Bs. ') : ''} />}
+            left={<TextInput.Affix text={
+                symbolPrices[symbol] 
+                    ? (symbol.endsWith('/USD') || symbol.endsWith('/USDT') ? '$ ' 
+                        : symbol.endsWith('/EUR') ? '€ ' 
+                        : 'Bs. ') 
+                    : ''
+            } />}
+            right={
+                loadingSymbols ? <TextInput.Icon icon={() => <ActivityIndicator size={16} />} /> :
+                symbol ? <TextInput.Icon icon="close" onPress={() => setSymbol('')} /> :
+                <TextInput.Icon icon="refresh" onPress={loadSymbols} />
+            }
           />
           {symbolPrices[symbol] && (
             <Text variant="bodySmall" style={{ marginTop: 4, color: theme.colors.primary }}>
@@ -311,9 +324,9 @@ const styles = StyleSheet.create({
     right: 0,
     borderWidth: 1,
     borderRadius: 12,
-    maxHeight: 160,
+    height: 160, // Fixed height instead of max-height to ensure scroll area is stable
     zIndex: 1000,
-    elevation: 4, // Keep small elevation for dropdown overlay
+    elevation: 4,
   },
   dropdownItem: {
     padding: 12,
