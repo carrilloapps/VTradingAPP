@@ -1,26 +1,32 @@
-import { firebase } from '@react-native-firebase/app-check';
+import { initializeAppCheck, getToken, AppCheck } from '@react-native-firebase/app-check';
+import { getApp } from '@react-native-firebase/app';
 
 class AppCheckService {
+  private appCheckInstance: AppCheck | null = null;
+
   /**
    * Initialize App Check
    */
   async initialize(): Promise<void> {
     try {
+      const app = getApp();
       // Create a custom provider or use the default one
       // For development, we might want to use the debug provider
-      const provider = firebase.appCheck().newReactNativeFirebaseAppCheckProvider();
-      provider.configure({
-        android: {
-          provider: __DEV__ ? 'debug' : 'playIntegrity',
-          debugToken: '12345678-1234-1234-1234-1234567890ab', // Replace with your debug token from logs
-        },
-        apple: {
-          provider: __DEV__ ? 'debug' : 'appAttestWithDeviceCheckFallback',
-          debugToken: '12345678-1234-1234-1234-1234567890ab', // Replace with your debug token from logs
-        },
-      });
+      // Use config object instead of class instance for modular API compatibility
+      const provider = {
+        providerOptions: {
+          android: {
+            provider: (__DEV__ ? 'debug' : 'playIntegrity') as 'debug' | 'playIntegrity',
+            debugToken: '12345678-1234-1234-1234-1234567890ab', // Replace with your debug token from logs
+          },
+          apple: {
+            provider: (__DEV__ ? 'debug' : 'appAttestWithDeviceCheckFallback') as 'debug' | 'appAttestWithDeviceCheckFallback',
+            debugToken: '12345678-1234-1234-1234-1234567890ab', // Replace with your debug token from logs
+          },
+        }
+      };
 
-      await firebase.appCheck().initializeAppCheck({
+      this.appCheckInstance = await initializeAppCheck(app, {
         provider,
         isTokenAutoRefreshEnabled: true,
       });
@@ -35,7 +41,20 @@ class AppCheckService {
    */
   async getToken(): Promise<string | undefined> {
     try {
-      const result = await firebase.appCheck().getToken();
+      if (!this.appCheckInstance) {
+        // Try to get instance if initialized previously, or re-initialize?
+        // initializeAppCheck is idempotent-ish (returns existing if exists)?
+        // But we need the provider config.
+        // Assuming initialize() is called at app start.
+        // If not, we can try to initialize here or warn.
+        // For now, let's try to get it via initializeAppCheck with same config or assume initialized.
+        // Actually, if we call initializeAppCheck again, it returns the promise of the instance.
+        // But we need the provider.
+        console.warn('[AppCheck] Instance not initialized. Call initialize() first.');
+        return undefined;
+      }
+      
+      const result = await getToken(this.appCheckInstance);
       return result.token;
     } catch (error: any) {
       // Handle "API not enabled" or configuration errors gracefully

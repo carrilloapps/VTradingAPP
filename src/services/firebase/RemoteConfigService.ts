@@ -1,12 +1,14 @@
-import remoteConfig from '@react-native-firebase/remote-config';
+import { getRemoteConfig, setDefaults, setConfigSettings, fetchAndActivate, getValue } from '@react-native-firebase/remote-config';
 
 class RemoteConfigService {
+  private remoteConfig = getRemoteConfig();
+
   /**
    * Initialize Remote Config with default values
    */
   async initialize(): Promise<void> {
     try {
-      await remoteConfig().setDefaults({
+      await setDefaults(this.remoteConfig, {
         welcome_message: 'Bienvenido a VTradingAPP',
         enable_new_feature: false,
         api_timeout: 5000,
@@ -29,11 +31,11 @@ class RemoteConfigService {
       // In development, fetch frequently (0 seconds cache)
       // In production, use default (usually 12 hours)
       const cacheDuration = __DEV__ ? 0 : 3600; 
-      await remoteConfig().setConfigSettings({
+      await setConfigSettings(this.remoteConfig, {
         minimumFetchIntervalMillis: cacheDuration * 1000,
       });
       
-      const activated = await remoteConfig().fetchAndActivate();
+      const activated = await fetchAndActivate(this.remoteConfig);
       if (activated) {
         console.log('[RemoteConfig] Fetched and activated new config');
       } else {
@@ -50,21 +52,21 @@ class RemoteConfigService {
    * Get a string value
    */
   getString(key: string): string {
-    return remoteConfig().getValue(key).asString();
+    return getValue(this.remoteConfig, key).asString();
   }
 
   /**
    * Get a number value
    */
   getNumber(key: string): number {
-    return remoteConfig().getValue(key).asNumber();
+    return getValue(this.remoteConfig, key).asNumber();
   }
 
   /**
    * Get a boolean value
    */
   getBoolean(key: string): boolean {
-    return remoteConfig().getValue(key).asBoolean();
+    return getValue(this.remoteConfig, key).asBoolean();
   }
 }
 

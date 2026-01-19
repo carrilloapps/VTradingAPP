@@ -106,8 +106,19 @@ const ExchangeRatesScreen = () => {
     });
   }, [filteredRates]);
 
+  const borderRates = useMemo(() => {
+    const rates = filteredRates.filter(r => r.type === 'border');
+    return rates.sort((a, b) => {
+      // Priority: USD first, then EUR
+      if (a.code === 'USD') return -1;
+      if (b.code === 'USD') return 1;
+      if (a.code === 'EUR') return -1;
+      if (b.code === 'EUR') return 1;
+      return 0;
+    });
+  }, [filteredRates]);
   const cryptoRates = useMemo(() => filteredRates.filter(r => r.type === 'crypto'), [filteredRates]);
-  const otherRates = useMemo(() => filteredRates.filter(r => r.type !== 'fiat' && r.type !== 'crypto'), [filteredRates]);
+  const otherRates = useMemo(() => filteredRates.filter(r => r.type !== 'fiat' && r.type !== 'crypto' && r.type !== 'border'), [filteredRates]);
 
   const renderRateCard = (rate: CurrencyRate) => (
     <RateCard 
@@ -229,11 +240,21 @@ const ExchangeRatesScreen = () => {
               </View>
             )}
 
-            {/* Section: Cripto & Paralelo */}
+            {/* Section: Border */}
+            {borderRates.length > 0 && (
+              <View style={styles.section}>
+                <View style={styles.sectionHeader}>
+                  <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>Mercado Fronterizo</Text>
+                </View>
+                {borderRates.map(renderRateCard)}
+              </View>
+            )}
+
+            {/* Section: Cripto */}
             {cryptoRates.length > 0 && (
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
-                  <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>Criptomoneda / Stablecoins</Text>
+                  <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>Mercado Cripto (P2P)</Text>
                 </View>
                 {cryptoRates.map(renderRateCard)}
               </View>
@@ -243,7 +264,7 @@ const ExchangeRatesScreen = () => {
             {otherRates.length > 0 && (
                  <View style={styles.section}>
                     <View style={styles.sectionHeader}>
-                      <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>OTRAS</Text>
+                      <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>Otras Tasas</Text>
                     </View>
                     {otherRates.map(renderRateCard)}
                  </View>

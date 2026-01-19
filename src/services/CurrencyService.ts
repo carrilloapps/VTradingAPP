@@ -7,7 +7,7 @@ export interface CurrencyRate {
   name: string;
   value: number;
   changePercent: number | null;
-  type: 'fiat' | 'crypto';
+  type: 'fiat' | 'crypto' | 'border';
   iconName?: string;
   lastUpdated: string;
   buyValue?: number;
@@ -60,6 +60,7 @@ interface ApiCryptoItem {
 interface ApiRatesResponse {
   rates: ApiRateItem[];
   crypto: ApiCryptoItem[];
+  border: ApiRateItem[];
 }
 
 type CurrencyListener = (rates: CurrencyRate[]) => void;
@@ -94,6 +95,12 @@ export class CurrencyService {
     const num = Number(val);
     if (isNaN(num)) return 0;
     return Number(num.toFixed(2));
+  }
+
+  private static parseRate(val: any): number {
+    if (val === null || val === undefined) return 0;
+    const num = Number(val);
+    return isNaN(num) ? 0 : num;
   }
 
   /**
@@ -150,13 +157,44 @@ export class CurrencyService {
                      id: String(index),
                      code: apiRate.currency,
                      name: name,
-                     value: apiRate.rate.average,
-                     changePercent: CurrencyService.parsePercentage(apiRate.change.percent), 
+                     value: CurrencyService.parseRate(apiRate.rate?.average),
+                     changePercent: CurrencyService.parsePercentage(apiRate.change?.percent), 
                      type: 'fiat',
                      iconName: iconName,
                      lastUpdated: apiRate.date || new Date().toISOString(),
-                     buyValue: apiRate.rate.buy,
-                     sellValue: apiRate.rate.sell
+                     buyValue: CurrencyService.parseRate(apiRate.rate?.buy),
+                     sellValue: CurrencyService.parseRate(apiRate.rate?.sell)
+                 });
+            });
+        }
+
+        // 1.5 Process Border Rates
+        if (response.border) {
+            response.border.forEach((apiRate, index) => {
+                 let name = apiRate.currency;
+                 let iconName = 'attach-money';
+    
+                 // Standardize names and icons based on currency code
+                 const sourceLabel = apiRate.source || 'Fronterizo';
+                 name = `${apiRate.currency}/VES • ${sourceLabel}`;
+
+                 switch(apiRate.currency) {
+                     case 'EUR': iconName = 'euro'; break;
+                     case 'USD': iconName = 'attach-money'; break;
+                     default: iconName = 'attach-money';
+                 }
+    
+                 rates.push({
+                     id: `border_${index}`,
+                     code: apiRate.currency,
+                     name: name,
+                     value: CurrencyService.parseRate(apiRate.rate?.average),
+                     changePercent: CurrencyService.parsePercentage(apiRate.change?.percent), 
+                     type: 'border',
+                     iconName: iconName,
+                     lastUpdated: apiRate.date || new Date().toISOString(),
+                     buyValue: CurrencyService.parseRate(apiRate.rate?.buy),
+                     sellValue: CurrencyService.parseRate(apiRate.rate?.sell)
                  });
             });
         }
@@ -179,23 +217,28 @@ export class CurrencyService {
                 }
 
                 // Calculate average value
-                const avgValue = (cryptoItem.rate.buy + cryptoItem.rate.sell) / 2;
+                const buy = cryptoItem.rate?.buy || 0;
+                const sell = cryptoItem.rate?.sell || 0;
+                const avgValue = (buy + sell) / 2;
+                
                 // Calculate average change percent
-                const avgChange = (cryptoItem.change.buy.percent + cryptoItem.change.sell.percent) / 2;
+                const buyPercent = cryptoItem.change?.buy?.percent || 0;
+                const sellPercent = cryptoItem.change?.sell?.percent || 0;
+                const avgChange = (buyPercent + sellPercent) / 2;
 
                 rates.push({
                     id: `${cryptoItem.currency.toLowerCase()}_p2p`,
                     code: cryptoItem.currency,
                     name: name,
-                    value: avgValue,
+                    value: CurrencyService.parseRate(avgValue),
                     changePercent: CurrencyService.parsePercentage(avgChange),
                     type: 'crypto',
                     iconName: iconName,
                     lastUpdated: cryptoItem.date || new Date().toISOString(),
-                    buyValue: cryptoItem.rate.buy,
-                    sellValue: cryptoItem.rate.sell,
-                    buyChangePercent: CurrencyService.parsePercentage(cryptoItem.change.buy.percent),
-                    sellChangePercent: CurrencyService.parsePercentage(cryptoItem.change.sell.percent)
+                    buyValue: CurrencyService.parseRate(cryptoItem.rate?.buy),
+                    sellValue: CurrencyService.parseRate(cryptoItem.rate?.sell),
+                    buyChangePercent: CurrencyService.parsePercentage(cryptoItem.change?.buy?.percent),
+                    sellChangePercent: CurrencyService.parsePercentage(cryptoItem.change?.sell?.percent)
                 });
             });
         }

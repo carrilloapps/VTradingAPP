@@ -1,26 +1,28 @@
-import inAppMessaging from '@react-native-firebase/in-app-messaging';
+import { getInAppMessaging, setMessagesDisplaySuppressed, triggerEvent } from '@react-native-firebase/in-app-messaging';
 
 class InAppMessagingService {
+  private inAppMessaging = getInAppMessaging();
+
   /**
    * Initialize and configure In-App Messaging
    */
   async initialize(): Promise<void> {
     // In-App Messaging is enabled by default, but we can explicitly enable it
-    await inAppMessaging().setMessagesDisplaySuppressed(false);
+    await setMessagesDisplaySuppressed(this.inAppMessaging, false);
   }
 
   /**
    * Suppress message display (e.g., during sensitive flows)
    */
   async setMessagesDisplaySuppressed(enabled: boolean): Promise<void> {
-    await inAppMessaging().setMessagesDisplaySuppressed(enabled);
+    await setMessagesDisplaySuppressed(this.inAppMessaging, enabled);
   }
 
   /**
    * Trigger an event manually (if configured in Firebase Console)
    */
   triggerEvent(eventId: string): void {
-      inAppMessaging().triggerEvent(eventId);
+      triggerEvent(this.inAppMessaging, eventId);
   }
 }
 
