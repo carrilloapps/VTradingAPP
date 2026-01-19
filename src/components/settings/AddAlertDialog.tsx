@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { Portal, Dialog, Button, TextInput, Text, SegmentedButtons, useTheme, Divider, ActivityIndicator } from 'react-native-paper';
+import { View, StyleSheet, ScrollView, TouchableOpacity, FlatList } from 'react-native';
+import { Button, TextInput, Text, SegmentedButtons, useTheme, ActivityIndicator, IconButton, Icon } from 'react-native-paper';
 import { CurrencyService } from '../../services/CurrencyService';
 import { StocksService } from '../../services/StocksService';
+import UniversalDialog from '../ui/UniversalDialog';
 
 interface AddAlertDialogProps {
   visible: boolean;
@@ -47,38 +48,27 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
 
       // Process Rates
       rates.forEach(r => {
-        // Base symbols (assumed vs VES if not specified, or just the value provided)
-        // Only add pairs as requested
         prices[`${r.code}/VES`] = r.value;
-        
-        // Crypto pairs
         if (r.type === 'crypto') {
             prices[`${r.code}/USD`] = r.value / usdRate;
             prices[`${r.code}/USDT`] = r.value / usdtRate;
         }
       });
       
-      // Special common pairs
       if (usdRate > 0) prices["VES/USD"] = 1 / usdRate;
       const eurRate = rates.find(r => r.code === 'EUR')?.value;
       if (eurRate && usdRate > 0) prices["EUR/USD"] = eurRate / usdRate;
 
       // Process Stocks
       stocks.forEach(s => {
-        // Stocks are listed by symbol directly (e.g., CANTV, BNC)
         prices[s.symbol] = s.price;
       });
 
       setSymbolPrices(prices);
-
-      // Combine and deduplicate based STRICTLY on available prices
-      // This ensures that every symbol in the list has a valid price from the API
       const allSymbols = Object.keys(prices).sort();
-
       setAvailableSymbols(allSymbols);
     } catch (err) {
       console.error("Failed to load symbols for autocomplete", err);
-      // No fallback to hardcoded data - strict API requirement
       setAvailableSymbols([]);
     } finally {
       setLoadingSymbols(false);
@@ -99,180 +89,279 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
     onDismiss();
   };
 
+  const handleSelectSymbol = (selected: string) => {
+    setSymbol(selected);
+    setShowDropdown(false);
+    // Auto-set current price as target suggestion if empty
+    if (!target && symbolPrices[selected]) {
+      setTarget(symbolPrices[selected].toFixed(2));
+    }
+  };
+
   const filteredSymbols = availableSymbols.filter(s => 
     s.toLowerCase().includes(symbol.toLowerCase())
   );
 
   return (
-    <Portal>
-      <Dialog 
-        visible={visible} 
-        onDismiss={onDismiss} 
-        style={{ 
-          backgroundColor: theme.colors.elevation.level3,
-          borderRadius: 28, // Material 3 standard
-          borderColor: theme.colors.outline,
-          borderWidth: 1,
-          elevation: 0, // Flat style requested
-          shadowColor: 'transparent',
-          shadowOffset: { width: 0, height: 0 },
-          shadowOpacity: 0,
-          shadowRadius: 0,
-        }}
-      >
-        <Dialog.Title style={{ 
-          textAlign: 'center',
-          color: theme.colors.onSurface,
-          fontSize: 24,
-        }}>
-          Nueva Alerta
-        </Dialog.Title>
-        <Dialog.Content>
-          <View style={styles.inputContainer}>
-            <View style={{ zIndex: 10 }}>
-              <TextInput
-                label="Par / Símbolo"
-                placeholder="Ej. BTC/USD, VES/USD"
-                value={symbol}
-                onChangeText={(text) => {
-                  setSymbol(text);
-                  setError('');
-                  setShowDropdown(true);
-                }}
-                onFocus={() => setShowDropdown(true)}
-                mode="outlined"
-                style={styles.input}
-                autoCapitalize="characters"
-              />
-              {showDropdown && symbol.length > 0 && filteredSymbols.length > 0 && (
-                <View style={[styles.dropdown, { backgroundColor: theme.colors.elevation.level2, borderColor: theme.colors.outline }]}>
-                  {loadingSymbols ? (
-                      <View style={{ padding: 16, alignItems: 'center' }}>
-                         <ActivityIndicator size="small" />
-                      </View>
-                  ) : (
-                    <ScrollView style={{ maxHeight: 150 }} keyboardShouldPersistTaps="handled">
-                      {filteredSymbols.map((item, index) => (
-                        <React.Fragment key={item}>
-                          <TouchableOpacity 
-                            style={styles.dropdownItem} 
-                            onPress={() => {
-                              setSymbol(item);
-                              if (symbolPrices[item]) {
-                                const p = symbolPrices[item];
-                                // Auto-fill target price with current value
-                                // Use 8 decimals for very small numbers (crypto), 4 for < 1, 2 for normal
-                                const formattedPrice = p < 0.01 ? p.toFixed(8) : p < 1 ? p.toFixed(4) : p.toFixed(2);
-                                setTarget(formattedPrice);
-                              }
-                              setShowDropdown(false);
-                              setError('');
-                            }}
-                          >
-                            <Text style={{ color: theme.colors.onSurface }}>{item}</Text>
-                          </TouchableOpacity>
-                          {index < filteredSymbols.length - 1 && <Divider />}
-                        </React.Fragment>
-                      ))}
-                    </ScrollView>
-                  )}
-                </View>
-              )}
-            </View>
-
+    <UniversalDialog
+      visible={visible}
+      onDismiss={onDismiss}
+      title="Nueva Alerta"
+      actions={
+        <View style={styles.actionButtonsContainer}>
+          <TouchableOpacity 
+            onPress={onDismiss} 
+            style={[styles.actionButton, { backgroundColor: theme.colors.surfaceVariant }]}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.actionButtonText, { color: theme.colors.onSurfaceVariant }]}>CANCELAR</Text>
+          </TouchableOpacity>
+          
+          <TouchableOpacity 
+            onPress={handleSave} 
+            style={[styles.actionButton, { backgroundColor: theme.colors.primary }]}
+            activeOpacity={0.8}
+          >
+            <Text style={[styles.actionButtonText, { color: theme.colors.onPrimary }]}>GUARDAR</Text>
+          </TouchableOpacity>
+        </View>
+      }
+    >
+      <View style={styles.formContainer}>
+        {/* Symbol Input */}
+        <View style={styles.inputGroup}>
+          <Text variant="labelMedium" style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Activo</Text>
+          <View style={styles.autocompleteContainer}>
             <TextInput
-              label="Precio Objetivo"
-              placeholder="0.00"
-              value={target}
+              value={symbol}
               onChangeText={(text) => {
-                setTarget(text);
+                setSymbol(text);
+                setShowDropdown(true);
                 setError('');
               }}
-              mode="outlined"
-              keyboardType="numeric"
-              style={styles.input}
-            />
-
-            <Text variant="bodyMedium" style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>
-              Condición
-            </Text>
-
-            <SegmentedButtons
-              value={condition}
-              onValueChange={value => setCondition(value as 'above' | 'below')}
-              buttons={[
-                {
-                  value: 'above',
-                  label: 'Sube de',
-                  icon: 'trending-up',
-                },
-                {
-                  value: 'below',
-                  label: 'Baja de',
-                  icon: 'trending-down',
-                },
+              placeholder="Ej. USD/VES, CANTV"
+              mode="flat"
+              style={[
+                styles.input, 
+                { 
+                  backgroundColor: theme.colors.surfaceVariant, // Matches surface-dark/accent from HTML
+                  borderTopLeftRadius: 12,
+                  borderTopRightRadius: 12,
+                  borderBottomLeftRadius: 12,
+                  borderBottomRightRadius: 12,
+                }
               ]}
-              style={styles.segmentedButton}
+              underlineColor="transparent"
+              activeUnderlineColor="transparent"
+              textColor={theme.colors.onSurface}
+              placeholderTextColor={theme.colors.onSurfaceVariant}
+              right={
+                loadingSymbols ? <TextInput.Icon icon={() => <ActivityIndicator size={16} />} /> :
+                symbol ? <TextInput.Icon icon="close" onPress={() => setSymbol('')} /> : null
+              }
             />
-
-            {error ? (
-              <Text style={{ color: theme.colors.error, marginTop: 8, fontSize: 12 }}>
-                {error}
-              </Text>
-            ) : null}
+            
+            {showDropdown && symbol.length > 0 && filteredSymbols.length > 0 && (
+               <View style={[styles.dropdown, { backgroundColor: theme.colors.elevation.level3, borderColor: theme.colors.outline }]}>
+                 <FlatList
+                    data={filteredSymbols}
+                    keyExtractor={(item) => item}
+                    keyboardShouldPersistTaps="handled"
+                    style={{ maxHeight: 150 }}
+                    nestedScrollEnabled={true}
+                    renderItem={({ item }) => (
+                     <TouchableOpacity
+                       style={[styles.dropdownItem, { borderBottomColor: theme.colors.outline }]}
+                       onPress={() => handleSelectSymbol(item)}
+                     >
+                       <View>
+                         <Text variant="bodyMedium" style={{ fontWeight: 'bold' }}>{item}</Text>
+                         <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                           Actual: {symbolPrices[item]?.toFixed(2)}
+                         </Text>
+                       </View>
+                       <IconButton icon="arrow-top-left" size={16} />
+                     </TouchableOpacity>
+                   )}
+                 />
+               </View>
+             )}
           </View>
-        </Dialog.Content>
-        <Dialog.Actions style={{ justifyContent: 'space-around', paddingBottom: 16 }}>
-          <Button 
-            onPress={onDismiss} 
-            textColor={theme.colors.onSurfaceVariant}
-            mode="text"
-          >
-            Cancelar
-          </Button>
-          <Button 
-            onPress={handleSave} 
-            mode="contained" 
-            style={{ paddingHorizontal: 16 }}
-            buttonColor={theme.colors.primary}
-            textColor={theme.colors.onPrimary}
-          >
-            Guardar
-          </Button>
-        </Dialog.Actions>
-      </Dialog>
-    </Portal>
+        </View>
+
+        {/* Condition Toggle Buttons */}
+        <View style={styles.inputGroup}>
+            <Text variant="labelMedium" style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Condición</Text>
+            <View style={[styles.toggleContainer, { backgroundColor: theme.colors.surfaceVariant }]}>
+                <TouchableOpacity
+                    style={[
+                        styles.toggleButton,
+                        condition === 'above' && { backgroundColor: theme.colors.elevation.level3 },
+                        { flexDirection: 'row', gap: 8 }
+                    ]}
+                    onPress={() => setCondition('above')}
+                    activeOpacity={0.7}
+                >
+                    <Icon 
+                        source="trending-up" 
+                        size={18} 
+                        color={condition === 'above' ? theme.colors.primary : theme.colors.onSurfaceVariant} 
+                    />
+                    <Text style={[
+                        styles.toggleButtonText,
+                        { color: condition === 'above' ? theme.colors.primary : theme.colors.onSurfaceVariant }
+                    ]}>
+                        SUBE DE
+                    </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                    style={[
+                        styles.toggleButton,
+                        condition === 'below' && { backgroundColor: theme.colors.elevation.level3 },
+                        { flexDirection: 'row', gap: 8 }
+                    ]}
+                    onPress={() => setCondition('below')}
+                    activeOpacity={0.7}
+                >
+                    <Icon 
+                        source="trending-down" 
+                        size={18} 
+                        color={condition === 'below' ? theme.colors.error : theme.colors.onSurfaceVariant} 
+                    />
+                    <Text style={[
+                        styles.toggleButtonText,
+                        { color: condition === 'below' ? theme.colors.error : theme.colors.onSurfaceVariant }
+                    ]}>
+                        BAJA DE
+                    </Text>
+                </TouchableOpacity>
+            </View>
+        </View>
+
+        {/* Target Price Input */}
+        <View style={styles.inputGroup}>
+          <Text variant="labelMedium" style={[styles.label, { color: theme.colors.onSurfaceVariant }]}>Precio Objetivo</Text>
+          <TextInput
+            value={target}
+            onChangeText={setTarget}
+            placeholder="0.00"
+            keyboardType="numeric"
+            mode="flat"
+            style={[
+                styles.input, 
+                { 
+                  backgroundColor: theme.colors.surfaceVariant,
+                  borderRadius: 12,
+                  borderTopLeftRadius: 12,
+                  borderTopRightRadius: 12,
+                }
+            ]}
+            underlineColor="transparent"
+            activeUnderlineColor="transparent"
+            textColor={theme.colors.onSurface}
+            left={<TextInput.Affix text={symbolPrices[symbol] ? (symbol.includes('/') ? '' : 'Bs. ') : ''} />}
+          />
+          {symbolPrices[symbol] && (
+            <Text variant="bodySmall" style={{ marginTop: 4, color: theme.colors.primary }}>
+                Precio actual: {symbolPrices[symbol].toFixed(2)}
+            </Text>
+          )}
+        </View>
+
+        {/* Disclaimer / Summary */}
+        {target && !isNaN(Number(target)) ? (
+           <Text style={{ textAlign: 'center', color: theme.colors.onSurfaceVariant, fontSize: 13 }}>
+             Se te notificará cuando el precio sea <Text style={{ fontWeight: 'bold', color: theme.colors.onSurface }}>{condition === 'above' ? 'mayor' : 'menor'}</Text> a <Text style={{ fontWeight: 'bold', color: theme.colors.onSurface }}>{target}</Text>.
+           </Text>
+        ) : null}
+
+        {error ? (
+          <Text style={{ color: theme.colors.error, marginTop: 8, textAlign: 'center' }}>
+            {error}
+          </Text>
+        ) : null}
+      </View>
+    </UniversalDialog>
   );
 };
 
 const styles = StyleSheet.create({
-  inputContainer: {
+  formContainer: {
     gap: 16,
   },
-  input: {
-    backgroundColor: 'transparent',
+  inputGroup: {
+    gap: 6,
   },
   label: {
-    marginBottom: 4,
+    fontWeight: '600',
+    marginLeft: 4,
   },
-  segmentedButton: {
-    marginBottom: 8,
+  input: {
+    height: 50,
+    fontSize: 16,
+  },
+  autocompleteContainer: {
+    position: 'relative',
+    zIndex: 10,
   },
   dropdown: {
     position: 'absolute',
-    top: 56, // Height of TextInput roughly
+    top: 52,
     left: 0,
     right: 0,
     borderWidth: 1,
-    borderTopWidth: 0,
-    borderBottomLeftRadius: 8,
-    borderBottomRightRadius: 8,
-    elevation: 4,
+    borderRadius: 12,
+    maxHeight: 160,
     zIndex: 1000,
+    elevation: 4, // Keep small elevation for dropdown overlay
   },
   dropdownItem: {
     padding: 12,
-  }
+    borderBottomWidth: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  segmentedButton: {
+    marginTop: 2,
+  },
+  toggleContainer: {
+    flexDirection: 'row',
+    padding: 4,
+    borderRadius: 12,
+    marginTop: 2,
+  },
+  toggleButton: {
+    flex: 1,
+    paddingVertical: 10,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  toggleButtonText: {
+    fontSize: 11,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  actionButtonsContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    width: '100%',
+  },
+  actionButton: {
+    flex: 1,
+    height: 48,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  actionButtonText: {
+    fontSize: 12,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
 });
 
 export default AddAlertDialog;
