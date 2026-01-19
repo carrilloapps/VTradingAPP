@@ -11,6 +11,7 @@
 *   Maneja tasas de cambio (Fiat y Cripto).
 *   Combina fuentes oficiales (BCV) y P2P (Binance).
 *   Provee suscripción a actualizaciones en tiempo real.
+*   **Constantes Centralizadas:** Mantiene la lista oficial de stablecoins (`STABLECOINS = ['USDT', 'USDC', 'DAI', 'FDUSD']`) para su uso unificado en toda la app.
 
 ### StocksService
 *   Maneja datos del mercado bursátil (Acciones, Índices).

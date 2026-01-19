@@ -3,7 +3,7 @@ import { View, StyleSheet, TouchableOpacity, FlatList, TextInput as RNTextInput,
 import { Text, useTheme, TouchableRipple } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
+import { CurrencyService, CurrencyRate, STABLECOINS } from '../services/CurrencyService';
 import { useToast } from '../context/ToastContext';
 import CurrencyPickerModal from '../components/dashboard/CurrencyPickerModal';
 import CurrencySelectorButton from '../components/dashboard/CurrencySelectorButton';
@@ -132,6 +132,43 @@ const AdvancedCalculatorScreen = () => {
   const baseCurrency = useMemo(() => 
     rates.find(r => r.code === baseCurrencyCode) || { code: 'USD', value: 1, name: 'Dollar' } as CurrencyRate
   , [rates, baseCurrencyCode]);
+
+  const availableRates = useMemo(() => {
+      if (pickerMode === 'base') return rates;
+
+      // Filter for 'add' mode (Target) based on business rules
+      const sourceRate = baseCurrency;
+      if (!sourceRate) return rates;
+
+      // Rule 1: VES -> All
+      if (sourceRate.code === 'VES' || sourceRate.code === 'Bs') return rates;
+
+      // Rule 2: BCV (Fiat) -> VES only
+      if (sourceRate.type === 'fiat') {
+          return rates.filter(r => r.code === 'VES' || r.code === 'Bs' || r.type === 'crypto');
+      }
+
+      // Rule 3: Border -> VES or Stablecoins (USDT, USDC, DAI, FDUSD)
+      if (sourceRate.type === 'border') {
+          return rates.filter(r => 
+              r.code === 'VES' || 
+              r.code === 'Bs' || 
+              (r.type === 'crypto' && STABLECOINS.includes(r.code))
+          );
+      }
+
+      // Rule 4: Crypto -> VES, Border or Crypto
+      if (sourceRate.type === 'crypto') {
+          return rates.filter(r => 
+              r.code === 'VES' || 
+              r.code === 'Bs' || 
+              r.type === 'border' ||
+              r.type === 'crypto'
+          );
+      }
+
+      return rates;
+  }, [rates, pickerMode, baseCurrency]);
 
   const getSourceLabel = (code: string) => {
     if (code === 'USDT') return 'Binance P2P';
@@ -269,12 +306,30 @@ const AdvancedCalculatorScreen = () => {
   const handleSetBase = (currency: CurrencyRate) => {
       setBaseCurrencyCode(currency.code);
       
-      // Business Rule: If new base is in target list, remove it (Prevent 1-to-1)
-      if (targetCodes.includes(currency.code)) {
-          setTargetCodes(prev => prev.filter(c => c !== currency.code));
-          showToast(`${currency.code} removida de la lista (ahora es base)`, 'info');
+      // Calculate valid targets for new base
+      let validTargets = rates; // Default All
+      if (currency.code !== 'VES' && currency.code !== 'Bs') {
+          if (currency.type === 'fiat') {
+              validTargets = rates.filter(r => r.code === 'VES' || r.code === 'Bs' || r.type === 'crypto');
+          } else if (currency.type === 'border') {
+              validTargets = rates.filter(r => r.code === 'VES' || r.code === 'Bs' || (r.type === 'crypto' && STABLECOINS.includes(r.code)));
+          } else if (currency.type === 'crypto') {
+              validTargets = rates.filter(r => r.code === 'VES' || r.code === 'Bs' || r.type === 'border' || r.type === 'crypto');
+          }
       }
       
+      const validCodes = validTargets.map(r => r.code);
+
+      // Filter existing targets to remove invalid ones
+      setTargetCodes(prev => prev.filter(code => {
+          // Remove if equal to new base
+          if (code === currency.code) return false;
+          // Remove if not valid for new base
+          if (!validCodes.includes(code)) return false;
+          return true;
+      }));
+      
+      showToast(`Base cambiada a ${currency.code}`, 'success');
       setPickerVisible(false);
   };
 
@@ -509,7 +564,7 @@ const AdvancedCalculatorScreen = () => {
           onDismiss={() => setPickerVisible(false)}
           onSelect={pickerMode === 'base' ? handleSetBase : handleAddCurrency}
           selectedCurrencyCode={pickerMode === 'base' ? baseCurrencyCode : null}
-          rates={rates}
+          rates={availableRates}
           title={pickerMode === 'base' ? "Seleccionar divisa" : "Añadir a la lista"}
           excludedCodes={getExcludedCodes}
       />

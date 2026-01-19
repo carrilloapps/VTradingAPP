@@ -98,6 +98,23 @@ Para mantener una armonía visual entre pantallas:
 *   **Servicios de Datos:** Utilizar `CurrencyService` y `StocksService` para obtener datos, evitando lógica de fetch directa en las pantallas.
 
 ### Estados de Carga y Error
+
+## Calculadora Avanzada (AdvancedCalculatorScreen)
+
+### Reglas de Conversión y Filtrado
+Mantiene paridad lógica con `CurrencyConverter`, aplicando restricciones dinámicas en la selección de monedas (`CurrencyPickerModal`) y limpieza automática de estados inválidos.
+
+1.  **Filtrado de Destinos (`availableRates`):**
+    *   Al seleccionar una moneda base, la lista de monedas destino disponibles se filtra automáticamente.
+    *   **Caso Frontera (Border):** Si la base es fronteriza (ej. COP), solo se muestran VES y Stablecoins (USDT, USDC, DAI, FDUSD) como opciones válidas para añadir.
+    *   **Caso Fiat (Fiat):** Si la base es Fiat (ej. USD), se permiten VES y Criptomonedas.
+
+2.  **Validación Automática (`handleSetBase`):**
+    *   Al cambiar la moneda base, se verifica la lista de monedas destino actuales.
+    *   Cualquier moneda destino que viole las reglas de negocio (ej. tener USD como destino cuando la nueva base es COP) es **eliminada automáticamente** de la lista para mantener la consistencia del estado.
+
+3.  **Reutilización de Constantes:**
+    *   Utiliza `STABLECOINS` importado de `CurrencyService` para definir qué criptomonedas son válidas para cruces con monedas fronterizas.
 *   Gestionar estados de `loading`, `error` y `empty` (sin resultados) de forma visualmente distinta.
 *   Usar `RefreshControl` en `ScrollView` para permitir recarga manual.
 

@@ -1,6 +1,8 @@
 import { apiClient } from './ApiClient';
 import { performanceService } from './firebase/PerformanceService';
 
+export const STABLECOINS = ['USDT', 'USDC', 'DAI', 'FDUSD'];
+
 export interface CurrencyRate {
   id: string;
   code: string;

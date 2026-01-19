@@ -84,3 +84,21 @@ Usado en `DetailsScreen` (Billetera/Detalles).
     2.  **Progress Section:** Barra de progreso de límites.
     3.  **Feature List:** Lista de opciones (Recargar, Retirar, etc.).
 *   **Estilo:** Respeta los `borderRadius` (r*6) y el estilo plano (sin elevación) de los `FeatureItem` reales.
+
+## Lógica de Negocio de Conversión (CurrencyConverter)
+
+Para garantizar la coherencia financiera y evitar pares de conversión ilógicos, `CurrencyConverter` implementa las siguientes reglas estrictas de filtrado (`availableToRates`):
+
+1.  **Origen VES/Bs:** Permite conversión a **TODAS** las divisas disponibles.
+2.  **Origen Fiat (ej. BCV, USD):**
+    *   Permite conversión a **VES/Bs** (Tasa Oficial/Paralela).
+    *   Permite conversión a **Cripto** (incluyendo Stablecoins y volátiles).
+    *   *Rationale:* BCV es oficial solo para Venezuela, pero es útil comparar contra referencias cripto.
+3.  **Origen Fronterizo (ej. COP, PEN):**
+    *   Permite conversión a **VES/Bs**.
+    *   Permite conversión a **Stablecoins** (USDT, USDC, DAI, FDUSD) definidas en `CurrencyService`.
+    *   **Restricción:** NO permite conversión directa a otras divisas Fiat (ej. COP -> USD) ni criptos volátiles.
+4.  **Origen Cripto:**
+    *   Permite conversión a **VES/Bs**.
+    *   Permite conversión a **Fronterizo**.
+    *   Permite conversión a **Cripto** (Arbitraje/Intercambio).

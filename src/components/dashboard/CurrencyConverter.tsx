@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, useTheme, TextInput, Button, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { CurrencyService, CurrencyRate } from '../../services/CurrencyService';
+import { CurrencyService, CurrencyRate, STABLECOINS } from '../../services/CurrencyService';
 import { useToast } from '../../context/ToastContext';
 import CurrencyPickerModal from './CurrencyPickerModal';
 import CurrencySelectorButton from './CurrencySelectorButton';
@@ -157,6 +157,43 @@ const CurrencyConverter: React.FC = () => {
     return () => unsubscribe();
   }, []); // Run once on mount
 
+  // Filter available target rates based on business rules
+  const availableToRates = useMemo(() => {
+      if (!fromCurrency) return rates;
+
+      // Rule 1: VES -> All
+      if (fromCurrency.code === 'VES' || fromCurrency.code === 'Bs') return rates;
+
+      // Rule 2: BCV (Fiat) -> VES only
+      // "La tasa de cambio BCV es oficial exclusivamente para venezuela"
+      if (fromCurrency.type === 'fiat') {
+          return rates.filter(r => r.code === 'VES' || r.code === 'Bs' || r.type === 'crypto');
+      }
+
+      // Rule 3: Border -> VES or Stablecoins (USDT, USDC, DAI, FDUSD)
+      // "si elijo COP, solo deberia poder cambiar a USDT, USDC, DAI, FDUSD (es decir stablecoins) y VES"
+      if (fromCurrency.type === 'border') {
+          return rates.filter(r => 
+              r.code === 'VES' || 
+              r.code === 'Bs' || 
+              (r.type === 'crypto' && STABLECOINS.includes(r.code))
+          );
+      }
+
+      // Rule 4: Crypto -> VES, Border or Crypto
+      // Implicit reciprocity for P2P markets
+      if (fromCurrency.type === 'crypto') {
+          return rates.filter(r => 
+              r.code === 'VES' || 
+              r.code === 'Bs' || 
+              r.type === 'border' ||
+              r.type === 'crypto'
+          );
+      }
+
+      return rates;
+  }, [fromCurrency, rates]);
+
   // Update selected currencies when rates change (to keep values fresh)
   useEffect(() => {
       if (rates.length > 0) {
@@ -176,6 +213,12 @@ const CurrencyConverter: React.FC = () => {
           // Sync toCurrency
           if (toCurrency) {
               const updatedTo = rates.find(r => r.code === toCurrency.code);
+              
+              // Validate if current toCurrency is still valid for new fromCurrency rules
+              // (This part is tricky inside this effect because availableToRates depends on fromCurrency)
+              // But strictly speaking, we just need to update the rate value here.
+              // Validation logic should happen when fromCurrency changes.
+              
               // Update if value changed or object reference is different
               if (updatedTo && updatedTo !== toCurrency) {
                   setToCurrency(updatedTo);
@@ -187,6 +230,19 @@ const CurrencyConverter: React.FC = () => {
           }
       }
   }, [rates]); // Only run when rates array changes
+
+  // Validate ToCurrency when FromCurrency changes
+  useEffect(() => {
+      if (toCurrency && availableToRates.length > 0) {
+          const isValid = availableToRates.find(r => r.code === toCurrency.code);
+          if (!isValid) {
+              // Reset to VES if available, otherwise first available
+              const ves = availableToRates.find(r => r.code === 'VES' || r.code === 'Bs');
+              setToCurrency(ves || availableToRates[0]);
+          }
+      }
+  }, [fromCurrency, availableToRates]);
+
 
   // Conversion Logic
   const convertedValue = useMemo(() => {
@@ -317,8 +373,8 @@ const CurrencyConverter: React.FC = () => {
           onDismiss={() => setShowToPicker(false)}
           onSelect={setToCurrency}
           selectedCurrencyCode={toCurrency?.code || null}
-          rates={rates}
-          title="Seleccionar divisa"
+          rates={availableToRates}
+          title="Seleccionar divisa destino"
       />
     </View>
   );
