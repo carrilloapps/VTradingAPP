@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Image, Text } from 'react-native';
-import { WidgetItem } from '../components/widgets/WidgetPreview';
+import { WidgetItem } from './types';
 
 interface VTradingWidgetProps {
   items: WidgetItem[];

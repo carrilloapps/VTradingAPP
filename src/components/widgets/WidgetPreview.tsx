@@ -5,17 +5,9 @@ import LinearGradient from 'react-native-linear-gradient';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../theme/theme';
 import WidgetCard from './WidgetCard';
+import { WidgetItem } from '../../widget/types';
 
-export interface WidgetItem {
-  id: string;
-  label: string;
-  value: string;
-  currency: string;
-  trend: 'up' | 'down' | 'neutral';
-  trendValue: string;
-  trendColor: string;
-  trendBg: string;
-}
+export type { WidgetItem };
 
 interface WidgetPreviewProps {
   items: WidgetItem[];

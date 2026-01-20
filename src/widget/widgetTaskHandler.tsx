@@ -3,7 +3,7 @@ import { WidgetTaskHandlerProps } from 'react-native-android-widget';
 import { storageService } from '../services/StorageService';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
 import VTradingWidget from './VTradingWidget';
-import { WidgetItem } from '../components/widgets/WidgetPreview';
+import { WidgetItem } from './types';
 
 export async function buildWidgetElement() {
   // 1. Get Widget Configuration
