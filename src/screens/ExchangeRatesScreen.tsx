@@ -11,7 +11,7 @@ import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
 import { StocksService } from '../services/StocksService';
 import { useFilters } from '../context/FilterContext';
 import { useToast } from '../context/ToastContext';
-import { useAppTheme } from '../theme/useAppTheme';
+import { useAppTheme } from '../theme/theme';
 
 if (Platform.OS === 'android') {
   if (UIManager.setLayoutAnimationEnabledExperimental) {

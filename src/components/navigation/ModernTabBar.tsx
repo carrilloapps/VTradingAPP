@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAppTheme } from '../../theme/useAppTheme';
+import { useAppTheme } from '../../theme/theme';
 import { MaterialTopTabBarProps } from '@react-navigation/material-top-tabs';
 
 const ModernTabBar: React.FC<MaterialTopTabBarProps> = ({ state, descriptors, navigation }) => {

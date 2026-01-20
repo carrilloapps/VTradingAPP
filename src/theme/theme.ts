@@ -3,52 +3,8 @@ import {
   MD3DarkTheme as DefaultDarkTheme,
   useTheme as usePaperTheme,
   MD3Theme,
+  configureFonts,
 } from 'react-native-paper';
-
-// Definición de colores personalizados del diseño (basados en ajustes.html)
-const customColors = {
-  primary: '#0e4981',
-  primaryDark: '#083056',
-  primaryLight: '#a5c8ea', // Light variant for Dark Mode Primary
-  secondary: '#243647',
-  backgroundLight: '#f2f5f8',
-  backgroundDark: '#0e1720',
-  surfaceDark: '#16212e',
-  textSecondary: '#93aec8',
-  danger: '#cf4848',
-  
-  // Semantic colors for Light Mode
-  successLight: '#15803d', // green-700
-  successBgLight: '#dcfce7', // green-100
-  errorLight: '#e11d48', // rose-600
-  errorBgLight: '#ffe4e6', // rose-100
-  infoLight: '#1d4ed8', // blue-700
-  infoBgLight: '#dbeafe', // blue-100
-  neutralLight: '#475569', // slate-600
-  neutralBgLight: '#f1f5f9', // slate-100
-  
-  // Semantic colors for Dark Mode
-  successDark: '#4ade80', // green-400
-  successBgDark: 'rgba(34, 197, 94, 0.2)', // green-500/20
-  errorDark: '#fb7185', // rose-400
-  errorBgDark: 'rgba(225, 29, 72, 0.3)', // rose-900/30
-  infoDark: '#60a5fa', // blue-400
-  infoBgDark: 'rgba(59, 130, 246, 0.2)', // blue-500/20
-  neutralDark: '#cbd5e1', // slate-300
-  neutralBgDark: '#334155', // slate-700
-  warning: '#eab308', // yellow-500
-  warningDark: '#facc15', // yellow-400
-
-  // Trend Colors (Matching StockItem and MarketStatus)
-  trendUp: '#10B981', // emerald-500
-  trendDown: '#EF4444', // red-500
-  
-  // Skeleton Colors
-  skeletonLight: '#E1E9EE',
-  skeletonHighlightLight: '#F2F8FC',
-  skeletonDark: '#1c2a3b', // Matches elevation level 2
-  skeletonHighlightDark: '#2b3d54', // Matches elevation level 4
-};
 
 // Sistema de espaciado centralizado
 export const spacing = {
@@ -74,6 +30,7 @@ export interface CustomColors {
     neutralContainer: string;
     danger: string;
     warning: string;
+    buttonBorder: string;
 }
 
 // Define AppTheme Type
@@ -85,61 +42,126 @@ export type AppTheme = Omit<MD3Theme, 'colors'> & {
 // Custom Hook to use the theme with types
 export const useAppTheme = () => usePaperTheme<AppTheme>();
 
+// Paleta de Colores Material 3 (Green/Financial Focus)
+// Generated for primary color: #006C4C (Financial Green)
+
+const lightColors = {
+  primary: '#006C4C',
+  onPrimary: '#FFFFFF',
+  primaryContainer: '#89F8C6',
+  onPrimaryContainer: '#002114',
+  secondary: '#4C6358',
+  onSecondary: '#FFFFFF',
+  secondaryContainer: '#CEE9DA',
+  onSecondaryContainer: '#092016',
+  tertiary: '#3E6373',
+  onTertiary: '#FFFFFF',
+  tertiaryContainer: '#C2E8FB',
+  onTertiaryContainer: '#001F29',
+  error: '#BA1A1A',
+  onError: '#FFFFFF',
+  errorContainer: '#FFDAD6',
+  onErrorContainer: '#410002',
+  background: '#FBFDF9',
+  onBackground: '#191C1A',
+  surface: '#FBFDF9',
+  onSurface: '#191C1A',
+  surfaceVariant: '#DBE5DE',
+  onSurfaceVariant: '#404944',
+  outline: '#CFD6D2', // Even subtler for light mode
+  outlineVariant: '#E0E6E2', // Very light for decorative borders
+  buttonBorder: '#747C78', // Stronger contrast for buttons
+  shadow: '#000000',
+  scrim: '#000000',
+  inverseSurface: '#2E312F',
+  inverseOnSurface: '#F0F2EE',
+  inversePrimary: '#6DDBAC',
+  elevation: {
+    level0: 'transparent',
+    level1: '#F0F5F2', 
+    level2: '#EAF1ED',
+    level3: '#E4EDE8',
+    level4: '#E2ECE7',
+    level5: '#DDE9E4',
+  },
+};
+
+const darkColors = {
+  primary: '#6DDBAC',
+  onPrimary: '#003825',
+  primaryContainer: '#005138',
+  onPrimaryContainer: '#89F8C6',
+  secondary: '#B3CCBE',
+  onSecondary: '#1F352B',
+  secondaryContainer: '#354B41',
+  onSecondaryContainer: '#CEE9DA',
+  tertiary: '#A6CCE0',
+  onTertiary: '#083543',
+  tertiaryContainer: '#254B5B',
+  onTertiaryContainer: '#C2E8FB',
+  error: '#FFB4AB',
+  onError: '#690005',
+  errorContainer: '#93000A',
+  onErrorContainer: '#FFDAD6',
+  background: '#191C1A',
+  onBackground: '#E1E3DF',
+  surface: '#191C1A',
+  onSurface: '#E1E3DF',
+  surfaceVariant: '#404944',
+  onSurfaceVariant: '#BFC9C2',
+  outline: '#2F3633', // Slightly more visible/lighter than #262A28
+  outlineVariant: '#1F2321', // Almost blends with background
+  buttonBorder: '#8E9692', // Stronger contrast for buttons
+  shadow: '#000000',
+  scrim: '#000000',
+  inverseSurface: '#E1E3DF',
+  inverseOnSurface: '#2E312F',
+  inversePrimary: '#006C4C',
+  elevation: {
+    level0: 'transparent',
+    level1: '#212523', // Surface + 5% primary tint approx (Dark)
+    level2: '#262A28',
+    level3: '#2B2F2D',
+    level4: '#2C312E',
+    level5: '#303532',
+  },
+};
+
+// Semantic Colors for Financial App
+const semanticColors = {
+  trendUp: '#006C4C', // Using primary green for positive trend
+  trendDown: '#BA1A1A', // Using error red for negative trend
+  
+  // Custom Semantic definitions mapped to M3 logic
+  success: '#006C4C',
+  successContainer: '#89F8C6',
+  
+  info: '#3E6373', // Using Tertiary for info
+  infoContainer: '#C2E8FB',
+  
+  neutral: '#4C6358', // Using Secondary for neutral
+  neutralContainer: '#CEE9DA',
+  
+  danger: '#BA1A1A', // Error
+  warning: '#E6C449', // Custom yellow/gold, ensuring visibility
+};
+
 // Tema Claro Personalizado
 export const LightTheme: AppTheme = {
   ...DefaultLightTheme,
   colors: {
     ...DefaultLightTheme.colors,
-    primary: customColors.primary,
-    onPrimary: '#ffffff',
-    primaryContainer: customColors.primaryLight,
-    onPrimaryContainer: customColors.primaryDark,
-    secondary: customColors.secondary,
-    onSecondary: '#ffffff',
-    secondaryContainer: '#d1e4f6',
-    onSecondaryContainer: '#0e1d2a',
-    tertiary: '#526679',
-    onTertiary: '#ffffff',
-    tertiaryContainer: '#d7e2ee',
-    onTertiaryContainer: '#0f1d2a',
-    error: customColors.errorLight,
-    errorContainer: customColors.errorBgLight,
-    onError: '#ffffff',
-    onErrorContainer: '#881337', // rose-900
-    background: customColors.backgroundLight,
-    onBackground: '#1a1c1e',
-    surface: '#ffffff',
-    onSurface: '#1a1c1e',
-    surfaceVariant: '#dfe3eb',
-    onSurfaceVariant: '#42474e',
-    outline: '#E0E4EA', // Material Level Match (Subtle Light)
-    outlineVariant: '#EFF2F7',
-    shadow: '#000000',
-    scrim: '#000000',
-    inverseSurface: '#2e3135',
-    inverseOnSurface: '#f0f0f3',
-    inversePrimary: '#a5c8ea',
-    elevation: {
-      level0: 'transparent',
-      level1: '#f6f9fc',
-      level2: '#f0f4f9',
-      level3: '#e9eff6',
-      level4: '#e4eaf4',
-      level5: '#dee5f1',
-    },
-    // Custom Semantic Colors
-    success: customColors.successLight,
-    successContainer: customColors.successBgLight,
-    info: customColors.infoLight,
-    infoContainer: customColors.infoBgLight,
-    neutral: customColors.neutralLight,
-    neutralContainer: customColors.neutralBgLight,
-    danger: customColors.danger,
-    warning: customColors.warning,
-    trendUp: customColors.trendUp,
-    trendDown: customColors.trendDown,
-    skeleton: customColors.skeletonLight,
-    skeletonHighlight: customColors.skeletonHighlightLight,
+    ...lightColors,
+    
+    // Custom Semantic
+    ...semanticColors,
+    trendUp: '#168953', // Slightly brighter green for charts/trends
+    trendDown: '#D32F2F', // Standard Red
+    warning: '#F57C00', // Orange-ish warning
+    
+    skeleton: '#E1E9EE',
+    skeletonHighlight: '#F2F8FC',
+    buttonBorder: '#747C78',
   },
   spacing,
 };
@@ -149,56 +171,29 @@ export const DarkTheme: AppTheme = {
   ...DefaultDarkTheme,
   colors: {
     ...DefaultDarkTheme.colors,
-    primary: customColors.primaryLight,
-    onPrimary: customColors.primaryDark,
-    primaryContainer: customColors.primaryDark,
-    onPrimaryContainer: customColors.primaryLight,
-    secondary: '#b9c8da',
-    onSecondary: '#243240',
-    secondaryContainer: '#3a4857',
-    onSecondaryContainer: '#d5e4f7',
-    tertiary: '#baccdd',
-    onTertiary: '#243240',
-    tertiaryContainer: '#3c4956',
-    onTertiaryContainer: '#d7e2ee',
-    error: customColors.errorDark,
-    errorContainer: customColors.errorBgDark,
-    onError: '#601410',
-    onErrorContainer: customColors.errorDark,
-    background: customColors.backgroundDark,
-    onBackground: '#e2e2e5',
-    surface: customColors.surfaceDark,
-    onSurface: '#e2e2e5',
-    surfaceVariant: '#42474e',
-    onSurfaceVariant: '#c2c7cf',
-    outline: '#2A3744', // Material Level Match (Subtle Dark)
-    outlineVariant: '#2B3846',
-    shadow: '#000000',
-    scrim: '#000000',
-    inverseSurface: '#e2e2e5',
-    inverseOnSurface: '#2e3135',
-    inversePrimary: customColors.primary,
-    elevation: {
-      level0: 'transparent',
-      level1: '#1e2b38', // Slightly lighter than background
-      level2: '#23303e',
-      level3: '#293645',
-      level4: '#2e3c4d',
-      level5: '#344355',
-    },
-    // Custom Semantic Colors
-    success: customColors.successDark,
-    successContainer: customColors.successBgDark,
-    info: customColors.infoDark,
-    infoContainer: customColors.infoBgDark,
-    neutral: customColors.neutralDark,
-    neutralContainer: customColors.neutralBgDark,
-    danger: customColors.danger,
-    warning: customColors.warningDark,
-    trendUp: customColors.trendUp,
-    trendDown: customColors.trendDown,
-    skeleton: customColors.skeletonDark,
-    skeletonHighlight: customColors.skeletonHighlightDark,
+    ...darkColors,
+    
+    // Custom Semantic
+    ...semanticColors,
+    // Adjust semantics for dark mode visibility
+    trendUp: '#6DDBAC', // Primary Light Green
+    trendDown: '#FFB4AB', // Error Light Red
+    
+    success: '#6DDBAC',
+    successContainer: '#005138',
+    
+    info: '#A6CCE0',
+    infoContainer: '#254B5B',
+    
+    neutral: '#B3CCBE',
+    neutralContainer: '#354B41',
+    
+    danger: '#FFB4AB',
+    warning: '#FFCC80', // Light Orange
+    
+    skeleton: '#2C312E', // Matches elevation level 4
+    skeletonHighlight: '#303532', // Matches elevation level 5
+    buttonBorder: '#8E9692',
   },
   spacing,
 };

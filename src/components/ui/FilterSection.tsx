@@ -2,7 +2,7 @@ import React from 'react';
 import { ScrollView, View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { Chip } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { useAppTheme } from '../../theme/useAppTheme';
+import { useAppTheme } from '../../theme/theme';
 
 export interface FilterOption {
   label: string;

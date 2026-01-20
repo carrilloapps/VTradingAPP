@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet, Modal, TouchableOpacity, ScrollView } from 'react-native';
 import { Text, IconButton } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAppTheme } from '../../theme/useAppTheme';
+import { useAppTheme } from '../../theme/theme';
 import { NotificationData } from './NotificationCard';
 import NotificationIcon, { getNotificationIconConfig } from './NotificationIcon';
 import { formatTimeAgo } from '../../utils/dateUtils';
@@ -74,7 +74,7 @@ const NotificationDetailModal: React.FC<NotificationDetailModalProps> = ({
                 styles.closeButton, 
                 { 
                   backgroundColor: theme.colors.surfaceVariant,
-                  borderColor: theme.colors.outline 
+                  borderColor: theme.colors.buttonBorder 
                 }
               ]}
             >
@@ -132,7 +132,7 @@ const NotificationDetailModal: React.FC<NotificationDetailModalProps> = ({
                   { 
                       backgroundColor: 'transparent', 
                       borderWidth: 1, 
-                      borderColor: theme.colors.outline 
+                      borderColor: theme.colors.buttonBorder 
                   }
               ]}
               activeOpacity={0.8}

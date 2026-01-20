@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import { useAppTheme } from '../../theme/useAppTheme';
+import { useAppTheme } from '../../theme/theme';
 import { NotificationData } from './NotificationCard';
 
 interface NotificationIconProps {

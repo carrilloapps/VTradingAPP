@@ -189,15 +189,14 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
               placeholder="Ej. USD/VES, CANTV"
               mode="flat"
               style={[
-                styles.input, 
-                { 
-                  backgroundColor: theme.colors.surfaceVariant, // Matches surface-dark/accent from HTML
-                  borderTopLeftRadius: 12,
-                  borderTopRightRadius: 12,
-                  borderBottomLeftRadius: 12,
-                  borderBottomRightRadius: 12,
-                }
-              ]}
+            styles.input, 
+            { 
+              borderTopLeftRadius: 12,
+              borderTopRightRadius: 12,
+              borderBottomLeftRadius: 12,
+              borderBottomRightRadius: 12,
+            }
+          ]}
               underlineColor="transparent"
               activeUnderlineColor="transparent"
               textColor={theme.colors.onSurface}

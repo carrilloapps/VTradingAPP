@@ -8,7 +8,7 @@ import PagerView from 'react-native-pager-view';
 import LottieView from 'lottie-react-native';
 
 import UnifiedHeader from '../components/ui/UnifiedHeader';
-import { useAppTheme } from '../theme/useAppTheme';
+import { useAppTheme } from '../theme/theme';
 import SearchBar from '../components/ui/SearchBar';
 import FilterSection, { FilterOption } from '../components/ui/FilterSection';
 import NotificationCard, { NotificationData } from '../components/notifications/NotificationCard';

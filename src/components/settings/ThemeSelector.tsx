@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
+import { Text } from 'react-native-paper';
+import { useAppTheme } from '../../theme/theme';
 
 interface ThemeSelectorProps {
   currentTheme: 'light' | 'dark' | 'system';
@@ -22,9 +23,9 @@ const ThemeOption: React.FC<ThemeOptionProps> = ({
   currentTheme,
   onSelect
 }) => {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const isSelected = currentTheme === mode;
-  const borderColor = isSelected ? theme.colors.primary : theme.colors.outline;
+  const borderColor = isSelected ? theme.colors.primary : theme.colors.buttonBorder;
   const bg = isSelected ? theme.colors.primaryContainer : 'transparent';
   const borderWidth = isSelected ? 2 : 1;
 
@@ -49,7 +50,7 @@ const ThemeOption: React.FC<ThemeOptionProps> = ({
 };
 
 const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onSelect }) => {
-  const theme = useTheme();
+  const theme = useAppTheme();
 
   return (
     <View style={styles.container}>
