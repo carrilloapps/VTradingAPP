@@ -6,6 +6,7 @@ Este proyecto utiliza documentación distribuida para mantener el contexto cerca
 *   **Validación Obligatoria:** Antes de considerar una tarea completada, **siempre ejecuta `npx tsc`** y corrige cualquier error de compilación. No entregar código que no compile.
 *   **Reutilización Primero:** Antes de crear un nuevo componente UI, verifica si ya existe uno similar. Si encuentras código duplicado (ej. selectores, tarjetas, botones con estilos específicos) en múltiples pantallas, **debes** refactorizarlo en un componente reutilizable dentro de `src/components/`.
 *   **Centralización de Estilos:** Todos los valores de estilo (colores, roundness, espaciados) deben provenir de `src/theme/theme.ts`.
+*   **React Native Paper First:** Prioriza siempre el uso de componentes de `react-native-paper` (ej. `Text`, `Surface`, `Button`, `Icon`) sobre componentes nativos (`View`, `Text`, `Image`) o estilos personalizados. Esto garantiza consistencia con Material Design y soporte automático de temas (Claro/Oscuro).
 *   **Estilo de Tarjetas (Cards):** Todas las tarjetas deben usar un diseño "Flat" (Plano) sin elevación (`elevation: 0`), con bordes ligeros (`theme.colors.outline`, `borderWidth: 1`) y esquinas redondeadas estándar (`borderRadius: theme.roundness * 6` = 24px).
 *   **Firebase API Modular:** Está estrictamente prohibido usar las APIs con namespace de Firebase (ej. `auth()`, `perf()`). Se debe usar siempre la API modular (ej. `getAuth()`, `getPerformance()`) para asegurar compatibilidad futura con React Native Firebase v22+.
 

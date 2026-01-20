@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Alert, Platform } from 'react-native';
+import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Alert, Image } from 'react-native';
 import { Text, useTheme, Switch, Snackbar, Button } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import DeviceInfo from 'react-native-device-info';
 import messaging from '@react-native-firebase/messaging';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import CustomDialog from '../components/ui/CustomDialog';
+import CustomButton from '../components/ui/CustomButton';
 import { useThemeContext } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { storageService, UserAlert } from '../services/StorageService';
@@ -427,17 +428,42 @@ const SettingsScreen = () => {
       <CustomDialog
         visible={showAboutDialog}
         onDismiss={() => setShowAboutDialog(false)}
-        title="Acerca de VTradingAPP"
-        content={`${appName}\nVersión: ${appVersion} (${buildNumber})\n\nDiseñado para el seguimiento financiero en tiempo real.`}
+        title="Acerca de"
         onConfirm={() => setShowAboutDialog(false)}
-          confirmLabel="Cerrar"
-          showCancel={false}
-          actions={
-              <Button mode="text" onPress={() => handleAction('Política de Privacidad no disponible')}>
-                Política de Privacidad
-            </Button>
+        confirmLabel="Cerrar"
+        showCancel={false}
+        actions={
+          <CustomButton 
+              variant="outlined" 
+              label="Aviso legal" 
+              onPress={() => handleAction('Aviso legal no disponible')}
+            />
         }
-      />
+      >
+        <View style={{ alignItems: 'center', paddingVertical: 0 }}>
+            <Image 
+                source={require('../assets/images/logo.png')} 
+                style={{ width: 64, height: 64, marginBottom: 8, tintColor: colors.primary }} 
+                resizeMode="contain" 
+            />
+            
+            <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: colors.onSurface, textAlign: 'center', marginBottom: 0 }}>
+                {appName || 'VTradingAPP'}
+            </Text>
+            
+            <Text variant="bodyMedium" style={{ color: colors.onSurfaceVariant, marginBottom: 12 }}>
+                Versión {appVersion}
+            </Text>
+
+            <Text variant="bodySmall" style={{ textAlign: 'center', marginBottom: 16, paddingHorizontal: 16, color: colors.onSurfaceVariant }}>
+                Diseñado para el seguimiento financiero en tiempo real.
+            </Text>
+            
+            <Text variant="labelSmall" style={{ color: colors.outline }}>
+                © {new Date().getFullYear()} VTradingAPP
+            </Text>
+        </View>
+      </CustomDialog>
     </View>
   );
 };

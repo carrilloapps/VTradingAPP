@@ -1,6 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
+import { Text } from 'react-native-paper';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useAppTheme } from '../../theme/theme';
 import { NotificationData } from './NotificationCard';
 import NotificationIcon, { getNotificationIconConfig } from './NotificationIcon';
 import { formatTimeAgo } from '../../utils/dateUtils';
@@ -20,9 +22,8 @@ const NotificationDetailModal: React.FC<NotificationDetailModalProps> = ({
   notification,
   onDismiss,
   onArchive,
-  onDelete,
 }) => {
-  const theme = useTheme();
+  const theme = useAppTheme();
 
   if (!notification) return null;
 
@@ -68,7 +69,27 @@ const NotificationDetailModal: React.FC<NotificationDetailModalProps> = ({
              {notification.data.price && (
                <View style={styles.dataRow}>
                  <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>Precio</Text>
-                 <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: 'bold' }}>Bs. {notification.data.price}</Text>
+                 <View style={styles.priceContainer}>
+                   <Text 
+                    variant="titleMedium" 
+                    style={{ 
+                      color: notification.trend === 'up' ? theme.colors.success : 
+                             notification.trend === 'down' ? theme.colors.error : 
+                             theme.colors.onSurface, 
+                      fontWeight: 'bold' 
+                    }}
+                   >
+                     Bs. {notification.data.price}
+                   </Text>
+                   {notification.trend && (
+                     <MaterialIcons 
+                       name={notification.trend === 'up' ? 'trending-up' : 'trending-down'} 
+                       size={20} 
+                       color={notification.trend === 'up' ? theme.colors.success : theme.colors.error} 
+                       style={{ marginLeft: 4 }}
+                     />
+                   )}
+                 </View>
                </View>
              )}
           </View>
@@ -115,6 +136,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingVertical: 4,
+  },
+  priceContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   divider: {
     height: 1,
