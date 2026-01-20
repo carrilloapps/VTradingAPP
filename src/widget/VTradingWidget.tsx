@@ -56,12 +56,12 @@ export default function VTradingWidget({
         padding: 16,
         marginVertical: 10,
         marginHorizontal: 10,
-        borderRadius: 24,
+        borderRadius: 14,
         overflow: 'hidden',
         borderWidth: 1,
         borderColor,
         flexDirection: 'column',
-        justifyContent: 'space-between'
+        justifyContent: 'flex-start'
       }}
     >
       <FlexWidget
@@ -72,7 +72,7 @@ export default function VTradingWidget({
           width: 'match_parent',
         }}
       >
-        <FlexWidget style={{ flexDirection: 'row', alignItems: 'center', flexGap: 8 }}>
+        <FlexWidget style={{ flexDirection: 'row', alignItems: 'flex-start', flexGap: 8 }}>
           <ImageWidget image={logoImage} imageWidth={30} imageHeight={15} />
           <TextWidget
             text={widgetTitle}
@@ -89,7 +89,7 @@ export default function VTradingWidget({
           <TextWidget text="Sin datos" style={{ fontSize: 12, color: subTextColor }} />
         </FlexWidget>
       ) : (
-        <FlexWidget style={{ flexDirection: 'column', width: 'match_parent' }}>
+        <FlexWidget style={{ flexDirection: 'column', width: 'match_parent', flex: 1, justifyContent: 'space-between' }}>
           {limitedItems.map((item, index) => (
             <FlexWidget
               key={item.id}
@@ -130,11 +130,9 @@ export default function VTradingWidget({
         </FlexWidget>
       )}
 
-      {!showGraph && (
-        <FlexWidget style={{ marginTop: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-          <TextWidget text={lastUpdated || 'Actualizado hace poco'} style={{ fontSize: 10, color: subTextColor }} />
-        </FlexWidget>
-      )}
+      <FlexWidget style={{ marginTop: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <TextWidget text={lastUpdated ? `Actualizado: ${lastUpdated}` : 'Actualizado: hace poco'} style={{ fontSize: 10, color: subTextColor }} />
+      </FlexWidget>
     </FlexWidget>
   );
 }
