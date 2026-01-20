@@ -30,6 +30,11 @@ interface ApiRateItem {
   date: string;
   previousDate: string | null;
   change: {
+    average?: {
+      value: number;
+      percent: number;
+      direction: string;
+    };
     value?: number;
     percent?: number;
     direction?: string;
@@ -170,12 +175,14 @@ export class CurrencyService {
                      code: apiRate.currency,
                      name: name,
                      value: CurrencyService.parseRate(apiRate.rate?.average),
-                     changePercent: CurrencyService.parsePercentage(apiRate.change?.percent), 
+                     changePercent: CurrencyService.parsePercentage(apiRate.change?.average?.percent || apiRate.change?.percent), 
                      type: 'fiat',
                      iconName: iconName,
                      lastUpdated: apiRate.date || new Date().toISOString(),
                      buyValue: CurrencyService.parseRate(apiRate.rate?.buy),
-                     sellValue: CurrencyService.parseRate(apiRate.rate?.sell)
+                     sellValue: CurrencyService.parseRate(apiRate.rate?.sell),
+                     buyChangePercent: CurrencyService.parsePercentage(apiRate.change?.buy?.percent),
+                     sellChangePercent: CurrencyService.parsePercentage(apiRate.change?.sell?.percent)
                  });
             });
         }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Image } from 'react-native';
-import { Text, useTheme, Surface } from 'react-native-paper';
+import { Text, useTheme } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Svg, { Path } from 'react-native-svg';
 import LinearGradient from 'react-native-linear-gradient';
@@ -169,6 +169,17 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
         <Svg height="100%" width="100%" viewBox="0 0 100 40" preserveAspectRatio="none">
           {buyChartPath && sellChartPath ? (
             <>
+              {/* Average Line */}
+              <Path
+                d={chartPath}
+                fill="none"
+                stroke={trendColor}
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                opacity={0.6}
+                strokeDasharray="4, 4"
+              />
               {/* Buy Line */}
               <Path
                 d={buyChartPath}

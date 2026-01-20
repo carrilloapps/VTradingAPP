@@ -39,9 +39,28 @@ const HomeScreen = () => {
       
       const getPath = (percent: number | null | undefined) => {
         if (percent === null || percent === undefined || Math.abs(percent) < 0.01) return 'M0 20 L 100 20';
-        // Smoother curves for dual display
-        if (percent > 0) return 'M0 30 C 30 30, 50 10, 100 5'; 
-        return 'M0 10 C 30 10, 50 30, 100 35';
+        
+        // Dynamic curve intensity based on percentage
+        // Cap at 3% for maximum visual steepness
+        const intensity = Math.min(Math.abs(percent), 3.0) / 3.0;
+        
+        // Base amplitude (how far from center Y=20)
+        // Min deviation 5 (for visibility), Max 15 (total range 5-35)
+        const amplitude = 5 + (10 * intensity);
+        const center = 20;
+        
+        if (percent > 0) {
+            // Up Trend: Start Low (Y > 20), End High (Y < 20)
+            const startY = center + amplitude;
+            const endY = center - amplitude;
+            // Bezier control points for smooth S-curve
+            return `M0 ${startY} C 40 ${startY}, 60 ${endY}, 100 ${endY}`; 
+        } else {
+            // Down Trend: Start High (Y < 20), End Low (Y > 20)
+            const startY = center - amplitude;
+            const endY = center + amplitude;
+            return `M0 ${startY} C 40 ${startY}, 60 ${endY}, 100 ${endY}`;
+        }
       };
 
       // Transform rates to ExchangeCard format
