@@ -80,7 +80,9 @@ const ExchangeRatesScreen = () => {
     Promise.all([
         CurrencyService.getRates(),
         StocksService.getStocks()
-    ]).catch(err => {
+    ]).then(() => {
+        setIsMarketOpen(StocksService.isMarketOpen());
+    }).catch(err => {
       console.error(err);
       setError('Error al cargar las tasas de cambio');
       showToast('Error de conexión', 'error');
@@ -100,6 +102,7 @@ const ExchangeRatesScreen = () => {
              CurrencyService.getRates(true),
              StocksService.getStocks(true)
           ]);
+          setIsMarketOpen(StocksService.isMarketOpen());
       } catch {
           showToast('Error al actualizar', 'error');
       } finally {

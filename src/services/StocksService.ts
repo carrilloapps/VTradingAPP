@@ -201,7 +201,7 @@ export class StocksService {
       
       // Update Market Status
       if (response.status && response.status.state) {
-          this.marketOpen = response.status.state === 'ABIERTO';
+          this.marketOpen = response.status.state.toUpperCase() === 'ABIERTO';
       } else if (response.marketStatus) {
           this.marketOpen = response.marketStatus.isOpen;
       }
