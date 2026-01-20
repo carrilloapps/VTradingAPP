@@ -1,7 +1,8 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useAppTheme } from '../../theme/theme';
 
 export interface MarketStatusProps {
   isOpen: boolean;
@@ -12,8 +13,7 @@ export interface MarketStatusProps {
 }
 
 const MarketStatus: React.FC<MarketStatusProps> = ({ isOpen, updatedAt, onRefresh, showBadge = true, style }) => {
-  const theme = useTheme();
-  const colors = theme.colors as any;
+  const theme = useAppTheme();
   const fadeAnim = useRef(new Animated.Value(0.4)).current;
 
   useEffect(() => {
@@ -39,14 +39,14 @@ const MarketStatus: React.FC<MarketStatusProps> = ({ isOpen, updatedAt, onRefres
 
   const themeStyles = React.useMemo(() => ({
     statusBadge: {
-      backgroundColor: isOpen ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', // emerald-500 / red-500 with opacity
-      borderColor: isOpen ? '#10B981' : '#EF4444',
+      backgroundColor: isOpen ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', // Keep opacity manual or use util
+      borderColor: isOpen ? theme.colors.trendUp : theme.colors.trendDown,
     },
     dot: {
-      backgroundColor: isOpen ? '#10B981' : '#EF4444',
+      backgroundColor: isOpen ? theme.colors.trendUp : theme.colors.trendDown,
     },
     statusText: {
-      color: isOpen ? '#10B981' : '#EF4444',
+      color: isOpen ? theme.colors.trendUp : theme.colors.trendDown,
     },
     timeText: {
       color: theme.colors.onSurfaceVariant,
@@ -54,7 +54,7 @@ const MarketStatus: React.FC<MarketStatusProps> = ({ isOpen, updatedAt, onRefres
     refreshIcon: {
       marginLeft: 4,
     }
-  }), [theme, colors, isOpen]);
+  }), [theme, isOpen]);
 
   return (
     <View style={[styles.container, style, !showBadge && styles.justifyEnd]}>
@@ -66,7 +66,7 @@ const MarketStatus: React.FC<MarketStatusProps> = ({ isOpen, updatedAt, onRefres
                     style={[
                         styles.ping,
                         {
-                        backgroundColor: '#10B981',
+                        backgroundColor: theme.colors.trendUp,
                         opacity: fadeAnim,
                         },
                     ]}
@@ -107,34 +107,33 @@ const MarketStatus: React.FC<MarketStatusProps> = ({ isOpen, updatedAt, onRefres
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 16,
+    justifyContent: 'space-between',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
   },
   justifyEnd: {
     justifyContent: 'flex-end',
   },
-  rightContent: {
-    flex: 1,
-    alignItems: 'flex-end',
-  },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 999,
+    borderRadius: 12,
     borderWidth: 1,
   },
   indicatorContainer: {
-    position: 'relative',
-    width: 6,
-    height: 6,
+    width: 8,
+    height: 8,
+    marginRight: 6,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
   },
   ping: {
     position: 'absolute',
@@ -142,15 +141,14 @@ const styles = StyleSheet.create({
     height: 12,
     borderRadius: 6,
   },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-  },
   statusText: {
     fontSize: 10,
     fontWeight: '700',
     letterSpacing: 0.5,
+  },
+  rightContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   refreshContainer: {
     flexDirection: 'row',
@@ -158,8 +156,8 @@ const styles = StyleSheet.create({
   },
   timeText: {
     fontSize: 10,
-    fontWeight: '600',
-  }
+    marginRight: 2,
+  },
 });
 
 export default MarketStatus;

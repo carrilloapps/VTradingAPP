@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { useAppTheme } from '../../theme/theme';
 
 export interface StockData {
   id: string;
@@ -38,7 +39,7 @@ const StockItem: React.FC<StockData> = ({
   change,
   isPositive: propIsPositive,
 }) => {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const colors = colorMap[color || 'emerald'] || colorMap.emerald;
   
   const isPositive = propIsPositive !== undefined ? propIsPositive : (changePercent > 0);
@@ -74,7 +75,7 @@ const StockItem: React.FC<StockData> = ({
     }
   ];
 
-  const changeColor = isPositive ? '#10B981' : isNegative ? '#EF4444' : theme.colors.onSurfaceVariant;
+  const changeColor = isPositive ? theme.colors.trendUp : isNegative ? theme.colors.trendDown : theme.colors.onSurfaceVariant;
   const changeTextStyle = [
     styles.changeText,
     { color: changeColor }
@@ -131,9 +132,9 @@ const StockItem: React.FC<StockData> = ({
         </Text>
         <View style={badgeStyle}>
           {isPositive ? (
-            <MaterialIcons name="trending-up" size={12} color="#10B981" />
+            <MaterialIcons name="trending-up" size={12} color={theme.colors.trendUp} />
           ) : isNegative ? (
-            <MaterialIcons name="trending-down" size={12} color="#EF4444" />
+            <MaterialIcons name="trending-down" size={12} color={theme.colors.trendDown} />
           ) : null}
           <Text style={changeTextStyle}>
             {formattedChange}

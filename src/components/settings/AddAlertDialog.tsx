@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
-import { TextInput, Text, useTheme, ActivityIndicator, IconButton, Icon } from 'react-native-paper';
+import { TextInput, Text, ActivityIndicator, IconButton, Icon } from 'react-native-paper';
 import { CurrencyService } from '../../services/CurrencyService';
 import { StocksService } from '../../services/StocksService';
 import UniversalDialog from '../ui/UniversalDialog';
+import { useAppTheme } from '../../theme/theme';
 
 interface AddAlertDialogProps {
   visible: boolean;
@@ -11,17 +12,25 @@ interface AddAlertDialogProps {
   onSave: (symbol: string, target: string, condition: 'above' | 'below') => void;
 }
 
+interface SymbolData {
+  price: number;
+  type: 'Acción' | 'Divisa' | 'Cripto';
+  changePercent: number;
+}
+
 const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const [symbol, setSymbol] = useState('');
   const [target, setTarget] = useState('');
   const [condition, setCondition] = useState<'above' | 'below'>('above');
   const [error, setError] = useState('');
   const [showDropdown, setShowDropdown] = useState(false);
   const [availableSymbols, setAvailableSymbols] = useState<string[]>([]);
-  const [symbolPrices, setSymbolPrices] = useState<Record<string, number>>({});
+  const [symbolData, setSymbolData] = useState<Record<string, SymbolData>>({});
   const [loadingSymbols, setLoadingSymbols] = useState(false);
 
+  // Match colors with StockItem.tsx and MarketStatus.tsx for consistency
+  
   useEffect(() => {
     if (visible) {
       setSymbol('');
@@ -42,30 +51,61 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
         StocksService.getAllStocks()
       ]);
 
-      const prices: Record<string, number> = {};
+      const data: Record<string, SymbolData> = {};
       const usdRate = rates.find(r => r.code === 'USD')?.value || 1;
       const usdtRate = rates.find(r => r.code === 'USDT')?.value || usdRate;
 
       // Process Rates
       rates.forEach(r => {
-        prices[`${r.code}/VES`] = r.value;
+        // Base VES pair
+        data[`${r.code}/VES`] = {
+            price: r.value,
+            type: r.type === 'crypto' ? 'Cripto' : 'Divisa',
+            changePercent: r.changePercent || 0
+        };
+
         if (r.type === 'crypto') {
-            prices[`${r.code}/USD`] = r.value / usdRate;
-            prices[`${r.code}/USDT`] = r.value / usdtRate;
+            data[`${r.code}/USD`] = {
+                price: r.value / usdRate,
+                type: 'Cripto',
+                changePercent: r.changePercent || 0
+            };
+            data[`${r.code}/USDT`] = {
+                price: r.value / usdtRate,
+                type: 'Cripto',
+                changePercent: r.changePercent || 0
+            };
         }
       });
       
-      if (usdRate > 0) prices["VES/USD"] = 1 / usdRate;
+      if (usdRate > 0) {
+          data["VES/USD"] = {
+              price: 1 / usdRate,
+              type: 'Divisa',
+              changePercent: 0
+          };
+      }
+      
       const eurRate = rates.find(r => r.code === 'EUR')?.value;
-      if (eurRate && usdRate > 0) prices["EUR/USD"] = eurRate / usdRate;
+      if (eurRate && usdRate > 0) {
+          data["EUR/USD"] = {
+              price: eurRate / usdRate,
+              type: 'Divisa',
+              changePercent: 0
+          };
+      }
 
       // Process Stocks
       stocks.forEach(s => {
-        prices[s.symbol] = s.price;
+        data[s.symbol] = {
+            price: s.price,
+            type: 'Acción',
+            changePercent: s.changePercent || 0
+        };
       });
 
-      setSymbolPrices(prices);
-      const allSymbols = Object.keys(prices).sort();
+      setSymbolData(data);
+      const allSymbols = Object.keys(data).sort();
       setAvailableSymbols(allSymbols);
     } catch (err) {
       console.error("Failed to load symbols for autocomplete", err);
@@ -93,8 +133,8 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
     setSymbol(selected);
     setShowDropdown(false);
     // Auto-set current price as target suggestion if empty
-    if (!target && symbolPrices[selected] !== undefined) {
-      setTarget(symbolPrices[selected].toFixed(2));
+    if (!target && symbolData[selected]?.price !== undefined) {
+      setTarget(symbolData[selected].price.toFixed(2));
     }
   };
 
@@ -178,24 +218,56 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
                     style={{ flex: 1 }}
                     contentContainerStyle={{ flexGrow: 1 }}
                     nestedScrollEnabled={true}
-                    renderItem={({ item }) => (
-                     <TouchableOpacity
-                       style={[styles.dropdownItem, { borderBottomColor: theme.colors.outline }]}
-                       onPress={() => handleSelectSymbol(item)}
-                     >
-                       <View>
-                         <Text variant="bodyMedium" style={{ fontWeight: 'bold' }}>{item}</Text>
-                         <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                           Actual: {getCurrencyPrefix(item)}{
-                             symbolPrices[item] !== undefined && !isNaN(symbolPrices[item]) 
-                               ? symbolPrices[item].toFixed(2) 
-                               : 'N/A'
-                           }
-                         </Text>
-                       </View>
-                       <IconButton icon="arrow-top-left" size={16} />
-                     </TouchableOpacity>
-                   )}
+                    renderItem={({ item }) => {
+                       const data = symbolData[item];
+                       const change = data?.changePercent || 0;
+                       const isZero = Math.abs(change) < 0.001; // Float safety
+                       const isPositive = change > 0;
+                       
+                       let changeColor = theme.colors.onSurfaceVariant;
+                       let changeIcon = 'remove'; // Neutral icon
+                       
+                       if (!isZero) {
+                           changeColor = isPositive ? theme.colors.trendUp : theme.colors.trendDown;
+                           changeIcon = isPositive ? 'trending-up' : 'trending-down';
+                       }
+                       
+                       return (
+                         <TouchableOpacity
+                           style={[styles.dropdownItem, { borderBottomColor: theme.colors.outline }]}
+                           onPress={() => handleSelectSymbol(item)}
+                         >
+                           <View style={{ flex: 1 }}>
+                             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                                <Text variant="bodyMedium" style={{ fontWeight: 'bold' }}>{item}</Text>
+                                <View style={{ 
+                                    backgroundColor: theme.colors.elevation.level5, 
+                                    paddingHorizontal: 6, 
+                                    paddingVertical: 2, 
+                                    borderRadius: 4 
+                                }}>
+                                    <Text style={{ fontSize: 10, color: theme.colors.onSurfaceVariant }}>{data?.type}</Text>
+                                </View>
+                             </View>
+                             
+                             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 2, gap: 8 }}>
+                                <Text variant="labelSmall" style={{ color: theme.colors.onSurface }}>
+                                   {getCurrencyPrefix(item)}{data?.price !== undefined && !isNaN(data.price) ? data.price.toFixed(2) : 'N/A'}
+                                </Text>
+                                {data?.changePercent !== undefined && (
+                                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                        <Icon source={changeIcon} size={12} color={changeColor} />
+                                        <Text style={{ fontSize: 10, color: changeColor, marginLeft: 2 }}>
+                                            {Math.abs(change).toFixed(2)}%
+                                        </Text>
+                                    </View>
+                                )}
+                             </View>
+                           </View>
+                           <IconButton icon="arrow-top-left" size={16} />
+                         </TouchableOpacity>
+                       );
+                   }}
                  />
                </View>
              )}
@@ -218,11 +290,11 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
                     <Icon 
                         source="trending-up" 
                         size={18} 
-                        color={condition === 'above' ? theme.colors.primary : theme.colors.onSurfaceVariant} 
+                        color={condition === 'above' ? theme.colors.trendUp : theme.colors.onSurfaceVariant} 
                     />
                     <Text style={[
                         styles.toggleButtonText,
-                        { color: condition === 'above' ? theme.colors.primary : theme.colors.onSurfaceVariant }
+                        { color: condition === 'above' ? theme.colors.trendUp : theme.colors.onSurfaceVariant }
                     ]}>
                         SUBE DE
                     </Text>
@@ -239,11 +311,11 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
                     <Icon 
                         source="trending-down" 
                         size={18} 
-                        color={condition === 'below' ? theme.colors.error : theme.colors.onSurfaceVariant} 
+                        color={condition === 'below' ? theme.colors.trendDown : theme.colors.onSurfaceVariant} 
                     />
                     <Text style={[
                         styles.toggleButtonText,
-                        { color: condition === 'below' ? theme.colors.error : theme.colors.onSurfaceVariant }
+                        { color: condition === 'below' ? theme.colors.trendDown : theme.colors.onSurfaceVariant }
                     ]}>
                         BAJA DE
                     </Text>
@@ -272,16 +344,16 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
             underlineColor="transparent"
             activeUnderlineColor="transparent"
             textColor={theme.colors.onSurface}
-            left={<TextInput.Affix text={symbolPrices[symbol] ? getCurrencyPrefix(symbol) : ''} />}
+            left={<TextInput.Affix text={symbolData[symbol]?.price ? getCurrencyPrefix(symbol) : ''} />}
             right={
                 loadingSymbols ? <TextInput.Icon icon={() => <ActivityIndicator size={16} />} /> :
                 symbol ? <TextInput.Icon icon="close" onPress={() => setSymbol('')} /> :
                 <TextInput.Icon icon="refresh" onPress={loadSymbols} />
             }
           />
-          {symbolPrices[symbol] && (
+          {symbolData[symbol]?.price !== undefined && (
             <Text variant="bodySmall" style={{ marginTop: 4, color: theme.colors.primary }}>
-                Precio actual: {getCurrencyPrefix(symbol)}{symbolPrices[symbol].toFixed(2)}
+                Precio actual: {getCurrencyPrefix(symbol)}{symbolData[symbol].price.toFixed(2)}
             </Text>
           )}
         </View>

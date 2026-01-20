@@ -1,6 +1,8 @@
 import { 
   MD3LightTheme as DefaultLightTheme, 
   MD3DarkTheme as DefaultDarkTheme,
+  useTheme as usePaperTheme,
+  MD3Theme,
 } from 'react-native-paper';
 
 // Definición de colores personalizados del diseño (basados en ajustes.html)
@@ -37,6 +39,10 @@ const customColors = {
   warning: '#eab308', // yellow-500
   warningDark: '#facc15', // yellow-400
 
+  // Trend Colors (Matching StockItem and MarketStatus)
+  trendUp: '#10B981', // emerald-500
+  trendDown: '#EF4444', // red-500
+  
   // Skeleton Colors
   skeletonLight: '#E1E9EE',
   skeletonHighlightLight: '#F2F8FC',
@@ -54,82 +60,74 @@ export const spacing = {
   xxl: 24,
 };
 
-// Extendemos el tipo de Theme de React Native Paper
-declare global {
-  namespace ReactNativePaper {
-    interface ThemeColors {
-      success: string;
-      successContainer: string;
-      info: string;
-      infoContainer: string;
-      neutral: string;
-      neutralContainer: string;
-      danger: string;
-      warning: string;
-      skeleton: string;
-      skeletonHighlight: string;
-    }
-
-    // Add this for MD3
-    interface MD3Colors {
-        success: string;
-        successContainer: string;
-        info: string;
-        infoContainer: string;
-        neutral: string;
-        neutralContainer: string;
-        danger: string;
-        warning: string;
-        skeleton: string;
-        skeletonHighlight: string;
-    }
-
-    interface Theme {
-      spacing: typeof spacing;
-    }
-    interface MD3Theme {
-      spacing: typeof spacing;
-    }
-  }
+// Define Custom Colors Interface
+export interface CustomColors {
+    trendUp: string;
+    trendDown: string;
+    skeleton: string;
+    skeletonHighlight: string;
+    success: string;
+    successContainer: string;
+    info: string;
+    infoContainer: string;
+    neutral: string;
+    neutralContainer: string;
+    danger: string;
+    warning: string;
 }
 
+// Define AppTheme Type
+export type AppTheme = Omit<MD3Theme, 'colors'> & {
+    colors: MD3Theme['colors'] & CustomColors;
+    spacing: typeof spacing;
+};
+
+// Custom Hook to use the theme with types
+export const useAppTheme = () => usePaperTheme<AppTheme>();
+
 // Tema Claro Personalizado
-export const LightTheme = {
+export const LightTheme: AppTheme = {
   ...DefaultLightTheme,
-  roundness: 4,
-  spacing,
   colors: {
     ...DefaultLightTheme.colors,
     primary: customColors.primary,
     onPrimary: '#ffffff',
-    primaryContainer: '#DBEAFE',
-    onPrimaryContainer: customColors.primary,
+    primaryContainer: customColors.primaryLight,
+    onPrimaryContainer: customColors.primaryDark,
     secondary: customColors.secondary,
     onSecondary: '#ffffff',
-    secondaryContainer: customColors.neutralBgLight,
-    onSecondaryContainer: customColors.secondary,
-    tertiary: customColors.secondary,
+    secondaryContainer: '#d1e4f6',
+    onSecondaryContainer: '#0e1d2a',
+    tertiary: '#526679',
     onTertiary: '#ffffff',
-    tertiaryContainer: customColors.neutralBgLight,
-    onTertiaryContainer: customColors.secondary,
-    background: customColors.backgroundLight,
-    surface: '#ffffff',
-    surfaceVariant: '#E2E8F0',
-    onSurface: '#0F172A',
-    onSurfaceVariant: '#64748B',
+    tertiaryContainer: '#d7e2ee',
+    onTertiaryContainer: '#0f1d2a',
     error: customColors.errorLight,
     errorContainer: customColors.errorBgLight,
-    outline: '#CBD5E1', // slate-300 for better visibility in light mode
+    onError: '#ffffff',
+    onErrorContainer: '#881337', // rose-900
+    background: customColors.backgroundLight,
+    onBackground: '#1a1c1e',
+    surface: '#ffffff',
+    onSurface: '#1a1c1e',
+    surfaceVariant: '#dfe3eb',
+    onSurfaceVariant: '#42474e',
+    outline: '#72777f',
+    outlineVariant: '#c2c7cf',
+    shadow: '#000000',
+    scrim: '#000000',
+    inverseSurface: '#2e3135',
+    inverseOnSurface: '#f0f0f3',
+    inversePrimary: '#a5c8ea',
     elevation: {
       level0: 'transparent',
-      level1: '#ffffff',
-      level2: '#f8fafc', // slate-50
-      level3: '#f1f5f9', // slate-100
-      level4: '#e2e8f0', // slate-200
-      level5: '#cbd5e1', // slate-300
+      level1: '#f6f9fc',
+      level2: '#f0f4f9',
+      level3: '#e9eff6',
+      level4: '#e4eaf4',
+      level5: '#dee5f1',
     },
-    
-    // Extensiones semánticas (disponibles vía theme.colors.extension...)
+    // Custom Semantic Colors
     success: customColors.successLight,
     successContainer: customColors.successBgLight,
     info: customColors.infoLight,
@@ -138,48 +136,57 @@ export const LightTheme = {
     neutralContainer: customColors.neutralBgLight,
     danger: customColors.danger,
     warning: customColors.warning,
+    trendUp: customColors.trendUp,
+    trendDown: customColors.trendDown,
     skeleton: customColors.skeletonLight,
     skeletonHighlight: customColors.skeletonHighlightLight,
   },
+  spacing,
 };
 
-// Tema Oscuro Personalizado (Coincide con el diseño HTML)
-export const DarkTheme = {
+// Tema Oscuro Personalizado
+export const DarkTheme: AppTheme = {
   ...DefaultDarkTheme,
-  roundness: 4,
-  spacing,
   colors: {
     ...DefaultDarkTheme.colors,
     primary: customColors.primaryLight,
     onPrimary: customColors.primaryDark,
     primaryContainer: customColors.primaryDark,
     onPrimaryContainer: customColors.primaryLight,
-    secondary: customColors.secondary,
-    onSecondary: '#ffffff',
-    secondaryContainer: customColors.neutralBgDark,
-    onSecondaryContainer: '#ffffff',
-    tertiary: customColors.secondary,
-    onTertiary: '#ffffff',
-    tertiaryContainer: customColors.neutralBgDark,
-    onTertiaryContainer: '#ffffff',
-    background: customColors.backgroundDark,
-    surface: customColors.surfaceDark,
-    surfaceVariant: customColors.surfaceDark,
-    onSurface: '#ffffff',
-    onSurfaceVariant: customColors.textSecondary,
+    secondary: '#b9c8da',
+    onSecondary: '#243240',
+    secondaryContainer: '#3a4857',
+    onSecondaryContainer: '#d5e4f7',
+    tertiary: '#baccdd',
+    onTertiary: '#243240',
+    tertiaryContainer: '#3c4956',
+    onTertiaryContainer: '#d7e2ee',
     error: customColors.errorDark,
     errorContainer: customColors.errorBgDark,
-    outline: 'rgba(255, 255, 255, 0.05)', // border-white/5
+    onError: '#601410',
+    onErrorContainer: customColors.errorDark,
+    background: customColors.backgroundDark,
+    onBackground: '#e2e2e5',
+    surface: customColors.surfaceDark,
+    onSurface: '#e2e2e5',
+    surfaceVariant: '#42474e',
+    onSurfaceVariant: '#c2c7cf',
+    outline: '#8c9199',
+    outlineVariant: '#42474e',
+    shadow: '#000000',
+    scrim: '#000000',
+    inverseSurface: '#e2e2e5',
+    inverseOnSurface: '#2e3135',
+    inversePrimary: customColors.primary,
     elevation: {
       level0: 'transparent',
-      level1: '#16212e', // surfaceDark
-      level2: '#1c2a3b', // slightly lighter
-      level3: '#233348', // even lighter
-      level4: '#2b3d54',
-      level5: '#324661',
+      level1: '#1e2b38', // Slightly lighter than background
+      level2: '#23303e',
+      level3: '#293645',
+      level4: '#2e3c4d',
+      level5: '#344355',
     },
-    
-    // Extensiones semánticas
+    // Custom Semantic Colors
     success: customColors.successDark,
     successContainer: customColors.successBgDark,
     info: customColors.infoDark,
@@ -188,7 +195,10 @@ export const DarkTheme = {
     neutralContainer: customColors.neutralBgDark,
     danger: customColors.danger,
     warning: customColors.warningDark,
+    trendUp: customColors.trendUp,
+    trendDown: customColors.trendDown,
     skeleton: customColors.skeletonDark,
     skeletonHighlight: customColors.skeletonHighlightDark,
   },
+  spacing,
 };
