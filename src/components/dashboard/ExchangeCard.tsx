@@ -14,8 +14,11 @@ export interface ExchangeCardProps {
   isPositive: boolean;
   chartPath: string;
   iconUrl?: string;
+  iconName?: string;
   iconSymbol?: string;
   iconColor?: string; // For symbol background
+  iconTintColor?: string; // For symbol foreground/tint
+  customIcon?: React.ReactNode;
   buyValue?: string;
   sellValue?: string;
   buyChangePercent?: string;
@@ -33,8 +36,11 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
   isPositive,
   chartPath,
   iconUrl,
+  iconName,
   iconSymbol,
   iconColor = '#F3BA2F',
+  iconTintColor,
+  customIcon,
   buyValue,
   sellValue,
   buyChangePercent,
@@ -86,8 +92,14 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
       <View style={[styles.header, { position: 'relative', zIndex: 1 }]}>
         <View style={styles.leftContent}>
           <View style={[styles.iconContainer, { borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: theme.roundness * 5 }]}>
-            {iconUrl ? (
+            {customIcon ? (
+              customIcon
+            ) : iconUrl ? (
               <Image source={{ uri: iconUrl }} style={styles.iconImage} />
+            ) : iconName ? (
+              <View style={[styles.symbolIcon, { backgroundColor: iconColor }]}>
+                <MaterialIcons name={iconName} size={32} color={iconTintColor || theme.colors.onPrimaryContainer} />
+              </View>
             ) : (
               <View style={[styles.symbolIcon, { backgroundColor: iconColor }]}>
                 <Text style={styles.symbolText}>{iconSymbol}</Text>

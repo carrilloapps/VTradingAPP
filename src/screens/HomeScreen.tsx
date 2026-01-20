@@ -13,6 +13,7 @@ import { StocksService, StockData } from '../services/StocksService';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { AppConfig } from '../constants/AppConfig';
+import { TetherIcon } from '../components/ui/TetherIcon';
 
 const HomeScreen = () => {
   const theme = useTheme();
@@ -38,15 +39,19 @@ const HomeScreen = () => {
       if (usdtRate) homeRates.push(usdtRate);
       
       const getPath = (percent: number | null | undefined) => {
-        if (percent === null || percent === undefined || Math.abs(percent) < 0.01) return 'M0 20 L 100 20';
+        if (percent === null || percent === undefined || Math.abs(percent) < 0.001) return 'M0 20 L 100 20';
         
         // Dynamic curve intensity based on percentage
-        // Cap at 3% for maximum visual steepness
-        const intensity = Math.min(Math.abs(percent), 3.0) / 3.0;
+        // We amplify small percentages to make them visible
+        // 0.5% is treated as "high intensity" (1.0) for visual purposes
+        const scaleFactor = 200; // Multiplier: 0.005 * 200 = 1.0
+        const intensity = Math.min(Math.abs(percent) * scaleFactor, 1.0);
         
         // Base amplitude (how far from center Y=20)
-        // Min deviation 5 (for visibility), Max 15 (total range 5-35)
-        const amplitude = 5 + (10 * intensity);
+        // Min deviation 3 (flat-ish), Max 18 (steep)
+        const minAmp = 3;
+        const maxAmp = 18;
+        const amplitude = minAmp + ((maxAmp - minAmp) * intensity);
         const center = 20;
         
         if (percent > 0) {
@@ -87,6 +92,29 @@ const HomeScreen = () => {
              displaySellValue = Number(rate.sellValue).toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES });
         }
 
+        // Determine icon and color based on currency type/code
+        let iconName = undefined;
+        let iconSymbol = '$';
+        let iconColor = undefined;
+        let iconTintColor = undefined;
+        let customIcon = undefined;
+        
+        // Use consistent background color for both modes that supports dark content (#212121)
+        // In Dark Mode: primary is #6DDBAC (Light Green)
+        // In Light Mode: inversePrimary is #6DDBAC (Light Green)
+        const iconBackground = theme.dark ? theme.colors.primary : theme.colors.inversePrimary;
+
+        if (rate.code === 'USD') {
+            iconName = 'attach-money';
+            iconColor = iconBackground;
+            iconTintColor = '#212121';
+        } else if (rate.code === 'USDT') {
+            customIcon = <TetherIcon backgroundColor={iconBackground} contentColor="#212121" />;
+        } else if (rate.type === 'crypto') {
+            iconSymbol = '₿';
+            iconColor = '#F7931A';
+        }
+
         return {
             title: rate.name,
             subtitle: '',
@@ -95,8 +123,11 @@ const HomeScreen = () => {
             changePercent: rate.changePercent !== null ? `${rate.changePercent.toFixed(2)}%` : '0.00%', 
             isPositive: rate.changePercent !== null ? rate.changePercent >= 0 : true,
             chartPath: getPath(rate.changePercent),
-            iconSymbol: rate.iconName === 'euro' ? '€' : '$',
-            iconColor: rate.type === 'crypto' ? '#F7931A' : undefined,
+            iconName: iconName,
+            iconSymbol: iconSymbol,
+            iconColor: iconColor,
+            iconTintColor: iconTintColor,
+            customIcon: customIcon,
             buyValue: displayBuyValue,
             sellValue: displaySellValue,
             buyChangePercent: rate.buyChangePercent !== undefined ? `${rate.buyChangePercent > 0 ? '+' : ''}${rate.buyChangePercent.toFixed(2)}%` : undefined,
@@ -106,7 +137,7 @@ const HomeScreen = () => {
         };
       });
       setFeaturedRates(featured);
-  }, []);
+  }, [theme]);
 
   useEffect(() => {
     const unsubscribeRates = CurrencyService.subscribe((data) => {
