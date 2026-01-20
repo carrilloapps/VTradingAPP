@@ -1,14 +1,15 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, ScrollView, StatusBar } from 'react-native';
 import { Text, TextInput, Button, useTheme, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { analyticsService } from '../../services/firebase/AnalyticsService';
 
 const RegisterScreen = ({ navigation }: any) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const { signUp, isLoading } = useAuth();
+  const { signUp, googleSignIn, isLoading } = useAuth();
 
   const themeStyles = React.useMemo(() => ({
     container: {
@@ -30,6 +31,13 @@ const RegisterScreen = ({ navigation }: any) => {
       fontWeight: 'bold' as const,
       marginLeft: 5,
     },
+    dividerLine: {
+      backgroundColor: theme.colors.outline,
+    },
+    dividerText: {
+      marginHorizontal: 10,
+      color: theme.colors.onSurfaceVariant,
+    },
   }), [theme]);
 
   const [email, setEmail] = useState('');
@@ -42,6 +50,10 @@ const RegisterScreen = ({ navigation }: any) => {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
+
+  useEffect(() => {
+    analyticsService.logScreenView('Register');
+  }, []);
 
   const validate = () => {
     let isValid = true;
@@ -76,12 +88,23 @@ const RegisterScreen = ({ navigation }: any) => {
   const handleRegister = async () => {
     if (validate()) {
       try {
+        await analyticsService.logEvent('sign_up_attempt', { method: 'password' });
         await signUp(email, password);
-        // Navigation might be handled by AuthState change, but if not:
-        // navigation.navigate('Login'); // Or auto-login logic
+        await analyticsService.logEvent('sign_up_success', { method: 'password' });
       } catch {
+        await analyticsService.logEvent('sign_up_error', { method: 'password' });
         // Error handled in context
       }
+    }
+  };
+
+  const handleGoogleRegister = async () => {
+    try {
+      await analyticsService.logEvent('sign_up_attempt', { method: 'google' });
+      await googleSignIn();
+      await analyticsService.logEvent('sign_up_success', { method: 'google' });
+    } catch {
+      await analyticsService.logEvent('sign_up_error', { method: 'google' });
     }
   };
 
@@ -105,6 +128,9 @@ const RegisterScreen = ({ navigation }: any) => {
       <TouchableOpacity 
         onPress={() => navigation.goBack()} 
         style={styles.backButton}
+        accessibilityRole="button"
+        accessibilityLabel="Volver"
+        accessibilityHint="Regresa a la pantalla anterior"
       >
         <MaterialIcons name="arrow-back" size={24} color={theme.colors.onSurface} />
       </TouchableOpacity>
@@ -126,8 +152,13 @@ const RegisterScreen = ({ navigation }: any) => {
           mode="outlined"
           keyboardType="email-address"
           autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="email"
+          textContentType="emailAddress"
+          accessibilityLabel="Correo electrónico"
+          accessibilityHint="Ingresa tu correo para registrarte"
           error={!!emailError}
-          left={<TextInput.Icon icon="email" />}
+          left={<TextInput.Icon icon="email" accessibilityLabel="Icono de correo" />}
           style={styles.input}
         />
         <HelperText type="error" visible={!!emailError}>
@@ -140,12 +171,19 @@ const RegisterScreen = ({ navigation }: any) => {
           onChangeText={setPassword}
           mode="outlined"
           secureTextEntry={secureTextEntry}
+          autoCorrect={false}
+          autoComplete="new-password"
+          textContentType="newPassword"
+          accessibilityLabel="Contraseña"
+          accessibilityHint="Crea una contraseña segura"
           error={!!passwordError}
-          left={<TextInput.Icon icon="lock" />}
+          left={<TextInput.Icon icon="lock" accessibilityLabel="Icono de contraseña" />}
           right={
             <TextInput.Icon 
               icon={secureTextEntry ? "eye" : "eye-off"} 
-              onPress={() => setSecureTextEntry(!secureTextEntry)} 
+              onPress={() => setSecureTextEntry(!secureTextEntry)}
+              accessibilityLabel={secureTextEntry ? 'Mostrar contraseña' : 'Ocultar contraseña'}
+              accessibilityHint="Alterna la visibilidad de la contraseña"
             />
           }
           style={styles.input}
@@ -160,12 +198,19 @@ const RegisterScreen = ({ navigation }: any) => {
           onChangeText={setConfirmPassword}
           mode="outlined"
           secureTextEntry={confirmSecureTextEntry}
+          autoCorrect={false}
+          autoComplete="new-password"
+          textContentType="newPassword"
+          accessibilityLabel="Confirmar contraseña"
+          accessibilityHint="Repite la contraseña para confirmar"
           error={!!confirmPasswordError}
-          left={<TextInput.Icon icon="lock-check" />}
+          left={<TextInput.Icon icon="lock-check" accessibilityLabel="Icono de confirmar contraseña" />}
           right={
             <TextInput.Icon 
               icon={confirmSecureTextEntry ? "eye" : "eye-off"} 
-              onPress={() => setConfirmSecureTextEntry(!confirmSecureTextEntry)} 
+              onPress={() => setConfirmSecureTextEntry(!confirmSecureTextEntry)}
+              accessibilityLabel={confirmSecureTextEntry ? 'Mostrar contraseña' : 'Ocultar contraseña'}
+              accessibilityHint="Alterna la visibilidad de la contraseña"
             />
           }
           style={styles.input}
@@ -180,8 +225,29 @@ const RegisterScreen = ({ navigation }: any) => {
           loading={isLoading}
           disabled={isLoading}
           style={styles.button}
+          accessibilityLabel="Registrarse"
+          accessibilityHint="Crea tu cuenta con correo y contraseña"
         >
           Registrarse
+        </Button>
+
+        <View style={styles.divider}>
+          <View style={[styles.line, themeStyles.dividerLine]} />
+          <Text style={themeStyles.dividerText}>O</Text>
+          <View style={[styles.line, themeStyles.dividerLine]} />
+        </View>
+
+        <Button
+          mode="outlined"
+          onPress={handleGoogleRegister}
+          loading={isLoading}
+          disabled={isLoading}
+          icon="google"
+          style={styles.button}
+          accessibilityLabel="Registrarse con Google"
+          accessibilityHint="Crea tu cuenta usando Google"
+        >
+          Registrarse con Google
         </Button>
       </View>
 
@@ -189,7 +255,15 @@ const RegisterScreen = ({ navigation }: any) => {
         <Text variant="bodyMedium" style={themeStyles.footerText}>
           ¿Ya tienes una cuenta?
         </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+        <TouchableOpacity
+          onPress={() => {
+            analyticsService.logEvent('navigate_login');
+            navigation.navigate('Login');
+          }}
+          accessibilityRole="button"
+          accessibilityLabel="Inicia sesión"
+          accessibilityHint="Abre la pantalla de inicio de sesión"
+        >
           <Text variant="bodyMedium" style={themeStyles.loginText}>
             Inicia Sesión
           </Text>
@@ -219,6 +293,15 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 10,
     paddingVertical: 5,
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  line: {
+    flex: 1,
+    height: 1,
   },
   footer: {
     flexDirection: 'row',

@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, TouchableOpacity, StatusBar } from 'react-native';
 import { Text, TextInput, Button, useTheme, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { analyticsService } from '../../services/firebase/AnalyticsService';
 
 const ForgotPasswordScreen = ({ navigation }: any) => {
   const theme = useTheme();
@@ -32,6 +33,10 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
   const [emailError, setEmailError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    analyticsService.logScreenView('ForgotPassword');
+  }, []);
+
   const validate = () => {
     if (!email || !email.includes('@')) {
       setEmailError('Ingresa un correo válido');
@@ -45,9 +50,12 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
     if (validate()) {
       setLoading(true);
       try {
+        await analyticsService.logEvent('password_reset_attempt');
         await resetPassword(email);
+        await analyticsService.logEvent('password_reset_success');
         navigation.goBack();
       } catch {
+        await analyticsService.logEvent('password_reset_error');
         // Error handled in context
       } finally {
         setLoading(false);
@@ -71,6 +79,9 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
       <TouchableOpacity 
         onPress={() => navigation.goBack()}  
         style={styles.backButton}
+        accessibilityRole="button"
+        accessibilityLabel="Volver"
+        accessibilityHint="Regresa a la pantalla anterior"
       >
         <MaterialIcons name="arrow-back" size={24} color={theme.colors.onSurface} />
       </TouchableOpacity>
@@ -92,8 +103,13 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
           mode="outlined"
           keyboardType="email-address"
           autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="email"
+          textContentType="emailAddress"
+          accessibilityLabel="Correo electrónico"
+          accessibilityHint="Ingresa tu correo para restablecer tu contraseña"
           error={!!emailError}
-          left={<TextInput.Icon icon="email" />}
+          left={<TextInput.Icon icon="email" accessibilityLabel="Icono de correo" />}
           style={styles.input}
         />
         <HelperText type="error" visible={!!emailError}>
@@ -106,6 +122,8 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
           loading={loading}
           disabled={loading}
           style={styles.button}
+          accessibilityLabel="Enviar enlace de recuperación"
+          accessibilityHint="Envía el enlace para restablecer tu contraseña"
         >
           Enviar Enlace
         </Button>

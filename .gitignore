@@ -32,6 +32,7 @@ local.properties
 *.hprof
 .cxx/
 *.keystore
+!vtrading.keystore
 !debug.keystore
 .kotlin/
 

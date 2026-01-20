@@ -130,7 +130,7 @@ export default function VTradingWidget({
         </FlexWidget>
       )}
 
-      <FlexWidget style={{ marginTop: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+      <FlexWidget style={{ marginTop: 12, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', width: 'match_parent' }}>
         <TextWidget text={lastUpdated ? `Actualizado: ${lastUpdated}` : 'Actualizado: hace poco'} style={{ fontSize: 10, color: subTextColor }} />
       </FlexWidget>
     </FlexWidget>

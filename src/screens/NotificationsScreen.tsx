@@ -16,7 +16,9 @@ import NotificationDetailModal from '../components/notifications/NotificationDet
 import NotificationsSkeleton from '../components/notifications/NotificationsSkeleton';
 import { useNotifications } from '../context/NotificationContext';
 
-if (Platform.OS === 'android') {
+const isFabricEnabled = !!(globalThis as any).nativeFabricUIManager;
+
+if (Platform.OS === 'android' && !isFabricEnabled) {
   if (UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
   }

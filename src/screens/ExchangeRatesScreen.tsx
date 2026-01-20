@@ -13,7 +13,9 @@ import { useFilters } from '../context/FilterContext';
 import { useToast } from '../context/ToastContext';
 import { useAppTheme } from '../theme/theme';
 
-if (Platform.OS === 'android') {
+const isFabricEnabled = !!(globalThis as any).nativeFabricUIManager;
+
+if (Platform.OS === 'android' && !isFabricEnabled) {
   if (UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
   }

@@ -1,16 +1,25 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, ScrollView, StatusBar } from 'react-native';
-import { Text, TextInput, Button, useTheme, HelperText } from 'react-native-paper';
+import React, { useEffect, useMemo, useState } from 'react';
+import { View, StyleSheet, TouchableOpacity, ScrollView, StatusBar, Image } from 'react-native';
+import { Text, TextInput, Button, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import { analyticsService } from '../../services/firebase/AnalyticsService';
+import DeviceInfo from 'react-native-device-info';
+import { useAppTheme } from '../../theme/theme';
 
 const LoginScreen = ({ navigation }: any) => {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const insets = useSafeAreaInsets();
   const { signIn, googleSignIn, signInAnonymously, isLoading } = useAuth();
 
-  const themeStyles = React.useMemo(() => ({
+  useEffect(() => {
+    analyticsService.logScreenView('Login');
+  }, []);
+
+  const appName = DeviceInfo.getApplicationName();
+
+  const themeStyles = useMemo(() => ({
     container: {
       backgroundColor: theme.colors.background,
     },
@@ -39,6 +48,13 @@ const LoginScreen = ({ navigation }: any) => {
       color: theme.colors.primary,
       fontWeight: 'bold' as const,
       marginLeft: 5,
+    },
+    badge: {
+      backgroundColor: theme.colors.elevation.level2,
+      borderColor: theme.colors.warning,
+    },
+    badgeText: {
+      color: theme.colors.warning,
     },
   }), [theme]);
 
@@ -69,10 +85,33 @@ const LoginScreen = ({ navigation }: any) => {
   const handleLogin = async () => {
     if (validate()) {
       try {
+        await analyticsService.logEvent('login_attempt', { method: 'password' });
         await signIn(email, password);
+        await analyticsService.logEvent('login_success', { method: 'password' });
       } catch {
+        await analyticsService.logEvent('login_error', { method: 'password' });
         // Error handled in context
       }
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      await analyticsService.logEvent('login_attempt', { method: 'google' });
+      await googleSignIn();
+      await analyticsService.logEvent('login_success', { method: 'google' });
+    } catch {
+      await analyticsService.logEvent('login_error', { method: 'google' });
+    }
+  };
+
+  const handleGuestLogin = async () => {
+    try {
+      await analyticsService.logEvent('login_attempt', { method: 'anonymous' });
+      await signInAnonymously();
+      await analyticsService.logEvent('login_success', { method: 'anonymous' });
+    } catch {
+      await analyticsService.logEvent('login_error', { method: 'anonymous' });
     }
   };
 
@@ -94,10 +133,20 @@ const LoginScreen = ({ navigation }: any) => {
         barStyle={theme.dark ? 'light-content' : 'dark-content'} 
       />
       <View style={styles.header}>
-        <MaterialIcons name="candlestick-chart" size={60} color={theme.colors.primary} />
-        <Text variant="headlineMedium" style={themeStyles.title}>
-          VTradingAPP
-        </Text>
+        <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
+        <View style={styles.titleRow}>
+          <Text variant="headlineMedium" style={themeStyles.title}>
+            {appName}
+          </Text>
+          <View
+            style={[styles.badge, themeStyles.badge]}
+            accessibilityLabel="BETA"
+          >
+            <Text variant="labelSmall" style={[styles.badgeText, themeStyles.badgeText]}>
+              BETA
+            </Text>
+          </View>
+        </View>
         <Text variant="bodyLarge" style={themeStyles.subtitle}>
           Inicia sesión para continuar
         </Text>
@@ -111,8 +160,13 @@ const LoginScreen = ({ navigation }: any) => {
           mode="outlined"
           keyboardType="email-address"
           autoCapitalize="none"
+          autoCorrect={false}
+          autoComplete="email"
+          textContentType="emailAddress"
+          accessibilityLabel="Correo electrónico"
+          accessibilityHint="Ingresa tu correo para iniciar sesión"
           error={!!emailError}
-          left={<TextInput.Icon icon="email" />}
+          left={<TextInput.Icon icon="email" accessibilityLabel="Icono de correo" />}
           style={styles.input}
         />
         <HelperText type="error" visible={!!emailError}>
@@ -125,12 +179,19 @@ const LoginScreen = ({ navigation }: any) => {
           onChangeText={setPassword}
           mode="outlined"
           secureTextEntry={secureTextEntry}
+          autoCorrect={false}
+          autoComplete="password"
+          textContentType="password"
+          accessibilityLabel="Contraseña"
+          accessibilityHint="Ingresa tu contraseña para iniciar sesión"
           error={!!passwordError}
-          left={<TextInput.Icon icon="lock" />}
+          left={<TextInput.Icon icon="lock" accessibilityLabel="Icono de contraseña" />}
           right={
             <TextInput.Icon 
               icon={secureTextEntry ? "eye" : "eye-off"} 
-              onPress={() => setSecureTextEntry(!secureTextEntry)} 
+              onPress={() => setSecureTextEntry(!secureTextEntry)}
+              accessibilityLabel={secureTextEntry ? 'Mostrar contraseña' : 'Ocultar contraseña'}
+              accessibilityHint="Alterna la visibilidad de la contraseña"
             />
           }
           style={styles.input}
@@ -140,8 +201,14 @@ const LoginScreen = ({ navigation }: any) => {
         </HelperText>
 
         <TouchableOpacity 
-          onPress={() => navigation.navigate('ForgotPassword')}
+          onPress={() => {
+            analyticsService.logEvent('navigate_forgot_password');
+            navigation.navigate('ForgotPassword');
+          }}
           style={styles.forgotPassword}
+          accessibilityRole="button"
+          accessibilityLabel="¿Olvidaste tu contraseña?"
+          accessibilityHint="Abre la pantalla para recuperar tu contraseña"
         >
           <Text variant="bodyMedium" style={themeStyles.linkText}>
             ¿Olvidaste tu contraseña?
@@ -154,6 +221,8 @@ const LoginScreen = ({ navigation }: any) => {
           loading={isLoading}
           disabled={isLoading}
           style={styles.button}
+          accessibilityLabel="Iniciar sesión"
+          accessibilityHint="Inicia sesión con correo y contraseña"
         >
           Iniciar Sesión
         </Button>
@@ -166,20 +235,24 @@ const LoginScreen = ({ navigation }: any) => {
 
         <Button 
           mode="outlined" 
-          onPress={googleSignIn} 
+          onPress={handleGoogleLogin} 
           loading={isLoading}
           disabled={isLoading}
           icon="google"
           style={styles.button}
+          accessibilityLabel="Continuar con Google"
+          accessibilityHint="Inicia sesión con tu cuenta de Google"
         >
           Continuar con Google
         </Button>
 
         <Button 
           mode="text" 
-          onPress={signInAnonymously} 
+          onPress={handleGuestLogin} 
           disabled={isLoading}
           style={styles.button}
+          accessibilityLabel="Ingresar como invitado"
+          accessibilityHint="Accede sin crear una cuenta"
         >
           Ingresar como Invitado
         </Button>
@@ -189,7 +262,15 @@ const LoginScreen = ({ navigation }: any) => {
         <Text variant="bodyMedium" style={themeStyles.footerText}>
           ¿No tienes una cuenta?
         </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+        <TouchableOpacity
+          onPress={() => {
+            analyticsService.logEvent('navigate_register');
+            navigation.navigate('Register');
+          }}
+          accessibilityRole="button"
+          accessibilityLabel="Regístrate"
+          accessibilityHint="Abre la pantalla de registro"
+        >
           <Text variant="bodyMedium" style={themeStyles.registerText}>
             Regístrate
           </Text>
@@ -208,6 +289,16 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
     marginBottom: 40,
+  },
+  logo: {
+    width: 70,
+    height: 45,
+    marginBottom: 12,
+  },
+  titleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    columnGap: 8,
   },
   form: {
     width: '100%',
@@ -236,6 +327,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: 20,
+  },
+  badge: {
+    borderWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+    alignSelf: 'center',
+  },
+  badgeText: {
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
 });
 
