@@ -10,7 +10,7 @@ Este documento registra los estándares y documentación para los componentes de
 Para mantener la coherencia con el sistema de diseño plano de la aplicación:
 
 *   **Contenedor Principal (`barBackground`):**
-    *   **Bordes:** `borderWidth: 1` (continuo en todos los lados) con `borderColor: theme.colors.outline`.
+    *   **Bordes:** Eliminados completamente (`borderWidth: 0`) para un diseño limpio y fluido.
     *   **Elevación:** `elevation: 0` y `shadowOpacity: 0` (Sin sombras).
     *   **Fondo:** `theme.colors.elevation.level1` (Coincide con las tarjetas).
     *   **Forma:** `borderTopLeftRadius: 20`, `borderTopRightRadius: 20`.
@@ -21,14 +21,17 @@ Para mantener la coherencia con el sistema de diseño plano de la aplicación:
     *   Icono: `theme.colors.onPrimary` (Para contraste correcto en ambos modos).
 
 ### Implementación Técnica
-El borde debe aplicarse como `borderWidth: 1` (no solo `borderTopWidth`) para asegurar que la línea del borde siga la curvatura de las esquinas redondeadas superiores, cerrando visualmente el contenedor.
+El borde debe aplicarse excluyendo la parte inferior para evitar líneas dobles con la barra de navegación del sistema o cortes visuales extraños.
 
 ```typescript
 barBackground: {
   // ...
   borderTopLeftRadius: 20,
   borderTopRightRadius: 20,
-  borderWidth: 1, // Crucial para bordes curvos completos
+  borderTopWidth: 1,
+  borderLeftWidth: 1,
+  borderRightWidth: 1,
+  borderBottomWidth: 0,
   borderColor: theme.colors.outline,
   elevation: 0,
   backgroundColor: theme.colors.elevation.level1,

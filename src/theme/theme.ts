@@ -112,8 +112,8 @@ export const LightTheme: AppTheme = {
     onSurface: '#1a1c1e',
     surfaceVariant: '#dfe3eb',
     onSurfaceVariant: '#42474e',
-    outline: '#72777f',
-    outlineVariant: '#c2c7cf',
+    outline: '#E0E4EA', // Material Level Match (Subtle Light)
+    outlineVariant: '#EFF2F7',
     shadow: '#000000',
     scrim: '#000000',
     inverseSurface: '#2e3135',
@@ -171,8 +171,8 @@ export const DarkTheme: AppTheme = {
     onSurface: '#e2e2e5',
     surfaceVariant: '#42474e',
     onSurfaceVariant: '#c2c7cf',
-    outline: '#8c9199',
-    outlineVariant: '#42474e',
+    outline: '#2A3744', // Material Level Match (Subtle Dark)
+    outlineVariant: '#2B3846',
     shadow: '#000000',
     scrim: '#000000',
     inverseSurface: '#e2e2e5',

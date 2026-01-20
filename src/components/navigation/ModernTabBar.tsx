@@ -1,11 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useTheme } from 'react-native-paper';
+import { useAppTheme } from '../../theme/useAppTheme';
 import { MaterialTopTabBarProps } from '@react-navigation/material-top-tabs';
 
 const ModernTabBar: React.FC<MaterialTopTabBarProps> = ({ state, descriptors, navigation }) => {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const insets = useSafeAreaInsets();
   // Create animated values for each tab
   const animatedValues = useRef(state.routes.map(() => new Animated.Value(0))).current;
@@ -32,7 +32,6 @@ const ModernTabBar: React.FC<MaterialTopTabBarProps> = ({ state, descriptors, na
           backgroundColor: theme.colors.elevation.level1,
           paddingBottom: insets.bottom,
           height: 60 + insets.bottom,
-          borderColor: theme.colors.outline,
         }
       ]}>
         <View style={styles.content}>
@@ -139,7 +138,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    borderWidth: 1,
     // Ensure the elevated button is visible
     overflow: 'visible',
     shadowOpacity: 0,

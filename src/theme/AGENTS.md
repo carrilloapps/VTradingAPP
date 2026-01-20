@@ -40,7 +40,7 @@ Para garantizar la consistencia visual y la mantenibilidad del código, se estab
     *   `elevation: 0` (Android)
     *   `shadowOpacity: 0` (iOS)
     *   `borderWidth: 1`
-    *   `borderColor: theme.colors.outline`
+    *   `borderColor: theme.colors.outline` (Color "Material Level" sutil)
     *   `backgroundColor`:
         *   Cards/Inputs: `theme.colors.elevation.level1` (o `surface`)
         *   Dialogs/Modals: `theme.colors.elevation.level3`
