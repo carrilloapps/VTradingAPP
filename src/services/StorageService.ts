@@ -4,6 +4,7 @@ const KEYS = {
   SETTINGS: 'app_settings',
   ALERTS: 'user_alerts',
   NOTIFICATIONS: 'user_notifications',
+  WIDGET_CONFIG: 'widget_config',
 };
 
 export interface StoredNotification {
@@ -17,6 +18,15 @@ export interface StoredNotification {
   trend?: 'up' | 'down';
   highlightedValue?: string;
   data?: any;
+}
+
+export interface WidgetConfig {
+  title: string;
+  selectedCurrencyIds: string[];
+  isWallpaperDark: boolean;
+  isTransparent: boolean;
+  showGraph: boolean;
+  isWidgetDarkMode: boolean;
 }
 
 export interface AppSettings {
@@ -92,6 +102,24 @@ class StorageService {
       await AsyncStorage.setItem(KEYS.NOTIFICATIONS, JSON.stringify(notifications));
     } catch (e) {
       console.error('Failed to save notifications', e);
+    }
+  }
+
+  async getWidgetConfig(): Promise<WidgetConfig | null> {
+    try {
+      const data = await AsyncStorage.getItem(KEYS.WIDGET_CONFIG);
+      return data ? JSON.parse(data) : null;
+    } catch (e) {
+      console.error('Failed to load widget config', e);
+      return null;
+    }
+  }
+
+  async saveWidgetConfig(config: WidgetConfig) {
+    try {
+      await AsyncStorage.setItem(KEYS.WIDGET_CONFIG, JSON.stringify(config));
+    } catch (e) {
+      console.error('Failed to save widget config', e);
     }
   }
 }

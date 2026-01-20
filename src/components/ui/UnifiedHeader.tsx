@@ -325,12 +325,10 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   simpleHeaderContainer: {
-    alignItems: 'center',
-    width: '100%',
+    justifyContent: 'center',
   },
   simpleTitle: {
     fontWeight: '800',
-    textAlign: 'center',
   },
 });
 

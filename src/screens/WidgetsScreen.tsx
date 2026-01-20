@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, Switch, SectionList } from 'react-native';
-import { Text, TextInput, IconButton, Portal, Modal, Button, TouchableRipple, Searchbar } from 'react-native-paper';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, ScrollView, StatusBar, Switch } from 'react-native';
+import { Text, TextInput, IconButton, Button } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -12,6 +12,9 @@ import DeviceInfo from 'react-native-device-info';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
 import { TetherIcon } from '../components/ui/TetherIcon';
 import WidgetPreview, { WidgetItem } from '../components/widgets/WidgetPreview';
+import CurrencyPickerModal from '../components/dashboard/CurrencyPickerModal';
+import { storageService, WidgetConfig } from '../services/StorageService';
+import { useToast } from '../context/ToastContext';
 
 const APP_VERSION = DeviceInfo.getVersion();
 
@@ -37,6 +40,7 @@ const WidgetsScreen = () => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
+  const { showToast } = useToast();
 
   // Data State
   const [availableRates, setAvailableRates] = useState<CurrencyRate[]>([]);
@@ -51,19 +55,52 @@ const WidgetsScreen = () => {
   const [widgetTitle, setWidgetTitle] = useState(`VTrading • ${APP_VERSION}`);
   // visibleItemCount removed as it should be automatic
   const [isSelectionModalVisible, setIsSelectionModalVisible] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    loadRates();
+    loadData();
   }, []);
 
-  const loadRates = async () => {
+  const loadData = async () => {
     try {
         const rates = await CurrencyService.getRates();
         setAvailableRates(rates);
         
-        // Default selection: USD (BCV) and USDT (Binance)
-    // Find them by code/id logic
+        // Load saved config
+        const config = await storageService.getWidgetConfig();
+        
+        if (config) {
+            setWidgetTitle(config.title);
+            setIsWallpaperDark(config.isWallpaperDark);
+            setIsTransparent(config.isTransparent);
+            setShowGraph(config.showGraph);
+            setIsWidgetDarkMode(config.isWidgetDarkMode);
+            
+            if (config.selectedCurrencyIds && config.selectedCurrencyIds.length > 0) {
+                // Restore selected rates maintaining order
+                const restoredRates = config.selectedCurrencyIds
+                    .map(id => rates.find(r => r.id === id))
+                    .filter(r => r !== undefined) as CurrencyRate[];
+                    
+                if (restoredRates.length > 0) {
+                    setSelectedRates(restoredRates);
+                } else {
+                    setDefaultRates(rates);
+                }
+            } else {
+                setDefaultRates(rates);
+            }
+        } else {
+            setDefaultRates(rates);
+        }
+    } catch (error) {
+        console.error('Error loading data for widget:', error);
+        showToast('Error cargando datos', 'error');
+    } finally {
+        setLoading(false);
+    }
+  };
+
+  const setDefaultRates = (rates: CurrencyRate[]) => {
     const defaults: CurrencyRate[] = [];
     // Prioritize USD Fiat (BCV) and USDT
     const usd = rates.find(r => r.code === 'USD' && r.type === 'fiat');
@@ -78,17 +115,25 @@ const WidgetsScreen = () => {
     }
 
     setSelectedRates(defaults);
-    } catch (error) {
-        console.error('Error loading rates for widget:', error);
-    } finally {
-        setLoading(false);
-    }
   };
 
-  const handleSave = () => {
-    // Aquí iría la lógica para guardar la configuración del widget
-    // Por ahora solo regresamos a la pantalla anterior
-    navigation.goBack();
+  const handleSave = async () => {
+    try {
+        const config: WidgetConfig = {
+            title: widgetTitle,
+            selectedCurrencyIds: selectedRates.map(r => r.id),
+            isWallpaperDark,
+            isTransparent,
+            showGraph,
+            isWidgetDarkMode
+        };
+        await storageService.saveWidgetConfig(config);
+        showToast('Configuración guardada', 'success');
+        navigation.goBack();
+    } catch (error) {
+        console.error('Error saving widget config:', error);
+        showToast('Error al guardar', 'error');
+    }
   };
 
   // Order & Selection Handlers
@@ -119,25 +164,6 @@ const WidgetsScreen = () => {
   // Widget Preview Data
   const widgetItems = selectedRates.map(mapRateToWidgetItem);
 
-  const sections = useMemo(() => {
-      const lowerQuery = searchQuery.toLowerCase();
-      
-      const filtered = availableRates.filter(r => 
-          r.code.toLowerCase().includes(lowerQuery) || 
-          r.name.toLowerCase().includes(lowerQuery)
-      );
-
-      const favorites = ['USD', 'USDT', 'VES'];
-      const main = filtered.filter(r => favorites.includes(r.code));
-      const others = filtered.filter(r => !favorites.includes(r.code));
-
-      const result = [];
-      if (main.length > 0) result.push({ title: 'PRINCIPALES', data: main });
-      if (others.length > 0) result.push({ title: 'OTRAS MONEDAS', data: others });
-
-      return result;
-  }, [availableRates, searchQuery]);
-
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar 
@@ -148,7 +174,7 @@ const WidgetsScreen = () => {
       
       <UnifiedHeader 
         variant="simple" 
-        title="Widget Preview" 
+        title="Personalización" 
         onBackPress={() => navigation.goBack()}
       />
 
@@ -261,7 +287,7 @@ const WidgetsScreen = () => {
                         <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
                              <MaterialIcons name="wallpaper" size={20} color={theme.colors.onSurfaceVariant} />
                         </View>
-                        <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Fondo de Pantalla Oscuro</Text>
+                        <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Fondo de pantalla oscuro</Text>
                     </View>
                     <Switch 
                         value={isWallpaperDark} 
@@ -279,7 +305,7 @@ const WidgetsScreen = () => {
                         <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
                              <MaterialIcons name="opacity" size={20} color={theme.colors.onSurfaceVariant} />
                         </View>
-                        <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Fondo Transparente</Text>
+                        <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Widget transparente</Text>
                     </View>
                     <Switch 
                         value={isTransparent} 
@@ -297,7 +323,7 @@ const WidgetsScreen = () => {
                         <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
                              <MaterialIcons name="show-chart" size={20} color={theme.colors.onSurfaceVariant} />
                         </View>
-                        <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Mostrar Porcentaje</Text>
+                        <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Mostrar porcentaje</Text>
                     </View>
                     <Switch 
                         value={showGraph} 
@@ -315,7 +341,7 @@ const WidgetsScreen = () => {
                         <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
                              <MaterialIcons name="brightness-6" size={20} color={theme.colors.onSurfaceVariant} />
                         </View>
-                        <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Widget Modo Oscuro</Text>
+                        <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Widget modo oscuro</Text>
                     </View>
                     <Switch 
                         value={isWidgetDarkMode} 
@@ -344,87 +370,15 @@ const WidgetsScreen = () => {
       </View>
 
       {/* Selection Modal */}
-      <Portal>
-        <Modal 
-            visible={isSelectionModalVisible} 
-            onDismiss={() => setIsSelectionModalVisible(false)}
-            contentContainerStyle={[styles.modalContent, { backgroundColor: theme.colors.elevation.level3, padding: 0, overflow: 'hidden' }]}
-        >
-            <View style={{ padding: 20, paddingBottom: 10 }}>
-                <Text variant="headlineSmall" style={{ marginBottom: 16, textAlign: 'center', color: theme.colors.onSurface }}>
-                    Seleccionar Divisas
-                </Text>
-                <Searchbar 
-                    placeholder="Buscar moneda..." 
-                    onChangeText={setSearchQuery} 
-                    value={searchQuery} 
-                    style={{ backgroundColor: theme.colors.elevation.level1 }}
-                    mode="bar"
-                />
-            </View>
-            
-            <SectionList
-                sections={sections}
-                keyExtractor={(item) => item.id}
-                contentContainerStyle={{ paddingBottom: 20 }}
-                stickySectionHeadersEnabled={false}
-                renderItem={({ item }) => {
-                    const isSelected = selectedRates.some(r => r.id === item.id);
-                    return (
-                        <TouchableRipple 
-                            onPress={() => toggleRateSelection(item)}
-                            style={[
-                                styles.pickerItem, 
-                                isSelected && { backgroundColor: theme.colors.secondaryContainer }
-                            ]}
-                        >
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <View style={[
-                                    styles.iconPlaceholder, 
-                                    { backgroundColor: isSelected ? theme.colors.primary : theme.colors.elevation.level4 }
-                                ]}>
-                                     <MaterialIcons 
-                                        name={item.iconName || 'attach-money'} 
-                                        size={24} 
-                                        color={isSelected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant} 
-                                     />
-                                </View>
-                                <View style={{ flex: 1, marginLeft: 16 }}>
-                                    <Text variant="titleMedium" style={{ fontWeight: isSelected ? '700' : '400', color: theme.colors.onSurface }}>
-                                        {item.code}
-                                    </Text>
-                                    <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                                        {item.name}
-                                    </Text>
-                                </View>
-                                {isSelected && (
-                                    <MaterialIcons name="check-circle" size={24} color={theme.colors.primary} />
-                                )}
-                            </View>
-                        </TouchableRipple>
-                    );
-                }}
-                renderSectionHeader={({ section: { title } }) => (
-                    <Text style={{ 
-                        paddingHorizontal: 24, 
-                        paddingVertical: 8, 
-                        color: theme.colors.onSurfaceVariant, 
-                        fontWeight: 'bold', 
-                        fontSize: 12,
-                        marginTop: 8
-                    }}>
-                        {title}
-                    </Text>
-                )}
-            />
-            
-            <View style={{ padding: 16, borderTopWidth: 1, borderTopColor: theme.colors.outline }}>
-                <Button mode="contained" onPress={() => setIsSelectionModalVisible(false)}>
-                    Listo
-                </Button>
-            </View>
-        </Modal>
-      </Portal>
+      <CurrencyPickerModal
+        visible={isSelectionModalVisible}
+        onDismiss={() => setIsSelectionModalVisible(false)}
+        rates={availableRates}
+        multiSelect={true}
+        selectedIds={selectedRates.map(r => r.id)}
+        onToggle={toggleRateSelection}
+        title="Seleccionar Divisas"
+      />
     </View>
   );
 };
@@ -507,119 +461,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 4,
   },
-  widgetCard: {
-    borderRadius: 22,
-    padding: 16,
-    borderWidth: 1,
-    minHeight: 160,
-  },
-  widgetHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  widgetTitleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  widgetIcon: {
-    width: 20,
-    height: 20,
-  },
-  widgetTitleText: {
-    fontWeight: '600',
-    fontSize: 14,
-  },
-  rateRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-    borderBottomWidth: 1,
-  },
-  rateRowNoBorder: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 8,
-  },
-  currencyLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  rateValue: {
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  trendBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 8,
-    gap: 2,
-  },
-  trendText: {
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  widgetFooter: {
-    marginTop: 12,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  dock: {
-    position: 'absolute',
-    bottom: 24,
-    left: 20,
-    right: 20,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    backgroundColor: 'rgba(255,255,255,0.2)',
-    padding: 12,
-    borderRadius: 24,
-  },
-  appIconWrapper: {
-    alignItems: 'center',
-  },
-  appIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-  },
   footer: {
     paddingHorizontal: 20,
     paddingTop: 16,
     borderTopWidth: 1,
-  },
-  modalContent: {
-    margin: 20,
-    borderRadius: 28,
-    maxHeight: '80%',
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderBottomWidth: 1,
-  },
-  pickerItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-  },
-  iconPlaceholder: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
 });
 

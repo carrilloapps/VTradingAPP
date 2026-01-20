@@ -335,7 +335,7 @@ const SettingsScreen = () => {
                 <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
                   <MaterialIcons name="notifications" size={20} color={theme.colors.onSurfaceVariant} />
                 </View>
-                <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Notificaciones Push</Text>
+                <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Notificaciones push</Text>
               </View>
               <Switch 
                 value={pushEnabled} 
@@ -353,7 +353,7 @@ const SettingsScreen = () => {
                   <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
                     <MaterialIcons name="widgets" size={20} color={theme.colors.onSurfaceVariant} />
                   </View>
-                  <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Widgets</Text>
+                  <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Perzonalización de widgets</Text>
                 </View>
                 <MaterialIcons name="chevron-right" size={24} color={theme.colors.onSurfaceVariant} />
               </View>
@@ -380,12 +380,12 @@ const SettingsScreen = () => {
           <View style={[styles.cardContainer, { borderColor: theme.colors.outline, backgroundColor: theme.colors.elevation.level1 }]}>
             <MenuButton 
               icon="security" 
-              label="Seguridad y Privacidad" 
+              label="Seguridad & Privacidad" 
               onPress={() => handleAction("Abriendo configuración de seguridad...")} 
             />
             <MenuButton 
               icon="logout" 
-              label="Cerrar Sesión" 
+              label="Cerrar sesión" 
               onPress={handleLogout} 
               isDanger
               hasTopBorder

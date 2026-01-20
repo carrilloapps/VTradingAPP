@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, SectionList } from 'react-native';
-import { Text, useTheme, Searchbar } from 'react-native-paper';
+import { Text, useTheme, Searchbar, Button } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { CurrencyRate } from '../../services/CurrencyService';
 import { BottomSheetModal } from '../ui/BottomSheetModal';
@@ -9,12 +9,15 @@ import { AppConfig } from '../../constants/AppConfig';
 export interface CurrencyPickerModalProps {
   visible: boolean;
   onDismiss: () => void;
-  onSelect: (currency: CurrencyRate) => void;
-  selectedCurrencyCode: string | null;
+  onSelect?: (currency: CurrencyRate) => void;
+  selectedCurrencyCode?: string | null;
   rates: CurrencyRate[];
   title?: string;
   favorites?: string[];
   excludedCodes?: string[];
+  multiSelect?: boolean;
+  selectedIds?: string[];
+  onToggle?: (currency: CurrencyRate) => void;
 }
 
 const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
@@ -25,7 +28,10 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
   rates,
   title = "Seleccionar divisa",
   favorites = ['USD', 'USDT', 'VES'],
-  excludedCodes = []
+  excludedCodes = [],
+  multiSelect = false,
+  selectedIds = [],
+  onToggle
 }) => {
   const theme = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
@@ -111,14 +117,21 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
 
         <SectionList
             sections={sections}
-            keyExtractor={(item) => item.code}
+            keyExtractor={(item) => item.id || item.code}
             renderItem={({ item }) => {
-                const isSelected = selectedCurrencyCode === item.code;
+                const isSelected = multiSelect 
+                    ? selectedIds.includes(item.id) 
+                    : selectedCurrencyCode === item.code;
+                
                 return (
                     <TouchableOpacity 
                         onPress={() => {
-                            onSelect(item);
-                            onDismiss();
+                            if (multiSelect) {
+                                onToggle && onToggle(item);
+                            } else {
+                                onSelect && onSelect(item);
+                                onDismiss();
+                            }
                         }}
                         style={[
                             styles.pickerItem, 
@@ -163,6 +176,14 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
             stickySectionHeadersEnabled={false}
             contentContainerStyle={{ paddingBottom: 24 }}
         />
+        
+        {multiSelect && (
+            <View style={{ padding: 16, borderTopWidth: 1, borderTopColor: theme.colors.outline }}>
+                <Button mode="contained" onPress={onDismiss}>
+                    Listo
+                </Button>
+            </View>
+        )}
     </BottomSheetModal>
   );
 };
