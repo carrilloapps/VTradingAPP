@@ -1,10 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, Switch, Image, Modal as RNModal, SectionList } from 'react-native';
-import { Text, TextInput, SegmentedButtons, IconButton, Portal, Modal, Button, Checkbox, Divider, TouchableRipple, Searchbar } from 'react-native-paper';
+import { View, StyleSheet, ScrollView, StatusBar, Switch, SectionList } from 'react-native';
+import { Text, TextInput, IconButton, Portal, Modal, Button, TouchableRipple, Searchbar } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import LinearGradient from 'react-native-linear-gradient';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 import UnifiedHeader from '../components/ui/UnifiedHeader';
@@ -12,11 +10,13 @@ import { useAppTheme } from '../theme/theme';
 import CustomButton from '../components/ui/CustomButton';
 import DeviceInfo from 'react-native-device-info';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
+import { TetherIcon } from '../components/ui/TetherIcon';
+import WidgetPreview, { WidgetItem } from '../components/widgets/WidgetPreview';
 
 const APP_VERSION = DeviceInfo.getVersion();
 
 // Helper to format rate for widget display
-const mapRateToWidgetItem = (rate: CurrencyRate) => {
+const mapRateToWidgetItem = (rate: CurrencyRate): WidgetItem => {
     const isUp = (rate.changePercent || 0) > 0;
     const isDown = (rate.changePercent || 0) < 0;
     
@@ -163,91 +163,14 @@ const WidgetsScreen = () => {
         </View>
 
         {/* Mockup Container */}
-        <View style={[styles.mockupContainer, { borderColor: theme.colors.outline }]}>
-            {/* Phone Bezel/Wallpaper */}
-            <LinearGradient
-                colors={isWallpaperDark ? ['#0f172a', '#1e293b', '#0f172a'] : ['#e2e8f0', '#f8fafc', '#e2e8f0']}
-                style={styles.wallpaper}
-            >
-                {/* Abstract Pattern Overlay (Simulated with Gradient) */}
-                <LinearGradient
-                    colors={['rgba(0,0,0,0.2)', 'transparent', 'rgba(0,0,0,0.6)']}
-                    style={StyleSheet.absoluteFill}
-                />
-                
-                {/* Status Bar Mockup */}
-                <View style={styles.statusBarMockup}>
-                    <Text variant="labelSmall" style={{ color: isWallpaperDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)', fontWeight: 'bold' }}>10:42</Text>
-                    <View style={styles.statusIcons}>
-                        <MaterialCommunityIcons name="signal-cellular-3" size={14} color={isWallpaperDark ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.8)"} />
-                        <MaterialCommunityIcons name="wifi" size={14} color={isWallpaperDark ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.8)"} />
-                        <MaterialCommunityIcons name="battery-50" size={14} color={isWallpaperDark ? "rgba(255,255,255,0.8)" : "rgba(0,0,0,0.8)"} />
-                    </View>
-                </View>
-
-                {/* The Widget Component */}
-                <View style={[
-                    styles.widgetCard, 
-                    { 
-                        backgroundColor: isTransparent ? (isWallpaperDark ? 'rgba(26, 44, 62, 0.4)' : 'rgba(255, 255, 255, 0.4)') : (isWidgetDarkMode ? 'rgba(26, 44, 62, 0.85)' : 'rgba(255,255,255,0.9)'),
-                        borderColor: theme.colors.exchangeCardBorder
-                    }
-                ]}>
-                    {/* Widget Header */}
-                    <View style={styles.widgetHeader}>
-                        <View style={styles.widgetTitleRow}>
-                            <Image 
-                                source={require('../assets/images/ic_notification.png')} 
-                                style={[styles.widgetIcon, { tintColor: isWidgetDarkMode ? '#FFF' : '#1A2C3E' }]}
-                            />
-                            <Text style={[styles.widgetTitleText, { color: isWidgetDarkMode ? '#FFF' : '#1A2C3E' }]}>{widgetTitle}</Text>
-                        </View>
-                        <MaterialCommunityIcons name="refresh" size={18} color={isWidgetDarkMode ? "rgba(255,255,255,0.6)" : "rgba(0,0,0,0.4)"} />
-                    </View>
-
-                    {/* Dynamic Rows */}
-                    {widgetItems.slice(0, 4).map((item, index) => {
-                        const isLast = index === widgetItems.length - 1;
-                        return (
-                            <View key={item.id} style={[
-                                isLast ? styles.rateRowNoBorder : styles.rateRow, 
-                                !isLast && { borderBottomColor: isWidgetDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }
-                            ]}>
-                                <View>
-                                    <Text style={[styles.currencyLabel, { color: isWidgetDarkMode ? '#8D99AE' : '#64748B' }]}>{item.label}</Text>
-                                    <Text style={[styles.rateValue, { color: isWidgetDarkMode ? '#FFF' : '#0F172A' }]}>
-                                        {item.value} <Text style={{ fontSize: 12, fontWeight: 'normal', color: isWidgetDarkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)' }}>{item.currency}</Text>
-                                    </Text>
-                                </View>
-                                <View style={[styles.trendBadge, { backgroundColor: item.trendBg }]}>
-                                    <MaterialCommunityIcons 
-                                        name={item.trend === 'up' ? "trending-up" : item.trend === 'down' ? "trending-down" : "minus"} 
-                                        size={14} 
-                                        color={item.trendColor} 
-                                    />
-                                    {showGraph && <Text style={[styles.trendText, { color: item.trendColor }]}>{item.trendValue}</Text>}
-                                </View>
-                            </View>
-                        );
-                    })}
-
-                    {/* Footer */}
-                    <View style={styles.widgetFooter}>
-                        <Text style={{ color: isWidgetDarkMode ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)', fontSize: 10, fontWeight: '500' }}>Actualizado 10:42 AM</Text>
-                        <MaterialCommunityIcons name="lightning-bolt" size={12} color={isWidgetDarkMode ? "rgba(255,255,255,0.4)" : "rgba(0,0,0,0.4)"} />
-                    </View>
-                </View>
-
-                {/* App Icons Simulation */}
-                <View style={styles.dock}>
-                    {[1, 2, 3, 4].map((_, i) => (
-                        <View key={i} style={styles.appIconWrapper}>
-                            <View style={[styles.appIcon, { backgroundColor: i === 1 ? '#0e4981' : '#334155' }]} />
-                        </View>
-                    ))}
-                </View>
-            </LinearGradient>
-        </View>
+        <WidgetPreview 
+            items={widgetItems}
+            widgetTitle={widgetTitle}
+            isWallpaperDark={isWallpaperDark}
+            isTransparent={isTransparent}
+            isWidgetDarkMode={isWidgetDarkMode}
+            showGraph={showGraph}
+        />
 
         {/* Customization Section */}
         <View style={styles.section}>
@@ -277,8 +200,8 @@ const WidgetsScreen = () => {
                 {/* Currency Header */}
                 <View style={styles.prefRow}>
                      <View style={styles.prefLeft}>
-                        <View style={[styles.iconBox, { backgroundColor: theme.colors.secondaryContainer }]}>
-                            <MaterialIcons name="attach-money" size={20} color={theme.colors.onSecondaryContainer} />
+                        <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
+                            <MaterialIcons name="attach-money" size={20} color={theme.colors.onSurfaceVariant} />
                         </View>
                         <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Divisas ({selectedRates.length})</Text>
                      </View>
@@ -288,22 +211,40 @@ const WidgetsScreen = () => {
                 </View>
 
                 {/* Currency List */}
-                {selectedRates.map((rate, index) => (
-                    <React.Fragment key={rate.id}>
-                         <View style={[styles.separator, { backgroundColor: theme.colors.outline }]} />
-                         <View style={[styles.prefRow, { paddingVertical: 8 }]}>
-                            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                                 {/* Use MaterialIcons for rate.iconName */}
-                                 <MaterialIcons name={rate.iconName || 'attach-money'} size={24} color={theme.colors.onSurfaceVariant} />
-                                 <Text variant="bodyMedium" numberOfLines={1} style={{ flex: 1, color: theme.colors.onSurface }}>{rate.name}</Text>
+                {selectedRates.map((rate, index) => {
+                    let iconElement;
+                    if (rate.code === 'USDT') {
+                        iconElement = (
+                            <View style={{ width: 24, height: 24, borderRadius: 12, overflow: 'hidden' }}>
+                                <TetherIcon backgroundColor={theme.colors.secondaryContainer} contentColor={theme.colors.onSecondaryContainer} />
                             </View>
-                            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                                <IconButton icon="arrow-up" size={20} disabled={index === 0} onPress={() => moveRate(index, 'up')} />
-                                <IconButton icon="arrow-down" size={20} disabled={index === selectedRates.length - 1} onPress={() => moveRate(index, 'down')} />
+                        );
+                    } else if (rate.type === 'crypto') {
+                        iconElement = (
+                            <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: '#F7931A', alignItems: 'center', justifyContent: 'center' }}>
+                                <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 14 }}>₿</Text>
                             </View>
-                         </View>
-                    </React.Fragment>
-                ))}
+                        );
+                    } else {
+                        iconElement = <MaterialIcons name={rate.iconName || 'attach-money'} size={24} color={theme.colors.onSurfaceVariant} />;
+                    }
+
+                    return (
+                        <React.Fragment key={rate.id}>
+                             <View style={[styles.separator, { backgroundColor: theme.colors.outline }]} />
+                             <View style={[styles.prefRow, { paddingVertical: 8 }]}>
+                                <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                                     {iconElement}
+                                     <Text variant="bodyMedium" numberOfLines={1} style={{ flex: 1, color: theme.colors.onSurface }}>{rate.name}</Text>
+                                </View>
+                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                    <IconButton icon="arrow-up" size={20} disabled={index === 0} onPress={() => moveRate(index, 'up')} />
+                                    <IconButton icon="arrow-down" size={20} disabled={index === selectedRates.length - 1} onPress={() => moveRate(index, 'down')} />
+                                </View>
+                             </View>
+                        </React.Fragment>
+                    );
+                })}
                 
                 {selectedRates.length === 0 && (
                      <Text style={{ textAlign: 'center', color: theme.colors.error, padding: 16 }}>Selecciona al menos una divisa</Text>
@@ -317,8 +258,8 @@ const WidgetsScreen = () => {
                  {/* Wallpaper */}
                  <View style={styles.prefRow}>
                     <View style={styles.prefLeft}>
-                        <View style={[styles.iconBox, { backgroundColor: theme.colors.primaryContainer }]}>
-                             <MaterialIcons name="wallpaper" size={20} color={theme.colors.onPrimaryContainer} />
+                        <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
+                             <MaterialIcons name="wallpaper" size={20} color={theme.colors.onSurfaceVariant} />
                         </View>
                         <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Fondo de Pantalla Oscuro</Text>
                     </View>
@@ -335,8 +276,8 @@ const WidgetsScreen = () => {
                  {/* Transparent */}
                  <View style={styles.prefRow}>
                     <View style={styles.prefLeft}>
-                        <View style={[styles.iconBox, { backgroundColor: theme.colors.secondaryContainer }]}>
-                             <MaterialIcons name="opacity" size={20} color={theme.colors.onSecondaryContainer} />
+                        <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
+                             <MaterialIcons name="opacity" size={20} color={theme.colors.onSurfaceVariant} />
                         </View>
                         <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Fondo Transparente</Text>
                     </View>
@@ -353,8 +294,8 @@ const WidgetsScreen = () => {
                  {/* Graph */}
                  <View style={styles.prefRow}>
                     <View style={styles.prefLeft}>
-                        <View style={[styles.iconBox, { backgroundColor: theme.colors.tertiaryContainer }]}>
-                             <MaterialIcons name="show-chart" size={20} color={theme.colors.onTertiaryContainer} />
+                        <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
+                             <MaterialIcons name="show-chart" size={20} color={theme.colors.onSurfaceVariant} />
                         </View>
                         <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Mostrar Porcentaje</Text>
                     </View>
@@ -371,8 +312,8 @@ const WidgetsScreen = () => {
                  {/* Dark Mode */}
                  <View style={styles.prefRow}>
                     <View style={styles.prefLeft}>
-                        <View style={[styles.iconBox, { backgroundColor: theme.colors.errorContainer }]}>
-                             <MaterialIcons name="brightness-6" size={20} color={theme.colors.onErrorContainer} />
+                        <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
+                             <MaterialIcons name="brightness-6" size={20} color={theme.colors.onSurfaceVariant} />
                         </View>
                         <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Widget Modo Oscuro</Text>
                     </View>
