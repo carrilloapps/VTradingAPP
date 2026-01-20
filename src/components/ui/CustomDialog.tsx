@@ -10,6 +10,8 @@ interface CustomDialogProps {
   confirmLabel?: string;
   cancelLabel?: string;
   isDestructive?: boolean;
+  showCancel?: boolean;
+  actions?: React.ReactNode;
 }
 
 const CustomDialog: React.FC<CustomDialogProps> = ({
@@ -21,6 +23,8 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
   confirmLabel = 'Aceptar',
   cancelLabel = 'Cancelar',
   isDestructive = false,
+  showCancel = true,
+  actions,
 }) => {
   const theme = useTheme();
 
@@ -59,14 +63,17 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
             {content}
           </Text>
         </Dialog.Content>
-        <Dialog.Actions style={{ justifyContent: 'space-around', paddingBottom: 16 }}>
-          <Button 
-            mode="text" 
-            onPress={onDismiss} 
-            textColor={theme.colors.onSurfaceVariant}
-          >
-            {cancelLabel}
-          </Button>
+        <Dialog.Actions style={{ justifyContent: 'space-around', paddingBottom: 16, flexWrap: 'wrap' }}>
+          {showCancel && (
+            <Button 
+              mode="text" 
+              onPress={onDismiss} 
+              textColor={theme.colors.onSurfaceVariant}
+            >
+              {cancelLabel}
+            </Button>
+          )}
+          {actions}
           <Button 
             mode="contained" 
             onPress={onConfirm} 

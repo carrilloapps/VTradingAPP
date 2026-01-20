@@ -54,3 +54,29 @@ La pantalla principal implementa:
 *   **Búsqueda:** Filtrado en tiempo real por título/mensaje.
 
 Esta pantalla está registrada en el `RootStack` (modal) y no en el `MainTabNavigator` para permitir superposición sobre la interfaz principal.
+
+## NotificationDetailModal
+
+Modal de detalle para visualizar el contenido completo de una notificación.
+
+### Estándares de Diseño (Coherencia con AddAlertDialog)
+Este componente sigue estrictamente los lineamientos visuales de `AddAlertDialog` para garantizar consistencia entre diálogos y modales.
+
+*   **Animación:** `slide-down` (Despliegue desde arriba) usando `Animated.View`.
+*   **Contenedor de Datos:**
+    *   Para mostrar pares Clave-Valor (ej. Divisa - Precio), se utiliza un contenedor con fondo `theme.colors.surfaceVariant`.
+    *   Bordes redondeados (12px) para coincidir con los Inputs de formularios.
+*   **Botones de Acción:**
+    *   **Archivar:** Estilo `outlined` con `borderColor: theme.colors.primary` y texto `primary`.
+    *   **Eliminar:** Estilo `contained` con color de error/advertencia si aplica, o secundario.
+*   **Indicador Superior:** Barra pequeña (`drag handle`) en la parte superior para indicar que es deslizable/modal.
+
+### Props
+
+| Prop | Tipo | Descripción |
+|---|---|---|
+| `visible` | `boolean` | Controla la visibilidad. |
+| `notification` | `Notification` | Objeto de notificación a mostrar. |
+| `onDismiss` | `() => void` | Callback al cerrar el modal. |
+| `onDelete` | `(id: string) => void` | Acción de eliminar. |
+| `onArchive` | `(id: string) => void` | Acción de archivar. |

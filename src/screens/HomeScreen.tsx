@@ -224,7 +224,7 @@ const HomeScreen = () => {
             <Text variant="headlineSmall" style={[styles.titleMedium, themeStyles.sectionTitle]}>
               Mercado Bursátil
             </Text>
-            <TouchableOpacity onPress={() => showToast('Ver todo', 'info')}>
+            <TouchableOpacity onPress={() => navigation.navigate('Stocks')}>
                 <Text variant="labelLarge" style={[styles.linkText, themeStyles.linkText]}>VER TODO</Text>
             </TouchableOpacity>
           </View>

@@ -70,7 +70,7 @@ const lightColors = {
   onSurfaceVariant: '#404944',
   outline: '#CFD6D2', // Even subtler for light mode
   outlineVariant: '#E0E6E2', // Very light for decorative borders
-  buttonBorder: '#747C78', // Stronger contrast for buttons
+  buttonBorder: '#5F6964', // Stronger contrast for buttons (Darker Grey)
   shadow: '#000000',
   scrim: '#000000',
   inverseSurface: '#2E312F',
@@ -109,9 +109,9 @@ const darkColors = {
   onSurface: '#E1E3DF',
   surfaceVariant: '#404944',
   onSurfaceVariant: '#BFC9C2',
-  outline: '#2F3633', // Slightly more visible/lighter than #262A28
+  outline: '#2A302D', // Subtle border for dark mode (Was #2F3633)
   outlineVariant: '#1F2321', // Almost blends with background
-  buttonBorder: '#8E9692', // Stronger contrast for buttons
+  buttonBorder: '#B3BEB9', // Much lighter for buttons in Dark Mode (High Contrast)
   shadow: '#000000',
   scrim: '#000000',
   inverseSurface: '#E1E3DF',
@@ -161,7 +161,7 @@ export const LightTheme: AppTheme = {
     
     skeleton: '#E1E9EE',
     skeletonHighlight: '#F2F8FC',
-    buttonBorder: '#747C78',
+    buttonBorder: '#5F6964',
   },
   spacing,
 };
@@ -193,7 +193,7 @@ export const DarkTheme: AppTheme = {
     
     skeleton: '#2C312E', // Matches elevation level 4
     skeletonHighlight: '#303532', // Matches elevation level 5
-    buttonBorder: '#8E9692',
+    buttonBorder: '#B3BEB9',
   },
   spacing,
 };

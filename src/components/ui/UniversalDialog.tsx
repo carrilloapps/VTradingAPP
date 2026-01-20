@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Modal as RNModal, TouchableOpacity, TouchableWithoutFeedback, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, StyleSheet, Modal as RNModal, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native';
 import { Text, IconButton, Surface } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '../../theme/theme';
@@ -77,7 +77,8 @@ const UniversalDialog: React.FC<UniversalDialogProps> = ({
                       styles.closeButton, 
                       { 
                         backgroundColor: theme.colors.surfaceVariant, // or white/5 equivalent
-                        borderColor: theme.colors.buttonBorder 
+                        borderColor: theme.colors.outline,
+                        borderWidth: 1,
                       }
                     ]}
                   >

@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   avatarWrapper: {
-    borderRadius: 32,
+    borderRadius: "100%", // (64 Avatar + 2*2 Padding) / 2
     borderWidth: 2,
     padding: 2, // Optional: gap between border and avatar
   },

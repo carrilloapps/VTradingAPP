@@ -132,12 +132,12 @@ const NotificationDetailModal: React.FC<NotificationDetailModalProps> = ({
                   { 
                       backgroundColor: 'transparent', 
                       borderWidth: 1, 
-                      borderColor: theme.colors.buttonBorder 
+                      borderColor: theme.colors.primary 
                   }
               ]}
               activeOpacity={0.8}
             >
-              <Text style={[styles.actionButtonText, { color: theme.colors.onSurface }]}>ARCHIVAR</Text>
+              <Text style={[styles.actionButtonText, { color: theme.colors.primary }]}>ARCHIVAR</Text>
             </TouchableOpacity>
             
             <TouchableOpacity 

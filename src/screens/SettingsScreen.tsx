@@ -33,6 +33,7 @@ const SettingsScreen = () => {
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [showAboutDialog, setShowAboutDialog] = useState(false);
   const [showSecurityDialog, setShowSecurityDialog] = useState(false);
   const [showEditProfileDialog, setShowEditProfileDialog] = useState(false);
   const [showAddAlertDialog, setShowAddAlertDialog] = useState(false);
@@ -231,6 +232,8 @@ const SettingsScreen = () => {
       <UnifiedHeader
         variant="section"
         title="Configuración"
+        rightActionIcon="info-outline"
+        onActionPress={() => setShowAboutDialog(true)}
       />
 
       <ScrollView 
@@ -419,6 +422,21 @@ const SettingsScreen = () => {
         visible={showAddAlertDialog}
         onDismiss={() => setShowAddAlertDialog(false)}
         onSave={saveNewAlert}
+      />
+
+      <CustomDialog
+        visible={showAboutDialog}
+        onDismiss={() => setShowAboutDialog(false)}
+        title="Acerca de VTradingAPP"
+        content={`${appName}\nVersión: ${appVersion} (${buildNumber})\n\nDiseñado para el seguimiento financiero en tiempo real.`}
+        onConfirm={() => setShowAboutDialog(false)}
+          confirmLabel="Cerrar"
+          showCancel={false}
+          actions={
+              <Button mode="text" onPress={() => handleAction('Política de Privacidad no disponible')}>
+                Política de Privacidad
+            </Button>
+        }
       />
     </View>
   );

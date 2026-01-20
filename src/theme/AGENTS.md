@@ -41,8 +41,10 @@ Para garantizar la consistencia visual y la mantenibilidad del código, se estab
     *   `shadowOpacity: 0` (iOS)
     *   `borderWidth: 1`
     *   `borderColor: theme.colors.outline` (Color "Material Level" sutil)
+    *   **Nota sobre Colores de Borde:** Se ha ajustado `theme.colors.outline` y `outlineVariant` para ser más sutiles y reducir el contraste visual duro, mejorando la estética general ("Clean UI").
     *   `backgroundColor`:
         *   Cards/Inputs: `theme.colors.elevation.level1` (o `surface`)
+        *   **Inputs de Formulario (Dialogs):** `theme.colors.surfaceVariant` para diferenciar del fondo del diálogo.
         *   Dialogs/Modals: `theme.colors.elevation.level3`
 *   **Prohibido:** El uso de sombras (`elevation` > 0) para denotar profundidad. La profundidad se denota exclusivamente mediante bordes y niveles de color de superficie.
 *   **Excepción:** Botones flotantes (FAB) pueden mantener elevación si es crítico para la UX, pero deben evaluarse caso por caso.
@@ -53,6 +55,8 @@ Para garantizar la consistencia visual y la mantenibilidad del código, se estab
     *   **Razón:** En modo oscuro, `primary` puede ser un color pastel claro (para reducir fatiga visual), mientras que en modo claro es oscuro. `onPrimary` cambia dinámicamente (Negro/Blanco) para garantizar la legibilidad en ambos casos.
     *   ❌ Incorrecto: `color: 'white'` (Falla en modo oscuro si primary es claro).
     *   ✅ Correcto: `color: theme.colors.onPrimary`.
+*   **Botones con Borde (Outlined Buttons):**
+    *   Deben usar `borderColor: theme.colors.primary` y `textColor={theme.colors.primary}` para denotar interactividad clara. Evitar bordes grises para acciones principales o secundarias importantes.
 
 ### 7. Sistema de Espaciado (Spacing)
 *   **Centralización:** Todo espaciado (padding, margin, gap) que no sea estructural (flex: 1) debe utilizar las variables definidas en `theme.spacing`.

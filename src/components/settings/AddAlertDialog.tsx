@@ -158,10 +158,10 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
         <View style={styles.actionButtonsContainer}>
           <TouchableOpacity 
             onPress={onDismiss} 
-            style={[styles.actionButton, { backgroundColor: 'transparent', borderWidth: 1, borderColor: theme.colors.outline }]}
+            style={[styles.actionButton, { backgroundColor: 'transparent', borderWidth: 1, borderColor: theme.colors.primary }]}
             activeOpacity={0.8}
           >
-            <Text style={[styles.actionButtonText, { color: theme.colors.onSurface }]}>CANCELAR</Text>
+            <Text style={[styles.actionButtonText, { color: theme.colors.primary }]}>CANCELAR</Text>
           </TouchableOpacity>
           
           <TouchableOpacity 
