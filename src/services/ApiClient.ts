@@ -53,9 +53,17 @@ class ApiClient {
     }
 
     // 2. Setup Performance Monitoring
-    const perf = getPerformance();
-    const metric = httpMetric(perf, url, 'GET');
-    await metric.start();
+    let metric: FirebasePerformanceTypes.HttpMetric | null = null;
+    try {
+      const perf = getPerformance();
+      if (!perf.dataCollectionEnabled) {
+          await perf.setPerformanceCollectionEnabled(true);
+      }
+      metric = httpMetric(perf, url, 'GET');
+      await metric.start();
+    } catch (e) {
+      console.warn('[ApiClient] Perf monitor failed', e);
+    }
 
     // 3. Setup Headers
     const token = await appCheckService.getToken();
@@ -78,13 +86,18 @@ class ApiClient {
       });
 
       // 5. Record Performance Data
-      metric.setHttpResponseCode(response.status);
-      const contentType = response.headers.get('Content-Type');
-      if (contentType) metric.setResponseContentType(contentType);
-      const contentLength = response.headers.get('Content-Length');
-      if (contentLength) metric.setResponsePayloadSize(parseInt(contentLength, 10));
-
-      await metric.stop();
+      if (metric) {
+        try {
+          metric.setHttpResponseCode(response.status);
+          const contentType = response.headers.get('Content-Type');
+          if (contentType) metric.setResponseContentType(contentType);
+          const contentLength = response.headers.get('Content-Length');
+          if (contentLength) metric.setResponsePayloadSize(parseInt(contentLength, 10));
+          await metric.stop();
+        } catch (e) {
+            console.warn('[ApiClient] Perf metric stop failed', e);
+        }
+      }
 
       if (!response.ok) {
         throw new Error(`API Error: ${response.status}`);
@@ -108,7 +121,9 @@ class ApiClient {
 
       return data;
     } catch (error: any) {
-      await metric.stop();
+      if (metric) {
+          try { await metric.stop(); } catch {}
+      }
       console.error(`[ApiClient] Error fetching ${url}:`, error);
       
       // Return stale cache if available on network error

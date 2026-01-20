@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Image, Text } from 'react-native';
+import { View, StyleSheet, Text } from 'react-native';
 import { WidgetItem } from './types';
 
 interface VTradingWidgetProps {
@@ -32,33 +32,43 @@ const VTradingWidget: React.FC<VTradingWidgetProps> = ({
   };
 
   const backgroundColor = getBackgroundColor();
-  const textColor = isWidgetDarkMode ? '#FFFFFF' : '#1A2C3E';
-  const subTextColor = isWidgetDarkMode ? 'rgba(255, 255, 255, 0.7)' : '#64748B';
-  const dividerColor = isWidgetDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
+      const textColor = isWidgetDarkMode ? '#FFFFFF' : '#1A2C3E';
+      const subTextColor = isWidgetDarkMode ? 'rgba(255, 255, 255, 0.7)' : '#64748B';
+      const dividerColor = isWidgetDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
 
-  return (
-    <View style={[styles.container, { backgroundColor }]}>
-      {/* Header */}
-      <View style={styles.header}>
+      return (
+        <View 
+          style={[styles.container, { backgroundColor }]}
+          {...({ clickAction: "OPEN_APP" } as any)}
+        >
+          {/* Header */}
+          <View style={styles.header}>
         <View style={styles.titleRow}>
-           {/* Logo - using require directly */}
-           {/* Note: TintColor might not be fully supported on all Image types in widgets, but usually works */}
-           <Image 
-             source={require('../assets/images/logo.png')} 
-             style={{ width: 30, height: 15, tintColor: isWidgetDarkMode ? '#00A86B' : '#1A2C3E' }}
-             resizeMode="contain"
-           />
+           {/* Fallback to Text if Image fails in Headless mode */}
+           <Text style={{ 
+             fontSize: 16, 
+             fontWeight: '900', 
+             color: isWidgetDarkMode ? '#00A86B' : '#1A2C3E',
+             marginRight: 4
+           }}>V</Text>
            <Text style={{ 
                fontSize: 14, 
                fontWeight: 'bold', 
                color: textColor, 
-               marginLeft: 8 
+               marginLeft: 4 
            }}>
              {widgetTitle}
            </Text>
         </View>
         <Text style={{ fontSize: 18, color: subTextColor }}>↻</Text>
       </View>
+
+      {/* Empty State */}
+      {items.length === 0 && (
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+              <Text style={{ color: subTextColor, fontSize: 12 }}>Sin datos</Text>
+          </View>
+      )}
 
       {/* Items */}
       {items.slice(0, 4).map((item, index) => (
@@ -105,7 +115,8 @@ const VTradingWidget: React.FC<VTradingWidgetProps> = ({
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    height: '100%',
+    width: '100%',
     padding: 16,
     borderRadius: 22,
     borderWidth: 1,
