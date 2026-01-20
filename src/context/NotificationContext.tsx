@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { AppState, AppStateStatus } from 'react-native';
 import { storageService, StoredNotification } from '../services/StorageService';
 import { fcmService } from '../services/firebase/FCMService';
 import { navigationRef } from '../navigation/NavigationRef';
@@ -131,19 +130,51 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
         // Prioritize data title if notification title is generic "Notificación" or missing
         let finalTitle = notifTitle || dataTitle || 'Notificación';
-        if (finalTitle === 'Notificación' && dataTitle) {
-            finalTitle = dataTitle;
+        let finalBody = notifBody || dataBody || '';
+
+        // Special handling for Price Alerts (symbol + price in data)
+        let highlightedVal = undefined;
+        let trendVal: 'up' | 'down' | undefined = undefined;
+        
+        if (remoteMessage.data?.symbol && remoteMessage.data?.price) {
+           const symbol = remoteMessage.data.symbol;
+           const price = remoteMessage.data.price;
+           highlightedVal = `${price}`; // e.g. "36.24"
+           
+           // If title is generic, make it specific
+           if (finalTitle === 'Notificación') {
+             finalTitle = `Alerta de Precio: ${symbol}`;
+           }
+           
+           // If body is empty, construct it
+           if (!finalBody) {
+             finalBody = `La tasa oficial ha subido a ${price} Bs.`;
+           }
+           
+           // Try to determine trend from body or data if available
+           if (remoteMessage.data?.trend) {
+              trendVal = remoteMessage.data.trend as 'up' | 'down';
+           } else {
+              // Infer from keywords if missing
+              const textContent = (finalTitle + ' ' + finalBody).toLowerCase();
+              if (textContent.includes('baja') || textContent.includes('down') || textContent.includes('cae') || textContent.includes('disminuye')) {
+                trendVal = 'down';
+              } else {
+                trendVal = 'up'; // Default to up if no negative keywords found
+              }
+           }
         }
 
         const newNotif: StoredNotification = {
           id: remoteMessage.messageId || Date.now().toString(),
-          type: (remoteMessage.data?.type as any) || 'system',
+          type: (remoteMessage.data?.type as any) || (remoteMessage.data?.symbol ? 'price_alert' : 'system'),
           title: finalTitle,
-          message: notifBody || dataBody || '',
+          message: finalBody,
           timestamp: new Date().toISOString(),
           isRead: false,
-          trend: (remoteMessage.data?.trend as any),
-          data: remoteMessage.data
+          trend: trendVal,
+          highlightedValue: highlightedVal,
+          data: remoteMessage.data,
         };
         addNotification(newNotif);
       }

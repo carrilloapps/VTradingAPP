@@ -17,6 +17,7 @@ export interface NotificationData {
   isArchived?: boolean;
   trend?: 'up' | 'down';
   highlightedValue?: string; // e.g., "36.24 Bs"
+  data?: any;
 }
 
 interface NotificationCardProps {
@@ -28,6 +29,8 @@ interface NotificationCardProps {
 
 import { formatTimeAgo } from '../../utils/dateUtils';
 
+import NotificationIcon, { getNotificationIconConfig } from './NotificationIcon';
+
 const NotificationCard: React.FC<NotificationCardProps> = ({
   notification,
   onPress,
@@ -35,55 +38,11 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
   onDelete,
 }) => {
   const theme = useAppTheme();
-
-  // Icon Logic
-  const getIconConfig = () => {
-    // Map generic 'Notificación' title or incomplete types to better visuals if possible
-    // This handles the case where data might be sparse
-    const effectiveType = notification.type || 'system';
-    
-    switch (effectiveType) {
-      case 'price_alert':
-        return {
-          name: 'payments',
-          color: notification.trend === 'up' ? theme.colors.success : theme.colors.error,
-          bgColor: notification.trend === 'up' ? theme.colors.successContainer : theme.colors.errorContainer,
-          badge: notification.trend === 'up' ? 'trending-up' : 'trending-down',
-        };
-      case 'market_news':
-        return {
-          name: 'show-chart',
-          color: theme.colors.primary,
-          bgColor: theme.colors.primaryContainer,
-          badge: null,
-        };
-      case 'system':
-      default:
-        // Try to infer from title if type is generic
-        if (notification.title.toLowerCase().includes('dolar') || notification.title.toLowerCase().includes('bs')) {
-             return {
-                name: 'attach-money',
-                color: theme.colors.secondary,
-                bgColor: theme.colors.secondaryContainer,
-                badge: null,
-             };
-        }
-        return {
-          name: 'notifications',
-          color: theme.colors.onSurfaceVariant,
-          bgColor: theme.colors.surfaceVariant,
-          badge: null,
-        };
-    }
-  };
-
-  const iconConfig = getIconConfig();
+  const iconConfig = getNotificationIconConfig(notification, theme);
   const formattedTime = formatTimeAgo(notification.timestamp);
   
   // Use fallback title if current title is generic "Notificación"
-  // Cast iconConfig to any to access custom properties if they are not in the inferred type
-  const fallbackTitle = (iconConfig as any).fallbackTitle || 'Notificación';
-  const displayTitle = notification.title === 'Notificación' ? fallbackTitle : notification.title;
+  const displayTitle = notification.title === 'Notificación' ? iconConfig.fallbackTitle : notification.title;
 
   const renderRightActions = (
     progress: Animated.AnimatedInterpolation<number>,
@@ -123,6 +82,41 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
     );
   };
 
+  // Render message with bold highlighted parts
+  const renderMessage = () => {
+    if (!notification.highlightedValue) {
+      return (
+        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }} numberOfLines={3}>
+          {notification.message}
+        </Text>
+      );
+    }
+
+    const parts = notification.message.split(notification.highlightedValue);
+    if (parts.length < 2) {
+       return (
+        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }} numberOfLines={3}>
+          {notification.message}
+        </Text>
+      );
+    }
+
+    return (
+      <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }} numberOfLines={3}>
+        {parts.map((part, index) => (
+          <React.Fragment key={index}>
+            {part}
+            {index < parts.length - 1 && (
+              <Text style={{ fontWeight: 'bold', color: theme.colors.onSurface }}>
+                {notification.highlightedValue}
+              </Text>
+            )}
+          </React.Fragment>
+        ))}
+      </Text>
+    );
+  };
+
   return (
     <Swipeable
       renderRightActions={renderRightActions}
@@ -145,27 +139,12 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
       >
         <View style={styles.contentContainer}>
           {/* Icon Section */}
-          <View style={[styles.iconContainer, { backgroundColor: iconConfig.bgColor }]}>
-            <MaterialIcons name={iconConfig.name} size={24} color={iconConfig.color} />
-            {iconConfig.badge && (
-              <View
-                style={[
-                  styles.badge,
-                  {
-                    backgroundColor: iconConfig.color,
-                    borderColor: theme.colors.elevation.level1,
-                  },
-                ]}
-              >
-                <MaterialIcons name={iconConfig.badge} size={12} color={theme.colors.surface} />
-              </View>
-            )}
-          </View>
+          <NotificationIcon notification={notification} />
 
           {/* Text Section */}
           <View style={styles.textContainer}>
             <View style={styles.headerRow}>
-              <Text variant="labelLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
+              <Text variant="labelLarge" style={{ color: theme.colors.onSurface, fontWeight: '700', flex: 1, marginRight: 8 }} numberOfLines={2}>
                 {displayTitle}
               </Text>
               <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
@@ -173,15 +152,13 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
               </Text>
             </View>
 
-            <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }}>
-              {notification.message}
-            </Text>
+            {renderMessage()}
 
             {/* Swipe Hint */}
             <View style={styles.swipeHint}>
-              <MaterialIcons name="swipe" size={12} color={theme.colors.onSurfaceVariant} />
-              <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, marginLeft: 4, textTransform: 'uppercase', fontSize: 10 }}>
-                DESLIZA: IZQ ARCHIVAR / DER BORRAR
+              <MaterialIcons name="touch-app" size={12} color={theme.colors.onSurfaceVariant} />
+              <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, marginLeft: 4, textTransform: 'uppercase', fontSize: 10, fontWeight: 'bold' }}>
+                DESLIZA: ARCHIVAR / BORRAR
               </Text>
             </View>
           </View>
@@ -202,22 +179,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 16,
     gap: 16,
-  },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  badge: {
-    position: 'absolute',
-    bottom: -4,
-    right: -4,
-    padding: 2,
-    borderRadius: 10,
-    borderWidth: 2,
   },
   textContainer: {
     flex: 1,

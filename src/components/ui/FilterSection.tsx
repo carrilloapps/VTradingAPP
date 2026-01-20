@@ -1,11 +1,14 @@
 import React from 'react';
 import { ScrollView, View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { Chip } from 'react-native-paper';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useAppTheme } from '../../theme/useAppTheme';
 
 export interface FilterOption {
   label: string;
   value: string;
+  icon?: string;
+  color?: string;
 }
 
 interface FilterSectionProps {
@@ -36,6 +39,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({
       <Chip
         key={option.value}
         selected={isSelected}
+        icon={option.icon ? ({ size, color }) => (
+          <MaterialIcons name={option.icon!} size={size} color={color} />
+        ) : undefined}
         onPress={() => {
           // Optional: Add animation on selection if desired
           onSelect(option.value);
@@ -43,13 +49,13 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         style={[
           styles.chip,
           isSelected 
-            ? [styles.chipSelected, { backgroundColor: theme.colors.primary }] 
+            ? [styles.chipSelected, { backgroundColor: option.color || theme.colors.primary }] 
             : [styles.chipUnselected, { borderColor: theme.colors.outline }]
         ]}
         textStyle={
           isSelected 
             ? [styles.chipTextSelected, { color: theme.colors.onPrimary }]
-            : [styles.chipTextUnselected, { color: theme.colors.onSurfaceVariant }]
+            : [styles.chipTextUnselected, { color: option.color || theme.colors.onSurfaceVariant }]
         }
         selectedColor={theme.colors.onPrimary}
         showSelectedOverlay={true}

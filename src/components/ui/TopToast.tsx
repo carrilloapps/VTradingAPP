@@ -83,10 +83,10 @@ const TopToast: React.FC<TopToastProps> = ({
         return { bg: themeColors.errorContainer, border: themeColors.error, icon: themeColors.error };
       case 'alert':
       case 'warning':
-        return { bg: theme.colors.surfaceVariant, border: themeColors.warning, icon: themeColors.warning };
+        return { bg: theme.colors.elevation.level3, border: themeColors.warning, icon: themeColors.warning };
       case 'info':
       default:
-        return { bg: themeColors.infoContainer || theme.colors.elevation.level3, border: themeColors.info || theme.colors.primary, icon: themeColors.info || theme.colors.primary };
+        return { bg: theme.colors.elevation.level3, border: themeColors.info || theme.colors.primary, icon: themeColors.info || theme.colors.primary };
     }
   };
 

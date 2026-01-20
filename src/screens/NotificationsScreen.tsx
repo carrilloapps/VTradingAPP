@@ -12,6 +12,7 @@ import { useAppTheme } from '../theme/useAppTheme';
 import SearchBar from '../components/ui/SearchBar';
 import FilterSection, { FilterOption } from '../components/ui/FilterSection';
 import NotificationCard, { NotificationData } from '../components/notifications/NotificationCard';
+import NotificationDetailModal from '../components/notifications/NotificationDetailModal';
 import NotificationsSkeleton from '../components/notifications/NotificationsSkeleton';
 import { useNotifications } from '../context/NotificationContext';
 
@@ -21,13 +22,6 @@ if (Platform.OS === 'android') {
   }
 }
 
-const FILTER_OPTIONS: FilterOption[] = [
-  { label: 'Todas', value: 'all' },
-  { label: 'Tasas', value: 'price_alert' },
-  { label: 'Acciones', value: 'market_news' },
-  { label: 'Generales', value: 'system' },
-];
-
 const NotificationsScreen: React.FC = () => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
@@ -35,11 +29,20 @@ const NotificationsScreen: React.FC = () => {
   const { notifications, markAsRead, markAllAsRead, deleteNotification, archiveNotification, isLoading } = useNotifications();
   const pagerRef = useRef<PagerView>(null);
 
+  // Filter Options with Theme Colors
+  const FILTER_OPTIONS: FilterOption[] = [
+    { label: 'Todas', value: 'all', icon: 'filter-list' },
+    { label: 'Tasas', value: 'price_alert', icon: 'payments', color: theme.colors.tertiary },
+    { label: 'Acciones', value: 'market_news', icon: 'show-chart', color: theme.colors.primary },
+    { label: 'Generales', value: 'system', icon: 'build', color: theme.colors.warning },
+  ];
+
   // State
   const [activeTab, setActiveTab] = useState<'unread' | 'read' | 'archived'>('unread');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState<NotificationData | null>(null);
 
   // Filter Logic Helper
   const filterNotifications = (items: NotificationData[]) => {
@@ -81,9 +84,17 @@ const NotificationsScreen: React.FC = () => {
   };
 
   const handleNotificationPress = (id: string) => {
-    markAsRead(id);
-    // Future: Navigate to specific detail based on type
-    // e.g., if (type === 'price_alert') navigation.navigate('Details', { ... })
+    const notification = notifications.find(n => n.id === id);
+    if (notification) {
+      setSelectedNotification(notification);
+    }
+  };
+
+  const handleModalDismiss = () => {
+    if (selectedNotification && !selectedNotification.isRead) {
+      markAsRead(selectedNotification.id);
+    }
+    setSelectedNotification(null);
   };
 
   const handlePageSelected = (e: any) => {
@@ -300,6 +311,14 @@ const NotificationsScreen: React.FC = () => {
           </View>
         </PagerView>
       </View>
+
+      <NotificationDetailModal 
+        visible={!!selectedNotification}
+        notification={selectedNotification}
+        onDismiss={handleModalDismiss}
+        onArchive={handleArchive}
+        onDelete={handleDelete}
+      />
     </View>
   );
 };

@@ -6,7 +6,7 @@ export const formatTimeAgo = (dateString: string): string => {
   if (isNaN(diffInSeconds)) return dateString;
 
   if (diffInSeconds < 60) {
-    return 'Hace un momento';
+    return `Hace ${diffInSeconds}s`;
   }
 
   const diffInMinutes = Math.floor(diffInSeconds / 60);
