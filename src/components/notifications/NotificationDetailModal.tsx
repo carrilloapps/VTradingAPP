@@ -1,10 +1,11 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { Text, Button, useTheme } from 'react-native-paper';
+import { Text, useTheme } from 'react-native-paper';
 import { NotificationData } from './NotificationCard';
 import NotificationIcon, { getNotificationIconConfig } from './NotificationIcon';
 import { formatTimeAgo } from '../../utils/dateUtils';
 import { BottomSheetModal } from '../ui/BottomSheetModal';
+import CustomButton from '../ui/CustomButton';
 
 interface NotificationDetailModalProps {
   visible: boolean;
@@ -73,30 +74,25 @@ const NotificationDetailModal: React.FC<NotificationDetailModalProps> = ({
           </View>
         )}
 
-        {/* Actions */}
+        {/* Actions - Standardized with CustomButton */}
         <View style={styles.actionsContainer}>
-          <Button 
-            mode="contained"
+          <CustomButton 
+            variant="outlined" 
+            label="CERRAR"
+            onPress={onDismiss}
+            style={styles.button}
+          />
+          
+          <CustomButton 
+            variant="primary"
+            label="ARCHIVAR"
             onPress={() => {
               onArchive(notification.id);
               onDismiss();
             }}
-            buttonColor={theme.colors.primary}
-            textColor={theme.colors.onPrimary}
-            style={styles.button}
             icon="archive-arrow-down-outline"
-          >
-            ARCHIVAR
-          </Button>
-
-          <Button 
-            mode="outlined" 
-            onPress={onDismiss}
-            textColor={theme.colors.primary}
-            style={[styles.button, { borderColor: theme.colors.primary }]}
-          >
-            CERRAR
-          </Button>
+            style={styles.button}
+          />
         </View>
       </ScrollView>
     </BottomSheetModal>

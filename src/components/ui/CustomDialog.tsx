@@ -1,5 +1,6 @@
 import React from 'react';
-import { Button, Dialog, Portal, Text, useTheme } from 'react-native-paper';
+import { Dialog, Portal, Text, useTheme } from 'react-native-paper';
+import CustomButton, { ButtonVariant } from './CustomButton';
 
 interface CustomDialogProps {
   visible: boolean;
@@ -15,7 +16,7 @@ interface CustomDialogProps {
   children?: React.ReactNode;
   confirmLoading?: boolean;
   confirmDisabled?: boolean;
-  cancelMode?: 'text' | 'outlined' | 'contained';
+  cancelMode?: 'text' | 'outlined' | 'contained'; // Legacy prop mapping
   fullWidthActions?: boolean;
 }
 
@@ -37,6 +38,15 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
   fullWidthActions = false,
 }) => {
   const theme = useTheme();
+
+  // Map legacy cancelMode to CustomButton variant
+  const getCancelVariant = (): ButtonVariant => {
+    switch (cancelMode) {
+      case 'outlined': return 'outlined';
+      case 'contained': return 'secondary'; // Map to secondary for contained cancel
+      default: return 'ghost';
+    }
+  };
 
   return (
     <Portal>
@@ -84,33 +94,22 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
             : { justifyContent: 'space-around', flexWrap: 'wrap' }
         ]}>
           {showCancel && (
-            <Button 
-              mode={cancelMode} 
-              onPress={onDismiss} 
-              textColor={cancelMode === 'outlined' ? theme.colors.primary : theme.colors.onSurfaceVariant}
-              style={[
-                fullWidthActions && { flex: 1 },
-                cancelMode === 'outlined' && { borderColor: theme.colors.primary }
-              ]}
-            >
-              {cancelLabel}
-            </Button>
+            <CustomButton 
+              variant={getCancelVariant()}
+              label={cancelLabel}
+              onPress={onDismiss}
+              style={fullWidthActions ? { flex: 1 } : undefined}
+            />
           )}
           {actions}
-          <Button 
-            mode="contained" 
-            onPress={onConfirm} 
-            buttonColor={isDestructive ? theme.colors.error : theme.colors.primary}
-            textColor={isDestructive ? theme.colors.onError : theme.colors.onPrimary}
-            style={[
-              { paddingHorizontal: 16 },
-              fullWidthActions && { flex: 1 }
-            ]}
+          <CustomButton 
+            variant={isDestructive ? 'destructive' : 'primary'}
+            label={confirmLabel}
+            onPress={onConfirm || (() => {})}
             loading={confirmLoading}
-            disabled={confirmDisabled || confirmLoading}
-          >
-            {confirmLabel}
-          </Button>
+            disabled={confirmDisabled}
+            style={fullWidthActions ? { flex: 1 } : { paddingHorizontal: 16 }}
+          />
         </Dialog.Actions>
       </Dialog>
     </Portal>

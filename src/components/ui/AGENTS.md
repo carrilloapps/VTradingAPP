@@ -2,6 +2,47 @@
 
 Este documento registra los estándares y documentación para los componentes UI globales ubicados en `src/components/ui/`.
 
+## CustomButton (Botón Reutilizable)
+
+Componente centralizado para todos los botones de la aplicación. En lugar de usar `Button` de `react-native-paper` directamente, se debe usar este componente para garantizar consistencia en estilos, bordes y variantes.
+
+### Características
+*   **Variantes Centralizadas:** Mapea estilos visuales a propósitos semánticos (`primary`, `secondary`, `destructive`, etc.).
+*   **Diseño Unificado:** Aplica automáticamente `borderRadius: 12` (Pill Shape) y márgenes estándar.
+*   **Estados:** Maneja automáticamente estados de carga (`loading`) y deshabilitado (`disabled`).
+
+### Props
+| Prop | Tipo | Default | Descripción |
+|---|---|---|---|
+| `label` | `string` | - | Texto del botón. |
+| `onPress` | `() => void` | - | Función a ejecutar al presionar. |
+| `variant` | `'primary' \| 'secondary' \| 'outlined' \| 'ghost' \| 'destructive' \| 'link'` | `'primary'` | Estilo visual del botón. |
+| `icon` | `string` | - | Icono opcional (Material Icons). |
+| `loading` | `boolean` | `false` | Muestra indicador de carga. |
+| `disabled` | `boolean` | `false` | Deshabilita la interacción. |
+| `fullWidth` | `boolean` | `false` | Si el botón ocupa el 100% del ancho. |
+
+### Ejemplo de Uso
+
+```typescript
+import CustomButton from '../ui/CustomButton';
+
+// ...
+
+<CustomButton 
+  variant="primary" 
+  label="GUARDAR" 
+  onPress={handleSave} 
+  loading={isSaving}
+/>
+
+<CustomButton 
+  variant="outlined" 
+  label="CANCELAR" 
+  onPress={handleCancel} 
+/>
+```
+
 ## TopToast (Notificaciones In-App)
 
 `TopToast` es un componente de notificación visual diseñado para aparecer en la parte superior de la pantalla ("Toast Superior"). Se utiliza para alertas críticas, actualizaciones de estado y notificaciones push recibidas mientras la app está en primer plano.
