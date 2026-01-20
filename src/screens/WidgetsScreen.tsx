@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, Switch } from 'react-native';
-import { Text, TextInput, IconButton, Button } from 'react-native-paper';
+import { Text, TextInput, IconButton, Button, SegmentedButtons } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
@@ -58,6 +58,7 @@ const WidgetsScreen = () => {
   const [widgetTitle, setWidgetTitle] = useState(`VTrading • ${APP_VERSION}`);
   // visibleItemCount removed as it should be automatic
   const [isSelectionModalVisible, setIsSelectionModalVisible] = useState(false);
+  const [refreshInterval, setRefreshInterval] = useState<'4' | '2' | '1'>('4');
 
   useEffect(() => {
     loadData();
@@ -77,6 +78,7 @@ const WidgetsScreen = () => {
             setIsTransparent(config.isTransparent);
             setShowGraph(config.showGraph);
             setIsWidgetDarkMode(config.isWidgetDarkMode);
+            setRefreshInterval(config.refreshInterval || '4');
             
             if (config.selectedCurrencyIds && config.selectedCurrencyIds.length > 0) {
                 // Restore selected rates maintaining order
@@ -128,7 +130,8 @@ const WidgetsScreen = () => {
             isWallpaperDark,
             isTransparent,
             showGraph,
-            isWidgetDarkMode
+            isWidgetDarkMode,
+            refreshInterval
         };
         await storageService.saveWidgetConfig(config);
         
@@ -285,6 +288,26 @@ const WidgetsScreen = () => {
                 {selectedRates.length === 0 && (
                      <Text style={{ textAlign: 'center', color: theme.colors.error, padding: 16 }}>Selecciona al menos una divisa</Text>
                 )}
+
+                <View style={[styles.separator, { backgroundColor: theme.colors.outline }]} />
+
+                <View style={[styles.prefRow, { flexDirection: 'column', alignItems: 'stretch', gap: 12 }]}>
+                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                        <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
+                            <MaterialIcons name="refresh" size={20} color={theme.colors.onSurfaceVariant} />
+                        </View>
+                        <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface, marginLeft: 12 }]}>Refresco automático</Text>
+                    </View>
+                    <SegmentedButtons
+                        value={refreshInterval}
+                        onValueChange={value => setRefreshInterval(value as '4' | '2' | '1')}
+                        buttons={[
+                            { value: '4', label: '4 horas' },
+                            { value: '2', label: '2 horas' },
+                            { value: '1', label: '1 hora' },
+                        ]}
+                    />
+                </View>
             </View>
         </View>
 

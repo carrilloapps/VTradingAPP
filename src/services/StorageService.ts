@@ -5,6 +5,7 @@ const KEYS = {
   ALERTS: 'user_alerts',
   NOTIFICATIONS: 'user_notifications',
   WIDGET_CONFIG: 'widget_config',
+  WIDGET_REFRESH_META: 'widget_refresh_meta',
 };
 
 export interface StoredNotification {
@@ -27,6 +28,11 @@ export interface WidgetConfig {
   isTransparent: boolean;
   showGraph: boolean;
   isWidgetDarkMode: boolean;
+  refreshInterval: '4' | '2' | '1';
+}
+
+export interface WidgetRefreshMeta {
+  lastRefreshAt: number;
 }
 
 export interface AppSettings {
@@ -108,7 +114,12 @@ class StorageService {
   async getWidgetConfig(): Promise<WidgetConfig | null> {
     try {
       const data = await AsyncStorage.getItem(KEYS.WIDGET_CONFIG);
-      return data ? JSON.parse(data) : null;
+      if (!data) return null;
+      const parsed = JSON.parse(data) as WidgetConfig;
+      return {
+        ...parsed,
+        refreshInterval: parsed.refreshInterval || '4',
+      };
     } catch (e) {
       console.error('Failed to load widget config', e);
       return null;
@@ -120,6 +131,24 @@ class StorageService {
       await AsyncStorage.setItem(KEYS.WIDGET_CONFIG, JSON.stringify(config));
     } catch (e) {
       console.error('Failed to save widget config', e);
+    }
+  }
+
+  async getWidgetRefreshMeta(): Promise<WidgetRefreshMeta | null> {
+    try {
+      const data = await AsyncStorage.getItem(KEYS.WIDGET_REFRESH_META);
+      return data ? JSON.parse(data) : null;
+    } catch (e) {
+      console.error('Failed to load widget refresh meta', e);
+      return null;
+    }
+  }
+
+  async saveWidgetRefreshMeta(meta: WidgetRefreshMeta) {
+    try {
+      await AsyncStorage.setItem(KEYS.WIDGET_REFRESH_META, JSON.stringify(meta));
+    } catch (e) {
+      console.error('Failed to save widget refresh meta', e);
     }
   }
 }

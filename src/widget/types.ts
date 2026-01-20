@@ -1,3 +1,5 @@
+import type { ColorProp } from 'react-native-android-widget';
+
 export interface WidgetItem {
   id: string;
   label: string;
@@ -5,6 +7,6 @@ export interface WidgetItem {
   currency: string;
   trend: 'up' | 'down' | 'neutral';
   trendValue: string;
-  trendColor: string;
-  trendBg: string;
+  trendColor: ColorProp;
+  trendBg: ColorProp;
 }

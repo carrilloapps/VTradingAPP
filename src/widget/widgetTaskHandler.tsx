@@ -1,11 +1,11 @@
 import React from 'react';
-import { WidgetTaskHandlerProps } from 'react-native-android-widget';
+import { WidgetInfo, WidgetTaskHandlerProps } from 'react-native-android-widget';
 import { storageService } from '../services/StorageService';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
 import VTradingWidget from './VTradingWidget';
 import { WidgetItem } from './types';
 
-export async function buildWidgetElement(info?: { width: number; height: number }) {
+export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false) {
   // MOCK DATA Fallback to prevent white screen if Services fail in Headless mode
   let finalConfig: any = {
     title: 'VTrading',
@@ -17,21 +17,41 @@ export async function buildWidgetElement(info?: { width: number; height: number 
   };
 
   let rates: CurrencyRate[] = [];
+  let didFetchFresh = false;
+  let lastUpdatedLabel: string | undefined;
 
   try {
       // 1. Get Widget Configuration
       const config = await storageService.getWidgetConfig();
       if (config) finalConfig = config;
+      const refreshInterval = parseInt(finalConfig.refreshInterval || '4', 10);
+      const refreshMeta = await storageService.getWidgetRefreshMeta();
+      const lastRefreshAt = refreshMeta?.lastRefreshAt ?? 0;
+      const shouldRefresh = forceRefresh || !lastRefreshAt || (Date.now() - lastRefreshAt) >= refreshInterval * 60 * 60 * 1000;
 
       // 2. Fetch Latest Rates
       try {
-        rates = await CurrencyService.getRates(true);
+        if (shouldRefresh) {
+          rates = await CurrencyService.getRates(true);
+          didFetchFresh = true;
+        } else {
+          rates = await CurrencyService.getRates(false);
+        }
       } catch (error) {
         console.error('Widget: Failed to fetch rates', error);
         rates = await CurrencyService.getRates(false);
       }
+
+      if (lastRefreshAt) {
+        lastUpdatedLabel = new Date(lastRefreshAt).toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+      } else if (rates.length > 0 && rates[0].lastUpdated) {
+        lastUpdatedLabel = new Date(rates[0].lastUpdated).toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+      }
   } catch (e) {
       console.error('Widget: Service Error', e);
+  }
+  if (didFetchFresh && rates.length > 0) {
+    await storageService.saveWidgetRefreshMeta({ lastRefreshAt: Date.now() });
   }
 
   // 3. Filter and Map Data
@@ -108,7 +128,7 @@ export async function buildWidgetElement(info?: { width: number; height: number 
       isWidgetDarkMode={finalConfig.isWidgetDarkMode}
       isWallpaperDark={finalConfig.isWallpaperDark}
       showGraph={finalConfig.showGraph}
-      lastUpdated={new Date().toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' })}
+      lastUpdated={lastUpdatedLabel}
       width={info?.width}
       height={info?.height}
     />
@@ -116,12 +136,23 @@ export async function buildWidgetElement(info?: { width: number; height: number 
 }
 
 export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
-  const { widgetInfo } = props;
+  const { widgetInfo, widgetAction, clickAction } = props;
   
   try {
     console.log(`[WidgetTask] Updating widget ${widgetInfo.widgetId} (${widgetInfo.width}x${widgetInfo.height})`);
-    
-    const element = await buildWidgetElement(widgetInfo);
+
+    if (widgetAction === 'WIDGET_DELETED') {
+      await storageService.saveWidgetRefreshMeta({ lastRefreshAt: 0 });
+      return;
+    }
+
+    if (widgetAction === 'WIDGET_CLICK' && clickAction === 'REFRESH_WIDGET') {
+      const element = await buildWidgetElement(widgetInfo, true);
+      await props.renderWidget(element);
+      return;
+    }
+
+    const element = await buildWidgetElement(widgetInfo, false);
     await props.renderWidget(element);
   } catch (error) {
     console.error('WidgetTaskHandler Error:', error);
