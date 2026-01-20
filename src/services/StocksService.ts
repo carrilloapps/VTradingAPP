@@ -45,6 +45,11 @@ interface ApiStocksResponse {
   marketStatus?: {
       isOpen: boolean;
   };
+  status?: {
+      state: string; // "ABIERTO" | "CERRADO"
+      date: string;
+      lastUpdate: string;
+  };
   // Fallback for previous structure if API is mixed
   stocks?: ApiStock[]; 
   index?: any;
@@ -111,6 +116,16 @@ export class StocksService {
         changePercent = this.parsePrice(item.changePercent);
     } else if (item.change && item.change.percent !== undefined) {
         changePercent = this.parsePrice(item.change.percent);
+    }
+
+    // Ensure changePercent is a valid number
+    if (isNaN(changePercent)) {
+        changePercent = 0;
+    }
+
+    // Ensure changePercent is a valid number
+    if (isNaN(changePercent)) {
+        changePercent = 0;
     }
 
     let volumeStr: string | undefined;
@@ -185,7 +200,9 @@ export class StocksService {
       const rawList = response.data || response.stocks || [];
       
       // Update Market Status
-      if (response.marketStatus) {
+      if (response.status && response.status.state) {
+          this.marketOpen = response.status.state === 'ABIERTO';
+      } else if (response.marketStatus) {
           this.marketOpen = response.marketStatus.isOpen;
       }
       
