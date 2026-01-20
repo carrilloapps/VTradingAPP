@@ -129,8 +129,6 @@ export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false
       isWallpaperDark={finalConfig.isWallpaperDark}
       showGraph={finalConfig.showGraph}
       lastUpdated={lastUpdatedLabel}
-      width={info?.width}
-      height={info?.height}
     />
   );
 }

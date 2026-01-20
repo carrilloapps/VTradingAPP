@@ -10,8 +10,6 @@ interface VTradingWidgetProps {
   isWallpaperDark: boolean;
   showGraph: boolean;
   lastUpdated?: string;
-  width?: number;
-  height?: number;
 }
 
 export default function VTradingWidget({
@@ -21,9 +19,7 @@ export default function VTradingWidget({
   isWidgetDarkMode,
   isWallpaperDark,
   showGraph,
-  lastUpdated,
-  width,
-  height
+  lastUpdated
 }: VTradingWidgetProps) {
   const backgroundColor = isTransparent
     ? isWallpaperDark
@@ -38,6 +34,7 @@ export default function VTradingWidget({
   const subTextColor = isWidgetDarkMode ? 'rgba(255, 255, 255, 0.7)' : '#64748B';
   const dividerColor = isWidgetDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
   const refreshColor = isWidgetDarkMode ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.4)';
+  const borderColor = isWidgetDarkMode ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.1)';
 
   const limitedItems = items.slice(0, 4);
   const logoImage = require('../assets/images/logo.png');
@@ -54,17 +51,14 @@ export default function VTradingWidget({
               orientation: 'TL_BR'
             }
           : undefined,
-        width: width ?? 'match_parent',
-        height: height ?? 'match_parent',
+        width: 'match_parent',
+        height: 'match_parent',
         padding: 16,
-        borderRadius: 22,
-        borderTopLeftRadius: 22,
-        borderTopRightRadius: 22,
-        borderBottomLeftRadius: 22,
-        borderBottomRightRadius: 22,
+        marginHorizontal: 10,
+        borderRadius: 24,
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: 'rgba(0, 0, 0, 0.1)',
+        borderColor,
         flexDirection: 'column',
         justifyContent: 'space-between'
       }}
@@ -73,16 +67,19 @@ export default function VTradingWidget({
         style={{
           flexDirection: 'row',
           justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          marginBottom: 12,
-          width: 'match_parent'
+          alignItems: 'center',
         }}
       >
         <FlexWidget style={{ flexDirection: 'row', alignItems: 'center', flexGap: 8 }}>
           <ImageWidget image={logoImage} imageWidth={30} imageHeight={15} />
-          <TextWidget text={widgetTitle} style={{ fontSize: 14, fontWeight: '600', color: textColor }} />
+          <TextWidget
+            text={widgetTitle}
+            style={{ fontSize: 14, fontWeight: '600', color: textColor, adjustsFontSizeToFit: true }}
+            maxLines={1}
+            truncate="END"
+          />
         </FlexWidget>
-        <TextWidget text="↻" style={{ fontSize: 18, color: refreshColor }} clickAction="REFRESH_WIDGET" />
+        <TextWidget text="↻" style={{ fontSize: 28, color: refreshColor }} clickAction="REFRESH_WIDGET" />
       </FlexWidget>
 
       {limitedItems.length === 0 ? (
@@ -104,16 +101,16 @@ export default function VTradingWidget({
                 width: 'match_parent'
               }}
             >
-              <FlexWidget style={{ flexDirection: 'column', flex: 1 }}>
+              <FlexWidget style={{ flexDirection: 'column', flex: 1, paddingRight: 8 }}>
                 <TextWidget
                   text={item.label}
-                  style={{ fontSize: 12, fontWeight: '600', color: subTextColor, marginBottom: 2 }}
+                  style={{ fontSize: 12, fontWeight: '600', color: subTextColor, marginBottom: 2, adjustsFontSizeToFit: true }}
                   maxLines={1}
                   truncate="END"
                 />
                 <TextWidget
                   text={`${item.value} ${item.currency}`}
-                  style={{ fontSize: 14, fontWeight: '700', color: textColor }}
+                  style={{ fontSize: 14, fontWeight: '700', color: textColor, adjustsFontSizeToFit: true }}
                   maxLines={1}
                   truncate="END"
                 />
@@ -121,7 +118,7 @@ export default function VTradingWidget({
               <FlexWidget style={{ backgroundColor: item.trendBg, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8, flexDirection: 'row', alignItems: 'center', flexGap: 2 }}>
                 <TextWidget
                   text={`${item.trend === 'up' ? '▲' : item.trend === 'down' ? '▼' : '−'}${showGraph ? ` ${item.trendValue}` : ''}`}
-                  style={{ fontSize: 11, fontWeight: '700', color: item.trendColor }}
+                  style={{ fontSize: 11, fontWeight: '700', color: item.trendColor, adjustsFontSizeToFit: true }}
                   maxLines={1}
                   truncate="END"
                 />
