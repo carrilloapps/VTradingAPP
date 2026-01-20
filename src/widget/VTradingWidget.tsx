@@ -14,7 +14,7 @@ interface VTradingWidgetProps {
   height?: number;
 }
 
-const VTradingWidget: React.FC<VTradingWidgetProps> = ({
+export default function VTradingWidget({
   items,
   widgetTitle,
   isTransparent,
@@ -24,7 +24,7 @@ const VTradingWidget: React.FC<VTradingWidgetProps> = ({
   lastUpdated,
   width,
   height
-}) => {
+}: VTradingWidgetProps) {
   // Styles based on WidgetCard logic
   const getBackgroundColor = () => {
     if (isTransparent) {
@@ -162,4 +162,3 @@ const styles = StyleSheet.create({
   }
 });
 
-export default VTradingWidget;

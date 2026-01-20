@@ -100,17 +100,19 @@ export async function buildWidgetElement(info?: { width: number; height: number 
   // Directly invoke the component function to return the View tree
   // This avoids "jsxTree.type is not a function" errors in some Headless JS environments
   // where custom component resolution might fail in the widget renderer.
-  return VTradingWidget({
-    items: widgetItems,
-    widgetTitle: finalConfig.title,
-    isTransparent: finalConfig.isTransparent,
-    isWidgetDarkMode: finalConfig.isWidgetDarkMode,
-    isWallpaperDark: finalConfig.isWallpaperDark,
-    showGraph: finalConfig.showGraph,
-    lastUpdated: new Date().toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' }),
-    width: info?.width,
-    height: info?.height
-  }) as React.ReactElement;
+  return (
+    <VTradingWidget
+      items={widgetItems}
+      widgetTitle={finalConfig.title}
+      isTransparent={finalConfig.isTransparent}
+      isWidgetDarkMode={finalConfig.isWidgetDarkMode}
+      isWallpaperDark={finalConfig.isWallpaperDark}
+      showGraph={finalConfig.showGraph}
+      lastUpdated={new Date().toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' })}
+      width={info?.width}
+      height={info?.height}
+    />
+  );
 }
 
 export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
