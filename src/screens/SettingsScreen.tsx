@@ -4,6 +4,7 @@ import { Text, useTheme, Switch, Snackbar, Button } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import DeviceInfo from 'react-native-device-info';
 import messaging from '@react-native-firebase/messaging';
+import { useNavigation } from '@react-navigation/native';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import CustomDialog from '../components/ui/CustomDialog';
 import CustomButton from '../components/ui/CustomButton';
@@ -22,6 +23,7 @@ import LogoutDialog from '../components/settings/LogoutDialog';
 const SettingsScreen = () => {
   const theme = useTheme();
   const colors = theme.colors as any;
+  const navigation = useNavigation();
   const { themeMode, setThemeMode } = useThemeContext();
   const { user, signOut, resetPassword } = useAuth();
   
@@ -341,6 +343,21 @@ const SettingsScreen = () => {
                 color={theme.colors.primary} 
               />
             </View>
+
+            <View style={[styles.separator, { backgroundColor: theme.colors.outline }]} />
+
+            {/* Widgets */}
+            <TouchableOpacity onPress={() => navigation.navigate('Widgets' as never)}>
+              <View style={styles.prefRow}>
+                <View style={styles.prefLeft}>
+                  <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
+                    <MaterialIcons name="widgets" size={20} color={theme.colors.onSurfaceVariant} />
+                  </View>
+                  <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Widgets</Text>
+                </View>
+                <MaterialIcons name="chevron-right" size={24} color={theme.colors.onSurfaceVariant} />
+              </View>
+            </TouchableOpacity>
 
             <View style={[styles.separator, { backgroundColor: theme.colors.outline }]} />
 

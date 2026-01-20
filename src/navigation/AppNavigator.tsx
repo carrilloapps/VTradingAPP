@@ -9,6 +9,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import HomeScreen from '../screens/HomeScreen';
 import DetailsScreen from '../screens/DetailsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import WidgetsScreen from '../screens/WidgetsScreen';
 import ExchangeRatesScreen from '../screens/ExchangeRatesScreen';
 import StocksScreen from '../screens/StocksScreen';
 import AdvancedCalculatorScreen from '../screens/AdvancedCalculatorScreen';
@@ -190,6 +191,14 @@ const AppNavigator = () => {
             <RootStack.Screen 
               name="Notifications" 
               component={NotificationsScreen}
+              options={{ 
+                headerShown: false,
+                animation: 'default',
+              }} 
+            />
+            <RootStack.Screen 
+              name="Widgets" 
+              component={WidgetsScreen}
               options={{ 
                 headerShown: false,
                 animation: 'default',
