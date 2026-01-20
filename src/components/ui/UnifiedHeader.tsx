@@ -66,6 +66,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
     container: {
       backgroundColor: theme.colors.background,
       borderBottomColor: theme.colors.outline,
+      borderBottomWidth: 1,
     },
     avatar: {
       borderColor: theme.colors.outline,

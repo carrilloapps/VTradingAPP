@@ -32,6 +32,11 @@ const ModernTabBar: React.FC<MaterialTopTabBarProps> = ({ state, descriptors, na
           backgroundColor: theme.colors.elevation.level1,
           paddingBottom: insets.bottom,
           height: 60 + insets.bottom,
+          elevation: 4,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.1,
+          shadowRadius: 4,
         }
       ]}>
         <View style={styles.content}>
@@ -82,7 +87,7 @@ const ModernTabBar: React.FC<MaterialTopTabBarProps> = ({ state, descriptors, na
                 outputRange: [0, 0] 
             });
 
-            const iconColor = isFocused ? theme.colors.onPrimary : theme.colors.onSurfaceVariant;
+            const iconColor = isFocused ? (theme.dark ? theme.colors.onPrimary : '#212121') : theme.colors.onSurfaceVariant;
 
             return (
               <TouchableOpacity
@@ -106,7 +111,7 @@ const ModernTabBar: React.FC<MaterialTopTabBarProps> = ({ state, descriptors, na
                     StyleSheet.absoluteFill,
                     styles.activeCircle,
                     {
-                      backgroundColor: theme.colors.primary,
+                      backgroundColor: theme.dark ? theme.colors.primary : theme.colors.inversePrimary,
                       transform: [{ scale: circleScale }],
                       opacity: circleScale
                     }

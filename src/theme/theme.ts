@@ -31,6 +31,7 @@ export interface CustomColors {
     danger: string;
     warning: string;
     buttonBorder: string;
+    exchangeCardBorder: string;
 }
 
 // Define AppTheme Type
@@ -68,7 +69,7 @@ const lightColors = {
   onSurface: '#191C1A',
   surfaceVariant: '#DBE5DE',
   onSurfaceVariant: '#404944',
-  outline: '#CFD6D2', // Even subtler for light mode
+  outline: 'rgba(0, 0, 0, 0.05)', // Subtle border for light mode
   outlineVariant: '#E0E6E2', // Very light for decorative borders
   buttonBorder: '#5F6964', // Stronger contrast for buttons (Darker Grey)
   shadow: '#000000',
@@ -163,6 +164,7 @@ export const LightTheme: AppTheme = {
     skeleton: '#E1E9EE',
     skeletonHighlight: '#F2F8FC',
     buttonBorder: '#5F6964',
+    exchangeCardBorder: 'rgba(255, 255, 255, 0.05)',
   },
   spacing,
 };
@@ -195,6 +197,7 @@ export const DarkTheme: AppTheme = {
     skeleton: '#2C312E', // Matches elevation level 4
     skeletonHighlight: '#303532', // Matches elevation level 5
     buttonBorder: '#B3BEB9',
+    exchangeCardBorder: 'rgba(255, 255, 255, 0.15)',
   },
   spacing,
 };

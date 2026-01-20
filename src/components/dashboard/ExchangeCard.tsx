@@ -1,9 +1,10 @@
 import React from 'react';
 import { View, StyleSheet, Image } from 'react-native';
-import { Text, useTheme } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Svg, { Path } from 'react-native-svg';
 import LinearGradient from 'react-native-linear-gradient';
+import { useAppTheme } from '../../theme/theme';
 
 export interface ExchangeCardProps {
   title: string;
@@ -48,12 +49,9 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
   buyChartPath,
   sellChartPath
 }) => {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const colors = theme.colors as any;
-  
-  // Determine if neutral (0.00% or explicitly marked as such via prop if we added one, 
-  // but checking the string value is also a safe fallback for display logic)
-  const isNeutral = changePercent === '' || changePercent.includes('0.00') || changePercent === '0%' || changePercent === '+0.00%' || changePercent === '0.00%';
+  const isNeutral = changePercent === '0.00%';
   
   const trendColor = isNeutral 
     ? 'rgba(255, 255, 255, 0.7)' 
@@ -80,7 +78,7 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
       style={[styles.card, { 
         borderRadius: theme.roundness * 6,
         // Flat style with subtle border for gradient
-        borderColor: 'rgba(255,255,255,0.15)',
+        borderColor: theme.colors.exchangeCardBorder,
         borderWidth: 1,
         overflow: 'hidden', // Ensure gradient respects border radius
         position: 'relative'

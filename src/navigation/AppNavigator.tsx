@@ -55,6 +55,7 @@ function AuthNavigator() {
 const Tab = createMaterialTopTabNavigator();
 
 function MainTabNavigator() {
+  const theme = useTheme();
   return (
     <Tab.Navigator
         initialRouteName="Home"
@@ -95,14 +96,21 @@ function MainTabNavigator() {
           component={HomeStackScreen} 
           options={{ 
             tabBarIcon: ({ color }) => (
-              <View style={{ width: 32, height: 32, alignItems: 'center', justifyContent: 'center' }}>
+              <View style={{ 
+                width: 32, 
+                height: 32, 
+                alignItems: 'center', 
+                justifyContent: 'center',
+                borderRadius: 16,
+              }}>
                 <Text style={{ 
                   color: color, 
-                  fontSize: 22, 
-                  fontWeight: '900',
-                  fontFamily: Platform.OS === 'ios' ? 'System' : 'Roboto',
+                  fontSize: 18,
+                  fontWeight: 'bold',
                   includeFontPadding: false,
                   textAlign: 'center',
+                  textAlignVertical: 'center',
+                  marginBottom: Platform.OS === 'android' ? 2 : 0,
                 }}>
                   Bs
                 </Text>
