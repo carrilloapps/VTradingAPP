@@ -82,12 +82,11 @@ const TopToast: React.FC<TopToastProps> = ({
       case 'error':
         return { bg: themeColors.errorContainer, border: themeColors.error, icon: themeColors.error };
       case 'alert':
-        return { bg: theme.colors.surfaceVariant, border: '#FFD700', icon: '#FFD700' }; // Gold/Yellow
       case 'warning':
-        return { bg: theme.colors.surfaceVariant, border: theme.colors.tertiary, icon: theme.colors.tertiary };
+        return { bg: theme.colors.surfaceVariant, border: themeColors.warning, icon: themeColors.warning };
       case 'info':
       default:
-        return { bg: theme.colors.elevation.level3, border: theme.colors.outline, icon: theme.colors.primary };
+        return { bg: themeColors.infoContainer || theme.colors.elevation.level3, border: themeColors.info || theme.colors.primary, icon: themeColors.info || theme.colors.primary };
     }
   };
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
-import { Text, TouchableRipple, useTheme } from 'react-native-paper';
+import { Text, TouchableRipple } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { useAppTheme } from '../../theme/useAppTheme';
@@ -14,6 +14,7 @@ export interface NotificationData {
   message: string;
   timestamp: string;
   isRead: boolean;
+  isArchived?: boolean;
   trend?: 'up' | 'down';
   highlightedValue?: string; // e.g., "36.24 Bs"
 }
@@ -22,18 +23,26 @@ interface NotificationCardProps {
   notification: NotificationData;
   onPress: () => void;
   onArchive: () => void;
+  onDelete: () => void;
 }
+
+import { formatTimeAgo } from '../../utils/dateUtils';
 
 const NotificationCard: React.FC<NotificationCardProps> = ({
   notification,
   onPress,
   onArchive,
+  onDelete,
 }) => {
   const theme = useAppTheme();
 
   // Icon Logic
   const getIconConfig = () => {
-    switch (notification.type) {
+    // Map generic 'Notificación' title or incomplete types to better visuals if possible
+    // This handles the case where data might be sparse
+    const effectiveType = notification.type || 'system';
+    
+    switch (effectiveType) {
       case 'price_alert':
         return {
           name: 'payments',
@@ -43,19 +52,22 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
         };
       case 'market_news':
         return {
-          name: 'show-chart', // monitoring -> show-chart
+          name: 'show-chart',
           color: theme.colors.primary,
           bgColor: theme.colors.primaryContainer,
           badge: null,
         };
       case 'system':
-        return {
-          name: 'campaign', // speaker-phone -> campaign
-          color: theme.colors.tertiary, // Orange-ish usually
-          bgColor: theme.colors.tertiaryContainer,
-          badge: null,
-        };
       default:
+        // Try to infer from title if type is generic
+        if (notification.title.toLowerCase().includes('dolar') || notification.title.toLowerCase().includes('bs')) {
+             return {
+                name: 'attach-money',
+                color: theme.colors.secondary,
+                bgColor: theme.colors.secondaryContainer,
+                badge: null,
+             };
+        }
         return {
           name: 'notifications',
           color: theme.colors.onSurfaceVariant,
@@ -66,6 +78,12 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
   };
 
   const iconConfig = getIconConfig();
+  const formattedTime = formatTimeAgo(notification.timestamp);
+  
+  // Use fallback title if current title is generic "Notificación"
+  // Cast iconConfig to any to access custom properties if they are not in the inferred type
+  const fallbackTitle = (iconConfig as any).fallbackTitle || 'Notificación';
+  const displayTitle = notification.title === 'Notificación' ? fallbackTitle : notification.title;
 
   const renderRightActions = (
     progress: Animated.AnimatedInterpolation<number>,
@@ -86,8 +104,32 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
     );
   };
 
+  const renderLeftActions = (
+    progress: Animated.AnimatedInterpolation<number>,
+    dragX: Animated.AnimatedInterpolation<number>
+  ) => {
+    const scale = dragX.interpolate({
+      inputRange: [0, 80],
+      outputRange: [0, 1],
+      extrapolate: 'clamp',
+    });
+
+    return (
+      <View style={[styles.leftAction, { backgroundColor: theme.colors.errorContainer }]}>
+        <Animated.View style={{ transform: [{ scale }] }}>
+          <MaterialIcons name="delete" size={24} color={theme.colors.onErrorContainer} />
+        </Animated.View>
+      </View>
+    );
+  };
+
   return (
-    <Swipeable renderRightActions={renderRightActions} onSwipeableRightOpen={onArchive}>
+    <Swipeable
+      renderRightActions={renderRightActions}
+      renderLeftActions={renderLeftActions}
+      onSwipeableRightOpen={onArchive}
+      onSwipeableLeftOpen={onDelete}
+    >
       <TouchableRipple
         onPress={onPress}
         style={[
@@ -124,10 +166,10 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
           <View style={styles.textContainer}>
             <View style={styles.headerRow}>
               <Text variant="labelLarge" style={{ color: theme.colors.onSurface, fontWeight: '700' }}>
-                {notification.title}
+                {displayTitle}
               </Text>
               <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                {notification.timestamp}
+                {formattedTime}
               </Text>
             </View>
 
@@ -139,7 +181,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
             <View style={styles.swipeHint}>
               <MaterialIcons name="swipe" size={12} color={theme.colors.onSurfaceVariant} />
               <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, marginLeft: 4, textTransform: 'uppercase', fontSize: 10 }}>
-                DESLIZA PARA ARCHIVAR
+                DESLIZA: IZQ ARCHIVAR / DER BORRAR
               </Text>
             </View>
           </View>
@@ -189,6 +231,14 @@ const styles = StyleSheet.create({
   rightAction: {
     justifyContent: 'center',
     alignItems: 'flex-end',
+    marginBottom: 12,
+    borderRadius: 16,
+    paddingHorizontal: 24,
+    flex: 1,
+  },
+  leftAction: {
+    justifyContent: 'center',
+    alignItems: 'flex-start',
     marginBottom: 12,
     borderRadius: 16,
     paddingHorizontal: 24,

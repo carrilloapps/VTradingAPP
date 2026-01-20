@@ -13,6 +13,12 @@ import { useFilters } from '../context/FilterContext';
 import { useToast } from '../context/ToastContext';
 import { useAppTheme } from '../theme/useAppTheme';
 
+if (Platform.OS === 'android') {
+  if (UIManager.setLayoutAnimationEnabledExperimental) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+  }
+}
+
 const ExchangeRatesScreen = () => {
   const theme = useAppTheme();
   const { exchangeRateFilters, setExchangeRateFilters } = useFilters();

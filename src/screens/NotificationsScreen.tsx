@@ -12,6 +12,7 @@ import { useAppTheme } from '../theme/useAppTheme';
 import SearchBar from '../components/ui/SearchBar';
 import FilterSection, { FilterOption } from '../components/ui/FilterSection';
 import NotificationCard, { NotificationData } from '../components/notifications/NotificationCard';
+import NotificationsSkeleton from '../components/notifications/NotificationsSkeleton';
 import { useNotifications } from '../context/NotificationContext';
 
 if (Platform.OS === 'android') {
@@ -31,11 +32,11 @@ const NotificationsScreen: React.FC = () => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const { notifications, markAsRead, markAllAsRead, deleteNotification } = useNotifications();
+  const { notifications, markAsRead, markAllAsRead, deleteNotification, archiveNotification, isLoading } = useNotifications();
   const pagerRef = useRef<PagerView>(null);
 
   // State
-  const [activeTab, setActiveTab] = useState<'unread' | 'read'>('unread');
+  const [activeTab, setActiveTab] = useState<'unread' | 'read' | 'archived'>('unread');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
@@ -53,17 +54,25 @@ const NotificationsScreen: React.FC = () => {
   };
 
   const unreadNotifications = useMemo(() => 
-    filterNotifications(notifications.filter(n => !n.isRead)), 
+    filterNotifications(notifications.filter(n => !n.isRead && !n.isArchived)), 
   [notifications, activeFilter, searchQuery]);
 
   const readNotifications = useMemo(() => 
-    filterNotifications(notifications.filter(n => n.isRead)), 
+    filterNotifications(notifications.filter(n => n.isRead && !n.isArchived)), 
   [notifications, activeFilter, searchQuery]);
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  const archivedNotifications = useMemo(() => 
+    filterNotifications(notifications.filter(n => n.isArchived)), 
+  [notifications, activeFilter, searchQuery]);
+
+  const unreadCount = notifications.filter(n => !n.isRead && !n.isArchived).length;
 
   // Actions
   const handleArchive = (id: string) => {
+    archiveNotification(id);
+  };
+
+  const handleDelete = (id: string) => {
     deleteNotification(id);
   };
 
@@ -79,7 +88,10 @@ const NotificationsScreen: React.FC = () => {
 
   const handlePageSelected = (e: any) => {
     const page = e.nativeEvent.position;
-    const newTab = page === 0 ? 'unread' : 'read';
+    let newTab: 'unread' | 'read' | 'archived' = 'unread';
+    if (page === 1) newTab = 'read';
+    if (page === 2) newTab = 'archived';
+    
     if (activeTab !== newTab) {
         LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
         setActiveTab(newTab);
@@ -89,7 +101,7 @@ const NotificationsScreen: React.FC = () => {
   const renderEmptyState = (title: string, subtitle: string) => (
     <View style={styles.emptyContainer}>
       <LottieView
-        source={require('../assets/animations/empty_state.json')}
+        source={require('../assets/animations/splash.json')}
         autoPlay
         loop
         style={styles.lottie}
@@ -113,6 +125,7 @@ const NotificationsScreen: React.FC = () => {
           notification={item}
           onPress={() => handleNotificationPress(item.id)}
           onArchive={() => handleArchive(item.id)}
+          onDelete={() => handleDelete(item.id)}
         />
       )}
       contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 20, flexGrow: 1 }}
@@ -120,6 +133,19 @@ const NotificationsScreen: React.FC = () => {
       showsVerticalScrollIndicator={false}
     />
   );
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <StatusBar
+          backgroundColor="transparent"
+          translucent
+          barStyle={theme.dark ? 'light-content' : 'dark-content'}
+        />
+        <NotificationsSkeleton />
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -171,7 +197,7 @@ const NotificationsScreen: React.FC = () => {
             />
           )}
 
-          {/* Segmented Tabs (Read/Unread) */}
+          {/* Segmented Tabs (Read/Unread/Archived) */}
           <View style={[styles.segmentedContainer, { backgroundColor: theme.colors.elevation.level1 }]}>
             <TouchableOpacity 
               style={[
@@ -216,6 +242,28 @@ const NotificationsScreen: React.FC = () => {
                 Leídas
               </Text>
             </TouchableOpacity>
+
+            <TouchableOpacity 
+              style={[
+                styles.segment, 
+                activeTab === 'archived' && { backgroundColor: theme.colors.secondaryContainer }
+              ]}
+              onPress={() => {
+                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                setActiveTab('archived');
+                pagerRef.current?.setPage(2);
+              }}
+              activeOpacity={0.7}
+            >
+              <Text 
+                style={[
+                  styles.segmentText, 
+                  { color: activeTab === 'archived' ? theme.colors.onSecondaryContainer : theme.colors.onSurfaceVariant }
+                ]}
+              >
+                Archivadas
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -242,10 +290,13 @@ const NotificationsScreen: React.FC = () => {
           onPageSelected={handlePageSelected}
         >
           <View key="unread" style={styles.page}>
-            {renderList(unreadNotifications, 'No tienes notificaciones nuevas', '¡Estás al día! Las nuevas alertas aparecerán aquí.')}
+            {renderList(unreadNotifications, 'No tienes notificaciones nuevas', '¡Estás al día! No hay nuevas notificaciones.')}
           </View>
           <View key="read" style={styles.page}>
             {renderList(readNotifications, 'No hay notificaciones leídas', 'Tu historial de notificaciones leídas está vacío.')}
+          </View>
+          <View key="archived" style={styles.page}>
+            {renderList(archivedNotifications, 'No hay notificaciones archivadas', 'Las notificaciones que archives aparecerán aquí.')}
           </View>
         </PagerView>
       </View>

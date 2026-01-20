@@ -38,7 +38,6 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         selected={isSelected}
         onPress={() => {
           // Optional: Add animation on selection if desired
-          // LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut); 
           onSelect(option.value);
         }}
         style={[

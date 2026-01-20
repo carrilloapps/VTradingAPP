@@ -13,6 +13,7 @@ export interface StoredNotification {
   message: string;
   timestamp: string;
   isRead: boolean;
+  isArchived?: boolean;
   trend?: 'up' | 'down';
   highlightedValue?: string;
   data?: any;

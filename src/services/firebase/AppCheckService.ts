@@ -38,6 +38,7 @@ class AppCheckService {
 
   private lastErrorTime: number = 0;
   private errorCount: number = 0;
+  private lastErrorMessage: string = '';
 
   /**
    * Get App Check token
@@ -64,6 +65,7 @@ class AppCheckService {
 
       const result = await getToken(this.appCheckInstance);
       this.errorCount = 0; // Reset on success
+      this.lastErrorMessage = '';
       return result.token;
     } catch (error: any) {
       this.lastErrorTime = Date.now();
@@ -82,9 +84,13 @@ class AppCheckService {
          }
          return undefined;
       }
+
+      // Avoid spamming the same error
+      if (message !== this.lastErrorMessage) {
+          console.warn('[AppCheck] Error obteniendo token:', message);
+          this.lastErrorMessage = message;
+      }
       
-      // Log as warning instead of error to avoid RedBox/interruptions
-      console.warn('[AppCheck] Error obteniendo token:', message);
       return undefined;
     }
   }

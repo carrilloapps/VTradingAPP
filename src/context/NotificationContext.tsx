@@ -11,6 +11,7 @@ interface NotificationContextType {
   addNotification: (notification: StoredNotification) => void;
   markAsRead: (id: string) => void;
   markAllAsRead: () => void;
+  archiveNotification: (id: string) => void;
   deleteNotification: (id: string) => void;
 }
 
@@ -21,6 +22,7 @@ const NotificationContext = createContext<NotificationContextType>({
   addNotification: () => {},
   markAsRead: () => {},
   markAllAsRead: () => {},
+  archiveNotification: () => {},
   deleteNotification: () => {},
 });
 
@@ -75,6 +77,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
   }, []);
 
+  const archiveNotification = useCallback((id: string) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isArchived: true, isRead: true } : n));
+  }, []);
+
   const deleteNotification = useCallback((id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
   }, []);
@@ -117,12 +123,24 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       
       // Add to list
       if (remoteMessage.notification || remoteMessage.data) {
+        // Extract content with fallbacks
+        const dataTitle = (remoteMessage.data?.title as string);
+        const notifTitle = (remoteMessage.notification?.title as string);
+        const dataBody = (remoteMessage.data?.message as string) || (remoteMessage.data?.body as string);
+        const notifBody = (remoteMessage.notification?.body as string);
+
+        // Prioritize data title if notification title is generic "Notificación" or missing
+        let finalTitle = notifTitle || dataTitle || 'Notificación';
+        if (finalTitle === 'Notificación' && dataTitle) {
+            finalTitle = dataTitle;
+        }
+
         const newNotif: StoredNotification = {
           id: remoteMessage.messageId || Date.now().toString(),
           type: (remoteMessage.data?.type as any) || 'system',
-          title: (remoteMessage.notification?.title as string) || (remoteMessage.data?.title as string) || 'Notificación',
-          message: (remoteMessage.notification?.body as string) || (remoteMessage.data?.message as string) || '',
-          timestamp: new Date().toISOString(), // Or formatted time
+          title: finalTitle,
+          message: notifBody || dataBody || '',
+          timestamp: new Date().toISOString(),
           isRead: false,
           trend: (remoteMessage.data?.trend as any),
           data: remoteMessage.data
@@ -145,6 +163,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       addNotification,
       markAsRead,
       markAllAsRead,
+      archiveNotification,
       deleteNotification
     }}>
       {children}
