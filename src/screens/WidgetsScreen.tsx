@@ -15,6 +15,8 @@ import WidgetPreview, { WidgetItem } from '../components/widgets/WidgetPreview';
 import CurrencyPickerModal from '../components/dashboard/CurrencyPickerModal';
 import { storageService, WidgetConfig } from '../services/StorageService';
 import { useToast } from '../context/ToastContext';
+import { requestWidgetUpdate } from 'react-native-android-widget';
+import { buildWidgetElement } from '../widget/widgetTaskHandler';
 
 const APP_VERSION = DeviceInfo.getVersion();
 
@@ -128,6 +130,13 @@ const WidgetsScreen = () => {
             isWidgetDarkMode
         };
         await storageService.saveWidgetConfig(config);
+        
+        // Request widget update
+        requestWidgetUpdate({
+            widgetName: 'VTradingWidget',
+            renderWidget: buildWidgetElement,
+        });
+
         showToast('Configuración guardada', 'success');
         navigation.goBack();
     } catch (error) {
@@ -154,7 +163,7 @@ const WidgetsScreen = () => {
           setSelectedRates(prev => prev.filter(r => r.id !== rate.id));
       } else {
           if (selectedRates.length >= 4) {
-              // Optional: Show toast "Max 4 items"
+              showToast('Máximo 4 divisas permitidas', 'info');
               return; 
           }
           setSelectedRates(prev => [...prev, rate]);
@@ -378,6 +387,7 @@ const WidgetsScreen = () => {
         selectedIds={selectedRates.map(r => r.id)}
         onToggle={toggleRateSelection}
         title="Seleccionar Divisas"
+        maxSelected={4}
       />
     </View>
   );

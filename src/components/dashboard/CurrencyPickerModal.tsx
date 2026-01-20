@@ -18,6 +18,7 @@ export interface CurrencyPickerModalProps {
   multiSelect?: boolean;
   selectedIds?: string[];
   onToggle?: (currency: CurrencyRate) => void;
+  maxSelected?: number;
 }
 
 const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
@@ -31,10 +32,25 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
   excludedCodes = [],
   multiSelect = false,
   selectedIds = [],
-  onToggle
+  onToggle,
+  maxSelected
 }) => {
   const theme = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
+
+  const isMaxReached = !!(multiSelect && maxSelected && selectedIds.length >= maxSelected);
+
+  const handleItemPress = (item: CurrencyRate) => {
+    if (multiSelect && onToggle) {
+        if (!selectedIds.includes(item.id) && isMaxReached) {
+            return; // Block selection if max reached
+        }
+        onToggle(item);
+    } else if (onSelect) {
+        onSelect(item);
+        onDismiss();
+    }
+  };
 
   const themeStyles = React.useMemo(() => ({
     searchBarInput: {
@@ -125,19 +141,15 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
                 
                 return (
                     <TouchableOpacity 
-                        onPress={() => {
-                            if (multiSelect) {
-                                onToggle && onToggle(item);
-                            } else {
-                                onSelect && onSelect(item);
-                                onDismiss();
-                            }
-                        }}
+                        onPress={() => handleItemPress(item)}
                         style={[
                             styles.pickerItem, 
                             themeStyles.pickerItem,
-                            isSelected && themeStyles.pickerItemSelected
+                            isSelected && themeStyles.pickerItemSelected,
+                            // Opacity for disabled items
+                            (!isSelected && isMaxReached) ? { opacity: 0.5 } : undefined
                         ]}
+                        disabled={!isSelected && isMaxReached}
                     >
                         <View style={[
                             styles.iconPlaceholder, 
