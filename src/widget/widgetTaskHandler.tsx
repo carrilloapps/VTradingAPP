@@ -5,10 +5,10 @@ import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
 import VTradingWidget from './VTradingWidget';
 import { WidgetItem } from './types';
 
-export async function buildWidgetElement() {
+export async function buildWidgetElement(info?: { width: number; height: number }) {
   // MOCK DATA Fallback to prevent white screen if Services fail in Headless mode
   let finalConfig: any = {
-    title: 'V-Trading',
+    title: 'VTrading',
     selectedCurrencyIds: [],
     isWallpaperDark: true,
     isTransparent: false,
@@ -107,14 +107,19 @@ export async function buildWidgetElement() {
     isWidgetDarkMode: finalConfig.isWidgetDarkMode,
     isWallpaperDark: finalConfig.isWallpaperDark,
     showGraph: finalConfig.showGraph,
-    lastUpdated: new Date().toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' })
+    lastUpdated: new Date().toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' }),
+    width: info?.width,
+    height: info?.height
   }) as React.ReactElement;
 }
 
 export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
+  const { widgetInfo } = props;
+  
   try {
-    const widgetInfo = props.widgetInfo;
-    const element = await buildWidgetElement();
+    console.log(`[WidgetTask] Updating widget ${widgetInfo.widgetId} (${widgetInfo.width}x${widgetInfo.height})`);
+    
+    const element = await buildWidgetElement(widgetInfo);
     await props.renderWidget(element);
   } catch (error) {
     console.error('WidgetTaskHandler Error:', error);

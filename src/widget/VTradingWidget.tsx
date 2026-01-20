@@ -10,6 +10,8 @@ interface VTradingWidgetProps {
   isWallpaperDark: boolean;
   showGraph: boolean;
   lastUpdated?: string;
+  width?: number;
+  height?: number;
 }
 
 const VTradingWidget: React.FC<VTradingWidgetProps> = ({
@@ -19,7 +21,9 @@ const VTradingWidget: React.FC<VTradingWidgetProps> = ({
   isWidgetDarkMode,
   isWallpaperDark,
   showGraph,
-  lastUpdated
+  lastUpdated,
+  width,
+  height
 }) => {
   // Styles based on WidgetCard logic
   const getBackgroundColor = () => {
@@ -32,15 +36,22 @@ const VTradingWidget: React.FC<VTradingWidgetProps> = ({
   };
 
   const backgroundColor = getBackgroundColor();
-      const textColor = isWidgetDarkMode ? '#FFFFFF' : '#1A2C3E';
-      const subTextColor = isWidgetDarkMode ? 'rgba(255, 255, 255, 0.7)' : '#64748B';
-      const dividerColor = isWidgetDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
+  const textColor = isWidgetDarkMode ? '#FFFFFF' : '#1A2C3E';
+  const subTextColor = isWidgetDarkMode ? 'rgba(255, 255, 255, 0.7)' : '#64748B';
+  const dividerColor = isWidgetDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
 
-      return (
-        <View 
-          style={[styles.container, { backgroundColor }]}
-          {...({ clickAction: "OPEN_APP" } as any)}
-        >
+  return (
+    <View 
+      style={[
+        styles.container, 
+        { 
+          backgroundColor,
+          width: width || '100%',
+          height: height || '100%'
+        }
+      ]}
+      {...({ clickAction: "OPEN_APP" } as any)}
+    >
           {/* Header */}
           <View style={styles.header}>
         <View style={styles.titleRow}>
