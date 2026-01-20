@@ -199,7 +199,8 @@ const HomeScreen = () => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.colors.primary]} />
         }
       >
-        <MarketStatus 
+        <MarketStatus
+            style={{ paddingHorizontal: 22, paddingTop: 15, paddingBottom: 20 }} 
             isOpen={isMarketOpen} 
             updatedAt={lastUpdated} 
             onRefresh={() => {
