@@ -40,7 +40,7 @@ const NotificationButton: React.FC<NotificationButtonProps> = ({
         useNativeDriver: true,
       }).start();
     }
-  }, [unreadCount]);
+  }, [scaleAnim, unreadCount]);
 
   const handlePress = () => {
     navigation.navigate('Notifications');

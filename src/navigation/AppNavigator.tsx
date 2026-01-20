@@ -56,7 +56,6 @@ function AuthNavigator() {
 const Tab = createMaterialTopTabNavigator();
 
 function MainTabNavigator() {
-  const theme = useTheme();
   return (
     <Tab.Navigator
         initialRouteName="Home"
@@ -150,7 +149,7 @@ function MainTabNavigator() {
 const AppNavigator = () => {
   const theme = useTheme();
   const { isDark } = useThemeContext();
-  const { user, isLoading } = useAuth();
+  const { user } = useAuth();
   const routeNameRef = React.useRef<string | undefined>(undefined);
   
   const navigationTheme = isDark ? NavDarkTheme : NavDefaultTheme;

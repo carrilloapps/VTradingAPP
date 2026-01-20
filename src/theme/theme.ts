@@ -3,7 +3,6 @@ import {
   MD3DarkTheme as DefaultDarkTheme,
   useTheme as usePaperTheme,
   MD3Theme,
-  configureFonts,
 } from 'react-native-paper';
 
 // Sistema de espaciado centralizado

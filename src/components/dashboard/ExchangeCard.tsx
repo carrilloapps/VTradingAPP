@@ -50,7 +50,6 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
   sellChartPath
 }) => {
   const theme = useAppTheme();
-  const colors = theme.colors as any;
   const isNeutral = changePercent === '0.00%';
   
   const trendColor = isNeutral 

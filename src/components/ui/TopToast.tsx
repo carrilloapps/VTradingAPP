@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, TouchableOpacity, Animated, Dimensions, Platform } from 'react-native';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Text, useTheme, Surface } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,8 +15,6 @@ interface TopToastProps {
   duration?: number;
 }
 
-const { width } = Dimensions.get('window');
-
 const TopToast: React.FC<TopToastProps> = ({
   visible,
   title,
@@ -30,6 +28,23 @@ const TopToast: React.FC<TopToastProps> = ({
   const insets = useSafeAreaInsets();
   const translateY = useRef(new Animated.Value(-200)).current;
   const opacity = useRef(new Animated.Value(0)).current;
+
+  const hide = useCallback(() => {
+    Animated.parallel([
+      Animated.timing(translateY, {
+        toValue: -200,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: 250,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+        if (visible) onDismiss();
+    });
+  }, [onDismiss, opacity, translateY, visible]);
 
   useEffect(() => {
     if (visible) {
@@ -54,24 +69,7 @@ const TopToast: React.FC<TopToastProps> = ({
     } else {
       hide();
     }
-  }, [visible]);
-
-  const hide = () => {
-    Animated.parallel([
-      Animated.timing(translateY, {
-        toValue: -200,
-        duration: 250,
-        useNativeDriver: true,
-      }),
-      Animated.timing(opacity, {
-        toValue: 0,
-        duration: 250,
-        useNativeDriver: true,
-      }),
-    ]).start(() => {
-        if (visible) onDismiss();
-    });
-  };
+  }, [duration, hide, opacity, translateY, visible]);
 
   if (!visible) return null;
 

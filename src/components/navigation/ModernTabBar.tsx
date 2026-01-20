@@ -22,7 +22,7 @@ const ModernTabBar: React.FC<MaterialTopTabBarProps> = ({ state, descriptors, na
       });
     });
     Animated.parallel(animations).start();
-  }, [state.index, state.routes]);
+  }, [animatedValues, state.index, state.routes]);
 
   return (
     <View pointerEvents="box-none" style={styles.mainContainer}>

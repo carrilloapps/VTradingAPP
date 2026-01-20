@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, useTheme, TextInput, Button, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { CurrencyService, CurrencyRate, STABLECOINS } from '../../services/CurrencyService';
+import { CurrencyService, CurrencyRate } from '../../services/CurrencyService';
 import { useToast } from '../../context/ToastContext';
 import CurrencyPickerModal from './CurrencyPickerModal';
 import CurrencySelectorButton from './CurrencySelectorButton';
@@ -200,7 +200,7 @@ const CurrencyConverter: React.FC = () => {
               if (ves) setToCurrency(ves);
           }
       }
-  }, [rates]); // Only run when rates array changes
+  }, [fromCurrency, rates, toCurrency]); // Only run when rates array changes
 
   // Validate ToCurrency when FromCurrency changes
   useEffect(() => {
@@ -212,7 +212,7 @@ const CurrencyConverter: React.FC = () => {
               setToCurrency(ves || availableToRates[0]);
           }
       }
-  }, [fromCurrency, availableToRates]);
+  }, [availableToRates, fromCurrency, toCurrency]);
 
 
   // Conversion Logic

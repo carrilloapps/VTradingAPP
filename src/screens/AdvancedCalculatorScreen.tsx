@@ -3,7 +3,7 @@ import { View, StyleSheet, TouchableOpacity, FlatList, TextInput as RNTextInput,
 import { Text, useTheme, TouchableRipple } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
-import { CurrencyService, CurrencyRate, STABLECOINS } from '../services/CurrencyService';
+import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
 import { useToast } from '../context/ToastContext';
 import CurrencyPickerModal from '../components/dashboard/CurrencyPickerModal';
 import CurrencySelectorButton from '../components/dashboard/CurrencySelectorButton';
@@ -98,7 +98,7 @@ const AdvancedCalculatorScreen = () => {
 
   // --- State ---
   const [rates, setRates] = useState<CurrencyRate[]>([]);
-  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [_isInputFocused, setIsInputFocused] = useState(false);
   // loading removed as unused
   const [refreshing, setRefreshing] = useState(false);
   const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);

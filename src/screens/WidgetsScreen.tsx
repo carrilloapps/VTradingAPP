@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, Switch } from 'react-native';
 import { Text, TextInput, IconButton, Button, SegmentedButtons } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -48,7 +48,7 @@ const WidgetsScreen = () => {
   // Data State
   const [availableRates, setAvailableRates] = useState<CurrencyRate[]>([]);
   const [selectedRates, setSelectedRates] = useState<CurrencyRate[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [_loading, setLoading] = useState(true);
 
   // Customization State
   const [isTransparent, setIsTransparent] = useState(false);
@@ -60,11 +60,7 @@ const WidgetsScreen = () => {
   const [isSelectionModalVisible, setIsSelectionModalVisible] = useState(false);
   const [refreshInterval, setRefreshInterval] = useState<'4' | '2' | '1'>('4');
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
         const rates = await CurrencyService.getRates();
         setAvailableRates(rates);
@@ -103,7 +99,11 @@ const WidgetsScreen = () => {
     } finally {
         setLoading(false);
     }
-  };
+  }, [showToast]);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   const setDefaultRates = (rates: CurrencyRate[]) => {
     const defaults: CurrencyRate[] = [];

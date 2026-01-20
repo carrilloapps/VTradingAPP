@@ -212,7 +212,7 @@ export class StocksService {
           this.currentPage = response.pagination.page;
       }
 
-      const newStocks: StockData[] = rawList.map((item, index) => this.mapStock(item));
+      const newStocks: StockData[] = rawList.map((item, _index) => this.mapStock(item));
 
       if (page === 1) {
           this.currentStocks = newStocks;

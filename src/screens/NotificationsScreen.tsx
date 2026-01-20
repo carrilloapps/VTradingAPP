@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { View, StyleSheet, FlatList, StatusBar, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -47,7 +47,7 @@ const NotificationsScreen: React.FC = () => {
   const [selectedNotification, setSelectedNotification] = useState<NotificationData | null>(null);
 
   // Filter Logic Helper
-  const filterNotifications = (items: NotificationData[]) => {
+  const filterNotifications = useCallback((items: NotificationData[]) => {
     return items.filter(n => {
       // Category Filter
       const matchesCategory = activeFilter === 'all' || n.type === activeFilter;
@@ -56,19 +56,19 @@ const NotificationsScreen: React.FC = () => {
                             n.message.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesCategory && matchesSearch;
     });
-  };
+  }, [activeFilter, searchQuery]);
 
   const unreadNotifications = useMemo(() => 
     filterNotifications(notifications.filter(n => !n.isRead && !n.isArchived)), 
-  [notifications, activeFilter, searchQuery]);
+  [notifications, filterNotifications]);
 
   const readNotifications = useMemo(() => 
     filterNotifications(notifications.filter(n => n.isRead && !n.isArchived)), 
-  [notifications, activeFilter, searchQuery]);
+  [notifications, filterNotifications]);
 
   const archivedNotifications = useMemo(() => 
     filterNotifications(notifications.filter(n => n.isArchived)), 
-  [notifications, activeFilter, searchQuery]);
+  [notifications, filterNotifications]);
 
   const unreadCount = notifications.filter(n => !n.isRead && !n.isArchived).length;
 

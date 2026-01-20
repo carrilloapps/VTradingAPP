@@ -3,7 +3,6 @@ import { View, StyleSheet, TouchableOpacity, ScrollView, StatusBar, Image } from
 import { Text, TextInput, Button, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { analyticsService } from '../../services/firebase/AnalyticsService';
 import DeviceInfo from 'react-native-device-info';
 import { useAppTheme } from '../../theme/theme';

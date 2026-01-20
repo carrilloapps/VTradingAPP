@@ -64,7 +64,7 @@ const NotificationController: React.FC = () => {
     });
 
     return unsubscribe;
-  }, []);
+  }, [showToast]);
 
   return null;
 };

@@ -1,8 +1,6 @@
-import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react-native';
 import { NotificationProvider, useNotifications } from '../../src/context/NotificationContext';
-import { storageService, StoredNotification } from '../../src/services/StorageService';
-import { fcmService } from '../../src/services/firebase/FCMService';
+import { StoredNotification } from '../../src/services/StorageService';
 
 // Mock Services
 jest.mock('../../src/services/StorageService', () => ({

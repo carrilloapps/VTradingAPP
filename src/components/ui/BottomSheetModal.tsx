@@ -41,7 +41,7 @@ export const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
         if (visible) {
             panY.setValue(0);
         }
-    }, [visible]);
+    }, [panY, visible]);
 
     const panResponder = useRef(
         PanResponder.create({
