@@ -54,6 +54,7 @@ export default function VTradingWidget({
         width: 'match_parent',
         height: 'match_parent',
         padding: 16,
+        marginVertical: 10,
         marginHorizontal: 10,
         borderRadius: 24,
         overflow: 'hidden',
@@ -68,6 +69,7 @@ export default function VTradingWidget({
           flexDirection: 'row',
           justifyContent: 'space-between',
           alignItems: 'center',
+          width: 'match_parent',
         }}
       >
         <FlexWidget style={{ flexDirection: 'row', alignItems: 'center', flexGap: 8 }}>
