@@ -100,6 +100,21 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
             <View style={styles.valueContainer}>
               {buyValue && sellValue ? (
                   <View style={styles.dualContainer}>
+                      {/* GENERAL (Average/Main) */}
+                      <View>
+                          <Text variant="labelSmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginBottom: 2}}>GENERAL</Text>
+                          <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
+                            <Text variant="titleLarge" style={[{ color: '#FFFFFF', fontWeight: 'bold' }]}>{value}</Text>
+                            <Text variant="bodySmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginLeft: 4}}>{currency}</Text>
+                          </View>
+                          <Text variant="labelSmall" style={{color: trendColor}}>
+                              {changePercent}
+                          </Text>
+                      </View>
+
+                      <View style={[styles.divider, { marginHorizontal: 8 }]} />
+
+                      {/* COMPRA */}
                       <View>
                           <Text variant="labelSmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginBottom: 2}}>COMPRA</Text>
                           <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
@@ -112,7 +127,10 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
                               </Text>
                           )}
                       </View>
-                      <View style={styles.divider} />
+
+                      <View style={[styles.divider, { marginHorizontal: 8 }]} />
+
+                      {/* VENTA */}
                       <View>
                           <Text variant="labelSmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginBottom: 2}}>VENTA</Text>
                           <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
