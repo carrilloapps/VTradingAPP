@@ -5,13 +5,18 @@ interface CustomDialogProps {
   visible: boolean;
   onDismiss: () => void;
   title: string;
-  content: string;
-  onConfirm: () => void;
+  content?: string;
+  onConfirm?: () => void;
   confirmLabel?: string;
   cancelLabel?: string;
   isDestructive?: boolean;
   showCancel?: boolean;
   actions?: React.ReactNode;
+  children?: React.ReactNode;
+  confirmLoading?: boolean;
+  confirmDisabled?: boolean;
+  cancelMode?: 'text' | 'outlined' | 'contained';
+  fullWidthActions?: boolean;
 }
 
 const CustomDialog: React.FC<CustomDialogProps> = ({
@@ -25,6 +30,11 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
   isDestructive = false,
   showCancel = true,
   actions,
+  children,
+  confirmLoading = false,
+  confirmDisabled = false,
+  cancelMode = 'text',
+  fullWidthActions = false,
 }) => {
   const theme = useTheme();
 
@@ -53,22 +63,35 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
           {title}
         </Dialog.Title>
         <Dialog.Content>
-          <Text 
-            variant="bodyMedium" 
-            style={{ 
-              color: theme.colors.onSurfaceVariant,
-              textAlign: 'center',
-            }}
-          >
-            {content}
-          </Text>
+          {content ? (
+            <Text 
+              variant="bodyMedium" 
+              style={{ 
+                color: theme.colors.onSurfaceVariant,
+                textAlign: 'center',
+                marginBottom: children ? 16 : 0,
+              }}
+            >
+              {content}
+            </Text>
+          ) : null}
+          {children}
         </Dialog.Content>
-        <Dialog.Actions style={{ justifyContent: 'space-around', paddingBottom: 16, flexWrap: 'wrap' }}>
+        <Dialog.Actions style={[
+          { paddingBottom: 16 },
+          fullWidthActions 
+            ? { flexDirection: 'row', paddingHorizontal: 16, gap: 12 } 
+            : { justifyContent: 'space-around', flexWrap: 'wrap' }
+        ]}>
           {showCancel && (
             <Button 
-              mode="text" 
+              mode={cancelMode} 
               onPress={onDismiss} 
-              textColor={theme.colors.onSurfaceVariant}
+              textColor={cancelMode === 'outlined' ? theme.colors.primary : theme.colors.onSurfaceVariant}
+              style={[
+                fullWidthActions && { flex: 1 },
+                cancelMode === 'outlined' && { borderColor: theme.colors.primary }
+              ]}
             >
               {cancelLabel}
             </Button>
@@ -79,7 +102,12 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
             onPress={onConfirm} 
             buttonColor={isDestructive ? theme.colors.error : theme.colors.primary}
             textColor={isDestructive ? theme.colors.onError : theme.colors.onPrimary}
-            style={{ paddingHorizontal: 16 }}
+            style={[
+              { paddingHorizontal: 16 },
+              fullWidthActions && { flex: 1 }
+            ]}
+            loading={confirmLoading}
+            disabled={confirmDisabled || confirmLoading}
           >
             {confirmLabel}
           </Button>

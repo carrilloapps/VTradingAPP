@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet } from 'react-native';
-import { Button, Dialog, Portal, TextInput, useTheme } from 'react-native-paper';
+import { TextInput, useTheme } from 'react-native-paper';
+import CustomDialog from '../ui/CustomDialog';
 
 interface ProfileEditDialogProps {
   visible: boolean;
@@ -37,38 +37,26 @@ const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({
   };
 
   return (
-    <Portal>
-      <Dialog 
-        visible={visible} 
-        onDismiss={onDismiss}
-        style={{ 
-          backgroundColor: theme.colors.elevation.level3,
-          borderRadius: 28,
-        }}
-      >
-        <Dialog.Title style={{ textAlign: 'center' }}>Editar Perfil</Dialog.Title>
-        <Dialog.Content>
-          <TextInput
-            label="Nombre de usuario"
-            value={name}
-            onChangeText={setName}
-            mode="outlined"
-            style={{ backgroundColor: theme.colors.surface }}
-            autoFocus
-          />
-        </Dialog.Content>
-        <Dialog.Actions>
-          <Button onPress={onDismiss} textColor={theme.colors.onSurfaceVariant}>Cancelar</Button>
-          <Button 
-            onPress={handleSave} 
-            loading={loading}
-            disabled={loading || !name.trim()}
-          >
-            Guardar
-          </Button>
-        </Dialog.Actions>
-      </Dialog>
-    </Portal>
+    <CustomDialog
+      visible={visible}
+      onDismiss={onDismiss}
+      title="Editar Perfil"
+      onConfirm={handleSave}
+      confirmLabel="Guardar"
+      confirmLoading={loading}
+      confirmDisabled={!name.trim()}
+      cancelMode="outlined"
+      fullWidthActions={true}
+    >
+      <TextInput
+        label="Nombre de usuario"
+        value={name}
+        onChangeText={setName}
+        mode="outlined"
+        style={{ backgroundColor: theme.colors.surface, marginTop: 8 }}
+        autoFocus
+      />
+    </CustomDialog>
   );
 };
 

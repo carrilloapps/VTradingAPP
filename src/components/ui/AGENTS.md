@@ -170,43 +170,41 @@ Componente estandarizado para inputs de búsqueda con soporte opcional para acci
 ---
 *Última actualización: 20 de Enero de 2026*
 
-## UniversalDialog
+## CustomDialog (Estándar Global)
 
-`UniversalDialog` es el componente base para todos los diálogos de la aplicación, diseñado para seguir estrictamente el estándar "Flat Design" y coincidir visualmente con las maquetas HTML de referencia.
+`CustomDialog` es el componente unificado para todos los diálogos de la aplicación, diseñado para seguir estrictamente el estándar "Flat Design" con un enfoque visual claro mediante un fondo oscurecido.
 
-### Características
+### Características Obligatorias
 *   **Diseño Plano (Flat):** Sin elevación (`elevation: 0`), bordes de 1px (`borderColor: theme.colors.outline`).
-*   **Bordes Redondeados:** Radio de 24px (`theme.roundness * 6`).
-*   **Adaptabilidad:** Soporta `SafeAreaInsets` y `KeyboardAvoidingView` automáticamente.
-*   **Encabezado Unificado:** Título opcional y botón de cierre circular estándar.
+*   **Fondo de Enfoque (Overlay):** Todos los diálogos utilizan automáticamente un fondo oscurecido al 80% (`theme.colors.backdrop`) para centrar la atención, tanto en modo claro como oscuro.
+*   **Estilo de Botones Estandarizado:**
+    *   **Cancelar:** Debe ser estilo `outlined` (`cancelMode="outlined"`).
+    *   **Confirmar:** Debe ser estilo `contained`.
+    *   **Disposición:** Deben ocupar todo el ancho disponible (`fullWidthActions={true}`).
 
-### Uso
-Utilizar como contenedor ("wrapper") para crear diálogos específicos (ej. `AddAlertDialog`).
+### Uso Estándar
 
 ```typescript
-<UniversalDialog
+<CustomDialog
   visible={visible}
   onDismiss={onDismiss}
   title="Título del Diálogo"
-  actions={
-    // Botones de acción personalizados
-    <Button onPress={onDismiss}>Cancelar</Button>
-  }
+  onConfirm={handleConfirm}
+  confirmLabel="Aceptar"
+  cancelLabel="Cancelar"
+  showCancel={true}
+  confirmLoading={loading}
+  cancelMode="outlined"      // OBLIGATORIO: Bordeado
+  fullWidthActions={true}    // OBLIGATORIO: Ancho completo
 >
-  {/* Contenido del diálogo */}
+  {/* Contenido personalizado opcional */}
   <View>...</View>
-</UniversalDialog>
+</CustomDialog>
 ```
 
 ## LogoutDialog (Diálogo de Cierre de Sesión)
 
-Componente especializado para la confirmación de cierre de sesión, que implementa un diseño visual único y de alto impacto (Icono rojo grande, mensaje centrado).
-
-### Diseño
-Replica fielmente el diseño de `dialogo.html`:
-*   Icono de "Logout" rojo sobre fondo rojo suave.
-*   Botón principal de peligro ("Cerrar Sesión") y botón secundario "Cancelar".
-*   Bordes extra redondeados (40px) y fondo con transparencia/blur simulado.
+Componente especializado que implementa `CustomDialog` con la configuración estandarizada para acciones destructivas.
 
 ### Implementación
 

@@ -109,7 +109,7 @@ export const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
 const styles = StyleSheet.create({
     overlay: {
         flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.6)', // Slightly darker for better focus
+        // backgroundColor handled via theme
         justifyContent: 'flex-end',
     },
     container: {

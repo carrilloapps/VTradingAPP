@@ -41,11 +41,13 @@ Para garantizar la consistencia visual y la mantenibilidad del código, se estab
     *   `shadowOpacity: 0` (iOS)
     *   `borderWidth: 1`
     *   `borderColor: theme.colors.outline` (Color "Material Level" sutil)
-    *   **Nota sobre Colores de Borde:** Se ha ajustado `theme.colors.outline` y `outlineVariant` para ser más sutiles y reducir el contraste visual duro, mejorando la estética general ("Clean UI").
+    *   **Nota sobre Colores de Borde (Dark Mode):** En modo oscuro, se utilizan colores específicos (`#2A302D`) para mantener la sutileza sin perder definición.
     *   `backgroundColor`:
         *   Cards/Inputs: `theme.colors.elevation.level1` (o `surface`)
         *   **Inputs de Formulario (Dialogs):** `theme.colors.surfaceVariant` para diferenciar del fondo del diálogo.
         *   Dialogs/Modals: `theme.colors.elevation.level3`
+*   **Overlay (Fondo Oscuro):**
+    *   Para Modales y Diálogos, se utiliza `theme.colors.backdrop` (`rgba(0, 0, 0, 0.8)`) en ambos modos (Claro/Oscuro) para garantizar un enfoque visual total en el contenido.
 *   **Prohibido:** El uso de sombras (`elevation` > 0) para denotar profundidad. La profundidad se denota exclusivamente mediante bordes y niveles de color de superficie.
 *   **Excepción:** Botones flotantes (FAB) pueden mantener elevación si es crítico para la UX, pero deben evaluarse caso por caso.
 

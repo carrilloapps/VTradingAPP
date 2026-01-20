@@ -104,17 +104,18 @@ const darkColors = {
   errorContainer: '#93000A',
   onErrorContainer: '#FFDAD6',
   background: '#191C1A',
-  onBackground: '#E1E3DF',
+  onBackground: '#E2E3DF',
   surface: '#191C1A',
-  onSurface: '#E1E3DF',
+  onSurface: '#E2E3DF',
   surfaceVariant: '#404944',
-  onSurfaceVariant: '#BFC9C2',
+  onSurfaceVariant: '#C0C9C2',
   outline: '#2A302D', // Subtle border for dark mode (Was #2F3633)
   outlineVariant: '#1F2321', // Almost blends with background
   buttonBorder: '#B3BEB9', // Much lighter for buttons in Dark Mode (High Contrast)
   shadow: '#000000',
   scrim: '#000000',
-  inverseSurface: '#E1E3DF',
+  backdrop: 'rgba(0, 0, 0, 0.8)', // Darker overlay as requested
+  inverseSurface: '#E2E3DF',
   inverseOnSurface: '#2E312F',
   inversePrimary: '#006C4C',
   elevation: {

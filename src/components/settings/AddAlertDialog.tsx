@@ -3,7 +3,7 @@ import { View, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
 import { TextInput, Text, ActivityIndicator, IconButton, Icon } from 'react-native-paper';
 import { CurrencyService } from '../../services/CurrencyService';
 import { StocksService } from '../../services/StocksService';
-import UniversalDialog from '../ui/UniversalDialog';
+import CustomDialog from '../ui/CustomDialog';
 import { useAppTheme } from '../../theme/theme';
 
 interface AddAlertDialogProps {
@@ -150,29 +150,16 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
   );
 
   return (
-    <UniversalDialog
+    <CustomDialog
       visible={visible}
       onDismiss={onDismiss}
       title="Nueva Alerta"
-      actions={
-        <View style={styles.actionButtonsContainer}>
-          <TouchableOpacity 
-            onPress={onDismiss} 
-            style={[styles.actionButton, { backgroundColor: 'transparent', borderWidth: 1, borderColor: theme.colors.primary }]}
-            activeOpacity={0.8}
-          >
-            <Text style={[styles.actionButtonText, { color: theme.colors.primary }]}>CANCELAR</Text>
-          </TouchableOpacity>
-          
-          <TouchableOpacity 
-            onPress={handleSave} 
-            style={[styles.actionButton, { backgroundColor: theme.colors.primary }]}
-            activeOpacity={0.8}
-          >
-            <Text style={[styles.actionButtonText, { color: theme.colors.onPrimary }]}>GUARDAR</Text>
-          </TouchableOpacity>
-        </View>
-      }
+      onConfirm={handleSave}
+      confirmLabel="GUARDAR"
+      cancelLabel="CANCELAR"
+      showCancel={true}
+      cancelMode="outlined"
+      fullWidthActions={true}
     >
       <View style={styles.formContainer}>
         {/* Symbol Input */}
@@ -359,7 +346,7 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
 
         {/* Disclaimer / Summary */}
         {target && !isNaN(Number(target)) ? (
-           <Text style={{ textAlign: 'center', color: theme.colors.onSurfaceVariant, fontSize: 13 }}>
+           <Text style={{ textAlign: 'center', color: theme.colors.onSurfaceVariant, fontSize: 12 }}>
              Se te notificará cuando el precio sea <Text style={{ fontWeight: 'bold', color: theme.colors.onSurface }}>{condition === 'above' ? 'mayor' : 'menor'}</Text> a <Text style={{ fontWeight: 'bold', color: theme.colors.onSurface }}>{getCurrencyPrefix(symbol)}{target}</Text>.
            </Text>
         ) : null}
@@ -370,7 +357,7 @@ const AddAlertDialog = ({ visible, onDismiss, onSave }: AddAlertDialogProps) => 
           </Text>
         ) : null}
       </View>
-    </UniversalDialog>
+    </CustomDialog>
   );
 };
 

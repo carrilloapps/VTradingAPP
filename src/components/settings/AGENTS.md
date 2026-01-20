@@ -20,25 +20,23 @@ Este componente es el **ESTÁNDAR DE REFERENCIA (Gold Standard)** para todos los
 ### Ejemplo de Estructura
 
 ```tsx
-<UniversalDialog visible={...}>
+<CustomDialog 
+  visible={...}
+  onDismiss={...}
+  title="Título"
+  onConfirm={handleSave}
+  confirmLabel="GUARDAR"
+  cancelLabel="CANCELAR"
+  showCancel={true}
+>
   <View style={styles.content}>
     {/* Inputs con fondo surfaceVariant */}
     <TextInput
       style={{ backgroundColor: theme.colors.surfaceVariant }}
       // ...
     />
-    
-    {/* Botones alineados a la derecha */}
-    <View style={styles.actions}>
-      <Button mode="outlined" textColor={theme.colors.primary} style={{ borderColor: theme.colors.primary }}>
-        CANCELAR
-      </Button>
-      <Button mode="contained" buttonColor={theme.colors.primary}>
-        GUARDAR
-      </Button>
-    </View>
   </View>
-</UniversalDialog>
+</CustomDialog>
 ```
 
 ## ThemeSelector
