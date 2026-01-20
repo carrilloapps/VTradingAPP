@@ -59,17 +59,19 @@ Esta pantalla está registrada en el `RootStack` (modal) y no en el `MainTabNavi
 
 Modal de detalle para visualizar el contenido completo de una notificación.
 
-### Estándares de Diseño (Coherencia con AddAlertDialog)
-Este componente sigue estrictamente los lineamientos visuales de `AddAlertDialog` para garantizar consistencia entre diálogos y modales.
+### Estándares de Diseño
+Este componente utiliza `BottomSheetModal` para presentar la información detallada, siguiendo el patrón de "Bottom Sheet" moderno solicitado.
 
-*   **Animación:** `slide-down` (Despliegue desde arriba) usando `Animated.View`.
+*   **Componente Base:** `BottomSheetModal` (src/components/ui/BottomSheetModal.tsx).
+*   **Animación:** `slide` (Despliegue desde abajo hacia arriba).
+*   **Indicador Visual:** Incluye una barra superior ("Handle Bar") que indica visualmente que es un elemento modal deslizable.
 *   **Contenedor de Datos:**
     *   Para mostrar pares Clave-Valor (ej. Divisa - Precio), se utiliza un contenedor con fondo `theme.colors.surfaceVariant`.
-    *   Bordes redondeados (12px) para coincidir con los Inputs de formularios.
-*   **Botones de Acción:**
-    *   **Archivar:** Estilo `outlined` con `borderColor: theme.colors.primary` y texto `primary`.
-    *   **Eliminar:** Estilo `contained` con color de error/advertencia si aplica, o secundario.
-*   **Indicador Superior:** Barra pequeña (`drag handle`) en la parte superior para indicar que es deslizable/modal.
+    *   Bordes redondeados (12px) para separar visualmente los datos del mensaje principal.
+*   **Botones de Acción (Layout Vertical):**
+    *   **ARCHIVAR:** `contained-tonal` (Acción principal no destructiva).
+    *   **ELIMINAR:** `contained` con color `error` (Acción destructiva).
+    *   **CERRAR:** `outlined` (Acción de cancelación).
 
 ### Props
 

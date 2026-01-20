@@ -4,7 +4,7 @@ import { Text, Button, useTheme } from 'react-native-paper';
 import { NotificationData } from './NotificationCard';
 import NotificationIcon, { getNotificationIconConfig } from './NotificationIcon';
 import { formatTimeAgo } from '../../utils/dateUtils';
-import CustomDialog from '../ui/CustomDialog';
+import { BottomSheetModal } from '../ui/BottomSheetModal';
 
 interface NotificationDetailModalProps {
   visible: boolean;
@@ -30,35 +30,14 @@ const NotificationDetailModal: React.FC<NotificationDetailModalProps> = ({
   const displayTitle = notification.title === 'Notificación' ? iconConfig.fallbackTitle : notification.title;
 
   return (
-    <CustomDialog
+    <BottomSheetModal
       visible={visible}
-      onDismiss={onDismiss}
+      onClose={onDismiss}
       title={displayTitle}
-      onConfirm={() => {
-        onDelete(notification.id);
-        onDismiss();
-      }}
-      confirmLabel="ELIMINAR"
-      isDestructive={true}
-      cancelLabel="CERRAR"
-      showCancel={true}
-      cancelMode="outlined"
-      fullWidthActions={true}
-      actions={
-        <Button 
-          onPress={() => {
-            onArchive(notification.id);
-            onDismiss();
-          }}
-          textColor={theme.colors.primary}
-          style={{ flex: 1 }}
-        >
-          ARCHIVAR
-        </Button>
-      }
-      content=""
+      height="auto"
+      style={{ maxHeight: '90%' }}
     >
-      <ScrollView contentContainerStyle={{ paddingBottom: 0 }}>
+      <ScrollView contentContainerStyle={{ paddingBottom: 48, paddingHorizontal: 24 }}>
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center', marginBottom: 16 }}>
           {formattedTime}
         </Text>
@@ -93,8 +72,34 @@ const NotificationDetailModal: React.FC<NotificationDetailModalProps> = ({
              )}
           </View>
         )}
+
+        {/* Actions */}
+        <View style={styles.actionsContainer}>
+          <Button 
+            mode="contained"
+            onPress={() => {
+              onArchive(notification.id);
+              onDismiss();
+            }}
+            buttonColor={theme.colors.primary}
+            textColor={theme.colors.onPrimary}
+            style={styles.button}
+            icon="archive-arrow-down-outline"
+          >
+            ARCHIVAR
+          </Button>
+
+          <Button 
+            mode="outlined" 
+            onPress={onDismiss}
+            textColor={theme.colors.primary}
+            style={[styles.button, { borderColor: theme.colors.primary }]}
+          >
+            CERRAR
+          </Button>
+        </View>
       </ScrollView>
-    </CustomDialog>
+    </BottomSheetModal>
   );
 };
 
@@ -107,7 +112,7 @@ const styles = StyleSheet.create({
   dataContainer: {
     borderRadius: 12,
     padding: 16,
-    marginBottom: 8,
+    marginBottom: 24,
   },
   dataRow: {
     flexDirection: 'row',
@@ -119,6 +124,14 @@ const styles = StyleSheet.create({
     height: 1,
     marginVertical: 8,
   },
+  actionsContainer: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 8,
+  },
+  button: {
+    flex: 1,
+  }
 });
 
 export default NotificationDetailModal;

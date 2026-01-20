@@ -61,7 +61,28 @@ El sistema utiliza `NotificationController` (dentro de `App.tsx`) para escuchar 
 *   **Modo Destructivo:** Propiedad `isDestructive` cambia el color del botón de confirmación a `error` (Rojo).
 *   **Portal:** Renderizado a través de `Portal` de React Native Paper para asegurar que aparezca sobre otros elementos.
 
-### Ejemplo de Implementación
+---
+
+## Diferenciación Crítica: Diálogos vs Modales
+
+Es imperativo **NO** confundir estos dos patrones de interfaz. Su uso incorrecto afecta la experiencia de usuario y la consistencia de la aplicación.
+
+### 1. Diálogos (`CustomDialog`)
+*   **Ubicación:** Centro de la pantalla.
+*   **Propósito:** Decisiones críticas, confirmaciones (Sí/No), Alertas de sistema.
+*   **Interacción:** Requiere una acción explícita (pulsar un botón) para avanzar o cancelar.
+*   **Componente:** `src/components/ui/CustomDialog.tsx`
+
+### 2. Modales / Bottom Sheets (`BottomSheetModal`)
+*   **Ubicación:** Anclado al borde inferior de la pantalla (desliza hacia arriba).
+*   **Propósito:** Mostrar detalles adicionales, formularios largos, o contenido secundario sin perder el contexto de la pantalla anterior.
+*   **Interacción:** Fluida. Se puede cerrar deslizando hacia abajo (`Swipe Down`), tocando el fondo (backdrop) o con botón de cierre.
+*   **Indicador:** DEBE tener siempre un "Handle Bar" (barra gris pequeña) en la parte superior para indicar que es deslizable.
+*   **Componente:** `src/components/ui/BottomSheetModal.tsx`
+
+---
+
+### Ejemplo de Implementación (Dialog)
 
 ```typescript
 import React, { useState } from 'react';
