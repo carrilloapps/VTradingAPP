@@ -66,7 +66,7 @@ jest.mock('@react-navigation/native', () => {
 
 const messagingMock = {
   hasPermission: jest.fn(() => Promise.resolve(true)),
-  requestPermission: jest.fn(() => Promise.resolve(1)), // AuthorizationStatus.AUTHORIZED
+  requestPermission: jest.fn(() => Promise.resolve(1)),
   getToken: jest.fn(() => Promise.resolve('mock-token')),
   onTokenRefresh: jest.fn(() => jest.fn()),
   onMessage: jest.fn(() => jest.fn()),
@@ -77,17 +77,25 @@ const messagingMock = {
   unsubscribeFromTopic: jest.fn(),
 };
 
-const messagingFn = () => messagingMock;
-
-// Add statics
-messagingFn.AuthorizationStatus = {
+const messagingModule = () => messagingMock;
+messagingModule.getMessaging = jest.fn(() => messagingMock);
+messagingModule.getToken = jest.fn(() => Promise.resolve('mock-token'));
+messagingModule.onTokenRefresh = jest.fn(() => jest.fn());
+messagingModule.onMessage = jest.fn(() => jest.fn());
+messagingModule.setBackgroundMessageHandler = jest.fn();
+messagingModule.onNotificationOpenedApp = jest.fn(() => jest.fn());
+messagingModule.getInitialNotification = jest.fn(() => Promise.resolve(null));
+messagingModule.subscribeToTopic = jest.fn(() => Promise.resolve());
+messagingModule.unsubscribeFromTopic = jest.fn(() => Promise.resolve());
+messagingModule.requestPermission = jest.fn(() => Promise.resolve(1));
+messagingModule.AuthorizationStatus = {
   AUTHORIZED: 1,
   DENIED: 0,
   NOT_DETERMINED: -1,
   PROVISIONAL: 2,
 };
 
-jest.mock('@react-native-firebase/messaging', () => messagingFn);
+jest.mock('@react-native-firebase/messaging', () => messagingModule);
 
 jest.mock('@react-native-firebase/auth', () => {
   const authFn = () => ({
@@ -131,20 +139,14 @@ jest.mock('@react-native-firebase/analytics', () => {
   });
 });
 
-jest.mock('@react-native-firebase/app-check', () => {
-  const appCheckMock = {
-    newReactNativeFirebaseAppCheckProvider: jest.fn(() => ({
-      configure: jest.fn(),
-    })),
-    initializeAppCheck: jest.fn(),
-    getToken: jest.fn(() => Promise.resolve({ token: 'mock-app-check-token' })),
-  };
-  return {
-    firebase: {
-      appCheck: () => appCheckMock,
-    },
-  };
-});
+jest.mock('@react-native-firebase/app-check', () => ({
+  initializeAppCheck: jest.fn(() => Promise.resolve({})),
+  getToken: jest.fn(() => Promise.resolve({ token: 'mock-app-check-token' })),
+}));
+
+jest.mock('@react-native-firebase/app', () => ({
+  getApp: jest.fn(() => ({})),
+}));
 
 jest.mock('@react-native-firebase/remote-config', () => {
   return () => ({
@@ -182,3 +184,17 @@ jest.mock('@react-native-firebase/app-distribution', () => {
     checkForUpdate: jest.fn(),
   });
 });
+
+jest.mock('react-native-google-mobile-ads', () => ({
+  BannerAd: 'BannerAd',
+  BannerAdSize: {
+    BANNER: 'BANNER',
+    FULL_BANNER: 'FULL_BANNER',
+    LARGE_BANNER: 'LARGE_BANNER',
+    LEADERBOARD: 'LEADERBOARD',
+    MEDIUM_RECTANGLE: 'MEDIUM_RECTANGLE',
+  },
+  TestIds: {
+    BANNER: 'test-banner',
+  },
+}));

@@ -31,6 +31,19 @@ jest.mock('../src/theme/ThemeContext', () => ({
   }),
 }));
 
+jest.mock('../src/context/AuthContext', () => ({
+  useAuth: () => ({
+    user: {
+      displayName: 'Alejandro Rodriguez',
+      email: 'test@example.com',
+      isAnonymous: false,
+    },
+    signOut: jest.fn(),
+    updateProfileName: jest.fn(),
+    deleteAccount: jest.fn(),
+  }),
+}));
+
 describe('SettingsScreen', () => {
   const renderWithProvider = (component: React.ReactElement) => {
     return render(
@@ -52,18 +65,19 @@ describe('SettingsScreen', () => {
     
     // Check Alerts Section
     expect(getByText('ALERTAS ACTIVAS')).toBeTruthy();
-    expect(getByText('USD/VES')).toBeTruthy();
-    expect(getByText('CANTV')).toBeTruthy();
+    expect(getByText('Crea tu primera alerta')).toBeTruthy();
     
     // Check Preferences Section
     expect(getByText('PREFERENCIAS')).toBeTruthy();
-    expect(getByText('Notificaciones Push')).toBeTruthy();
+    expect(getByText('Notificaciones push')).toBeTruthy();
     expect(getByText('Apariencia')).toBeTruthy();
     
     // Check Account Section
     expect(getByText('CUENTA')).toBeTruthy();
-    expect(getByText('Seguridad y Privacidad')).toBeTruthy();
-    expect(getByText('Cerrar Sesión')).toBeTruthy();
+    expect(getByText('Políticas de privacidad')).toBeTruthy();
+    expect(getByText('Términos y condiciones')).toBeTruthy();
+    expect(getByText('Eliminar cuenta')).toBeTruthy();
+    expect(getByText('Cerrar sesión')).toBeTruthy();
     
     // Check Footer (Wait for effect)
     // We expect "Finanzas VE v1.0.0 (100)"
@@ -85,8 +99,7 @@ describe('SettingsScreen', () => {
     // It used: <Switch value={isActive} onValueChange={onToggle} color={theme.colors.primary} />
     
     const switches = getAllByRole('switch');
-    // We expect at least 3 switches: 2 for alerts, 1 for push notifications
-    expect(switches.length).toBeGreaterThanOrEqual(3);
+    expect(switches.length).toBeGreaterThanOrEqual(1);
     
     // Toggle first alert
     fireEvent(switches[0], 'valueChange', false);

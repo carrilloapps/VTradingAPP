@@ -123,6 +123,19 @@ class AuthService {
     }
   }
 
+  async deleteAccount(): Promise<void> {
+    try {
+      const currentUser = getAuth().currentUser;
+      if (!currentUser) {
+        throw new Error('Usuario no autenticado');
+      }
+      await currentUser.delete();
+    } catch (error: any) {
+      console.error('Error deleting account:', error);
+      throw this.handleError(error);
+    }
+  }
+
   async updateProfileName(displayName: string): Promise<FirebaseAuthTypes.User> {
     try {
       const trimmedName = displayName.trim();
@@ -184,6 +197,9 @@ class AuthService {
                 break;
             case 'auth/too-many-requests':
                 message = 'Demasiados intentos fallidos. Intente más tarde.';
+                break;
+            case 'auth/requires-recent-login':
+                message = 'Por seguridad, vuelve a iniciar sesión y reintenta eliminar la cuenta.';
                 break;
              case 'auth/network-request-failed':
                 message = 'Error de conexión. Verifique su internet.';

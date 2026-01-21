@@ -9,6 +9,7 @@ interface AuthContextData {
   signIn: (email: string, pass: string) => Promise<void>;
   signUp: (email: string, pass: string) => Promise<void>;
   signOut: () => Promise<void>;
+  deleteAccount: () => Promise<void>;
   googleSignIn: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   signInAnonymously: () => Promise<void>;
@@ -54,6 +55,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await authService.signOut();
       showToast('Sesión cerrada', 'info');
+    } catch (error: any) {
+      showToast(error.message, 'error');
+      throw error;
+    }
+  };
+
+  const deleteAccount = async () => {
+    try {
+      await authService.deleteAccount();
+      showToast('Cuenta eliminada', 'success');
     } catch (error: any) {
       showToast(error.message, 'error');
       throw error;
@@ -111,6 +122,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       signIn,
       signUp,
       signOut,
+      deleteAccount,
       googleSignIn,
       resetPassword,
       signInAnonymously,

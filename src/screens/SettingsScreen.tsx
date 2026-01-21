@@ -26,7 +26,7 @@ const SettingsScreen = () => {
   const colors = theme.colors as any;
   const navigation = useNavigation();
   const { themeMode, setThemeMode } = useThemeContext();
-  const { user, signOut, updateProfileName } = useAuth();
+  const { user, signOut, updateProfileName, deleteAccount } = useAuth();
   
   // App Info State
   const [appName, setAppName] = useState('');
@@ -40,6 +40,8 @@ const SettingsScreen = () => {
   const [showAboutDialog, setShowAboutDialog] = useState(false);
   const [showEditProfileDialog, setShowEditProfileDialog] = useState(false);
   const [showAddAlertDialog, setShowAddAlertDialog] = useState(false);
+  const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
+  const [deleteAccountLoading, setDeleteAccountLoading] = useState(false);
 
   // Functional State
   const [alerts, setAlerts] = useState<UserAlert[]>([]);
@@ -79,6 +81,22 @@ const SettingsScreen = () => {
         // Navigation will handle the switch to AuthStack automatically via Context
     } catch (error) {
         handleAction("Error al cerrar sesión");
+    }
+  };
+
+  const handleDeleteAccount = () => {
+    setShowDeleteAccountDialog(true);
+  };
+
+  const confirmDeleteAccount = async () => {
+    setDeleteAccountLoading(true);
+    try {
+      await deleteAccount();
+      setShowDeleteAccountDialog(false);
+    } catch (error) {
+      handleAction('Error al eliminar la cuenta');
+    } finally {
+      setDeleteAccountLoading(false);
     }
   };
 
@@ -382,6 +400,13 @@ const SettingsScreen = () => {
               onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL)}
               hasTopBorder
             />
+            <MenuButton
+              icon="delete-forever"
+              label="Eliminar cuenta"
+              onPress={handleDeleteAccount}
+              isDanger
+              hasTopBorder
+            />
             <MenuButton 
               icon="logout" 
               label="Cerrar sesión" 
@@ -477,6 +502,20 @@ const SettingsScreen = () => {
             </Text>
         </View>
       </CustomDialog>
+      <CustomDialog
+        visible={showDeleteAccountDialog}
+        onDismiss={() => setShowDeleteAccountDialog(false)}
+        title="Eliminar cuenta"
+        content="Al eliminar la cuenta se borrarán todos los datos en los servidores del app, pero su configuración local se mantiene, como widget y personalización."
+        onConfirm={confirmDeleteAccount}
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        isDestructive
+        confirmLoading={deleteAccountLoading}
+        confirmDisabled={deleteAccountLoading}
+        cancelMode="outlined"
+        fullWidthActions
+      />
     </View>
   );
 };
