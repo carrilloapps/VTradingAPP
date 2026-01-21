@@ -7,7 +7,6 @@ import messaging from '@react-native-firebase/messaging';
 import { useNavigation } from '@react-navigation/native';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import CustomDialog from '../components/ui/CustomDialog';
-import CustomButton from '../components/ui/CustomButton';
 import { useThemeContext } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { storageService, UserAlert } from '../services/StorageService';
@@ -400,13 +399,6 @@ const SettingsScreen = () => {
               onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL)}
               hasTopBorder
             />
-            <MenuButton
-              icon="delete-forever"
-              label="Eliminar cuenta"
-              onPress={handleDeleteAccount}
-              isDanger
-              hasTopBorder
-            />
             <MenuButton 
               icon="logout" 
               label="Cerrar sesión" 
@@ -463,20 +455,6 @@ const SettingsScreen = () => {
         onConfirm={() => setShowAboutDialog(false)}
         confirmLabel="Cerrar"
         showCancel={false}
-        actions={
-          <>
-            <CustomButton
-              variant="outlined"
-              label="Políticas de privacidad"
-              onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL)}
-            />
-            <CustomButton
-              variant="outlined"
-              label="Términos y condiciones"
-              onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL)}
-            />
-          </>
-        }
       >
         <View style={{ alignItems: 'center', paddingVertical: 0 }}>
             <Image 
@@ -496,6 +474,32 @@ const SettingsScreen = () => {
             <Text variant="bodySmall" style={{ textAlign: 'center', marginBottom: 16, paddingHorizontal: 16, color: colors.onSurfaceVariant }}>
                 Diseñado para el seguimiento financiero en tiempo real.
             </Text>
+
+            <View style={styles.aboutLinksContainer}>
+              <View style={[styles.cardContainer, { borderColor: theme.colors.outline, backgroundColor: theme.colors.elevation.level1 }]}>
+                <MenuButton
+                  icon="policy"
+                  label="Políticas de privacidad"
+                  onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL)}
+                />
+                <MenuButton
+                  icon="gavel"
+                  label="Términos y condiciones"
+                  onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL)}
+                  hasTopBorder
+                />
+                <MenuButton
+                  icon="delete-forever"
+                  label="Eliminar cuenta"
+                  onPress={() => {
+                    setShowAboutDialog(false);
+                    handleDeleteAccount();
+                  }}
+                  isDanger
+                  hasTopBorder
+                />
+              </View>
+            </View>
             
             <Text variant="labelSmall" style={{ color: colors.outline }}>
                 © {new Date().getFullYear()} VTradingAPP
@@ -602,6 +606,10 @@ const styles = StyleSheet.create({
     fontSize: 10,
     marginTop: 4,
     opacity: 0.7,
+  },
+  aboutLinksContainer: {
+    width: '100%',
+    marginBottom: 16,
   },
 });
 

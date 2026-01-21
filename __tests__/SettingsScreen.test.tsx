@@ -76,7 +76,6 @@ describe('SettingsScreen', () => {
     expect(getByText('CUENTA')).toBeTruthy();
     expect(getByText('Políticas de privacidad')).toBeTruthy();
     expect(getByText('Términos y condiciones')).toBeTruthy();
-    expect(getByText('Eliminar cuenta')).toBeTruthy();
     expect(getByText('Cerrar sesión')).toBeTruthy();
     
     // Check Footer (Wait for effect)
