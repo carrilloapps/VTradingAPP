@@ -23,10 +23,21 @@ import { remoteConfigService } from './src/services/firebase/RemoteConfigService
 import { appDistributionService } from './src/services/firebase/AppDistributionService';
 import NotificationController from './src/components/ui/NotificationController';
 import mobileAds from 'react-native-google-mobile-ads';
+import { getCrashlytics } from '@react-native-firebase/crashlytics';
+import { getPerformance } from '@react-native-firebase/perf';
 
 function App(): React.JSX.Element {
   useEffect(() => {
     const initializeFirebase = async () => {
+      const crashlytics = getCrashlytics();
+      await crashlytics.setCrashlyticsCollectionEnabled(true);
+      crashlytics.log('App start');
+
+      const perf = getPerformance();
+      if (!perf.dataCollectionEnabled) {
+        await perf.setPerformanceCollectionEnabled(true);
+      }
+
       // App Check (Initialize first)
       await appCheckService.initialize();
 

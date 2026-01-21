@@ -139,6 +139,21 @@ jest.mock('@react-native-firebase/analytics', () => {
   });
 });
 
+jest.mock(
+  '@react-native-firebase/crashlytics',
+  () => ({
+    getCrashlytics: () => ({
+      log: jest.fn(),
+      recordError: jest.fn(),
+      crash: jest.fn(),
+      setCrashlyticsCollectionEnabled: jest.fn(() => Promise.resolve()),
+      setUserId: jest.fn(() => Promise.resolve()),
+      setAttributes: jest.fn(() => Promise.resolve()),
+    }),
+  }),
+  { virtual: true }
+);
+
 jest.mock('@react-native-firebase/app-check', () => ({
   initializeAppCheck: jest.fn(() => Promise.resolve({})),
   getToken: jest.fn(() => Promise.resolve({ token: 'mock-app-check-token' })),
@@ -162,21 +177,29 @@ jest.mock('@react-native-firebase/remote-config', () => {
 });
 
 jest.mock('@react-native-firebase/perf', () => {
-  return () => ({
-    startTrace: jest.fn(() => Promise.resolve({
-      stop: jest.fn(),
-      putAttribute: jest.fn(),
-    })),
-    newHttpMetric: jest.fn(() => Promise.resolve({
-      start: jest.fn(),
-      stop: jest.fn(),
-      putAttribute: jest.fn(),
-      setHttpResponseCode: jest.fn(),
-      setRequestPayloadSize: jest.fn(),
-      setResponsePayloadSize: jest.fn(),
-      setResponseContentType: jest.fn(),
-    })),
-  });
+  const perfInstance = {
+    dataCollectionEnabled: true,
+    setPerformanceCollectionEnabled: jest.fn(() => Promise.resolve()),
+  };
+  const traceInstance = {
+    start: jest.fn(() => Promise.resolve()),
+    stop: jest.fn(() => Promise.resolve()),
+    putAttribute: jest.fn(),
+  };
+  const metricInstance = {
+    start: jest.fn(() => Promise.resolve()),
+    stop: jest.fn(() => Promise.resolve()),
+    putAttribute: jest.fn(),
+    setHttpResponseCode: jest.fn(),
+    setRequestPayloadSize: jest.fn(),
+    setResponsePayloadSize: jest.fn(),
+    setResponseContentType: jest.fn(),
+  };
+  return {
+    getPerformance: jest.fn(() => perfInstance),
+    trace: jest.fn(() => traceInstance),
+    httpMetric: jest.fn(() => metricInstance),
+  };
 });
 
 jest.mock('@react-native-firebase/app-distribution', () => {

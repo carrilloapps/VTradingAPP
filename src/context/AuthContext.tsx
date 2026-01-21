@@ -2,6 +2,7 @@ import React, { createContext, useState, useEffect, useContext } from 'react';
 import { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { authService } from '../services/firebase/AuthService';
 import { useToast } from './ToastContext';
+import { getCrashlytics } from '@react-native-firebase/crashlytics';
 
 interface AuthContextData {
   user: FirebaseAuthTypes.User | null;
@@ -30,6 +31,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     return unsubscribe;
   }, [isLoading]);
+
+  useEffect(() => {
+    const crashlytics = getCrashlytics();
+    if (user) {
+      crashlytics.setUserId(user.uid || 'unknown');
+      crashlytics.setAttributes({
+        user_name: user.displayName || '',
+        user_email: user.email || '',
+      });
+    } else {
+      crashlytics.setUserId('');
+      crashlytics.setAttributes({
+        user_name: '',
+        user_email: '',
+      });
+    }
+  }, [user]);
 
   const signIn = async (email: string, pass: string) => {
     try {
