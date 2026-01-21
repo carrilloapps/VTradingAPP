@@ -1,10 +1,11 @@
 import React from 'react';
-import { Text, Platform, View } from 'react-native';
+import { Text, Platform, View, StyleSheet } from 'react-native';
 import { NavigationContainer, DefaultTheme as NavDefaultTheme, DarkTheme as NavDarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import LottieView from 'lottie-react-native';
 
 import HomeScreen from '../screens/HomeScreen';
 import DetailsScreen from '../screens/DetailsScreen';
@@ -149,7 +150,7 @@ function MainTabNavigator() {
 const AppNavigator = () => {
   const theme = useTheme();
   const { isDark } = useThemeContext();
-  const { user } = useAuth();
+  const { user, isLoading } = useAuth();
   const routeNameRef = React.useRef<string | undefined>(undefined);
   
   const navigationTheme = isDark ? NavDarkTheme : NavDefaultTheme;
@@ -164,6 +165,32 @@ const AppNavigator = () => {
       primary: theme.colors.primary,
     },
   };
+
+  if (isLoading) {
+    return (
+      <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background }]}>
+        <View style={[
+          styles.loadingCard,
+          {
+            backgroundColor: theme.colors.surface,
+            borderColor: theme.colors.outline,
+            borderRadius: theme.roundness * 6,
+          }
+        ]}>
+          <LottieView
+            source={require('../assets/animations/splash.json')}
+            autoPlay
+            loop
+            style={styles.loadingAnimation}
+            resizeMode="contain"
+          />
+          <Text style={[styles.loadingText, { color: theme.colors.onSurface }]}>
+            Cargando
+          </Text>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <NavigationContainer
@@ -219,5 +246,31 @@ const AppNavigator = () => {
     </NavigationContainer>
   );
 };
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  loadingCard: {
+    width: '100%',
+    maxWidth: 320,
+    paddingVertical: 24,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  loadingAnimation: {
+    width: 140,
+    height: 140,
+  },
+  loadingText: {
+    marginTop: 8,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});
 
 export default AppNavigator;

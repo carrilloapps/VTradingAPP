@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { analyticsService } from '../../services/firebase/AnalyticsService';
 import { AppConfig } from '../../constants/AppConfig';
+import LottieView from 'lottie-react-native';
 
 const RegisterScreen = ({ navigation }: any) => {
   const theme = useTheme();
@@ -58,6 +59,8 @@ const RegisterScreen = ({ navigation }: any) => {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [confirmPasswordError, setConfirmPasswordError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isBusy = isLoading || isSubmitting;
 
   useEffect(() => {
     analyticsService.logScreenView('Register');
@@ -103,6 +106,7 @@ const RegisterScreen = ({ navigation }: any) => {
 
   const handleRegister = async () => {
     if (validate()) {
+      setIsSubmitting(true);
       try {
         await analyticsService.logEvent('sign_up_attempt', { method: 'password' });
         await signUp(email, password);
@@ -110,214 +114,259 @@ const RegisterScreen = ({ navigation }: any) => {
       } catch {
         await analyticsService.logEvent('sign_up_error', { method: 'password' });
         // Error handled in context
+      } finally {
+        setIsSubmitting(false);
       }
     }
   };
 
   const handleGoogleRegister = async () => {
+    setIsSubmitting(true);
     try {
       await analyticsService.logEvent('sign_up_attempt', { method: 'google' });
       await googleSignIn();
       await analyticsService.logEvent('sign_up_success', { method: 'google' });
     } catch {
       await analyticsService.logEvent('sign_up_error', { method: 'google' });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <ScrollView 
-      contentContainerStyle={[
-        styles.container, 
-        themeStyles.container,
-        { 
-          paddingTop: insets.top + 20,
-          paddingBottom: insets.bottom + 20
-        }
-      ]}
-      keyboardShouldPersistTaps="handled"
-    >
-      <StatusBar 
-        backgroundColor="transparent" 
-        translucent 
-        barStyle={theme.dark ? 'light-content' : 'dark-content'} 
-      />
-      <TouchableOpacity 
-        onPress={() => navigation.goBack()} 
-        style={styles.backButton}
-        accessibilityRole="button"
-        accessibilityLabel="Volver"
-        accessibilityHint="Regresa a la pantalla anterior"
+    <View style={[styles.screen, themeStyles.container]}>
+      <ScrollView 
+        contentContainerStyle={[
+          styles.container, 
+          themeStyles.container,
+          { 
+            paddingTop: insets.top + 20,
+            paddingBottom: insets.bottom + 20
+          }
+        ]}
+        keyboardShouldPersistTaps="handled"
       >
-        <MaterialIcons name="arrow-back" size={24} color={theme.colors.onSurface} />
-      </TouchableOpacity>
-
-      <View style={styles.header}>
-        <Text variant="headlineMedium" style={themeStyles.title}>
-          Crear Cuenta
-        </Text>
-        <Text variant="bodyLarge" style={themeStyles.subtitle}>
-          Regístrate para comenzar a operar
-        </Text>
-      </View>
-
-      <View style={styles.form}>
-        <TextInput
-          label="Correo Electrónico"
-          value={email}
-          onChangeText={setEmail}
-          mode="outlined"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
-          autoComplete="email"
-          textContentType="emailAddress"
-          accessibilityLabel="Correo electrónico"
-          accessibilityHint="Ingresa tu correo para registrarte"
-          error={!!emailError}
-          left={<TextInput.Icon icon="email" accessibilityLabel="Icono de correo" />}
-          style={styles.input}
+        <StatusBar 
+          backgroundColor="transparent" 
+          translucent 
+          barStyle={theme.dark ? 'light-content' : 'dark-content'} 
         />
-        <HelperText type="error" visible={!!emailError}>
-          {emailError}
-        </HelperText>
-
-        <TextInput
-          label="Contraseña"
-          value={password}
-          onChangeText={setPassword}
-          mode="outlined"
-          secureTextEntry={secureTextEntry}
-          autoCorrect={false}
-          autoComplete="new-password"
-          textContentType="newPassword"
-          accessibilityLabel="Contraseña"
-          accessibilityHint="Crea una contraseña segura"
-          error={!!passwordError}
-          left={<TextInput.Icon icon="lock" accessibilityLabel="Icono de contraseña" />}
-          right={
-            <TextInput.Icon 
-              icon={secureTextEntry ? "eye" : "eye-off"} 
-              onPress={() => setSecureTextEntry(!secureTextEntry)}
-              accessibilityLabel={secureTextEntry ? 'Mostrar contraseña' : 'Ocultar contraseña'}
-              accessibilityHint="Alterna la visibilidad de la contraseña"
-            />
-          }
-          style={styles.input}
-        />
-        <HelperText type="error" visible={!!passwordError}>
-          {passwordError}
-        </HelperText>
-
-        <TextInput
-          label="Confirmar Contraseña"
-          value={confirmPassword}
-          onChangeText={setConfirmPassword}
-          mode="outlined"
-          secureTextEntry={confirmSecureTextEntry}
-          autoCorrect={false}
-          autoComplete="new-password"
-          textContentType="newPassword"
-          accessibilityLabel="Confirmar contraseña"
-          accessibilityHint="Repite la contraseña para confirmar"
-          error={!!confirmPasswordError}
-          left={<TextInput.Icon icon="lock-check" accessibilityLabel="Icono de confirmar contraseña" />}
-          right={
-            <TextInput.Icon 
-              icon={confirmSecureTextEntry ? "eye" : "eye-off"} 
-              onPress={() => setConfirmSecureTextEntry(!confirmSecureTextEntry)}
-              accessibilityLabel={confirmSecureTextEntry ? 'Mostrar contraseña' : 'Ocultar contraseña'}
-              accessibilityHint="Alterna la visibilidad de la contraseña"
-            />
-          }
-          style={styles.input}
-        />
-        <HelperText type="error" visible={!!confirmPasswordError}>
-          {confirmPasswordError}
-        </HelperText>
-
-        <Button 
-          mode="contained" 
-          onPress={handleRegister} 
-          loading={isLoading}
-          disabled={isLoading}
-          style={styles.button}
-          accessibilityLabel="Registrarse"
-          accessibilityHint="Crea tu cuenta con correo y contraseña"
+        <TouchableOpacity 
+          onPress={() => navigation.goBack()} 
+          style={styles.backButton}
+          accessibilityRole="button"
+          accessibilityLabel="Volver"
+          accessibilityHint="Regresa a la pantalla anterior"
+          disabled={isBusy}
         >
-          Registrarse
-        </Button>
+          <MaterialIcons name="arrow-back" size={24} color={theme.colors.onSurface} />
+        </TouchableOpacity>
 
-        <View style={styles.divider}>
-          <View style={[styles.line, themeStyles.dividerLine]} />
-          <Text style={themeStyles.dividerText}>O</Text>
-          <View style={[styles.line, themeStyles.dividerLine]} />
+        <View style={styles.header}>
+          <Text variant="headlineMedium" style={themeStyles.title}>
+            Crear Cuenta
+          </Text>
+          <Text variant="bodyLarge" style={themeStyles.subtitle}>
+            Regístrate para comenzar a operar
+          </Text>
         </View>
 
-        <Button
-          mode="outlined"
-          onPress={handleGoogleRegister}
-          loading={isLoading}
-          disabled={isLoading}
-          icon="google"
-          style={styles.button}
-          accessibilityLabel="Registrarse con Google"
-          accessibilityHint="Crea tu cuenta usando Google"
-        >
-          Registrarse con Google
-        </Button>
-      </View>
+        <View style={styles.form}>
+          <TextInput
+            label="Correo Electrónico"
+            value={email}
+            onChangeText={setEmail}
+            mode="outlined"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="email"
+            textContentType="emailAddress"
+            accessibilityLabel="Correo electrónico"
+            accessibilityHint="Ingresa tu correo para registrarte"
+            error={!!emailError}
+            left={<TextInput.Icon icon="email" accessibilityLabel="Icono de correo" />}
+            style={styles.input}
+            disabled={isBusy}
+          />
+          <HelperText type="error" visible={!!emailError}>
+            {emailError}
+          </HelperText>
 
-      <View style={styles.footer}>
-        <Text variant="bodyMedium" style={themeStyles.footerText}>
-          ¿Ya tienes una cuenta?
-        </Text>
-        <TouchableOpacity
-          onPress={() => {
-            analyticsService.logEvent('navigate_login');
-            navigation.navigate('Login');
-          }}
-          accessibilityRole="button"
-          accessibilityLabel="Inicia sesión"
-          accessibilityHint="Abre la pantalla de inicio de sesión"
-        >
-          <Text variant="bodyMedium" style={themeStyles.loginText}>
-            Inicia Sesión
+          <TextInput
+            label="Contraseña"
+            value={password}
+            onChangeText={setPassword}
+            mode="outlined"
+            secureTextEntry={secureTextEntry}
+            autoCorrect={false}
+            autoComplete="new-password"
+            textContentType="newPassword"
+            accessibilityLabel="Contraseña"
+            accessibilityHint="Crea una contraseña segura"
+            error={!!passwordError}
+            left={<TextInput.Icon icon="lock" accessibilityLabel="Icono de contraseña" />}
+            right={
+              <TextInput.Icon 
+                icon={secureTextEntry ? "eye" : "eye-off"} 
+                onPress={() => setSecureTextEntry(!secureTextEntry)}
+                accessibilityLabel={secureTextEntry ? 'Mostrar contraseña' : 'Ocultar contraseña'}
+                accessibilityHint="Alterna la visibilidad de la contraseña"
+                disabled={isBusy}
+              />
+            }
+            style={styles.input}
+            disabled={isBusy}
+          />
+          <HelperText type="error" visible={!!passwordError}>
+            {passwordError}
+          </HelperText>
+
+          <TextInput
+            label="Confirmar Contraseña"
+            value={confirmPassword}
+            onChangeText={setConfirmPassword}
+            mode="outlined"
+            secureTextEntry={confirmSecureTextEntry}
+            autoCorrect={false}
+            autoComplete="new-password"
+            textContentType="newPassword"
+            accessibilityLabel="Confirmar contraseña"
+            accessibilityHint="Repite la contraseña para confirmar"
+            error={!!confirmPasswordError}
+            left={<TextInput.Icon icon="lock-check" accessibilityLabel="Icono de confirmar contraseña" />}
+            right={
+              <TextInput.Icon 
+                icon={confirmSecureTextEntry ? "eye" : "eye-off"} 
+                onPress={() => setConfirmSecureTextEntry(!confirmSecureTextEntry)}
+                accessibilityLabel={confirmSecureTextEntry ? 'Mostrar contraseña' : 'Ocultar contraseña'}
+                accessibilityHint="Alterna la visibilidad de la contraseña"
+                disabled={isBusy}
+              />
+            }
+            style={styles.input}
+            disabled={isBusy}
+          />
+          <HelperText type="error" visible={!!confirmPasswordError}>
+            {confirmPasswordError}
+          </HelperText>
+
+          <Button 
+            mode="contained" 
+            onPress={handleRegister} 
+            loading={isBusy}
+            disabled={isBusy}
+            style={styles.button}
+            accessibilityLabel="Registrarse"
+            accessibilityHint="Crea tu cuenta con correo y contraseña"
+          >
+            Registrarse
+          </Button>
+
+          <View style={styles.divider}>
+            <View style={[styles.line, themeStyles.dividerLine]} />
+            <Text style={themeStyles.dividerText}>O</Text>
+            <View style={[styles.line, themeStyles.dividerLine]} />
+          </View>
+
+          <Button
+            mode="outlined"
+            onPress={handleGoogleRegister}
+            loading={isBusy}
+            disabled={isBusy}
+            icon="google"
+            style={styles.button}
+            accessibilityLabel="Registrarse con Google"
+            accessibilityHint="Crea tu cuenta usando Google"
+          >
+            Registrarse con Google
+          </Button>
+        </View>
+
+        <View style={styles.footer}>
+          <Text variant="bodyMedium" style={themeStyles.footerText}>
+            ¿Ya tienes una cuenta?
           </Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.legal}>
-        <Text variant="bodySmall" style={themeStyles.legalText}>
-          Al continuar aceptas nuestras{' '}
-        </Text>
-        <TouchableOpacity
-          onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL)}
-          accessibilityRole="button"
-          accessibilityLabel="Políticas de privacidad"
-          accessibilityHint="Abre las políticas de privacidad"
-        >
-          <Text variant="bodySmall" style={themeStyles.linkText}>
-            Políticas de privacidad
+          <TouchableOpacity
+            onPress={() => {
+              analyticsService.logEvent('navigate_login');
+              navigation.navigate('Login');
+            }}
+            accessibilityRole="button"
+            accessibilityLabel="Inicia sesión"
+            accessibilityHint="Abre la pantalla de inicio de sesión"
+            disabled={isBusy}
+          >
+            <Text variant="bodyMedium" style={themeStyles.loginText}>
+              Inicia Sesión
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.legal}>
+          <Text variant="bodySmall" style={themeStyles.legalText}>
+            Al continuar aceptas nuestras{' '}
           </Text>
-        </TouchableOpacity>
-        <Text variant="bodySmall" style={themeStyles.legalText}>
-          {' '}y{' '}
-        </Text>
-        <TouchableOpacity
-          onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL)}
-          accessibilityRole="button"
-          accessibilityLabel="Términos y condiciones"
-          accessibilityHint="Abre los términos y condiciones"
-        >
-          <Text variant="bodySmall" style={themeStyles.linkText}>
-            Términos y condiciones
+          <TouchableOpacity
+            onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL)}
+            accessibilityRole="button"
+            accessibilityLabel="Políticas de privacidad"
+            accessibilityHint="Abre las políticas de privacidad"
+            disabled={isBusy}
+          >
+            <Text variant="bodySmall" style={themeStyles.linkText}>
+              Políticas de privacidad
+            </Text>
+          </TouchableOpacity>
+          <Text variant="bodySmall" style={themeStyles.legalText}>
+            {' '}y{' '}
           </Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+          <TouchableOpacity
+            onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL)}
+            accessibilityRole="button"
+            accessibilityLabel="Términos y condiciones"
+            accessibilityHint="Abre los términos y condiciones"
+            disabled={isBusy}
+          >
+            <Text variant="bodySmall" style={themeStyles.linkText}>
+              Términos y condiciones
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+      {isBusy && (
+        <View style={[
+          styles.loadingOverlay,
+          { backgroundColor: theme.colors.backdrop ?? 'rgba(0, 0, 0, 0.35)' }
+        ]}>
+          <View style={[
+            styles.loadingCard,
+            {
+              backgroundColor: theme.colors.surface,
+              borderColor: theme.colors.outline,
+              borderRadius: theme.roundness * 6,
+            }
+          ]}>
+            <LottieView
+              source={require('../../assets/animations/splash.json')}
+              autoPlay
+              loop
+              style={styles.loadingAnimation}
+              resizeMode="contain"
+            />
+            <Text style={[styles.loadingText, { color: theme.colors.onSurface }]}>
+              Cargando
+            </Text>
+          </View>
+        </View>
+      )}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
   container: {
     flexGrow: 1,
     paddingHorizontal: 20,
@@ -357,6 +406,29 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'center',
     marginTop: 12,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  loadingCard: {
+    width: '100%',
+    maxWidth: 320,
+    paddingVertical: 24,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  loadingAnimation: {
+    width: 140,
+    height: 140,
+  },
+  loadingText: {
+    marginTop: 8,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

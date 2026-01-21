@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { analyticsService } from '../../services/firebase/AnalyticsService';
 import { AppConfig } from '../../constants/AppConfig';
+import LottieView from 'lottie-react-native';
 
 const ForgotPasswordScreen = ({ navigation }: any) => {
   const theme = useTheme();
@@ -40,6 +41,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
   const [loading, setLoading] = useState(false);
+  const isBusy = loading;
 
   useEffect(() => {
     analyticsService.logScreenView('ForgotPassword');
@@ -98,6 +100,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
         accessibilityRole="button"
         accessibilityLabel="Volver"
         accessibilityHint="Regresa a la pantalla anterior"
+        disabled={isBusy}
       >
         <MaterialIcons name="arrow-back" size={24} color={theme.colors.onSurface} />
       </TouchableOpacity>
@@ -127,6 +130,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
           error={!!emailError}
           left={<TextInput.Icon icon="email" accessibilityLabel="Icono de correo" />}
           style={styles.input}
+          disabled={isBusy}
         />
         <HelperText type="error" visible={!!emailError}>
           {emailError}
@@ -135,8 +139,8 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
         <Button 
           mode="contained" 
           onPress={handleReset} 
-          loading={loading}
-          disabled={loading}
+          loading={isBusy}
+          disabled={isBusy}
           style={styles.button}
           accessibilityLabel="Enviar enlace de recuperación"
           accessibilityHint="Envía el enlace para restablecer tu contraseña"
@@ -153,6 +157,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
           accessibilityRole="button"
           accessibilityLabel="Políticas de privacidad"
           accessibilityHint="Abre las políticas de privacidad"
+          disabled={isBusy}
         >
           <Text variant="bodySmall" style={themeStyles.linkText}>
             Políticas de privacidad
@@ -166,12 +171,39 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
           accessibilityRole="button"
           accessibilityLabel="Términos y condiciones"
           accessibilityHint="Abre los términos y condiciones"
+          disabled={isBusy}
         >
           <Text variant="bodySmall" style={themeStyles.linkText}>
             Términos y condiciones
           </Text>
         </TouchableOpacity>
       </View>
+      {isBusy && (
+        <View style={[
+          styles.loadingOverlay,
+          { backgroundColor: theme.colors.backdrop ?? 'rgba(0, 0, 0, 0.35)' }
+        ]}>
+          <View style={[
+            styles.loadingCard,
+            {
+              backgroundColor: theme.colors.surface,
+              borderColor: theme.colors.outline,
+              borderRadius: theme.roundness * 6,
+            }
+          ]}>
+            <LottieView
+              source={require('../../assets/animations/splash.json')}
+              autoPlay
+              loop
+              style={styles.loadingAnimation}
+              resizeMode="contain"
+            />
+            <Text style={[styles.loadingText, { color: theme.colors.onSurface }]}>
+              Cargando
+            </Text>
+          </View>
+        </View>
+      )}
     </View>
   );
 };
@@ -202,6 +234,29 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'center',
     marginTop: 16,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  loadingCard: {
+    width: '100%',
+    maxWidth: 320,
+    paddingVertical: 24,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  loadingAnimation: {
+    width: 140,
+    height: 140,
+  },
+  loadingText: {
+    marginTop: 8,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

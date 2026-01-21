@@ -7,11 +7,12 @@ import { analyticsService } from '../../services/firebase/AnalyticsService';
 import DeviceInfo from 'react-native-device-info';
 import { useAppTheme } from '../../theme/theme';
 import { AppConfig } from '../../constants/AppConfig';
+import LottieView from 'lottie-react-native';
 
 const LoginScreen = ({ navigation }: any) => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
-  const { signIn, googleSignIn, signInAnonymously, isLoading } = useAuth();
+  const { signIn, googleSignIn, signInAnonymously, isLoading: isAuthLoading } = useAuth();
 
   useEffect(() => {
     analyticsService.logScreenView('Login');
@@ -66,6 +67,8 @@ const LoginScreen = ({ navigation }: any) => {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isBusy = isAuthLoading || isSubmitting;
 
   const openExternalUrl = async (url: string) => {
     try {
@@ -95,6 +98,7 @@ const LoginScreen = ({ navigation }: any) => {
 
   const handleLogin = async () => {
     if (validate()) {
+      setIsSubmitting(true);
       try {
         await analyticsService.logEvent('login_attempt', { method: 'password' });
         await signIn(email, password);
@@ -102,224 +106,270 @@ const LoginScreen = ({ navigation }: any) => {
       } catch {
         await analyticsService.logEvent('login_error', { method: 'password' });
         // Error handled in context
+      } finally {
+        setIsSubmitting(false);
       }
     }
   };
 
   const handleGoogleLogin = async () => {
+    setIsSubmitting(true);
     try {
       await analyticsService.logEvent('login_attempt', { method: 'google' });
       await googleSignIn();
       await analyticsService.logEvent('login_success', { method: 'google' });
     } catch {
       await analyticsService.logEvent('login_error', { method: 'google' });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleGuestLogin = async () => {
+    setIsSubmitting(true);
     try {
       await analyticsService.logEvent('login_attempt', { method: 'anonymous' });
       await signInAnonymously();
       await analyticsService.logEvent('login_success', { method: 'anonymous' });
     } catch {
       await analyticsService.logEvent('login_error', { method: 'anonymous' });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
-    <ScrollView 
-      contentContainerStyle={[
-        styles.container, 
-        themeStyles.container,
-        { 
-          paddingTop: insets.top + 20,
-          paddingBottom: insets.bottom + 20
-        }
-      ]}
-      keyboardShouldPersistTaps="handled"
-    >
-      <StatusBar 
-        backgroundColor="transparent" 
-        translucent 
-        barStyle={theme.dark ? 'light-content' : 'dark-content'} 
-      />
-      <View style={styles.header}>
-        <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
-        <View style={styles.titleRow}>
-          <Text variant="headlineMedium" style={themeStyles.title}>
-            {appName}
+    <View style={[styles.screen, themeStyles.container]}>
+      <ScrollView 
+        contentContainerStyle={[
+          styles.container, 
+          themeStyles.container,
+          { 
+            paddingTop: insets.top + 20,
+            paddingBottom: insets.bottom + 20
+          }
+        ]}
+        keyboardShouldPersistTaps="handled"
+      >
+        <StatusBar 
+          backgroundColor="transparent" 
+          translucent 
+          barStyle={theme.dark ? 'light-content' : 'dark-content'} 
+        />
+        <View style={styles.header}>
+          <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
+          <View style={styles.titleRow}>
+            <Text variant="headlineMedium" style={themeStyles.title}>
+              {appName}
+            </Text>
+            <View
+              style={[styles.badge, themeStyles.badge]}
+              accessibilityLabel="BETA"
+            >
+              <Text variant="labelSmall" style={[styles.badgeText, themeStyles.badgeText]}>
+                BETA
+              </Text>
+            </View>
+          </View>
+          <Text variant="bodyLarge" style={themeStyles.subtitle}>
+            Inicia sesión para continuar
           </Text>
-          <View
-            style={[styles.badge, themeStyles.badge]}
-            accessibilityLabel="BETA"
+        </View>
+
+        <View style={styles.form}>
+          <TextInput
+            label="Correo Electrónico"
+            value={email}
+            onChangeText={setEmail}
+            mode="outlined"
+            keyboardType="email-address"
+            autoCapitalize="none"
+            autoCorrect={false}
+            autoComplete="email"
+            textContentType="emailAddress"
+            accessibilityLabel="Correo electrónico"
+            accessibilityHint="Ingresa tu correo para iniciar sesión"
+            error={!!emailError}
+            left={<TextInput.Icon icon="email" accessibilityLabel="Icono de correo" />}
+            style={styles.input}
+            disabled={isBusy}
+          />
+          <HelperText type="error" visible={!!emailError}>
+            {emailError}
+          </HelperText>
+
+          <TextInput
+            label="Contraseña"
+            value={password}
+            onChangeText={setPassword}
+            mode="outlined"
+            secureTextEntry={secureTextEntry}
+            autoCorrect={false}
+            autoComplete="password"
+            textContentType="password"
+            accessibilityLabel="Contraseña"
+            accessibilityHint="Ingresa tu contraseña para iniciar sesión"
+            error={!!passwordError}
+            left={<TextInput.Icon icon="lock" accessibilityLabel="Icono de contraseña" />}
+            right={
+              <TextInput.Icon 
+                icon={secureTextEntry ? "eye" : "eye-off"} 
+                onPress={() => setSecureTextEntry(!secureTextEntry)}
+                accessibilityLabel={secureTextEntry ? 'Mostrar contraseña' : 'Ocultar contraseña'}
+                accessibilityHint="Alterna la visibilidad de la contraseña"
+                disabled={isBusy}
+              />
+            }
+            style={styles.input}
+            disabled={isBusy}
+          />
+          <HelperText type="error" visible={!!passwordError}>
+            {passwordError}
+          </HelperText>
+
+          <TouchableOpacity 
+            onPress={() => {
+              analyticsService.logEvent('navigate_forgot_password');
+              navigation.navigate('ForgotPassword');
+            }}
+            style={styles.forgotPassword}
+            accessibilityRole="button"
+            accessibilityLabel="¿Olvidaste tu contraseña?"
+            accessibilityHint="Abre la pantalla para recuperar tu contraseña"
+            disabled={isBusy}
           >
-            <Text variant="labelSmall" style={[styles.badgeText, themeStyles.badgeText]}>
-              BETA
+            <Text variant="bodyMedium" style={themeStyles.linkText}>
+              ¿Olvidaste tu contraseña?
+            </Text>
+          </TouchableOpacity>
+
+          <Button 
+            mode="contained" 
+            onPress={handleLogin} 
+            loading={isBusy}
+            disabled={isBusy}
+            style={styles.button}
+            accessibilityLabel="Iniciar sesión"
+            accessibilityHint="Inicia sesión con correo y contraseña"
+          >
+            Iniciar Sesión
+          </Button>
+
+          <View style={styles.divider}>
+            <View style={[styles.line, themeStyles.dividerLine]} />
+            <Text style={themeStyles.dividerText}>O</Text>
+            <View style={[styles.line, themeStyles.dividerLine]} />
+          </View>
+
+          <Button 
+            mode="outlined" 
+            onPress={handleGoogleLogin} 
+            loading={isBusy}
+            disabled={isBusy}
+            icon="google"
+            style={styles.button}
+            accessibilityLabel="Continuar con Google"
+            accessibilityHint="Inicia sesión con tu cuenta de Google"
+          >
+            Continuar con Google
+          </Button>
+
+          <Button 
+            mode="text" 
+            onPress={handleGuestLogin} 
+            disabled={isBusy}
+            style={styles.button}
+            accessibilityLabel="Ingresar como invitado"
+            accessibilityHint="Accede sin crear una cuenta"
+          >
+            Ingresar como Invitado
+          </Button>
+        </View>
+
+        <View style={styles.footer}>
+          <Text variant="bodyMedium" style={themeStyles.footerText}>
+            ¿No tienes una cuenta?
+          </Text>
+          <TouchableOpacity
+            onPress={() => {
+              analyticsService.logEvent('navigate_register');
+              navigation.navigate('Register');
+            }}
+            accessibilityRole="button"
+            accessibilityLabel="Regístrate"
+            accessibilityHint="Abre la pantalla de registro"
+            disabled={isBusy}
+          >
+            <Text variant="bodyMedium" style={themeStyles.registerText}>
+              Regístrate
+            </Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.legal}>
+          <Text variant="bodySmall" style={themeStyles.legalText}>
+            Al continuar aceptas nuestras{' '}
+          </Text>
+          <TouchableOpacity
+            onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL)}
+            accessibilityRole="button"
+            accessibilityLabel="Políticas de privacidad"
+            accessibilityHint="Abre las políticas de privacidad"
+            disabled={isBusy}
+          >
+            <Text variant="bodySmall" style={themeStyles.linkText}>
+              Políticas de privacidad
+            </Text>
+          </TouchableOpacity>
+          <Text variant="bodySmall" style={themeStyles.legalText}>
+            {' '}y{' '}
+          </Text>
+          <TouchableOpacity
+            onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL)}
+            accessibilityRole="button"
+            accessibilityLabel="Términos y condiciones"
+            accessibilityHint="Abre los términos y condiciones"
+            disabled={isBusy}
+          >
+            <Text variant="bodySmall" style={themeStyles.linkText}>
+              Términos y condiciones
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+      {isBusy && (
+        <View style={[
+          styles.loadingOverlay,
+          { backgroundColor: theme.colors.backdrop ?? 'rgba(0, 0, 0, 0.35)' }
+        ]}>
+          <View style={[
+            styles.loadingCard,
+            {
+              backgroundColor: theme.colors.surface,
+              borderColor: theme.colors.outline,
+              borderRadius: theme.roundness * 6,
+            }
+          ]}>
+            <LottieView
+              source={require('../../assets/animations/splash.json')}
+              autoPlay
+              loop
+              style={styles.loadingAnimation}
+              resizeMode="contain"
+            />
+            <Text style={[styles.loadingText, { color: theme.colors.onSurface }]}>
+              Cargando
             </Text>
           </View>
         </View>
-        <Text variant="bodyLarge" style={themeStyles.subtitle}>
-          Inicia sesión para continuar
-        </Text>
-      </View>
-
-      <View style={styles.form}>
-        <TextInput
-          label="Correo Electrónico"
-          value={email}
-          onChangeText={setEmail}
-          mode="outlined"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          autoCorrect={false}
-          autoComplete="email"
-          textContentType="emailAddress"
-          accessibilityLabel="Correo electrónico"
-          accessibilityHint="Ingresa tu correo para iniciar sesión"
-          error={!!emailError}
-          left={<TextInput.Icon icon="email" accessibilityLabel="Icono de correo" />}
-          style={styles.input}
-        />
-        <HelperText type="error" visible={!!emailError}>
-          {emailError}
-        </HelperText>
-
-        <TextInput
-          label="Contraseña"
-          value={password}
-          onChangeText={setPassword}
-          mode="outlined"
-          secureTextEntry={secureTextEntry}
-          autoCorrect={false}
-          autoComplete="password"
-          textContentType="password"
-          accessibilityLabel="Contraseña"
-          accessibilityHint="Ingresa tu contraseña para iniciar sesión"
-          error={!!passwordError}
-          left={<TextInput.Icon icon="lock" accessibilityLabel="Icono de contraseña" />}
-          right={
-            <TextInput.Icon 
-              icon={secureTextEntry ? "eye" : "eye-off"} 
-              onPress={() => setSecureTextEntry(!secureTextEntry)}
-              accessibilityLabel={secureTextEntry ? 'Mostrar contraseña' : 'Ocultar contraseña'}
-              accessibilityHint="Alterna la visibilidad de la contraseña"
-            />
-          }
-          style={styles.input}
-        />
-        <HelperText type="error" visible={!!passwordError}>
-          {passwordError}
-        </HelperText>
-
-        <TouchableOpacity 
-          onPress={() => {
-            analyticsService.logEvent('navigate_forgot_password');
-            navigation.navigate('ForgotPassword');
-          }}
-          style={styles.forgotPassword}
-          accessibilityRole="button"
-          accessibilityLabel="¿Olvidaste tu contraseña?"
-          accessibilityHint="Abre la pantalla para recuperar tu contraseña"
-        >
-          <Text variant="bodyMedium" style={themeStyles.linkText}>
-            ¿Olvidaste tu contraseña?
-          </Text>
-        </TouchableOpacity>
-
-        <Button 
-          mode="contained" 
-          onPress={handleLogin} 
-          loading={isLoading}
-          disabled={isLoading}
-          style={styles.button}
-          accessibilityLabel="Iniciar sesión"
-          accessibilityHint="Inicia sesión con correo y contraseña"
-        >
-          Iniciar Sesión
-        </Button>
-
-        <View style={styles.divider}>
-          <View style={[styles.line, themeStyles.dividerLine]} />
-          <Text style={themeStyles.dividerText}>O</Text>
-          <View style={[styles.line, themeStyles.dividerLine]} />
-        </View>
-
-        <Button 
-          mode="outlined" 
-          onPress={handleGoogleLogin} 
-          loading={isLoading}
-          disabled={isLoading}
-          icon="google"
-          style={styles.button}
-          accessibilityLabel="Continuar con Google"
-          accessibilityHint="Inicia sesión con tu cuenta de Google"
-        >
-          Continuar con Google
-        </Button>
-
-        <Button 
-          mode="text" 
-          onPress={handleGuestLogin} 
-          disabled={isLoading}
-          style={styles.button}
-          accessibilityLabel="Ingresar como invitado"
-          accessibilityHint="Accede sin crear una cuenta"
-        >
-          Ingresar como Invitado
-        </Button>
-      </View>
-
-      <View style={styles.footer}>
-        <Text variant="bodyMedium" style={themeStyles.footerText}>
-          ¿No tienes una cuenta?
-        </Text>
-        <TouchableOpacity
-          onPress={() => {
-            analyticsService.logEvent('navigate_register');
-            navigation.navigate('Register');
-          }}
-          accessibilityRole="button"
-          accessibilityLabel="Regístrate"
-          accessibilityHint="Abre la pantalla de registro"
-        >
-          <Text variant="bodyMedium" style={themeStyles.registerText}>
-            Regístrate
-          </Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.legal}>
-        <Text variant="bodySmall" style={themeStyles.legalText}>
-          Al continuar aceptas nuestras{' '}
-        </Text>
-        <TouchableOpacity
-          onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL)}
-          accessibilityRole="button"
-          accessibilityLabel="Políticas de privacidad"
-          accessibilityHint="Abre las políticas de privacidad"
-        >
-          <Text variant="bodySmall" style={themeStyles.linkText}>
-            Políticas de privacidad
-          </Text>
-        </TouchableOpacity>
-        <Text variant="bodySmall" style={themeStyles.legalText}>
-          {' '}y{' '}
-        </Text>
-        <TouchableOpacity
-          onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL)}
-          accessibilityRole="button"
-          accessibilityLabel="Términos y condiciones"
-          accessibilityHint="Abre los términos y condiciones"
-        >
-          <Text variant="bodySmall" style={themeStyles.linkText}>
-            Términos y condiciones
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      )}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  screen: {
+    flex: 1,
+  },
   container: {
     flexGrow: 1,
     paddingHorizontal: 20,
@@ -383,6 +433,29 @@ const styles = StyleSheet.create({
   badgeText: {
     fontWeight: '700',
     letterSpacing: 0.5,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  loadingCard: {
+    width: '100%',
+    maxWidth: 320,
+    paddingVertical: 24,
+    paddingHorizontal: 16,
+    borderWidth: 1,
+    alignItems: 'center',
+  },
+  loadingAnimation: {
+    width: 140,
+    height: 140,
+  },
+  loadingText: {
+    marginTop: 8,
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 
