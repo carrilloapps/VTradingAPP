@@ -11,12 +11,15 @@ import {
   sendPasswordResetEmail
 } from '@react-native-firebase/auth';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { AppConfig } from '../../constants/AppConfig';
 
 class AuthService {
+  private googleWebClientId: string | null;
+
   constructor() {
+    this.googleWebClientId = AppConfig.GOOGLE_WEB_CLIENT_ID?.trim() || null;
     GoogleSignin.configure({
-      // Reemplaza con tu Web Client ID de la consola de Firebase -> Autenticación -> Sign-in method -> Google
-      webClientId: 'YOUR_WEB_CLIENT_ID', 
+      webClientId: this.googleWebClientId || undefined,
     });
   }
 
@@ -63,6 +66,9 @@ class AuthService {
    */
   async signInWithGoogle(): Promise<FirebaseAuthTypes.UserCredential> {
     try {
+      if (!this.googleWebClientId) {
+        throw new Error('Google Sign-In no está configurado. Actualiza AppConfig.GOOGLE_WEB_CLIENT_ID con el Web Client ID de Firebase.');
+      }
       // Check if your device supports Google Play
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
       // Get the users ID token
