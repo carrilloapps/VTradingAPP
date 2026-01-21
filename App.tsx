@@ -37,26 +37,27 @@ function App(): React.JSX.Element {
       if (!perf.dataCollectionEnabled) {
         await perf.setPerformanceCollectionEnabled(true);
       }
+      const initTrace = perf.newTrace('app_initialize');
+      await initTrace.start();
 
-      // App Check (Initialize first)
-      await appCheckService.initialize();
+      try {
+        await appCheckService.initialize();
 
-      await mobileAds().initialize();
+        await mobileAds().initialize();
 
-      // Remote Config
-      await remoteConfigService.initialize();
+        await remoteConfigService.initialize();
 
-      // In-App Messaging
-      await inAppMessagingService.initialize();
+        await inAppMessagingService.initialize();
 
-      // App Distribution (Check for updates)
-      await appDistributionService.checkForUpdate();
+        await appDistributionService.checkForUpdate();
 
-      // FCM
-      const hasPermission = await fcmService.requestUserPermission();
-      if (hasPermission) {
-        await fcmService.getFCMToken();
-        await fcmService.subscribeToDemographics();
+        const hasPermission = await fcmService.requestUserPermission();
+        if (hasPermission) {
+          await fcmService.getFCMToken();
+          await fcmService.subscribeToDemographics();
+        }
+      } finally {
+        await initTrace.stop();
       }
     };
 
