@@ -12,6 +12,7 @@ interface AuthContextData {
   googleSignIn: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   signInAnonymously: () => Promise<void>;
+  updateProfileName: (newName: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextData>({} as AuthContextData);
@@ -92,6 +93,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const updateProfileName = async (newName: string) => {
+    try {
+      const updatedUser = await authService.updateProfileName(newName);
+      setUser(updatedUser);
+      showToast('Perfil actualizado correctamente', 'success');
+    } catch (error: any) {
+      showToast(error.message, 'error');
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider value={{
       user,
@@ -102,6 +114,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       googleSignIn,
       resetPassword,
       signInAnonymously,
+      updateProfileName,
     }}>
       {children}
     </AuthContext.Provider>

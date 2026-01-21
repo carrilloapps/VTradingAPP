@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="com.google.android.gms.permission.AD_ID" />
 
     <application
       android:name=".MainApplication"
@@ -20,6 +22,10 @@
         android:name="com.google.firebase.messaging.default_notification_color"
         android:resource="@color/notification_color"
         tools:replace="android:resource" />
+      <meta-data
+        android:name="com.google.android.gms.ads.APPLICATION_ID"
+        android:value="ca-app-pub-3649030791244826~2135334355"
+        tools:replace="android:value" />
 
       <activity
         android:name=".MainActivity"

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, StatusBar } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, StatusBar, Linking } from 'react-native';
 import { Text, TextInput, Button, useTheme, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { analyticsService } from '../../services/firebase/AnalyticsService';
+import { AppConfig } from '../../constants/AppConfig';
 
 const ForgotPasswordScreen = ({ navigation }: any) => {
   const theme = useTheme();
@@ -22,6 +23,13 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
     subtitle: {
       color: theme.colors.onSurfaceVariant,
       marginTop: 10,
+    },
+    legalText: {
+      color: theme.colors.onSurfaceVariant,
+    },
+    linkText: {
+      color: theme.colors.primary,
+      fontWeight: 'bold' as const,
     },
     contentContainer: {
       paddingTop: insets.top + 20,
@@ -60,6 +68,14 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
       } finally {
         setLoading(false);
       }
+    }
+  };
+
+  const openExternalUrl = async (url: string) => {
+    try {
+      await Linking.openURL(url);
+    } catch {
+      analyticsService.logEvent('open_external_url_error');
     }
   };
 
@@ -128,6 +144,34 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
           Enviar Enlace
         </Button>
       </View>
+      <View style={styles.legal}>
+        <Text variant="bodySmall" style={themeStyles.legalText}>
+          Al continuar aceptas nuestras{' '}
+        </Text>
+        <TouchableOpacity
+          onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL)}
+          accessibilityRole="button"
+          accessibilityLabel="Políticas de privacidad"
+          accessibilityHint="Abre las políticas de privacidad"
+        >
+          <Text variant="bodySmall" style={themeStyles.linkText}>
+            Políticas de privacidad
+          </Text>
+        </TouchableOpacity>
+        <Text variant="bodySmall" style={themeStyles.legalText}>
+          {' '}y{' '}
+        </Text>
+        <TouchableOpacity
+          onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL)}
+          accessibilityRole="button"
+          accessibilityLabel="Términos y condiciones"
+          accessibilityHint="Abre los términos y condiciones"
+        >
+          <Text variant="bodySmall" style={themeStyles.linkText}>
+            Términos y condiciones
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -152,6 +196,12 @@ const styles = StyleSheet.create({
   button: {
     marginTop: 10,
     paddingVertical: 5,
+  },
+  legal: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginTop: 16,
   },
 });
 

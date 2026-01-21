@@ -123,6 +123,29 @@ class AuthService {
     }
   }
 
+  async updateProfileName(displayName: string): Promise<FirebaseAuthTypes.User> {
+    try {
+      const trimmedName = displayName.trim();
+      if (!trimmedName) {
+        throw new Error('El nombre no puede estar vacío');
+      }
+      const currentUser = getAuth().currentUser;
+      if (!currentUser) {
+        throw new Error('Usuario no autenticado');
+      }
+      await currentUser.updateProfile({ displayName: trimmedName });
+      await currentUser.reload();
+      const updatedUser = getAuth().currentUser;
+      if (!updatedUser) {
+        throw new Error('Usuario no autenticado');
+      }
+      return updatedUser;
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      throw this.handleError(error);
+    }
+  }
+
   /**
    * Send password reset email
    */

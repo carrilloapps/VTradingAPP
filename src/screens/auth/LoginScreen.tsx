@@ -1,11 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, ScrollView, StatusBar, Image } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView, StatusBar, Image, Linking } from 'react-native';
 import { Text, TextInput, Button, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import { analyticsService } from '../../services/firebase/AnalyticsService';
 import DeviceInfo from 'react-native-device-info';
 import { useAppTheme } from '../../theme/theme';
+import { AppConfig } from '../../constants/AppConfig';
 
 const LoginScreen = ({ navigation }: any) => {
   const theme = useAppTheme();
@@ -43,6 +44,9 @@ const LoginScreen = ({ navigation }: any) => {
     footerText: {
       color: theme.colors.onSurface,
     },
+    legalText: {
+      color: theme.colors.onSurfaceVariant,
+    },
     registerText: {
       color: theme.colors.primary,
       fontWeight: 'bold' as const,
@@ -62,6 +66,14 @@ const LoginScreen = ({ navigation }: any) => {
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
+
+  const openExternalUrl = async (url: string) => {
+    try {
+      await Linking.openURL(url);
+    } catch {
+      analyticsService.logEvent('open_external_url_error');
+    }
+  };
 
   const validate = () => {
     let isValid = true;
@@ -275,6 +287,34 @@ const LoginScreen = ({ navigation }: any) => {
           </Text>
         </TouchableOpacity>
       </View>
+      <View style={styles.legal}>
+        <Text variant="bodySmall" style={themeStyles.legalText}>
+          Al continuar aceptas nuestras{' '}
+        </Text>
+        <TouchableOpacity
+          onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL)}
+          accessibilityRole="button"
+          accessibilityLabel="Políticas de privacidad"
+          accessibilityHint="Abre las políticas de privacidad"
+        >
+          <Text variant="bodySmall" style={themeStyles.linkText}>
+            Políticas de privacidad
+          </Text>
+        </TouchableOpacity>
+        <Text variant="bodySmall" style={themeStyles.legalText}>
+          {' '}y{' '}
+        </Text>
+        <TouchableOpacity
+          onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL)}
+          accessibilityRole="button"
+          accessibilityLabel="Términos y condiciones"
+          accessibilityHint="Abre los términos y condiciones"
+        >
+          <Text variant="bodySmall" style={themeStyles.linkText}>
+            Términos y condiciones
+          </Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 };
@@ -326,6 +366,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     marginTop: 20,
+  },
+  legal: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    marginTop: 12,
   },
   badge: {
     borderWidth: 1,

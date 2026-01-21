@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, ViewStyle } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ViewStyle, Platform } from 'react-native';
 import { Text, useTheme, TouchableRipple, Avatar } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import NotificationButton from './NotificationButton';
 import { md5 } from '../../utils/md5';
+import { useAuth } from '../../context/AuthContext';
+import { AppConfig } from '../../constants/AppConfig';
+import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 
 export type HeaderVariant = 'profile' | 'section' | 'simple';
 
@@ -35,7 +38,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   avatarUrl,
   email,
   notificationCount: _notificationCount = 0,
-  isPremium = false,
+  isPremium,
   onActionPress,
   onNotificationPress: _onNotificationPress,
   onBackPress,
@@ -48,6 +51,11 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   const theme = useTheme();
   const colors = theme.colors as any;
   const insets = useSafeAreaInsets();
+  const { user } = useAuth();
+  const resolvedIsPremium = typeof isPremium === 'boolean' ? isPremium : !!(user && !user.isAnonymous);
+  const adUnitId = Platform.OS === 'ios' ? AppConfig.ADMOB_BANNER_ID_IOS : AppConfig.ADMOB_BANNER_ID_ANDROID;
+  const bannerId = __DEV__ ? TestIds.BANNER : adUnitId;
+  const shouldShowAd = !resolvedIsPremium && !!bannerId;
   
   const [imageError, setImageError] = useState(false);
 
@@ -100,6 +108,10 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
       backgroundColor: buttonBgColor,
       borderWidth: 1,
       borderColor: theme.dark ? 'transparent' : theme.colors.outline,
+    },
+    adContainer: {
+      backgroundColor: theme.colors.background,
+      borderBottomColor: theme.colors.outline,
     },
     badge: {
       backgroundColor: accentRed,
@@ -162,8 +174,8 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
       </View>
       
       <View style={styles.textContainer}>
-        <Text style={[styles.subtitle, isPremium ? themeStyles.subtitlePremium : themeStyles.subtitleDefault]}>
-          {isPremium ? 'PLAN PREMIUM' : 'PLAN GRATUITO'}
+        <Text style={[styles.subtitle, resolvedIsPremium ? themeStyles.subtitlePremium : themeStyles.subtitleDefault]}>
+          {resolvedIsPremium ? 'PLAN PREMIUM' : 'PLAN GRATUITO'}
         </Text>
         <Text variant="titleMedium" style={[styles.greeting, themeStyles.greeting]}>
           Hola, {userName}
@@ -194,46 +206,53 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   );
 
   return (
-    <View style={[styles.container, themeStyles.container, { 
-      paddingTop: insets.top + 10,
-    }, style]}>
-      
-      {/* Left Content */}
-      <View style={styles.leftContent}>
-        {onBackPress && (
-          <TouchableRipple
-            onPress={onBackPress}
-            style={[styles.iconButton, themeStyles.iconButton, { marginRight: 8 }]}
-            borderless
-            rippleColor="rgba(0, 0, 0, .1)"
-          >
-            <MaterialIcons name="arrow-back" size={22} color={theme.colors.onSurface} />
-          </TouchableRipple>
-        )}
-        {variant === 'profile' && renderProfileContent()}
-        {variant === 'section' && renderSectionContent()}
-        {variant === 'simple' && renderSimpleContent()}
-      </View>
-
-      {/* Right Content (Actions) */}
-      {(variant !== 'simple' || onActionPress || showNotification) && (
-        <View style={styles.rightContent}>
-          {onActionPress && (
-            <TouchableRipple 
-              onPress={onActionPress} 
-              style={[styles.iconButton, themeStyles.iconButton]}
+    <View style={[styles.wrapper, style]}>
+      <View style={[styles.container, themeStyles.container, { 
+        paddingTop: insets.top + 10,
+      }]}>
+        <View style={styles.leftContent}>
+          {onBackPress && (
+            <TouchableRipple
+              onPress={onBackPress}
+              style={[styles.iconButton, themeStyles.iconButton, { marginRight: 8 }]}
               borderless
               rippleColor="rgba(0, 0, 0, .1)"
             >
-              <MaterialIcons name={rightActionIcon} size={22} color={theme.colors.onSurfaceVariant} />
+              <MaterialIcons name="arrow-back" size={22} color={theme.colors.onSurface} />
             </TouchableRipple>
           )}
+          {variant === 'profile' && renderProfileContent()}
+          {variant === 'section' && renderSectionContent()}
+          {variant === 'simple' && renderSimpleContent()}
+        </View>
 
-          {showNotification && (
-            <NotificationButton 
-              icon={notificationIcon}
-            />
-          )}
+        {(variant !== 'simple' || onActionPress || showNotification) && (
+          <View style={styles.rightContent}>
+            {onActionPress && (
+              <TouchableRipple 
+                onPress={onActionPress} 
+                style={[styles.iconButton, themeStyles.iconButton]}
+                borderless
+                rippleColor="rgba(0, 0, 0, .1)"
+              >
+                <MaterialIcons name={rightActionIcon} size={22} color={theme.colors.onSurfaceVariant} />
+              </TouchableRipple>
+            )}
+
+            {showNotification && (
+              <NotificationButton 
+                icon={notificationIcon}
+              />
+            )}
+          </View>
+        )}
+      </View>
+      {shouldShowAd && (
+        <View style={[styles.adContainer, themeStyles.adContainer]}>
+          <BannerAd
+            unitId={bannerId}
+            size={BannerAdSize.BANNER}
+          />
         </View>
       )}
     </View>
@@ -241,6 +260,9 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
 };
 
 const styles = StyleSheet.create({
+  wrapper: {
+    width: '100%',
+  },
   container: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -329,6 +351,11 @@ const styles = StyleSheet.create({
   },
   simpleTitle: {
     fontWeight: '800',
+  },
+  adContainer: {
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    paddingBottom: 12,
   },
 });
 

@@ -22,12 +22,15 @@ import { appCheckService } from './src/services/firebase/AppCheckService';
 import { remoteConfigService } from './src/services/firebase/RemoteConfigService';
 import { appDistributionService } from './src/services/firebase/AppDistributionService';
 import NotificationController from './src/components/ui/NotificationController';
+import mobileAds from 'react-native-google-mobile-ads';
 
 function App(): React.JSX.Element {
   useEffect(() => {
     const initializeFirebase = async () => {
       // App Check (Initialize first)
       await appCheckService.initialize();
+
+      await mobileAds().initialize();
 
       // Remote Config
       await remoteConfigService.initialize();

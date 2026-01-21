@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Alert, Image } from 'react-native';
+import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Alert, Image, Linking } from 'react-native';
 import { Text, useTheme, Switch, Snackbar, Button } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import DeviceInfo from 'react-native-device-info';
@@ -11,6 +11,7 @@ import CustomButton from '../components/ui/CustomButton';
 import { useThemeContext } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { storageService, UserAlert } from '../services/StorageService';
+import { AppConfig } from '../constants/AppConfig';
 
 import UserProfileCard from '../components/settings/UserProfileCard';
 import AlertItem from '../components/settings/AlertItem';
@@ -25,7 +26,7 @@ const SettingsScreen = () => {
   const colors = theme.colors as any;
   const navigation = useNavigation();
   const { themeMode, setThemeMode } = useThemeContext();
-  const { user, signOut, resetPassword } = useAuth();
+  const { user, signOut, updateProfileName } = useAuth();
   
   // App Info State
   const [appName, setAppName] = useState('');
@@ -37,7 +38,6 @@ const SettingsScreen = () => {
   const [snackbarMessage, setSnackbarMessage] = useState('');
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [showAboutDialog, setShowAboutDialog] = useState(false);
-  const [showSecurityDialog, setShowSecurityDialog] = useState(false);
   const [showEditProfileDialog, setShowEditProfileDialog] = useState(false);
   const [showAddAlertDialog, setShowAddAlertDialog] = useState(false);
 
@@ -88,25 +88,18 @@ const SettingsScreen = () => {
 
   const saveProfileName = async (newName: string) => {
     try {
-      if (user) {
-        await user.updateProfile({ displayName: newName });
-        await user.reload();
-        handleAction("Perfil actualizado correctamente");
-      }
+      await updateProfileName(newName);
     } catch (error) {
       handleAction("Error al actualizar el perfil");
       console.error(error);
     }
   };
 
-  const confirmSecurityAction = async () => {
-    setShowSecurityDialog(false);
+  const openExternalUrl = async (url: string) => {
     try {
-        if (user?.email) {
-            await resetPassword(user.email);
-        }
+      await Linking.openURL(url);
     } catch (error) {
-        // Error handling is done in resetPassword usually, but if it throws, we catch here
+      handleAction('No se pudo abrir el enlace');
     }
   };
 
@@ -378,10 +371,16 @@ const SettingsScreen = () => {
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>CUENTA</Text>
           <View style={[styles.cardContainer, { borderColor: theme.colors.outline, backgroundColor: theme.colors.elevation.level1 }]}>
-            <MenuButton 
-              icon="security" 
-              label="Seguridad & Privacidad" 
-              onPress={() => handleAction("Abriendo configuración de seguridad...")} 
+            <MenuButton
+              icon="policy"
+              label="Políticas de privacidad"
+              onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL)}
+            />
+            <MenuButton
+              icon="gavel"
+              label="Términos y condiciones"
+              onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL)}
+              hasTopBorder
             />
             <MenuButton 
               icon="logout" 
@@ -419,16 +418,6 @@ const SettingsScreen = () => {
         onConfirm={confirmLogout}
       />
 
-      <CustomDialog
-        visible={showSecurityDialog}
-        onDismiss={() => setShowSecurityDialog(false)}
-        title="Restablecer Contraseña"
-        content={`¿Deseas enviar un correo de restablecimiento de contraseña a ${user?.email}?`}
-        onConfirm={confirmSecurityAction}
-        confirmLabel="Enviar"
-        cancelLabel="Cancelar"
-      />
-
       <ProfileEditDialog
         visible={showEditProfileDialog}
         onDismiss={() => setShowEditProfileDialog(false)}
@@ -450,11 +439,18 @@ const SettingsScreen = () => {
         confirmLabel="Cerrar"
         showCancel={false}
         actions={
-          <CustomButton 
-              variant="outlined" 
-              label="Aviso legal" 
-              onPress={() => handleAction('Aviso legal no disponible')}
+          <>
+            <CustomButton
+              variant="outlined"
+              label="Políticas de privacidad"
+              onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL)}
             />
+            <CustomButton
+              variant="outlined"
+              label="Términos y condiciones"
+              onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL)}
+            />
+          </>
         }
       >
         <View style={{ alignItems: 'center', paddingVertical: 0 }}>
