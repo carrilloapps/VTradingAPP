@@ -62,18 +62,6 @@ function App(): React.JSX.Element {
 
     initializeFirebase();
 
-    // Background/Quit state handlers
-    fcmService.onNotificationOpenedApp(remoteMessage => {
-      console.log('Notification caused app to open from background state:', remoteMessage);
-    });
-
-    fcmService.getInitialNotification().then(remoteMessage => {
-      if (remoteMessage) {
-        console.log('Notification caused app to open from quit state:', remoteMessage);
-      }
-    });
-
-    // Note: Foreground listener is now handled by NotificationController inside the Context
   }, []);
 
   return (
