@@ -45,7 +45,7 @@ Se ha integrado el seguimiento de eventos y navegación.
 
 ### 5. App Check
 
-Protección de la API `https://vt.isapp.dev/`.
+Protección de la API `https://api.vtrading.app/`.
 
 - **Servicio**: `src/services/firebase/AppCheckService.ts`.
 - **ApiClient**: `src/services/ApiClient.ts` incluye el token en el header `X-Firebase-AppCheck`.

@@ -1,6 +1,6 @@
 # Integración de API de Tasas (RNFirebase Performance)
 
-Se ha implementado una conexión robusta a la API de tasas de cambio (`https://vt.isapp.dev/api/rates`) siguiendo las mejores prácticas de performance y monitoreo con Firebase.
+Se ha implementado una conexión robusta a la API de tasas de cambio (`https://api.vtrading.app/api/rates`) siguiendo las mejores prácticas de performance y monitoreo con Firebase.
 
 ## Detalles de Implementación
 
@@ -33,7 +33,7 @@ const results = await CurrencyService.searchCurrencies('euro');
 ## Configuración de Performance
 
 La implementación utiliza las siguientes métricas en Firebase Console:
-*   **Http Metric**: `https://vt.isapp.dev/api/rates` (GET)
+*   **Http Metric**: `https://api.vtrading.app/api/rates` (GET)
     *   Attributes: Response Code, Content-Type, Payload Size.
 *   **Custom Trace**: `get_currency_rates_service`
     *   Attributes: `error` (true/false).

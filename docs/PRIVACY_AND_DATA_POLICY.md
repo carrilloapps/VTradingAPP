@@ -57,7 +57,7 @@ Se utiliza para persistencia rápida y funcionamiento offline parcial.
 ### Almacenamiento Remoto
 - **Firebase Auth**: Perfiles de usuario y credenciales.
 - **Firebase Console**: Datos agregados de analíticas, rendimiento y errores.
-- **VTrading API**: Los datos financieros reales se consumen de `https://vt.isapp.dev/`.
+- **VTrading API**: Los datos financieros reales se consumen de `https://api.vtrading.app/`.
 
 ---
 

@@ -1,6 +1,7 @@
 import { appCheckService } from './firebase/AppCheckService';
 import { getPerformance, httpMetric, initializePerformance, FirebasePerformanceTypes } from '@react-native-firebase/perf';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AppConfig } from '../constants/AppConfig';
 
 interface CacheItem<T> {
   data: T;
@@ -70,7 +71,7 @@ class ApiClient {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'X-API-Key': 'admin_key', // Default API Key as requested
+      'X-API-Key': AppConfig.API_KEY,
       ...options.headers,
     };
 
@@ -151,4 +152,4 @@ class ApiClient {
   }
 }
 
-export const apiClient = new ApiClient('https://vt.isapp.dev/');
+export const apiClient = new ApiClient(AppConfig.API_BASE_URL);
