@@ -179,7 +179,7 @@ jest.mock('@react-native-firebase/remote-config', () => {
 jest.mock('@react-native-firebase/perf', () => {
   const perfInstance = {
     dataCollectionEnabled: true,
-    setPerformanceCollectionEnabled: jest.fn(() => Promise.resolve()),
+    app: {},
   };
   const traceInstance = {
     start: jest.fn(() => Promise.resolve()),
@@ -197,15 +197,17 @@ jest.mock('@react-native-firebase/perf', () => {
   };
   return {
     getPerformance: jest.fn(() => perfInstance),
+    initializePerformance: jest.fn(() => Promise.resolve(perfInstance)),
     trace: jest.fn(() => traceInstance),
     httpMetric: jest.fn(() => metricInstance),
   };
 });
 
 jest.mock('@react-native-firebase/app-distribution', () => {
-  return () => ({
-    checkForUpdate: jest.fn(),
-  });
+  return {
+    getAppDistribution: jest.fn(() => ({})),
+    checkForUpdate: jest.fn(() => Promise.resolve()),
+  };
 });
 
 jest.mock('react-native-google-mobile-ads', () => ({

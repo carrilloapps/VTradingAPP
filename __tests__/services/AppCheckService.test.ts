@@ -1,10 +1,10 @@
 import { appCheckService } from '../../src/services/firebase/AppCheckService';
-import { firebase } from '@react-native-firebase/app-check';
+import { initializeAppCheck } from '@react-native-firebase/app-check';
 
 describe('AppCheckService', () => {
   it('initializes correctly', async () => {
     await appCheckService.initialize();
-    expect(firebase.appCheck().initializeAppCheck).toHaveBeenCalled();
+    expect(initializeAppCheck).toHaveBeenCalled();
   });
 
   it('gets token', async () => {

@@ -23,9 +23,13 @@ import { remoteConfigService } from './src/services/firebase/RemoteConfigService
 import { appDistributionService } from './src/services/firebase/AppDistributionService';
 import NotificationController from './src/components/ui/NotificationController';
 import mobileAds from 'react-native-google-mobile-ads';
-import { getCrashlytics } from '@react-native-firebase/crashlytics';
-import { getPerformance } from '@react-native-firebase/perf';
+import { getCrashlytics, setCrashlyticsCollectionEnabled, log } from '@react-native-firebase/crashlytics';
+import { getPerformance, trace, initializePerformance } from '@react-native-firebase/perf';
 import * as Sentry from '@sentry/react-native';
+
+// Silence Firebase modular deprecation warnings
+// @ts-ignore
+globalThis.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
 
 const isProd = !__DEV__;
 
@@ -56,14 +60,14 @@ function App(): React.JSX.Element {
   useEffect(() => {
     const initializeFirebase = async () => {
       const crashlytics = getCrashlytics();
-      await crashlytics.setCrashlyticsCollectionEnabled(true);
-      crashlytics.log('App start');
+      await setCrashlyticsCollectionEnabled(crashlytics, true);
+      log(crashlytics, 'App start');
 
       const perf = getPerformance();
       if (!perf.dataCollectionEnabled) {
-        await perf.setPerformanceCollectionEnabled(true);
+        await initializePerformance(perf.app, { dataCollectionEnabled: true });
       }
-      const initTrace = perf.newTrace('app_initialize');
+      const initTrace = trace(perf, 'app_initialize');
       await initTrace.start();
 
       try {

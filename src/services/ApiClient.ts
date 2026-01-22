@@ -1,5 +1,5 @@
 import { appCheckService } from './firebase/AppCheckService';
-import { getPerformance, httpMetric, FirebasePerformanceTypes } from '@react-native-firebase/perf';
+import { getPerformance, httpMetric, initializePerformance, FirebasePerformanceTypes } from '@react-native-firebase/perf';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface CacheItem<T> {
@@ -56,11 +56,11 @@ class ApiClient {
     let metric: FirebasePerformanceTypes.HttpMetric | null = null;
     try {
       const perf = getPerformance();
-      if (!perf.dataCollectionEnabled) {
-          await perf.setPerformanceCollectionEnabled(true);
-      }
-      metric = httpMetric(perf, url, 'GET');
-      await metric.start();
+        if (!perf.dataCollectionEnabled) {
+            await initializePerformance(perf.app, { dataCollectionEnabled: true });
+        }
+        metric = httpMetric(perf, url, 'GET');
+        await metric.start();
     } catch (e) {
       console.warn('[ApiClient] Perf monitor failed', e);
     }
@@ -89,10 +89,18 @@ class ApiClient {
       if (metric) {
         try {
           metric.setHttpResponseCode(response.status);
+          
+          // Capture Content-Type
           const contentType = response.headers.get('Content-Type');
           if (contentType) metric.setResponseContentType(contentType);
+          
+          // Capture Content-Length (Response Payload Size)
           const contentLength = response.headers.get('Content-Length');
           if (contentLength) metric.setResponsePayloadSize(parseInt(contentLength, 10));
+          
+          // Optional: You could add custom attributes here
+          // metric.putAttribute('custom_attr', 'value');
+
           await metric.stop();
         } catch (e) {
             console.warn('[ApiClient] Perf metric stop failed', e);

@@ -22,15 +22,30 @@ class PerformanceService {
   /**
    * Track an API call manually (if needed)
    */
-  async trackApiCall(url: string, method: string, responseCode: number, duration: number, requestPayloadSize: number, responsePayloadSize: number): Promise<void> {
+  async trackApiCall(
+    url: string, 
+    method: string, 
+    responseCode: number, 
+    contentType?: string, 
+    requestPayloadSize?: number, 
+    responsePayloadSize?: number,
+    attributes?: Record<string, string>
+  ): Promise<void> {
       const perf = getPerformance();
       const metric = httpMetric(perf, url, method as FirebasePerformanceTypes.HttpMethod);
       await metric.start();
-      metric.putAttribute('response_code', responseCode.toString());
+      
       metric.setHttpResponseCode(responseCode);
-      metric.setRequestPayloadSize(requestPayloadSize);
-      metric.setResponsePayloadSize(responsePayloadSize);
-      // Duration is calculated by start/stop, but for manual logging of past requests we might just log attributes
+      if (contentType) metric.setResponseContentType(contentType);
+      if (requestPayloadSize) metric.setRequestPayloadSize(requestPayloadSize);
+      if (responsePayloadSize) metric.setResponsePayloadSize(responsePayloadSize);
+      
+      if (attributes) {
+        Object.entries(attributes).forEach(([key, value]) => {
+          metric.putAttribute(key, value);
+        });
+      }
+
       await metric.stop();
   }
 }

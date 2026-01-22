@@ -3,7 +3,7 @@ import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Alert, Image
 import { Text, useTheme, Switch, Snackbar, Button } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import DeviceInfo from 'react-native-device-info';
-import messaging from '@react-native-firebase/messaging';
+import { fcmService } from '../services/firebase/FCMService';
 import { useNavigation } from '@react-navigation/native';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import CustomDialog from '../components/ui/CustomDialog';
@@ -141,7 +141,7 @@ const SettingsScreen = () => {
         const topic = getTopicName(alert.symbol);
         try {
             if (value) {
-                await messaging().subscribeToTopic(topic);
+                await fcmService.subscribeToTopic(topic);
                 console.log(`Subscribed to ${topic}`);
             } else {
                 // Solo desuscribir si no hay otras alertas activas para el mismo símbolo
@@ -150,7 +150,7 @@ const SettingsScreen = () => {
                 );
                 
                 if (otherActiveAlerts.length === 0) {
-                    await messaging().unsubscribeFromTopic(topic);
+                    await fcmService.unsubscribeFromTopic(topic);
                     console.log(`Unsubscribed from ${topic}`);
                 }
             }
@@ -176,7 +176,7 @@ const SettingsScreen = () => {
             );
             
             if (otherActiveAlerts.length === 0) {
-                await messaging().unsubscribeFromTopic(topic);
+                await fcmService.unsubscribeFromTopic(topic);
                 console.log(`Unsubscribed from ${topic}`);
             }
         } catch (err) {
@@ -224,7 +224,7 @@ const SettingsScreen = () => {
       // Solo necesitamos suscribirnos al ticker (topic) del símbolo
       const topic = getTopicName(symbol);
       try {
-          await messaging().subscribeToTopic(topic);
+          await fcmService.subscribeToTopic(topic);
           console.log(`Subscribed to ${topic}`);
       } catch (err) {
           console.error('FCM Topic Error:', err);
