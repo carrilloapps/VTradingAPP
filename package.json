@@ -4,7 +4,9 @@
   "private": true,
   "scripts": {
     "android": "react-native run-android",
-    "android:release": "react-native run-android --mode=release",
+    "android:prod": "react-native run-android --mode=release",
+    "android:release": "cd android && ./gradlew bundleRelease && cd ..",
+    "android:apk": "cd android && ./gradlew assembleRelease && cd ..",
     "android:signingReport": "cd android && ./gradlew signingReport && cd ..",
     "ios": "react-native run-ios",
     "lint": "eslint .",
