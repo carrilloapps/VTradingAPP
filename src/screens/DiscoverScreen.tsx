@@ -3,7 +3,7 @@ import { View, StyleSheet, ScrollView, Animated, Easing, StatusBar } from 'react
 import { Text, useTheme, Button, ProgressBar, Surface } from 'react-native-paper';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
-import DetailsSkeleton from '../components/details/DetailsSkeleton';
+import DiscoverSkeleton from '../components/discover/DiscoverSkeleton';
 
 import { storageService } from '../services/StorageService';
 import { fcmService } from '../services/firebase/FCMService';
@@ -35,7 +35,7 @@ const FeatureItem = ({ icon, title, description, theme }: any) => {
   );
 };
 
-const DetailsScreen = () => {
+const DiscoverScreen = () => {
   const theme = useTheme();
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
@@ -133,7 +133,7 @@ const DetailsScreen = () => {
   };
 
   if (isLoading) {
-    return <DetailsSkeleton />;
+    return <DiscoverSkeleton />;
   }
 
   return (
@@ -377,4 +377,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DetailsScreen;
+export default DiscoverScreen;

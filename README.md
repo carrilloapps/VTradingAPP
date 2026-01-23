@@ -34,7 +34,7 @@ cd ..
 ```
 src/
   components/  # Componentes reutilizables
-  screens/     # Pantallas de la aplicación (HomeScreen, DetailsScreen)
+  screens/     # Pantallas de la aplicación (HomeScreen, DiscoverScreen)
   navigation/  # Configuración de navegación (AppNavigator)
   theme/       # Configuración del tema (Paper Theme)
   utils/       # Utilidades

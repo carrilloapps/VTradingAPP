@@ -4,7 +4,7 @@ import { useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Skeleton from '../ui/Skeleton';
 
-const DetailsSkeleton = () => {
+const DiscoverSkeleton = () => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const r = theme.roundness;
@@ -154,4 +154,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default DetailsSkeleton;
+export default DiscoverSkeleton;

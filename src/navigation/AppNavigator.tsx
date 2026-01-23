@@ -8,7 +8,6 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import LottieView from 'lottie-react-native';
 
 import HomeScreen from '../screens/HomeScreen';
-import DetailsScreen from '../screens/DetailsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import WidgetsScreen from '../screens/WidgetsScreen';
 import ExchangeRatesScreen from '../screens/ExchangeRatesScreen';
@@ -28,18 +27,19 @@ import OnboardingScreen from '../screens/OnboardingScreen';
 import ModernTabBar from '../components/navigation/ModernTabBar';
 import { navigationRef } from './NavigationRef';
 import { storageService } from '../services/StorageService';
+import DiscoverScreen from '../screens/DiscoverScreen';
 
 // Root Stack that includes Splash
 const RootStack = createNativeStackNavigator();
 
-// Stack para Home y Details
+// Stack para Home y Discover
 const HomeStack = createNativeStackNavigator();
 
 function HomeStackScreen() {
   return (
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
       <HomeStack.Screen name="HomeMain" component={HomeScreen} />
-      <HomeStack.Screen name="Details" component={DetailsScreen} options={{ headerShown: true, title: 'Detalles' }} />
+      <HomeStack.Screen name="Discover" component={DiscoverScreen} options={{ headerShown: true, title: 'Descubre' }} />
     </HomeStack.Navigator>
   );
 }
@@ -126,7 +126,7 @@ function MainTabNavigator() {
         />
         <Tab.Screen 
           name="Discover" 
-          component={DetailsScreen} 
+          component={DiscoverScreen} 
           options={{ 
             title: 'Descubre',
             tabBarIcon: ({ color }) => (

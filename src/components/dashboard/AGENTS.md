@@ -78,7 +78,7 @@ Usado en `HomeScreen` para la sección de Mercado Bursátil y otras listas de re
 *   **Light Mode:** Incluye `elevation: 0` (Flat Style) y bordes `theme.colors.outline` para evitar que la UI "salte" o cambie de forma al cargar el contenido real.
 
 ### WalletSkeleton
-Usado en `DetailsScreen` (Billetera/Detalles).
+Usado en `DiscoverScreen` (Billetera/Detalles).
 *   **Estructura:**
     1.  **Header & Hero:** Icono circular grande, estado y balances.
     2.  **Progress Section:** Barra de progreso de límites.
