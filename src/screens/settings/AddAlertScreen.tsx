@@ -364,154 +364,183 @@ const AddAlertScreen = ({ route }: Props) => {
       
       {selectedItem ? (
         <ScrollView contentContainerStyle={[styles.configContainer, { paddingBottom: insets.bottom + 24 }]} showsVerticalScrollIndicator={false}>
-            {/* Target Symbol Card */}
-            <View style={[styles.targetCard, { 
-                backgroundColor: theme.colors.elevation.level1,
-                borderColor: theme.colors.outline
-            }]}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
-                    <View style={{ 
-                        width: 48, height: 48, borderRadius: 24, 
-                        backgroundColor: theme.colors.primaryContainer,
-                        alignItems: 'center', justifyContent: 'center', marginRight: 16
-                    }}>
-                        <MaterialCommunityIcons 
-                            name={selectedItem.iconName || 'currency-usd'} 
-                            size={28} 
-                            color={theme.colors.onPrimaryContainer} 
-                        />
-                    </View>
-                    <View>
-                        <Text variant="headlineSmall" style={{ fontWeight: 'bold' }}>{selectedItem.symbol}</Text>
-                        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>{selectedItem.name}</Text>
-                    </View>
-                </View>
-
-                {/* Current Price Display */}
-                <View style={{ marginBottom: 24, padding: 16, backgroundColor: theme.colors.elevation.level2, borderRadius: 12 }}>
-                    <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant, marginBottom: 4 }}>PRECIO ACTUAL</Text>
-                    <Text variant="headlineMedium" style={{ fontWeight: 'bold', color: theme.colors.primary }}>
-                        {selectedItem.price < 1 ? selectedItem.price.toFixed(4) : selectedItem.price.toFixed(2)}
-                    </Text>
-                </View>
-
-                {/* Target Price Input */}
-                <View style={styles.inputGroup}>
-                    <Text variant="labelMedium" style={{ marginBottom: 8 }}>PRECIO OBJETIVO</Text>
-                    <TextInput
-                        mode="outlined"
-                        value={targetPrice}
-                        onChangeText={setTargetPrice}
-                        keyboardType="numeric"
-                        placeholder="0.00"
-                        right={<TextInput.Icon icon="target" />}
-                        style={{ backgroundColor: theme.colors.elevation.level1 }}
+            
+            {/* Symbol Header Section */}
+            <View style={styles.headerSection}>
+                <View style={[styles.iconLarge, { backgroundColor: theme.colors.elevation.level2 }]}>
+                    <MaterialCommunityIcons 
+                        name={selectedItem.iconName || 'currency-usd'} 
+                        size={40} 
+                        color={theme.colors.primary} 
                     />
-                    {(() => {
-                        const current = selectedItem.price;
-                        const target = parseFloat(targetPrice) || 0;
-                        if (target > 0) {
-                            const diff = ((target - current) / current) * 100;
-                            const isDiffNeutral = Math.abs(diff) < 0.01;
-                            
-                            let color = theme.colors.onSurfaceVariant;
-                            let text = 'Igual al precio actual';
-                            
-                            if (!isDiffNeutral) {
-                                if (diff > 0) {
-                                    color = theme.colors.trendUp;
-                                    text = `+${diff.toFixed(2)}% desde el precio actual`;
-                                } else {
-                                    color = theme.colors.trendDown;
-                                    text = `${diff.toFixed(2)}% desde el precio actual`;
-                                }
-                            }
-
-                            return (
-                                <Text style={{ 
-                                    marginTop: 8, 
-                                    color: color,
-                                    fontWeight: 'bold'
-                                }}>
-                                    {text}
-                                </Text>
-                            );
-                        }
-                        return null;
-                    })()}
                 </View>
-
-                {/* Condition Selector */}
-                <View style={styles.inputGroup}>
-                    <Text variant="labelMedium" style={{ marginBottom: 8 }}>CONDICIÓN</Text>
-                    <View style={styles.conditionRow}>
-                        <TouchableOpacity 
-                            style={[
-                                styles.conditionBtn, 
-                                condition === 'above' && { 
-                                    backgroundColor: theme.colors.secondaryContainer,
-                                    borderColor: theme.colors.secondary
-                                }
-                            ]}
-                            onPress={() => setCondition('above')}
-                        >
-                            <MaterialCommunityIcons 
-                                name="arrow-top-right" 
-                                size={24} 
-                                color={condition === 'above' ? theme.colors.onSecondaryContainer : theme.colors.onSurface} 
-                            />
-                            <Text style={{ 
-                                color: condition === 'above' ? theme.colors.onSecondaryContainer : theme.colors.onSurface,
-                                fontWeight: 'bold'
-                            }}>Mayor que</Text>
-                        </TouchableOpacity>
-
-                        <TouchableOpacity 
-                            style={[
-                                styles.conditionBtn, 
-                                condition === 'below' && { 
-                                    backgroundColor: theme.colors.secondaryContainer,
-                                    borderColor: theme.colors.secondary
-                                }
-                            ]}
-                            onPress={() => setCondition('below')}
-                        >
-                            <MaterialCommunityIcons 
-                                name="arrow-bottom-right" 
-                                size={24} 
-                                color={condition === 'below' ? theme.colors.onSecondaryContainer : theme.colors.onSurface} 
-                            />
-                            <Text style={{ 
-                                color: condition === 'below' ? theme.colors.onSecondaryContainer : theme.colors.onSurface,
-                                fontWeight: 'bold'
-                            }}>Menor que</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-
-                {/* Action Buttons */}
-                <View style={{ gap: 12, marginTop: 12 }}>
-                    <CustomButton
-                        variant="primary"
-                        onPress={handleSaveAlert}
-                        loading={saving}
-                        disabled={!targetPrice || saving || deleting}
-                        icon="bell-ring"
-                        label={editAlert ? "Guardar Cambios" : "Crear Alerta"}
-                    />
-                    
-                    {editAlert && (
-                        <CustomButton
-                            variant="destructive"
-                            onPress={() => setShowDeleteDialog(true)}
-                            loading={deleting}
-                            disabled={saving || deleting}
-                            icon="delete-outline"
-                            label="Eliminar Alerta"
-                        />
-                    )}
+                <View style={{ alignItems: 'center' }}>
+                    <Text variant="headlineMedium" style={{ fontWeight: 'bold' }}>{selectedItem.symbol}</Text>
+                    <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>{selectedItem.name}</Text>
                 </View>
             </View>
+
+            {/* Current Price Section */}
+            <View style={[styles.priceCard, { backgroundColor: theme.colors.elevation.level1 }]}>
+                <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant, textTransform: 'uppercase' }}>Precio Actual</Text>
+                <Text variant="displaySmall" style={{ fontWeight: 'bold', color: theme.colors.onSurface, marginVertical: 4 }}>
+                    {selectedItem.price < 1 ? selectedItem.price.toFixed(4) : selectedItem.price.toFixed(2)}
+                </Text>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                    <MaterialCommunityIcons 
+                        name={Math.abs(selectedItem.changePercent) < 0.01 ? 'minus' : (selectedItem.changePercent > 0 ? 'arrow-up' : 'arrow-down')} 
+                        size={16} 
+                        color={Math.abs(selectedItem.changePercent) < 0.01 ? theme.colors.onSurfaceVariant : (selectedItem.changePercent > 0 ? theme.colors.trendUp : theme.colors.trendDown)} 
+                    />
+                    <Text variant="bodyMedium" style={{ 
+                        color: Math.abs(selectedItem.changePercent) < 0.01 ? theme.colors.onSurfaceVariant : (selectedItem.changePercent > 0 ? theme.colors.trendUp : theme.colors.trendDown),
+                        fontWeight: 'bold'
+                    }}>
+                        {Math.abs(selectedItem.changePercent).toFixed(2)}%
+                    </Text>
+                </View>
+            </View>
+
+            {/* Target Price Input */}
+            <View style={styles.sectionContainer}>
+                <Text variant="titleMedium" style={{ marginBottom: 12, fontWeight: 'bold' }}>Configurar Objetivo</Text>
+                <TextInput
+                    mode="outlined"
+                    label="Precio Objetivo"
+                    value={targetPrice}
+                    onChangeText={setTargetPrice}
+                    keyboardType="numeric"
+                    placeholder="0.00"
+                    right={<TextInput.Icon icon="target" />}
+                    style={{ backgroundColor: theme.colors.background }}
+                    outlineColor={theme.colors.outline}
+                    activeOutlineColor={theme.colors.primary}
+                />
+                
+                {/* Dynamic Difference Indicator */}
+                {(() => {
+                    const current = selectedItem.price;
+                    const target = parseFloat(targetPrice) || 0;
+                    if (target > 0) {
+                        const diff = ((target - current) / current) * 100;
+                        const isDiffNeutral = Math.abs(diff) < 0.01;
+                        const isPositive = diff > 0;
+                        
+                        let color = theme.colors.onSurfaceVariant;
+                        let bgColor = theme.colors.elevation.level2;
+                        let icon = 'minus-circle-outline';
+                        let text = 'Igual al precio actual';
+                        
+                        if (!isDiffNeutral) {
+                            if (isPositive) {
+                                color = theme.colors.trendUp;
+                                bgColor = theme.colors.successContainer; // Use theme container if available or fallback
+                                icon = 'trending-up';
+                                text = `+${diff.toFixed(2)}% vs precio actual`;
+                            } else {
+                                color = theme.colors.trendDown;
+                                bgColor = theme.colors.errorContainer;
+                                icon = 'trending-down';
+                                text = `${diff.toFixed(2)}% vs precio actual`;
+                            }
+                        }
+
+                        return (
+                            <View style={[styles.diffIndicator, { backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outline, marginTop: 12 }]}>
+                                <MaterialCommunityIcons name={icon} size={20} color={color} />
+                                <Text variant="bodyMedium" style={{ color: color, fontWeight: 'bold', marginLeft: 8 }}>
+                                    {text}
+                                </Text>
+                            </View>
+                        );
+                    }
+                    return null;
+                })()}
+            </View>
+
+            {/* Condition Selector */}
+            <View style={styles.sectionContainer}>
+                <Text variant="titleMedium" style={{ marginBottom: 12, fontWeight: 'bold' }}>Condición de Alerta</Text>
+                <View style={[styles.conditionSelector, { backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outline }]}>
+                    <TouchableOpacity 
+                        style={[
+                            styles.conditionOption, 
+                            condition === 'above' && { backgroundColor: theme.colors.secondaryContainer }
+                        ]}
+                        onPress={() => setCondition('above')}
+                    >
+                        <MaterialCommunityIcons 
+                            name="arrow-top-right" 
+                            size={20} 
+                            color={condition === 'above' ? theme.colors.onSecondaryContainer : theme.colors.onSurfaceVariant} 
+                        />
+                        <Text style={{ 
+                            marginLeft: 8,
+                            color: condition === 'above' ? theme.colors.onSecondaryContainer : theme.colors.onSurfaceVariant,
+                            fontWeight: condition === 'above' ? 'bold' : 'normal'
+                        }}>Mayor que</Text>
+                    </TouchableOpacity>
+
+                    <View style={{ width: 1, backgroundColor: theme.colors.outline, marginVertical: 8 }} />
+
+                    <TouchableOpacity 
+                        style={[
+                            styles.conditionOption, 
+                            condition === 'below' && { backgroundColor: theme.colors.secondaryContainer }
+                        ]}
+                        onPress={() => setCondition('below')}
+                    >
+                        <MaterialCommunityIcons 
+                            name="arrow-bottom-right" 
+                            size={20} 
+                            color={condition === 'below' ? theme.colors.onSecondaryContainer : theme.colors.onSurfaceVariant} 
+                        />
+                        <Text style={{ 
+                            marginLeft: 8,
+                            color: condition === 'below' ? theme.colors.onSecondaryContainer : theme.colors.onSurfaceVariant,
+                            fontWeight: condition === 'below' ? 'bold' : 'normal'
+                        }}>Menor que</Text>
+                    </TouchableOpacity>
+                </View>
+                <Text variant="bodySmall" style={{ marginTop: 8, color: theme.colors.onSurfaceVariant, textAlign: 'center' }}>
+                    {condition === 'above' 
+                        ? `La alerta se activará cuando el precio suba a ${targetPrice || '...'}` 
+                        : `La alerta se activará cuando el precio baje a ${targetPrice || '...'}`}
+                </Text>
+            </View>
+
+            {/* Action Buttons */}
+            <View style={styles.sectionContainer}>
+                <CustomButton
+                    variant="primary"
+                    onPress={handleSaveAlert}
+                    loading={saving}
+                    disabled={!targetPrice || saving || deleting}
+                    icon={editAlert ? "content-save-outline" : "bell-plus-outline"}
+                    label={editAlert ? "Guardar Cambios" : "Crear Alerta"}
+                    style={{ marginBottom: 12 }}
+                />
+                
+                {editAlert && (
+                    <CustomButton
+                        variant="destructive"
+                        onPress={() => setShowDeleteDialog(true)}
+                        loading={deleting}
+                        disabled={saving || deleting}
+                        icon="trash-can-outline"
+                        label="Eliminar Alerta"
+                    />
+                )}
+            </View>
+
+            {/* Disclaimer Section */}
+            <View style={[styles.disclaimerContainer, { backgroundColor: theme.colors.elevation.level1 }]}>
+                <MaterialCommunityIcons name="information-outline" size={20} color={theme.colors.onSurfaceVariant} style={{ marginRight: 8 }} />
+                <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, flex: 1 }}>
+                    Nota: Las alertas pueden tener un ligero retraso dependiendo de la conectividad y las actualizaciones del mercado. Asegúrate de tener las notificaciones activadas para VTradingAPP.
+                </Text>
+            </View>
+
         </ScrollView>
       ) : (
         <>
@@ -603,32 +632,57 @@ const styles = StyleSheet.create({
   },
   // Config Styles
   configContainer: {
-    flex: 1,
     padding: 24,
   },
-  targetCard: {
+  headerSection: {
+    alignItems: 'center',
+    marginBottom: 32,
+    marginTop: 8,
+  },
+  iconLarge: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  priceCard: {
+    alignItems: 'center',
     padding: 24,
-    borderRadius: 16,
-    borderWidth: 1,
+    borderRadius: 24,
+    marginBottom: 32,
+  },
+  sectionContainer: {
     marginBottom: 24,
   },
-  inputGroup: {
-    marginBottom: 24,
-  },
-  conditionRow: {
+  diffIndicator: {
     flexDirection: 'row',
-    gap: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
   },
-  conditionBtn: {
+  conditionSelector: {
+    flexDirection: 'row',
+    borderRadius: 12,
+    borderWidth: 1,
+    overflow: 'hidden',
+  },
+  conditionOption: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 12,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.1)',
-    gap: 8,
+  },
+  disclaimerContainer: {
+    flexDirection: 'row',
+    padding: 16,
+    borderRadius: 12,
+    marginTop: 8,
+    alignItems: 'flex-start',
   },
 });
 
