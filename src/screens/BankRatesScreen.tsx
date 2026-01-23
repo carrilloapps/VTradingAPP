@@ -50,8 +50,8 @@ const BankRatesScreen = () => {
               setBankRates(prev => [...prev, ...rates]);
           }
 
-          setPage(pagination.page);
-          setHasMore(pagination.page < pagination.totalPages);
+          setPage(Number(pagination.page));
+          setHasMore(Number(pagination.page) < Number(pagination.totalPages));
           setError(null);
       } catch (err) {
           console.error(err);
@@ -75,14 +75,15 @@ const BankRatesScreen = () => {
 
   const onRefresh = useCallback(() => {
       setRefreshing(true);
+      setError(null); // Reset error on refresh
       fetchRates(true, { page: 1 });
   }, [fetchRates]);
 
   const loadMore = useCallback(() => {
-      if (!loading && !loadingMore && hasMore && !error && searchQuery === '') {
+      if (!loading && !loadingMore && hasMore && searchQuery === '') {
           fetchRates(false, { page: page + 1 });
       }
-  }, [loading, loadingMore, hasMore, error, page, fetchRates, searchQuery]);
+  }, [loading, loadingMore, hasMore, page, fetchRates, searchQuery]);
 
   // Filter rates based on search query
   const filteredRates = useMemo(() => {
@@ -100,7 +101,7 @@ const BankRatesScreen = () => {
       return officialRate || bankRates.find(r => r.name.includes('BCV') || r.source?.includes('BCV'));
   }, [bankRates, officialRate]);
 
-  const renderItem = ({ item }: { item: CurrencyRate }) => {
+  const renderItem = useCallback(({ item }: { item: CurrencyRate }) => {
     // Format values
     const formatValue = (val?: number) => val ? `${val.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs` : 'N/A';
     
@@ -130,7 +131,7 @@ const BankRatesScreen = () => {
             sellPercentage={sellPercentage}
         />
     );
-  };
+  }, [bcvRate]);
 
   const renderFooter = () => {
       if (!loadingMore) return null;
@@ -243,6 +244,7 @@ const BankRatesScreen = () => {
           </View>
       ) : (
           <FlatList
+            style={styles.list}
             data={filteredRates}
             renderItem={renderItem}
             keyExtractor={item => item.id}
@@ -266,6 +268,9 @@ const BankRatesScreen = () => {
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+  },
+  list: {
     flex: 1,
   },
   header: {
