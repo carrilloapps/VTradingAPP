@@ -238,17 +238,17 @@ const LoginScreen = ({ navigation }: any) => {
                 style={styles.input}
                 disabled={isBusy}
               />
-              <HelperText type="error" visible={!!passwordError}>
+              <HelperText type="error" visible={!!passwordError} style={{ marginBottom: -theme.spacing.xs }}>
                 {passwordError}
               </HelperText>
             </View>
 
-            <View style={[styles.forgotPassword, themeStyles.forgotPassword, { marginTop: -theme.spacing.s }]}>
+            <View style={[styles.forgotPassword, themeStyles.forgotPassword, { marginTop: -theme.spacing.l }]}>
               <CustomButton
                 label="¿Olvidaste tu contraseña?"
                 variant="link"
                 onPress={() => navigation.navigate('ForgotPassword')}
-                style={{ alignSelf: 'flex-end' }}
+                style={{ alignSelf: 'flex-end', marginBottom: theme.spacing.m }}
                 disabled={isBusy}
               />
             </View>
