@@ -9,6 +9,7 @@ import {
   subscribeToTopic,
   unsubscribeFromTopic,
   requestPermission,
+  hasPermission,
   AuthorizationStatus,
   RemoteMessage,
   Messaging
@@ -21,6 +22,24 @@ class FCMService {
 
   constructor() {
     this.messaging = getMessaging();
+  }
+
+  /**
+   * Check permission status without requesting
+   */
+  async checkPermission(): Promise<boolean> {
+    if (Platform.OS === 'ios') {
+      const authStatus = await hasPermission(this.messaging);
+      return (
+        authStatus === AuthorizationStatus.AUTHORIZED ||
+        authStatus === AuthorizationStatus.PROVISIONAL
+      );
+    } else if (Platform.OS === 'android' && Platform.Version >= 33) {
+      return await PermissionsAndroid.check(
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+      );
+    }
+    return true;
   }
 
   /**

@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet, FlatList, StatusBar, ActivityIndicator, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
-import LottieView from 'lottie-react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import BankRateCard from '../components/dashboard/BankRateCard';
+import BankRatesSkeleton from '../components/dashboard/BankRatesSkeleton';
 import SearchBar from '../components/ui/SearchBar';
 import FilterSection from '../components/ui/FilterSection';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
@@ -243,8 +243,7 @@ const BankRatesScreen = () => {
         
         <FilterSection 
             options={[
-              { label: 'Nombre', value: 'az', icon: 'sort-alphabetical-ascending' },
-              { label: 'Relevancia', value: 'relevance', icon: 'star' },
+              { label: 'A-Z', value: 'az', icon: 'sort' },
               { label: 'Menor precio', value: 'price_asc', icon: 'trending-down', color: '#4CAF50' }, // Green
               { label: 'Mayor precio', value: 'price_desc', icon: 'trending-up', color: '#F44336' }, // Red
             ]}
@@ -291,16 +290,7 @@ const BankRatesScreen = () => {
       </View>
 
       {loading && !refreshing ? (
-          <View style={styles.centerContainer}>
-            <LottieView
-              source={require('../assets/animations/splash.json')}
-              autoPlay
-              loop
-              style={{ width: 120, height: 120 }}
-              resizeMode="contain"
-            />
-            <Text style={{ marginTop: 16, color: theme.colors.onSurfaceVariant }}>Cargando bancos...</Text>
-          </View>
+          <BankRatesSkeleton />
       ) : (
           <FlatList
             style={styles.list}

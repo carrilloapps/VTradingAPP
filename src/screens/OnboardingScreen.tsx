@@ -15,8 +15,8 @@ interface OnboardingItem {
   key: string;
   title: string;
   description: string;
-  icon: string;
-  colorType: 'primary' | 'secondary' | 'tertiary' | 'error' | 'warning';
+  icon: any;
+  colorType: 'primary' | 'secondary' | 'tertiary' | 'error' | 'warning' | 'info';
   hasAction?: boolean;
 }
 
@@ -31,6 +31,11 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
   const { width, height } = useWindowDimensions();
   const pagerRef = useRef<PagerView>(null);
   
+  // Dynamic layout values
+  const iconSize = Math.min(width * 0.25, 120);
+  const contentWidth = Math.min(400, width * 0.9);
+  const verticalSpacing = height * 0.05;
+
   const [currentPage, setCurrentPage] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [notificationPermissionStatus, setNotificationPermissionStatus] = useState<boolean | null>(null);
@@ -40,7 +45,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
       key: 'welcome',
       title: 'Bienvenido/a',
       description: 'Tu herramienta definitiva para el seguimiento financiero en Venezuela. Cotizaciones, tasas y análisis en tiempo real.',
-      icon: 'chart-box',
+      icon: require('../assets/images/logo.png'),
       colorType: 'primary', 
     },
     {
@@ -63,12 +68,12 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
       title: 'Banco Central de Venezuela',
       description: 'Información oficial y actualizada. Monitorea las tasas oficiales del BCV y su histórico de comportamiento.',
       icon: 'bank',
-      colorType: 'error',
+      colorType: 'info',
     },
     {
       key: 'p2p',
       title: 'Mercado P2P y Frontera',
-      description: 'Conoce el mercado paralelo, tasas de cambio en Cúcuta y arbitraje P2P en plataformas como Binance.',
+      description: 'Conoce el mercado, tasas de cambio en monedas fronterizas y arbitraje P2P en plataformas.',
       icon: 'swap-horizontal-bold',
       colorType: 'warning',
     },
@@ -113,8 +118,17 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
           text: theme.colors.onSurface,
           buttonText: isDark ? '#3E2D00' : '#FFFFFF', // Contrast text for warning
         };
-      default:
+      case 'info':
+        // Blue theme for BCV (Official/Bank look)
+        const isDarkInfo = theme.dark;
         return { 
+          gradientStart: isDarkInfo ? '#004A77' : '#D1E4FF', // Blue Container
+          icon: isDarkInfo ? '#A8C7FA' : '#0061A4', // Blue Primary
+          text: theme.colors.onSurface,
+          buttonText: isDarkInfo ? '#00325B' : '#FFFFFF',
+        };
+      default:
+        return {  
           gradientStart: theme.colors.surface, 
           icon: theme.colors.primary,
           text: theme.colors.onSurface,
@@ -138,6 +152,19 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
 
     return () => clearInterval(interval);
   }, [currentPage, isPaused]);
+
+  // Check initial notification permission
+  useEffect(() => {
+    const checkStatus = async () => {
+      try {
+        const hasPermission = await fcmService.checkPermission();
+        setNotificationPermissionStatus(hasPermission);
+      } catch (error) {
+        console.error('Error checking permission:', error);
+      }
+    };
+    checkStatus();
+  }, []);
 
   const handlePageSelected = (e: any) => {
     setCurrentPage(e.nativeEvent.position);
@@ -250,9 +277,16 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 0, y: 1 }}
               >
-                <View style={styles.contentContainer}>
-                  <View style={[styles.iconContainer, { backgroundColor: theme.colors.surfaceVariant }]}>
-                    <Icon source={item.icon} size={80} color={pageColors.icon} />
+                <View style={[styles.contentContainer, { width: contentWidth }]}>
+                  <View style={[
+                    styles.iconContainer, 
+                    { 
+                      backgroundColor: theme.colors.surfaceVariant,
+                      marginBottom: verticalSpacing,
+                      padding: iconSize * 0.25 // Responsive padding
+                    }
+                  ]}>
+                    <Icon source={item.icon} size={iconSize} color={pageColors.icon} />
                   </View>
                   
                   <Text variant="displaySmall" style={[styles.title, { color: theme.colors.onSurface }]}>
@@ -274,8 +308,8 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
                       disabled={notificationPermissionStatus === true}
                     >
                       {notificationPermissionStatus === true 
-                        ? 'Notificaciones Activadas' 
-                        : 'Activar Alertas'}
+                        ? 'Notificaciones activas' 
+                        : 'Activar notificaciones'}
                     </Button>
                   )}
                 </View>
