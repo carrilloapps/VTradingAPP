@@ -14,6 +14,7 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { AppConfig } from '../constants/AppConfig';
 import { TetherIcon } from '../components/ui/TetherIcon';
+import AdvancedCalculatorCTA from '../components/dashboard/AdvancedCalculatorCTA';
 
 const HomeScreen = () => {
   const theme = useTheme();
@@ -24,6 +25,7 @@ const HomeScreen = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [rates, setRates] = useState<CurrencyRate[]>([]);
+  const [spread, setSpread] = useState<number | null>(null);
   const [stocks, setStocks] = useState<StockData[]>([]);
   const [featuredRates, setFeaturedRates] = useState<ExchangeCardProps[]>([]);
   const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
@@ -37,6 +39,24 @@ const HomeScreen = () => {
 
       if (usdRate) homeRates.push(usdRate);
       if (usdtRate) homeRates.push(usdtRate);
+
+      // Calculate Spread (Brecha)
+      const usdRates = data.filter(r => (r.code === 'USD' || r.code === 'USDT') && r.value > 0);
+      let spreadVal: number | null = null;
+      let minVal: number | undefined = undefined;
+      let maxVal: number | undefined = undefined;
+
+      if (usdRates.length >= 2) {
+           const values = usdRates.map(r => r.value);
+           const min = Math.min(...values);
+           const max = Math.max(...values);
+           if (min > 0) {
+               spreadVal = ((max - min) / min) * 100;
+               minVal = min;
+               maxVal = max;
+           }
+      }
+      setSpread(spreadVal);
       
       const getPath = (percent: number | null | undefined) => {
         if (percent === null || percent === undefined || Math.abs(percent) < 0.001) return 'M0 20 L 100 20';
@@ -268,6 +288,8 @@ const HomeScreen = () => {
              </Text>
           )}
         </View>
+
+        <AdvancedCalculatorCTA spread={spread} />
 
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
