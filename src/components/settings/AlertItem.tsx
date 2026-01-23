@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { Text, useTheme, Switch, IconButton } from 'react-native-paper';
+import { View, StyleSheet } from 'react-native';
+import { Text, useTheme, Switch, IconButton, TouchableRipple } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 
 interface AlertItemProps {
@@ -42,14 +42,16 @@ const AlertItem: React.FC<AlertItemProps> = ({
     : colors.errorContainer;
 
   return (
-    <TouchableOpacity 
+    <TouchableRipple 
       onPress={onPress}
+      disabled={disabled}
       style={[styles.container, { 
         backgroundColor: theme.colors.elevation.level1,
         borderBottomColor: theme.colors.outline,
       }]}
     >
-      <View style={styles.leftContent}>
+      <View style={styles.innerContainer}>
+        <View style={styles.leftContent}>
         <View style={[styles.iconContainer, { backgroundColor: iconBgColor }]}>
           <MaterialIcons name={iconName} size={24} color={iconColor} />
         </View>
@@ -86,12 +88,16 @@ const AlertItem: React.FC<AlertItemProps> = ({
           disabled={disabled}
         />
       </View>
-    </TouchableOpacity>
+    </View>
+    </TouchableRipple>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    // Container for the ripple
+  },
+  innerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
