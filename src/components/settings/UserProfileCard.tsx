@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { Text, useTheme, Avatar, Button } from 'react-native-paper';
+import { Text, Avatar, Button } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { md5 } from '../../utils/md5';
+import { useAppTheme } from '../../theme/theme';
 
 interface UserProfileCardProps {
   user: FirebaseAuthTypes.User | null;
@@ -12,7 +13,7 @@ interface UserProfileCardProps {
 }
 
 const UserProfileCard = ({ user, onEdit, onRegister }: UserProfileCardProps) => {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const [imageError, setImageError] = useState(false);
 
   const displayName = user?.displayName || (user?.isAnonymous ? 'Invitado' : 'Usuario');
@@ -82,11 +83,13 @@ const UserProfileCard = ({ user, onEdit, onRegister }: UserProfileCardProps) => 
             {renderAvatar()}
           </View>
           <View style={[styles.badge, { 
-            backgroundColor: isPro ? theme.colors.tertiaryContainer : theme.colors.surfaceVariant,
+            backgroundColor: isPro ? theme.colors.warning : theme.colors.surfaceVariant,
             borderColor: theme.colors.elevation.level1 
           }]}>
             <Text style={[styles.badgeText, { 
-              color: isPro ? theme.colors.onTertiaryContainer : theme.colors.onSurfaceVariant 
+              color: isPro 
+                ? (theme.dark ? theme.colors.onPrimary : theme.colors.onPrimaryContainer) 
+                : theme.colors.onSurfaceVariant 
             }]}>
               {isPro ? 'PRO' : 'FREE'}
             </Text>
