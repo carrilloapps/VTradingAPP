@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from 'react-native-paper';
-import { useAppTheme } from '../../theme/theme';
+import { useAppTheme, LightTheme, DarkTheme } from '../../theme/theme';
 
 interface ThemeSelectorProps {
   currentTheme: 'light' | 'dark' | 'system';
@@ -121,23 +121,23 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   lightPreview: {
-    backgroundColor: '#f2f5f8',
-    borderColor: '#E2E8F0',
+    backgroundColor: LightTheme.colors.background,
+    borderColor: LightTheme.colors.outline,
   },
   lightPreviewInner: {
     height: '100%',
     width: '100%',
-    backgroundColor: '#ffffff',
+    backgroundColor: LightTheme.colors.elevation.level2,
     borderRadius: 2,
   },
   darkPreview: {
-    backgroundColor: '#0e1720',
-    borderColor: '#243647',
+    backgroundColor: DarkTheme.colors.background,
+    borderColor: DarkTheme.colors.outline,
   },
   darkPreviewInner: {
     height: '100%',
     width: '100%',
-    backgroundColor: '#16212e',
+    backgroundColor: DarkTheme.colors.elevation.level2,
     borderRadius: 2,
   },
   systemPreview: {
@@ -146,11 +146,11 @@ const styles = StyleSheet.create({
   },
   systemLeft: {
     flex: 1,
-    backgroundColor: '#f2f5f8',
+    backgroundColor: LightTheme.colors.background,
   },
   systemRight: {
     flex: 1,
-    backgroundColor: '#0e1720',
+    backgroundColor: DarkTheme.colors.background,
   },
   label: {
     fontSize: 12,
