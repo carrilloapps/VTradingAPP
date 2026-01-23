@@ -15,60 +15,85 @@ const AuthSkeleton: React.FC<AuthSkeletonProps> = ({ mode, testID = 'auth-skelet
 
   return (
     <View testID={testID} style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <View style={[styles.content, { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 20 }]}>
+      <View style={[
+        styles.content, 
+        { 
+          paddingTop: insets.top + theme.spacing.m, 
+          paddingBottom: insets.bottom + theme.spacing.xl,
+          paddingHorizontal: theme.spacing.xl
+        }
+      ]}>
         
         {/* Header */}
-        <View style={styles.header}>
-          {mode === 'login' && (
-            <View style={styles.logoContainer}>
-              <Skeleton width={70} height={45} borderRadius={8} />
-            </View>
-          )}
+          <View style={[styles.header, { marginBottom: mode === 'register' ? theme.spacing.l : theme.spacing.xl }]}>
+          <View style={[styles.logoRow, { marginBottom: theme.spacing.s }]}>
+            <Skeleton 
+              width={mode === 'register' ? 60 : 80} 
+              height={mode === 'register' ? 60 : 80} 
+              borderRadius={40} 
+            />
+            <View style={[styles.badge, { marginLeft: theme.spacing.m, backgroundColor: theme.colors.elevation.level2 }]} />
+          </View>
+          
           <View style={styles.titleContainer}>
-            <Skeleton width={200} height={32} borderRadius={4} style={{ marginBottom: 8 }} />
-            <Skeleton width={260} height={20} borderRadius={4} />
+            <Skeleton 
+              width={mode === 'register' ? 140 : 180} 
+              height={mode === 'register' ? 28 : 32} 
+              borderRadius={4} 
+              style={{ marginBottom: theme.spacing.xs }} 
+            />
+            <Skeleton width={240} height={20} borderRadius={4} />
           </View>
         </View>
 
         {/* Form */}
-        <View style={styles.form}>
-          <Skeleton width="100%" height={56} borderRadius={4} style={styles.input} />
+        <View style={[styles.form, { gap: theme.spacing.xs }]}>
+          <Skeleton width="100%" height={56} borderRadius={4} />
           
           {(mode === 'login' || mode === 'register') && (
-            <Skeleton width="100%" height={56} borderRadius={4} style={styles.input} />
+            <Skeleton width="100%" height={56} borderRadius={4} />
           )}
 
           {mode === 'register' && (
-             <Skeleton width="100%" height={56} borderRadius={4} style={styles.input} />
+             <Skeleton width="100%" height={56} borderRadius={4} />
           )}
 
           {mode === 'login' && (
-            <View style={styles.forgotPassword}>
+            <View style={[styles.forgotPassword, { marginTop: -theme.spacing.xs, marginBottom: theme.spacing.m }]}>
                <Skeleton width={150} height={16} borderRadius={4} />
             </View>
           )}
 
-          <Skeleton width="100%" height={48} borderRadius={24} style={styles.button} />
+          <Skeleton 
+            width="100%" 
+            height={48} 
+            borderRadius={12} 
+            style={[styles.button, { marginTop: mode === 'login' ? 0 : theme.spacing.m }]} 
+          />
 
           {(mode === 'login' || mode === 'register') && (
             <>
-              <View style={styles.divider}>
-                <Skeleton width="40%" height={1} />
-                <Skeleton width={20} height={10} borderRadius={2} style={{ marginHorizontal: 10 }} />
-                <Skeleton width="40%" height={1} />
+              <View style={[styles.divider, { marginVertical: theme.spacing.m }]}>
+                <Skeleton width="35%" height={1} />
+                <Skeleton width={80} height={14} borderRadius={2} style={{ marginHorizontal: 10 }} />
+                <Skeleton width="35%" height={1} />
               </View>
-              <Skeleton width="100%" height={48} borderRadius={24} style={styles.button} />
+              <Skeleton width="100%" height={48} borderRadius={12} style={styles.button} />
             </>
           )}
 
           {mode === 'login' && (
-             <Skeleton width="100%" height={40} borderRadius={20} style={[styles.button, { marginTop: 10 }]} />
+             <Skeleton width="100%" height={48} borderRadius={12} style={[styles.button, { marginTop: theme.spacing.m }]} />
           )}
         </View>
 
         {/* Footer */}
-        <View style={styles.footer}>
-           <Skeleton width={200} height={16} borderRadius={4} />
+        <View style={[styles.footer, { marginTop: theme.spacing.xl }]}>
+           <View style={styles.footerRow}>
+             <Skeleton width={140} height={16} borderRadius={4} />
+             <Skeleton width={80} height={16} borderRadius={4} style={{ marginLeft: theme.spacing.s }} />
+           </View>
+           <Skeleton width={240} height={12} borderRadius={4} style={{ marginTop: theme.spacing.m }} />
         </View>
       </View>
     </View>
@@ -81,15 +106,19 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingHorizontal: 20,
-    justifyContent: 'center',
+    // paddingHorizontal and paddingVertical handled in component
   },
   header: {
     alignItems: 'center',
-    marginBottom: 40,
   },
-  logoContainer: {
-    marginBottom: 12,
+  logoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  badge: {
+    width: 45,
+    height: 20,
+    borderRadius: 4,
   },
   titleContainer: {
     alignItems: 'center',
@@ -97,26 +126,25 @@ const styles = StyleSheet.create({
   form: {
     width: '100%',
   },
-  input: {
-    marginBottom: 16,
-  },
   forgotPassword: {
     alignSelf: 'flex-end',
-    marginBottom: 20,
   },
   button: {
-    marginBottom: 15,
+    // marginBottom removed to use gap
   },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 20,
   },
   footer: {
-    marginTop: 20,
     alignItems: 'center',
   },
+  footerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 4, // Equivalent to theme.spacing.xs
+  }
 });
 
 export default AuthSkeleton;

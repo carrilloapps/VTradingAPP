@@ -175,36 +175,73 @@ class AuthService {
     let message = 'Ocurrió un error inesperado';
     if (error.code) {
         switch (error.code) {
+            // Registro y Email
             case 'auth/email-already-in-use':
-                message = 'El correo electrónico ya está en uso.';
+                message = 'Este correo electrónico ya está registrado. Intenta iniciar sesión.';
                 break;
             case 'auth/invalid-email':
-                message = 'El correo electrónico no es válido.';
+                message = 'El formato del correo electrónico no es válido.';
                 break;
             case 'auth/operation-not-allowed':
-                message = 'Operación no permitida.';
+                message = 'El método de autenticación no está habilitado.';
                 break;
             case 'auth/weak-password':
-                message = 'La contraseña es muy débil.';
+                message = 'La contraseña es muy débil. Usa al menos 6 caracteres con letras y números.';
                 break;
+            
+            // Inicio de Sesión
             case 'auth/user-disabled':
-                message = 'El usuario ha sido deshabilitado.';
+                message = 'Esta cuenta ha sido deshabilitada. Contacta al soporte.';
                 break;
             case 'auth/user-not-found':
             case 'auth/wrong-password':
             case 'auth/invalid-credential':
-                message = 'Credenciales inválidas.';
+                message = 'Correo o contraseña incorrectos.';
                 break;
             case 'auth/too-many-requests':
-                message = 'Demasiados intentos fallidos. Intente más tarde.';
+                message = 'Demasiados intentos fallidos. Tu cuenta ha sido bloqueada temporalmente por seguridad. Intenta más tarde.';
                 break;
+            case 'auth/user-token-expired':
+                message = 'Tu sesión ha expirado. Por favor, inicia sesión de nuevo.';
+                break;
+
+            // Google Sign-In y Credenciales
+            case 'auth/account-exists-with-different-credential':
+                message = 'Ya existe una cuenta vinculada a este correo con otro método de inicio de sesión.';
+                break;
+            case 'auth/credential-already-in-use':
+                message = 'Esta credencial ya está vinculada a otro usuario.';
+                break;
+
+            // Acciones de Usuario
             case 'auth/requires-recent-login':
-                message = 'Por seguridad, vuelve a iniciar sesión y reintenta eliminar la cuenta.';
+                message = 'Por seguridad, debes haber iniciado sesión recientemente para realizar esta acción. Vuelve a ingresar.';
                 break;
-             case 'auth/network-request-failed':
-                message = 'Error de conexión. Verifique su internet.';
+            case 'auth/no-current-user':
+                message = 'No se encontró una sesión activa.';
                 break;
+            
+            // Red y Errores Generales
+            case 'auth/network-request-failed':
+                message = 'Error de conexión. Verifica tu conexión a internet e intenta de nuevo.';
+                break;
+            case 'auth/internal-error':
+                message = 'Error interno del servidor. Intenta de nuevo en unos minutos.';
+                break;
+            case 'auth/timeout':
+                message = 'La operación ha tardado demasiado. Reintenta de nuevo.';
+                break;
+
+            // Google Sign-In específico (si el error viene con estos códigos)
+            case 'SIGN_IN_CANCELLED':
+                message = 'Inicio de sesión cancelado.';
+                break;
+            case 'PLAY_SERVICES_NOT_AVAILABLE':
+                message = 'Los servicios de Google Play no están disponibles o están desactualizados.';
+                break;
+
             default:
+                // Si es un error de Firebase pero no mapeado, intentamos usar el mensaje técnico si es legible
                 message = error.message || message;
         }
     } else if (error.message) {
