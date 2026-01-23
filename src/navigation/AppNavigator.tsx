@@ -15,6 +15,7 @@ import ExchangeRatesScreen from '../screens/ExchangeRatesScreen';
 import StocksScreen from '../screens/StocksScreen';
 import AdvancedCalculatorScreen from '../screens/AdvancedCalculatorScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
+import BankRatesScreen from '../screens/BankRatesScreen';
 import { useThemeContext } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { analyticsService } from '../services/firebase/AnalyticsService';
@@ -236,6 +237,14 @@ const AppNavigator = () => {
               options={{ 
                 headerShown: false, 
                 animation: 'default' 
+              }} 
+            />
+            <RootStack.Screen 
+              name="BankRates" 
+              component={BankRatesScreen} 
+              options={{ 
+                headerShown: false, 
+                animation: 'slide_from_right' 
               }} 
             />
           </>

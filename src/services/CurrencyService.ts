@@ -12,6 +12,7 @@ export interface CurrencyRate {
   type: 'fiat' | 'crypto' | 'border';
   iconName?: string;
   lastUpdated: string;
+  source?: string;
   buyValue?: number;
   sellValue?: number;
   buyChangePercent?: number;
@@ -78,6 +79,23 @@ interface ApiRatesResponse {
   rates: ApiRateItem[];
   crypto: ApiCryptoItem[];
   border: ApiRateItem[];
+}
+
+interface ApiBankRate {
+  bank: string;
+  buy: number;
+  sell: number;
+  indicatorDate: string;
+}
+
+interface ApiBankRatesResponse {
+  rates: ApiBankRate[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 type CurrencyListener = (rates: CurrencyRate[]) => void;
@@ -179,6 +197,7 @@ export class CurrencyService {
                      type: 'fiat',
                      iconName: iconName,
                      lastUpdated: apiRate.date || new Date().toISOString(),
+                     source: sourceLabel,
                      buyValue: CurrencyService.parseRate(apiRate.rate?.buy),
                      sellValue: CurrencyService.parseRate(apiRate.rate?.sell),
                      buyChangePercent: CurrencyService.parsePercentage(apiRate.change?.buy?.percent),
@@ -245,6 +264,7 @@ export class CurrencyService {
                      type: 'border',
                      iconName: iconName,
                      lastUpdated: apiRate.date || new Date().toISOString(),
+                     source: sourceLabel,
                      buyValue: finalBuy,
                      sellValue: finalSell,
                      buyChangePercent: apiRate.change?.buy?.percent ? CurrencyService.parsePercentage(apiRate.change.buy.percent) : undefined,
@@ -289,6 +309,7 @@ export class CurrencyService {
                     type: 'crypto',
                     iconName: iconName,
                     lastUpdated: cryptoItem.date || new Date().toISOString(),
+                    source: sourceLabel,
                     buyValue: CurrencyService.parseRate(cryptoItem.rate?.buy),
                     sellValue: CurrencyService.parseRate(cryptoItem.rate?.sell),
                     buyChangePercent: CurrencyService.parsePercentage(cryptoItem.change?.buy?.percent),
@@ -347,6 +368,46 @@ export class CurrencyService {
       rate.code.toLowerCase().includes(lowerQuery) || 
       rate.name.toLowerCase().includes(lowerQuery)
     );
+  }
+
+  /**
+   * Obtiene tasas bancarias con paginación
+   */
+  static async getBankRates(page = 1, limit = 15): Promise<{ rates: CurrencyRate[], pagination: ApiBankRatesResponse['pagination'] }> {
+    const trace = await performanceService.startTrace('get_bank_rates_service');
+    try {
+        const response = await apiClient.get<ApiBankRatesResponse>('api/rates/banks', {
+            params: { page, limit },
+            useCache: false
+        });
+
+        if (!response || !response.rates) {
+            return { rates: [], pagination: { page: 1, limit, total: 0, totalPages: 1 } };
+        }
+
+        const rates: CurrencyRate[] = response.rates.map((rate, index) => ({
+            id: `bank_${rate.bank.replace(/\s+/g, '_')}_${index}`,
+            code: 'USD', 
+            name: rate.bank,
+            value: (rate.buy + rate.sell) / 2,
+            changePercent: 0, 
+            type: 'fiat',
+            iconName: 'account-balance',
+            lastUpdated: rate.indicatorDate,
+            source: rate.bank,
+            buyValue: rate.buy,
+            sellValue: rate.sell,
+        }));
+
+        return { rates, pagination: response.pagination };
+
+    } catch (error) {
+        console.error('Error fetching bank rates:', error);
+        trace.putAttribute('error', 'true');
+        throw error;
+    } finally {
+        await performanceService.stopTrace(trace);
+    }
   }
 
   /**

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, RefreshControl, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { Text } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
 import LottieView from 'lottie-react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import RateCard from '../components/dashboard/RateCard';
@@ -23,6 +24,7 @@ if (Platform.OS === 'android' && !isFabricEnabled) {
 
 const ExchangeRatesScreen = () => {
   const theme = useAppTheme();
+  const navigation = useNavigation<any>();
   const { exchangeRateFilters, setExchangeRateFilters } = useFilters();
   const { query: searchQuery, type: filterType } = exchangeRateFilters;
   const { showToast } = useToast();
@@ -260,15 +262,22 @@ const ExchangeRatesScreen = () => {
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
                   <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>Tasa oficial del BCV</Text>
-                  <View style={[styles.tag, { 
-                      backgroundColor: isMarketOpen ? colors.successContainer : colors.secondaryContainer 
-                  }]}>
-                    <Text style={[styles.tagText, { 
-                        color: isMarketOpen ? colors.success : colors.onSecondaryContainer 
+                  <TouchableOpacity 
+                    onPress={() => navigation.navigate('BankRates')}
+                    activeOpacity={0.7}
+                    style={[styles.tag, { 
+                      backgroundColor: theme.colors.primaryContainer,
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      gap: 4
                     }]}>
-                        {isMarketOpen ? 'ACTUALIZADO' : 'ACTUALIZADO • P2P'}
+                    <Text style={[styles.tagText, { 
+                        color: theme.colors.onPrimaryContainer 
+                    }]}>
+                        VER BANCOS
                     </Text>
-                  </View>
+                    <MaterialIcons name="arrow-forward" size={12} color={theme.colors.onPrimaryContainer} />
+                  </TouchableOpacity>
                 </View>
                 {officialRates.map(renderRateCard)}
               </View>
