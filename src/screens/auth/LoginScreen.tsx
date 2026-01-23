@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, Image, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, StyleSheet, ScrollView, StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
 import { Text, TextInput, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import DeviceInfo from 'react-native-device-info';
 import { useAuth } from '../../context/AuthContext';
 import { analyticsService } from '../../services/firebase/AnalyticsService';
-import DeviceInfo from 'react-native-device-info';
 import { useAppTheme } from '../../theme/theme';
 import { AppConfig } from '../../constants/AppConfig';
 import AuthLoading from '../../components/auth/AuthLoading';
