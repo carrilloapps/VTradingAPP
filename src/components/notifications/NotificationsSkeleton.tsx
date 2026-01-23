@@ -10,29 +10,10 @@ const NotificationsSkeleton = () => {
   const r = theme.roundness;
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
-      {/* Header Skeleton */}
-      <View style={styles.header}>
-        <View style={styles.headerRow}>
-          <Skeleton width={150} height={24} />
-          <Skeleton width={24} height={24} borderRadius={12} />
-        </View>
-        <Skeleton width={200} height={16} style={{ marginTop: 8 }} />
-      </View>
-
-      {/* Search Bar Skeleton */}
-      <View style={styles.searchBar}>
-        <Skeleton width="100%" height={48} borderRadius={r * 6} />
-      </View>
-
-      {/* Filters/Tabs Skeleton */}
-      <View style={styles.filters}>
-        <Skeleton width="100%" height={40} borderRadius={20} />
-      </View>
-
+    <View style={styles.container}>
       {/* Notification Cards Skeleton */}
       <View style={styles.list}>
-        {[1, 2, 3, 4, 5].map((key) => (
+        {[1, 2, 3, 4, 5, 6].map((key) => (
           <View 
             key={key} 
             style={[
@@ -66,21 +47,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-  },
-  header: {
-    marginBottom: 20,
-    marginTop: 10,
-  },
-  headerRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  searchBar: {
-    marginBottom: 16,
-  },
-  filters: {
-    marginBottom: 20,
+    paddingTop: 10,
   },
   list: {
     gap: 12,

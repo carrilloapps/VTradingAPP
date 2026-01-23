@@ -1,11 +1,9 @@
 import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { View, StyleSheet, FlatList, StatusBar, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
-import { Text } from 'react-native-paper';
+import { Text, Icon } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useNavigation } from '@react-navigation/native';
 import PagerView from 'react-native-pager-view';
-import LottieView from 'lottie-react-native';
 
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import { useAppTheme } from '../theme/theme';
@@ -33,10 +31,10 @@ const NotificationsScreen: React.FC = () => {
 
   // Filter Options with Theme Colors
   const FILTER_OPTIONS: FilterOption[] = [
-    { label: 'Todas', value: 'all', icon: 'filter-list' },
-    { label: 'Tasas', value: 'price_alert', icon: 'payments', color: theme.colors.tertiary },
-    { label: 'Acciones', value: 'market_news', icon: 'show-chart', color: theme.colors.primary },
-    { label: 'Generales', value: 'system', icon: 'build', color: theme.colors.warning },
+    { label: 'Todas', value: 'all', icon: 'filter-variant' },
+    { label: 'Tasas', value: 'price_alert', icon: 'cash-multiple', color: theme.colors.tertiary },
+    { label: 'Acciones', value: 'market_news', icon: 'chart-line', color: theme.colors.primary },
+    { label: 'Generales', value: 'system', icon: 'wrench', color: theme.colors.warning },
   ];
 
   // State
@@ -113,12 +111,10 @@ const NotificationsScreen: React.FC = () => {
 
   const renderEmptyState = (title: string, subtitle: string) => (
     <View style={styles.emptyContainer}>
-      <LottieView
-        source={require('../assets/animations/splash.json')}
-        autoPlay
-        loop
-        style={styles.lottie}
-        resizeMode="contain"
+      <Icon
+        source="bell-off-outline"
+        size={80}
+        color={theme.colors.onSurfaceVariant}
       />
       <Text variant="titleMedium" style={[styles.emptyTitle, { color: theme.colors.onSurface }]}>
         {title}
@@ -148,16 +144,11 @@ const NotificationsScreen: React.FC = () => {
   );
 
   if (isLoading) {
-    return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <StatusBar
-          backgroundColor="transparent"
-          translucent
-          barStyle={theme.dark ? 'light-content' : 'dark-content'}
-        />
-        <NotificationsSkeleton />
-      </View>
-    );
+    // We render the skeleton inside the main layout structure now, but for simplicity
+    // let's just use the skeleton component if we want to replace the list content.
+    // However, the user asked to NOT use any type of loading (meaning spinner).
+    // The previous implementation returned early. Now we want to show the header and just skeleton the list.
+    // So we will NOT return early here.
   }
 
   return (
@@ -175,8 +166,8 @@ const NotificationsScreen: React.FC = () => {
           title="Notificaciones" 
           subtitle="Tus alertas y avisos recientes"
           onBackPress={() => navigation.goBack()}
-          onActionPress={() => { /* Navigate to Archive? */ }}
-          rightActionIcon="archive"
+          onActionPress={() => navigation.navigate('Settings' as never)}
+          rightActionIcon="settings"
           showNotification={false}
           style={styles.headerStyle}
         />
@@ -287,7 +278,7 @@ const NotificationsScreen: React.FC = () => {
               onPress={handleMarkAllRead}
               style={styles.markReadButton}
             >
-              <MaterialIcons name="done-all" size={16} color={theme.colors.primary} />
+              <Icon source="check-all" size={16} color={theme.colors.primary} />
               <Text style={{ color: theme.colors.primary, fontWeight: 'bold', fontSize: 11, textTransform: 'uppercase', marginLeft: 4 }}>
                 Marcar todo como leído
               </Text>
@@ -296,6 +287,11 @@ const NotificationsScreen: React.FC = () => {
         )}
 
         {/* Pager Content */}
+        {isLoading ? (
+           <View style={{ flex: 1 }}>
+             <NotificationsSkeleton />
+           </View>
+        ) : (
         <PagerView
           ref={pagerRef}
           style={styles.pagerView}
@@ -312,6 +308,7 @@ const NotificationsScreen: React.FC = () => {
             {renderList(archivedNotifications, 'No hay notificaciones archivadas', 'Las notificaciones que archives aparecerán aquí.')}
           </View>
         </PagerView>
+        )}
       </View>
 
       <NotificationDetailModal 
@@ -387,10 +384,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 40,
     minHeight: 300,
-  },
-  lottie: {
-    width: 300,
-    height: 300,
   },
   emptyTitle: {
     marginTop: 16,
