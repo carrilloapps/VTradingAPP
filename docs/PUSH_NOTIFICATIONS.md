@@ -184,6 +184,89 @@ El servicio `FCMService` maneja la solicitud de permisos de manera diferenciada 
 
 ---
 
+## Notas Importantes sobre Símbolos vs Tópicos
+
+Es crucial distinguir entre el nombre del **Topic** de suscripción y el valor del **Symbol** dentro del payload JSON, ya que la aplicación realiza validaciones estrictas.
+
+### Regla de Oro
+*   **Topic (Canal de Envío):** Siempre sanitizado (minúsculas, sin caracteres especiales, espacios reemplazados por `_`).
+*   **Payload `symbol` (Dato de Lógica):** Siempre idéntico al formato visual de la app (Mayúsculas, con `/` para pares, puntos para acciones).
+
+| Caso | Símbolo en App (Payload) | Tópico FCM (Canal) | Razón |
+| :--- | :--- | :--- | :--- |
+| **Par Divisas** | `VES/USD` | `ticker_ves_usd` | La app compara `a.symbol === "VES/USD"` para disparar la alerta. |
+| **Par Divisas** | `VES/COP` | `ticker_ves_cop` | Si envías solo "COP", la comparación falla. |
+| **Cripto** | `BTC/USDT` | `ticker_btc_usdt` | Igual que divisas, requiere el par completo. |
+| **Acción** | `ABC.A` | `ticker_abc_a` | El punto se reemplaza en el topic, pero debe mantenerse en el payload. |
+| **Índice** | `IBC` | `ticker_ibc` | Símbolos simples coinciden (salvo mayúsculas/minúsculas). |
+
+---
+
+## Ejemplos de Segmentación por Tópicos
+
+A continuación se detallan ejemplos prácticos de payloads para enviar notificaciones a segmentos específicos de usuarios.
+
+### 1. Usuarios en "Modo Claro" (Marketing)
+Enviar una promoción visual solo a usuarios que usan el tema claro (`theme_light`).
+
+```bash
+curl -X POST -H "Authorization: key=YOUR_SERVER_KEY" -H "Content-Type: application/json" -d '{
+  "to": "/topics/theme_light",
+  "notification": {
+    "title": "¡Protege tu vista!",
+    "body": "Prueba nuestro nuevo Modo Oscuro en Configuración."
+  },
+  "data": {
+    "screen": "Settings"
+  }
+}' https://fcm.googleapis.com/fcm/send
+```
+
+### 2. Alerta de Precio: VES/USD (Data Message)
+Actualización de precio para usuarios siguiendo la tasa del Bolívar respecto al Dólar (inverso).
+*   **Topic:** `ticker_ves_usd` (Sanitizado de `VES/USD`)
+*   **Payload:** Data Message silencioso.
+
+```bash
+curl -X POST -H "Authorization: key=YOUR_SERVER_KEY" -H "Content-Type: application/json" -d '{
+  "to": "/topics/ticker_ves_usd",
+  "data": {
+    "symbol": "VES/USD",
+    "price": "0.0275"
+  }
+}' https://fcm.googleapis.com/fcm/send
+```
+
+### 3. Alerta de Precio: VES/COP (Data Message)
+Actualización para el par Bolívar/Peso Colombiano.
+*   **Topic:** `ticker_ves_cop` (Sanitizado de `VES/COP`)
+
+```bash
+curl -X POST -H "Authorization: key=YOUR_SERVER_KEY" -H "Content-Type: application/json" -d '{
+  "to": "/topics/ticker_ves_cop",
+  "data": {
+    "symbol": "VES/COP",
+    "price": "115.50"
+  }
+}' https://fcm.googleapis.com/fcm/send
+```
+
+### 4. Alerta de Stock: ABC.A (Data Message)
+Actualización de precio para una acción específica (ej. `ABC.A`).
+*   **Topic:** `ticker_abc_a` (El punto `.` se reemplaza por `_`)
+
+```bash
+curl -X POST -H "Authorization: key=YOUR_SERVER_KEY" -H "Content-Type: application/json" -d '{
+  "to": "/topics/ticker_abc_a",
+  "data": {
+    "symbol": "ABC.A",
+    "price": "45.20"
+  }
+}' https://fcm.googleapis.com/fcm/send
+```
+
+---
+
 ## Flujo de Navegación
 
 *   **Background/Quit:** Al tocar la notificación, `NotificationContext` detecta la apertura (`getInitialNotification` o `onNotificationOpenedApp`) y navega automáticamente a la pantalla `Notifications`.
