@@ -4,7 +4,7 @@ import { Text, TextInput, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import { analyticsService } from '../../services/firebase/AnalyticsService';
-import AuthSkeleton from '../../components/auth/AuthSkeleton';
+import AuthLoading from '../../components/auth/AuthLoading';
 import CustomButton from '../../components/ui/CustomButton';
 import UnifiedHeader from '../../components/ui/UnifiedHeader';
 import { useAppTheme } from '../../theme/theme';
@@ -83,7 +83,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
   };
 
   if (isBusy) {
-    return <AuthSkeleton mode="forgot-password" />;
+    return <AuthLoading />;
   }
 
   return (

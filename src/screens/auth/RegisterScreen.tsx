@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
 import { analyticsService } from '../../services/firebase/AnalyticsService';
 import { AppConfig } from '../../constants/AppConfig';
-import AuthSkeleton from '../../components/auth/AuthSkeleton';
+import AuthLoading from '../../components/auth/AuthLoading';
 import CustomButton from '../../components/ui/CustomButton';
 import UnifiedHeader from '../../components/ui/UnifiedHeader';
 import { useAppTheme } from '../../theme/theme';
@@ -133,7 +133,7 @@ const RegisterScreen = ({ navigation }: any) => {
   };
 
   if (isBusy) {
-    return <AuthSkeleton mode="register" />;
+    return <AuthLoading />;
   }
 
   return (

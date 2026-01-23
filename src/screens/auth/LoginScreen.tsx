@@ -7,7 +7,7 @@ import { analyticsService } from '../../services/firebase/AnalyticsService';
 import DeviceInfo from 'react-native-device-info';
 import { useAppTheme } from '../../theme/theme';
 import { AppConfig } from '../../constants/AppConfig';
-import AuthSkeleton from '../../components/auth/AuthSkeleton';
+import AuthLoading from '../../components/auth/AuthLoading';
 import CustomButton from '../../components/ui/CustomButton';
 import UnifiedHeader from '../../components/ui/UnifiedHeader';
 import AboutDialog from '../../components/ui/AboutDialog';
@@ -141,7 +141,7 @@ const LoginScreen = ({ navigation }: any) => {
   };
 
   if (isBusy) {
-    return <AuthSkeleton mode="login" />;
+    return <AuthLoading />;
   }
 
   return (
