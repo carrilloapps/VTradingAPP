@@ -107,13 +107,17 @@ const BankRatesScreen = () => {
 
       // Sort
       switch (sortType) {
-          case 'user_sell': // A vender (High Buy Price)
-              result.sort((a, b) => (b.buyValue || 0) - (a.buyValue || 0));
-              break;
-          case 'user_buy': // A comprar (Low Sell Price)
+          case 'price_desc': // Mayor precio (High Buy Price - Best for Selling)
               result.sort((a, b) => {
-                  const valA = a.sellValue || Infinity;
-                  const valB = b.sellValue || Infinity;
+                  const valA = a.buyValue || a.value || 0;
+                  const valB = b.buyValue || b.value || 0;
+                  return valB - valA;
+              });
+              break;
+          case 'price_asc': // Menor precio (Low Sell Price - Best for Buying)
+              result.sort((a, b) => {
+                  const valA = a.sellValue || a.value || Infinity;
+                  const valB = b.sellValue || b.value || Infinity;
                   return valA - valB;
               });
               break;
@@ -244,8 +248,8 @@ const BankRatesScreen = () => {
         <FilterSection 
             options={[
               { label: 'A-Z', value: 'az', icon: 'sort' },
-              { label: 'Menor precio', value: 'price_asc', icon: 'trending-down', color: theme.colors.trendUp }, // Green (Good/Up)
-              { label: 'Mayor precio', value: 'price_desc', icon: 'trending-up', color: theme.colors.trendDown }, // Red (Bad/Down)
+              { label: 'Menor precio', value: 'price_asc', icon: 'trending-down', color: theme.colors.trendDown }, // Green (Good/Up)
+              { label: 'Mayor precio', value: 'price_desc', icon: 'trending-up', color: theme.colors.trendUp }, // Red (Bad/Down)
             ]}
             selectedValue={sortType}
             onSelect={(value) => {
