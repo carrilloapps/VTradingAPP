@@ -18,6 +18,39 @@ const WebViewScreen = () => {
   const { url, title } = route.params;
   const [isLoading, setIsLoading] = useState(true);
 
+  // Script para ocultar header, footer y breadcrumbs en vtrading.app
+  const hideElementsScript = `
+    (function() {
+      try {
+        if (window.location.hostname.includes('vtrading.app')) {
+          const style = document.createElement('style');
+          style.innerHTML = \`
+            header, .header, #header, .site-header, .main-header,
+            footer, .footer, #footer, .site-footer, .main-footer,
+            .breadcrumbs, .breadcrumb, .breadcrumb-container, nav[aria-label="breadcrumb"], .yoast-breadcrumbs {
+               display: none !important;
+             }
+             
+             /* Ajuste de márgenes superiores para acercar el contenido */
+             body, #page, .site, .site-content, .content-area, main, article {
+               margin-top: 10px !important;
+               padding-top: 0 !important;
+             }
+             
+             .entry-content, .entry-header {
+               margin-top: 10px !important;
+               padding-top: 0 !important;
+             }
+           \`;
+           document.head.appendChild(style);
+        }
+      } catch (e) {
+        // Silent error
+      }
+    })();
+    true;
+  `;
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar 
@@ -37,6 +70,7 @@ const WebViewScreen = () => {
       <View style={styles.webViewContainer}>
         <WebView
           source={{ uri: url }}
+          injectedJavaScript={hideElementsScript}
           onLoadStart={() => setIsLoading(true)}
           onLoadEnd={() => setIsLoading(false)}
           style={{ flex: 1, backgroundColor: theme.colors.background }}
