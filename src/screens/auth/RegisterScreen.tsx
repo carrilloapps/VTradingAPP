@@ -161,7 +161,7 @@ const RegisterScreen = ({ navigation }: any) => {
 
         <View style={styles.header}>
           <Text variant="headlineMedium" style={themeStyles.title}>
-            Crear Cuenta
+            Crear cuenta
           </Text>
           <Text variant="bodyLarge" style={themeStyles.subtitle}>
             Regístrate para comenzar a operar
@@ -170,7 +170,7 @@ const RegisterScreen = ({ navigation }: any) => {
 
         <View style={styles.form}>
           <TextInput
-            label="Correo Electrónico"
+            label="Correo electrónico"
             value={email}
             onChangeText={setEmail}
             mode="outlined"
@@ -220,7 +220,7 @@ const RegisterScreen = ({ navigation }: any) => {
           </HelperText>
 
           <TextInput
-            label="Confirmar Contraseña"
+            label="Confirmar contraseña"
             value={confirmPassword}
             onChangeText={setConfirmPassword}
             mode="outlined"

@@ -175,7 +175,7 @@ const LoginScreen = ({ navigation }: any) => {
 
         <View style={styles.form}>
           <TextInput
-            label="Correo Electrónico"
+            label="Correo electrónico"
             value={email}
             onChangeText={setEmail}
             mode="outlined"
@@ -249,7 +249,7 @@ const LoginScreen = ({ navigation }: any) => {
             accessibilityLabel="Iniciar sesión"
             accessibilityHint="Inicia sesión con correo y contraseña"
           >
-            Iniciar Sesión
+            Iniciar sesión
           </Button>
 
           <View style={styles.divider}>
