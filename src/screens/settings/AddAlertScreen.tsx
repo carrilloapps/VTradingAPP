@@ -175,7 +175,7 @@ const AddAlertScreen = ({ route }: Props) => {
   }, [editAlert, items]);
 
   if (loading) {
-    return <AddAlertSkeleton />;
+    return <AddAlertSkeleton variant={editAlert ? 'form' : 'list'} />;
   }
 
 

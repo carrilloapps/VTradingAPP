@@ -4,10 +4,52 @@ import { useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Skeleton from '../ui/Skeleton';
 
-const AddAlertSkeleton = () => {
+interface Props {
+  variant?: 'list' | 'form';
+}
+
+const AddAlertSkeleton = ({ variant = 'list' }: Props) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const r = theme.roundness;
+
+  if (variant === 'form') {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+         {/* Header Skeleton */}
+        <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Skeleton width={24} height={24} borderRadius={12} />
+              <Skeleton width={150} height={24} style={{ marginLeft: 16 }} />
+           </View>
+        </View>
+
+        <View style={styles.formContent}>
+            {/* Icon & Title */}
+            <View style={{ alignItems: 'center', marginBottom: 32 }}>
+                <Skeleton width={80} height={80} borderRadius={40} style={{ marginBottom: 16 }} />
+                <Skeleton width={120} height={32} style={{ marginBottom: 8 }} />
+                <Skeleton width={200} height={20} />
+            </View>
+
+            {/* Price Card */}
+            <View style={{ marginBottom: 32, alignItems: 'center' }}>
+                <Skeleton width="100%" height={120} borderRadius={24} />
+            </View>
+
+            {/* Inputs */}
+            <Skeleton width="100%" height={56} borderRadius={4} style={{ marginBottom: 24 }} />
+            
+            {/* Condition */}
+            <Skeleton width="100%" height={56} borderRadius={12} style={{ marginBottom: 24 }} />
+
+            {/* Buttons */}
+            <Skeleton width="100%" height={48} borderRadius={24} style={{ marginBottom: 12 }} />
+            <Skeleton width="100%" height={48} borderRadius={24} />
+        </View>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -68,6 +110,10 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 16,
+  },
+  formContent: {
+      paddingHorizontal: 24,
+      paddingTop: 16,
   },
   searchBar: {
     marginBottom: 16,
