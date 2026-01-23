@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { View, StyleSheet, StatusBar, RefreshControl, FlatList, ActivityIndicator } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MarketStatus from '../components/ui/MarketStatus';
 import IndexHero from '../components/stocks/IndexHero';
@@ -79,9 +80,26 @@ const StocksScreen = () => {
     return stocks.filter(stock => {
       const matchesSearch = stock.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             stock.symbol.toLowerCase().includes(searchQuery.toLowerCase());
-      // For now, filter category is mocked since data doesn't have category field
-      // In real app, we would check stock.category === activeFilter
-      const matchesCategory = activeFilter === 'Todos' || true; 
+      
+      let matchesCategory = true;
+      if (activeFilter !== 'Todos') {
+        const filterLower = activeFilter.toLowerCase();
+        
+        // Mapeo de palabras clave para cubrir variaciones (ej: Banca vs Banco)
+        const categoryKeywords: Record<string, string[]> = {
+            'banca': ['banca', 'banco', 'financiero', 'b.o.d', 'bnc', 'bbva', 'provincial', 'mercantil', 'plaza', 'venezuela', 'tesoro', 'bicentenario', 'caroni', 'exterior', 'fondo común', 'banesco', 'activo', 'agrícola', 'sofitasa', 'bancaribe', 'bancamiga'],
+            'industria': ['industria', 'industrial', 'manuf', 'sivensa', 'fvi', 'corimon', 'envases', 'proagro', 'ron', 'santa teresa', 'cerámica', 'dominguez', 'vencemos', 'mampa', 'telares'],
+            'servicios': ['servicio', 'cantv', 'electricidad', 'netuno', 'inter', 'bolsa'],
+            'seguros': ['seguros', 'aseguradora', 'seg', 'horizonte', 'piramide', 'mercantil seg', 'estar'],
+        };
+
+        const keywords = categoryKeywords[filterLower] || [filterLower];
+
+        matchesCategory = keywords.some(kw => 
+            stock.name.toLowerCase().includes(kw) || 
+            stock.symbol.toLowerCase().includes(kw)
+        );
+      }
       
       return matchesSearch && matchesCategory;
     });
@@ -207,6 +225,14 @@ const StocksScreen = () => {
         initialNumToRender={10}
         windowSize={5}
         style={styles.content}
+        ListEmptyComponent={
+            <View style={{ padding: 40, alignItems: 'center', justifyContent: 'center' }}>
+                <MaterialIcons name="sentiment-dissatisfied" size={48} color={theme.colors.onSurfaceVariant} style={{ opacity: 0.5, marginBottom: 16 }} />
+                <Text style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}>
+                    No se encontraron acciones para "{activeFilter}"
+                </Text>
+            </View>
+        }
       />
     </View>
   );
