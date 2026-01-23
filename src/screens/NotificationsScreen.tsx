@@ -166,7 +166,7 @@ const NotificationsScreen: React.FC = () => {
           title="Notificaciones" 
           subtitle="Tus alertas y avisos recientes"
           onBackPress={() => navigation.goBack()}
-          onActionPress={() => navigation.navigate('Settings' as never)}
+          onActionPress={() => (navigation.navigate as any)('Main', { screen: 'Settings' })}
           rightActionIcon="settings"
           showNotification={false}
           style={styles.headerStyle}
