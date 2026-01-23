@@ -182,8 +182,8 @@ const RegisterScreen = ({ navigation }: any) => {
             styles.container, 
             themeStyles.container,
             { 
-              paddingTop: theme.spacing.s,
-              paddingBottom: insets.bottom + theme.spacing.m,
+              paddingTop: theme.spacing.l,
+              paddingBottom: insets.bottom + theme.spacing.xl,
               paddingHorizontal: theme.spacing.xl
             }
           ]}

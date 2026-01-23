@@ -188,7 +188,7 @@ const LoginScreen = ({ navigation }: any) => {
             styles.container, 
             themeStyles.container,
             { 
-              paddingTop: insets.top + theme.spacing.xl,
+              paddingTop: theme.spacing.l,
               paddingBottom: insets.bottom + theme.spacing.xl,
               paddingHorizontal: theme.spacing.xl
             }

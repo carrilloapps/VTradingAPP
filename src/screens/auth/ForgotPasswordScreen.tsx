@@ -132,7 +132,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
             styles.container, 
             themeStyles.container,
             { 
-              paddingTop: theme.spacing.m,
+              paddingTop: theme.spacing.l,
               paddingBottom: insets.bottom + theme.spacing.xl,
               paddingHorizontal: theme.spacing.xl
             }
