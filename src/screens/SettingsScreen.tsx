@@ -224,36 +224,6 @@ const SettingsScreen = () => {
       (navigation as any).navigate('AddAlert');
   };
 
-  const saveNewAlert = async (symbol: string, target: string, condition: 'above' | 'below') => {
-      // Determine icon based on symbol type (Currency pair has /, Stock doesn't)
-      const iconName = symbol.includes('/') ? 'currency-exchange' : 'show-chart';
-
-      const newAlert: UserAlert = {
-          id: Date.now().toString(),
-          symbol: symbol,
-          target: target,
-          condition: condition,
-          isActive: true,
-          iconName: iconName
-      };
-      
-      const updated = [...alerts, newAlert];
-      setAlerts(updated);
-      await storageService.saveAlerts(updated);
-      
-      // Subscribe to FCM topic
-      // Solo necesitamos suscribirnos al ticker (topic) del símbolo
-      const topic = getTopicName(symbol);
-      try {
-          await fcmService.subscribeToTopic(topic);
-          console.log(`Subscribed to ${topic}`);
-      } catch (err) {
-          console.error('FCM Topic Error:', err);
-      }
-
-      handleAction(`Alerta creada para ${symbol}`);
-  };
-
   if (loading) {
     return <SettingsSkeleton />;
   }
@@ -358,8 +328,6 @@ const SettingsScreen = () => {
                           onPress={() => handleEditAlert(alert)}
                           disabled={togglingIds.has(alert.id)}
                           iconName={alert.iconName || 'show-chart'}
-                          iconColor={alert.condition === 'above' ? colors.success : colors.error} 
-                          iconBgColor={alert.condition === 'above' ? colors.successContainer : colors.errorContainer} 
                         />
                         {index < alerts.length - 1 && (
                             <View style={[styles.separator, { backgroundColor: theme.colors.outline }]} />

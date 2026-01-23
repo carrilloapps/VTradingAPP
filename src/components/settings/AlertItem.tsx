@@ -12,8 +12,6 @@ interface AlertItemProps {
   onDelete: () => void;
   onPress: () => void;
   iconName: string;
-  iconColor: string;
-  iconBgColor: string;
   disabled?: boolean;
 }
 
@@ -26,8 +24,6 @@ const AlertItem: React.FC<AlertItemProps> = ({
   onDelete,
   onPress,
   iconName,
-  iconColor,
-  iconBgColor,
   disabled = false
 }) => {
   const theme = useTheme();
@@ -41,12 +37,14 @@ const AlertItem: React.FC<AlertItemProps> = ({
     ? colors.successContainer
     : colors.errorContainer;
 
+  const iconColor = status === 'Sube' ? colors.success : colors.error;
+  const iconBgColor = status === 'Sube' ? colors.successContainer : colors.errorContainer;
+
   return (
     <TouchableRipple 
       onPress={onPress}
       disabled={disabled}
       style={[styles.container, { 
-        backgroundColor: theme.colors.elevation.level1,
         borderBottomColor: theme.colors.outline,
       }]}
     >
