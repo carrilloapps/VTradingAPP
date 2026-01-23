@@ -29,9 +29,22 @@ import { navigationRef } from './NavigationRef';
 import { storageService } from '../services/StorageService';
 import DiscoverScreen from '../screens/DiscoverScreen';
 import AddAlertScreen from '../screens/settings/AddAlertScreen';
+import { UserAlert } from '../services/StorageService';
+
+export type RootStackParamList = {
+  Onboarding: undefined;
+  Auth: undefined;
+  Main: undefined;
+  Notifications: undefined;
+  Widgets: undefined;
+  AdvancedCalculator: undefined;
+  BankRates: undefined;
+  WebView: { url: string; title?: string };
+  AddAlert: { editAlert?: UserAlert };
+};
 
 // Root Stack that includes Splash
-const RootStack = createNativeStackNavigator();
+const RootStack = createNativeStackNavigator<RootStackParamList>();
 
 // Stack para Home y Discover
 const HomeStack = createNativeStackNavigator();

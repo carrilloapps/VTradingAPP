@@ -1,7 +1,7 @@
 import React from 'react';
 import { ScrollView, View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { Chip } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../theme/theme';
 
 export interface FilterOption {
@@ -46,7 +46,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         key={option.value}
         selected={isSelected}
         icon={option.icon ? ({ size }) => (
-          <MaterialIcons name={option.icon!} size={size} color={contentColor} />
+          <MaterialCommunityIcons name={option.icon!} size={size} color={contentColor} />
         ) : undefined}
         onPress={() => {
           // Optional: Add animation on selection if desired

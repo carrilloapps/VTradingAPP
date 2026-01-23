@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, Keyboard } from 'react-native';
-import { Text, ActivityIndicator, TextInput, Button } from 'react-native-paper';
+import { View, StyleSheet, FlatList, TouchableOpacity, Keyboard, ScrollView } from 'react-native';
+import { Text, ActivityIndicator, TextInput, Button, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -8,12 +8,17 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import UnifiedHeader from '../../components/ui/UnifiedHeader';
 import SearchBar from '../../components/ui/SearchBar';
 import FilterSection from '../../components/ui/FilterSection';
+import CustomButton from '../../components/ui/CustomButton';
+import CustomDialog from '../../components/ui/CustomDialog';
 import { useAppTheme } from '../../theme/theme';
 import { CurrencyService } from '../../services/CurrencyService';
 import { StocksService } from '../../services/StocksService';
 import { storageService, UserAlert } from '../../services/StorageService';
 import { fcmService } from '../../services/firebase/FCMService';
 import { useToast } from '../../context/ToastContext';
+
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../../navigation/AppNavigator';
 
 interface SymbolItem {
   id: string;
@@ -25,11 +30,16 @@ interface SymbolItem {
   iconName?: string;
 }
 
-const AddAlertScreen = () => {
+type Props = NativeStackScreenProps<RootStackParamList, 'AddAlert'>;
+
+const AddAlertScreen = ({ route }: Props) => {
   const theme = useAppTheme();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
   const { showToast } = useToast();
+  
+  // Params for Edit Mode
+  const editAlert = route.params?.editAlert;
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<'Todas' | 'Divisas' | 'Cripto' | 'Acciones'>('Todas');
@@ -41,10 +51,24 @@ const AddAlertScreen = () => {
   const [targetPrice, setTargetPrice] = useState('');
   const [condition, setCondition] = useState<'above' | 'below'>('above');
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   useEffect(() => {
     loadData();
   }, []);
+
+  // Pre-fill if editing
+  useEffect(() => {
+    if (editAlert && items.length > 0) {
+        const item = items.find(i => i.symbol === editAlert.symbol);
+        if (item) {
+            setSelectedItem(item);
+            setTargetPrice(editAlert.target);
+            setCondition(editAlert.condition);
+        }
+    }
+  }, [editAlert, items]);
 
   const loadData = async () => {
     setLoading(true);
@@ -72,7 +96,7 @@ const AddAlertScreen = () => {
           price: r.value,
           type: r.type === 'crypto' ? 'Cripto' : 'Divisa',
           changePercent: r.changePercent || 0,
-          iconName: r.type === 'crypto' ? 'bitcoin' : 'currency-usd'
+          iconName: r.type === 'crypto' ? 'currency-btc' : 'currency-usd'
         });
 
         // VES/CODE (Inverse) - e.g. VES/COP
@@ -91,50 +115,38 @@ const AddAlertScreen = () => {
 
         // Crypto Pairs against USD/USDT
         if (r.type === 'crypto') {
-          const id3 = `${r.code}/USD`;
-          itemsMap.set(id3, {
-            id: id3,
-            symbol: id3,
-            name: `${r.name} en Dólares`,
-            price: r.value / usdRate,
-            type: 'Cripto',
-            changePercent: r.changePercent || 0,
-            iconName: 'bitcoin'
-          });
+            // CODE/USD
+            const id3 = `${r.code}/USD`;
+            const priceUsd = r.value / usdRate;
+            itemsMap.set(id3, {
+                id: id3,
+                symbol: id3,
+                name: `${r.name} / USD`,
+                price: priceUsd,
+                type: 'Cripto',
+                changePercent: r.changePercent || 0,
+                iconName: 'currency-btc'
+            });
         }
       });
 
-      // Special Case: EUR/USD
-      const eurRate = rates.find(r => r.code === 'EUR')?.value;
-      if (eurRate && usdRate > 0) {
-        itemsMap.set('EUR/USD', {
-            id: 'EUR/USD',
-            symbol: 'EUR/USD',
-            name: 'Euro vs Dólar',
-            price: eurRate / usdRate,
-            type: 'Divisa',
-            changePercent: 0,
-            iconName: 'currency-eur'
-        });
-      }
-
       // 2. Process Stocks
       stocks.forEach(s => {
-        itemsMap.set(s.symbol, {
-          id: s.symbol,
-          symbol: s.symbol,
-          name: s.name,
-          price: s.price,
-          type: 'Acción',
-          changePercent: s.changePercent || 0,
-          iconName: 'chart-line'
-        });
+         itemsMap.set(s.symbol, {
+            id: s.symbol,
+            symbol: s.symbol,
+            name: s.name,
+            price: s.price,
+            type: 'Acción',
+            changePercent: s.changePercent,
+            iconName: 'domain'
+         });
       });
 
-      setItems(Array.from(itemsMap.values()).sort((a, b) => a.symbol.localeCompare(b.symbol)));
+      setItems(Array.from(itemsMap.values()));
     } catch (error) {
-      console.error('Error loading alert items:', error);
-      showToast('Error cargando activos', 'error');
+      console.error('Error loading data for alerts:', error);
+      showToast('Error cargando datos de mercado', 'error');
     } finally {
       setLoading(false);
     }
@@ -160,6 +172,8 @@ const AddAlertScreen = () => {
 
   const handleSelectItem = (item: SymbolItem) => {
     setSelectedItem(item);
+    // Only reset target/condition if we are NOT editing or if we changed the symbol (which effectively is a reset)
+    // But since handleSelectItem is triggered by user tap, it implies a change.
     setTargetPrice(item.price.toFixed(item.price < 1 ? 4 : 2));
     setCondition('above');
     Keyboard.dismiss();
@@ -172,14 +186,18 @@ const AddAlertScreen = () => {
     try {
         const alerts = await storageService.getAlerts();
         
-        if (alerts.length >= 5) {
+        // Validation: Limit 5 alerts (unless editing existing)
+        if (!editAlert && alerts.length >= 5) {
             showToast('Límite de 5 alertas alcanzado', 'error');
             setSaving(false);
             return;
         }
 
+        const currentTimestamp = Date.now().toString();
+        const alertId = editAlert ? editAlert.id : currentTimestamp;
+
         const newAlert: UserAlert = {
-            id: Date.now().toString(),
+            id: alertId,
             symbol: selectedItem.symbol,
             target: targetPrice,
             condition: condition,
@@ -187,15 +205,35 @@ const AddAlertScreen = () => {
             iconName: selectedItem.iconName || 'bell-ring'
         };
 
-        const updated = [...alerts, newAlert];
-        await storageService.saveAlerts(updated);
+        let updatedAlerts: UserAlert[];
 
-        // Subscribe to FCM
+        if (editAlert) {
+            // Update existing
+            updatedAlerts = alerts.map(a => a.id === editAlert.id ? newAlert : a);
+            
+            // Handle Topic Change if symbol changed
+            if (editAlert.symbol !== selectedItem.symbol) {
+                 // Check if old symbol has other alerts
+                 const othersWithOldSymbol = updatedAlerts.filter(a => a.symbol === editAlert.symbol && a.id !== editAlert.id);
+                 if (othersWithOldSymbol.length === 0) {
+                     const oldTopic = `ticker_${editAlert.symbol.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase()}`;
+                     await fcmService.unsubscribeFromTopic(oldTopic);
+                 }
+                 // New topic subscription will happen below
+            }
+        } else {
+            // Add new
+            updatedAlerts = [...alerts, newAlert];
+        }
+
+        await storageService.saveAlerts(updatedAlerts);
+
+        // Subscribe to FCM (Always subscribe to ensure we are listening, even if already subscribed)
         const safeSymbol = selectedItem.symbol.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
         const topic = `ticker_${safeSymbol}`;
         await fcmService.subscribeToTopic(topic);
 
-        showToast(`Alerta creada para ${selectedItem.symbol}`, 'success');
+        showToast(editAlert ? 'Alerta actualizada' : `Alerta creada para ${selectedItem.symbol}`, 'success');
         navigation.goBack();
     } catch (error) {
         console.error('Error saving alert:', error);
@@ -205,144 +243,258 @@ const AddAlertScreen = () => {
     }
   };
 
+  const handleDeleteConfirm = async () => {
+      if (!editAlert) return;
+      setShowDeleteDialog(false);
+      setDeleting(true);
+      try {
+          const alerts = await storageService.getAlerts();
+          const updated = alerts.filter(a => a.id !== editAlert.id);
+          await storageService.saveAlerts(updated);
+
+          // Unsubscribe from FCM topic if no remaining alerts for symbol
+          const safeSymbol = editAlert.symbol.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+          const topic = `ticker_${safeSymbol}`;
+          const remainingAlerts = updated.filter(a => a.symbol === editAlert.symbol);
+          
+          if (remainingAlerts.length === 0) {
+              await fcmService.unsubscribeFromTopic(topic);
+          }
+
+          showToast('Alerta eliminada', 'success');
+          navigation.goBack();
+      } catch (error) {
+          console.error('Error deleting alert:', error);
+          showToast('Error al eliminar alerta', 'error');
+      } finally {
+          setDeleting(false);
+      }
+  };
+
   const renderItem = ({ item }: { item: SymbolItem }) => (
-    <TouchableOpacity
-      style={[styles.itemCard, { borderColor: theme.colors.outline, backgroundColor: theme.colors.surface }]}
+    <TouchableOpacity 
       onPress={() => handleSelectItem(item)}
+      style={[
+        styles.itemCard, 
+        { 
+            backgroundColor: theme.colors.elevation.level1,
+            borderColor: theme.colors.outline,
+        }
+      ]}
     >
-      <View style={[styles.iconContainer, { backgroundColor: theme.colors.elevation.level2 }]}>
-        <MaterialCommunityIcons name={item.iconName || 'finance'} size={24} color={theme.colors.primary} />
+      <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+        <View style={{ 
+            width: 40, height: 40, 
+            borderRadius: 20, 
+            backgroundColor: theme.colors.secondaryContainer,
+            alignItems: 'center', justifyContent: 'center',
+            marginRight: 12
+        }}>
+            <MaterialCommunityIcons 
+                name={item.iconName || 'currency-usd'} 
+                size={24} 
+                color={theme.colors.onSecondaryContainer} 
+            />
+        </View>
+        <View>
+            <Text variant="titleMedium" style={{ fontWeight: 'bold' }}>{item.symbol}</Text>
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{item.name}</Text>
+        </View>
       </View>
-      <View style={styles.itemContent}>
-        <Text variant="titleMedium" style={{ fontWeight: 'bold' }}>{item.symbol}</Text>
-        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }} numberOfLines={1}>
-          {item.name}
+      
+      <View style={{ alignItems: 'flex-end', gap: 4, minWidth: 80 }}>
+        <Text variant="bodyMedium" style={{ fontWeight: 'bold', fontSize: 13 }}>
+            {item.price < 1 ? item.price.toFixed(4) : item.price.toFixed(2)}
         </Text>
-      </View>
-      <View style={styles.priceContainer}>
-        <Text variant="titleSmall" style={{ fontWeight: 'bold' }}>
-          {item.price < 1 ? item.price.toFixed(4) : item.price.toFixed(2)}
-        </Text>
-        <Text 
-          variant="labelSmall" 
-          style={{ 
-            color: item.changePercent >= 0 ? theme.colors.trendUp : theme.colors.trendDown 
-          }}
-        >
-          {item.changePercent > 0 ? '+' : ''}{item.changePercent.toFixed(2)}%
-        </Text>
+        <View style={{ 
+            flexDirection: 'row', 
+            alignItems: 'center',
+            backgroundColor: item.changePercent >= 0 ? theme.colors.successContainer : theme.colors.errorContainer,
+            paddingHorizontal: 6,
+            paddingVertical: 2,
+            borderRadius: 4
+        }}>
+            <MaterialCommunityIcons 
+                name={item.changePercent >= 0 ? 'arrow-up' : 'arrow-down'} 
+                size={12} 
+                color={item.changePercent >= 0 ? theme.colors.trendUp : theme.colors.trendDown} 
+            />
+            <Text style={{ 
+                fontSize: 10, 
+                fontWeight: 'bold',
+                color: item.changePercent >= 0 ? theme.colors.trendUp : theme.colors.trendDown 
+            }}>
+                {Math.abs(item.changePercent).toFixed(2)}%
+            </Text>
+        </View>
       </View>
     </TouchableOpacity>
   );
 
-  const handleBack = () => {
-    if (selectedItem) {
-      setSelectedItem(null);
-    } else {
-      navigation.goBack();
-    }
-  };
-
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <UnifiedHeader 
-        title={selectedItem ? "Configurar alerta" : "Nueva alerta"} 
-        variant="section"
-        onBackPress={handleBack}
+        title={selectedItem ? (editAlert ? "Editar Alerta" : "Configurar Alerta") : "Nueva Alerta"} 
+        onBackPress={() => {
+            if (selectedItem && !editAlert) {
+                setSelectedItem(null);
+            } else {
+                navigation.goBack();
+            }
+        }}
       />
       
-      {/* Configuration Mode */}
       {selectedItem ? (
-        <View style={[styles.configContainer, { paddingBottom: insets.bottom + 16 }]}>
-            <View style={[styles.targetCard, { backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outline }]}>
-                <View style={{ alignItems: 'center', marginBottom: 24 }}>
+        <ScrollView contentContainerStyle={[styles.configContainer, { paddingBottom: insets.bottom + 24 }]}>
+            {/* Target Symbol Card */}
+            <View style={[styles.targetCard, { 
+                backgroundColor: theme.colors.elevation.level1,
+                borderColor: theme.colors.outline
+            }]}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 16 }}>
+                    <View style={{ 
+                        width: 48, height: 48, borderRadius: 24, 
+                        backgroundColor: theme.colors.primaryContainer,
+                        alignItems: 'center', justifyContent: 'center', marginRight: 16
+                    }}>
+                        <MaterialCommunityIcons 
+                            name={selectedItem.iconName || 'currency-usd'} 
+                            size={28} 
+                            color={theme.colors.onPrimaryContainer} 
+                        />
+                    </View>
+                    <View>
+                        <Text variant="headlineSmall" style={{ fontWeight: 'bold' }}>{selectedItem.symbol}</Text>
+                        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>{selectedItem.name}</Text>
+                    </View>
+                </View>
+
+                {/* Current Price Display */}
+                <View style={{ marginBottom: 24, padding: 16, backgroundColor: theme.colors.elevation.level2, borderRadius: 12 }}>
+                    <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant, marginBottom: 4 }}>PRECIO ACTUAL</Text>
                     <Text variant="headlineMedium" style={{ fontWeight: 'bold', color: theme.colors.primary }}>
-                        {selectedItem.symbol}
-                    </Text>
-                    <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
-                        Precio actual: {selectedItem.price < 1 ? selectedItem.price.toFixed(4) : selectedItem.price.toFixed(2)}
+                        {selectedItem.price < 1 ? selectedItem.price.toFixed(4) : selectedItem.price.toFixed(2)}
                     </Text>
                 </View>
 
+                {/* Target Price Input */}
                 <View style={styles.inputGroup}>
-                    <Text variant="labelMedium" style={{ marginBottom: 8 }}>Precio Objetivo</Text>
+                    <Text variant="labelMedium" style={{ marginBottom: 8 }}>PRECIO OBJETIVO</Text>
                     <TextInput
                         mode="outlined"
                         value={targetPrice}
                         onChangeText={setTargetPrice}
                         keyboardType="numeric"
+                        placeholder="0.00"
                         right={<TextInput.Icon icon="target" />}
-                        style={{ backgroundColor: theme.colors.surface }}
+                        style={{ backgroundColor: theme.colors.elevation.level1 }}
                     />
+                    {(() => {
+                        const current = selectedItem.price;
+                        const target = parseFloat(targetPrice) || 0;
+                        if (target > 0) {
+                            const diff = ((target - current) / current) * 100;
+                            const isPositive = diff > 0;
+                            return (
+                                <Text style={{ 
+                                    marginTop: 8, 
+                                    color: isPositive ? theme.colors.trendUp : theme.colors.trendDown,
+                                    fontWeight: 'bold'
+                                }}>
+                                    {isPositive ? '+' : ''}{diff.toFixed(2)}% desde el precio actual
+                                </Text>
+                            );
+                        }
+                        return null;
+                    })()}
                 </View>
 
+                {/* Condition Selector */}
                 <View style={styles.inputGroup}>
-                    <Text variant="labelMedium" style={{ marginBottom: 8 }}>Condición</Text>
+                    <Text variant="labelMedium" style={{ marginBottom: 8 }}>CONDICIÓN</Text>
                     <View style={styles.conditionRow}>
                         <TouchableOpacity 
                             style={[
                                 styles.conditionBtn, 
-                                condition === 'above' && { backgroundColor: theme.colors.trendUp, borderColor: theme.colors.trendUp }
+                                condition === 'above' && { 
+                                    backgroundColor: theme.colors.secondaryContainer,
+                                    borderColor: theme.colors.secondary
+                                }
                             ]}
                             onPress={() => setCondition('above')}
                         >
                             <MaterialCommunityIcons 
-                                name="trending-up" 
+                                name="arrow-top-right" 
                                 size={24} 
-                                color={condition === 'above' ? '#FFF' : theme.colors.onSurfaceVariant} 
+                                color={condition === 'above' ? theme.colors.onSecondaryContainer : theme.colors.onSurface} 
                             />
-                            <Text style={{ color: condition === 'above' ? '#FFF' : theme.colors.onSurfaceVariant, fontWeight: 'bold' }}>
-                                SUBE DE
-                            </Text>
+                            <Text style={{ 
+                                color: condition === 'above' ? theme.colors.onSecondaryContainer : theme.colors.onSurface,
+                                fontWeight: 'bold'
+                            }}>Mayor que</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity 
                             style={[
                                 styles.conditionBtn, 
-                                condition === 'below' && { backgroundColor: theme.colors.trendDown, borderColor: theme.colors.trendDown }
+                                condition === 'below' && { 
+                                    backgroundColor: theme.colors.secondaryContainer,
+                                    borderColor: theme.colors.secondary
+                                }
                             ]}
                             onPress={() => setCondition('below')}
                         >
                             <MaterialCommunityIcons 
-                                name="trending-down" 
+                                name="arrow-bottom-right" 
                                 size={24} 
-                                color={condition === 'below' ? '#FFF' : theme.colors.onSurfaceVariant} 
+                                color={condition === 'below' ? theme.colors.onSecondaryContainer : theme.colors.onSurface} 
                             />
-                            <Text style={{ color: condition === 'below' ? '#FFF' : theme.colors.onSurfaceVariant, fontWeight: 'bold' }}>
-                                BAJA DE
-                            </Text>
+                            <Text style={{ 
+                                color: condition === 'below' ? theme.colors.onSecondaryContainer : theme.colors.onSurface,
+                                fontWeight: 'bold'
+                            }}>Menor que</Text>
                         </TouchableOpacity>
                     </View>
                 </View>
+
+                {/* Action Buttons */}
+                <View style={{ gap: 12, marginTop: 12 }}>
+                    <CustomButton
+                        variant="primary"
+                        onPress={handleSaveAlert}
+                        loading={saving}
+                        disabled={!targetPrice || saving || deleting}
+                        icon="bell-ring"
+                        label={editAlert ? "Guardar Cambios" : "Crear Alerta"}
+                    />
+                    
+                    {editAlert && (
+                        <CustomButton
+                            variant="destructive"
+                            onPress={() => setShowDeleteDialog(true)}
+                            loading={deleting}
+                            disabled={saving || deleting}
+                            icon="delete-outline"
+                            label="Eliminar Alerta"
+                        />
+                    )}
+                </View>
             </View>
-
-            <View style={{ flex: 1 }} />
-
-            <Button 
-                mode="contained" 
-                onPress={handleSaveAlert} 
-                loading={saving}
-                style={{ borderRadius: 8, height: 48, justifyContent: 'center' }}
-                labelStyle={{ fontSize: 16, fontWeight: 'bold' }}
-            >
-                GUARDAR ALERTA
-            </Button>
-        </View>
+        </ScrollView>
       ) : (
-        /* Search Mode */
         <>
-            <View style={[styles.searchSection, { backgroundColor: theme.colors.surface }]}>
-                <SearchBar
-                    placeholder="Buscar activo (ej. BTC, VES, AAPL)"
+            <View style={styles.searchSection}>
+                <SearchBar 
+                    placeholder="Buscar divisa, cripto o acción..."
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                 />
                 <FilterSection
                     options={[
-                        { label: 'Todas', value: 'Todas' },
-                        { label: 'Divisas', value: 'Divisas', icon: 'currency-exchange' },
-                        { label: 'Cripto', value: 'Cripto', icon: 'bitcoin' },
-                        { label: 'Acciones', value: 'Acciones', icon: 'chart-line' },
+                        { label: 'Todas', value: 'Todas', icon: 'apps' },
+                        { label: 'Divisas', value: 'Divisas', icon: 'currency-usd' },
+                        { label: 'Cripto', value: 'Cripto', icon: 'currency-btc' },
+                        { label: 'Acciones', value: 'Acciones', icon: 'domain' },
                     ]}
                     selectedValue={selectedCategory}
                     onSelect={(val) => setSelectedCategory(val as any)}
@@ -372,6 +524,18 @@ const AddAlertScreen = () => {
             )}
         </>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <CustomDialog
+        visible={showDeleteDialog}
+        onDismiss={() => setShowDeleteDialog(false)}
+        title="Eliminar Alerta"
+        content={`¿Estás seguro que deseas eliminar la alerta para ${selectedItem?.symbol}?`}
+        onConfirm={handleDeleteConfirm}
+        confirmLabel="Eliminar"
+        isDestructive={true}
+        cancelMode="outlined"
+      />
     </View>
   );
 };
@@ -391,23 +555,12 @@ const styles = StyleSheet.create({
   itemCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 12,
-    borderRadius: 12,
+    justifyContent: 'space-between',
+    padding: 16,
+    borderRadius: 24,
     borderWidth: 1,
-  },
-  iconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  itemContent: {
-    flex: 1,
-  },
-  priceContainer: {
-    alignItems: 'flex-end',
+    marginBottom: 12,
+    elevation: 0,
   },
   centerContainer: {
     flex: 1,
