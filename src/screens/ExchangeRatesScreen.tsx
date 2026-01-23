@@ -2,12 +2,12 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, RefreshControl, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import LottieView from 'lottie-react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import RateCard from '../components/dashboard/RateCard';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import SearchBar from '../components/ui/SearchBar';
 import FilterSection from '../components/ui/FilterSection';
+import ExchangeRatesSkeleton from '../components/dashboard/ExchangeRatesSkeleton';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
 import { StocksService } from '../services/StocksService';
 import { useFilters } from '../context/FilterContext';
@@ -163,6 +163,19 @@ const ExchangeRatesScreen = () => {
     />
   );
 
+  if (loading && !refreshing && allRates.length === 0) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <StatusBar 
+          backgroundColor="transparent"
+          translucent
+          barStyle={theme.dark ? 'light-content' : 'dark-content'} 
+        />
+        <ExchangeRatesSkeleton />
+      </View>
+    );
+  }
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar 
@@ -227,18 +240,7 @@ const ExchangeRatesScreen = () => {
           }}
         />
 
-        {loading && !refreshing && filteredRates.length === 0 ? (
-          <View style={styles.centerContainer}>
-            <LottieView
-              source={require('../assets/animations/splash.json')}
-              autoPlay
-              loop
-              style={{ width: 120, height: 120 }}
-              resizeMode="contain"
-            />
-            <Text style={[styles.messageText, { color: theme.colors.onSurfaceVariant, marginTop: 0 }]}>Cargando tasas...</Text>
-          </View>
-        ) : error && filteredRates.length === 0 ? (
+        {error && filteredRates.length === 0 ? (
            <View style={styles.centerContainer}>
             <MaterialIcons name="error-outline" size={40} color={accentRed} />
             <Text style={[styles.messageText, { color: theme.colors.onSurface }]}>{error}</Text>

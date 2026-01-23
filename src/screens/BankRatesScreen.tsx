@@ -230,35 +230,36 @@ const BankRatesScreen = () => {
           </View>
 
           <View style={styles.listHeader}>
-              <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>COTIZACIONES BANCARIAS</Text>
-              <View style={{ 
-                  backgroundColor: theme.colors.secondaryContainer,
-                  paddingHorizontal: 8,
-                  paddingVertical: 2,
-                  borderRadius: 6,
-              }}>
-                  <Text style={[styles.sectionSubtitle, { color: theme.colors.onSecondaryContainer }]}>VES/USD</Text>
-              </View>
-          </View>
-          
-          <FilterSection 
-              options={[
-                { label: 'A-Z', value: 'az' },
-                { label: 'MENOR', value: 'user_buy', icon: 'trending-down', color: theme.colors.trendDown },
-                { label: 'MAYOR', value: 'user_sell', icon: 'trending-up', color: theme.colors.trendUp },
-              ]}
-              selectedValue={sortType}
-              onSelect={(value) => {
-                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                setSortType(value);
-              }}
-              visible={true}
-              mode="scroll"
-              style={{ 
-                marginBottom: 16,
-                marginTop: -8,
-              }}
-          />
+            <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>COTIZACIONES BANCARIAS</Text>
+            <View style={{ 
+                backgroundColor: theme.colors.primaryContainer,
+                paddingHorizontal: 12,
+                paddingVertical: 4,
+                borderRadius: 8,
+            }}>
+                <Text style={[styles.sectionSubtitle, { color: theme.colors.onPrimaryContainer, fontSize: 12 }]}>VES / USD</Text>
+            </View>
+        </View>
+        
+        <FilterSection 
+            options={[
+              { label: 'Nombre', value: 'az', icon: 'sort-alphabetical-ascending' },
+              { label: 'Relevancia', value: 'relevance', icon: 'star' },
+              { label: 'Menor precio', value: 'price_asc', icon: 'trending-down', color: '#4CAF50' }, // Green
+              { label: 'Mayor precio', value: 'price_desc', icon: 'trending-up', color: '#F44336' }, // Red
+            ]}
+            selectedValue={sortType}
+            onSelect={(value) => {
+              LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+              setSortType(value);
+            }}
+            visible={true}
+            mode="scroll"
+            style={{ 
+              marginBottom: 16,
+              marginTop: -8,
+            }}
+        />
       </View>
   );
 

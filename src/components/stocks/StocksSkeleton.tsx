@@ -35,6 +35,13 @@ const StocksSkeleton = () => {
         <Skeleton width="100%" height={180} borderRadius={16} />
       </View>
 
+      {/* Filters Skeleton */}
+      <View style={{ flexDirection: 'row', marginBottom: 20 }}>
+        {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} width={80} height={32} borderRadius={16} style={{ marginRight: 8 }} />
+        ))}
+      </View>
+
       {/* Stocks List Skeleton */}
       <View style={styles.listSection}>
         {[1, 2, 3, 4, 5].map((_, index) => (
