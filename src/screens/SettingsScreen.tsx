@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Alert, Image, Linking } from 'react-native';
+import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Alert, Image, Linking, Platform } from 'react-native';
 import { Text, useTheme, Switch, Snackbar, Button } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import DeviceInfo from 'react-native-device-info';
@@ -354,20 +354,23 @@ const SettingsScreen = () => {
               />
             </View>
 
-            <View style={[styles.separator, { backgroundColor: theme.colors.outline }]} />
-
-            {/* Widgets */}
-            <TouchableOpacity onPress={() => navigation.navigate('Widgets' as never)}>
-              <View style={styles.prefRow}>
-                <View style={styles.prefLeft}>
-                  <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
-                    <MaterialIcons name="widgets" size={20} color={theme.colors.onSurfaceVariant} />
+            {/* Widgets - Android Only */}
+            {Platform.OS === 'android' && (
+              <>
+                <View style={[styles.separator, { backgroundColor: theme.colors.outline }]} />
+                <TouchableOpacity onPress={() => navigation.navigate('Widgets' as never)}>
+                  <View style={styles.prefRow}>
+                    <View style={styles.prefLeft}>
+                      <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
+                        <MaterialIcons name="widgets" size={20} color={theme.colors.onSurfaceVariant} />
+                      </View>
+                      <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Personalización de widgets</Text>
+                    </View>
+                    <MaterialIcons name="chevron-right" size={24} color={theme.colors.onSurfaceVariant} />
                   </View>
-                  <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Perzonalización de widgets</Text>
-                </View>
-                <MaterialIcons name="chevron-right" size={24} color={theme.colors.onSurfaceVariant} />
-              </View>
-            </TouchableOpacity>
+                </TouchableOpacity>
+              </>
+            )}
 
             <View style={[styles.separator, { backgroundColor: theme.colors.outline }]} />
 
