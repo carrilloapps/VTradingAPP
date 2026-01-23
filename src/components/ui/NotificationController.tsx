@@ -49,12 +49,13 @@ const NotificationController: React.FC = () => {
           }
 
           if (triggered) {
-             const actionVerb = alert.condition === 'above' ? 'subió' : 'bajó';
-             const emoji = alert.condition === 'above' ? '📈' : '📉';
+             const isUp = alert.condition === 'above';
+             const actionVerb = isUp ? 'subió' : 'bajó';
+             const emoji = isUp ? '📈' : '📉';
              
-             showToast(`El precio ${actionVerb} de los ${targetPrice}`, {
-                 title: `Alerta: ${symbol} ${emoji} a ${currentPrice}`,
-                 type: 'alert', // Uses the new Gold/Yellow style
+             showToast(`El precio ${actionVerb} a ${currentPrice} (Objetivo: ${targetPrice})`, {
+                 title: `Alerta: ${symbol} ${emoji}`,
+                 type: isUp ? 'trendUp' : 'trendDown',
                  position: 'top',
                  duration: 6000
              });

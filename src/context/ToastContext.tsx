@@ -68,6 +68,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   }, []);
 
   const getToastColor = useCallback(() => {
+    const colors = theme.colors as any;
     switch (toast.type) {
       case 'success':
         return theme.colors.primary; 
@@ -77,6 +78,10 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return theme.colors.tertiary || '#FFA500';
       case 'alert':
         return theme.colors.surfaceVariant;
+      case 'trendUp':
+        return colors.trendUp || theme.colors.primary;
+      case 'trendDown':
+        return colors.trendDown || theme.colors.error;
       case 'info':
       default:
         return theme.colors.inverseSurface;
@@ -89,6 +94,8 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       case 'error': return 'error';
       case 'warning': return 'warning';
       case 'alert': return 'notifications-active';
+      case 'trendUp': return 'trending-up';
+      case 'trendDown': return 'trending-down';
       case 'info': default: return 'info';
     }
   };

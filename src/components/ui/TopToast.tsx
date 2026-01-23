@@ -4,7 +4,7 @@ import { Text, useTheme, Surface } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export type ToastType = 'success' | 'error' | 'info' | 'warning' | 'alert';
+export type ToastType = 'success' | 'error' | 'info' | 'warning' | 'alert' | 'trendUp' | 'trendDown';
 
 interface TopToastProps {
   visible: boolean;
@@ -76,15 +76,31 @@ const TopToast: React.FC<TopToastProps> = ({
   const getColors = () => {
     switch (type) {
       case 'success':
-        return { bg: themeColors.successContainer, border: themeColors.success, icon: themeColors.success };
+        return { bg: themeColors.successContainer, border: themeColors.success, icon: themeColors.success, text: theme.colors.onSurface, textVariant: theme.colors.onSurfaceVariant };
       case 'error':
-        return { bg: themeColors.errorContainer, border: themeColors.error, icon: themeColors.error };
+        return { bg: themeColors.errorContainer, border: themeColors.error, icon: themeColors.error, text: theme.colors.onSurface, textVariant: theme.colors.onSurfaceVariant };
+      case 'trendUp':
+        return { 
+          bg: themeColors.trendUp, 
+          border: themeColors.trendUp, 
+          icon: themeColors.onPrimary, 
+          text: themeColors.onPrimary, 
+          textVariant: themeColors.onPrimary 
+        };
+      case 'trendDown':
+        return { 
+          bg: themeColors.trendDown, 
+          border: themeColors.trendDown, 
+          icon: themeColors.onError, 
+          text: themeColors.onError, 
+          textVariant: themeColors.onError 
+        };
       case 'alert':
       case 'warning':
-        return { bg: theme.colors.elevation.level3, border: themeColors.warning, icon: themeColors.warning };
+        return { bg: theme.colors.elevation.level3, border: themeColors.warning, icon: themeColors.warning, text: theme.colors.onSurface, textVariant: theme.colors.onSurfaceVariant };
       case 'info':
       default:
-        return { bg: theme.colors.elevation.level3, border: themeColors.info || theme.colors.primary, icon: themeColors.info || theme.colors.primary };
+        return { bg: theme.colors.elevation.level3, border: themeColors.info || theme.colors.primary, icon: themeColors.info || theme.colors.primary, text: theme.colors.onSurface, textVariant: theme.colors.onSurfaceVariant };
     }
   };
 
@@ -94,6 +110,8 @@ const TopToast: React.FC<TopToastProps> = ({
       case 'error': return 'error';
       case 'alert': return 'notifications-active';
       case 'warning': return 'warning';
+      case 'trendUp': return 'trending-up';
+      case 'trendDown': return 'trending-down';
       case 'info': default: return 'info';
     }
   };
@@ -127,16 +145,16 @@ const TopToast: React.FC<TopToastProps> = ({
           </View>
           <View style={styles.textContainer}>
             {title && (
-              <Text variant="titleSmall" style={{ color: theme.colors.onSurface, fontWeight: 'bold' }}>
+              <Text variant="titleSmall" style={{ color: colors.text, fontWeight: 'bold' }}>
                 {title}
               </Text>
             )}
-            <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+            <Text variant="bodyMedium" style={{ color: colors.textVariant }}>
               {message}
             </Text>
           </View>
           <TouchableOpacity onPress={hide} style={styles.closeButton}>
-            <MaterialIcons name="close" size={20} color={theme.colors.onSurfaceDisabled} />
+            <MaterialIcons name="close" size={20} color={colors.textVariant} style={{ opacity: 0.7 }} />
           </TouchableOpacity>
         </TouchableOpacity>
       </Surface>
