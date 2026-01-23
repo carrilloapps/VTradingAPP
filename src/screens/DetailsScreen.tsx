@@ -3,6 +3,7 @@ import { View, StyleSheet, ScrollView, Animated, Easing, StatusBar } from 'react
 import { Text, useTheme, Button, ProgressBar, Surface } from 'react-native-paper';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import DetailsSkeleton from '../components/details/DetailsSkeleton';
 
 import { storageService } from '../services/StorageService';
 import { fcmService } from '../services/firebase/FCMService';
@@ -40,8 +41,10 @@ const DetailsScreen = () => {
   const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
   const [progress, setProgress] = useState(0);
 
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
-    const loadSubscription = async () => {
+    const loadData = async () => {
       try {
         const settings = await storageService.getSettings();
         setIsSubscribed(settings.newsSubscription ?? false);
@@ -50,9 +53,16 @@ const DetailsScreen = () => {
       } finally {
         setIsLoadingSubscription(false);
       }
+
+      // Simulate backend data fetching for real-time progress
+      setTimeout(() => {
+        // This value would come from the backend: { "progress": 0.75 }
+        setProgress(0.75);
+        setIsLoading(false);
+      }, 1000);
     };
 
-    loadSubscription();
+    loadData();
   }, []);
 
   // Animations
@@ -61,16 +71,7 @@ const DetailsScreen = () => {
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Simulate backend data fetching for real-time progress
-    const fetchWalletStatus = () => {
-      // Mocking a backend response delay
-      setTimeout(() => {
-        // This value would come from the backend: { "progress": 0.75 }
-        setProgress(0.75);
-      }, 1000);
-    };
-
-    fetchWalletStatus();
+    if (isLoading) return;
 
     // Fade in content
     Animated.timing(fadeAnim, {
@@ -106,7 +107,7 @@ const DetailsScreen = () => {
         useNativeDriver: true,
       })
     ).start();
-  }, [fadeAnim, pulseAnim, rotateAnim]);
+  }, [isLoading, fadeAnim, pulseAnim, rotateAnim]);
 
   const spin = rotateAnim.interpolate({
     inputRange: [0, 1],
@@ -130,6 +131,10 @@ const DetailsScreen = () => {
       setIsSubscribed(!newState);
     }
   };
+
+  if (isLoading) {
+    return <DetailsSkeleton />;
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>

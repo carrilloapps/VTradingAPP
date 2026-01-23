@@ -19,6 +19,7 @@ import MenuButton from '../components/settings/MenuButton';
 import ProfileEditDialog from '../components/settings/ProfileEditDialog';
 import AddAlertDialog from '../components/settings/AddAlertDialog';
 import LogoutDialog from '../components/settings/LogoutDialog';
+import SettingsSkeleton from '../components/settings/SettingsSkeleton';
 
 const SettingsScreen = () => {
   const theme = useTheme();
@@ -45,6 +46,7 @@ const SettingsScreen = () => {
   // Functional State
   const [alerts, setAlerts] = useState<UserAlert[]>([]);
   const [pushEnabled, setPushEnabled] = useState(true);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadData = async () => {
@@ -59,6 +61,8 @@ const SettingsScreen = () => {
         
         const savedAlerts = await storageService.getAlerts();
         setAlerts(savedAlerts);
+
+        setLoading(false);
     };
     
     loadData();
@@ -232,6 +236,10 @@ const SettingsScreen = () => {
 
       handleAction(`Alerta creada para ${symbol}`);
   };
+
+  if (loading) {
+    return <SettingsSkeleton />;
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
