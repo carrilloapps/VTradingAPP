@@ -34,6 +34,11 @@ const DashboardSkeleton = () => {
         <Skeleton width="100%" height={140} borderRadius={r * 4} />
       </View>
 
+      {/* Advanced Calculator CTA Skeleton */}
+      <View style={styles.section}>
+        <Skeleton width="100%" height={130} borderRadius={r * 6} />
+      </View>
+
       {/* Stocks List Skeleton */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>

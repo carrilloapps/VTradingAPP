@@ -87,7 +87,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
       borderColor: theme.colors.background,
     },
     subtitlePremium: {
-      color: theme.dark ? '#FFD700' : '#A68400', // Gold for dark, Accessible Dark Gold for light
+      color: colors.warning,
       fontWeight: 'bold' as const,
     },
     subtitleDefault: {

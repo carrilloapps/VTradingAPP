@@ -21,7 +21,8 @@ const AdvancedCalculatorCTA: React.FC<AdvancedCalculatorCTAProps> = ({
   // Determine colors based on the "Warning/Gold" aesthetic requested
   // Warning color is Yellow/Orange in the theme
   const accentColor = theme.colors.warning;
-  const containerColor = theme.dark ? theme.colors.elevation.level2 : theme.colors.surface;
+  // Flat design: Use level1 for background, similar to other cards
+  const containerColor = theme.colors.elevation.level1;
   
   // Text color for the badge (Dark text on Light Orange in Dark Mode, White text on Dark Orange in Light Mode)
   const badgeTextColor = theme.dark ? '#2A2A2A' : '#FFFFFF';
@@ -36,6 +37,7 @@ const AdvancedCalculatorCTA: React.FC<AdvancedCalculatorCTAProps> = ({
           borderRadius: theme.roundness * 6,
         }
       ]}
+      elevation={0} // Flat design: No elevation
     >
       <TouchableOpacity 
         onPress={handlePress}
