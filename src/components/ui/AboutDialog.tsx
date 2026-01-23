@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import DeviceInfo from 'react-native-device-info';
 import CustomDialog from './CustomDialog';
 import { useAppTheme } from '../../theme/theme';
 import MenuButton from '../settings/MenuButton';
+import AuthLogo from './AuthLogo';
 import { AppConfig } from '../../constants/AppConfig';
 import { useNavigation } from '@react-navigation/native';
 
@@ -44,9 +45,11 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
       fullWidthActions
     >
       <View style={styles.content}>
-        <Image 
-          source={require('../../assets/images/logo.png')} 
-          style={[styles.logo, { tintColor: theme.colors.primary }]}
+        <AuthLogo 
+          size={64} 
+          showBadge={false} 
+          tintColor={theme.colors.primary} 
+          containerStyle={{ marginBottom: 8 }} 
         />
         <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: theme.colors.onSurface, textAlign: 'center', marginBottom: 0 }}>
           {appName || 'VTradingAPP'}
@@ -110,12 +113,6 @@ const styles = StyleSheet.create({
   content: {
     alignItems: 'center',
     paddingVertical: 0,
-  },
-  logo: {
-    width: 64,
-    height: 64,
-    resizeMode: 'contain',
-    marginBottom: 8,
   },
   aboutLinksContainer: {
     width: '100%',

@@ -9,6 +9,7 @@ import AuthSkeleton from '../../components/auth/AuthSkeleton';
 import CustomButton from '../../components/ui/CustomButton';
 import UnifiedHeader from '../../components/ui/UnifiedHeader';
 import { useAppTheme } from '../../theme/theme';
+import AuthLogo from '../../components/ui/AuthLogo';
 
 const RegisterScreen = ({ navigation }: any) => {
   const theme = useAppTheme();
@@ -32,15 +33,6 @@ const RegisterScreen = ({ navigation }: any) => {
       marginHorizontal: theme.spacing.s,
       color: theme.colors.onSurfaceVariant,
     },
-    logo: {
-      // marginBottom moved to logoRow
-    },
-    logoRow: {
-      flexDirection: 'row' as const,
-      alignItems: 'center' as const,
-      justifyContent: 'center' as const,
-      marginBottom: theme.spacing.s,
-    },
     title: {
       color: theme.colors.primary,
       fontWeight: 'bold' as const,
@@ -51,20 +43,6 @@ const RegisterScreen = ({ navigation }: any) => {
       justifyContent: 'center' as const,
       marginTop: 0,
       marginBottom: theme.spacing.s,
-    },
-    badge: {
-      backgroundColor: theme.colors.elevation.level2,
-      borderColor: theme.colors.warning,
-      marginLeft: theme.spacing.m,
-      paddingHorizontal: theme.spacing.s,
-      paddingVertical: 2,
-      borderRadius: 12,
-      borderWidth: 1,
-    },
-    badgeText: {
-      color: theme.colors.warning,
-      fontSize: 10,
-      fontWeight: 'bold' as const,
     },
     subtitle: {
       color: theme.colors.onSurfaceVariant,
@@ -182,7 +160,7 @@ const RegisterScreen = ({ navigation }: any) => {
             styles.container, 
             themeStyles.container,
             { 
-              paddingTop: theme.spacing.l,
+              paddingTop: theme.spacing.xs,
               paddingBottom: insets.bottom + theme.spacing.xl,
               paddingHorizontal: theme.spacing.xl
             }
@@ -191,20 +169,10 @@ const RegisterScreen = ({ navigation }: any) => {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.headerContent}>
-            <View style={themeStyles.logoRow}>
-              <Image 
-                source={require('../../assets/images/logo.png')} 
-                style={[styles.logo, themeStyles.logo]} 
-              />
-              <View
-                style={themeStyles.badge}
-                accessibilityLabel="BETA"
-              >
-                <Text variant="labelSmall" style={themeStyles.badgeText}>
-                  BETA
-                </Text>
-              </View>
-            </View>
+            <AuthLogo 
+              size={60} 
+              containerStyle={{ marginBottom: theme.spacing.s }} 
+            />
             <View style={themeStyles.titleRow}>
               <Text variant="headlineSmall" style={themeStyles.title}>
                 Crear cuenta
@@ -363,11 +331,6 @@ const styles = StyleSheet.create({
   headerContent: {
     alignItems: 'center',
     // marginBottom handled in themeStyles
-  },
-  logo: {
-    width: 60,
-    height: 60,
-    resizeMode: 'contain',
   },
   form: {
     width: '100%',

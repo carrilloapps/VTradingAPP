@@ -8,6 +8,7 @@ import AuthSkeleton from '../../components/auth/AuthSkeleton';
 import CustomButton from '../../components/ui/CustomButton';
 import UnifiedHeader from '../../components/ui/UnifiedHeader';
 import { useAppTheme } from '../../theme/theme';
+import AuthLogo from '../../components/ui/AuthLogo';
 
 const ForgotPasswordScreen = ({ navigation }: any) => {
   const theme = useAppTheme();
@@ -31,15 +32,6 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
       fontWeight: 'bold' as const,
       marginLeft: theme.spacing.xs,
     },
-    logo: {
-      // marginBottom moved to logoRow
-    },
-    logoRow: {
-      flexDirection: 'row' as const,
-      alignItems: 'center' as const,
-      justifyContent: 'center' as const,
-      marginBottom: theme.spacing.m,
-    },
     title: {
       color: theme.colors.primary,
       fontWeight: 'bold' as const,
@@ -50,20 +42,6 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
       justifyContent: 'center' as const,
       marginTop: theme.spacing.s,
       marginBottom: theme.spacing.m,
-    },
-    badge: {
-      backgroundColor: theme.colors.elevation.level2,
-      borderColor: theme.colors.warning,
-      marginLeft: theme.spacing.m,
-      paddingHorizontal: theme.spacing.s,
-      paddingVertical: 2,
-      borderRadius: 12,
-      borderWidth: 1,
-    },
-    badgeText: {
-      color: theme.colors.warning,
-      fontSize: 10,
-      fontWeight: 'bold' as const,
     },
   }), [theme]);
 
@@ -132,7 +110,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
             styles.container, 
             themeStyles.container,
             { 
-              paddingTop: theme.spacing.l,
+              paddingTop: theme.spacing.xs,
               paddingBottom: insets.bottom + theme.spacing.xl,
               paddingHorizontal: theme.spacing.xl
             }
@@ -141,20 +119,10 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.headerContent}>
-            <View style={themeStyles.logoRow}>
-              <Image 
-                source={require('../../assets/images/logo.png')} 
-                style={[styles.logo, themeStyles.logo]} 
-              />
-              <View
-                style={themeStyles.badge}
-                accessibilityLabel="BETA"
-              >
-                <Text variant="labelSmall" style={themeStyles.badgeText}>
-                  BETA
-                </Text>
-              </View>
-            </View>
+            <AuthLogo 
+              size={80} 
+              containerStyle={{ marginBottom: theme.spacing.m }} 
+            />
             <View style={themeStyles.titleRow}>
               <Text variant="headlineSmall" style={themeStyles.title}>
                 Recuperar contraseña
@@ -165,7 +133,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
             </Text>
           </View>
 
-          <View style={[styles.form, { gap: theme.spacing.m }]}>
+          <View style={[styles.form, { gap: theme.spacing.s }]}>
             <View>
               <TextInput
                 label="Correo electrónico"
@@ -207,7 +175,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
             />
           </View>
 
-          <View style={[styles.footer, { marginTop: theme.spacing.xl }]}>
+          <View style={[styles.footer, { marginTop: theme.spacing.m }]}>
             <Text variant="bodyMedium" style={themeStyles.footerText}>
               ¿Recordaste tu contraseña?
             </Text>
@@ -234,11 +202,6 @@ const styles = StyleSheet.create({
   headerContent: {
     alignItems: 'center',
     // marginBottom handled in themeStyles
-  },
-  logo: {
-    width: 80,
-    height: 80,
-    resizeMode: 'contain',
   },
   form: {
     width: '100%',

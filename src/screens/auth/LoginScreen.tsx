@@ -11,6 +11,7 @@ import AuthSkeleton from '../../components/auth/AuthSkeleton';
 import CustomButton from '../../components/ui/CustomButton';
 import UnifiedHeader from '../../components/ui/UnifiedHeader';
 import AboutDialog from '../../components/ui/AboutDialog';
+import AuthLogo from '../../components/ui/AuthLogo';
 
 const LoginScreen = ({ navigation }: any) => {
   const theme = useAppTheme();
@@ -56,25 +57,6 @@ const LoginScreen = ({ navigation }: any) => {
       color: theme.colors.primary,
       fontWeight: 'bold' as const,
       marginLeft: theme.spacing.xs,
-    },
-    badge: {
-      backgroundColor: theme.colors.elevation.level2,
-      borderColor: theme.colors.warning,
-      marginLeft: theme.spacing.m,
-      paddingHorizontal: theme.spacing.s,
-      paddingVertical: 2,
-    },
-    badgeText: {
-      color: theme.colors.warning,
-    },
-    logo: {
-      // marginBottom moved to logoRow
-    },
-    logoRow: {
-      flexDirection: 'row' as const,
-      alignItems: 'center' as const,
-      justifyContent: 'center' as const,
-      marginBottom: theme.spacing.m,
     },
     titleRow: {
       // Removed marginBottom as it now only contains title
@@ -197,17 +179,10 @@ const LoginScreen = ({ navigation }: any) => {
           showsVerticalScrollIndicator={false}
         >
           <View style={[styles.header, { marginBottom: theme.spacing.l }]}>
-            <View style={themeStyles.logoRow}>
-              <Image source={require('../../assets/images/logo.png')} style={[styles.logo, themeStyles.logo]} />
-              <View
-                style={[styles.badge, themeStyles.badge]}
-                accessibilityLabel="BETA"
-              >
-                <Text variant="labelSmall" style={[styles.badgeText, themeStyles.badgeText]}>
-                  BETA
-                </Text>
-              </View>
-            </View>
+            <AuthLogo 
+              size={80} 
+              containerStyle={{ marginBottom: theme.spacing.m }} 
+            />
             <View style={[styles.titleRow, themeStyles.titleRow]}>
               <Text variant="headlineMedium" style={themeStyles.title}>
                 {appName}
@@ -218,7 +193,7 @@ const LoginScreen = ({ navigation }: any) => {
             </Text>
           </View>
 
-          <View style={[styles.form, { gap: theme.spacing.xs }]}>
+          <View style={[styles.form, { gap: theme.spacing.s }]}>
             <View>
               <TextInput
                 label="Correo electrónico"
@@ -313,7 +288,7 @@ const LoginScreen = ({ navigation }: any) => {
             />
           </View>
 
-          <View style={[styles.footer, { marginTop: theme.spacing.s }]}>
+          <View style={[styles.footer, { marginTop: theme.spacing.m }]}>
             <View style={styles.registerContainer}>
               <Text style={themeStyles.footerText}>¿No tienes cuenta?</Text>
               <CustomButton
@@ -364,22 +339,9 @@ const styles = StyleSheet.create({
   header: {
     alignItems: 'center',
   },
-  logo: {
-    width: 80,
-    height: 80,
-    resizeMode: 'contain',
-  },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-  },
-  badge: {
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  badgeText: {
-    fontSize: 10,
-    fontWeight: 'bold',
   },
   form: {
     width: '100%',
