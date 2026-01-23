@@ -181,27 +181,27 @@ const BankRatesScreen = () => {
           <View style={styles.bcvSection}>
               <View style={styles.sectionHeader}>
                   <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>VALORES SEGÚN BCV</Text>
-                  <View style={[styles.liveBadge, { backgroundColor: 'rgba(80, 200, 120, 0.15)' }]}>
-                      <Text style={[styles.liveText, { color: '#50C878' }]}>TIEMPO REAL</Text>
+                  <View style={[styles.liveBadge, { backgroundColor: theme.colors.tertiaryContainer }]}>
+                      <Text style={[styles.liveText, { color: theme.colors.onTertiaryContainer }]}>TIEMPO REAL</Text>
                   </View>
               </View>
 
               <LinearGradient
-                  colors={['#0052D4', '#4364F7', '#6FB1FC']}
+                  colors={[theme.colors.primary, theme.colors.secondary]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 1 }}
                   style={styles.bcvCard}
               >
                   <View style={styles.bcvCardContent}>
                       <View style={styles.bcvHeader}>
-                          <View style={styles.bcvIconContainer}>
-                              <MaterialIcons name="account-balance" size={24} color="#FFF" />
+                          <View style={[styles.bcvIconContainer, { backgroundColor: 'rgba(255,255,255,0.2)', borderColor: 'rgba(255,255,255,0.1)' }]}>
+                              <MaterialIcons name="account-balance" size={24} color={theme.colors.onPrimary} />
                           </View>
                           <View>
-                              <Text style={styles.bcvTitle}>Tasa General (BCV)</Text>
+                              <Text style={[styles.bcvTitle, { color: theme.colors.onPrimary }]}>Tasa General (BCV)</Text>
                               <View style={styles.bcvSubtitleRow}>
-                                  <View style={styles.statusDot} />
-                                  <Text style={styles.bcvSubtitle}>
+                                  <View style={[styles.statusDot, { backgroundColor: theme.colors.onPrimary }]} />
+                                  <Text style={[styles.bcvSubtitle, { color: theme.colors.onPrimary }]}>
                                     {bcvRate?.lastUpdated 
                                         ? `A ${new Date(bcvRate.lastUpdated).toLocaleString('es-VE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
                                         : 'ACTUALIZADO'}
@@ -213,18 +213,18 @@ const BankRatesScreen = () => {
 
                   <View style={styles.bcvBottomRow}>
                       <View style={styles.bcvPriceContainer}>
-                          <Text style={styles.bcvPrice}>
+                          <Text style={[styles.bcvPrice, { color: theme.colors.onPrimary }]}>
                             {bcvRate 
                                 ? bcvRate.value.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) 
                                 : '--,--'}
                           </Text>
-                          <Text style={styles.bcvCurrency}>Bs/$</Text>
+                          <Text style={[styles.bcvCurrency, { color: theme.colors.onPrimary }]}>Bs/$</Text>
                       </View>
                   </View>
                   
                   {/* Decorative huge icon */}
                   <View style={styles.decorativeIcon}>
-                      <MaterialIcons name="account-balance" size={160} color="rgba(255,255,255,0.1)" />
+                      <MaterialIcons name="account-balance" size={160} color={theme.colors.onPrimary} style={{ opacity: 0.1 }} />
                   </View>
               </LinearGradient>
           </View>
@@ -244,8 +244,8 @@ const BankRatesScreen = () => {
         <FilterSection 
             options={[
               { label: 'A-Z', value: 'az', icon: 'sort' },
-              { label: 'Menor precio', value: 'price_asc', icon: 'trending-down', color: '#4CAF50' }, // Green
-              { label: 'Mayor precio', value: 'price_desc', icon: 'trending-up', color: '#F44336' }, // Red
+              { label: 'Menor precio', value: 'price_asc', icon: 'trending-down', color: theme.colors.trendUp }, // Green (Good/Up)
+              { label: 'Mayor precio', value: 'price_desc', icon: 'trending-up', color: theme.colors.trendDown }, // Red (Bad/Down)
             ]}
             selectedValue={sortType}
             onSelect={(value) => {
@@ -396,16 +396,15 @@ const styles = StyleSheet.create({
       width: 48,
       height: 48,
       borderRadius: 16,
-      backgroundColor: 'rgba(255,255,255,0.2)',
+      // Background and border handled dynamically in component style prop
       alignItems: 'center',
       justifyContent: 'center',
       borderWidth: 1,
-      borderColor: 'rgba(255,255,255,0.1)',
   },
   bcvTitle: {
       fontSize: 18,
       fontWeight: '800',
-      color: '#FFF',
+      // Color handled dynamically
       letterSpacing: -0.5,
   },
   bcvSubtitleRow: {
@@ -418,10 +417,10 @@ const styles = StyleSheet.create({
       width: 6,
       height: 6,
       borderRadius: 3,
-      backgroundColor: '#86EFAC', // green-300
+      // Color handled dynamically
   },
   bcvSubtitle: {
-      color: 'rgba(255,255,255,0.8)',
+      // Color handled dynamically
       fontSize: 11,
       fontWeight: 'bold',
       textTransform: 'uppercase',
@@ -455,20 +454,20 @@ const styles = StyleSheet.create({
   bcvPrice: {
       fontSize: 60,
       fontWeight: '800',
-      color: '#FFF',
+      // Color handled dynamically
       letterSpacing: -2,
       lineHeight: 64,
   },
   bcvCurrency: {
       fontSize: 20,
       fontWeight: 'bold',
-      color: 'rgba(255,255,255,0.7)',
+      // Color handled dynamically
   },
   decorativeIcon: {
       position: 'absolute',
       bottom: -24,
       right: -24,
-      opacity: 0.1,
+      // Opacity and Color handled dynamically
       zIndex: 0,
   },
   listHeader: {
