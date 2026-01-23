@@ -28,6 +28,7 @@ import ModernTabBar from '../components/navigation/ModernTabBar';
 import { navigationRef } from './NavigationRef';
 import { storageService } from '../services/StorageService';
 import DiscoverScreen from '../screens/DiscoverScreen';
+import AddAlertScreen from '../screens/settings/AddAlertScreen';
 
 // Root Stack that includes Splash
 const RootStack = createNativeStackNavigator();
@@ -269,6 +270,14 @@ const AppNavigator = () => {
             <RootStack.Screen 
               name="WebView" 
               component={WebViewScreen} 
+              options={{ 
+                headerShown: false, 
+                animation: 'slide_from_bottom' 
+              }} 
+            />
+            <RootStack.Screen 
+              name="AddAlert" 
+              component={AddAlertScreen} 
               options={{ 
                 headerShown: false, 
                 animation: 'slide_from_bottom' 

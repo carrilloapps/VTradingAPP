@@ -17,7 +17,6 @@ import AlertItem from '../components/settings/AlertItem';
 import ThemeSelector from '../components/settings/ThemeSelector';
 import MenuButton from '../components/settings/MenuButton';
 import ProfileEditDialog from '../components/settings/ProfileEditDialog';
-import AddAlertDialog from '../components/settings/AddAlertDialog';
 import LogoutDialog from '../components/settings/LogoutDialog';
 import SettingsSkeleton from '../components/settings/SettingsSkeleton';
 
@@ -39,7 +38,6 @@ const SettingsScreen = () => {
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [showAboutDialog, setShowAboutDialog] = useState(false);
   const [showEditProfileDialog, setShowEditProfileDialog] = useState(false);
-  const [showAddAlertDialog, setShowAddAlertDialog] = useState(false);
   const [showDeleteAccountDialog, setShowDeleteAccountDialog] = useState(false);
   const [deleteAccountLoading, setDeleteAccountLoading] = useState(false);
 
@@ -193,15 +191,10 @@ const SettingsScreen = () => {
 
   const handleAddAlert = () => {
       if (alerts.length >= 5) {
-        // Use a simple alert or toast if CustomDialog isn't easily accessible here for simple warnings
-        // But I should use handleAction for feedback or a proper dialog. 
-        // Since I can't easily pop a dialog without state, I'll use a simple alert for now or just ignore.
-        // Better: Show a toast/snackbar via handleAction? No, handleAction seems to be a debug thing? 
-        // Wait, handleAction uses Toast.
         Alert.alert('Límite Alcanzado', 'Solo puedes tener un máximo de 5 alertas activas.');
          return;
       }
-      setShowAddAlertDialog(true);
+      (navigation as any).navigate('AddAlert');
   };
 
   const saveNewAlert = async (symbol: string, target: string, condition: 'above' | 'below') => {
@@ -457,12 +450,6 @@ const SettingsScreen = () => {
         onDismiss={() => setShowEditProfileDialog(false)}
         currentName={user?.displayName || ''}
         onSave={saveProfileName}
-      />
-
-      <AddAlertDialog
-        visible={showAddAlertDialog}
-        onDismiss={() => setShowAddAlertDialog(false)}
-        onSave={saveNewAlert}
       />
 
       <CustomDialog

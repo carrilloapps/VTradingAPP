@@ -283,7 +283,20 @@ curl -X POST -H "Authorization: key=YOUR_SERVER_KEY" -H "Content-Type: applicati
 
 ---
 
-## Resolución de Problemas Comunes (Troubleshooting)
+### 3. Optimización de Tópicos y Desuscripción
+El sistema está diseñado para ser eficiente en el uso de datos y batería:
+
+1.  **Un Tópico para Múltiples Alertas:**
+    *   Si tienes 2 alertas para `COP/VES` (una "Sube de 0.15" y otra "Baja de 0.10"), el dispositivo **SOLO se suscribe una vez** al canal `ticker_cop_ves`.
+    *   Cuando llega un mensaje con el precio actual, la app verifica internamente ambas condiciones.
+    *   **Resultado:** Funciona perfectamente para subida y bajada simultáneamente.
+
+2.  **Desuscripción Inteligente:**
+    *   Al borrar o desactivar una alerta, el sistema verifica si tienes **otras alertas activas** para ese mismo símbolo.
+    *   **Si quedan alertas:** Mantiene la suscripción al tópico (para que las otras sigan funcionando).
+    *   **Si NO quedan alertas:** Se desuscribe automáticamente del tópico en FCM para ahorrar recursos.
+
+## Solución de Problemas (Troubleshooting)
 
 ### 1. La notificación no llega (Alertas de Precio)
 *   **Verificar Topic:** ¿Estás enviando al topic correcto?
@@ -292,7 +305,11 @@ curl -X POST -H "Authorization: key=YOUR_SERVER_KEY" -H "Content-Type: applicati
 *   **Verificar Symbol:** ¿El `symbol` en el JSON es IDÉNTICO al de la alerta?
     *   La app compara `alert.symbol === payload.symbol`.
     *   `COP/VES` !== `VES/COP`.
+*   **Verificar Suscripción:**
+    *   Si acabas de crear la alerta y no funciona, prueba desactivar y activar el switch de la alerta. Esto fuerza una re-suscripción al topic en FCM.
 *   **Verificar Condición:** La app recibe el mensaje silencioso pero solo muestra la notificación visual SI se cumple la condición (Mayor o Menor al precio objetivo).
+    *   Ejemplo: Alerta "Baja de 0.15". Payload precio "0.13". 0.13 < 0.15 -> **DISPARA**.
+    *   Ejemplo: Alerta "Baja de 0.15". Payload precio "0.16". 0.16 > 0.15 -> **IGNORA**.
 
 ### 2. Notificación llega pero no se muestra
 *   **Foreground:** Revisa si aparece el Toast dorado.
