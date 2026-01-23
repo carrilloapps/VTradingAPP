@@ -28,6 +28,7 @@ interface UnifiedHeaderProps {
   notificationIcon?: string;
   showNotification?: boolean;
   showAd?: boolean;
+  hideDivider?: boolean;
   style?: ViewStyle;
 }
 
@@ -48,6 +49,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   notificationIcon = 'notifications',
   showNotification = true,
   showAd = true,
+  hideDivider = false,
   style,
 }) => {
   const theme = useTheme();
@@ -76,7 +78,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
     container: {
       backgroundColor: theme.colors.background,
       borderBottomColor: theme.colors.outline,
-      borderBottomWidth: 1,
+      borderBottomWidth: hideDivider ? 0 : 1,
     },
     avatar: {
       borderColor: theme.colors.outline,
@@ -119,7 +121,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
       backgroundColor: accentRed,
       borderColor: theme.colors.background,
     }
-  }), [theme, accentGreen, accentRed, buttonBgColor]);
+  }), [theme, accentGreen, accentRed, buttonBgColor, hideDivider]);
 
   const getInitials = (name: string) => {
     return name
