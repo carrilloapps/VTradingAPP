@@ -195,6 +195,7 @@ Es crucial distinguir entre el nombre del **Topic** de suscripción y el valor d
 | Caso | Símbolo en App (Payload) | Tópico FCM (Canal) | Razón |
 | :--- | :--- | :--- | :--- |
 | **Par Divisas** | `VES/USD` | `ticker_ves_usd` | La app compara `a.symbol === "VES/USD"` para disparar la alerta. |
+| **Par Divisas (Inverso)** | `COP/VES` | `ticker_cop_ves` | Inverso de VES/COP. **OJO:** Son instrumentos diferentes con Topics diferentes. |
 | **Par Divisas** | `VES/COP` | `ticker_ves_cop` | Si envías solo "COP", la comparación falla. |
 | **Cripto** | `BTC/USDT` | `ticker_btc_usdt` | Igual que divisas, requiere el par completo. |
 | **Acción** | `ABC.A` | `ticker_abc_a` | El punto se reemplaza en el topic, pero debe mantenerse en el payload. |
@@ -251,7 +252,22 @@ curl -X POST -H "Authorization: key=YOUR_SERVER_KEY" -H "Content-Type: applicati
 }' https://fcm.googleapis.com/fcm/send
 ```
 
-### 4. Alerta de Stock: ABC.A (Data Message)
+### 4. Alerta de Precio: COP/VES (Inverso)
+**Caso Común de Error:** `COP/VES` (Pesos por Bolívar) es un instrumento distinto a `VES/COP`.
+*   **Topic:** `ticker_cop_ves`
+*   **Symbol:** `COP/VES`
+
+```bash
+curl -X POST -H "Authorization: key=YOUR_SERVER_KEY" -H "Content-Type: application/json" -d '{
+  "to": "/topics/ticker_cop_ves",
+  "data": {
+    "symbol": "COP/VES",
+    "price": "0.13"
+  }
+}' https://fcm.googleapis.com/fcm/send
+```
+
+### 5. Alerta de Stock: ABC.A (Data Message)
 Actualización de precio para una acción específica (ej. `ABC.A`).
 *   **Topic:** `ticker_abc_a` (El punto `.` se reemplaza por `_`)
 
@@ -264,6 +280,24 @@ curl -X POST -H "Authorization: key=YOUR_SERVER_KEY" -H "Content-Type: applicati
   }
 }' https://fcm.googleapis.com/fcm/send
 ```
+
+---
+
+## Resolución de Problemas Comunes (Troubleshooting)
+
+### 1. La notificación no llega (Alertas de Precio)
+*   **Verificar Topic:** ¿Estás enviando al topic correcto?
+    *   Si la alerta es `COP/VES` -> Topic: `ticker_cop_ves`.
+    *   Si envías a `ticker_ves_cop`, el dispositivo NO recibirá nada porque no está suscrito a ese canal inverso.
+*   **Verificar Symbol:** ¿El `symbol` en el JSON es IDÉNTICO al de la alerta?
+    *   La app compara `alert.symbol === payload.symbol`.
+    *   `COP/VES` !== `VES/COP`.
+*   **Verificar Condición:** La app recibe el mensaje silencioso pero solo muestra la notificación visual SI se cumple la condición (Mayor o Menor al precio objetivo).
+
+### 2. Notificación llega pero no se muestra
+*   **Foreground:** Revisa si aparece el Toast dorado.
+*   **Background:** Revisa si se generó la notificación de sistema.
+*   **Condición:** Si el precio recibido no cruza el umbral definido por el usuario, la app descarta el mensaje silenciosamente (comportamiento esperado).
 
 ---
 
