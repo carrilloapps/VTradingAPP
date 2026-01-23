@@ -23,6 +23,7 @@ import { analyticsService } from '../services/firebase/AnalyticsService';
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
+import WebViewScreen from '../screens/WebViewScreen';
 import ModernTabBar from '../components/navigation/ModernTabBar';
 import { navigationRef } from './NavigationRef';
 
@@ -50,6 +51,7 @@ function AuthNavigator() {
       <AuthStack.Screen name="Login" component={LoginScreen} />
       <AuthStack.Screen name="Register" component={RegisterScreen} />
       <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+      <AuthStack.Screen name="WebView" component={WebViewScreen} />
     </AuthStack.Navigator>
   );
 }
@@ -245,6 +247,14 @@ const AppNavigator = () => {
               options={{ 
                 headerShown: false, 
                 animation: 'slide_from_right' 
+              }} 
+            />
+            <RootStack.Screen 
+              name="WebView" 
+              component={WebViewScreen} 
+              options={{ 
+                headerShown: false, 
+                animation: 'slide_from_bottom' 
               }} 
             />
           </>

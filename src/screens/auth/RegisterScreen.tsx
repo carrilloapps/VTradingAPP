@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, TouchableOpacity, ScrollView, StatusBar, Linking } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, ScrollView, StatusBar } from 'react-native';
 import { Text, TextInput, Button, useTheme, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';
@@ -96,12 +96,9 @@ const RegisterScreen = ({ navigation }: any) => {
     return isValid;
   };
 
-  const openExternalUrl = async (url: string) => {
-    try {
-      await Linking.openURL(url);
-    } catch {
-      analyticsService.logEvent('open_external_url_error');
-    }
+  const openExternalUrl = (url: string, title?: string) => {
+    // @ts-ignore
+    navigation.navigate('WebView', { url, title: title || 'Navegador' });
   };
 
   const handleRegister = async () => {
@@ -307,8 +304,8 @@ const RegisterScreen = ({ navigation }: any) => {
             Al continuar aceptas nuestras{' '}
           </Text>
           <TouchableOpacity
-            onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL)}
-            accessibilityRole="button"
+          onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL, 'Políticas de privacidad')}
+          accessibilityRole="button"
             accessibilityLabel="Políticas de privacidad"
             accessibilityHint="Abre las políticas de privacidad"
             disabled={isBusy}
@@ -321,7 +318,7 @@ const RegisterScreen = ({ navigation }: any) => {
             {' '}y{' '}
           </Text>
           <TouchableOpacity
-            onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL)}
+            onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL, 'Términos y condiciones')}
             accessibilityRole="button"
             accessibilityLabel="Términos y condiciones"
             accessibilityHint="Abre los términos y condiciones"

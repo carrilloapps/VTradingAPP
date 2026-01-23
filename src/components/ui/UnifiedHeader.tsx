@@ -27,6 +27,7 @@ interface UnifiedHeaderProps {
   rightActionIcon?: string;
   notificationIcon?: string;
   showNotification?: boolean;
+  showAd?: boolean;
   style?: ViewStyle;
 }
 
@@ -46,6 +47,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   rightActionIcon = 'refresh',
   notificationIcon = 'notifications',
   showNotification = true,
+  showAd = true,
   style,
 }) => {
   const theme = useTheme();
@@ -55,7 +57,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   const resolvedIsPremium = typeof isPremium === 'boolean' ? isPremium : !!(user && !user.isAnonymous);
   const adUnitId = Platform.OS === 'ios' ? AppConfig.ADMOB_BANNER_ID_IOS : AppConfig.ADMOB_BANNER_ID_ANDROID;
   const bannerId = __DEV__ ? TestIds.BANNER : adUnitId;
-  const shouldShowAd = !resolvedIsPremium && !!bannerId;
+  const shouldShowAd = showAd && !resolvedIsPremium && !!bannerId;
   
   const [imageError, setImageError] = useState(false);
 

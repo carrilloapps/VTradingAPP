@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Alert, Image, Linking, Platform } from 'react-native';
+import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Alert, Image, Platform } from 'react-native';
 import { Text, useTheme, Switch, Snackbar, Button } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import DeviceInfo from 'react-native-device-info';
@@ -116,12 +116,9 @@ const SettingsScreen = () => {
     }
   };
 
-  const openExternalUrl = async (url: string) => {
-    try {
-      await Linking.openURL(url);
-    } catch (error) {
-      handleAction('No se pudo abrir el enlace');
-    }
+  const openExternalUrl = (url: string, title?: string) => {
+    // @ts-ignore
+    navigation.navigate('WebView', { url, title: title || 'Navegador' });
   };
 
   const togglePush = async (value: boolean) => {
@@ -402,12 +399,12 @@ const SettingsScreen = () => {
             <MenuButton
               icon="policy"
               label="Políticas de privacidad"
-              onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL)}
+              onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL, 'Políticas de privacidad')}
             />
             <MenuButton
               icon="gavel"
               label="Términos y condiciones"
-              onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL)}
+              onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL, 'Términos y condiciones')}
               hasTopBorder
             />
             <MenuButton 
@@ -491,12 +488,12 @@ const SettingsScreen = () => {
                 <MenuButton
                   icon="policy"
                   label="Políticas de privacidad"
-                  onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL)}
+                  onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL, 'Políticas de privacidad')}
                 />
                 <MenuButton
                   icon="gavel"
                   label="Términos y condiciones"
-                  onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL)}
+                  onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL, 'Términos y condiciones')}
                   hasTopBorder
                 />
                 <MenuButton
