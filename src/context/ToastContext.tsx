@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { Snackbar, useTheme, Text } from 'react-native-paper';
 import { View, StyleSheet } from 'react-native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import TopToast, { ToastType } from '../components/ui/TopToast';
 
 interface ToastAction {
@@ -91,12 +91,12 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const getIcon = () => {
     switch (toast.type) {
       case 'success': return 'check-circle';
-      case 'error': return 'error';
-      case 'warning': return 'warning';
-      case 'alert': return 'notifications-active';
+      case 'error': return 'alert-circle';
+      case 'warning': return 'alert';
+      case 'alert': return 'bell-ring';
       case 'trendUp': return 'trending-up';
       case 'trendDown': return 'trending-down';
-      case 'info': default: return 'info';
+      case 'info': default: return 'information';
     }
   };
 
@@ -147,7 +147,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             }}
         >
             <View style={styles.content}>
-            <MaterialIcons 
+            <MaterialCommunityIcons 
                 name={getIcon()} 
                 size={20} 
                 color={theme.colors.inverseOnSurface} 

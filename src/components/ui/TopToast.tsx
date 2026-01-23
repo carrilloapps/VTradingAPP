@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Text, useTheme, Surface } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export type ToastType = 'success' | 'error' | 'info' | 'warning' | 'alert' | 'trendUp' | 'trendDown';
@@ -107,12 +107,12 @@ const TopToast: React.FC<TopToastProps> = ({
   const getIcon = () => {
     switch (type) {
       case 'success': return 'check-circle';
-      case 'error': return 'error';
-      case 'alert': return 'notifications-active';
-      case 'warning': return 'warning';
+      case 'error': return 'alert-circle';
+      case 'alert': return 'bell-ring';
+      case 'warning': return 'alert';
       case 'trendUp': return 'trending-up';
       case 'trendDown': return 'trending-down';
-      case 'info': default: return 'info';
+      case 'info': default: return 'information';
     }
   };
 
@@ -141,7 +141,7 @@ const TopToast: React.FC<TopToastProps> = ({
       >
         <TouchableOpacity style={styles.content} onPress={hide} activeOpacity={0.9}>
           <View style={styles.iconContainer}>
-            <MaterialIcons name={getIcon()} size={28} color={colors.icon} />
+            <MaterialCommunityIcons name={getIcon()} size={28} color={colors.icon} />
           </View>
           <View style={styles.textContainer}>
             {title && (
@@ -154,7 +154,7 @@ const TopToast: React.FC<TopToastProps> = ({
             </Text>
           </View>
           <TouchableOpacity onPress={hide} style={styles.closeButton}>
-            <MaterialIcons name="close" size={20} color={colors.textVariant} style={{ opacity: 0.7 }} />
+            <MaterialCommunityIcons name="close" size={20} color={colors.textVariant} style={{ opacity: 0.7 }} />
           </TouchableOpacity>
         </TouchableOpacity>
       </Surface>
