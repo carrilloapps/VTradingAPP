@@ -21,6 +21,26 @@ jest.mock('../src/context/ToastContext', () => ({
 // Mock CurrencyService
 jest.mock('../src/components/dashboard/DashboardSkeleton', () => 'DashboardSkeleton');
 
+jest.mock('../src/services/StocksService', () => ({
+  StocksService: {
+    getStocks: jest.fn(() => Promise.resolve([])),
+    subscribe: jest.fn((callback) => {
+      callback([]);
+      return () => {};
+    }),
+    isMarketOpen: jest.fn(() => true),
+  },
+}));
+
+jest.mock('../src/components/dashboard/Calculator', () => {
+  const { View, Text } = require('react-native');
+  return () => (
+    <View>
+      <Text>Calculadora Rápida</Text>
+    </View>
+  );
+});
+
 jest.mock('../src/services/CurrencyService', () => ({
   CurrencyService: {
     getRates: jest.fn(() => Promise.resolve([

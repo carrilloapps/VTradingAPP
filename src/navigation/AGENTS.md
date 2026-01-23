@@ -16,5 +16,5 @@ El componente `ModernTabBar` ha sido actualizado para ser compatible con `Materi
 
 ## Transiciones y Pantallas de Carga
 *   **Eliminación de Splash Screen:** Se ha eliminado la pantalla `SplashScreen` dedicada y su lógica de bloqueo.
-*   **Skeleton Screens:** Se prioriza el uso de "Skeleton Screens" (ej. `DashboardSkeleton`) y estados de carga integrados en las pantallas (ej. `LottieView` en `ExchangeRatesScreen`) para una percepción de carga más rápida y fluida.
-*   **Animaciones Lottie:** Se utilizan animaciones Lottie (ej. `splash.json` como loader) para reemplazar indicadores de carga estáticos (`ActivityIndicator`) donde sea posible, mejorando la experiencia visual.
+*   **Skeleton Screens:** Se prioriza el uso de "Skeleton Screens" (ej. `DashboardSkeleton`) y estados de carga integrados en las pantallas (ej. `ActivityIndicator` de `react-native-paper`) para una percepción de carga más rápida y fluida.
+*   **Iconografía y Carga:** Se utilizan iconos de `react-native-paper` (Material Community Icons) y `ActivityIndicator` para estados de carga, reemplazando animaciones complejas (Lottie) para mantener la aplicación ligera y consistente con el diseño Material.

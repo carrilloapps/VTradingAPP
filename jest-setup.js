@@ -97,21 +97,38 @@ messagingModule.AuthorizationStatus = {
 
 jest.mock('@react-native-firebase/messaging', () => messagingModule);
 
+require('react-native-gesture-handler/jestSetup');
+
+jest.mock('react-native-reanimated', () => {
+  const Reanimated = require('react-native-reanimated/mock');
+
+  // The mock for `call` immediately calls the callback which is incorrect
+  // So we override it with a no-op
+  Reanimated.default.call = () => {};
+
+  return Reanimated;
+});
+
 jest.mock('@react-native-firebase/auth', () => {
-  const authFn = () => ({
-    onAuthStateChanged: jest.fn(() => jest.fn()),
-    currentUser: { uid: 'test-user', email: 'test@example.com' },
+  return () => ({
+    onAuthStateChanged: jest.fn(),
+    currentUser: {
+      email: 'test@test.com',
+      uid: 'test-uid',
+      displayName: 'Test User',
+    },
+    signOut: jest.fn(),
     signInWithEmailAndPassword: jest.fn(),
     createUserWithEmailAndPassword: jest.fn(),
-    signOut: jest.fn(),
     sendPasswordResetEmail: jest.fn(),
-    signInWithCredential: jest.fn(),
-    signInAnonymously: jest.fn(),
   });
-  authFn.GoogleAuthProvider = {
-    credential: jest.fn(),
+});
+
+jest.mock('react-native-webview', () => {
+  const { View } = require('react-native');
+  return {
+    WebView: View,
   };
-  return authFn;
 });
 
 jest.mock('@react-native-google-signin/google-signin', () => ({
