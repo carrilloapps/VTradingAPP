@@ -238,6 +238,11 @@ const SettingsScreen = () => {
     return <SettingsSkeleton />;
   }
 
+  const handleRegister = () => {
+    // For anonymous users, signing out redirects to the Auth flow where they can register
+    handleLogout();
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar 
@@ -260,7 +265,11 @@ const SettingsScreen = () => {
       >
         {/* User Profile */}
         <View style={styles.section}>
-          <UserProfileCard user={user} onEdit={handleEditProfile} />
+          <UserProfileCard 
+            user={user} 
+            onEdit={handleEditProfile} 
+            onRegister={handleRegister}
+          />
         </View>
 
         {/* Alerts Section */}

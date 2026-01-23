@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { Text, useTheme, Avatar } from 'react-native-paper';
+import { Text, useTheme, Avatar, Button } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { md5 } from '../../utils/md5';
@@ -8,15 +8,16 @@ import { md5 } from '../../utils/md5';
 interface UserProfileCardProps {
   user: FirebaseAuthTypes.User | null;
   onEdit?: () => void;
+  onRegister?: () => void;
 }
 
-const UserProfileCard = ({ user, onEdit }: UserProfileCardProps) => {
+const UserProfileCard = ({ user, onEdit, onRegister }: UserProfileCardProps) => {
   const theme = useTheme();
   const [imageError, setImageError] = useState(false);
 
   const displayName = user?.displayName || (user?.isAnonymous ? 'Invitado' : 'Usuario');
   const email = user?.email || (user?.isAnonymous ? 'Sesión anónima' : 'Sin correo');
-  const isPro = !user?.isAnonymous; // Mock logic for PRO badge
+  const isPro = !!user && !user.isAnonymous;
 
   // Reset error state when user changes
   useEffect(() => {
@@ -71,44 +72,80 @@ const UserProfileCard = ({ user, onEdit }: UserProfileCardProps) => {
   };
 
   return (
-    <View style={[styles.container, { 
-      backgroundColor: theme.colors.elevation.level1,
-      borderColor: theme.colors.outline,
-    }]}>
-      <View style={styles.avatarContainer}>
-        <View style={[styles.avatarWrapper, { borderColor: theme.colors.primary + '33' }]}>
-          {renderAvatar()}
-        </View>
-        {isPro && (
-          <View style={[styles.badge, { 
-            backgroundColor: theme.colors.primary,
-            borderColor: theme.colors.surface 
-          }]}>
-            <Text style={styles.badgeText}>PRO</Text>
+    <View style={styles.wrapper}>
+      <View style={[styles.container, { 
+        backgroundColor: theme.colors.elevation.level1,
+        borderColor: theme.colors.outline,
+      }]}>
+        <View style={styles.avatarContainer}>
+          <View style={[styles.avatarWrapper, { borderColor: theme.colors.primary + '33' }]}>
+            {renderAvatar()}
           </View>
+          <View style={[styles.badge, { 
+            backgroundColor: isPro ? theme.colors.tertiaryContainer : theme.colors.surfaceVariant,
+            borderColor: theme.colors.elevation.level1 
+          }]}>
+            <Text style={[styles.badgeText, { 
+              color: isPro ? theme.colors.onTertiaryContainer : theme.colors.onSurfaceVariant 
+            }]}>
+              {isPro ? 'PRO' : 'FREE'}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.infoContainer}>
+          <Text variant="titleMedium" style={[styles.userName, { color: theme.colors.onSurface }]}>
+            {displayName}
+          </Text>
+          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+            {email}
+          </Text>
+        </View>
+
+        {isPro && (
+          <TouchableOpacity 
+            style={styles.editButton}
+            onPress={onEdit}
+          >
+            <MaterialIcons name="edit" size={20} color={theme.colors.onSurfaceVariant} />
+          </TouchableOpacity>
         )}
       </View>
 
-      <View style={styles.infoContainer}>
-        <Text variant="titleMedium" style={[styles.userName, { color: theme.colors.onSurface }]}>
-          {displayName}
-        </Text>
-        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          {email}
-        </Text>
-      </View>
-
-      <TouchableOpacity 
-        style={styles.editButton}
-        onPress={onEdit}
-      >
-        <MaterialIcons name="edit" size={20} color={theme.colors.onSurfaceVariant} />
-      </TouchableOpacity>
+      {!isPro && (
+        <View style={[styles.premiumCard, { 
+          backgroundColor: theme.colors.primaryContainer,
+          // borderColor: theme.colors.primary, // Optional border
+        }]}>
+          <View style={styles.premiumContent}>
+             <MaterialIcons name="diamond" size={24} color={theme.colors.onPrimaryContainer} />
+             <View style={styles.premiumTextContainer}>
+                <Text variant="titleSmall" style={{ color: theme.colors.onPrimaryContainer, fontWeight: 'bold' }}>
+                  PÁSATE AL PLAN PREMIUM
+                </Text>
+                <Text variant="bodySmall" style={{ color: theme.colors.onPrimaryContainer, opacity: 0.8 }}>
+                  Gratis durante el periodo de pruebas. Solo necesitas registrarte presionando el boton "Registrarse gratis".
+                </Text>
+             </View>
+          </View>
+          <Button 
+            mode="contained" 
+            onPress={onRegister}
+            style={{ marginTop: 12, backgroundColor: theme.colors.primary }}
+            textColor={theme.colors.onPrimary}
+          >
+            Registrarse gratis
+          </Button>
+        </View>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  wrapper: {
+    gap: 16,
+  },
   container: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -121,9 +158,10 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   avatarWrapper: {
-    borderRadius: "100%", // (64 Avatar + 2*2 Padding) / 2
+    borderRadius: 100, // Fixed: "100%" string not recommended for borderRadius in some RN versions/linters, use number usually, but if it works it works. 64/2 = 32. 
+    // Actually the previous code had "100%". I'll keep it as number 100 (large enough) or 34.
     borderWidth: 2,
-    padding: 2, // Optional: gap between border and avatar
+    padding: 2, 
   },
   badge: {
     position: 'absolute',
@@ -136,7 +174,6 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   badgeText: {
-    color: 'white',
     fontSize: 10,
     fontWeight: 'bold',
   },
@@ -153,6 +190,18 @@ const styles = StyleSheet.create({
   },
   userName: {
     fontWeight: 'bold',
+  },
+  premiumCard: {
+    padding: 16,
+    borderRadius: 24,
+  },
+  premiumContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  premiumTextContainer: {
+    flex: 1,
   },
 });
 

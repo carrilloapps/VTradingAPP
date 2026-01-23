@@ -25,7 +25,7 @@ const ThemeOption: React.FC<ThemeOptionProps> = ({
 }) => {
   const theme = useAppTheme();
   const isSelected = currentTheme === mode;
-  const borderColor = isSelected ? theme.colors.primary : theme.colors.buttonBorder;
+  const borderColor = isSelected ? theme.colors.primary : theme.colors.outline;
   const bg = isSelected ? theme.colors.primaryContainer : 'transparent';
   const borderWidth = isSelected ? 2 : 1;
 
