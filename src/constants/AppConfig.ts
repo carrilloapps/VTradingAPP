@@ -9,6 +9,8 @@ export const AppConfig = {
   ADMOB_BANNER_ID_IOS: 'ca-app-pub-3940256099942544/2934735716',
   PRIVACY_POLICY_URL: 'https://vtrading.app/privacidad',
   TERMS_OF_USE_URL: 'https://vtrading.app/terminos',
+  LICENSES_URL: 'https://vtrading.app/licencias',
+  COOKIES_URL: 'https://vtrading.app/cookies',
   API_BASE_URL: 'https://api.vtrading.app/',
   API_KEY: '4f9e8d7c6b5a43210fedcba9876543210fedcba9876543210fedcba987654321',
 };

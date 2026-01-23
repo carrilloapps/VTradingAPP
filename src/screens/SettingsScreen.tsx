@@ -488,12 +488,36 @@ const SettingsScreen = () => {
                 <MenuButton
                   icon="policy"
                   label="Políticas de privacidad"
-                  onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL, 'Políticas de privacidad')}
+                  onPress={() => {
+                    openExternalUrl(AppConfig.PRIVACY_POLICY_URL, 'Políticas de privacidad');
+                    setShowAboutDialog(false);
+                  }}
                 />
                 <MenuButton
                   icon="gavel"
                   label="Términos y condiciones"
-                  onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL, 'Términos y condiciones')}
+                  onPress={() => {
+                    openExternalUrl(AppConfig.TERMS_OF_USE_URL, 'Términos y condiciones');
+                    setShowAboutDialog(false);
+                  }}
+                  hasTopBorder
+                />
+                <MenuButton
+                  icon="assignment"
+                  label="Licencias de uso"
+                  onPress={() => {
+                    openExternalUrl(AppConfig.LICENSES_URL, 'Licencias de uso');
+                    setShowAboutDialog(false);
+                  }}
+                  hasTopBorder
+                />
+                <MenuButton
+                  icon="web"
+                  label="Uso de Cookies"
+                  onPress={() => {
+                    openExternalUrl(AppConfig.COOKIES_URL, 'Uso de Cookies');
+                    setShowAboutDialog(false);
+                  }}
                   hasTopBorder
                 />
                 <MenuButton
