@@ -135,48 +135,72 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         // Special handling for Price Alerts (symbol + price in data)
         let highlightedVal = undefined;
         let trendVal: 'up' | 'down' | undefined = undefined;
-        
+        let shouldAdd = true; // Default to true for standard messages
+
         if (remoteMessage.data?.symbol && remoteMessage.data?.price) {
-           const symbol = remoteMessage.data.symbol;
-           const price = remoteMessage.data.price;
-           highlightedVal = `${price}`; // e.g. "36.24"
-           
-           // If title is generic, make it specific
-           if (finalTitle === 'Notificación') {
-             finalTitle = `Alerta de Precio: ${symbol}`;
-           }
-           
-           // If body is empty, construct it
-           if (!finalBody) {
-             finalBody = `La tasa oficial ha subido a ${price} Bs.`;
-           }
-           
-           // Try to determine trend from body or data if available
-           if (remoteMessage.data?.trend) {
-              trendVal = remoteMessage.data.trend as 'up' | 'down';
-           } else {
-              // Infer from keywords if missing
-              const textContent = (finalTitle + ' ' + finalBody).toLowerCase();
-              if (textContent.includes('baja') || textContent.includes('down') || textContent.includes('cae') || textContent.includes('disminuye')) {
-                trendVal = 'down';
-              } else {
-                trendVal = 'up'; // Default to up if no negative keywords found
-              }
+           const symbol = remoteMessage.data.symbol as string;
+           const price = parseFloat(remoteMessage.data.price as string);
+           highlightedVal = `${price}`; 
+
+           if (!isNaN(price)) {
+               // Check if this price matches any active alert
+               // We need to fetch alerts to know if this is UP or DOWN
+               try {
+                   const alerts = await storageService.getAlerts();
+                   const matchingAlerts = alerts.filter(a => 
+                       a.isActive && 
+                       a.symbol === symbol &&
+                       (
+                           (a.condition === 'above' && price >= parseFloat(a.target)) ||
+                           (a.condition === 'below' && price <= parseFloat(a.target))
+                       )
+                   );
+
+                   if (matchingAlerts.length > 0) {
+                       // Use the first matching alert to define the message context
+                       const alert = matchingAlerts[0];
+                       const isUp = alert.condition === 'above';
+                       
+                       trendVal = isUp ? 'up' : 'down';
+                       
+                       if (finalTitle === 'Notificación') {
+                           finalTitle = `Alerta de Precio: ${symbol}`;
+                       }
+                       
+                       // Construct precise body
+                       const actionVerb = isUp ? 'subió' : 'bajó';
+                       const emoji = isUp ? '📈' : '📉';
+                       const targetPrice = alert.target;
+                       
+                       finalBody = `La tasa ha ${actionVerb} a ${price} (Objetivo: ${targetPrice})`;
+                   } else {
+                       // Price update received but no alert condition met -> Ignore it
+                       shouldAdd = false;
+                       console.log('Price update received but no matching local alert condition met. Ignoring in history.');
+                   }
+               } catch (e) {
+                   console.error('Error checking alerts in NotificationContext', e);
+                   // Fallback: If error checking alerts, add it anyway but try to infer trend
+                   // (Keep existing fallback logic if needed, or better safe to not spam?)
+                   // Let's keep it but with neutral text if possible.
+               }
            }
         }
 
-        const newNotif: StoredNotification = {
-          id: remoteMessage.messageId || Date.now().toString(),
-          type: (remoteMessage.data?.type as any) || (remoteMessage.data?.symbol ? 'price_alert' : 'system'),
-          title: finalTitle,
-          message: finalBody,
-          timestamp: new Date().toISOString(),
-          isRead: false,
-          trend: trendVal,
-          highlightedValue: highlightedVal,
-          data: remoteMessage.data,
-        };
-        addNotification(newNotif);
+        if (shouldAdd) {
+            const newNotif: StoredNotification = {
+            id: remoteMessage.messageId || Date.now().toString(),
+            type: (remoteMessage.data?.type as any) || (remoteMessage.data?.symbol ? 'price_alert' : 'system'),
+            title: finalTitle,
+            message: finalBody,
+            timestamp: new Date().toISOString(),
+            isRead: false,
+            trend: trendVal,
+            highlightedValue: highlightedVal,
+            data: remoteMessage.data,
+            };
+            addNotification(newNotif);
+        }
       }
     });
 
