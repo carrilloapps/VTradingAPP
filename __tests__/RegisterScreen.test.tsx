@@ -4,7 +4,6 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import RegisterScreen from '../src/screens/auth/RegisterScreen';
 import * as AuthContext from '../src/context/AuthContext';
 
-jest.mock('lottie-react-native', () => 'LottieView');
 jest.mock('../src/services/firebase/AnalyticsService', () => ({
   analyticsService: {
     logEvent: jest.fn(),
@@ -37,7 +36,7 @@ describe('RegisterScreen', () => {
       isLoading: false,
     } as any);
 
-    const { getByLabelText, getByText, queryByText } = renderScreen();
+    const { getByLabelText, getByText, getByTestId, queryByTestId } = renderScreen();
 
     fireEvent.changeText(getByLabelText('Correo electrónico'), 'test@example.com');
     fireEvent.changeText(getByLabelText('Contraseña'), '123456');
@@ -46,13 +45,13 @@ describe('RegisterScreen', () => {
     fireEvent.press(getByText('Registrarse'));
 
     await waitFor(() => {
-      expect(getByText('Cargando')).toBeTruthy();
+      expect(getByTestId('auth-skeleton')).toBeTruthy();
     });
 
     resolveSignUp();
 
     await waitFor(() => {
-      expect(queryByText('Cargando')).toBeNull();
+      expect(queryByTestId('auth-skeleton')).toBeNull();
     });
   });
 });

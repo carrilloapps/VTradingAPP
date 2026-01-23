@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { analyticsService } from '../../services/firebase/AnalyticsService';
 import { AppConfig } from '../../constants/AppConfig';
-import LottieView from 'lottie-react-native';
+import AuthSkeleton from '../../components/auth/AuthSkeleton';
 
 const ForgotPasswordScreen = ({ navigation }: any) => {
   const theme = useTheme();
@@ -77,6 +77,19 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
     // @ts-ignore
     navigation.navigate('WebView', { url, title: title || 'Navegador' });
   };
+
+  if (isBusy) {
+    return (
+      <View style={[{ flex: 1 }, themeStyles.container]}>
+        <StatusBar 
+          backgroundColor="transparent" 
+          translucent 
+          barStyle={theme.dark ? 'light-content' : 'dark-content'} 
+        />
+        <AuthSkeleton mode="forgot-password" />
+      </View>
+    );
+  }
 
   return (
     <View 
@@ -175,32 +188,6 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
           </Text>
         </TouchableOpacity>
       </View>
-      {isBusy && (
-        <View style={[
-          styles.loadingOverlay,
-          { backgroundColor: theme.colors.backdrop ?? 'rgba(0, 0, 0, 0.35)' }
-        ]}>
-          <View style={[
-            styles.loadingCard,
-            {
-              backgroundColor: theme.colors.surface,
-              borderColor: theme.colors.outline,
-              borderRadius: theme.roundness * 6,
-            }
-          ]}>
-            <LottieView
-              source={require('../../assets/animations/splash.json')}
-              autoPlay
-              loop
-              style={styles.loadingAnimation}
-              resizeMode="contain"
-            />
-            <Text style={[styles.loadingText, { color: theme.colors.onSurface }]}>
-              Cargando
-            </Text>
-          </View>
-        </View>
-      )}
     </View>
   );
 };
@@ -231,29 +218,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'center',
     marginTop: 16,
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  loadingCard: {
-    width: '100%',
-    maxWidth: 320,
-    paddingVertical: 24,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  loadingAnimation: {
-    width: 140,
-    height: 140,
-  },
-  loadingText: {
-    marginTop: 8,
-    fontSize: 16,
-    fontWeight: '600',
   },
 });
 

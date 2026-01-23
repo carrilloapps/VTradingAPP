@@ -5,8 +5,6 @@ import AppNavigator from '../src/navigation/AppNavigator';
 import * as AuthContext from '../src/context/AuthContext';
 import * as ThemeContext from '../src/theme/ThemeContext';
 
-jest.mock('lottie-react-native', () => 'LottieView');
-
 describe('AppNavigator', () => {
   beforeEach(() => {
     jest.clearAllMocks();

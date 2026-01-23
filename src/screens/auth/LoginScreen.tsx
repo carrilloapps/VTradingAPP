@@ -7,7 +7,7 @@ import { analyticsService } from '../../services/firebase/AnalyticsService';
 import DeviceInfo from 'react-native-device-info';
 import { useAppTheme } from '../../theme/theme';
 import { AppConfig } from '../../constants/AppConfig';
-import LottieView from 'lottie-react-native';
+import AuthSkeleton from '../../components/auth/AuthSkeleton';
 
 const LoginScreen = ({ navigation }: any) => {
   const theme = useAppTheme();
@@ -137,6 +137,14 @@ const LoginScreen = ({ navigation }: any) => {
 
   return (
     <View style={[styles.screen, themeStyles.container]}>
+      <StatusBar 
+        backgroundColor="transparent" 
+        translucent 
+        barStyle={theme.dark ? 'light-content' : 'dark-content'} 
+      />
+      {isBusy ? (
+        <AuthSkeleton mode="login" />
+      ) : (
       <ScrollView 
         contentContainerStyle={[
           styles.container, 
@@ -148,11 +156,6 @@ const LoginScreen = ({ navigation }: any) => {
         ]}
         keyboardShouldPersistTaps="handled"
       >
-        <StatusBar 
-          backgroundColor="transparent" 
-          translucent 
-          barStyle={theme.dark ? 'light-content' : 'dark-content'} 
-        />
         <View style={styles.header}>
           <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
           <View style={styles.titleRow}>
@@ -333,31 +336,6 @@ const LoginScreen = ({ navigation }: any) => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-      {isBusy && (
-        <View style={[
-          styles.loadingOverlay,
-          { backgroundColor: theme.colors.backdrop ?? 'rgba(0, 0, 0, 0.35)' }
-        ]}>
-          <View style={[
-            styles.loadingCard,
-            {
-              backgroundColor: theme.colors.surface,
-              borderColor: theme.colors.outline,
-              borderRadius: theme.roundness * 6,
-            }
-          ]}>
-            <LottieView
-              source={require('../../assets/animations/splash.json')}
-              autoPlay
-              loop
-              style={styles.loadingAnimation}
-              resizeMode="contain"
-            />
-            <Text style={[styles.loadingText, { color: theme.colors.onSurface }]}>
-              Cargando
-            </Text>
-          </View>
-        </View>
       )}
     </View>
   );
@@ -430,29 +408,6 @@ const styles = StyleSheet.create({
   badgeText: {
     fontWeight: '700',
     letterSpacing: 0.5,
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  loadingCard: {
-    width: '100%',
-    maxWidth: 320,
-    paddingVertical: 24,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  loadingAnimation: {
-    width: 140,
-    height: 140,
-  },
-  loadingText: {
-    marginTop: 8,
-    fontSize: 16,
-    fontWeight: '600',
   },
 });
 

@@ -6,7 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { analyticsService } from '../../services/firebase/AnalyticsService';
 import { AppConfig } from '../../constants/AppConfig';
-import LottieView from 'lottie-react-native';
+import AuthSkeleton from '../../components/auth/AuthSkeleton';
 
 const RegisterScreen = ({ navigation }: any) => {
   const theme = useTheme();
@@ -132,6 +132,14 @@ const RegisterScreen = ({ navigation }: any) => {
 
   return (
     <View style={[styles.screen, themeStyles.container]}>
+      <StatusBar 
+        backgroundColor="transparent" 
+        translucent 
+        barStyle={theme.dark ? 'light-content' : 'dark-content'} 
+      />
+      {isBusy ? (
+        <AuthSkeleton mode="register" />
+      ) : (
       <ScrollView 
         contentContainerStyle={[
           styles.container, 
@@ -143,11 +151,6 @@ const RegisterScreen = ({ navigation }: any) => {
         ]}
         keyboardShouldPersistTaps="handled"
       >
-        <StatusBar 
-          backgroundColor="transparent" 
-          translucent 
-          barStyle={theme.dark ? 'light-content' : 'dark-content'} 
-        />
         <TouchableOpacity 
           onPress={() => navigation.goBack()} 
           style={styles.backButton}
@@ -330,31 +333,6 @@ const RegisterScreen = ({ navigation }: any) => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-      {isBusy && (
-        <View style={[
-          styles.loadingOverlay,
-          { backgroundColor: theme.colors.backdrop ?? 'rgba(0, 0, 0, 0.35)' }
-        ]}>
-          <View style={[
-            styles.loadingCard,
-            {
-              backgroundColor: theme.colors.surface,
-              borderColor: theme.colors.outline,
-              borderRadius: theme.roundness * 6,
-            }
-          ]}>
-            <LottieView
-              source={require('../../assets/animations/splash.json')}
-              autoPlay
-              loop
-              style={styles.loadingAnimation}
-              resizeMode="contain"
-            />
-            <Text style={[styles.loadingText, { color: theme.colors.onSurface }]}>
-              Cargando
-            </Text>
-          </View>
-        </View>
       )}
     </View>
   );
@@ -403,29 +381,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     justifyContent: 'center',
     marginTop: 12,
-  },
-  loadingOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  loadingCard: {
-    width: '100%',
-    maxWidth: 320,
-    paddingVertical: 24,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  loadingAnimation: {
-    width: 140,
-    height: 140,
-  },
-  loadingText: {
-    marginTop: 8,
-    fontSize: 16,
-    fontWeight: '600',
   },
 });
 

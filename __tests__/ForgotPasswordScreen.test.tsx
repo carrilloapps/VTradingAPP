@@ -4,7 +4,6 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import ForgotPasswordScreen from '../src/screens/auth/ForgotPasswordScreen';
 import * as AuthContext from '../src/context/AuthContext';
 
-jest.mock('lottie-react-native', () => 'LottieView');
 jest.mock('../src/services/firebase/AnalyticsService', () => ({
   analyticsService: {
     logEvent: jest.fn(),
@@ -35,19 +34,19 @@ describe('ForgotPasswordScreen', () => {
       resetPassword: jest.fn(() => resetPromise),
     } as any);
 
-    const { getByLabelText, getByText, queryByText } = renderScreen();
+    const { getByLabelText, getByText, getByTestId, queryByTestId } = renderScreen();
 
     fireEvent.changeText(getByLabelText('Correo electrónico'), 'test@example.com');
     fireEvent.press(getByText('Enviar Enlace'));
 
     await waitFor(() => {
-      expect(getByText('Cargando')).toBeTruthy();
+      expect(getByTestId('auth-skeleton')).toBeTruthy();
     });
 
     resolveReset();
 
     await waitFor(() => {
-      expect(queryByText('Cargando')).toBeNull();
+      expect(queryByTestId('auth-skeleton')).toBeNull();
     });
   });
 });

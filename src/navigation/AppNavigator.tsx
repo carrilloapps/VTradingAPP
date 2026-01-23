@@ -3,9 +3,8 @@ import { Text, Platform, View, StyleSheet } from 'react-native';
 import { NavigationContainer, DefaultTheme as NavDefaultTheme, DarkTheme as NavDarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { useTheme } from 'react-native-paper';
+import { useTheme, ActivityIndicator } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import LottieView from 'lottie-react-native';
 
 import HomeScreen from '../screens/HomeScreen';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -207,13 +206,13 @@ const AppNavigator = () => {
             borderRadius: theme.roundness * 6,
           }
         ]}>
-          <LottieView
-            source={require('../assets/animations/splash.json')}
-            autoPlay
-            loop
-            style={styles.loadingAnimation}
-            resizeMode="contain"
+          <MaterialCommunityIcons 
+            name="wallet-outline" 
+            size={80} 
+            color={theme.colors.primary} 
+            style={{ marginBottom: 16 }}
           />
+          <ActivityIndicator animating={true} color={theme.colors.primary} size="large" />
           <Text style={[styles.loadingText, { color: theme.colors.onSurface }]}>
             Cargando
           </Text>
@@ -315,14 +314,12 @@ const styles = StyleSheet.create({
   loadingCard: {
     width: '100%',
     maxWidth: 320,
-    paddingVertical: 24,
-    paddingHorizontal: 16,
+    paddingVertical: 32,
+    paddingHorizontal: 24,
     borderWidth: 1,
     alignItems: 'center',
-  },
-  loadingAnimation: {
-    width: 140,
-    height: 140,
+    justifyContent: 'center',
+    elevation: 0,
   },
   loadingText: {
     marginTop: 8,
