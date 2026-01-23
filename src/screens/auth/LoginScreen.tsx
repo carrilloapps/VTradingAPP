@@ -9,6 +9,8 @@ import { useAppTheme } from '../../theme/theme';
 import { AppConfig } from '../../constants/AppConfig';
 import AuthSkeleton from '../../components/auth/AuthSkeleton';
 import CustomButton from '../../components/ui/CustomButton';
+import UnifiedHeader from '../../components/ui/UnifiedHeader';
+import AboutDialog from '../../components/ui/AboutDialog';
 
 const LoginScreen = ({ navigation }: any) => {
   const theme = useAppTheme();
@@ -85,6 +87,7 @@ const LoginScreen = ({ navigation }: any) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [secureTextEntry, setSecureTextEntry] = useState(true);
+  const [aboutVisible, setAboutVisible] = useState(false);
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -165,6 +168,16 @@ const LoginScreen = ({ navigation }: any) => {
         backgroundColor="transparent" 
         translucent 
         barStyle={theme.dark ? 'light-content' : 'dark-content'} 
+      />
+      <UnifiedHeader 
+        variant="section"
+        title=""
+        rightActionIcon="info-outline"
+        onActionPress={() => setAboutVisible(true)}
+        showNotification={false}
+        showAd={false}
+        hideDivider
+        style={{ backgroundColor: theme.colors.background }}
       />
       <KeyboardAvoidingView 
         behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -332,6 +345,10 @@ const LoginScreen = ({ navigation }: any) => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      <AboutDialog 
+        visible={aboutVisible} 
+        onDismiss={() => setAboutVisible(false)} 
+      />
     </View>
   );
 };
@@ -342,7 +359,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flexGrow: 1,
-    justifyContent: 'center',
+    // justifyContent: 'center',
   },
   header: {
     alignItems: 'center',
