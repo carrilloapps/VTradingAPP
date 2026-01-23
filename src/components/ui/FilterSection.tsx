@@ -35,12 +35,18 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   const renderChip = (option: FilterOption) => {
     const isSelected = selectedValue === option.value;
     
+    // Determine content color based on selection state and theme
+    // If selected, use onPrimary. If unselected, use option.color or onSurfaceVariant.
+    const contentColor = isSelected 
+      ? theme.colors.onPrimary 
+      : (option.color || theme.colors.onSurfaceVariant);
+
     return (
       <Chip
         key={option.value}
         selected={isSelected}
-        icon={option.icon ? ({ size, color }) => (
-          <MaterialIcons name={option.icon!} size={size} color={color} />
+        icon={option.icon ? ({ size }) => (
+          <MaterialIcons name={option.icon!} size={size} color={contentColor} />
         ) : undefined}
         onPress={() => {
           // Optional: Add animation on selection if desired
@@ -54,10 +60,10 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         ]}
         textStyle={
           isSelected 
-            ? [styles.chipTextSelected, { color: theme.colors.onPrimary }]
-            : [styles.chipTextUnselected, { color: option.color || theme.colors.onSurfaceVariant }]
+            ? [styles.chipTextSelected, { color: contentColor }]
+            : [styles.chipTextUnselected, { color: contentColor }]
         }
-        selectedColor={theme.colors.onPrimary}
+        selectedColor={contentColor}
         showSelectedOverlay={true}
         rippleColor={isSelected ? undefined : 'rgba(0,0,0,0.1)'}
       >

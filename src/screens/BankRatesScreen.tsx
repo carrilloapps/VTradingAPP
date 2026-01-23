@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, StyleSheet, FlatList, StatusBar, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, FlatList, StatusBar, ActivityIndicator, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 import LottieView from 'lottie-react-native';
 import LinearGradient from 'react-native-linear-gradient';
@@ -7,10 +7,19 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import BankRateCard from '../components/dashboard/BankRateCard';
 import SearchBar from '../components/ui/SearchBar';
+import FilterSection from '../components/ui/FilterSection';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
 import { useToast } from '../context/ToastContext';
 import { AppTheme } from '../theme/theme';
 import { useNavigation } from '@react-navigation/native';
+
+const isFabricEnabled = !!(globalThis as any).nativeFabricUIManager;
+
+if (Platform.OS === 'android' && !isFabricEnabled) {
+  if (UIManager.setLayoutAnimationEnabledExperimental) {
+    UIManager.setLayoutAnimationEnabledExperimental(true);
+  }
+}
 
 const BankRatesScreen = () => {
   const theme = useTheme<AppTheme>();
@@ -25,6 +34,7 @@ const BankRatesScreen = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortType, setSortType] = useState('relevance'); // relevance, buy_desc, sell_desc, az
   const [officialRate, setOfficialRate] = useState<CurrencyRate | null>(null);
 
   const fetchRates = useCallback(async (isRefresh = false, nextInfo = { page: 1 }) => {
@@ -32,8 +42,8 @@ const BankRatesScreen = () => {
           if (!isRefresh && nextInfo.page === 1) setLoading(true);
           if (!isRefresh && nextInfo.page > 1) setLoadingMore(true);
 
-          // Fetch Bank Rates
-          const { rates, pagination } = await CurrencyService.getBankRates(nextInfo.page, 15);
+          // Fetch Bank Rates - Increased limit to get more data for sorting
+          const { rates, pagination } = await CurrencyService.getBankRates(nextInfo.page, 50);
           
           // Fetch Official BCV Rate (only on first load or refresh)
           if (isRefresh || nextInfo.page === 1) {
@@ -85,16 +95,42 @@ const BankRatesScreen = () => {
       }
   }, [loading, loadingMore, hasMore, page, fetchRates, searchQuery]);
 
-  // Filter rates based on search query
+  // Filter and Sort rates
   const filteredRates = useMemo(() => {
-      if (!searchQuery) return bankRates;
-      const query = searchQuery.toLowerCase();
-      return bankRates.filter(rate => 
-          rate.name.toLowerCase().includes(query) || 
-          rate.code.toLowerCase().includes(query) ||
-          (rate.source && rate.source.toLowerCase().includes(query))
-      );
-  }, [bankRates, searchQuery]);
+      let result = [...bankRates];
+
+      // Filter by query
+      if (searchQuery) {
+          const query = searchQuery.toLowerCase();
+          result = result.filter(rate => 
+              rate.name.toLowerCase().includes(query) || 
+              rate.code.toLowerCase().includes(query) ||
+              (rate.source && rate.source.toLowerCase().includes(query))
+          );
+      }
+
+      // Sort
+      switch (sortType) {
+          case 'user_sell': // A vender (High Buy Price)
+              result.sort((a, b) => (b.buyValue || 0) - (a.buyValue || 0));
+              break;
+          case 'user_buy': // A comprar (Low Sell Price)
+              result.sort((a, b) => {
+                  const valA = a.sellValue || Infinity;
+                  const valB = b.sellValue || Infinity;
+                  return valA - valB;
+              });
+              break;
+          case 'az':
+              result.sort((a, b) => a.name.localeCompare(b.name));
+              break;
+          default:
+              // relevance/default order from API
+              break;
+      }
+
+      return result;
+  }, [bankRates, searchQuery, sortType]);
 
   // Find BCV rate if available (assuming it might be in the list or we mock it for the UI)
   const bcvRate = useMemo(() => {
@@ -199,8 +235,27 @@ const BankRatesScreen = () => {
 
           <View style={styles.listHeader}>
               <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>COTIZACIONES BANCARIAS</Text>
-              <Text style={[styles.sectionSubtitle, { color: theme.colors.onSurfaceVariant }]}>VES/USD</Text>
+              <Text style={[styles.sectionSubtitle, { color: theme.colors.primary }]}>VES/USD</Text>
           </View>
+          
+          <FilterSection 
+              options={[
+                { label: 'A-Z', value: 'az' },
+                { label: 'A vender', value: 'user_sell', icon: 'trending-up', color: theme.colors.trendUp },
+                { label: 'A comprar', value: 'user_buy', icon: 'trending-down', color: theme.colors.trendDown },
+              ]}
+              selectedValue={sortType}
+              onSelect={(value) => {
+                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                setSortType(value);
+              }}
+              visible={true}
+              mode="scroll"
+              style={{ 
+                marginBottom: 16,
+                marginTop: -8,
+              }}
+          />
       </View>
   );
 
@@ -255,6 +310,7 @@ const BankRatesScreen = () => {
             onEndReachedThreshold={0.5}
             ListHeaderComponent={renderHeader}
             ListFooterComponent={renderFooter}
+            showsVerticalScrollIndicator={false}
             ListEmptyComponent={
                 <View style={styles.centerContainer}>
                     <Text style={{ color: theme.colors.onSurfaceVariant }}>No hay tasas disponibles</Text>
