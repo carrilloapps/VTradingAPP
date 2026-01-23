@@ -10,6 +10,7 @@ import SearchBar from '../../components/ui/SearchBar';
 import FilterSection from '../../components/ui/FilterSection';
 import CustomButton from '../../components/ui/CustomButton';
 import CustomDialog from '../../components/ui/CustomDialog';
+import AddAlertSkeleton from '../../components/settings/AddAlertSkeleton';
 import { useAppTheme } from '../../theme/theme';
 import { CurrencyService } from '../../services/CurrencyService';
 import { StocksService } from '../../services/StocksService';
@@ -45,6 +46,24 @@ const AddAlertScreen = ({ route }: Props) => {
   const [selectedCategory, setSelectedCategory] = useState<'Todas' | 'Divisas' | 'Cripto' | 'Acciones'>('Todas');
   const [items, setItems] = useState<SymbolItem[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const filteredItems = useMemo(() => {
+    return items.filter(item => {
+      // Category Filter
+      if (selectedCategory === 'Divisas' && item.type !== 'Divisa') return false;
+      if (selectedCategory === 'Cripto' && item.type !== 'Cripto') return false;
+      if (selectedCategory === 'Acciones' && item.type !== 'Acción') return false;
+
+      // Search Filter
+      if (!searchQuery) return true;
+      const q = searchQuery.toLowerCase();
+      return (
+        item.symbol.toLowerCase().includes(q) ||
+        item.name.toLowerCase().includes(q) ||
+        item.id.toLowerCase().includes(q)
+      );
+    });
+  }, [items, searchQuery, selectedCategory]);
   
   // Configuration State
   const [selectedItem, setSelectedItem] = useState<SymbolItem | null>(null);
@@ -54,21 +73,8 @@ const AddAlertScreen = ({ route }: Props) => {
   const [deleting, setDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
-  useEffect(() => {
-    loadData();
-  }, []);
+  // Effects moved below
 
-  // Pre-fill if editing
-  useEffect(() => {
-    if (editAlert && items.length > 0) {
-        const item = items.find(i => i.symbol === editAlert.symbol);
-        if (item) {
-            setSelectedItem(item);
-            setTargetPrice(editAlert.target);
-            setCondition(editAlert.condition);
-        }
-    }
-  }, [editAlert, items]);
 
   const loadData = async () => {
     setLoading(true);
@@ -152,23 +158,29 @@ const AddAlertScreen = ({ route }: Props) => {
     }
   };
 
-  const filteredItems = useMemo(() => {
-    return items.filter(item => {
-      // Category Filter
-      if (selectedCategory === 'Divisas' && item.type !== 'Divisa') return false;
-      if (selectedCategory === 'Cripto' && item.type !== 'Cripto') return false;
-      if (selectedCategory === 'Acciones' && item.type !== 'Acción') return false;
+  useEffect(() => {
+    loadData();
+  }, []);
 
-      // Search Filter
-      if (!searchQuery) return true;
-      const q = searchQuery.toLowerCase();
-      return (
-        item.symbol.toLowerCase().includes(q) ||
-        item.name.toLowerCase().includes(q) ||
-        item.id.toLowerCase().includes(q)
-      );
-    });
-  }, [items, searchQuery, selectedCategory]);
+  // Pre-fill if editing
+  useEffect(() => {
+    if (editAlert && items.length > 0) {
+        const item = items.find(i => i.symbol === editAlert.symbol);
+        if (item) {
+            setSelectedItem(item);
+            setTargetPrice(editAlert.target);
+            setCondition(editAlert.condition);
+        }
+    }
+  }, [editAlert, items]);
+
+  if (loading) {
+    return <AddAlertSkeleton />;
+  }
+
+
+
+
 
   const handleSelectItem = (item: SymbolItem) => {
     setSelectedItem(item);
@@ -351,7 +363,7 @@ const AddAlertScreen = ({ route }: Props) => {
       />
       
       {selectedItem ? (
-        <ScrollView contentContainerStyle={[styles.configContainer, { paddingBottom: insets.bottom + 24 }]}>
+        <ScrollView contentContainerStyle={[styles.configContainer, { paddingBottom: insets.bottom + 24 }]} showsVerticalScrollIndicator={false}>
             {/* Target Symbol Card */}
             <View style={[styles.targetCard, { 
                 backgroundColor: theme.colors.elevation.level1,
@@ -532,6 +544,7 @@ const AddAlertScreen = ({ route }: Props) => {
                     keyExtractor={(item) => item.id}
                     renderItem={renderItem}
                     contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 16 }]}
+                    showsVerticalScrollIndicator={false}
                     ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
                     ListEmptyComponent={
                         <View style={styles.centerContainer}>

@@ -275,7 +275,7 @@ const SettingsScreen = () => {
               disabled={alerts.length >= 5}
             >
               <MaterialIcons name="add" size={18} color={theme.colors.primary} />
-              <Text style={[styles.newAlertText, { color: theme.colors.primary }]}>Nueva Alerta</Text>
+              <Text style={[styles.newAlertText, { color: theme.colors.primary }]}>Nueva alerta</Text>
             </TouchableOpacity>
           </View>
           
