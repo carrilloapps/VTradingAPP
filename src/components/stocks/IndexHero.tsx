@@ -39,7 +39,7 @@ const IndexHero: React.FC<IndexHeroProps> = ({
           </View>
 
           <View style={styles.mainValueRow}>
-            <Text variant="displaySmall" style={styles.valueText}>{value}</Text>
+            <Text variant="displaySmall" style={styles.valueText}>Bs. {value}</Text>
             <View style={styles.changeBadge}>
               <MaterialIcons name="trending-up" size={16} color="#6EE7B7" />
               <Text variant="labelLarge" style={styles.changeText}>{changePercent}</Text>
@@ -54,9 +54,9 @@ const IndexHero: React.FC<IndexHeroProps> = ({
               </Text>
             </View>
             <View style={styles.rightAlign}>
-              <Text variant="labelSmall" style={styles.labelSmall}>APERTURA</Text>
+              <Text variant="labelSmall" style={styles.labelSmall}>APERTURA </Text>
               <Text variant="bodyMedium" style={styles.whiteBold}>
-                {opening} <Text variant="labelSmall" style={styles.unitText}>Bs</Text>
+                {opening} <Text variant="labelSmall" style={styles.unitText}>Bs.</Text>
               </Text>
             </View>
           </View>
