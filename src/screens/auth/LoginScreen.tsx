@@ -62,7 +62,7 @@ const LoginScreen = ({ navigation }: any) => {
       // Removed marginBottom as it now only contains title
     },
     forgotPassword: {
-      marginBottom: theme.spacing.s,
+      marginBottom: 0,
     },
   }), [theme]);
 
@@ -170,7 +170,7 @@ const LoginScreen = ({ navigation }: any) => {
             styles.container, 
             themeStyles.container,
             { 
-              paddingTop: theme.spacing.xs,
+              paddingTop: theme.spacing.m,
               paddingBottom: insets.bottom + theme.spacing.xl,
               paddingHorizontal: theme.spacing.xl
             }
@@ -178,10 +178,10 @@ const LoginScreen = ({ navigation }: any) => {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={[styles.header, { marginBottom: theme.spacing.l }]}>
+          <View style={[styles.header, { marginBottom: theme.spacing.xl }]}>
             <AuthLogo 
               size={80} 
-              containerStyle={{ marginBottom: theme.spacing.m }} 
+              containerStyle={{ marginBottom: theme.spacing.s }} 
             />
             <View style={[styles.titleRow, themeStyles.titleRow]}>
               <Text variant="headlineMedium" style={themeStyles.title}>
@@ -193,8 +193,8 @@ const LoginScreen = ({ navigation }: any) => {
             </Text>
           </View>
 
-          <View style={[styles.form, { gap: theme.spacing.s }]}>
-            <View>
+          <View style={styles.form}>
+            <View style={{ marginBottom: -theme.spacing.s }}>
               <TextInput
                 label="Correo electrónico"
                 value={email}
@@ -212,7 +212,7 @@ const LoginScreen = ({ navigation }: any) => {
                 style={styles.input}
                 disabled={isBusy}
               />
-              <HelperText type="error" visible={!!emailError}>
+              <HelperText type="error" visible={!!emailError} style={{ marginBottom: -theme.spacing.xs }}>
                 {emailError}
               </HelperText>
             </View>
@@ -243,7 +243,7 @@ const LoginScreen = ({ navigation }: any) => {
               </HelperText>
             </View>
 
-            <View style={[styles.forgotPassword, themeStyles.forgotPassword]}>
+            <View style={[styles.forgotPassword, themeStyles.forgotPassword, { marginTop: -theme.spacing.s }]}>
               <CustomButton
                 label="¿Olvidaste tu contraseña?"
                 variant="link"
@@ -261,7 +261,7 @@ const LoginScreen = ({ navigation }: any) => {
               fullWidth
             />
 
-            <View style={[styles.divider, { marginVertical: theme.spacing.s }]}>
+            <View style={[styles.divider, { marginVertical: theme.spacing.m }]}>
               <View style={[styles.line, themeStyles.dividerLine]} />
               <Text style={themeStyles.dividerText}>O continúa con</Text>
               <View style={[styles.line, themeStyles.dividerLine]} />
@@ -284,11 +284,11 @@ const LoginScreen = ({ navigation }: any) => {
               loading={isBusy}
               disabled={isBusy}
               fullWidth
-              style={{ marginTop: theme.spacing.s }}
+              style={{ marginTop: theme.spacing.m }}
             />
           </View>
 
-          <View style={[styles.footer, { marginTop: theme.spacing.m }]}>
+          <View style={[styles.footer, { marginTop: theme.spacing.xl }]}>
             <View style={styles.registerContainer}>
               <Text style={themeStyles.footerText}>¿No tienes cuenta?</Text>
               <CustomButton
@@ -299,7 +299,7 @@ const LoginScreen = ({ navigation }: any) => {
               />
             </View>
             
-            <View style={[styles.legal, { marginTop: theme.spacing.s }]}>
+            <View style={[styles.legal, { marginTop: theme.spacing.m }]}>
               <Text variant="bodySmall" style={[themeStyles.legalText, { textAlign: 'center' }]}>
                 Al continuar aceptas nuestras{' '}
                 <Text

@@ -21,7 +21,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
     },
     description: {
       color: theme.colors.onSurfaceVariant,
-      marginBottom: theme.spacing.l,
+      marginBottom: theme.spacing.m,
       textAlign: 'center' as const,
     },
     footerText: {
@@ -40,8 +40,8 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
       // Removed flex direction as it now only contains title
       alignItems: 'center' as const,
       justifyContent: 'center' as const,
-      marginTop: theme.spacing.s,
-      marginBottom: theme.spacing.m,
+      marginTop: 0,
+      marginBottom: theme.spacing.s,
     },
   }), [theme]);
 
@@ -110,7 +110,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
             styles.container, 
             themeStyles.container,
             { 
-              paddingTop: theme.spacing.xs,
+              paddingTop: theme.spacing.m,
               paddingBottom: insets.bottom + theme.spacing.xl,
               paddingHorizontal: theme.spacing.xl
             }
@@ -121,7 +121,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
           <View style={styles.headerContent}>
             <AuthLogo 
               size={80} 
-              containerStyle={{ marginBottom: theme.spacing.m }} 
+              containerStyle={{ marginBottom: theme.spacing.s }} 
             />
             <View style={themeStyles.titleRow}>
               <Text variant="headlineSmall" style={themeStyles.title}>
@@ -133,7 +133,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
             </Text>
           </View>
 
-          <View style={[styles.form, { gap: theme.spacing.s }]}>
+          <View style={[styles.form, { gap: theme.spacing.xs }]}>
             <View>
               <TextInput
                 label="Correo electrónico"
@@ -171,11 +171,10 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
               loading={isBusy}
               disabled={isBusy}
               fullWidth
-              style={{ marginTop: theme.spacing.s }}
             />
           </View>
 
-          <View style={[styles.footer, { marginTop: theme.spacing.m }]}>
+          <View style={[styles.footer, { marginTop: theme.spacing.xl }]}>
             <Text variant="bodyMedium" style={themeStyles.footerText}>
               ¿Recordaste tu contraseña?
             </Text>

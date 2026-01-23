@@ -47,7 +47,7 @@ const RegisterScreen = ({ navigation }: any) => {
     subtitle: {
       color: theme.colors.onSurfaceVariant,
       textAlign: 'center' as const,
-      marginBottom: theme.spacing.m,
+      marginBottom: theme.spacing.l,
     },
   }), [theme]);
 
@@ -160,7 +160,7 @@ const RegisterScreen = ({ navigation }: any) => {
             styles.container, 
             themeStyles.container,
             { 
-              paddingTop: theme.spacing.xs,
+              paddingTop: theme.spacing.m,
               paddingBottom: insets.bottom + theme.spacing.xl,
               paddingHorizontal: theme.spacing.xl
             }
@@ -183,8 +183,8 @@ const RegisterScreen = ({ navigation }: any) => {
             </Text>
           </View>
 
-          <View style={[styles.form, { gap: theme.spacing.s }]}>
-            <View>
+          <View style={styles.form}>
+            <View style={{ marginBottom: -theme.spacing.s }}>
               <TextInput
                 label="Correo electrónico"
                 value={email}
@@ -202,12 +202,12 @@ const RegisterScreen = ({ navigation }: any) => {
                 style={styles.input}
                 disabled={isBusy}
               />
-              <HelperText type="error" visible={!!emailError}>
+              <HelperText type="error" visible={!!emailError} style={{ marginBottom: -theme.spacing.xs }}>
                 {emailError}
               </HelperText>
             </View>
 
-            <View>
+            <View style={{ marginBottom: -theme.spacing.s }}>
               <TextInput
                 label="Contraseña"
                 value={password}
@@ -228,7 +228,7 @@ const RegisterScreen = ({ navigation }: any) => {
                 style={styles.input}
                 disabled={isBusy}
               />
-              <HelperText type="error" visible={!!passwordError}>
+              <HelperText type="error" visible={!!passwordError} style={{ marginBottom: -theme.spacing.xs }}>
                 {passwordError}
               </HelperText>
             </View>
@@ -268,7 +268,7 @@ const RegisterScreen = ({ navigation }: any) => {
               style={{ marginTop: theme.spacing.s }}
             />
 
-            <View style={[styles.divider, { marginVertical: theme.spacing.s }]}>
+            <View style={[styles.divider, { marginVertical: theme.spacing.m }]}>
               <View style={[styles.line, themeStyles.dividerLine]} />
               <Text style={themeStyles.dividerText}>O regístrate con</Text>
               <View style={[styles.line, themeStyles.dividerLine]} />
@@ -285,7 +285,7 @@ const RegisterScreen = ({ navigation }: any) => {
             />
           </View>
 
-          <View style={[styles.footer, { marginTop: theme.spacing.m }]}>
+          <View style={[styles.footer, { marginTop: theme.spacing.xl }]}>
             <View style={styles.loginContainer}>
               <Text style={themeStyles.footerText}>¿Ya tienes una cuenta?</Text>
               <CustomButton
@@ -296,7 +296,7 @@ const RegisterScreen = ({ navigation }: any) => {
               />
             </View>
             
-            <View style={[styles.legal, { marginTop: theme.spacing.s }]}>
+            <View style={[styles.legal, { marginTop: theme.spacing.m }]}>
               <Text variant="bodySmall" style={[themeStyles.legalText, { textAlign: 'center' }]}>
                 Al continuar aceptas nuestras{' '}
                 <Text
