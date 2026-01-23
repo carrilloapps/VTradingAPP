@@ -277,7 +277,7 @@ const AppNavigator = () => {
               component={BankRatesScreen} 
               options={{ 
                 headerShown: false, 
-                animation: 'slide_from_right' 
+                animation: 'default' 
               }} 
             />
             <RootStack.Screen 
@@ -293,7 +293,7 @@ const AppNavigator = () => {
               component={AddAlertScreen} 
               options={{ 
                 headerShown: false, 
-                animation: 'slide_from_bottom' 
+                animation: 'default' 
               }} 
             />
           </>

@@ -45,6 +45,7 @@ const SettingsScreen = () => {
   const [alerts, setAlerts] = useState<UserAlert[]>([]);
   const [pushEnabled, setPushEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
+  const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const loadData = async () => {
@@ -134,34 +135,56 @@ const SettingsScreen = () => {
   };
 
   const toggleAlert = async (id: string, value: boolean) => {
-      const alert = alerts.find(a => a.id === id);
-      if (alert) {
-        // Nos suscribimos al ticker del par, no a la condición específica
-        const topic = getTopicName(alert.symbol);
-        try {
-            if (value) {
-                await fcmService.subscribeToTopic(topic);
-                console.log(`Subscribed to ${topic}`);
-            } else {
-                // Solo desuscribir si no hay otras alertas activas para el mismo símbolo
-                const otherActiveAlerts = alerts.filter(a => 
-                    a.id !== id && a.symbol === alert.symbol && a.isActive
-                );
-                
-                if (otherActiveAlerts.length === 0) {
-                    await fcmService.unsubscribeFromTopic(topic);
-                    console.log(`Unsubscribed from ${topic}`);
-                }
-            }
-        } catch (err) {
-            console.error('FCM Topic Error:', err);
-        }
-      }
+      // Prevent double toggle
+      if (togglingIds.has(id)) return;
 
+      const alert = alerts.find(a => a.id === id);
+      if (!alert) return;
+
+      // Optimistic update
+      const originalAlerts = [...alerts];
       const updated = alerts.map(a => a.id === id ? { ...a, isActive: value } : a);
       setAlerts(updated);
-      await storageService.saveAlerts(updated);
-      handleAction(`Alerta ${value ? 'activada' : 'desactivada'}`);
+
+      // Add to toggling set
+      setTogglingIds(prev => new Set(prev).add(id));
+
+      try {
+        // FCM Logic
+        const topic = getTopicName(alert.symbol);
+        
+        if (value) {
+            await fcmService.subscribeToTopic(topic);
+            console.log(`Subscribed to ${topic}`);
+        } else {
+            // Check if other active alerts exist for the same symbol
+            const otherActiveAlerts = updated.filter(a => 
+                a.id !== id && a.symbol === alert.symbol && a.isActive
+            );
+            
+            if (otherActiveAlerts.length === 0) {
+                await fcmService.unsubscribeFromTopic(topic);
+                console.log(`Unsubscribed from ${topic}`);
+            }
+        }
+        
+        // Persist to storage
+        await storageService.saveAlerts(updated);
+        handleAction(`Alerta ${value ? 'activada' : 'desactivada'}`);
+
+      } catch (err) {
+        console.error('Error toggling alert:', err);
+        // Revert on error
+        setAlerts(originalAlerts);
+        handleAction('Error al actualizar la alerta');
+      } finally {
+        // Remove from toggling set
+        setTogglingIds(prev => {
+            const next = new Set(prev);
+            next.delete(id);
+            return next;
+        });
+      }
   };
 
   const deleteAlert = async (id: string) => {
@@ -187,6 +210,10 @@ const SettingsScreen = () => {
       setAlerts(updated);
       await storageService.saveAlerts(updated);
       handleAction('Alerta eliminada');
+  };
+
+  const handleEditAlert = (alert: UserAlert) => {
+    (navigation as any).navigate('AddAlert', { editAlert: alert });
   };
 
   const handleAddAlert = () => {
@@ -328,6 +355,8 @@ const SettingsScreen = () => {
                           isActive={alert.isActive}
                           onToggle={(v) => toggleAlert(alert.id, v)}
                           onDelete={() => deleteAlert(alert.id)}
+                          onPress={() => handleEditAlert(alert)}
+                          disabled={togglingIds.has(alert.id)}
                           iconName={alert.iconName || 'show-chart'}
                           iconColor={alert.condition === 'above' ? colors.success : colors.error} 
                           iconBgColor={alert.condition === 'above' ? colors.successContainer : colors.errorContainer} 

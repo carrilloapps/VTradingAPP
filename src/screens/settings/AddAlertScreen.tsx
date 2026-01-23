@@ -352,7 +352,7 @@ const AddAlertScreen = ({ route }: Props) => {
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <UnifiedHeader 
-        title={selectedItem ? (editAlert ? "Editar Alerta" : "Configurar Alerta") : "Nueva Alerta"} 
+        title={selectedItem ? (editAlert ? "Editar alerta" : "Configurar alerta") : "Nueva alerta"} 
         onBackPress={() => {
             if (selectedItem && !editAlert) {
                 setSelectedItem(null);
