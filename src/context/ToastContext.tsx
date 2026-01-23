@@ -11,8 +11,9 @@ interface ToastAction {
 
 interface ToastState {
   visible: boolean;
-  message: string;
+  message: string | React.ReactNode;
   title?: string;
+  caption?: string;
   type: ToastType;
   position: 'top' | 'bottom';
   action?: ToastAction;
@@ -22,12 +23,13 @@ interface ShowToastOptions {
   type?: ToastType;
   position?: 'top' | 'bottom';
   title?: string;
+  caption?: string;
   action?: ToastAction;
   duration?: number;
 }
 
 interface ToastContextData {
-  showToast: (message: string, options?: ShowToastOptions | ToastType) => void;
+  showToast: (message: string | React.ReactNode, options?: ShowToastOptions | ToastType) => void;
   hideToast: () => void;
 }
 
@@ -45,10 +47,11 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     position: 'bottom',
   });
 
-  const showToast = useCallback((message: string, options?: ShowToastOptions | ToastType) => {
+  const showToast = useCallback((message: string | React.ReactNode, options?: ShowToastOptions | ToastType) => {
     let type: ToastType = 'info';
     let position: 'top' | 'bottom' = 'bottom';
     let title: string | undefined;
+    let caption: string | undefined;
     let action: ToastAction | undefined;
 
     if (typeof options === 'string') {
@@ -57,10 +60,11 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         type = options.type || 'info';
         position = options.position || 'bottom';
         title = options.title;
+        caption = options.caption;
         action = options.action;
     }
 
-    setToast({ visible: true, message, type, position, title, action });
+    setToast({ visible: true, message, type, position, title, caption, action });
   }, []);
 
   const hideToast = useCallback(() => {
@@ -121,6 +125,7 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           visible={toast.visible}
           message={toast.message}
           title={toast.title}
+          caption={toast.caption}
           type={toast.type}
           onDismiss={hideToast}
         />

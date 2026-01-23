@@ -9,7 +9,8 @@ export type ToastType = 'success' | 'error' | 'info' | 'warning' | 'alert' | 'tr
 interface TopToastProps {
   visible: boolean;
   title?: string;
-  message: string;
+  message: string | React.ReactNode;
+  caption?: string;
   type: ToastType;
   onDismiss: () => void;
   duration?: number;
@@ -19,6 +20,7 @@ const TopToast: React.FC<TopToastProps> = ({
   visible,
   title,
   message,
+  caption,
   type,
   onDismiss,
   duration = 4000,
@@ -152,6 +154,14 @@ const TopToast: React.FC<TopToastProps> = ({
             <Text variant="bodyMedium" style={{ color: colors.textVariant }}>
               {message}
             </Text>
+            {caption && (
+              <View style={{ marginTop: 4, flexDirection: 'row', alignItems: 'center' }}>
+                <MaterialCommunityIcons name="target" size={14} color={colors.textVariant} style={{ marginRight: 4, opacity: 0.8 }} />
+                <Text variant="labelSmall" style={{ color: colors.textVariant, opacity: 0.9 }}>
+                  {caption}
+                </Text>
+              </View>
+            )}
           </View>
           <TouchableOpacity onPress={hide} style={styles.closeButton}>
             <MaterialCommunityIcons name="close" size={20} color={colors.textVariant} style={{ opacity: 0.7 }} />

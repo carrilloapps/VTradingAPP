@@ -1,7 +1,9 @@
 import React, { useEffect } from 'react';
+import { Text } from 'react-native';
 import { fcmService } from '../../services/firebase/FCMService';
 import { useToast } from '../../context/ToastContext';
 import { storageService } from '../../services/StorageService';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 /**
  * Controller to handle foreground FCM messages and display UI feedback
@@ -51,8 +53,22 @@ const NotificationController: React.FC = () => {
           if (triggered) {
              const isUp = alert.condition === 'above';
              const actionVerb = isUp ? 'subió' : 'bajó';
+             // Format: COP/VES -> COP por VES
+             const readableSymbol = symbol.replace('/', ' por ');
              
-             showToast(`El precio ${actionVerb} a ${currentPrice} (Objetivo: ${targetPrice})`, {
+             // Construct rich message with inline icon
+             const richMessage = (
+               <Text>
+                 El precio {actionVerb} a {currentPrice} {readableSymbol}, según tu objetivo de{' '}
+                 <MaterialCommunityIcons 
+                    name={isUp ? 'trending-up' : 'trending-down'} 
+                    size={14} 
+                 />
+                 {' '}{targetPrice} {readableSymbol}
+               </Text>
+             );
+             
+             showToast(richMessage, {
                  title: `Alerta: ${symbol}`,
                  type: isUp ? 'trendUp' : 'trendDown',
                  position: 'top',
