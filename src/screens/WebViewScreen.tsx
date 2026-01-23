@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ActivityIndicator, StatusBar } from 'react-native';
-import { useTheme } from 'react-native-paper';
+import { View, StyleSheet, StatusBar } from 'react-native';
+import { useTheme, ActivityIndicator } from 'react-native-paper';
 import { WebView } from 'react-native-webview';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
@@ -78,8 +78,8 @@ const WebViewScreen = () => {
         />
         
         {isLoading && (
-          <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background }]}>
-            <ActivityIndicator size="large" color={theme.colors.primary} />
+          <View style={[styles.loadingContainer, { backgroundColor: theme.colors.backdrop }]}>
+            <ActivityIndicator animating={true} size="large" color={theme.colors.primary} />
           </View>
         )}
       </View>
