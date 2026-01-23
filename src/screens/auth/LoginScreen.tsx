@@ -295,7 +295,6 @@ const LoginScreen = ({ navigation }: any) => {
                 label="Regístrate"
                 variant="link"
                 onPress={() => navigation.navigate('Register')}
-                style={{ marginLeft: -theme.spacing.s }}
               />
             </View>
             

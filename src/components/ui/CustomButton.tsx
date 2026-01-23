@@ -22,6 +22,7 @@ interface CustomButtonProps {
   style?: ViewStyle;
   labelStyle?: TextStyle;
   fullWidth?: boolean;
+  compact?: boolean;
   testID?: string;
 }
 
@@ -35,6 +36,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   style,
   labelStyle,
   fullWidth = false,
+  compact = false,
   testID,
 }) => {
   const theme = useTheme<AppTheme>();
@@ -118,15 +120,18 @@ const CustomButton: React.FC<CustomButtonProps> = ({
       disabled={disabled || loading}
       buttonColor={getButtonColor()}
       textColor={getTextColor()}
+      compact={compact || variant === 'link'}
+      rippleColor={variant === 'link' ? 'transparent' : undefined}
       style={[
         styles.button,
         fullWidth && styles.fullWidth,
         (variant === 'outlined' || variant === 'outlined-destructive') && { borderColor: getBorderColor() },
+        variant === 'link' && styles.linkButton,
         style
       ]}
       labelStyle={[
         styles.label,
-        variant === 'link' && styles.link,
+        variant === 'link' && styles.linkLabel,
         labelStyle
       ]}
       testID={testID}
@@ -148,8 +153,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     letterSpacing: 0.5,
   },
-  link: {
-    textDecorationLine: 'underline',
+  linkButton: {
+    marginVertical: 0,
+    marginHorizontal: 0,
+    paddingHorizontal: 0,
+    minWidth: 0,
+  },
+  linkLabel: {
+    fontWeight: 'bold',
+    textDecorationLine: 'none',
+    marginHorizontal: 4, // Small margin for links as requested
   }
 });
 

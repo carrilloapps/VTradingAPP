@@ -182,7 +182,6 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
               label="Inicia sesión"
               variant="link"
               onPress={() => navigation.goBack()}
-              style={{ marginLeft: -theme.spacing.s }}
             />
           </View>
         </ScrollView>
