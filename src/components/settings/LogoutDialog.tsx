@@ -12,10 +12,10 @@ const LogoutDialog = ({ visible, onDismiss, onConfirm }: LogoutDialogProps) => {
     <CustomDialog
       visible={visible}
       onDismiss={onDismiss}
-      title="Cerrar Sesión"
+      title="Cerrar sesión"
       content="¿Estás seguro de que deseas cerrar tu sesión? Tendrás que ingresar tus credenciales nuevamente para acceder."
       onConfirm={onConfirm}
-      confirmLabel="Cerrar Sesión"
+      confirmLabel="Cerrar sesión"
       cancelLabel="Cancelar"
       isDestructive={true}
       cancelMode="outlined"

@@ -80,7 +80,7 @@ const LoginScreen = ({ navigation }: any) => {
       // Removed marginBottom as it now only contains title
     },
     forgotPassword: {
-      marginBottom: theme.spacing.m,
+      marginBottom: theme.spacing.s,
     },
   }), [theme]);
 
@@ -188,7 +188,7 @@ const LoginScreen = ({ navigation }: any) => {
             styles.container, 
             themeStyles.container,
             { 
-              paddingTop: theme.spacing.l,
+              paddingTop: theme.spacing.xs,
               paddingBottom: insets.bottom + theme.spacing.xl,
               paddingHorizontal: theme.spacing.xl
             }
@@ -196,7 +196,7 @@ const LoginScreen = ({ navigation }: any) => {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={[styles.header, { marginBottom: theme.spacing.xl }]}>
+          <View style={[styles.header, { marginBottom: theme.spacing.l }]}>
             <View style={themeStyles.logoRow}>
               <Image source={require('../../assets/images/logo.png')} style={[styles.logo, themeStyles.logo]} />
               <View
@@ -218,7 +218,7 @@ const LoginScreen = ({ navigation }: any) => {
             </Text>
           </View>
 
-          <View style={[styles.form, { gap: theme.spacing.m }]}>
+          <View style={[styles.form, { gap: theme.spacing.xs }]}>
             <View>
               <TextInput
                 label="Correo electrónico"
@@ -286,7 +286,7 @@ const LoginScreen = ({ navigation }: any) => {
               fullWidth
             />
 
-            <View style={[styles.divider, { marginVertical: theme.spacing.l }]}>
+            <View style={[styles.divider, { marginVertical: theme.spacing.s }]}>
               <View style={[styles.line, themeStyles.dividerLine]} />
               <Text style={themeStyles.dividerText}>O continúa con</Text>
               <View style={[styles.line, themeStyles.dividerLine]} />
@@ -313,7 +313,7 @@ const LoginScreen = ({ navigation }: any) => {
             />
           </View>
 
-          <View style={[styles.footer, { marginTop: theme.spacing.xl }]}>
+          <View style={[styles.footer, { marginTop: theme.spacing.s }]}>
             <View style={styles.registerContainer}>
               <Text style={themeStyles.footerText}>¿No tienes cuenta?</Text>
               <CustomButton

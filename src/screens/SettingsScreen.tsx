@@ -7,6 +7,7 @@ import { fcmService } from '../services/firebase/FCMService';
 import { useNavigation } from '@react-navigation/native';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import CustomDialog from '../components/ui/CustomDialog';
+import AboutDialog from '../components/ui/AboutDialog';
 import { useThemeContext } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { storageService, UserAlert } from '../services/StorageService';
@@ -449,88 +450,13 @@ const SettingsScreen = () => {
         onSave={saveProfileName}
       />
 
-      <CustomDialog
+      <AboutDialog
         visible={showAboutDialog}
         onDismiss={() => setShowAboutDialog(false)}
-        title="Acerca de"
-        onConfirm={() => setShowAboutDialog(false)}
-        confirmLabel="Cerrar"
-        showCancel={false}
-      >
-        <View style={{ alignItems: 'center', paddingVertical: 0 }}>
-            <Image 
-                source={require('../assets/images/logo.png')} 
-                style={{ width: 64, height: 64, marginBottom: 8, tintColor: colors.primary }} 
-                resizeMode="contain" 
-            />
-            
-            <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: colors.onSurface, textAlign: 'center', marginBottom: 0 }}>
-                {appName || 'VTradingAPP'}
-            </Text>
-            
-            <Text variant="bodyMedium" style={{ color: colors.onSurfaceVariant, marginBottom: 12 }}>
-                Versión {appVersion}
-            </Text>
+        showDeleteAccount={true}
+        onDeleteAccount={handleDeleteAccount}
+      />
 
-            <Text variant="bodySmall" style={{ textAlign: 'center', marginBottom: 16, paddingHorizontal: 16, color: colors.onSurfaceVariant }}>
-                Diseñado para el seguimiento financiero en tiempo real.
-            </Text>
-
-            <View style={styles.aboutLinksContainer}>
-              <View style={[styles.cardContainer, { borderColor: theme.colors.outline, backgroundColor: theme.colors.elevation.level1 }]}>
-                <MenuButton
-                  icon="policy"
-                  label="Políticas de privacidad"
-                  onPress={() => {
-                    openExternalUrl(AppConfig.PRIVACY_POLICY_URL, 'Políticas de privacidad');
-                    setShowAboutDialog(false);
-                  }}
-                />
-                <MenuButton
-                  icon="gavel"
-                  label="Términos y condiciones"
-                  onPress={() => {
-                    openExternalUrl(AppConfig.TERMS_OF_USE_URL, 'Términos y condiciones');
-                    setShowAboutDialog(false);
-                  }}
-                  hasTopBorder
-                />
-                <MenuButton
-                  icon="assignment"
-                  label="Licencias de uso"
-                  onPress={() => {
-                    openExternalUrl(AppConfig.LICENSES_URL, 'Licencias de uso');
-                    setShowAboutDialog(false);
-                  }}
-                  hasTopBorder
-                />
-                <MenuButton
-                  icon="web"
-                  label="Uso de Cookies"
-                  onPress={() => {
-                    openExternalUrl(AppConfig.COOKIES_URL, 'Uso de Cookies');
-                    setShowAboutDialog(false);
-                  }}
-                  hasTopBorder
-                />
-                <MenuButton
-                  icon="delete-forever"
-                  label="Eliminar cuenta"
-                  onPress={() => {
-                    setShowAboutDialog(false);
-                    handleDeleteAccount();
-                  }}
-                  isDanger
-                  hasTopBorder
-                />
-              </View>
-            </View>
-            
-            <Text variant="labelSmall" style={{ color: colors.outline }}>
-                © {new Date().getFullYear()} VTradingAPP
-            </Text>
-        </View>
-      </CustomDialog>
       <CustomDialog
         visible={showDeleteAccountDialog}
         onDismiss={() => setShowDeleteAccountDialog(false)}

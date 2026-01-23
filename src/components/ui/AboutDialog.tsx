@@ -4,17 +4,34 @@ import { Text } from 'react-native-paper';
 import DeviceInfo from 'react-native-device-info';
 import CustomDialog from './CustomDialog';
 import { useAppTheme } from '../../theme/theme';
+import MenuButton from '../settings/MenuButton';
+import { AppConfig } from '../../constants/AppConfig';
+import { useNavigation } from '@react-navigation/native';
 
 interface AboutDialogProps {
   visible: boolean;
   onDismiss: () => void;
+  showDeleteAccount?: boolean;
+  onDeleteAccount?: () => void;
 }
 
-const AboutDialog: React.FC<AboutDialogProps> = ({ visible, onDismiss }) => {
+const AboutDialog: React.FC<AboutDialogProps> = ({ 
+  visible, 
+  onDismiss,
+  showDeleteAccount = false,
+  onDeleteAccount
+}) => {
   const theme = useAppTheme();
+  const navigation = useNavigation();
   const appName = DeviceInfo.getApplicationName();
   const version = DeviceInfo.getVersion();
   const buildNumber = DeviceInfo.getBuildNumber();
+
+  const openExternalUrl = (url: string, title?: string) => {
+    onDismiss();
+    // @ts-ignore
+    navigation.navigate('WebView', { url, title: title || 'Navegador' });
+  };
 
   return (
     <CustomDialog
@@ -29,16 +46,60 @@ const AboutDialog: React.FC<AboutDialogProps> = ({ visible, onDismiss }) => {
       <View style={styles.content}>
         <Image 
           source={require('../../assets/images/logo.png')} 
-          style={styles.logo}
+          style={[styles.logo, { tintColor: theme.colors.primary }]}
         />
-        <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: 'bold' }}>
-          {appName}
+        <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: theme.colors.onSurface, textAlign: 'center', marginBottom: 0 }}>
+          {appName || 'VTradingAPP'}
         </Text>
-        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }}>
-          Versión {version} ({buildNumber})
+        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, marginBottom: 12 }}>
+          Versión {version}
         </Text>
-        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginTop: theme.spacing.l, textAlign: 'center' }}>
-          © {new Date().getFullYear()} VTradingAPP. Todos los derechos reservados.
+        <Text variant="bodySmall" style={{ textAlign: 'center', marginBottom: 16, paddingHorizontal: 16, color: theme.colors.onSurfaceVariant }}>
+          Diseñado para el seguimiento financiero en tiempo real.
+        </Text>
+
+        <View style={styles.aboutLinksContainer}>
+          <View style={[styles.cardContainer, { borderColor: theme.colors.outline, backgroundColor: theme.colors.elevation.level1 }]}>
+            <MenuButton
+              icon="policy"
+              label="Políticas de privacidad"
+              onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL, 'Políticas de privacidad')}
+            />
+            <MenuButton
+              icon="gavel"
+              label="Términos y condiciones"
+              onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL, 'Términos y condiciones')}
+              hasTopBorder
+            />
+            <MenuButton
+              icon="assignment"
+              label="Licencias de uso"
+              onPress={() => openExternalUrl(AppConfig.LICENSES_URL, 'Licencias de uso')}
+              hasTopBorder
+            />
+            <MenuButton
+              icon="web"
+              label="Uso de Cookies"
+              onPress={() => openExternalUrl(AppConfig.COOKIES_URL, 'Uso de Cookies')}
+              hasTopBorder
+            />
+            {showDeleteAccount && onDeleteAccount && (
+              <MenuButton
+                icon="delete-forever"
+                label="Eliminar cuenta"
+                onPress={() => {
+                  onDismiss();
+                  onDeleteAccount();
+                }}
+                isDanger
+                hasTopBorder
+              />
+            )}
+          </View>
+        </View>
+
+        <Text variant="labelSmall" style={{ color: theme.colors.outline }}>
+          © {new Date().getFullYear()} VTradingAPP
         </Text>
       </View>
     </CustomDialog>
@@ -48,13 +109,23 @@ const AboutDialog: React.FC<AboutDialogProps> = ({ visible, onDismiss }) => {
 const styles = StyleSheet.create({
   content: {
     alignItems: 'center',
-    paddingVertical: 8,
+    paddingVertical: 0,
   },
   logo: {
     width: 64,
     height: 64,
     resizeMode: 'contain',
+    marginBottom: 8,
+  },
+  aboutLinksContainer: {
+    width: '100%',
     marginBottom: 16,
+  },
+  cardContainer: {
+    borderRadius: 24,
+    borderWidth: 1,
+    overflow: 'hidden',
+    elevation: 0,
   },
 });
 
