@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, StyleSheet, FlatList, StatusBar, ActivityIndicator, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { View, StyleSheet, FlatList, StatusBar, ActivityIndicator, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 import LottieView from 'lottie-react-native';
 import LinearGradient from 'react-native-linear-gradient';
@@ -30,11 +30,10 @@ const BankRatesScreen = () => {
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [bankRates, setBankRates] = useState<CurrencyRate[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
-  const [sortType, setSortType] = useState('relevance'); // relevance, buy_desc, sell_desc, az
+  const [sortType, setSortType] = useState('az'); // relevance, buy_desc, sell_desc, az
   const [officialRate, setOfficialRate] = useState<CurrencyRate | null>(null);
 
   const fetchRates = useCallback(async (isRefresh = false, nextInfo = { page: 1 }) => {
@@ -42,8 +41,8 @@ const BankRatesScreen = () => {
           if (!isRefresh && nextInfo.page === 1) setLoading(true);
           if (!isRefresh && nextInfo.page > 1) setLoadingMore(true);
 
-          // Fetch Bank Rates - Increased limit to get more data for sorting
-          const { rates, pagination } = await CurrencyService.getBankRates(nextInfo.page, 50);
+          // Fetch Bank Rates - Limit 20 for better infinite scroll experience
+          const { rates, pagination } = await CurrencyService.getBankRates(nextInfo.page, 20);
           
           // Fetch Official BCV Rate (only on first load or refresh)
           if (isRefresh || nextInfo.page === 1) {
@@ -62,12 +61,10 @@ const BankRatesScreen = () => {
 
           setPage(Number(pagination.page));
           setHasMore(Number(pagination.page) < Number(pagination.totalPages));
-          setError(null);
       } catch (err) {
           console.error(err);
           // Only show error toast if it's the first page or refresh
           if (isRefresh || nextInfo.page === 1) {
-             setError('Error al cargar tasas bancarias');
              showToast('Error de conexión', 'error');
           } else {
              showToast('Error al cargar más tasas', 'error');
@@ -85,7 +82,6 @@ const BankRatesScreen = () => {
 
   const onRefresh = useCallback(() => {
       setRefreshing(true);
-      setError(null); // Reset error on refresh
       fetchRates(true, { page: 1 });
   }, [fetchRates]);
 
@@ -235,14 +231,21 @@ const BankRatesScreen = () => {
 
           <View style={styles.listHeader}>
               <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>COTIZACIONES BANCARIAS</Text>
-              <Text style={[styles.sectionSubtitle, { color: theme.colors.primary }]}>VES/USD</Text>
+              <View style={{ 
+                  backgroundColor: theme.colors.secondaryContainer,
+                  paddingHorizontal: 8,
+                  paddingVertical: 2,
+                  borderRadius: 6,
+              }}>
+                  <Text style={[styles.sectionSubtitle, { color: theme.colors.onSecondaryContainer }]}>VES/USD</Text>
+              </View>
           </View>
           
           <FilterSection 
               options={[
                 { label: 'A-Z', value: 'az' },
-                { label: 'A vender', value: 'user_sell', icon: 'trending-up', color: theme.colors.trendUp },
-                { label: 'A comprar', value: 'user_buy', icon: 'trending-down', color: theme.colors.trendDown },
+                { label: 'MENOR', value: 'user_buy', icon: 'trending-down', color: theme.colors.trendDown },
+                { label: 'MAYOR', value: 'user_sell', icon: 'trending-up', color: theme.colors.trendUp },
               ]}
               selectedValue={sortType}
               onSelect={(value) => {

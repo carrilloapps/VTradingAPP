@@ -274,7 +274,7 @@ const ExchangeRatesScreen = () => {
                     <Text style={[styles.tagText, { 
                         color: theme.colors.onPrimaryContainer 
                     }]}>
-                        VER BANCOS
+                        VER MESAS DE CAMBIO
                     </Text>
                     <MaterialIcons name="arrow-forward" size={12} color={theme.colors.onPrimaryContainer} />
                   </TouchableOpacity>
