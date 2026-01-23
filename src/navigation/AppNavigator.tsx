@@ -24,8 +24,10 @@ import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
 import WebViewScreen from '../screens/WebViewScreen';
+import OnboardingScreen from '../screens/OnboardingScreen';
 import ModernTabBar from '../components/navigation/ModernTabBar';
 import { navigationRef } from './NavigationRef';
+import { storageService } from '../services/StorageService';
 
 // Root Stack that includes Splash
 const RootStack = createNativeStackNavigator();
@@ -153,9 +155,20 @@ function MainTabNavigator() {
 const AppNavigator = () => {
   const theme = useTheme();
   const { isDark } = useThemeContext();
-  const { user, isLoading } = useAuth();
+  const { user, isLoading: authLoading } = useAuth();
+  const [isReady, setIsReady] = React.useState(false);
+  const [showOnboarding, setShowOnboarding] = React.useState(false);
   const routeNameRef = React.useRef<string | undefined>(undefined);
   
+  React.useEffect(() => {
+    const checkOnboarding = async () => {
+      const hasSeen = await storageService.getHasSeenOnboarding();
+      setShowOnboarding(!hasSeen);
+      setIsReady(true);
+    };
+    checkOnboarding();
+  }, []);
+
   const navigationTheme = isDark ? NavDarkTheme : NavDefaultTheme;
   const themeWithPaper = {
     ...navigationTheme,
@@ -169,7 +182,7 @@ const AppNavigator = () => {
     },
   };
 
-  if (isLoading) {
+  if (authLoading || !isReady) {
     return (
       <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background }]}>
         <View style={[
@@ -214,7 +227,11 @@ const AppNavigator = () => {
       }}
     >
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
-        {user ? (
+        {showOnboarding ? (
+          <RootStack.Screen name="Onboarding">
+            {(props) => <OnboardingScreen {...props} onFinish={() => setShowOnboarding(false)} />}
+          </RootStack.Screen>
+        ) : user ? (
           <>
             <RootStack.Screen name="Main" component={MainTabNavigator} />
             <RootStack.Screen 

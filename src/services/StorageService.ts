@@ -6,6 +6,7 @@ const KEYS = {
   NOTIFICATIONS: 'user_notifications',
   WIDGET_CONFIG: 'widget_config',
   WIDGET_REFRESH_META: 'widget_refresh_meta',
+  HAS_SEEN_ONBOARDING: 'has_seen_onboarding',
 };
 
 export interface StoredNotification {
@@ -149,6 +150,24 @@ class StorageService {
       await AsyncStorage.setItem(KEYS.WIDGET_REFRESH_META, JSON.stringify(meta));
     } catch (e) {
       console.error('Failed to save widget refresh meta', e);
+    }
+  }
+
+  async getHasSeenOnboarding(): Promise<boolean> {
+    try {
+      const data = await AsyncStorage.getItem(KEYS.HAS_SEEN_ONBOARDING);
+      return data === 'true';
+    } catch (e) {
+      console.error('Failed to load onboarding status', e);
+      return false;
+    }
+  }
+
+  async setHasSeenOnboarding(value: boolean) {
+    try {
+      await AsyncStorage.setItem(KEYS.HAS_SEEN_ONBOARDING, String(value));
+    } catch (e) {
+      console.error('Failed to save onboarding status', e);
     }
   }
 }
