@@ -9,6 +9,7 @@ export type ButtonVariant =
   | 'outlined'     // Outlined, Primary Color
   | 'ghost'        // Text only, Primary Color
   | 'destructive'  // Contained, Error Color
+  | 'outlined-destructive' // Outlined, Error Color
   | 'link';        // Text only, Link style (Underlined optional)
 
 interface CustomButtonProps {
@@ -46,6 +47,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
       case 'destructive':
         return 'contained';
       case 'outlined':
+      case 'outlined-destructive':
         return 'outlined';
       case 'ghost':
       case 'link':
@@ -66,6 +68,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
       case 'destructive':
         return theme.colors.error;
       case 'outlined':
+      case 'outlined-destructive':
       case 'ghost':
       case 'link':
         return 'transparent';
@@ -83,6 +86,8 @@ const CustomButton: React.FC<CustomButtonProps> = ({
         return theme.colors.onSecondaryContainer;
       case 'destructive':
         return theme.colors.onError;
+      case 'outlined-destructive':
+        return theme.colors.error;
       case 'outlined':
         return theme.colors.primary; // Outlined usually primary
       case 'ghost':
@@ -97,6 +102,9 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   const getBorderColor = () => {
     if (variant === 'outlined') {
         return disabled ? theme.colors.onSurfaceDisabled : theme.colors.primary;
+    }
+    if (variant === 'outlined-destructive') {
+        return disabled ? theme.colors.onSurfaceDisabled : theme.colors.error;
     }
     return 'transparent';
   };
@@ -113,7 +121,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
       style={[
         styles.button,
         fullWidth && styles.fullWidth,
-        variant === 'outlined' && { borderColor: getBorderColor() },
+        (variant === 'outlined' || variant === 'outlined-destructive') && { borderColor: getBorderColor() },
         style
       ]}
       labelStyle={[

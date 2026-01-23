@@ -353,6 +353,7 @@ const AddAlertScreen = ({ route }: Props) => {
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <UnifiedHeader 
         title={selectedItem ? (editAlert ? "Editar alerta" : "Configurar alerta") : "Nueva alerta"} 
+        showNotification={false}
         onBackPress={() => {
             if (selectedItem && !editAlert) {
                 setSelectedItem(null);
@@ -465,18 +466,18 @@ const AddAlertScreen = ({ route }: Props) => {
                     <TouchableOpacity 
                         style={[
                             styles.conditionOption, 
-                            condition === 'above' && { backgroundColor: theme.colors.secondaryContainer }
+                            condition === 'above' && { backgroundColor: theme.colors.success }
                         ]}
                         onPress={() => setCondition('above')}
                     >
                         <MaterialCommunityIcons 
                             name="arrow-top-right" 
                             size={20} 
-                            color={condition === 'above' ? theme.colors.onSecondaryContainer : theme.colors.onSurfaceVariant} 
+                            color={condition === 'above' ? theme.colors.onPrimary : theme.colors.onSurfaceVariant} 
                         />
                         <Text style={{ 
                             marginLeft: 8,
-                            color: condition === 'above' ? theme.colors.onSecondaryContainer : theme.colors.onSurfaceVariant,
+                            color: condition === 'above' ? theme.colors.onPrimary : theme.colors.onSurfaceVariant,
                             fontWeight: condition === 'above' ? 'bold' : 'normal'
                         }}>Mayor que</Text>
                     </TouchableOpacity>
@@ -486,18 +487,18 @@ const AddAlertScreen = ({ route }: Props) => {
                     <TouchableOpacity 
                         style={[
                             styles.conditionOption, 
-                            condition === 'below' && { backgroundColor: theme.colors.secondaryContainer }
+                            condition === 'below' && { backgroundColor: theme.colors.error }
                         ]}
                         onPress={() => setCondition('below')}
                     >
                         <MaterialCommunityIcons 
                             name="arrow-bottom-right" 
                             size={20} 
-                            color={condition === 'below' ? theme.colors.onSecondaryContainer : theme.colors.onSurfaceVariant} 
+                            color={condition === 'below' ? theme.colors.onError : theme.colors.onSurfaceVariant} 
                         />
                         <Text style={{ 
                             marginLeft: 8,
-                            color: condition === 'below' ? theme.colors.onSecondaryContainer : theme.colors.onSurfaceVariant,
+                            color: condition === 'below' ? theme.colors.onError : theme.colors.onSurfaceVariant,
                             fontWeight: condition === 'below' ? 'bold' : 'normal'
                         }}>Menor que</Text>
                     </TouchableOpacity>
@@ -517,18 +518,18 @@ const AddAlertScreen = ({ route }: Props) => {
                     loading={saving}
                     disabled={!targetPrice || saving || deleting}
                     icon={editAlert ? "content-save-outline" : "bell-plus-outline"}
-                    label={editAlert ? "Guardar Cambios" : "Crear Alerta"}
+                    label={editAlert ? "Guardar cambios" : "Crear alerta"}
                     style={{ marginBottom: 12 }}
                 />
                 
                 {editAlert && (
                     <CustomButton
-                        variant="destructive"
+                        variant="outlined-destructive"
                         onPress={() => setShowDeleteDialog(true)}
                         loading={deleting}
                         disabled={saving || deleting}
                         icon="trash-can-outline"
-                        label="Eliminar Alerta"
+                        label="Eliminar alerta"
                     />
                 )}
             </View>
