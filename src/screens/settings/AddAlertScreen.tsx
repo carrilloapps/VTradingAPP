@@ -271,67 +271,71 @@ const AddAlertScreen = ({ route }: Props) => {
       }
   };
 
-  const renderItem = ({ item }: { item: SymbolItem }) => (
-    <TouchableOpacity 
-      onPress={() => handleSelectItem(item)}
-      style={[
-        styles.itemCard, 
-        { 
-            backgroundColor: theme.colors.elevation.level1,
-            borderColor: theme.colors.outline,
-        }
-      ]}
-    >
-      <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-        <View style={{ 
-            width: 40, height: 40, 
-            borderRadius: 20, 
-            backgroundColor: theme.colors.secondaryContainer,
-            alignItems: 'center', justifyContent: 'center',
-            marginRight: 12
-        }}>
-            <MaterialCommunityIcons 
-                name={item.iconName || 'currency-usd'} 
-                size={24} 
-                color={theme.colors.onSecondaryContainer} 
-            />
+  const renderItem = ({ item }: { item: SymbolItem }) => {
+    const isNeutral = Math.abs(item.changePercent) < 0.01;
+
+    return (
+      <TouchableOpacity 
+        onPress={() => handleSelectItem(item)}
+        style={[
+          styles.itemCard, 
+          { 
+              backgroundColor: theme.colors.elevation.level1,
+              borderColor: theme.colors.outline,
+          }
+        ]}
+      >
+        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+          <View style={{ 
+              width: 40, height: 40, 
+              borderRadius: 20, 
+              backgroundColor: theme.colors.secondaryContainer,
+              alignItems: 'center', justifyContent: 'center',
+              marginRight: 12
+          }}>
+              <MaterialCommunityIcons 
+                  name={item.iconName || 'currency-usd'} 
+                  size={24} 
+                  color={theme.colors.onSecondaryContainer} 
+              />
+          </View>
+          <View>
+              <Text variant="titleMedium" style={{ fontWeight: 'bold' }}>{item.symbol}</Text>
+              <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{item.name}</Text>
+          </View>
         </View>
-        <View>
-            <Text variant="titleMedium" style={{ fontWeight: 'bold' }}>{item.symbol}</Text>
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{item.name}</Text>
+        
+        <View style={{ alignItems: 'flex-end', gap: 4, minWidth: 80 }}>
+          <Text variant="bodyMedium" style={{ fontWeight: 'bold', fontSize: 13 }}>
+              {item.price < 1 ? item.price.toFixed(4) : item.price.toFixed(2)}
+          </Text>
+          <View style={{ 
+              flexDirection: 'row', 
+              alignItems: 'center',
+              backgroundColor: isNeutral 
+                  ? (theme.dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)')
+                  : (item.changePercent > 0 ? theme.colors.successContainer : theme.colors.errorContainer),
+              paddingHorizontal: 6,
+              paddingVertical: 2,
+              borderRadius: 4
+          }}>
+              <MaterialCommunityIcons 
+                  name={isNeutral ? 'minus' : (item.changePercent > 0 ? 'arrow-up' : 'arrow-down')} 
+                  size={12} 
+                  color={isNeutral ? theme.colors.onSurfaceVariant : (item.changePercent > 0 ? theme.colors.trendUp : theme.colors.trendDown)} 
+              />
+              <Text style={{ 
+                  fontSize: 10, 
+                  fontWeight: 'bold',
+                  color: isNeutral ? theme.colors.onSurfaceVariant : (item.changePercent > 0 ? theme.colors.trendUp : theme.colors.trendDown) 
+              }}>
+                  {Math.abs(item.changePercent).toFixed(2)}%
+              </Text>
+          </View>
         </View>
-      </View>
-      
-      <View style={{ alignItems: 'flex-end', gap: 4, minWidth: 80 }}>
-        <Text variant="bodyMedium" style={{ fontWeight: 'bold', fontSize: 13 }}>
-            {item.price < 1 ? item.price.toFixed(4) : item.price.toFixed(2)}
-        </Text>
-        <View style={{ 
-            flexDirection: 'row', 
-            alignItems: 'center',
-            backgroundColor: item.changePercent === 0 
-                ? theme.colors.neutralContainer 
-                : (item.changePercent > 0 ? theme.colors.successContainer : theme.colors.errorContainer),
-            paddingHorizontal: 6,
-            paddingVertical: 2,
-            borderRadius: 4
-        }}>
-            <MaterialCommunityIcons 
-                name={item.changePercent === 0 ? 'minus' : (item.changePercent > 0 ? 'arrow-up' : 'arrow-down')} 
-                size={12} 
-                color={item.changePercent === 0 ? theme.colors.neutral : (item.changePercent > 0 ? theme.colors.trendUp : theme.colors.trendDown)} 
-            />
-            <Text style={{ 
-                fontSize: 10, 
-                fontWeight: 'bold',
-                color: item.changePercent === 0 ? theme.colors.neutral : (item.changePercent > 0 ? theme.colors.trendUp : theme.colors.trendDown) 
-            }}>
-                {Math.abs(item.changePercent).toFixed(2)}%
-            </Text>
-        </View>
-      </View>
-    </TouchableOpacity>
-  );
+      </TouchableOpacity>
+    );
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -396,16 +400,19 @@ const AddAlertScreen = ({ route }: Props) => {
                         const target = parseFloat(targetPrice) || 0;
                         if (target > 0) {
                             const diff = ((target - current) / current) * 100;
+                            const isDiffNeutral = Math.abs(diff) < 0.01;
                             
-                            let color = theme.colors.neutral;
+                            let color = theme.colors.onSurfaceVariant;
                             let text = 'Igual al precio actual';
                             
-                            if (diff > 0) {
-                                color = theme.colors.trendUp;
-                                text = `+${diff.toFixed(2)}% desde el precio actual`;
-                            } else if (diff < 0) {
-                                color = theme.colors.trendDown;
-                                text = `${diff.toFixed(2)}% desde el precio actual`;
+                            if (!isDiffNeutral) {
+                                if (diff > 0) {
+                                    color = theme.colors.trendUp;
+                                    text = `+${diff.toFixed(2)}% desde el precio actual`;
+                                } else {
+                                    color = theme.colors.trendDown;
+                                    text = `${diff.toFixed(2)}% desde el precio actual`;
+                                }
                             }
 
                             return (
