@@ -164,15 +164,14 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                        trendVal = isUp ? 'up' : 'down';
                        
                        if (finalTitle === 'Notificación') {
-                           finalTitle = `Alerta de Precio: ${symbol}`;
+                           finalTitle = `Alerta de ${isUp ? 'subida' : 'bajada'} para ${symbol}`;
                        }
                        
                        // Construct precise body
                        const actionVerb = isUp ? 'subió' : 'bajó';
-                       const emoji = isUp ? '📈' : '📉';
                        const targetPrice = alert.target;
                        
-                       finalBody = `La tasa ha ${actionVerb} a ${price} (Objetivo: ${targetPrice})`;
+                       finalBody = `El precio ${actionVerb} a ${price} (Objetivo: ${targetPrice})`;
                    } else {
                        // Price update received but no alert condition met -> Ignore it
                        shouldAdd = false;

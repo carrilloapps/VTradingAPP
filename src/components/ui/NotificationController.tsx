@@ -69,7 +69,7 @@ const NotificationController: React.FC = () => {
              );
              
              showToast(richMessage, {
-                 title: `Alerta: ${symbol}`,
+                 title: `Alerta de ${isUp ? 'subida' : 'bajada'} para ${symbol}`,
                  type: isUp ? 'trendUp' : 'trendDown',
                  position: 'top',
                  duration: 6000
