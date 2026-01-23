@@ -13,8 +13,6 @@ import { StocksService, StockData } from '../services/StocksService';
 import { useToast } from '../context/ToastContext';
 import StocksSkeleton from '../components/stocks/StocksSkeleton';
 
-const FILTERS = ['Todos', 'Banca', 'Industria', 'Servicios', 'Seguros'];
-
 const StocksScreen = () => {
   const theme = useTheme();
   const { stockFilters, setStockFilters } = useFilters();
@@ -22,6 +20,7 @@ const StocksScreen = () => {
   const { showToast } = useToast();
 
   const [stocks, setStocks] = useState<StockData[]>([]);
+  const [categories, setCategories] = useState<string[]>(['Todos']);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [indexData, setIndexData] = useState<any>(null);
@@ -31,6 +30,11 @@ const StocksScreen = () => {
   useEffect(() => {
     const unsubscribe = StocksService.subscribe((data) => {
         setStocks(data);
+        
+        // Extract unique categories from data
+        const uniqueCats = Array.from(new Set(data.map(s => s.category))).filter(Boolean).sort();
+        setCategories(['Todos', ...uniqueCats]);
+
         setIsMarketOpen(StocksService.isMarketOpen());
         setLoading(false);
     });
@@ -69,7 +73,7 @@ const StocksScreen = () => {
   }, [showToast]);
 
   const handleLoadMore = async () => {
-      if (loadingMore) return;
+      if (loadingMore || !StocksService.hasMorePages()) return;
       setLoadingMore(true);
       await StocksService.loadMore();
       setLoadingMore(false);
@@ -81,25 +85,7 @@ const StocksScreen = () => {
       const matchesSearch = stock.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
                             stock.symbol.toLowerCase().includes(searchQuery.toLowerCase());
       
-      let matchesCategory = true;
-      if (activeFilter !== 'Todos') {
-        const filterLower = activeFilter.toLowerCase();
-        
-        // Mapeo de palabras clave para cubrir variaciones (ej: Banca vs Banco)
-        const categoryKeywords: Record<string, string[]> = {
-            'banca': ['banca', 'banco', 'financiero', 'b.o.d', 'bnc', 'bbva', 'provincial', 'mercantil', 'plaza', 'venezuela', 'tesoro', 'bicentenario', 'caroni', 'exterior', 'fondo común', 'banesco', 'activo', 'agrícola', 'sofitasa', 'bancaribe', 'bancamiga'],
-            'industria': ['industria', 'industrial', 'manuf', 'sivensa', 'fvi', 'corimon', 'envases', 'proagro', 'ron', 'santa teresa', 'cerámica', 'dominguez', 'vencemos', 'mampa', 'telares'],
-            'servicios': ['servicio', 'cantv', 'electricidad', 'netuno', 'inter', 'bolsa'],
-            'seguros': ['seguros', 'aseguradora', 'seg', 'horizonte', 'piramide', 'mercantil seg', 'estar'],
-        };
-
-        const keywords = categoryKeywords[filterLower] || [filterLower];
-
-        matchesCategory = keywords.some(kw => 
-            stock.name.toLowerCase().includes(kw) || 
-            stock.symbol.toLowerCase().includes(kw)
-        );
-      }
+      const matchesCategory = activeFilter === 'Todos' || stock.category === activeFilter;
       
       return matchesSearch && matchesCategory;
     });
@@ -140,7 +126,7 @@ const StocksScreen = () => {
 
         {/* Filters */}
         <FilterSection
-          options={FILTERS.map(f => ({ label: f, value: f }))}
+          options={categories.map((f: string) => ({ label: f, value: f }))}
           selectedValue={activeFilter}
           onSelect={(value) => setStockFilters({ category: value })}
           mode="scroll"

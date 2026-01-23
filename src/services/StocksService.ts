@@ -12,6 +12,7 @@ export interface StockData {
   volume?: string;
   opening?: number;
   iconUrl?: string; // Add iconUrl support
+  category: string;
 }
 
 interface ApiStock {
@@ -28,6 +29,7 @@ interface ApiStock {
       amount: number;
   };
   openingPrice?: number;
+  category?: string; // Changed from sector to category
   meta?: {
     iconUrl?: string;
   };
@@ -83,6 +85,10 @@ export class StocksService {
   
   static isMarketOpen(): boolean {
       return this.marketOpen;
+  }
+
+  static hasMorePages(): boolean {
+      return this.currentPage < this.totalPages;
   }
 
   private static notifyListeners(stocks: StockData[]) {
@@ -145,7 +151,8 @@ export class StocksService {
       color: this.getColorForStock(item.symbol),
       volume: volumeStr,
       opening: this.parsePrice(item.openingPrice),
-      iconUrl: item.meta?.iconUrl
+      iconUrl: item.meta?.iconUrl,
+      category: item.category || 'Otros'
     };
   }
 
@@ -235,8 +242,8 @@ export class StocksService {
          // Fallback logic remains for critical failures on empty state
          console.warn("Using fallback data due to API failure");
          const fallbackStocks: StockData[] = [
-            { id: '1', symbol: 'BNC', name: 'Banco Nal. de Crédito', price: 0.0035, changePercent: 2.10, initials: 'BNC', color: 'emerald' },
-            { id: '2', symbol: 'MVZ.A', name: 'Mercantil Serv. Fin.', price: 145.50, changePercent: -0.50, initials: 'MVZ', color: 'blue' }
+            { id: '1', symbol: 'BNC', name: 'Banco Nal. de Crédito', price: 0.0035, changePercent: 2.10, initials: 'BNC', color: 'emerald', category: 'Banca' },
+            { id: '2', symbol: 'MVZ.A', name: 'Mercantil Serv. Fin.', price: 145.50, changePercent: -0.50, initials: 'MVZ', color: 'blue', category: 'Banca' }
          ];
          this.notifyListeners(fallbackStocks);
          return fallbackStocks;
