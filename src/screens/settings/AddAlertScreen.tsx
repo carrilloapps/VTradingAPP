@@ -309,20 +309,22 @@ const AddAlertScreen = ({ route }: Props) => {
         <View style={{ 
             flexDirection: 'row', 
             alignItems: 'center',
-            backgroundColor: item.changePercent >= 0 ? theme.colors.successContainer : theme.colors.errorContainer,
+            backgroundColor: item.changePercent === 0 
+                ? theme.colors.neutralContainer 
+                : (item.changePercent > 0 ? theme.colors.successContainer : theme.colors.errorContainer),
             paddingHorizontal: 6,
             paddingVertical: 2,
             borderRadius: 4
         }}>
             <MaterialCommunityIcons 
-                name={item.changePercent >= 0 ? 'arrow-up' : 'arrow-down'} 
+                name={item.changePercent === 0 ? 'minus' : (item.changePercent > 0 ? 'arrow-up' : 'arrow-down')} 
                 size={12} 
-                color={item.changePercent >= 0 ? theme.colors.trendUp : theme.colors.trendDown} 
+                color={item.changePercent === 0 ? theme.colors.neutral : (item.changePercent > 0 ? theme.colors.trendUp : theme.colors.trendDown)} 
             />
             <Text style={{ 
                 fontSize: 10, 
                 fontWeight: 'bold',
-                color: item.changePercent >= 0 ? theme.colors.trendUp : theme.colors.trendDown 
+                color: item.changePercent === 0 ? theme.colors.neutral : (item.changePercent > 0 ? theme.colors.trendUp : theme.colors.trendDown) 
             }}>
                 {Math.abs(item.changePercent).toFixed(2)}%
             </Text>
@@ -394,14 +396,25 @@ const AddAlertScreen = ({ route }: Props) => {
                         const target = parseFloat(targetPrice) || 0;
                         if (target > 0) {
                             const diff = ((target - current) / current) * 100;
-                            const isPositive = diff > 0;
+                            
+                            let color = theme.colors.neutral;
+                            let text = 'Igual al precio actual';
+                            
+                            if (diff > 0) {
+                                color = theme.colors.trendUp;
+                                text = `+${diff.toFixed(2)}% desde el precio actual`;
+                            } else if (diff < 0) {
+                                color = theme.colors.trendDown;
+                                text = `${diff.toFixed(2)}% desde el precio actual`;
+                            }
+
                             return (
                                 <Text style={{ 
                                     marginTop: 8, 
-                                    color: isPositive ? theme.colors.trendUp : theme.colors.trendDown,
+                                    color: color,
                                     fontWeight: 'bold'
                                 }}>
-                                    {isPositive ? '+' : ''}{diff.toFixed(2)}% desde el precio actual
+                                    {text}
                                 </Text>
                             );
                         }
