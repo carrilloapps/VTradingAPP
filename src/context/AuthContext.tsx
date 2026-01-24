@@ -104,12 +104,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const googleSignIn = async () => {
     try {
       await authService.signInWithGoogle();
+      await analyticsService.logLogin('google');
       showToast('Autenticado con Google', 'success');
     } catch (e: any) {
-      observabilityService.captureError(e);
       if (e.code === -5) { // SIGN_IN_CANCELLED
          return;
       }
+      observabilityService.captureError(e);
       showToast(e.message, 'error');
       throw e;
     }

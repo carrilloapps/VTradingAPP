@@ -8,7 +8,10 @@ const KEYS = {
   WIDGET_CONFIG: 'widget_config',
   WIDGET_REFRESH_META: 'widget_refresh_meta',
   HAS_SEEN_ONBOARDING: 'has_seen_onboarding',
+  ANALYTICS_CONSENT: 'analytics_consent_status',
 };
+
+export type ConsentStatus = 'granted' | 'denied' | 'pending';
 
 export interface StoredNotification {
   id: string;
@@ -175,6 +178,24 @@ class StorageService {
     } catch (e) {
       observabilityService.captureError(e);
       // Failed to save onboarding status
+    }
+  }
+
+  async getAnalyticsConsent(): Promise<ConsentStatus> {
+    try {
+      const data = await AsyncStorage.getItem(KEYS.ANALYTICS_CONSENT);
+      return (data as ConsentStatus) || 'pending';
+    } catch (e) {
+      observabilityService.captureError(e);
+      return 'pending';
+    }
+  }
+
+  async saveAnalyticsConsent(status: ConsentStatus) {
+    try {
+      await AsyncStorage.setItem(KEYS.ANALYTICS_CONSENT, status);
+    } catch (e) {
+      observabilityService.captureError(e);
     }
   }
 }

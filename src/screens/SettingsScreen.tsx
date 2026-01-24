@@ -14,6 +14,7 @@ import { useToast } from '../context/ToastContext';
 import { storageService, UserAlert } from '../services/StorageService';
 import { observabilityService } from '../services/ObservabilityService';
 import { AppConfig } from '../constants/AppConfig';
+import { analyticsService } from '../services/firebase/AnalyticsService';
 
 import UserProfileCard from '../components/settings/UserProfileCard';
 import AlertItem from '../components/settings/AlertItem';
@@ -134,6 +135,7 @@ const SettingsScreen = () => {
   const saveProfileName = async (newName: string) => {
     try {
       await updateProfileName(newName);
+      await analyticsService.logEvent('update_profile_name');
     } catch (error) {
       handleAction("Error al actualizar el perfil");
       showToast('Error al actualizar el perfil', 'error');
@@ -148,7 +150,13 @@ const SettingsScreen = () => {
   const togglePush = async (value: boolean) => {
       setPushEnabled(value);
       await storageService.saveSettings({ pushEnabled: value });
+      await analyticsService.logEvent('toggle_push', { enabled: value });
       handleAction(`Notificaciones ${value ? 'habilitadas' : 'deshabilitadas'}`);
+  };
+
+  const handleThemeChange = async (mode: 'light' | 'dark' | 'system') => {
+      setThemeMode(mode);
+      await analyticsService.logEvent('change_theme', { mode });
   };
 
   const getTopicName = (symbol: string) => {
@@ -232,6 +240,9 @@ const SettingsScreen = () => {
       const updated = alerts.filter(a => a.id !== id);
       setAlerts(updated);
       await storageService.saveAlerts(updated);
+      if (alert) {
+        await analyticsService.logEvent('delete_alert', { symbol: alert.symbol });
+      }
       handleAction('Alerta eliminada');
   };
 
@@ -409,7 +420,7 @@ const SettingsScreen = () => {
                 </View>
                 <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Apariencia</Text>
               </View>
-              <ThemeSelector currentTheme={themeMode} onSelect={setThemeMode} />
+              <ThemeSelector currentTheme={themeMode} onSelect={handleThemeChange} />
             </View>
           </View>
         </View>

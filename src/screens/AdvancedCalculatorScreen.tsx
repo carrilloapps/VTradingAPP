@@ -11,6 +11,7 @@ import CurrencySelectorButton from '../components/dashboard/CurrencySelectorButt
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MarketStatus from '../components/ui/MarketStatus';
 import { AppConfig } from '../constants/AppConfig';
+import { analyticsService } from '../services/firebase/AnalyticsService';
 
 // --- Components ---
 const KeypadButton = ({ label, icon, onPress, isAction = false, isDestructive = false, testID }: { label?: string, icon?: string, onPress: () => void, isAction?: boolean, isDestructive?: boolean, testID?: string }) => {
@@ -271,9 +272,10 @@ const AdvancedCalculatorScreen = () => {
       }
 
       if (!targetCodes.includes(currency.code)) {
-          setTargetCodes(prev => [...prev, currency.code]);
-          showToast(`${currency.code} añadida`, 'success');
-      } else {
+        setTargetCodes(prev => [...prev, currency.code]);
+        showToast(`${currency.code} añadida`, 'success');
+        analyticsService.logEvent('calculator_add_currency', { currency: currency.code });
+    } else {
           showToast(`${currency.code} ya está en la lista`, 'info');
       }
       setPickerVisible(false);
@@ -394,6 +396,7 @@ const AdvancedCalculatorScreen = () => {
                       setBaseAmount('1');
                       setTargetCodes([]);
                       showToast('Calculadora reiniciada', 'info');
+                      analyticsService.logEvent('calculator_clear');
                   }}>
                       <Text variant="labelMedium" style={[styles.clearText, { color: theme.colors.error }]}>
                           LIMPIAR

@@ -17,6 +17,7 @@ export interface StockData {
   change?: string; // Optional pre-formatted change for dashboard compatibility
   isPositive?: boolean; // Optional for dashboard compatibility
   iconName?: string; // Optional for dashboard compatibility
+  onPress?: (stock: StockData) => void; // Optional press handler
 }
 
 const colorMap: Record<string, { bg: string; text: string; darkBg: string; darkText: string }> = {
@@ -28,6 +29,7 @@ const colorMap: Record<string, { bg: string; text: string; darkBg: string; darkT
 };
 
 const StockItem: React.FC<StockData> = ({
+  id,
   symbol,
   name,
   price,
@@ -38,6 +40,7 @@ const StockItem: React.FC<StockData> = ({
   value,
   change,
   isPositive: propIsPositive,
+  onPress,
 }) => {
   const theme = useAppTheme();
   const colors = colorMap[color || 'emerald'] || colorMap.emerald;
@@ -91,10 +94,29 @@ const StockItem: React.FC<StockData> = ({
     { backgroundColor: badgeBackgroundColor }
   ];
 
+  const handlePress = () => {
+    if (onPress) {
+      onPress({
+        id,
+        symbol,
+        name,
+        price,
+        changePercent,
+        initials,
+        color,
+        iconUrl,
+        value,
+        change,
+        isPositive: propIsPositive,
+      });
+    }
+  };
+
   return (
     <TouchableOpacity 
       style={containerStyle}
       activeOpacity={0.7}
+      onPress={handlePress}
     >
       <View style={styles.leftContent}>
         <View style={[

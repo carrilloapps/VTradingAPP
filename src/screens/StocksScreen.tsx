@@ -104,6 +104,10 @@ const StocksScreen = () => {
   const handleSearch = (text: string) => setStockFilters({ query: text });
   const handleSuggestionPress = (suggestion: string) => setStockFilters({ query: suggestion });
 
+  const handleStockPress = (stock: StockData) => {
+    console.log('Stock pressed:', stock.symbol);
+  };
+
   const renderHeader = () => (
       <View style={styles.headerContainer}>
         {/* Market Status */}
@@ -199,7 +203,7 @@ const StocksScreen = () => {
       <FlatList
         data={filteredStocks}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <StockItem {...item} />}
+        renderItem={({ item }) => <StockItem {...item} onPress={() => handleStockPress(item)} />}
         ListHeaderComponent={renderHeader}
         ListFooterComponent={renderFooter}
         contentContainerStyle={[styles.scrollContent, { paddingHorizontal: 20 }]}
