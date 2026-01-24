@@ -78,10 +78,12 @@ function App(): React.JSX.Element {
       await initTrace.start();
 
       try {
+        // App Check must be first to ensure tokens are ready for other requests
         await appCheckService.initialize();
 
         await mobileAds().initialize();
 
+        // Initialize Remote Config early to apply feature flags
         await remoteConfigService.initialize();
 
         await inAppMessagingService.initialize();
@@ -93,6 +95,9 @@ function App(): React.JSX.Element {
           await fcmService.getFCMToken();
           await fcmService.subscribeToDemographics(['all_users']);
         }
+      } catch (e) {
+        // Safe catch to ensure app continues even if initialization fails
+        console.error('Firebase initialization error:', e);
       } finally {
         await initTrace.stop();
       }
