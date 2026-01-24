@@ -371,8 +371,8 @@ const AdvancedCalculatorScreen = () => {
         onBackPress={() => navigation.goBack()}
         onActionPress={onRefresh}
         rightActionIcon="refresh"
-        onNotificationPress={() => showToast('Historial próximamente', 'info')}
-        notificationIcon="history"
+        // notificationIcon="bell-outline" // Default is bell-outline
+        // onNotificationPress={() => {}} // Default behavior (navigate to Notifications)
         showNotification={true}
       />
       
@@ -460,7 +460,11 @@ const AdvancedCalculatorScreen = () => {
                   <View style={[styles.targetRow, themeStyles.targetRow]}>
                       {/* Left Side: Icon */}
                       <View style={[styles.iconBox, themeStyles.iconBox]}>
-                            <MaterialCommunityIcons name={item.rateObj.iconName || 'currency-usd'} size={24} color={theme.colors.primary} />
+                            {item.rateObj.iconName === 'Bs' ? (
+                                <Text style={{fontWeight: '900', fontSize: 18, color: theme.colors.primary}}>Bs</Text>
+                            ) : (
+                                <MaterialCommunityIcons name={item.rateObj.iconName || 'currency-usd'} size={24} color={theme.colors.primary} />
+                            )}
                       </View>
 
                       {/* Middle: Code & Name */}

@@ -43,7 +43,11 @@ const CurrencySelectorButton: React.FC<CurrencySelectorButtonProps> = ({
       accessibilityLabel={`Seleccionar moneda. Actual: ${currencyCode}`}
     >
       <View style={[styles.iconPlaceholder, themeStyles.iconPlaceholder]}>
-        <MaterialCommunityIcons name={iconName} size={18} color={theme.colors.onSurface} />
+        {iconName === 'Bs' ? (
+             <Text style={{fontWeight: '900', fontSize: 14, color: theme.colors.onSurface}}>Bs</Text>
+        ) : (
+            <MaterialCommunityIcons name={iconName} size={18} color={theme.colors.onSurface} />
+        )}
       </View>
       
       <Text variant="titleMedium" style={[styles.boldText, themeStyles.textPrimary]}>

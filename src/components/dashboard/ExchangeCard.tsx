@@ -95,7 +95,11 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
               <Image source={{ uri: iconUrl }} style={styles.iconImage} />
             ) : iconName ? (
               <View style={[styles.symbolIcon, { backgroundColor: iconColor }]}>
-                <MaterialCommunityIcons name={iconName} size={32} color={iconTintColor || theme.colors.onPrimaryContainer} />
+                {iconName === 'Bs' ? (
+                     <Text style={{fontWeight: '900', fontSize: 24, color: iconTintColor || theme.colors.onPrimaryContainer}}>Bs</Text>
+                ) : (
+                    <MaterialCommunityIcons name={iconName} size={32} color={iconTintColor || theme.colors.onPrimaryContainer} />
+                )}
               </View>
             ) : (
               <View style={[styles.symbolIcon, { backgroundColor: iconColor }]}>

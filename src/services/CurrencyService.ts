@@ -290,8 +290,9 @@ export class CurrencyService {
                 const sourceLabel = cryptoItem.source || 'P2P';
                 
                 switch(currencyCode) {
-                    case 'USDT': name = `USDT • ${sourceLabel}`; iconName = 'currency-usd'; break;
+                    case 'USDT': name = `USDT • ${sourceLabel}`; iconName = 'alpha-t-circle-outline'; break;
                     case 'BTC': name = `Bitcoin • ${sourceLabel}`; iconName = 'currency-btc'; break;
+                    case 'VES': name = `Bolívar • ${sourceLabel}`; iconName = 'Bs'; break;
                     case 'ETH': name = `Ethereum • ${sourceLabel}`; iconName = 'ethereum'; break;
                     case 'USDC': name = `USDC • ${sourceLabel}`; iconName = 'alpha-u-circle-outline'; break;
                     case 'BNB': name = `BNB • ${sourceLabel}`; iconName = 'hexagon-slice-6'; break;

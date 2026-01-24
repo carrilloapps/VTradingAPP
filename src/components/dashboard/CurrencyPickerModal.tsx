@@ -155,11 +155,15 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
                             styles.iconPlaceholder, 
                             isSelected ? themeStyles.iconPlaceholderSelected : themeStyles.iconPlaceholderNormal
                         ]}>
-                             <MaterialCommunityIcons 
-                                name={item.iconName || 'currency-usd'} 
-                                size={24} 
-                                color={isSelected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant} 
-                             />
+                             {item.iconName === 'Bs' ? (
+                                <Text style={{fontWeight: '900', fontSize: 16, color: isSelected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant}}>Bs</Text>
+                             ) : (
+                                <MaterialCommunityIcons 
+                                    name={item.iconName || 'currency-usd'} 
+                                    size={24} 
+                                    color={isSelected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant} 
+                                />
+                             )}
                         </View>
                         <View style={styles.textContainer}>
                             <Text variant="titleMedium" style={[{ fontWeight: isSelected ? '700' : '400'}, themeStyles.textPrimary]}>
