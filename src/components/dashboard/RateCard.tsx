@@ -56,7 +56,11 @@ const RateCard: React.FC<RateCardProps> = ({
           backgroundColor: finalIconBgColor,
           borderRadius: theme.roundness * 4
         }]}>
-          <MaterialCommunityIcons name={iconName} size={24} color={finalIconColor} />
+          {iconName === 'Bs' ? (
+            <Text variant="titleMedium" style={{fontWeight: '900', color: finalIconColor}}>Bs</Text>
+          ) : (
+            <MaterialCommunityIcons name={iconName} size={24} color={finalIconColor} />
+          )}
         </View>
         <View>
           <Text variant="titleMedium" style={[styles.titleText, { color: theme.colors.onSurface }]}>{title}</Text>

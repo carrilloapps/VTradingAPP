@@ -94,7 +94,7 @@ interface CurrencyRow {
 
 const AdvancedCalculatorScreen = () => {
   const theme = useTheme();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const { showToast } = useToast();
 
   // --- State ---
@@ -371,8 +371,8 @@ const AdvancedCalculatorScreen = () => {
         onBackPress={() => navigation.goBack()}
         onActionPress={onRefresh}
         rightActionIcon="refresh"
-        // notificationIcon="bell-outline" // Default is bell-outline
-        // onNotificationPress={() => {}} // Default behavior (navigate to Notifications)
+        notificationIcon="bell-outline"
+        onNotificationPress={() => navigation.navigate('Notifications')}
         showNotification={true}
       />
       

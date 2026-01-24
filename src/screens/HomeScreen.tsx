@@ -115,7 +115,7 @@ const HomeScreen = () => {
         }
 
         // Determine icon and color based on currency type/code
-        let iconName;
+        let iconName = rate.iconName;
         let iconSymbol = '$';
         let iconColor;
         let iconTintColor;

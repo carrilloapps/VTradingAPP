@@ -176,7 +176,7 @@ const StocksScreen = () => {
         <UnifiedHeader
           variant="section"
           title="Mercados"
-          subtitle="Acciones y CEDEARs"
+          subtitle="Acciones • ETFs"
           onActionPress={onRefresh}
           rightActionIcon="refresh"
           onNotificationPress={() => {}}
