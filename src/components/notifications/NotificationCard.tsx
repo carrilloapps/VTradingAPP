@@ -48,7 +48,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
   const displayTitle = notification.title === 'Notificación' ? iconConfig.fallbackTitle : notification.title;
 
   const renderRightActions = (
-    progress: Animated.AnimatedInterpolation<number>,
+    _: Animated.AnimatedInterpolation<number>,
     dragX: Animated.AnimatedInterpolation<number>
   ) => {
     const scale = dragX.interpolate({

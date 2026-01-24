@@ -143,9 +143,7 @@ const NotificationsScreen: React.FC = () => {
       showsVerticalScrollIndicator={false}
     />
   );
-
-
-
+  
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar
