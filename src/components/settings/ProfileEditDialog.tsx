@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { TextInput, useTheme } from 'react-native-paper';
 import CustomDialog from '../ui/CustomDialog';
+import { useToast } from '../../context/ToastContext';
+import { observabilityService } from '../../services/ObservabilityService';
 
 interface ProfileEditDialogProps {
   visible: boolean;
@@ -16,6 +18,7 @@ const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({
   onSave,
 }) => {
   const theme = useTheme();
+  const { showToast } = useToast();
   const [name, setName] = useState(currentName);
   const [loading, setLoading] = useState(false);
 
@@ -29,8 +32,9 @@ const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({
     try {
       await onSave(name);
       onDismiss();
-    } catch (error) {
-      console.error(error);
+    } catch (e) {
+      observabilityService.captureError(e);
+      showToast('Error al guardar perfil', 'error');
     } finally {
       setLoading(false);
     }

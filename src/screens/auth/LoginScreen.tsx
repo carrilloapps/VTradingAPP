@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DeviceInfo from 'react-native-device-info';
 import { useAuth } from '../../context/AuthContext';
 import { analyticsService } from '../../services/firebase/AnalyticsService';
+import { observabilityService } from '../../services/ObservabilityService';
 import { useAppTheme } from '../../theme/theme';
 import { AppConfig } from '../../constants/AppConfig';
 import AuthLoading from '../../components/auth/AuthLoading';
@@ -105,7 +106,8 @@ const LoginScreen = ({ navigation }: any) => {
         await analyticsService.logEvent('login_attempt', { method: 'password' });
         await signIn(email, password);
         await analyticsService.logEvent('login_success', { method: 'password' });
-      } catch {
+      } catch (e) {
+        observabilityService.captureError(e);
         await analyticsService.logEvent('login_error', { method: 'password' });
         // Error handled in context
       } finally {
@@ -120,7 +122,8 @@ const LoginScreen = ({ navigation }: any) => {
       await analyticsService.logEvent('login_attempt', { method: 'google' });
       await googleSignIn();
       await analyticsService.logEvent('login_success', { method: 'google' });
-    } catch {
+    } catch (e) {
+      observabilityService.captureError(e);
       await analyticsService.logEvent('login_error', { method: 'google' });
     } finally {
       setIsSubmitting(false);
@@ -133,7 +136,8 @@ const LoginScreen = ({ navigation }: any) => {
       await analyticsService.logEvent('login_attempt', { method: 'anonymous' });
       await signInAnonymously();
       await analyticsService.logEvent('login_success', { method: 'anonymous' });
-    } catch {
+    } catch (e) {
+      observabilityService.captureError(e);
       await analyticsService.logEvent('login_error', { method: 'anonymous' });
     } finally {
       setIsSubmitting(false);
@@ -154,7 +158,7 @@ const LoginScreen = ({ navigation }: any) => {
       <UnifiedHeader 
         variant="section"
         title=""
-        rightActionIcon="info-outline"
+        rightActionIcon="information-outline"
         onActionPress={() => setAboutVisible(true)}
         showNotification={false}
         showAd={false}

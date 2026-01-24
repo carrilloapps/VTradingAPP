@@ -4,6 +4,7 @@ import { storageService } from '../services/StorageService';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
 import VTradingWidget from './VTradingWidget';
 import { WidgetItem } from './types';
+import { observabilityService } from '../services/ObservabilityService';
 
 export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false) {
   // MOCK DATA Fallback to prevent white screen if Services fail in Headless mode
@@ -36,19 +37,20 @@ export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false
           didFetchFresh = true;
         } else {
           rates = await CurrencyService.getRates(false);
-        }
-      } catch (error) {
-        console.error('Widget: Failed to fetch rates', error);
-        rates = await CurrencyService.getRates(false);
       }
+    } catch (e) {
+      observabilityService.captureError(e);
+      rates = await CurrencyService.getRates(false);
+    }
 
-      if (lastRefreshAt) {
-        lastUpdatedLabel = new Date(lastRefreshAt).toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
-      } else if (rates.length > 0 && rates[0].lastUpdated) {
-        lastUpdatedLabel = new Date(rates[0].lastUpdated).toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
-      }
+    if (lastRefreshAt) {
+      lastUpdatedLabel = new Date(lastRefreshAt).toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+    } else if (rates.length > 0 && rates[0].lastUpdated) {
+      lastUpdatedLabel = new Date(rates[0].lastUpdated).toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
+    }
   } catch (e) {
-      console.error('Widget: Service Error', e);
+    observabilityService.captureError(e);
+    // Service Error
   }
   if (didFetchFresh && rates.length > 0) {
     await storageService.saveWidgetRefreshMeta({ lastRefreshAt: Date.now() });
@@ -112,8 +114,8 @@ export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false
   } else {
       // Emergency Mock Data if Rate Fetch Fails
        widgetItems.push(
-        { id: '1', label: 'Dolar BCV', value: '36.50', currency: 'Bs', trend: 'up', trendValue: '+0.10%', trendBg: 'rgba(0, 168, 107, 0.15)', trendColor: '#00A86B' },
-        { id: '2', label: 'Paralelo', value: '38.20', currency: 'Bs', trend: 'down', trendValue: '-0.50%', trendBg: 'rgba(255, 59, 48, 0.15)', trendColor: '#FF3B30' }
+        { id: '1', label: 'USD/VES', value: '0.00', currency: 'Bs', trend: 'up', trendValue: '0.00%', trendBg: 'rgba(0, 168, 107, 0.15)', trendColor: '#00A86B' },
+        { id: '2', label: 'USDT/VES', value: '0.00', currency: 'Bs', trend: 'down', trendValue: '0.00%', trendBg: 'rgba(255, 59, 48, 0.15)', trendColor: '#FF3B30' }
        );
   }
 
@@ -137,7 +139,7 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
   const { widgetInfo, widgetAction, clickAction } = props;
   
   try {
-    console.log(`[WidgetTask] Updating widget ${widgetInfo.widgetId} (${widgetInfo.width}x${widgetInfo.height})`);
+    // Updating widget
 
     if (widgetAction === 'WIDGET_DELETED') {
       await storageService.saveWidgetRefreshMeta({ lastRefreshAt: 0 });
@@ -145,6 +147,7 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
     }
 
     if (widgetAction === 'WIDGET_CLICK' && clickAction === 'REFRESH_WIDGET') {
+      // Updating widget
       const element = await buildWidgetElement(widgetInfo, true);
       await props.renderWidget(element);
       return;
@@ -152,7 +155,8 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
 
     const element = await buildWidgetElement(widgetInfo, false);
     await props.renderWidget(element);
-  } catch (error) {
-    console.error('WidgetTaskHandler Error:', error);
+  } catch (e) {
+    observabilityService.captureError(e);
+    // WidgetTaskHandler Error
   }
 }

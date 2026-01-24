@@ -2,11 +2,13 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, ScrollView, Animated, Easing, StatusBar } from 'react-native';
 import { Text, useTheme, Button, ProgressBar, Surface } from 'react-native-paper';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DiscoverSkeleton from '../components/discover/DiscoverSkeleton';
 
 import { storageService } from '../services/StorageService';
 import { fcmService } from '../services/firebase/FCMService';
+import { useToast } from '../context/ToastContext';
+import { observabilityService } from '../services/ObservabilityService';
 
 const FeatureItem = ({ icon, title, description, theme }: any) => {
   const iconBgColor = theme.dark ? 'rgba(16, 185, 129, 0.1)' : '#E6FFFA';
@@ -25,7 +27,7 @@ const FeatureItem = ({ icon, title, description, theme }: any) => {
       elevation={0}
     >
       <View style={[styles.featureIconBox, { backgroundColor: iconBgColor }]}>
-        <MaterialIcons name={icon} size={24} color={theme.colors.primary} />
+        <MaterialCommunityIcons name={icon} size={24} color={theme.colors.primary} />
       </View>
       <View style={styles.featureText}>
         <Text variant="titleSmall" style={[styles.featureTitle, { color: theme.colors.onSurface }]}>{title}</Text>
@@ -37,6 +39,7 @@ const FeatureItem = ({ icon, title, description, theme }: any) => {
 
 const DiscoverScreen = () => {
   const theme = useTheme();
+  const { showToast } = useToast();
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
   const [progress, setProgress] = useState(0);
@@ -49,7 +52,8 @@ const DiscoverScreen = () => {
         const settings = await storageService.getSettings();
         setIsSubscribed(settings.newsSubscription ?? false);
       } catch (e) {
-        console.error('Failed to load subscription state', e);
+        observabilityService.captureError(e);
+        // Failed to load subscription state
       } finally {
         setIsLoadingSubscription(false);
       }
@@ -126,7 +130,8 @@ const DiscoverScreen = () => {
       }
       await storageService.saveSettings({ newsSubscription: newState });
     } catch (e) {
-      console.error('Failed to toggle subscription', e);
+      observabilityService.captureError(e);
+      showToast('Error al actualizar suscripción', 'error');
       // Revert state on error
       setIsSubscribed(!newState);
     }
@@ -158,10 +163,10 @@ const DiscoverScreen = () => {
           <View style={styles.heroSection}>
             <View style={styles.iconContainer}>
               <Animated.View style={{ transform: [{ scale: pulseAnim }] }}>
-                <MaterialIcons name="explore" size={80} color={theme.colors.primary} />
+                <MaterialCommunityIcons name="compass" size={80} color={theme.colors.primary} />
               </Animated.View>
               <Animated.View style={[styles.gearIcon, { transform: [{ rotate: spin }] }]}>
-                <MaterialIcons name="build" size={32} color={theme.colors.tertiary} />
+                <MaterialCommunityIcons name="wrench" size={32} color={theme.colors.tertiary} />
               </Animated.View>
             </View>
 

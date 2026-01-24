@@ -12,6 +12,7 @@ import { useThemeContext } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { storageService, UserAlert } from '../services/StorageService';
+import { observabilityService } from '../services/ObservabilityService';
 import { AppConfig } from '../constants/AppConfig';
 
 import UserProfileCard from '../components/settings/UserProfileCard';
@@ -72,7 +73,8 @@ const SettingsScreen = () => {
             setAlerts(savedAlerts);
             setLoading(false);
           }
-        } catch (error) {
+        } catch (e) {
+          observabilityService.captureError(e);
           showToast('Error cargando configuración', 'error');
           if (isActive) {
             setLoading(false);
@@ -102,7 +104,8 @@ const SettingsScreen = () => {
     try {
         await signOut();
         // Navigation will handle the switch to AuthStack automatically via Context
-    } catch (error) {
+    } catch (e) {
+        observabilityService.captureError(e);
         handleAction("Error al cerrar sesión");
     }
   };
@@ -116,7 +119,8 @@ const SettingsScreen = () => {
     try {
       await deleteAccount();
       setShowDeleteAccountDialog(false);
-    } catch (error) {
+    } catch (e) {
+      observabilityService.captureError(e);
       handleAction('Error al eliminar la cuenta');
     } finally {
       setDeleteAccountLoading(false);
@@ -219,7 +223,8 @@ const SettingsScreen = () => {
             if (otherActiveAlerts.length === 0) {
                 await fcmService.unsubscribeFromTopic(topic);
             }
-        } catch (err) {
+        } catch (e) {
+            observabilityService.captureError(e);
             showToast('Error al desuscribir del tema', 'error');
         }
       }
@@ -365,7 +370,7 @@ const SettingsScreen = () => {
             <View style={styles.prefRow}>
               <View style={styles.prefLeft}>
                 <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
-                  <MaterialCommunityIcons name="notifications" size={20} color={theme.colors.onSurfaceVariant} />
+                  <MaterialCommunityIcons name="bell-outline" size={20} color={theme.colors.onSurfaceVariant} />
                 </View>
                 <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Notificaciones push</Text>
               </View>

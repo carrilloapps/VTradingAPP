@@ -3,7 +3,7 @@ import { render, fireEvent } from '@testing-library/react-native';
 import NotificationButton from '../../../src/components/ui/NotificationButton';
 
 // Mocks
-jest.mock('react-native-vector-icons/MaterialIcons', () => 'Icon');
+jest.mock('react-native-vector-icons/MaterialCommunityIcons', () => 'Icon');
 
 const mockNavigate = jest.fn();
 jest.mock('@react-navigation/native', () => ({

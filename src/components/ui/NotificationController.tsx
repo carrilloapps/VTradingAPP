@@ -15,7 +15,7 @@ const NotificationController: React.FC = () => {
   useEffect(() => {
     // Foreground listener
     const unsubscribe = fcmService.onMessage(async (remoteMessage: any) => {
-      console.log('Foreground Message:', remoteMessage);
+      // Foreground Message received
 
       // Case 1: Standard Notification (with visual payload)
       if (remoteMessage.notification) {

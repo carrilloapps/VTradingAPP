@@ -1,5 +1,6 @@
 import { apiClient } from './ApiClient';
 import { performanceService } from './firebase/PerformanceService';
+import { observabilityService } from './ObservabilityService';
 
 export const STABLECOINS = ['USDT', 'USDC', 'DAI', 'FDUSD'];
 
@@ -171,21 +172,24 @@ export class CurrencyService {
         if (response.rates) {
             response.rates.forEach((apiRate, index) => {
                  let name = apiRate.currency;
-                 let iconName = 'attach-money';
+                 let iconName = 'currency-usd';
     
                  // Standardize names and icons based on currency code
                  const sourceLabel = apiRate.source || 'BCV';
                  name = `${apiRate.currency}/VES • ${sourceLabel}`;
 
                  switch(apiRate.currency) {
-                     case 'EUR': iconName = 'euro'; break;
-                     case 'USD': iconName = 'attach-money'; break;
-                     case 'CNY': iconName = 'currency-yuan'; break;
-                     case 'RUB': iconName = 'currency-ruble'; break;
-                     case 'TRY': iconName = 'account-balance'; break;
-                     case 'GBP': iconName = 'currency-pound'; break;
-                     case 'JPY': iconName = 'currency-yen'; break;
-                     default: iconName = 'attach-money';
+                     case 'EUR': iconName = 'currency-eur'; break;
+                     case 'USD': iconName = 'currency-usd'; break;
+                     case 'CNY': iconName = 'currency-cny'; break;
+                     case 'RUB': iconName = 'currency-rub'; break;
+                     case 'TRY': iconName = 'currency-try'; break;
+                     case 'GBP': iconName = 'currency-gbp'; break;
+                     case 'JPY': iconName = 'currency-jpy'; break;
+                     case 'BRL': iconName = 'currency-brl'; break;
+                     case 'INR': iconName = 'currency-inr'; break;
+                     case 'KRW': iconName = 'currency-krw'; break;
+                     default: iconName = 'currency-usd';
                  }
     
                  rates.push({
@@ -210,7 +214,7 @@ export class CurrencyService {
         if (response.border) {
             response.border.forEach((apiRate, index) => {
                  let name = apiRate.currency;
-                 let iconName = 'attach-money';
+                 let iconName = 'currency-usd';
     
                  // Standardize names and icons based on currency code
                  const sourceLabel = apiRate.source || 'Fronterizo';
@@ -218,13 +222,13 @@ export class CurrencyService {
 
                  switch(apiRate.currency) {
                      case 'EUR': iconName = 'euro'; break;
-                     case 'USD': iconName = 'attach-money'; break;
+                     case 'USD': iconName = 'currency-usd'; break;
                      case 'CNY': iconName = 'currency-yuan'; break;
                      case 'RUB': iconName = 'currency-ruble'; break;
                      case 'TRY': iconName = 'account-balance'; break;
                      case 'GBP': iconName = 'currency-pound'; break;
                      case 'JPY': iconName = 'currency-yen'; break;
-                     default: iconName = 'attach-money';
+                     default: iconName = 'currency-usd';
                  }
 
                  // Calculate values if average is missing (common in P2P/Border rates)
@@ -282,11 +286,11 @@ export class CurrencyService {
                 const sourceLabel = cryptoItem.source || 'P2P';
                 
                 switch(cryptoItem.currency) {
-                    case 'USDT': name = `Tether • ${sourceLabel}`; iconName = 'currency-bitcoin'; break;
+                    case 'USDT': name = `Tether • ${sourceLabel}`; iconName = 'currency-usd'; break;
                     case 'BTC': name = `Bitcoin • ${sourceLabel}`; iconName = 'currency-bitcoin'; break;
-                    case 'ETH': name = `Ethereum • ${sourceLabel}`; iconName = 'diamond'; break;
-                    case 'USDC': name = `USD Coin • ${sourceLabel}`; iconName = 'attach-money'; break;
-                    case 'BNB': name = `Binance Coin • ${sourceLabel}`; iconName = 'verified-user'; break;
+                    case 'ETH': name = `Ethereum • ${sourceLabel}`; iconName = 'ethereum'; break;
+                    case 'USDC': name = `USD Coin • ${sourceLabel}`; iconName = 'currency-usd'; break;
+                    case 'BNB': name = `Binance Coin • ${sourceLabel}`; iconName = 'shield-check'; break;
                     default: name = `${cryptoItem.currency} • ${sourceLabel}`; iconName = 'currency-bitcoin';
                 }
 
@@ -338,18 +342,17 @@ export class CurrencyService {
 
         return rates;
 
-    } catch (error) {
-        console.error('Error fetching rates:', error);
+    } catch (e) {
+        observabilityService.captureError(e);
         trace.putAttribute('error', 'true');
         
         // If we have stale data in memory, return it but warn
         if (this.currentRates.length > 0) {
-            console.warn('Returning stale in-memory data due to fetch error');
             this.notifyListeners([...this.currentRates]);
             return this.currentRates;
         }
         
-        throw error;
+        throw e;
     } finally {
         await performanceService.stopTrace(trace);
     }
@@ -401,10 +404,12 @@ export class CurrencyService {
 
         return { rates, pagination: response.pagination };
 
-    } catch (error) {
-        console.error('Error fetching bank rates:', error);
-        trace.putAttribute('error', 'true');
-        throw error;
+    } catch (e) {
+        observabilityService.captureError(e);
+        return {
+            rates: [],
+            pagination: { page, limit, total: 0, totalPages: 1 }
+        };
     } finally {
         await performanceService.stopTrace(trace);
     }

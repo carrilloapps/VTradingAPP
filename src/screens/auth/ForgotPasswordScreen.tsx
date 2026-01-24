@@ -9,6 +9,7 @@ import CustomButton from '../../components/ui/CustomButton';
 import UnifiedHeader from '../../components/ui/UnifiedHeader';
 import { useAppTheme } from '../../theme/theme';
 import AuthLogo from '../../components/ui/AuthLogo';
+import { observabilityService } from '../../services/ObservabilityService';
 
 const ForgotPasswordScreen = ({ navigation }: any) => {
   const theme = useAppTheme();
@@ -73,7 +74,8 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
         await resetPassword(email);
         setSuccessMessage('Se ha enviado un correo para restablecer tu contraseña.');
         await analyticsService.logEvent('password_reset_success');
-      } catch (error) {
+      } catch (e) {
+        observabilityService.captureError(e);
         // Error is handled in context, but we can clear success message
         await analyticsService.logEvent('password_reset_error');
       } finally {

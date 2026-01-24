@@ -3,6 +3,7 @@ import { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { authService } from '../services/firebase/AuthService';
 import { useToast } from './ToastContext';
 import { getCrashlytics, setUserId, setAttributes } from '@react-native-firebase/crashlytics';
+import { observabilityService } from '../services/ObservabilityService';
 
 interface AuthContextData {
   user: FirebaseAuthTypes.User | null;
@@ -53,9 +54,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await authService.signInWithEmail(email, pass);
       showToast('Bienvenido de nuevo', 'success');
-    } catch (error: any) {
-      showToast(error.message, 'error');
-      throw error;
+    } catch (e: any) {
+      observabilityService.captureError(e);
+      showToast(e.message, 'error');
+      throw e;
     }
   };
 
@@ -63,9 +65,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await authService.signUpWithEmail(email, pass);
       showToast('Cuenta creada exitosamente', 'success');
-    } catch (error: any) {
-      showToast(error.message, 'error');
-      throw error;
+    } catch (e: any) {
+      observabilityService.captureError(e);
+      showToast(e.message, 'error');
+      throw e;
     }
   };
 
@@ -73,9 +76,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await authService.signOut();
       showToast('Sesión cerrada', 'info');
-    } catch (error: any) {
-      showToast(error.message, 'error');
-      throw error;
+    } catch (e: any) {
+      observabilityService.captureError(e);
+      showToast(e.message, 'error');
+      throw e;
     }
   };
 
@@ -83,9 +87,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await authService.deleteAccount();
       showToast('Cuenta eliminada', 'success');
-    } catch (error: any) {
-      showToast(error.message, 'error');
-      throw error;
+    } catch (e: any) {
+      observabilityService.captureError(e);
+      showToast(e.message, 'error');
+      throw e;
     }
   };
 
@@ -93,12 +98,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await authService.signInWithGoogle();
       showToast('Autenticado con Google', 'success');
-    } catch (error: any) {
-      if (error.code === -5) { // SIGN_IN_CANCELLED
+    } catch (e: any) {
+      observabilityService.captureError(e);
+      if (e.code === -5) { // SIGN_IN_CANCELLED
          return;
       }
-      showToast(error.message, 'error');
-      throw error;
+      showToast(e.message, 'error');
+      throw e;
     }
   };
 
@@ -106,9 +112,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await authService.sendPasswordResetEmail(email);
       showToast('Correo de recuperación enviado', 'success');
-    } catch (error: any) {
-      showToast(error.message, 'error');
-      throw error;
+    } catch (e: any) {
+      observabilityService.captureError(e);
+      showToast(e.message, 'error');
+      throw e;
     }
   };
 
@@ -116,9 +123,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       await authService.signInAnonymously();
       showToast('Ingresaste como invitado', 'warning');
-    } catch (error: any) {
-      showToast(error.message, 'error');
-      throw error;
+    } catch (e: any) {
+      observabilityService.captureError(e);
+      showToast(e.message, 'error');
+      throw e;
     }
   };
 
@@ -127,9 +135,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const updatedUser = await authService.updateProfileName(newName);
       setUser(updatedUser);
       showToast('Perfil actualizado correctamente', 'success');
-    } catch (error: any) {
-      showToast(error.message, 'error');
-      throw error;
+    } catch (e: any) {
+      observabilityService.captureError(e);
+      showToast(e.message, 'error');
+      throw e;
     }
   };
 

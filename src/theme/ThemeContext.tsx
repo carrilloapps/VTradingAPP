@@ -3,6 +3,7 @@ import { useColorScheme } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { LightTheme, DarkTheme } from './theme';
+import { observabilityService } from '../services/ObservabilityService';
 
 type ThemeType = 'light' | 'dark' | 'system';
 
@@ -36,7 +37,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           setThemeModeState(savedTheme as ThemeType);
         }
       } catch (e) {
-        console.error('Failed to load theme preference', e);
+        observabilityService.captureError(e);
+        // Failed to load theme preference
       } finally {
         setIsReady(true);
       }
@@ -49,7 +51,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setThemeModeState(mode);
       await AsyncStorage.setItem(THEME_KEY, mode);
     } catch (e) {
-      console.error('Failed to save theme preference', e);
+      observabilityService.captureError(e);
+      // Failed to save theme preference
     }
   };
 

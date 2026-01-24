@@ -75,7 +75,7 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
               hasTopBorder
             />
             <MenuButton
-              icon="assignment"
+              icon="clipboard-text"
               label="Licencias de uso"
               onPress={() => openExternalUrl(AppConfig.LICENSES_URL, 'Licencias de uso')}
               hasTopBorder

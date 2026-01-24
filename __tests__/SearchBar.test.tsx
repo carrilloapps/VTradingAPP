@@ -2,8 +2,8 @@ import React from 'react';
 import { render, fireEvent } from '@testing-library/react-native';
 import SearchBar from '../src/components/ui/SearchBar';
 
-// Mock MaterialIcons to avoid rendering issues in tests
-jest.mock('react-native-vector-icons/MaterialIcons', () => 'Icon');
+// Mock MaterialCommunityIcons to avoid rendering issues in tests
+jest.mock('react-native-vector-icons/MaterialCommunityIcons', () => 'Icon');
 
 describe('SearchBar', () => {
   it('renders correctly with placeholder', () => {

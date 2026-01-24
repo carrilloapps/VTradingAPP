@@ -1,13 +1,15 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { View, StyleSheet, TouchableOpacity, StatusBar, Image, Platform, Linking, useWindowDimensions } from 'react-native';
-import { Text, Button, useTheme, Icon } from 'react-native-paper';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, StyleSheet, TouchableOpacity, StatusBar, useWindowDimensions } from 'react-native';
+import { Text, Button, Icon } from 'react-native-paper';
 import PagerView from 'react-native-pager-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import { storageService } from '../services/StorageService';
 import { fcmService } from '../services/firebase/FCMService';
-import { useAppTheme, AppTheme } from '../theme/theme';
+import { useAppTheme } from '../theme/theme';
+import { useToast } from '../context/ToastContext';
+import { observabilityService } from '../services/ObservabilityService';
 
 const STORY_DURATION = 6000; // 6 seconds per slide
 
@@ -27,6 +29,7 @@ interface OnboardingScreenProps {
 const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
   const theme = useAppTheme();
   const navigation = useNavigation();
+  const { showToast } = useToast();
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const pagerRef = useRef<PagerView>(null);
@@ -160,7 +163,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
         const hasPermission = await fcmService.checkPermission();
         setNotificationPermissionStatus(hasPermission);
       } catch (error) {
-        console.error('Error checking permission:', error);
+        // Error checking permission
       }
     };
     checkStatus();
@@ -195,8 +198,9 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
       if (hasPermission) {
         await fcmService.getFCMToken();
       }
-    } catch (error) {
-      console.error('Permission error', error);
+    } catch (e) {
+      observabilityService.captureError(e);
+      showToast('Error al solicitar permiso', 'error');
     } finally {
       setIsPaused(false); // Resume after dialog
       // Auto advance after decision? Optional.

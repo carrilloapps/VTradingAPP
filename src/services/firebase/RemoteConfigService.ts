@@ -1,4 +1,5 @@
 import { getRemoteConfig, setDefaults, setConfigSettings, fetchAndActivate, getValue } from '@react-native-firebase/remote-config';
+import { observabilityService } from '../ObservabilityService';
 
 class RemoteConfigService {
   private remoteConfig = getRemoteConfig();
@@ -17,9 +18,9 @@ class RemoteConfigService {
       
       // Fetch and activate
       await this.fetchAndActivate();
-      console.log('[RemoteConfig] Initialized');
-    } catch (error) {
-      console.error('[RemoteConfig] Initialization error:', error);
+    } catch (e) {
+      observabilityService.captureError(e);
+      // Initialization error
     }
   }
 
@@ -28,22 +29,10 @@ class RemoteConfigService {
    */
   async fetchAndActivate(): Promise<boolean> {
     try {
-      // In development, fetch frequently (0 seconds cache)
-      // In production, use default (usually 12 hours)
-      const cacheDuration = __DEV__ ? 0 : 3600; 
-      await setConfigSettings(this.remoteConfig, {
-        minimumFetchIntervalMillis: cacheDuration * 1000,
-      });
-      
-      const activated = await fetchAndActivate(this.remoteConfig);
-      if (activated) {
-        console.log('[RemoteConfig] Fetched and activated new config');
-      } else {
-        console.log('[RemoteConfig] No new config found');
-      }
-      return activated;
-    } catch (error) {
-      console.error('[RemoteConfig] Error fetching config:', error);
+      const fetched = await fetchAndActivate(this.remoteConfig);
+      return fetched;
+    } catch (e) {
+      observabilityService.captureError(e);
       return false;
     }
   }

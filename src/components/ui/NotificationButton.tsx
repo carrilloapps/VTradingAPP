@@ -13,7 +13,7 @@ interface NotificationButtonProps {
 }
 
 const NotificationButton: React.FC<NotificationButtonProps> = ({
-  icon = 'bell',
+  icon = 'bell-outline',
   size = 22,
   color,
   style,

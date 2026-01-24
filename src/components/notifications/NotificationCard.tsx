@@ -79,7 +79,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
     return (
       <View style={[styles.leftAction, { backgroundColor: theme.colors.errorContainer }]}>
         <Animated.View style={{ transform: [{ scale }] }}>
-          <MaterialCommunityIcons name="delete" size={24} color={theme.colors.onErrorContainer} />
+          <MaterialCommunityIcons name="trash-can" size={24} color={theme.colors.onErrorContainer} />
         </Animated.View>
       </View>
     );

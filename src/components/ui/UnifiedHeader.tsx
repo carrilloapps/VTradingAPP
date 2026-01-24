@@ -46,7 +46,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   onBackPress,
   onProfilePress,
   rightActionIcon = 'refresh',
-  notificationIcon = 'notifications',
+  notificationIcon = 'bell-outline',
   showNotification = true,
   showAd = true,
   hideDivider = false,
@@ -222,7 +222,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
               borderless
               rippleColor="rgba(0, 0, 0, .1)"
             >
-              <MaterialCommunityIcons name="arrow-back" size={22} color={theme.colors.onSurface} />
+              <MaterialCommunityIcons name="arrow-left" size={22} color={theme.colors.onSurface} />
             </TouchableRipple>
           )}
           {variant === 'profile' && renderProfileContent()}

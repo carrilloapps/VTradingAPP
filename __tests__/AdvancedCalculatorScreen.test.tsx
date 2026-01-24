@@ -33,11 +33,11 @@ jest.mock('react-native-safe-area-context', () => {
 });
 
 // Mock Icons
-jest.mock('react-native-vector-icons/MaterialIcons', () => 'Icon');
+jest.mock('react-native-vector-icons/MaterialCommunityIcons', () => 'Icon');
 
 // Mock CurrencyService
 const mockRates = [
-  { code: 'USD', value: 36.5, name: 'Dollar', iconName: 'attach-money', changePercent: 0.1 },
+  { code: 'USD', value: 36.5, name: 'Dollar', iconName: 'currency-usd', changePercent: 0.1 },
   { code: 'VES', value: 1, name: 'Bolivar', iconName: 'attach-money', changePercent: -0.5 },
   { code: 'EUR', value: 40.0, name: 'Euro', iconName: 'euro', changePercent: 0.0 },
   { code: 'USDT', value: 37.0, name: 'Tether', iconName: 'attach-money', changePercent: 0.05 },

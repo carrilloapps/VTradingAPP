@@ -17,8 +17,6 @@ const ANDROID_NOTIFICATION_DEFAULTS = {
  * También maneja notificaciones generales enviadas como Data Messages.
  */
 export const handleBackgroundMessage = async (remoteMessage: any) => {
-    console.log('Background Message Received:', remoteMessage);
-
     if (!remoteMessage.data) return;
 
     const { symbol, price, title, body } = remoteMessage.data;
@@ -59,8 +57,6 @@ export const handleBackgroundMessage = async (remoteMessage: any) => {
             }
 
             if (triggered) {
-                console.log(`[ALERTA TRIGGERED] ${alert.symbol} llegó a ${currentPrice}`);
-                
                 const actionVerb = alert.condition === 'above' ? 'subió' : 'bajó';
                 const emoji = alert.condition === 'above' ? '📈' : '📉';
                 

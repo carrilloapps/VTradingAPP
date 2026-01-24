@@ -17,6 +17,7 @@ import { StocksService } from '../../services/StocksService';
 import { storageService, UserAlert } from '../../services/StorageService';
 import { fcmService } from '../../services/firebase/FCMService';
 import { useToast } from '../../context/ToastContext';
+import { observabilityService } from '../../services/ObservabilityService';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
@@ -150,8 +151,8 @@ const AddAlertScreen = ({ route }: Props) => {
       });
 
       setItems(Array.from(itemsMap.values()));
-    } catch (error) {
-      console.error('Error loading data for alerts:', error);
+    } catch (e) {
+      observabilityService.captureError(e);
       showToast('Error cargando datos de mercado', 'error');
     } finally {
       setLoading(false);
@@ -247,10 +248,9 @@ const AddAlertScreen = ({ route }: Props) => {
 
         showToast(editAlert ? 'Alerta actualizada' : `Alerta creada para ${selectedItem.symbol}`, 'success');
         navigation.goBack();
-    } catch (error) {
-        console.error('Error saving alert:', error);
+    } catch (e) {
+        observabilityService.captureError(e);
         showToast('Error al guardar alerta', 'error');
-    } finally {
         setSaving(false);
     }
   };
@@ -275,8 +275,8 @@ const AddAlertScreen = ({ route }: Props) => {
 
           showToast('Alerta eliminada', 'success');
           navigation.goBack();
-      } catch (error) {
-          console.error('Error deleting alert:', error);
+      } catch (e) {
+          observabilityService.captureError(e);
           showToast('Error al eliminar alerta', 'error');
       } finally {
           setDeleting(false);

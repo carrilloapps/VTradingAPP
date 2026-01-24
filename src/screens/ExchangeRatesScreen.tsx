@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, RefreshControl, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import RateCard from '../components/dashboard/RateCard';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import SearchBar from '../components/ui/SearchBar';
@@ -10,6 +10,7 @@ import FilterSection from '../components/ui/FilterSection';
 import ExchangeRatesSkeleton from '../components/dashboard/ExchangeRatesSkeleton';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
 import { StocksService } from '../services/StocksService';
+import { observabilityService } from '../services/ObservabilityService';
 import { useFilters } from '../context/FilterContext';
 import { useToast } from '../context/ToastContext';
 import { useAppTheme } from '../theme/theme';
@@ -86,8 +87,8 @@ const ExchangeRatesScreen = () => {
         StocksService.getStocks()
     ]).then(() => {
         setIsMarketOpen(StocksService.isMarketOpen());
-    }).catch(err => {
-      console.error(err);
+    }).catch((e) => {
+      observabilityService.captureError(e);
       setError('Error al cargar las tasas de cambio');
       showToast('Error de conexión', 'error');
       setLoading(false);
@@ -107,7 +108,8 @@ const ExchangeRatesScreen = () => {
              StocksService.getStocks(true)
           ]);
           setIsMarketOpen(StocksService.isMarketOpen());
-      } catch {
+      } catch (e) {
+          observabilityService.captureError(e);
           showToast('Error al actualizar', 'error');
       } finally {
           setRefreshing(false);
@@ -116,7 +118,8 @@ const ExchangeRatesScreen = () => {
 
   const loadRates = useCallback(() => {
       setLoading(true);
-      CurrencyService.getRates(true).catch(() => {
+      CurrencyService.getRates(true).catch((e) => {
+          observabilityService.captureError(e);
           showToast('Error al recargar', 'error');
           setLoading(false);
       });
@@ -157,7 +160,7 @@ const ExchangeRatesScreen = () => {
       value={`${rate.value.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`}
       changePercent={rate.changePercent !== null ? `${Math.abs(rate.changePercent).toFixed(2)}%` : ''}
       isPositive={rate.changePercent !== null ? rate.changePercent >= 0 : true}
-      iconName={rate.iconName || 'attach-money'}
+      iconName={rate.iconName || 'currency-usd'}
       iconBgColor={rate.type === 'crypto' ? undefined : colors.infoContainer}
       iconColor={rate.type === 'crypto' ? undefined : colors.info}
     />
@@ -242,7 +245,7 @@ const ExchangeRatesScreen = () => {
 
         {error && filteredRates.length === 0 ? (
            <View style={styles.centerContainer}>
-            <MaterialIcons name="error-outline" size={40} color={accentRed} />
+            <MaterialCommunityIcons name="alert-circle-outline" size={40} color={accentRed} />
             <Text style={[styles.messageText, { color: theme.colors.onSurface }]}>{error}</Text>
             <TouchableOpacity onPress={() => loadRates()} style={styles.retryButton}>
               <Text style={[styles.retryText, { color: theme.colors.primary }]}>Reintentar</Text>
@@ -250,7 +253,7 @@ const ExchangeRatesScreen = () => {
           </View>
         ) : filteredRates.length === 0 ? (
           <View style={styles.centerContainer}>
-             <MaterialIcons name="search-off" size={40} color={theme.colors.onSurfaceVariant} />
+             <MaterialCommunityIcons name="magnify-remove-outline" size={40} color={theme.colors.onSurfaceVariant} />
              <Text style={[styles.messageText, { color: theme.colors.onSurfaceVariant }]}>
                {filterType !== 'all' 
                  ? `No hay resultados para "${filterType}"` 
@@ -278,7 +281,7 @@ const ExchangeRatesScreen = () => {
                     }]}>
                         VER MESAS DE CAMBIO
                     </Text>
-                    <MaterialIcons name="arrow-forward" size={12} color={theme.colors.onPrimaryContainer} />
+                    <MaterialCommunityIcons name="arrow-right" size={12} color={theme.colors.onPrimaryContainer} />
                   </TouchableOpacity>
                 </View>
                 {officialRates.map(renderRateCard)}

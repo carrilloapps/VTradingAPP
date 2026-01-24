@@ -1,9 +1,9 @@
 import React from 'react';
-import { Text, Platform, View, StyleSheet } from 'react-native';
+import { Text, Platform, View } from 'react-native';
 import { NavigationContainer, DefaultTheme as NavDefaultTheme, DarkTheme as NavDarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
-import { useTheme, ActivityIndicator } from 'react-native-paper';
+import { useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import HomeScreen from '../screens/HomeScreen';
@@ -29,6 +29,7 @@ import { storageService } from '../services/StorageService';
 import DiscoverScreen from '../screens/DiscoverScreen';
 import AddAlertScreen from '../screens/settings/AddAlertScreen';
 import { UserAlert } from '../services/StorageService';
+import AuthLoading from '../components/auth/AuthLoading';
 
 export type RootStackParamList = {
   Onboarding: undefined;
@@ -196,29 +197,7 @@ const AppNavigator = () => {
   };
 
   if (authLoading || !isReady) {
-    return (
-      <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background }]}>
-        <View style={[
-          styles.loadingCard,
-          {
-            backgroundColor: theme.colors.surface,
-            borderColor: theme.colors.outline,
-            borderRadius: theme.roundness * 6,
-          }
-        ]}>
-          <MaterialCommunityIcons 
-            name="wallet-outline" 
-            size={80} 
-            color={theme.colors.primary} 
-            style={{ marginBottom: 16 }}
-          />
-          <ActivityIndicator animating={true} color={theme.colors.primary} size="large" />
-          <Text style={[styles.loadingText, { color: theme.colors.onSurface }]}>
-            Cargando
-          </Text>
-        </View>
-      </View>
-    );
+    return <AuthLoading />;
   }
 
   return (
@@ -303,29 +282,5 @@ const AppNavigator = () => {
     </NavigationContainer>
   );
 };
-
-const styles = StyleSheet.create({
-  loadingContainer: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  loadingCard: {
-    width: '100%',
-    maxWidth: 320,
-    paddingVertical: 32,
-    paddingHorizontal: 24,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 0,
-  },
-  loadingText: {
-    marginTop: 8,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});
 
 export default AppNavigator;

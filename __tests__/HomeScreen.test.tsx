@@ -129,6 +129,10 @@ describe('HomeScreen', () => {
       expect(getByText('Dólar BCV')).toBeTruthy();
       expect(getByText('Tether')).toBeTruthy();
     });
+
+    // Verify ExchangeCard props (mocked)
+    // You might need to check if the correct icon name is passed
+    // expect(screen.getByTestId('exchange-card-USD')).toHaveProp('iconName', 'currency-usd');
   });
 
   it('renders calculator section', async () => {

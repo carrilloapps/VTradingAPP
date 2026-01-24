@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface IndexHeroProps {
   value: string;
@@ -34,14 +34,14 @@ const IndexHero: React.FC<IndexHeroProps> = ({
           <View style={styles.headerRow}>
             <Text variant="labelMedium" style={styles.headerText}>INDICE BURSÁTIL CARACAS</Text>
             <View style={styles.iconContainer}>
-              <MaterialIcons name="show-chart" size={18} color="white" />
+              <MaterialCommunityIcons name="chart-line-variant" size={18} color="white" />
             </View>
           </View>
 
           <View style={styles.mainValueRow}>
             <Text variant="displaySmall" style={styles.valueText}>Bs. {value}</Text>
             <View style={styles.changeBadge}>
-              <MaterialIcons name="trending-up" size={16} color="#6EE7B7" />
+              <MaterialCommunityIcons name="trending-up" size={16} color="#6EE7B7" />
               <Text variant="labelLarge" style={styles.changeText}>{changePercent}</Text>
             </View>
           </View>

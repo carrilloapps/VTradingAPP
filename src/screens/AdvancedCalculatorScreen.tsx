@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, FlatList, TextInput as RNTextInput, StatusBar, Keyboard, RefreshControl, Platform } from 'react-native';
 import { Text, useTheme, TouchableRipple } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
+import { observabilityService } from '../services/ObservabilityService';
 import { useToast } from '../context/ToastContext';
 import CurrencyPickerModal from '../components/dashboard/CurrencyPickerModal';
 import CurrencySelectorButton from '../components/dashboard/CurrencySelectorButton';
@@ -45,7 +46,7 @@ const KeypadButton = ({ label, icon, onPress, isAction = false, isDestructive = 
     >
         <View style={styles.centerContent}>
             {icon ? (
-                <MaterialIcons name={icon} size={28} color={contentColor} />
+                <MaterialCommunityIcons name={icon} size={28} color={contentColor} />
             ) : (
                 <Text style={[styles.keypadText, textStyle]}>{label}</Text>
             )}
@@ -124,7 +125,9 @@ const AdvancedCalculatorScreen = () => {
       setRefreshing(false);
       setLastRefreshTime(new Date()); // Update time on any data change (manual or pushed)
     });
-    CurrencyService.getRates().catch(console.error);
+    CurrencyService.getRates().catch((e) => {
+        observabilityService.captureError(e);
+    });
     return () => unsubscribe();
   }, []);
 
@@ -305,7 +308,8 @@ const AdvancedCalculatorScreen = () => {
     try {
         await CurrencyService.getRates(true);
         showToast('Tasas actualizadas', 'success');
-    } catch {
+    } catch (e) {
+        observabilityService.captureError(e);
         showToast('Error al actualizar', 'error');
     } finally {
         setRefreshing(false);
@@ -400,7 +404,7 @@ const AdvancedCalculatorScreen = () => {
               <View style={styles.inputRow}>
                   <CurrencySelectorButton 
                       currencyCode={baseCurrency.code}
-                      iconName={baseCurrency.iconName || 'attach-money'}
+                      iconName={baseCurrency.iconName || 'currency-usd'}
                       onPress={() => { setPickerMode('base'); setPickerVisible(true); }}
                   />
                   
@@ -456,7 +460,7 @@ const AdvancedCalculatorScreen = () => {
                   <View style={[styles.targetRow, themeStyles.targetRow]}>
                       {/* Left Side: Icon */}
                       <View style={[styles.iconBox, themeStyles.iconBox]}>
-                            <MaterialIcons name={item.rateObj.iconName || 'attach-money'} size={24} color={theme.colors.primary} />
+                            <MaterialCommunityIcons name={item.rateObj.iconName || 'currency-usd'} size={24} color={theme.colors.primary} />
                       </View>
 
                       {/* Middle: Code & Name */}
@@ -500,7 +504,7 @@ const AdvancedCalculatorScreen = () => {
                           hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
                           style={[styles.closeButton, themeStyles.errorContainer]}
                       >
-                          <MaterialIcons name="close" size={14} color={theme.colors.error} />
+                          <MaterialCommunityIcons name="close" size={14} color={theme.colors.error} />
                       </TouchableOpacity>
                   </View>
               )}
@@ -510,7 +514,7 @@ const AdvancedCalculatorScreen = () => {
                     style={[styles.addButton, themeStyles.addButton]}
                   >
                       <View style={[styles.addIcon, themeStyles.addIcon]}>
-                        <MaterialIcons name="add" size={18} color={theme.colors.onSecondaryContainer} />
+                        <MaterialCommunityIcons name="add" size={18} color={theme.colors.onSecondaryContainer} />
                       </View>
                       <Text style={[styles.addText, themeStyles.textSecondary]}>
                           AÑADIR OTRA DIVISA

@@ -110,7 +110,7 @@ const UserProfileCard = ({ user, onEdit, onRegister }: UserProfileCardProps) => 
             style={styles.editButton}
             onPress={onEdit}
           >
-            <MaterialCommunityIcons name="edit" size={20} color={theme.colors.onSurfaceVariant} />
+            <MaterialCommunityIcons name="pencil" size={20} color={theme.colors.onSurfaceVariant} />
           </TouchableOpacity>
         )}
       </View>

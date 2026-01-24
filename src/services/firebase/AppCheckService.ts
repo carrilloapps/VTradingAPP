@@ -1,5 +1,6 @@
 import { initializeAppCheck, getToken, AppCheck } from '@react-native-firebase/app-check';
 import { getApp } from '@react-native-firebase/app';
+import { observabilityService } from '../ObservabilityService';
 
 class AppCheckService {
   private appCheckInstance: AppCheck | null = null;
@@ -30,9 +31,9 @@ class AppCheckService {
         provider,
         isTokenAutoRefreshEnabled: true,
       });
-      console.log('[AppCheck] Initialized');
-    } catch (error) {
-      console.error('[AppCheck] Initialization error:', error);
+    } catch (e) {
+      observabilityService.captureError(e);
+      // Ignore error
     }
   }
 
@@ -48,7 +49,7 @@ class AppCheckService {
       if (!this.appCheckInstance) {
         // Suppress warning if repeated too frequently
         if (Date.now() - this.lastErrorTime > 60000) {
-            console.warn('[AppCheck] Instance not initialized. Call initialize() first.');
+            // Instance not initialized
             this.lastErrorTime = Date.now();
         }
         return undefined;
@@ -59,7 +60,6 @@ class AppCheckService {
       const backoffTime = Math.min(60000 * Math.pow(2, this.errorCount - 3), 3600000);
       
       if (this.errorCount > 3 && Date.now() - this.lastErrorTime < backoffTime) {
-          if (__DEV__) console.log(`[AppCheck] Backing off for ${backoffTime/1000}s`);
           return undefined; 
       }
 
@@ -67,12 +67,13 @@ class AppCheckService {
       this.errorCount = 0; // Reset on success
       this.lastErrorMessage = '';
       return result.token;
-    } catch (error: any) {
+    } catch (e: any) {
+      observabilityService.captureError(e);
       this.lastErrorTime = Date.now();
       this.errorCount++;
 
       // Handle "API not enabled" or configuration errors gracefully
-      const message = error.message || '';
+      const message = e.message || '';
       
       // Silence expected development errors or quota exceeded
       if (message.includes('App Check API has not been used') || 
@@ -80,14 +81,13 @@ class AppCheckService {
           message.includes('Too many attempts')) {
          
          if (__DEV__ && this.errorCount === 1) { // Only warn once per backoff period
-             console.warn('[AppCheck] Warning: App Check skipped (API not enabled or quota exceeded).');
+             // Warning: App Check skipped
          }
          return undefined;
       }
 
       // Avoid spamming the same error
       if (message !== this.lastErrorMessage) {
-          console.warn('[AppCheck] Error obteniendo token:', message);
           this.lastErrorMessage = message;
       }
       

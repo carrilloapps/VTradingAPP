@@ -15,6 +15,7 @@ import { useToast } from '../context/ToastContext';
 import { AppConfig } from '../constants/AppConfig';
 import { TetherIcon } from '../components/ui/TetherIcon';
 import AdvancedCalculatorCTA from '../components/dashboard/AdvancedCalculatorCTA';
+import { observabilityService } from '../services/ObservabilityService';
 
 const HomeScreen = () => {
   const theme = useTheme();
@@ -97,7 +98,8 @@ const HomeScreen = () => {
                 displayValue = Number(rate.value).toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES });
             }
         } catch (e) {
-            console.warn('Error formatting value', e);
+            observabilityService.captureError(e);
+            // Error formatting value
         }
 
         // Handle potential undefined/null for buy/sell
@@ -125,7 +127,7 @@ const HomeScreen = () => {
         const iconBackground = theme.dark ? theme.colors.primary : theme.colors.inversePrimary;
 
         if (rate.code === 'USD') {
-            iconName = 'attach-money';
+            iconName = 'currency-usd';
             iconColor = iconBackground;
             iconTintColor = '#212121';
         } else if (rate.code === 'USDT') {
@@ -173,16 +175,21 @@ const HomeScreen = () => {
     });
 
     // Initial fetch
-    Promise.all([
-        CurrencyService.getRates(),
-        StocksService.getStocks()
-    ]).then(() => {
-        setIsMarketOpen(StocksService.isMarketOpen());
-    }).catch(error => {
-        console.error(error);
-        showToast('Error al actualizar datos', 'error');
-        setLoading(false);
-    });
+    const loadInitialData = async () => {
+        try {
+            await Promise.all([
+                CurrencyService.getRates(),
+                StocksService.getStocks()
+            ]);
+            setIsMarketOpen(StocksService.isMarketOpen());
+        } catch (e) {
+            observabilityService.captureError(e);
+            showToast('Error al actualizar datos', 'error');
+        } finally {
+            setLoading(false);
+        }
+    };
+    loadInitialData();
 
     return () => {
         unsubscribeRates();
@@ -200,8 +207,8 @@ const HomeScreen = () => {
         setIsMarketOpen(StocksService.isMarketOpen());
         showToast('Datos actualizados', 'success');
         setLastRefreshTime(new Date()); // Force update time immediately on success
-    } catch (error) {
-        console.error(error);
+    } catch (e) {
+        observabilityService.captureError(e);
         showToast('Error al actualizar', 'error');
     } finally {
         setRefreshing(false);

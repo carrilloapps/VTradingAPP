@@ -7,6 +7,7 @@ import { useToast } from '../../context/ToastContext';
 import CurrencyPickerModal from './CurrencyPickerModal';
 import CurrencySelectorButton from './CurrencySelectorButton';
 import { AppConfig } from '../../constants/AppConfig';
+import { observabilityService } from '../../services/ObservabilityService';
 
 const CurrencyConverter: React.FC = () => {
   const theme = useTheme();
@@ -154,7 +155,9 @@ const CurrencyConverter: React.FC = () => {
     });
 
     // Trigger initial fetch
-    CurrencyService.getRates().catch(err => console.error("Error initial fetch", err));
+    CurrencyService.getRates().catch(e => {
+        observabilityService.captureError(e);
+    });
 
     return () => unsubscribe();
   }, []); // Run once on mount
@@ -258,7 +261,7 @@ const CurrencyConverter: React.FC = () => {
         <View style={styles.row}>
             <CurrencySelectorButton 
                 currencyCode={fromCurrency?.code || 'SEL'}
-                iconName={fromCurrency?.iconName || 'attach-money'}
+                iconName={fromCurrency?.iconName || 'currency-usd'}
                 onPress={() => setShowFromPicker(true)}
                 style={{zIndex: 10}}
             />
@@ -301,7 +304,7 @@ const CurrencyConverter: React.FC = () => {
         <View style={styles.row}>
             <CurrencySelectorButton 
                 currencyCode={toCurrency?.code || 'SEL'}
-                iconName={toCurrency?.iconName || 'attach-money'}
+                iconName={toCurrency?.iconName || 'currency-usd'}
                 onPress={() => setShowToPicker(true)}
             />
             

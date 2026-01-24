@@ -20,7 +20,7 @@ jest.mock('react-native-safe-area-context', () => {
   };
 });
 
-jest.mock('react-native-vector-icons/MaterialIcons', () => 'Icon');
+jest.mock('react-native-vector-icons/MaterialCommunityIcons', () => 'Icon');
 
 // Mock ThemeContext
 jest.mock('../src/theme/ThemeContext', () => ({

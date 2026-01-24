@@ -1,5 +1,6 @@
 import { apiClient } from './ApiClient';
 import { performanceService } from './firebase/PerformanceService';
+import { observabilityService } from './ObservabilityService';
 
 export interface StockData {
   id: string;
@@ -167,11 +168,11 @@ export class StocksService {
        });
        const rawList = response.data || response.stocks || [];
        return rawList.map(item => this.mapStock(item));
-     } catch (error) {
-      console.error('Error fetching all stocks:', error);
-      return [];
-    }
-  }
+    } catch (e) {
+     observabilityService.captureError(e);
+     return [];
+   }
+ }
 
   /**
    * Fetch stocks with pagination support
@@ -234,22 +235,17 @@ export class StocksService {
       this.notifyListeners(this.currentStocks);
       return this.currentStocks;
 
-    } catch (error) {
-      console.error('Error fetching stocks:', error);
-      trace.putAttribute('error', 'true');
+    } catch (e) {
+      observabilityService.captureError(e);
+      // Error fetching stocks
       
-      if (this.currentStocks.length === 0) {
-         // Fallback logic remains for critical failures on empty state
-         console.warn("Using fallback data due to API failure");
-         const fallbackStocks: StockData[] = [
-            { id: '1', symbol: 'BNC', name: 'Banco Nal. de Crédito', price: 0.0035, changePercent: 2.10, initials: 'BNC', color: 'emerald', category: 'Banca' },
-            { id: '2', symbol: 'MVZ.A', name: 'Mercantil Serv. Fin.', price: 145.50, changePercent: -0.50, initials: 'MVZ', color: 'blue', category: 'Banca' }
-         ];
-         this.notifyListeners(fallbackStocks);
-         return fallbackStocks;
+      // Fallback: Return cached if available even if expired, or empty
+      if (this.currentStocks.length > 0) {
+         // Using fallback data due to API failure
+         return this.currentStocks;
       }
       
-      throw error;
+      throw e;
     } finally {
       this.isLoadingMore = false;
       await performanceService.stopTrace(trace);
@@ -277,6 +273,7 @@ export class StocksService {
               opening: "54.575,20"
           };
       } catch (e) {
+          observabilityService.captureError(e);
           return null;
       }
   }

@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { View, StyleSheet, StatusBar, RefreshControl, FlatList, ActivityIndicator } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MarketStatus from '../components/ui/MarketStatus';
 import IndexHero from '../components/stocks/IndexHero';
@@ -12,6 +12,7 @@ import { useFilters } from '../context/FilterContext';
 import { StocksService, StockData } from '../services/StocksService';
 import { useToast } from '../context/ToastContext';
 import StocksSkeleton from '../components/stocks/StocksSkeleton';
+import { observabilityService } from '../services/ObservabilityService';
 
 const StocksScreen = () => {
   const theme = useTheme();
@@ -46,7 +47,6 @@ const StocksScreen = () => {
             setIndexData(idx);
             setIsMarketOpen(StocksService.isMarketOpen());
         } catch (error) {
-            console.error(error);
             showToast('Error cargando datos del mercado', 'error');
             setLoading(false);
         }
@@ -65,7 +65,8 @@ const StocksScreen = () => {
         setIndexData(idx);
         setIsMarketOpen(StocksService.isMarketOpen());
         showToast('Mercado actualizado', 'success');
-    } catch (error) {
+    } catch (e) {
+        observabilityService.captureError(e);
         showToast('Error actualizando mercado', 'error');
     } finally {
         setRefreshing(false);
@@ -213,7 +214,7 @@ const StocksScreen = () => {
         style={styles.content}
         ListEmptyComponent={
             <View style={{ padding: 40, alignItems: 'center', justifyContent: 'center' }}>
-                <MaterialIcons name="sentiment-dissatisfied" size={48} color={theme.colors.onSurfaceVariant} style={{ opacity: 0.5, marginBottom: 16 }} />
+                <MaterialCommunityIcons name="emoticon-sad-outline" size={48} color={theme.colors.onSurfaceVariant} style={{ opacity: 0.5, marginBottom: 16 }} />
                 <Text style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}>
                     No se encontraron acciones para "{activeFilter}"
                 </Text>

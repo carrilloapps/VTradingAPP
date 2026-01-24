@@ -10,6 +10,7 @@ import CustomButton from '../../components/ui/CustomButton';
 import UnifiedHeader from '../../components/ui/UnifiedHeader';
 import { useAppTheme } from '../../theme/theme';
 import AuthLogo from '../../components/ui/AuthLogo';
+import { observabilityService } from '../../services/ObservabilityService';
 
 const RegisterScreen = ({ navigation }: any) => {
   const theme = useAppTheme();
@@ -125,7 +126,8 @@ const RegisterScreen = ({ navigation }: any) => {
       await analyticsService.logEvent('sign_up_attempt', { method: 'google' });
       await googleSignIn();
       await analyticsService.logEvent('sign_up_success', { method: 'google' });
-    } catch {
+    } catch (e) {
+      observabilityService.captureError(e);
       await analyticsService.logEvent('sign_up_error', { method: 'google' });
     } finally {
       setIsSubmitting(false);

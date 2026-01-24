@@ -16,6 +16,7 @@ import {
 } from '@react-native-firebase/messaging';
 import { PermissionsAndroid, Platform, Appearance } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
+import { observabilityService } from '../ObservabilityService';
 
 class FCMService {
   private messaging: Messaging;
@@ -69,7 +70,8 @@ class FCMService {
       const token = await getToken(this.messaging);
       console.log('FCM Token:', token);
       return token;
-    } catch (error) {
+    } catch (e) {
+      observabilityService.captureError(e);
       return null;
     }
   }
@@ -117,7 +119,8 @@ class FCMService {
       // Ensure topic matches regex: [a-zA-Z0-9-_.~%]+
       const sanitizedTopic = topic.replace(/[^a-zA-Z0-9-_.~%]/g, '_');
       await this.messaging.subscribeToTopic(sanitizedTopic);
-    } catch (error) {
+    } catch (e) {
+      observabilityService.captureError(e);
       // Ignore error
     }
   }
@@ -129,7 +132,8 @@ class FCMService {
   async subscribeToDemographics(topics: string[]): Promise<void> {
     try {
       await Promise.all(topics.map(topic => this.subscribeToTopic(topic)));
-    } catch (error) {
+    } catch (e) {
+      observabilityService.captureError(e);
       // Ignore error
     }
   }
@@ -141,7 +145,8 @@ class FCMService {
     try {
       const sanitizedTopic = topic.replace(/[^a-zA-Z0-9-_.~%]/g, '_');
       await this.messaging.unsubscribeFromTopic(sanitizedTopic);
-    } catch (error) {
+    } catch (e) {
+      observabilityService.captureError(e);
       // Ignore error
     }
   }

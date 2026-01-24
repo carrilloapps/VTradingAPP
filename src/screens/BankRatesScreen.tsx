@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet, FlatList, StatusBar, ActivityIndicator, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import BankRateCard from '../components/dashboard/BankRateCard';
 import BankRatesSkeleton from '../components/dashboard/BankRatesSkeleton';
@@ -12,6 +12,7 @@ import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
 import { useToast } from '../context/ToastContext';
 import { AppTheme } from '../theme/theme';
 import { useNavigation } from '@react-navigation/native';
+import { observabilityService } from '../services/ObservabilityService';
 
 const isFabricEnabled = !!(globalThis as any).nativeFabricUIManager;
 
@@ -51,7 +52,7 @@ const BankRatesScreen = () => {
                   const bcv = allRates.find(r => r.code === 'USD' && (r.source === 'BCV' || r.name.includes('BCV')));
                   if (bcv) setOfficialRate(bcv);
               } catch (e) {
-                  console.warn('Failed to fetch BCV rate', e);
+                  // Failed to fetch BCV rate silently
               }
 
               setBankRates(rates);
@@ -61,8 +62,8 @@ const BankRatesScreen = () => {
 
           setPage(Number(pagination.page));
           setHasMore(Number(pagination.page) < Number(pagination.totalPages));
-      } catch (err) {
-          console.error(err);
+      } catch (e) {
+          observabilityService.captureError(e);
           // Only show error toast if it's the first page or refresh
           if (isRefresh || nextInfo.page === 1) {
              showToast('Error de conexión', 'error');
@@ -199,7 +200,7 @@ const BankRatesScreen = () => {
                   <View style={styles.bcvCardContent}>
                       <View style={styles.bcvHeader}>
                           <View style={[styles.bcvIconContainer, { backgroundColor: 'rgba(255,255,255,0.2)', borderColor: 'rgba(255,255,255,0.1)' }]}>
-                              <MaterialIcons name="account-balance" size={24} color={theme.colors.onPrimary} />
+                              <MaterialCommunityIcons name="bank" size={24} color={theme.colors.onPrimary} />
                           </View>
                           <View>
                               <Text style={[styles.bcvTitle, { color: theme.colors.onPrimary }]}>Tasa General (BCV)</Text>
@@ -228,7 +229,7 @@ const BankRatesScreen = () => {
                   
                   {/* Decorative huge icon */}
                   <View style={styles.decorativeIcon}>
-                      <MaterialIcons name="account-balance" size={160} color={theme.colors.onPrimary} style={{ opacity: 0.1 }} />
+                      <MaterialCommunityIcons name="bank" size={160} color={theme.colors.onPrimary} style={{ opacity: 0.1 }} />
                   </View>
               </LinearGradient>
           </View>

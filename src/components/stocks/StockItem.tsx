@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Text } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../theme/theme';
 
 export interface StockData {
@@ -132,9 +132,9 @@ const StockItem: React.FC<StockData> = ({
         </Text>
         <View style={badgeStyle}>
           {isPositive ? (
-            <MaterialIcons name="trending-up" size={12} color={theme.colors.trendUp} />
+            <MaterialCommunityIcons name="trending-up" size={12} color={theme.colors.trendUp} />
           ) : isNegative ? (
-            <MaterialIcons name="trending-down" size={12} color={theme.colors.trendDown} />
+            <MaterialCommunityIcons name="trending-down" size={12} color={theme.colors.trendDown} />
           ) : null}
           <Text style={changeTextStyle}>
             {formattedChange}

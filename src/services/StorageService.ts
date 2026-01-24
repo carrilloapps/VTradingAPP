@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { observabilityService } from './ObservabilityService';
 
 const KEYS = {
   SETTINGS: 'app_settings',
@@ -57,7 +58,7 @@ class StorageService {
       const data = await AsyncStorage.getItem(KEYS.SETTINGS);
       return data ? JSON.parse(data) : { pushEnabled: true };
     } catch (e) {
-      console.error('Failed to load settings', e);
+      observabilityService.captureError(e);
       return { pushEnabled: true };
     }
   }
@@ -68,7 +69,8 @@ class StorageService {
       const newSettings = { ...current, ...settings };
       await AsyncStorage.setItem(KEYS.SETTINGS, JSON.stringify(newSettings));
     } catch (e) {
-      console.error('Failed to save settings', e);
+      observabilityService.captureError(e);
+      // Failed to save settings
     }
   }
 
@@ -81,7 +83,7 @@ class StorageService {
       }
       return JSON.parse(data);
     } catch (e) {
-      console.error('Failed to load alerts', e);
+      observabilityService.captureError(e);
       return [];
     }
   }
@@ -90,7 +92,8 @@ class StorageService {
     try {
       await AsyncStorage.setItem(KEYS.ALERTS, JSON.stringify(alerts));
     } catch (e) {
-      console.error('Failed to save alerts', e);
+      observabilityService.captureError(e);
+      // Failed to save alerts
     }
   }
 
@@ -99,7 +102,7 @@ class StorageService {
       const data = await AsyncStorage.getItem(KEYS.NOTIFICATIONS);
       return data ? JSON.parse(data) : [];
     } catch (e) {
-      console.error('Failed to load notifications', e);
+      observabilityService.captureError(e);
       return [];
     }
   }
@@ -108,7 +111,8 @@ class StorageService {
     try {
       await AsyncStorage.setItem(KEYS.NOTIFICATIONS, JSON.stringify(notifications));
     } catch (e) {
-      console.error('Failed to save notifications', e);
+      observabilityService.captureError(e);
+      // Failed to save notifications
     }
   }
 
@@ -122,7 +126,7 @@ class StorageService {
         refreshInterval: parsed.refreshInterval || '4',
       };
     } catch (e) {
-      console.error('Failed to load widget config', e);
+      observabilityService.captureError(e);
       return null;
     }
   }
@@ -131,7 +135,8 @@ class StorageService {
     try {
       await AsyncStorage.setItem(KEYS.WIDGET_CONFIG, JSON.stringify(config));
     } catch (e) {
-      console.error('Failed to save widget config', e);
+      observabilityService.captureError(e);
+      // Failed to save widget config
     }
   }
 
@@ -140,7 +145,7 @@ class StorageService {
       const data = await AsyncStorage.getItem(KEYS.WIDGET_REFRESH_META);
       return data ? JSON.parse(data) : null;
     } catch (e) {
-      console.error('Failed to load widget refresh meta', e);
+      observabilityService.captureError(e);
       return null;
     }
   }
@@ -149,7 +154,8 @@ class StorageService {
     try {
       await AsyncStorage.setItem(KEYS.WIDGET_REFRESH_META, JSON.stringify(meta));
     } catch (e) {
-      console.error('Failed to save widget refresh meta', e);
+      observabilityService.captureError(e);
+      // Failed to save widget refresh meta
     }
   }
 
@@ -158,7 +164,7 @@ class StorageService {
       const data = await AsyncStorage.getItem(KEYS.HAS_SEEN_ONBOARDING);
       return data === 'true';
     } catch (e) {
-      console.error('Failed to load onboarding status', e);
+      observabilityService.captureError(e);
       return false;
     }
   }
@@ -167,7 +173,8 @@ class StorageService {
     try {
       await AsyncStorage.setItem(KEYS.HAS_SEEN_ONBOARDING, String(value));
     } catch (e) {
-      console.error('Failed to save onboarding status', e);
+      observabilityService.captureError(e);
+      // Failed to save onboarding status
     }
   }
 }

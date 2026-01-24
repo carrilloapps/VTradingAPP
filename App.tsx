@@ -15,6 +15,7 @@ import { FilterProvider } from './src/context/FilterContext';
 import { AuthProvider } from './src/context/AuthContext';
 import { ToastProvider } from './src/context/ToastContext';
 import { NotificationProvider } from './src/context/NotificationContext';
+import { NetworkProvider } from './src/context/NetworkContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { fcmService } from './src/services/firebase/FCMService';
 import { inAppMessagingService } from './src/services/firebase/InAppMessagingService';
@@ -22,6 +23,7 @@ import { appCheckService } from './src/services/firebase/AppCheckService';
 import { remoteConfigService } from './src/services/firebase/RemoteConfigService';
 import { appDistributionService } from './src/services/firebase/AppDistributionService';
 import NotificationController from './src/components/ui/NotificationController';
+import NoInternetModal from './src/components/ui/NoInternetModal';
 import mobileAds from 'react-native-google-mobile-ads';
 import { getCrashlytics, setCrashlyticsCollectionEnabled, log } from '@react-native-firebase/crashlytics';
 import { getPerformance, trace, initializePerformance } from '@react-native-firebase/perf';
@@ -84,7 +86,7 @@ function App(): React.JSX.Element {
         const hasPermission = await fcmService.requestUserPermission();
         if (hasPermission) {
           await fcmService.getFCMToken();
-          await fcmService.subscribeToDemographics();
+          await fcmService.subscribeToDemographics([]);
         }
       } finally {
         await initTrace.stop();
@@ -97,18 +99,21 @@ function App(): React.JSX.Element {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <ThemeProvider>
-          <ToastProvider>
-            <AuthProvider>
-              <NotificationProvider>
-                <FilterProvider>
-                  <AppNavigator />
-                  <NotificationController />
-                </FilterProvider>
-              </NotificationProvider>
-            </AuthProvider>
-          </ToastProvider>
-        </ThemeProvider>
+        <NetworkProvider>
+          <ThemeProvider>
+            <ToastProvider>
+              <AuthProvider>
+                <NotificationProvider>
+                  <FilterProvider>
+                    <AppNavigator />
+                    <NotificationController />
+                    <NoInternetModal />
+                  </FilterProvider>
+                </NotificationProvider>
+              </AuthProvider>
+            </ToastProvider>
+          </ThemeProvider>
+        </NetworkProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );

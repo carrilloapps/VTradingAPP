@@ -1,5 +1,6 @@
 import { getAppDistribution, checkForUpdate } from '@react-native-firebase/app-distribution';
 import { Platform } from 'react-native';
+import { observabilityService } from '../ObservabilityService';
 
 class AppDistributionService {
   /**
@@ -17,12 +18,12 @@ class AppDistributionService {
     try {
       const appDistribution = getAppDistribution();
       await checkForUpdate(appDistribution);
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
+    } catch (e) {
+      observabilityService.captureError(e);
+      const message = e instanceof Error ? e.message : String(e);
       if (message.includes('not supported')) {
         return;
       }
-      console.error('[AppDistribution] Error checking for update:', error);
     }
   }
 }

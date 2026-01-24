@@ -2,6 +2,7 @@ import { appCheckService } from './firebase/AppCheckService';
 import { getPerformance, httpMetric, initializePerformance, FirebasePerformanceTypes } from '@react-native-firebase/perf';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppConfig } from '../constants/AppConfig';
+import { observabilityService } from './ObservabilityService';
 
 interface CacheItem<T> {
   data: T;
@@ -44,12 +45,12 @@ class ApiClient {
           const { data, timestamp } = JSON.parse(cached) as CacheItem<T>;
           const ttl = options.cacheTTL || 5 * 60 * 1000; // Default 5 mins
           if (Date.now() - timestamp < ttl) {
-            console.log(`[ApiClient] Serving from cache: ${url}`);
             return data;
           }
         }
       } catch (e) {
-        console.warn('[ApiClient] Cache read error', e);
+        observabilityService.captureError(e);
+        // Cache read error
       }
     }
 
@@ -63,7 +64,8 @@ class ApiClient {
         metric = httpMetric(perf, url, 'GET');
         await metric.start();
     } catch (e) {
-      console.warn('[ApiClient] Perf monitor failed', e);
+      observabilityService.captureError(e);
+      // Perf monitor failed
     }
 
     // 3. Setup Headers
@@ -104,7 +106,8 @@ class ApiClient {
 
           await metric.stop();
         } catch (e) {
-            console.warn('[ApiClient] Perf metric stop failed', e);
+            observabilityService.captureError(e);
+            // Perf metric stop failed
         }
       }
 
@@ -124,30 +127,30 @@ class ApiClient {
           };
           await AsyncStorage.setItem(cacheKey, JSON.stringify(cacheItem));
         } catch (e) {
-          console.warn('[ApiClient] Cache write error', e);
+          observabilityService.captureError(e);
+          // Cache write error
         }
       }
 
       return data;
-    } catch (error: any) {
+    } catch (e: any) {
+      observabilityService.captureError(e);
       if (metric) {
-          try { await metric.stop(); } catch {}
+          try { await metric.stop(); } catch (stopError) { observabilityService.captureError(stopError); }
       }
-      console.error(`[ApiClient] Error fetching ${url}:`, error);
       
       // Return stale cache if available on network error
       if (options.useCache) {
         try {
             const cached = await AsyncStorage.getItem(cacheKey);
             if (cached) {
-                console.log(`[ApiClient] Network failed, serving stale cache: ${url}`);
                 const { data } = JSON.parse(cached) as CacheItem<T>;
                 return data;
             }
-        } catch { /* ignore */ }
+        } catch (cacheError) { observabilityService.captureError(cacheError); /* ignore */ }
       }
       
-      throw error;
+      throw e;
     }
   }
 }

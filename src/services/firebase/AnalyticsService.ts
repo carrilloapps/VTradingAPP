@@ -1,4 +1,5 @@
 import { getAnalytics, logEvent, setUserProperty, setUserId } from '@react-native-firebase/analytics';
+import { observabilityService } from '../ObservabilityService';
 
 class AnalyticsService {
   /**
@@ -7,9 +8,9 @@ class AnalyticsService {
   async logEvent(name: string, params?: Record<string, any>): Promise<void> {
     try {
       await logEvent(getAnalytics(), name, params);
-      console.log(`[Analytics] Event logged: ${name}`, params);
-    } catch (error) {
-      console.error(`[Analytics] Error logging event ${name}:`, error);
+    } catch (e) {
+      observabilityService.captureError(e);
+      // Error logging event
     }
   }
 
@@ -23,9 +24,9 @@ class AnalyticsService {
         screen_name: screenName,
         screen_class: screenClass || screenName,
       });
-      console.log(`[Analytics] Screen view logged: ${screenName}`);
-    } catch (error) {
-      console.error(`[Analytics] Error logging screen view ${screenName}:`, error);
+    } catch (e) {
+      observabilityService.captureError(e);
+      // Error logging screen view
     }
   }
 
@@ -35,8 +36,9 @@ class AnalyticsService {
   async setUserProperty(name: string, value: string): Promise<void> {
     try {
       await setUserProperty(getAnalytics(), name, value);
-    } catch (error) {
-      console.error(`[Analytics] Error setting user property ${name}:`, error);
+    } catch (e) {
+      observabilityService.captureError(e);
+      // Error setting user property
     }
   }
 
@@ -46,8 +48,9 @@ class AnalyticsService {
   async setUserId(userId: string | null): Promise<void> {
     try {
       await setUserId(getAnalytics(), userId);
-    } catch (error) {
-      console.error(`[Analytics] Error setting user ID:`, error);
+    } catch (e) {
+      observabilityService.captureError(e);
+      // Error setting user ID
     }
   }
 }

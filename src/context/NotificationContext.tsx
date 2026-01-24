@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { storageService, StoredNotification } from '../services/StorageService';
 import { fcmService } from '../services/firebase/FCMService';
 import { navigationRef } from '../navigation/NavigationRef';
+import { observabilityService } from '../services/ObservabilityService';
 
 interface NotificationContextType {
   notifications: StoredNotification[];
@@ -46,7 +47,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             setNotifications(stored);
         }
       } catch (e) {
-        console.error('Error loading notifications', e);
+        observabilityService.captureError(e);
+        // Error loading notifications
       } finally {
         setIsLoading(false);
       }
@@ -89,14 +91,15 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     // 1. Initial Notification (Quit State)
     fcmService.getInitialNotification().then(remoteMessage => {
       if (remoteMessage) {
-        console.log('Notification caused app to open from quit state:', remoteMessage);
+        // Notification caused app to open from quit state
         // Navigate to Notifications Screen
         setTimeout(() => {
              if (navigationRef.isReady()) {
                  try {
                      navigationRef.navigate('Notifications');
                  } catch (e) {
-                     console.log('Navigation to Notifications failed (possibly unauthenticated)', e);
+                     observabilityService.captureError(e);
+                     // Navigation failed
                  }
              }
         }, 1000);
@@ -105,20 +108,19 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     // 2. Background State
     const unsubscribeOpened = fcmService.onNotificationOpenedApp(remoteMessage => {
-      console.log('Notification caused app to open from background state:', remoteMessage);
        // Navigate to Notifications Screen
        if (navigationRef.isReady()) {
            try {
                navigationRef.navigate('Notifications');
            } catch (e) {
-               console.log('Navigation to Notifications failed', e);
+               observabilityService.captureError(e);
+               // Navigation to Notifications failed
            }
        }
     });
 
     // 3. Foreground State
     const unsubscribeMessage = fcmService.onMessage(async (remoteMessage) => {
-      console.log('Foreground Message in Context:', remoteMessage);
       
       // Add to list
       if (remoteMessage.notification || remoteMessage.data) {
@@ -175,10 +177,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                    } else {
                        // Price update received but no alert condition met -> Ignore it
                        shouldAdd = false;
-                       console.log('Price update received but no matching local alert condition met. Ignoring in history.');
                    }
                } catch (e) {
-                   console.error('Error checking alerts in NotificationContext', e);
+                   observabilityService.captureError(e);
+                   // Error checking alerts in NotificationContext
                    // Fallback: If error checking alerts, add it anyway but try to infer trend
                    // (Keep existing fallback logic if needed, or better safe to not spam?)
                    // Let's keep it but with neutral text if possible.

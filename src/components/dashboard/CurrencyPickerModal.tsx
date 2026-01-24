@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, SectionList } from 'react-native';
 import { Text, useTheme, Searchbar, Button } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { CurrencyRate } from '../../services/CurrencyService';
 import { BottomSheetModal } from '../ui/BottomSheetModal';
 import { AppConfig } from '../../constants/AppConfig';
@@ -155,8 +155,8 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
                             styles.iconPlaceholder, 
                             isSelected ? themeStyles.iconPlaceholderSelected : themeStyles.iconPlaceholderNormal
                         ]}>
-                             <MaterialIcons 
-                                name={item.iconName || 'attach-money'} 
+                             <MaterialCommunityIcons 
+                                name={item.iconName || 'currency-usd'} 
                                 size={24} 
                                 color={isSelected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant} 
                              />
@@ -175,7 +175,7 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
                             </Text>
                             {isSelected && (
                                 <View style={styles.checkContainer}>
-                                    <MaterialIcons name="check-circle" size={16} color={theme.colors.primary} />
+                                    <MaterialCommunityIcons name="check-circle" size={16} color={theme.colors.primary} />
                                 </View>
                             )}
                         </View>

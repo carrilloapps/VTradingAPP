@@ -10,8 +10,9 @@ import {
   FirebaseAuthTypes,
   sendPasswordResetEmail
 } from '@react-native-firebase/auth';
-import { GoogleSignin } from '@react-native-google-signin/google-signin';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { AppConfig } from '../../constants/AppConfig';
+import { observabilityService } from '../ObservabilityService';
 
 class AuthService {
   private googleWebClientId: string | null;
@@ -43,9 +44,9 @@ class AuthService {
   async signInWithEmail(email: string, password: string): Promise<FirebaseAuthTypes.UserCredential> {
     try {
       return await signInWithEmailAndPassword(getAuth(), email, password);
-    } catch (error: any) {
-      console.error('Error signing in:', error);
-      throw this.handleError(error);
+    } catch (e) {
+      observabilityService.captureError(e);
+      throw this.handleError(e);
     }
   }
 
@@ -55,22 +56,20 @@ class AuthService {
   async signUpWithEmail(email: string, password: string): Promise<FirebaseAuthTypes.UserCredential> {
     try {
       return await createUserWithEmailAndPassword(getAuth(), email, password);
-    } catch (error: any) {
-      console.error('Error signing up:', error);
-      throw this.handleError(error);
+    } catch (e) {
+      observabilityService.captureError(e);
+      throw this.handleError(e);
     }
   }
 
   /**
    * Sign in with Google
    */
-  async signInWithGoogle(): Promise<FirebaseAuthTypes.UserCredential> {
+  async signInWithGoogle(): Promise<FirebaseAuthTypes.UserCredential | null> {
     try {
-      if (!this.googleWebClientId) {
-        throw new Error('Google Sign-In no está configurado. Actualiza AppConfig.GOOGLE_WEB_CLIENT_ID con el Web Client ID de Firebase.');
-      }
-      // Check if your device supports Google Play
+      // Check if Google Play Services is available
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      
       // Get the users ID token
       const signInResult = await GoogleSignin.signIn();
       const idToken = signInResult.data?.idToken;
@@ -84,9 +83,21 @@ class AuthService {
 
       // Sign-in the user with the credential
       return await signInWithCredential(getAuth(), googleCredential);
-    } catch (error: any) {
-      console.error('Error signing in with Google:', error);
-      throw this.handleError(error);
+    } catch (e: any) {
+      observabilityService.captureError(e);
+      if (e.code === statusCodes.SIGN_IN_CANCELLED) {
+        // user cancelled the login flow
+        return null;
+      } else if (e.code === statusCodes.IN_PROGRESS) {
+        // operation (e.g. sign in) is in progress already
+        return null;
+      } else if (e.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
+        // play services not available or outdated
+        throw new Error('Google Play Services not available');
+      } else {
+        // some other error happened
+        throw this.handleError(e);
+      }
     }
   }
 
@@ -96,9 +107,9 @@ class AuthService {
   async signInAnonymously(): Promise<FirebaseAuthTypes.UserCredential> {
     try {
       return await signInAnonymously(getAuth());
-    } catch (error: any) {
-      console.error('Error signing in anonymously:', error);
-      throw this.handleError(error);
+    } catch (e) {
+      observabilityService.captureError(e);
+      throw this.handleError(e);
     }
   }
 
@@ -107,19 +118,27 @@ class AuthService {
    */
   async signOut(): Promise<void> {
     try {
-      // Sign out from Google as well if signed in
       const currentUser = getAuth().currentUser;
-      if (currentUser?.providerData.some(p => p.providerId === 'google.com')) {
+      if (currentUser) {
+        // If signed in with Google, sign out from Google as well
+        const isGoogleUser = currentUser.providerData.some(
+          provider => provider.providerId === 'google.com'
+        );
+        
+        if (isGoogleUser) {
           try {
-             await GoogleSignin.signOut();
-          } catch (e) {
-             console.warn("Google sign out error", e);
+            await GoogleSignin.signOut();
+          } catch (googleError) {
+            // Ignore Google sign out errors
+            observabilityService.captureError(googleError);
           }
+        }
       }
+      
       await signOut(getAuth());
-    } catch (error: any) {
-      console.error('Error signing out:', error);
-      throw this.handleError(error);
+    } catch (e) {
+      observabilityService.captureError(e);
+      throw this.handleError(e);
     }
   }
 
@@ -130,9 +149,9 @@ class AuthService {
         throw new Error('Usuario no autenticado');
       }
       await currentUser.delete();
-    } catch (error: any) {
-      console.error('Error deleting account:', error);
-      throw this.handleError(error);
+    } catch (e) {
+      observabilityService.captureError(e);
+      throw this.handleError(e);
     }
   }
 
@@ -153,9 +172,9 @@ class AuthService {
         throw new Error('Usuario no autenticado');
       }
       return updatedUser;
-    } catch (error: any) {
-      console.error('Error updating profile:', error);
-      throw this.handleError(error);
+    } catch (e) {
+      observabilityService.captureError(e);
+      throw this.handleError(e);
     }
   }
 
@@ -165,9 +184,9 @@ class AuthService {
   async sendPasswordResetEmail(email: string): Promise<void> {
     try {
       await sendPasswordResetEmail(getAuth(), email);
-    } catch (error: any) {
-      console.error('Error sending password reset email:', error);
-      throw this.handleError(error);
+    } catch (e) {
+      observabilityService.captureError(e);
+      throw this.handleError(e);
     }
   }
 

@@ -3,7 +3,7 @@ import { View, StyleSheet, ScrollView, StatusBar, Switch } from 'react-native';
 import { Text, TextInput, IconButton, Button, SegmentedButtons } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import { useAppTheme } from '../theme/theme';
@@ -18,6 +18,7 @@ import { storageService, WidgetConfig } from '../services/StorageService';
 import { useToast } from '../context/ToastContext';
 import { requestWidgetUpdate } from 'react-native-android-widget';
 import { buildWidgetElement } from '../widget/widgetTaskHandler';
+import { observabilityService } from '../services/ObservabilityService';
 
 const APP_VERSION = DeviceInfo.getVersion();
 
@@ -94,7 +95,6 @@ const WidgetsScreen = () => {
             setDefaultRates(rates);
         }
     } catch (error) {
-        console.error('Error loading data for widget:', error);
         showToast('Error cargando datos', 'error');
     } finally {
         setLoading(false);
@@ -143,8 +143,8 @@ const WidgetsScreen = () => {
 
         showToast('Configuración guardada', 'success');
         navigation.goBack();
-    } catch (error) {
-        console.error('Error saving widget config:', error);
+    } catch (e) {
+        observabilityService.captureError(e);
         showToast('Error al guardar', 'error');
     }
   };
@@ -220,7 +220,7 @@ const WidgetsScreen = () => {
                 <View style={[styles.prefRow, { flexDirection: 'column', alignItems: 'stretch', gap: 12 }]}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <View style={[styles.iconBox, { backgroundColor: theme.colors.primaryContainer }]}>
-                            <MaterialIcons name="title" size={20} color={theme.colors.onPrimaryContainer} />
+                            <MaterialCommunityIcons name="format-title" size={20} color={theme.colors.onPrimaryContainer} />
                         </View>
                         <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface, marginLeft: 12 }]}>Título del Widget</Text>
                     </View>
@@ -240,7 +240,7 @@ const WidgetsScreen = () => {
                 <View style={styles.prefRow}>
                      <View style={styles.prefLeft}>
                         <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
-                            <MaterialIcons name="attach-money" size={20} color={theme.colors.onSurfaceVariant} />
+                            <MaterialCommunityIcons name="currency-usd" size={20} color={theme.colors.onSurfaceVariant} />
                         </View>
                         <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Divisas ({selectedRates.length})</Text>
                      </View>
@@ -265,7 +265,10 @@ const WidgetsScreen = () => {
                             </View>
                         );
                     } else {
-                        iconElement = <MaterialIcons name={rate.iconName || 'attach-money'} size={24} color={theme.colors.onSurfaceVariant} />;
+                        // Map specific icons if needed, otherwise fallback to currency-usd
+                        // For BCV/Monitor which use 'attach-money', we use 'currency-usd'
+                        const iconName = (rate.iconName === 'attach-money' || !rate.iconName) ? 'currency-usd' : rate.iconName;
+                        iconElement = <MaterialCommunityIcons name={iconName} size={24} color={theme.colors.onSurfaceVariant} />;
                     }
 
                     return (
@@ -294,7 +297,7 @@ const WidgetsScreen = () => {
                 <View style={[styles.prefRow, { flexDirection: 'column', alignItems: 'stretch', gap: 12 }]}>
                     <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                         <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
-                            <MaterialIcons name="refresh" size={20} color={theme.colors.onSurfaceVariant} />
+                            <MaterialCommunityIcons name="refresh" size={20} color={theme.colors.onSurfaceVariant} />
                         </View>
                         <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface, marginLeft: 12 }]}>Refresco automático</Text>
                     </View>
@@ -318,7 +321,7 @@ const WidgetsScreen = () => {
                  <View style={styles.prefRow}>
                     <View style={styles.prefLeft}>
                         <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
-                             <MaterialIcons name="wallpaper" size={20} color={theme.colors.onSurfaceVariant} />
+                             <MaterialCommunityIcons name="wallpaper" size={20} color={theme.colors.onSurfaceVariant} />
                         </View>
                         <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Fondo de pantalla oscuro</Text>
                     </View>
@@ -336,7 +339,7 @@ const WidgetsScreen = () => {
                  <View style={styles.prefRow}>
                     <View style={styles.prefLeft}>
                         <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
-                             <MaterialIcons name="opacity" size={20} color={theme.colors.onSurfaceVariant} />
+                             <MaterialCommunityIcons name="opacity" size={20} color={theme.colors.onSurfaceVariant} />
                         </View>
                         <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Widget transparente</Text>
                     </View>
@@ -354,7 +357,7 @@ const WidgetsScreen = () => {
                  <View style={styles.prefRow}>
                     <View style={styles.prefLeft}>
                         <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
-                             <MaterialIcons name="show-chart" size={20} color={theme.colors.onSurfaceVariant} />
+                             <MaterialCommunityIcons name="chart-line-variant" size={20} color={theme.colors.onSurfaceVariant} />
                         </View>
                         <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Mostrar porcentaje</Text>
                     </View>
@@ -365,14 +368,14 @@ const WidgetsScreen = () => {
                         thumbColor={'#FFF'}
                     />
                  </View>
-
+                 
                  <View style={[styles.separator, { backgroundColor: theme.colors.outline }]} />
 
                  {/* Dark Mode */}
                  <View style={styles.prefRow}>
                     <View style={styles.prefLeft}>
                         <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
-                             <MaterialIcons name="brightness-6" size={20} color={theme.colors.onSurfaceVariant} />
+                             <MaterialCommunityIcons name="brightness-6" size={20} color={theme.colors.onSurfaceVariant} />
                         </View>
                         <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Widget modo oscuro</Text>
                     </View>
