@@ -231,6 +231,7 @@ export class CurrencyService {
                      case 'COP': iconName = 'currency-usd'; break;
                      case 'BRL': iconName = 'currency-brl'; break;
                      case 'DAI': iconName = 'currency-dai'; break;
+                     case 'VES': iconName = 'Bs'; break;
                      default: iconName = 'currency-usd';
                  }
 
