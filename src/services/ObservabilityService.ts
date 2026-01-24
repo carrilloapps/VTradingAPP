@@ -51,6 +51,64 @@ class ObservabilityService {
       console.error('[Observability] Failed to log message:', e);
     }
   }
+
+  /**
+   * Inicia una transacción de rendimiento (Performance Transaction) en Sentry.
+   * Nota: En versiones recientes del SDK, se prefiere startInactiveSpan o startSpan.
+   * Adaptado para @sentry/react-native ~7.9.0
+   * @param name Nombre de la transacción (ej: "GET /api/v1/users")
+   * @param op Operación (ej: "http.client")
+   */
+  startTransaction(name: string, op: string) {
+    try {
+      // Usamos startInactiveSpan que es el reemplazo moderno para startTransaction en trazas manuales
+      // sin callbacks.
+      if (typeof Sentry.startInactiveSpan === 'function') {
+         return Sentry.startInactiveSpan({ name, op });
+      }
+      
+      // Fallback para versiones antiguas (aunque startTransaction no existe en esta version)
+      if (typeof (Sentry as any).startTransaction === 'function') {
+         return (Sentry as any).startTransaction({ name, op });
+      }
+
+      return null;
+    } catch (e) {
+      if (__DEV__) {
+        console.warn('[Observability] Failed to start transaction:', e);
+      }
+      return null;
+    }
+  }
+
+  /**
+   * Finaliza una transacción de rendimiento.
+   * @param transaction La transacción a finalizar.
+   * @param status Estado final (opcional).
+   */
+  finishTransaction(transaction: any, status?: string) {
+    if (!transaction) return;
+    try {
+      // Mapear status de string a span status si es necesario, o usar setStatus
+      if (status) {
+         // Sentry Span status handling
+         if (typeof transaction.setStatus === 'function') {
+             transaction.setStatus(status);
+         }
+      }
+      
+      // En la nueva API, end() reemplaza a finish(), pero finish() suele mantenerse por compatibilidad en objetos Span
+      if (typeof transaction.end === 'function') {
+        transaction.end();
+      } else if (typeof transaction.finish === 'function') {
+        transaction.finish();
+      }
+    } catch (e) {
+      if (__DEV__) {
+        console.warn('[Observability] Failed to finish transaction:', e);
+      }
+    }
+  }
 }
 
 export const observabilityService = new ObservabilityService();

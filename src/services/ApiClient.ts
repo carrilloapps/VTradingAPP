@@ -56,16 +56,42 @@ class ApiClient {
 
     // 2. Setup Performance Monitoring
     let metric: FirebasePerformanceTypes.HttpMetric | null = null;
+    let sentryTransaction: any = null;
     try {
+      // Firebase Perf
       const perf = getPerformance();
-        if (!perf.dataCollectionEnabled) {
-            await initializePerformance(perf.app, { dataCollectionEnabled: true });
+      if (!perf.dataCollectionEnabled) {
+          await initializePerformance(perf.app, { dataCollectionEnabled: true });
+      }
+      metric = httpMetric(perf, url, 'GET');
+      
+      // Add detailed attributes to Firebase Perf
+      metric.putAttribute('http_method', 'GET');
+      metric.putAttribute('api_endpoint', endpoint);
+      metric.putAttribute('cache_enabled', options.useCache ? 'true' : 'false');
+      
+      await metric.start();
+
+      // Sentry Perf
+      sentryTransaction = observabilityService.startTransaction(`GET ${endpoint}`, 'http.client');
+      if (sentryTransaction) {
+        // En versiones nuevas de Sentry SDK, se usa setTag o setAttribute (para spans)
+        // setData fue removido o renombrado. Usaremos setTag para compatibilidad segura.
+        const setTagFn = sentryTransaction.setTag || sentryTransaction.setData;
+        if (typeof setTagFn === 'function') {
+            const safeSetTag = setTagFn.bind(sentryTransaction);
+            safeSetTag('url', url);
+            safeSetTag('http.method', 'GET');
+            safeSetTag('api.endpoint', endpoint);
+            safeSetTag('cache.enabled', String(!!options.useCache));
+            if (options.params) {
+                safeSetTag('query_params_keys', Object.keys(options.params).join(','));
+            }
         }
-        metric = httpMetric(perf, url, 'GET');
-        await metric.start();
+      }
     } catch (e) {
       observabilityService.captureError(e);
-      // Perf monitor failed
+      if (__DEV__) console.warn('[ApiClient] Perf setup failed', e);
     }
 
     // 3. Setup Headers
@@ -79,6 +105,9 @@ class ApiClient {
 
     if (token) {
       headers['X-Firebase-AppCheck'] = token;
+      if (metric) metric.putAttribute('has_app_check_token', 'true');
+    } else {
+      if (metric) metric.putAttribute('has_app_check_token', 'false');
     }
 
     try {
@@ -101,14 +130,28 @@ class ApiClient {
           const contentLength = response.headers.get('Content-Length');
           if (contentLength) metric.setResponsePayloadSize(parseInt(contentLength, 10));
           
-          // Optional: You could add custom attributes here
-          // metric.putAttribute('custom_attr', 'value');
-
+          // Capture Request Payload Size (0 for GET)
+          metric.setRequestPayloadSize(0);
+          
           await metric.stop();
         } catch (e) {
             observabilityService.captureError(e);
-            // Perf metric stop failed
+            if (__DEV__) console.warn('[ApiClient] Perf stop failed', e);
         }
+      }
+
+      if (sentryTransaction) {
+        const setTagFn = sentryTransaction.setTag || sentryTransaction.setData;
+        if (typeof setTagFn === 'function') {
+           const safeSetTag = setTagFn.bind(sentryTransaction);
+           if (response.headers.get('Content-Length')) {
+              safeSetTag('content_length', response.headers.get('Content-Length'));
+           }
+           safeSetTag('http.status_code', String(response.status));
+           safeSetTag('has_app_check_token', token ? 'true' : 'false');
+        }
+        
+        observabilityService.finishTransaction(sentryTransaction, response.ok ? 'ok' : 'unknown_error');
       }
 
       if (!response.ok) {
@@ -139,6 +182,10 @@ class ApiClient {
           try { await metric.stop(); } catch (stopError) { observabilityService.captureError(stopError); }
       }
       
+      if (sentryTransaction) {
+        observabilityService.finishTransaction(sentryTransaction, 'internal_error');
+      }
+
       // Return stale cache if available on network error
       if (options.useCache) {
         try {

@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import * as Clarity from '@microsoft/react-native-clarity';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { Platform, UIManager } from 'react-native';
 import { ThemeProvider } from './src/theme/ThemeContext';
@@ -34,6 +35,10 @@ import * as Sentry from '@sentry/react-native';
 globalThis.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
 
 const isProd = !__DEV__;
+
+Clarity.initialize('v6dxvnsq12', {
+  logLevel: isProd ? Clarity.LogLevel.None : Clarity.LogLevel.Verbose, // Note: Use "LogLevel.Verbose" value while testing to debug initialization issues.
+});
 
 Sentry.init({
   dsn: 'https://8978e60b895f59f65a44a1aee2a3e1f3@o456904.ingest.us.sentry.io/4510745960120320',
