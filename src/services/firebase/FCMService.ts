@@ -70,7 +70,6 @@ class FCMService {
       console.log('FCM Token:', token);
       return token;
     } catch (error) {
-      console.error('Error getting FCM token:', error);
       return null;
     }
   }
@@ -114,46 +113,24 @@ class FCMService {
    * Subscribe to a topic
    */
   async subscribeToTopic(topic: string): Promise<void> {
-      try {
-          await subscribeToTopic(this.messaging, topic);
-          console.log(`Subscribed to topic: ${topic}`);
-      } catch (error) {
-          console.error(`Error subscribing to topic ${topic}:`, error);
-      }
+    try {
+      // Ensure topic matches regex: [a-zA-Z0-9-_.~%]+
+      const sanitizedTopic = topic.replace(/[^a-zA-Z0-9-_.~%]/g, '_');
+      await this.messaging.subscribeToTopic(sanitizedTopic);
+    } catch (error) {
+      // Ignore error
+    }
   }
 
   /**
    * Subscribe to demographic topics for targeted notifications
    * Captures: Build, OS, Theme, OS Version, App Version, Install Cohort
    */
-  async subscribeToDemographics(): Promise<void> {
+  async subscribeToDemographics(topics: string[]): Promise<void> {
     try {
-      const buildNumber = DeviceInfo.getBuildNumber();
-      const appVersion = DeviceInfo.getVersion();
-      const systemVersion = DeviceInfo.getSystemVersion();
-      const colorScheme = Appearance.getColorScheme() || 'light';
-      const date = new Date();
-      // Cohort: Year_Month (e.g. cohort_2024_05)
-      const cohort = `cohort_${date.getFullYear()}_${String(date.getMonth() + 1).padStart(2, '0')}`;
-
-      // Sanitize function to ensure valid FCM topic format
-      const sanitize = (str: string) => str.replace(/[^a-zA-Z0-9-_.~%]/g, '_').toLowerCase();
-
-      const topics = [
-        `build_${sanitize(buildNumber)}`,
-        `os_${sanitize(Platform.OS)}`,
-        `theme_${sanitize(colorScheme)}`,
-        `os_ver_${sanitize(systemVersion)}`,
-        `app_ver_${sanitize(appVersion)}`,
-        sanitize(cohort)
-      ];
-
-      console.log('Subscribing to demographic topics:', topics);
-
-      // Subscribe in parallel
       await Promise.all(topics.map(topic => this.subscribeToTopic(topic)));
     } catch (error) {
-      console.error('Error subscribing to demographics:', error);
+      // Ignore error
     }
   }
 
@@ -161,12 +138,12 @@ class FCMService {
    * Unsubscribe from a topic
    */
   async unsubscribeFromTopic(topic: string): Promise<void> {
-      try {
-          await unsubscribeFromTopic(this.messaging, topic);
-          console.log(`Unsubscribed from topic: ${topic}`);
-      } catch (error) {
-          console.error(`Error unsubscribing from topic ${topic}:`, error);
-      }
+    try {
+      const sanitizedTopic = topic.replace(/[^a-zA-Z0-9-_.~%]/g, '_');
+      await this.messaging.unsubscribeFromTopic(sanitizedTopic);
+    } catch (error) {
+      // Ignore error
+    }
   }
 }
 
