@@ -85,21 +85,46 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
     );
   };
 
-  // Render message with bold highlighted parts
+  // Render message with bold highlighted parts and number formatting
   const renderMessage = () => {
-    if (!notification.highlightedValue) {
+    let displayMessage = notification.message;
+    let highlight = notification.highlightedValue;
+
+    // Attempt to format numeric highlight to 2 decimals
+    if (highlight) {
+      // Extract number from highlight string (e.g. "36.24123" or "36.24123 Bs")
+      const numberMatch = highlight.match(/(\d+\.\d+)/);
+      if (numberMatch) {
+        const originalNumberStr = numberMatch[0];
+        const numericVal = parseFloat(originalNumberStr);
+        
+        if (!isNaN(numericVal)) {
+          const formattedNumber = numericVal.toFixed(2);
+          // Replace only the number part in highlight
+          const formattedHighlight = highlight.replace(originalNumberStr, formattedNumber);
+          
+          // Replace the highlight in the full message
+          if (displayMessage.includes(highlight)) {
+            displayMessage = displayMessage.replace(highlight, formattedHighlight);
+            highlight = formattedHighlight;
+          }
+        }
+      }
+    }
+
+    if (!highlight) {
       return (
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }} numberOfLines={3}>
-          {notification.message}
+          {displayMessage}
         </Text>
       );
     }
 
-    const parts = notification.message.split(notification.highlightedValue);
+    const parts = displayMessage.split(highlight);
     if (parts.length < 2) {
        return (
         <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }} numberOfLines={3}>
-          {notification.message}
+          {displayMessage}
         </Text>
       );
     }
@@ -111,7 +136,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
             {part}
             {index < parts.length - 1 && (
               <Text style={{ fontWeight: 'bold', color: theme.colors.onSurface }}>
-                {notification.highlightedValue}
+                {highlight}
               </Text>
             )}
           </React.Fragment>
@@ -160,7 +185,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
             {/* Swipe Hint */}
             {showSwipeHint && (
               <View style={styles.swipeHint}>
-                <MaterialCommunityIcons name="touch-app" size={12} color={theme.colors.onSurfaceVariant} />
+                <MaterialCommunityIcons name="gesture-swipe-horizontal" size={12} color={theme.colors.onSurfaceVariant} />
                 <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, marginLeft: 4, textTransform: 'uppercase', fontSize: 10, fontWeight: 'bold' }}>
                   DESLIZA: ARCHIVAR / BORRAR
                 </Text>

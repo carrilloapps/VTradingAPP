@@ -243,7 +243,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
                   <MaterialCommunityIcons 
                     name={rightActionIcon} 
                     size={24} 
-                    color={theme.colors.onSurfaceVariant} 
+                    color={theme.colors.onSurface} // Changed from onSurfaceVariant for better visibility
                   />
                 ) : (
                   <MaterialCommunityIcons 
