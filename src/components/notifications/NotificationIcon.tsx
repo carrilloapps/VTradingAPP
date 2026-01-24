@@ -4,6 +4,8 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { useAppTheme } from '../../theme/theme';
 import { NotificationData } from './NotificationCard';
 
+import { BolivarIcon } from '../ui/BolivarIcon';
+
 interface NotificationIconProps {
   notification: NotificationData;
   size?: number;
@@ -32,7 +34,16 @@ export const getNotificationIconConfig = (notification: NotificationData, theme:
     case 'system':
     default:
       // Try to infer from title if type is generic
-      if (notification.title.toLowerCase().includes('dolar') || notification.title.toLowerCase().includes('bs')) {
+      if (notification.title.toLowerCase().includes('bs') || notification.title.toLowerCase().includes('bolivar')) {
+           return {
+              name: 'Bs', // Special marker
+              color: theme.colors.primary,
+              bgColor: theme.colors.primaryContainer,
+              badge: null,
+              fallbackTitle: 'Notificación de Bolívar',
+           };
+      }
+      if (notification.title.toLowerCase().includes('dolar')) {
            return {
               name: 'currency-usd',
               color: theme.colors.secondary,
@@ -57,7 +68,11 @@ const NotificationIcon: React.FC<NotificationIconProps> = ({ notification, size 
 
   return (
     <View style={[styles.iconContainer, { backgroundColor: iconConfig.bgColor, width: size * 2, height: size * 2 }]}>
-      <MaterialCommunityIcons name={iconConfig.name} size={size} color={iconConfig.color} />
+      {iconConfig.name === 'Bs' ? (
+        <BolivarIcon color={iconConfig.color} size={size} />
+      ) : (
+        <MaterialCommunityIcons name={iconConfig.name} size={size} color={iconConfig.color} />
+      )}
       {iconConfig.badge && (
         <View
           style={[

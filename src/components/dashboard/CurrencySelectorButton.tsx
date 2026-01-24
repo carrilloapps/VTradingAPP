@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity, StyleProp, ViewStyle } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { BolivarIcon } from '../ui/BolivarIcon';
 
 interface CurrencySelectorButtonProps {
   currencyCode: string;
@@ -43,8 +44,8 @@ const CurrencySelectorButton: React.FC<CurrencySelectorButtonProps> = ({
       accessibilityLabel={`Seleccionar moneda. Actual: ${currencyCode}`}
     >
       <View style={[styles.iconPlaceholder, themeStyles.iconPlaceholder]}>
-        {iconName === 'Bs' ? (
-             <Text style={{fontWeight: '900', fontSize: 14, color: theme.colors.onSurface}}>Bs</Text>
+        {(iconName === 'Bs' || currencyCode === 'VES') ? (
+             <BolivarIcon color={theme.colors.onSurface} size={18} />
         ) : (
             <MaterialCommunityIcons name={iconName} size={18} color={theme.colors.onSurface} />
         )}

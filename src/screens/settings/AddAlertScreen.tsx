@@ -6,6 +6,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import UnifiedHeader from '../../components/ui/UnifiedHeader';
+import { BolivarIcon } from '../../components/ui/BolivarIcon';
 import SearchBar from '../../components/ui/SearchBar';
 import FilterSection from '../../components/ui/FilterSection';
 import CustomButton from '../../components/ui/CustomButton';
@@ -116,7 +117,7 @@ const AddAlertScreen = ({ route }: Props) => {
             price: 1 / r.value,
             type: r.type === 'crypto' ? 'Cripto' : 'Divisa',
             changePercent: r.changePercent ? -r.changePercent : 0, // Approx inverse change
-            iconName: 'swap-horizontal'
+            iconName: 'Bs'
           });
         }
 
@@ -305,11 +306,15 @@ const AddAlertScreen = ({ route }: Props) => {
               alignItems: 'center', justifyContent: 'center',
               marginRight: 12
           }}>
-              <MaterialCommunityIcons 
-                  name={item.iconName || 'currency-usd'} 
-                  size={24} 
-                  color={theme.colors.onSecondaryContainer} 
-              />
+              {item.iconName === 'Bs' ? (
+                  <BolivarIcon color={theme.colors.onSecondaryContainer} size={24} />
+              ) : (
+                  <MaterialCommunityIcons 
+                      name={item.iconName || 'currency-usd'} 
+                      size={24} 
+                      color={theme.colors.onSecondaryContainer} 
+                  />
+              )}
           </View>
           <View>
               <Text variant="titleMedium" style={{ fontWeight: 'bold' }}>{item.symbol}</Text>
@@ -369,11 +374,15 @@ const AddAlertScreen = ({ route }: Props) => {
             {/* Symbol Header Section */}
             <View style={styles.headerSection}>
                 <View style={[styles.iconLarge, { backgroundColor: theme.colors.elevation.level2 }]}>
-                    <MaterialCommunityIcons 
-                        name={selectedItem.iconName || 'currency-usd'} 
-                        size={40} 
-                        color={theme.colors.primary} 
-                    />
+                    {selectedItem.iconName === 'Bs' ? (
+                        <BolivarIcon color={theme.colors.primary} size={40} />
+                    ) : (
+                        <MaterialCommunityIcons 
+                            name={selectedItem.iconName || 'currency-usd'} 
+                            size={40} 
+                            color={theme.colors.primary} 
+                        />
+                    )}
                 </View>
                 <View style={{ alignItems: 'center' }}>
                     <Text variant="headlineMedium" style={{ fontWeight: 'bold' }}>{selectedItem.symbol}</Text>

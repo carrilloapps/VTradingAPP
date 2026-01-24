@@ -342,7 +342,7 @@ export class CurrencyService {
                 value: 1,
                 changePercent: null,
                 type: 'fiat',
-                iconName: 'cash', // Distinct icon for base
+                iconName: 'Bs', // Custom icon for base
                 lastUpdated: new Date().toISOString()
              });
         }

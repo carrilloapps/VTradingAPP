@@ -3,6 +3,8 @@ import { View, StyleSheet } from 'react-native';
 import { Text, useTheme, Surface } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
+import { BolivarIcon } from '../ui/BolivarIcon';
+
 interface RateCardProps {
   title: string;
   subtitle: string;
@@ -57,7 +59,7 @@ const RateCard: React.FC<RateCardProps> = ({
           borderRadius: theme.roundness * 4
         }]}>
           {iconName === 'Bs' ? (
-            <Text variant="titleMedium" style={{fontWeight: '900', color: finalIconColor}}>Bs</Text>
+            <BolivarIcon color={finalIconColor} size={24} />
           ) : (
             <MaterialCommunityIcons name={iconName} size={24} color={finalIconColor} />
           )}

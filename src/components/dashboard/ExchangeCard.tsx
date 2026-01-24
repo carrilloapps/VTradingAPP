@@ -5,6 +5,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Svg, { Path } from 'react-native-svg';
 import LinearGradient from 'react-native-linear-gradient';
 import { useAppTheme } from '../../theme/theme';
+import { BolivarIcon } from '../ui/BolivarIcon';
 
 export interface ExchangeCardProps {
   title: string;
@@ -96,9 +97,10 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
             ) : iconName ? (
               <View style={[styles.symbolIcon, { backgroundColor: iconColor }]}>
                 {iconName === 'Bs' ? (
-                     <Text style={{fontWeight: '900', fontSize: 24, color: iconTintColor || theme.colors.onPrimaryContainer}}>Bs</Text>
+                     <BolivarIcon color={iconTintColor || theme.colors.onPrimaryContainer} size={24} />
                 ) : (
-                    <MaterialCommunityIcons name={iconName} size={32} color={iconTintColor || theme.colors.onPrimaryContainer} />
+                  <MaterialCommunityIcons 
+                    name={iconName} size={32} color={iconTintColor || theme.colors.onPrimaryContainer} />
                 )}
               </View>
             ) : (

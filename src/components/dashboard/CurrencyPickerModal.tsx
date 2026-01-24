@@ -5,6 +5,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { CurrencyRate } from '../../services/CurrencyService';
 import { BottomSheetModal } from '../ui/BottomSheetModal';
 import { AppConfig } from '../../constants/AppConfig';
+import { BolivarIcon } from '../ui/BolivarIcon';
 
 export interface CurrencyPickerModalProps {
   visible: boolean;
@@ -155,8 +156,8 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
                             styles.iconPlaceholder, 
                             isSelected ? themeStyles.iconPlaceholderSelected : themeStyles.iconPlaceholderNormal
                         ]}>
-                             {item.iconName === 'Bs' ? (
-                                <Text style={{fontWeight: '900', fontSize: 16, color: isSelected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant}}>Bs</Text>
+                             {(item.iconName === 'Bs' || item.code === 'VES') ? (
+                                <BolivarIcon color={isSelected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant} size={24} />
                              ) : (
                                 <MaterialCommunityIcons 
                                     name={item.iconName || 'currency-usd'} 

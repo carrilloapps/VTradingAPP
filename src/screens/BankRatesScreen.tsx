@@ -13,6 +13,7 @@ import { useToast } from '../context/ToastContext';
 import { AppTheme } from '../theme/theme';
 import { useNavigation } from '@react-navigation/native';
 import { observabilityService } from '../services/ObservabilityService';
+import { BolivarIcon } from '../components/ui/BolivarIcon';
 
 const isFabricEnabled = !!(globalThis as any).nativeFabricUIManager;
 
@@ -229,7 +230,7 @@ const BankRatesScreen = () => {
                   
                   {/* Decorative huge icon */}
                   <View style={styles.decorativeIcon}>
-                      <MaterialCommunityIcons name="bank" size={160} color={theme.colors.onPrimary} style={{ opacity: 0.1 }} />
+                      <BolivarIcon color={theme.colors.onPrimary} size={160} style={{ opacity: 0.1 }} />
                   </View>
               </LinearGradient>
           </View>

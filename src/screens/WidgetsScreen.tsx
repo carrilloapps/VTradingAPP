@@ -19,6 +19,7 @@ import { useToast } from '../context/ToastContext';
 import { requestWidgetUpdate } from 'react-native-android-widget';
 import { buildWidgetElement } from '../widget/widgetTaskHandler';
 import { observabilityService } from '../services/ObservabilityService';
+import { BolivarIcon } from '../components/ui/BolivarIcon';
 
 const APP_VERSION = DeviceInfo.getVersion();
 
@@ -263,6 +264,10 @@ const WidgetsScreen = () => {
                             <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: '#F7931A', alignItems: 'center', justifyContent: 'center' }}>
                                 <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 14 }}>₿</Text>
                             </View>
+                        );
+                    } else if (rate.code === 'VES' || rate.iconName === 'Bs') {
+                        iconElement = (
+                            <BolivarIcon color={theme.colors.onSurfaceVariant} size={24} />
                         );
                     } else {
                         // Map specific icons if needed, otherwise fallback to currency-usd
