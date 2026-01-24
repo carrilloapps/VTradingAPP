@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity, StyleProp, ViewStyle } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface CurrencySelectorButtonProps {
   currencyCode: string;
@@ -12,7 +12,7 @@ interface CurrencySelectorButtonProps {
 
 const CurrencySelectorButton: React.FC<CurrencySelectorButtonProps> = ({ 
   currencyCode, 
-  iconName = 'attach-money', 
+  iconName = 'currency-usd', 
   onPress,
   style 
 }) => {
@@ -43,15 +43,15 @@ const CurrencySelectorButton: React.FC<CurrencySelectorButtonProps> = ({
       accessibilityLabel={`Seleccionar moneda. Actual: ${currencyCode}`}
     >
       <View style={[styles.iconPlaceholder, themeStyles.iconPlaceholder]}>
-        <MaterialIcons name={iconName} size={18} color={theme.colors.onSurface} />
+        <MaterialCommunityIcons name={iconName} size={18} color={theme.colors.onSurface} />
       </View>
       
       <Text variant="titleMedium" style={[styles.boldText, themeStyles.textPrimary]}>
         {currencyCode}
       </Text>
       
-      <MaterialIcons 
-        name="keyboard-arrow-down" 
+      <MaterialCommunityIcons 
+        name="chevron-down" 
         size={24} 
         color={theme.colors.onSurfaceVariant} 
         style={themeStyles.icon} 

@@ -1,7 +1,7 @@
 import React from 'react';
 import { StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface MenuButtonProps {
   icon: string;
@@ -45,12 +45,12 @@ const MenuButton: React.FC<MenuButtonProps> = ({
         }
       ]}
     >
-      <MaterialIcons name={icon} size={24} color={iconColor} />
+      <MaterialCommunityIcons name={icon} size={24} color={iconColor} />
       <Text style={[styles.label, { color: textColor }, isDanger && styles.boldLabel]}>
         {label}
       </Text>
       {showChevron && !isDanger && (
-        <MaterialIcons name="chevron-right" size={24} color={theme.colors.onSurfaceVariant} />
+        <MaterialCommunityIcons name="chevron-right" size={24} color={theme.colors.onSurfaceVariant} />
       )}
     </TouchableOpacity>
   );

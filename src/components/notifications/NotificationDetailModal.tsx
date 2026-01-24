@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../theme/theme';
 import { NotificationData } from './NotificationCard';
 import NotificationIcon, { getNotificationIconConfig } from './NotificationIcon';
@@ -82,7 +82,7 @@ const NotificationDetailModal: React.FC<NotificationDetailModalProps> = ({
                      Bs. {notification.data.price}
                    </Text>
                    {notification.trend && (
-                     <MaterialIcons 
+                     <MaterialCommunityIcons 
                        name={notification.trend === 'up' ? 'trending-up' : 'trending-down'} 
                        size={20} 
                        color={notification.trend === 'up' ? theme.colors.success : theme.colors.error} 

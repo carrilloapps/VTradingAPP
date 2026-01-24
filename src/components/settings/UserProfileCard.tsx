@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, Avatar, Button } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { md5 } from '../../utils/md5';
 import { useAppTheme } from '../../theme/theme';
@@ -110,7 +110,7 @@ const UserProfileCard = ({ user, onEdit, onRegister }: UserProfileCardProps) => 
             style={styles.editButton}
             onPress={onEdit}
           >
-            <MaterialIcons name="edit" size={20} color={theme.colors.onSurfaceVariant} />
+            <MaterialCommunityIcons name="edit" size={20} color={theme.colors.onSurfaceVariant} />
           </TouchableOpacity>
         )}
       </View>
@@ -121,7 +121,7 @@ const UserProfileCard = ({ user, onEdit, onRegister }: UserProfileCardProps) => 
           // borderColor: theme.colors.primary, // Optional border
         }]}>
           <View style={styles.premiumContent}>
-             <MaterialIcons name="diamond" size={24} color={theme.colors.onPrimaryContainer} />
+             <MaterialCommunityIcons name="diamond" size={24} color={theme.colors.onPrimaryContainer} />
              <View style={styles.premiumTextContainer}>
                 <Text variant="titleSmall" style={{ color: theme.colors.onPrimaryContainer, fontWeight: 'bold' }}>
                   PÁSATE AL PLAN PREMIUM

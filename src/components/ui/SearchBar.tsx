@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, TextInput, StyleSheet, TouchableOpacity, FlatList, Text } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface SearchBarProps {
   placeholder?: string;
@@ -43,8 +43,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
   return (
     <View style={styles.wrapper}>
       <View style={containerStyle}>
-        <MaterialIcons 
-          name="search" 
+        <MaterialCommunityIcons 
+          name="magnify" 
           size={20} 
           color={isFocused ? theme.colors.primary : theme.colors.onSurfaceVariant} 
         />
@@ -68,7 +68,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             accessibilityHint="Abrir opciones de filtrado"
             accessibilityRole="button"
           >
-            <MaterialIcons name="tune" size={20} color={theme.colors.primary} />
+            <MaterialCommunityIcons name="tune" size={20} color={theme.colors.primary} />
           </TouchableOpacity>
         )}
       </View>
@@ -93,7 +93,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                   setIsFocused(false);
                 }}
               >
-                <MaterialIcons name="history" size={16} color={theme.colors.onSurfaceVariant} style={styles.suggestionIcon} />
+                <MaterialCommunityIcons name="history" size={16} color={theme.colors.onSurfaceVariant} style={styles.suggestionIcon} />
                 <Text style={{ color: theme.colors.onSurface }}>{item}</Text>
               </TouchableOpacity>
             )}

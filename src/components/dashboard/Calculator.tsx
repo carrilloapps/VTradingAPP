@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme, Text } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import CurrencyConverter from './CurrencyConverter';
 
@@ -39,7 +39,7 @@ const Calculator: React.FC = () => {
             style={styles.expandButton}
             hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
         >
-            <MaterialIcons name="open-in-full" size={18} color={theme.colors.primary} style={themeStyles.icon} />
+            <MaterialCommunityIcons name="arrow-expand-all" size={18} color={theme.colors.primary} style={themeStyles.icon} />
             <Text variant="labelLarge" style={themeStyles.expandText}>Ampliar</Text>
         </TouchableOpacity>
       </View>

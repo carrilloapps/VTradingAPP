@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, Surface, Tooltip } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../theme/theme';
 import { useToast } from '../../context/ToastContext';
 
@@ -60,7 +60,7 @@ const BankRateCard: React.FC<BankRateCardProps> = ({
                     <Text variant="labelSmall" style={{ color: color, fontWeight: '700', fontSize: 10 }}>
                         {percent > 0 ? '+' : ''}{percent.toFixed(2)}%
                     </Text>
-                    <MaterialIcons name="info-outline" size={10} color={color} style={{ opacity: 0.7 }} />
+                    <MaterialCommunityIcons name="information-outline" size={10} color={color} style={{ opacity: 0.7 }} />
                 </View>
             </TouchableOpacity>
           </Tooltip>
@@ -82,8 +82,8 @@ const BankRateCard: React.FC<BankRateCardProps> = ({
             <View style={[styles.iconContainer, { 
                 backgroundColor: theme.dark ? 'rgba(80, 200, 120, 0.1)' : theme.colors.secondaryContainer 
             }]}>
-                <MaterialIcons 
-                    name="account-balance" 
+                <MaterialCommunityIcons 
+                    name="bank" 
                     size={20} 
                     color={theme.dark ? '#50C878' : theme.colors.secondary} 
                 />
@@ -100,7 +100,7 @@ const BankRateCard: React.FC<BankRateCardProps> = ({
         
         {lastUpdated && (
             <View style={[styles.dateBadge, { backgroundColor: theme.colors.elevation.level2 }]}>
-                <MaterialIcons name="schedule" size={12} color={theme.colors.onSurfaceVariant} style={{ marginRight: 4 }} />
+                <MaterialCommunityIcons name="schedule" size={12} color={theme.colors.onSurfaceVariant} style={{ marginRight: 4 }} />
                 <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
                     {formatDate(lastUpdated)}
                 </Text>

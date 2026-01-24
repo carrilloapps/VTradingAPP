@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, ViewStyle, Platform } from 'react-native';
 import { Text, useTheme, TouchableRipple, Avatar } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import NotificationButton from './NotificationButton';
 import { md5 } from '../../utils/md5';
 import { useAuth } from '../../context/AuthContext';
@@ -222,7 +222,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
               borderless
               rippleColor="rgba(0, 0, 0, .1)"
             >
-              <MaterialIcons name="arrow-back" size={22} color={theme.colors.onSurface} />
+              <MaterialCommunityIcons name="arrow-back" size={22} color={theme.colors.onSurface} />
             </TouchableRipple>
           )}
           {variant === 'profile' && renderProfileContent()}
@@ -239,7 +239,19 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
                 borderless
                 rippleColor="rgba(0, 0, 0, .1)"
               >
-                <MaterialIcons name={rightActionIcon} size={22} color={theme.colors.onSurfaceVariant} />
+                {variant === 'section' && rightActionIcon ? (
+                  <MaterialCommunityIcons 
+                    name={rightActionIcon} 
+                    size={24} 
+                    color={theme.colors.onSurfaceVariant} 
+                  />
+                ) : (
+                  <MaterialCommunityIcons 
+                    name="dots-vertical" 
+                    size={24} 
+                    color={theme.colors.onSurfaceVariant} 
+                  />
+                )}
               </TouchableRipple>
             )}
 

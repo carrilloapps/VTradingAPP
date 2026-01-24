@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { TouchableRipple, useTheme, Text } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import { useNotifications } from '../../context/NotificationContext';
 
@@ -13,7 +13,7 @@ interface NotificationButtonProps {
 }
 
 const NotificationButton: React.FC<NotificationButtonProps> = ({
-  icon = 'notifications',
+  icon = 'bell',
   size = 22,
   color,
   style,
@@ -66,7 +66,7 @@ const NotificationButton: React.FC<NotificationButtonProps> = ({
       rippleColor="rgba(0, 0, 0, .1)"
     >
       <View style={styles.content}>
-        <MaterialIcons name={icon} size={size} color={iconColor} />
+        <MaterialCommunityIcons name={icon} size={size} color={iconColor} />
         
         {unreadCount > 0 && (
           <Animated.View 

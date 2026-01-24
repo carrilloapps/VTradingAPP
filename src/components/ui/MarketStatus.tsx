@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { Text } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../theme/theme';
 
 export interface MarketStatusProps {
@@ -91,7 +91,7 @@ const MarketStatus: React.FC<MarketStatusProps> = ({ isOpen, updatedAt, onRefres
             Actualizado: {updatedAt}
             </Text>
             {onRefresh && (
-            <MaterialIcons 
+            <MaterialCommunityIcons 
                 name="refresh" 
                 size={14} 
                 color={theme.colors.onSurfaceVariant} 

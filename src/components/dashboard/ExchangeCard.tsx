@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Image } from 'react-native';
 import { Text } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Svg, { Path } from 'react-native-svg';
 import LinearGradient from 'react-native-linear-gradient';
 import { useAppTheme } from '../../theme/theme';
@@ -66,7 +66,7 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
   const sellColor = getTrendColor(sellChangePercent);
 
   const trendIcon = isNeutral 
-    ? "trending-flat" 
+    ? "minus" 
     : (isPositive ? "trending-up" : "trending-down");
 
   return (
@@ -95,7 +95,7 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
               <Image source={{ uri: iconUrl }} style={styles.iconImage} />
             ) : iconName ? (
               <View style={[styles.symbolIcon, { backgroundColor: iconColor }]}>
-                <MaterialIcons name={iconName} size={32} color={iconTintColor || theme.colors.onPrimaryContainer} />
+                <MaterialCommunityIcons name={iconName} size={32} color={iconTintColor || theme.colors.onPrimaryContainer} />
               </View>
             ) : (
               <View style={[styles.symbolIcon, { backgroundColor: iconColor }]}>
@@ -167,7 +167,7 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
             {/* Trend Indicator */}
             {!buyValue && (
                 <View style={{flexDirection: 'row', alignItems: 'center', backgroundColor: isNeutral ? 'rgba(255,255,255,0.1)' : (isPositive ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'), paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12}}>
-                    <MaterialIcons name={trendIcon} size={16} color={trendColor} />
+                    <MaterialCommunityIcons name={trendIcon} size={16} color={trendColor} />
                     <Text variant="labelMedium" style={[styles.trendText, { color: trendColor }]}>{changePercent}</Text>
                 </View>
             )}

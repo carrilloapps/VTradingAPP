@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, useTheme, Surface } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface RateCardProps {
   title: string;
@@ -36,7 +36,7 @@ const RateCard: React.FC<RateCardProps> = ({
     : (isPositive ? colors.success : colors.error);
 
   const trendIcon = isNeutral 
-    ? "remove" 
+    ? "minus" 
     : (isPositive ? "trending-up" : "trending-down");
   
   // Default icon colors if not provided
@@ -56,7 +56,7 @@ const RateCard: React.FC<RateCardProps> = ({
           backgroundColor: finalIconBgColor,
           borderRadius: theme.roundness * 4
         }]}>
-          <MaterialIcons name={iconName} size={24} color={finalIconColor} />
+          <MaterialCommunityIcons name={iconName} size={24} color={finalIconColor} />
         </View>
         <View>
           <Text variant="titleMedium" style={[styles.titleText, { color: theme.colors.onSurface }]}>{title}</Text>
@@ -69,7 +69,7 @@ const RateCard: React.FC<RateCardProps> = ({
           {value}
         </Text>
         <View style={styles.trendContainer}>
-          <MaterialIcons 
+          <MaterialCommunityIcons 
             name={trendIcon} 
             size={16} 
             color={trendColor} 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../theme/theme';
 import { NotificationData } from './NotificationCard';
 
@@ -15,7 +15,7 @@ export const getNotificationIconConfig = (notification: NotificationData, theme:
   switch (effectiveType) {
     case 'price_alert':
       return {
-        name: 'payments',
+        name: 'cash-multiple',
         color: notification.trend === 'up' ? theme.colors.success : theme.colors.error,
         bgColor: notification.trend === 'up' ? theme.colors.successContainer : theme.colors.errorContainer,
         badge: notification.trend === 'up' ? 'trending-up' : 'trending-down',
@@ -23,7 +23,7 @@ export const getNotificationIconConfig = (notification: NotificationData, theme:
       };
     case 'market_news':
       return {
-        name: 'show-chart',
+        name: 'chart-line',
         color: theme.colors.primary,
         bgColor: theme.colors.primaryContainer,
         badge: null,
@@ -34,7 +34,7 @@ export const getNotificationIconConfig = (notification: NotificationData, theme:
       // Try to infer from title if type is generic
       if (notification.title.toLowerCase().includes('dolar') || notification.title.toLowerCase().includes('bs')) {
            return {
-              name: 'attach-money',
+              name: 'currency-usd',
               color: theme.colors.secondary,
               bgColor: theme.colors.secondaryContainer,
               badge: null,
@@ -42,7 +42,7 @@ export const getNotificationIconConfig = (notification: NotificationData, theme:
            };
       }
       return {
-        name: 'notifications',
+        name: 'bell',
         color: theme.colors.onSurfaceVariant,
         bgColor: theme.colors.surfaceVariant,
         badge: null,
@@ -57,7 +57,7 @@ const NotificationIcon: React.FC<NotificationIconProps> = ({ notification, size 
 
   return (
     <View style={[styles.iconContainer, { backgroundColor: iconConfig.bgColor, width: size * 2, height: size * 2 }]}>
-      <MaterialIcons name={iconConfig.name} size={size} color={iconConfig.color} />
+      <MaterialCommunityIcons name={iconConfig.name} size={size} color={iconConfig.color} />
       {iconConfig.badge && (
         <View
           style={[
@@ -68,7 +68,7 @@ const NotificationIcon: React.FC<NotificationIconProps> = ({ notification, size 
             },
           ]}
         >
-          <MaterialIcons name={iconConfig.badge} size={size * 0.5} color={theme.colors.surface} />
+          <MaterialCommunityIcons name={iconConfig.badge} size={size * 0.5} color={theme.colors.surface} />
         </View>
       )}
     </View>

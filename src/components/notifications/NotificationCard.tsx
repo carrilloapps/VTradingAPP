@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { Text, TouchableRipple } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
 import { useAppTheme } from '../../theme/theme';
 
@@ -60,7 +60,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
     return (
       <View style={[styles.rightAction, { backgroundColor: theme.colors.primaryContainer }]}>
         <Animated.View style={{ transform: [{ scale }] }}>
-          <MaterialIcons name="archive" size={24} color={theme.colors.onPrimaryContainer} />
+          <MaterialCommunityIcons name="archive" size={24} color={theme.colors.onPrimaryContainer} />
         </Animated.View>
       </View>
     );
@@ -79,7 +79,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
     return (
       <View style={[styles.leftAction, { backgroundColor: theme.colors.errorContainer }]}>
         <Animated.View style={{ transform: [{ scale }] }}>
-          <MaterialIcons name="delete" size={24} color={theme.colors.onErrorContainer} />
+          <MaterialCommunityIcons name="delete" size={24} color={theme.colors.onErrorContainer} />
         </Animated.View>
       </View>
     );
@@ -160,7 +160,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
             {/* Swipe Hint */}
             {showSwipeHint && (
               <View style={styles.swipeHint}>
-                <MaterialIcons name="touch-app" size={12} color={theme.colors.onSurfaceVariant} />
+                <MaterialCommunityIcons name="touch-app" size={12} color={theme.colors.onSurfaceVariant} />
                 <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, marginLeft: 4, textTransform: 'uppercase', fontSize: 10, fontWeight: 'bold' }}>
                   DESLIZA: ARCHIVAR / BORRAR
                 </Text>

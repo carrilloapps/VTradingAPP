@@ -414,10 +414,10 @@ const SettingsScreen = () => {
           <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>CUENTA</Text>
           <View style={[styles.cardContainer, { borderColor: theme.colors.outline, backgroundColor: theme.colors.elevation.level1 }]}>
             <MenuButton
-              icon="policy"
-              label="Políticas de privacidad"
-              onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL, 'Políticas de privacidad')}
-            />
+                      icon="shield-account"
+                      label="Políticas de privacidad"
+                      onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL, 'Políticas de privacidad')}
+                    />
             <MenuButton
               icon="gavel"
               label="Términos y condiciones"

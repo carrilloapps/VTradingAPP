@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, useTheme, Switch, IconButton, TouchableRipple } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface AlertItemProps {
   symbol: string;
@@ -51,7 +51,7 @@ const AlertItem: React.FC<AlertItemProps> = ({
       <View style={styles.innerContainer}>
         <View style={styles.leftContent}>
         <View style={[styles.iconContainer, { backgroundColor: iconBgColor }]}>
-          <MaterialIcons name={iconName} size={24} color={iconColor} />
+          <MaterialCommunityIcons name={iconName} size={24} color={iconColor} />
         </View>
         
         <View style={styles.textContainer}>
