@@ -1,8 +1,11 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { View, StyleSheet, StatusBar, RefreshControl, FlatList, ActivityIndicator } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
+import { RootStackParamList } from '../navigation/AppNavigator';
 import MarketStatus from '../components/ui/MarketStatus';
 import IndexHero from '../components/stocks/IndexHero';
 import StockItem from '../components/stocks/StockItem';
@@ -19,6 +22,7 @@ const StocksScreen = () => {
   const { stockFilters, setStockFilters } = useFilters();
   const { query: searchQuery, category: activeFilter } = stockFilters;
   const { showToast } = useToast();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const [stocks, setStocks] = useState<StockData[]>([]);
   const [categories, setCategories] = useState<string[]>(['Todos']);
@@ -105,7 +109,7 @@ const StocksScreen = () => {
   const handleSuggestionPress = (suggestion: string) => setStockFilters({ query: suggestion });
 
   const handleStockPress = (stock: StockData) => {
-    console.log('Stock pressed:', stock.symbol);
+    navigation.navigate('StockDetail', { stock });
   };
 
   const renderHeader = () => (

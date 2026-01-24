@@ -14,6 +14,9 @@ export interface StockData {
   opening?: number;
   iconUrl?: string; // Add iconUrl support
   category: string;
+  changeAmount?: number;
+  volumeShares?: number;
+  volumeAmount?: number;
 }
 
 interface ApiStock {
@@ -153,10 +156,25 @@ export class StocksService {
     }
 
     let volumeStr: string | undefined;
+    let volShares = 0;
+    let volAmount = 0;
+
     if (typeof item.volume === 'number') {
+        volShares = item.volume;
         volumeStr = `${(item.volume / 1000).toFixed(1)}k`;
-    } else if (item.volume && typeof item.volume === 'object' && item.volume.amount) {
-         volumeStr = `${(item.volume.amount / 1000).toFixed(1)}k`;
+    } else if (item.volume && typeof item.volume === 'object') {
+         if (item.volume.amount) {
+            volAmount = item.volume.amount;
+            volumeStr = `${(item.volume.amount / 1000).toFixed(1)}k`;
+         }
+         if (item.volume.shares) {
+            volShares = item.volume.shares;
+         }
+    }
+
+    let changeAmount = 0;
+    if (item.change && item.change.amount !== undefined) {
+        changeAmount = this.parsePrice(item.change.amount);
     }
 
     return {
@@ -165,9 +183,12 @@ export class StocksService {
       name: item.name,
       price: this.parsePrice(item.price),
       changePercent: changePercent,
+      changeAmount: changeAmount,
       initials: item.symbol.substring(0, 3),
       color: this.getColorForStock(item.symbol),
       volume: volumeStr,
+      volumeShares: volShares,
+      volumeAmount: volAmount,
       opening: this.parsePrice(item.openingPrice),
       iconUrl: item.meta?.iconUrl,
       category: item.category || 'Otros'

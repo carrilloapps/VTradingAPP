@@ -30,6 +30,8 @@ import DiscoverScreen from '../screens/DiscoverScreen';
 import AddAlertScreen from '../screens/settings/AddAlertScreen';
 import { UserAlert } from '../services/StorageService';
 import AuthLoading from '../components/auth/AuthLoading';
+import StockDetailScreen from '../screens/StockDetailScreen';
+import { StockData } from '../services/StocksService';
 
 export type RootStackParamList = {
   Onboarding: undefined;
@@ -41,6 +43,7 @@ export type RootStackParamList = {
   BankRates: undefined;
   WebView: { url: string; title?: string };
   AddAlert: { editAlert?: UserAlert };
+  StockDetail: { stock: StockData };
 };
 
 // Root Stack that includes Splash
@@ -230,6 +233,14 @@ const AppNavigator = () => {
               <RootStack.Screen 
                 name="Notifications" 
                 component={NotificationsScreen}
+                options={{ 
+                  headerShown: false,
+                  animation: 'default',
+                }} 
+              />
+              <RootStack.Screen 
+                name="StockDetail" 
+                component={StockDetailScreen} 
                 options={{ 
                   headerShown: false,
                   animation: 'default',
