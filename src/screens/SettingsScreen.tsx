@@ -50,23 +50,39 @@ const SettingsScreen = () => {
 
   useFocusEffect(
     useCallback(() => {
+      let isActive = true;
+
       const loadData = async () => {
-        // App Info
-        setAppName(DeviceInfo.getApplicationName());
-        setAppVersion(DeviceInfo.getVersion());
-        setBuildNumber(DeviceInfo.getBuildNumber());
+        try {
+          // App Info
+          setAppName(DeviceInfo.getApplicationName());
+          setAppVersion(DeviceInfo.getVersion());
+          setBuildNumber(DeviceInfo.getBuildNumber());
 
-        // Settings & Alerts
-        const settings = await storageService.getSettings();
-        setPushEnabled(settings.pushEnabled);
-        
-        const savedAlerts = await storageService.getAlerts();
-        setAlerts(savedAlerts);
-
-        setLoading(false);
+          // Settings & Alerts
+          const settings = await storageService.getSettings();
+          if (isActive) {
+            setPushEnabled(settings.pushEnabled);
+          }
+          
+          const savedAlerts = await storageService.getAlerts();
+          if (isActive) {
+            setAlerts(savedAlerts);
+            setLoading(false);
+          }
+        } catch (error) {
+          console.error('Error loading settings:', error);
+          if (isActive) {
+            setLoading(false);
+          }
+        }
       };
       
       loadData();
+
+      return () => {
+        isActive = false;
+      };
     }, [])
   );
 
