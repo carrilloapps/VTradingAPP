@@ -53,6 +53,23 @@ interface ApiStocksResponse {
       date: string;
       lastUpdate: string;
   };
+  stats?: {
+      totalVolume: number;
+      totalAmount: number;
+      titlesUp: number;
+      titlesDown: number;
+      titlesUnchanged: number;
+  };
+  indices?: Array<{
+      symbol: string;
+      description: string;
+      price: number;
+      changeAmount: number;
+      changePercent: number;
+      volume: number;
+      amountTraded: number;
+      lastUpdate: string;
+  }>;
   // Fallback for previous structure if API is mixed
   stocks?: ApiStock[]; 
   index?: any;
@@ -258,20 +275,55 @@ export class StocksService {
       }
   }
 
+  private static formatCurrency(value: number): string {
+      const parts = value.toFixed(2).split('.');
+      parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      return parts.join(',');
+  }
+
   static async getMarketIndex(): Promise<any> {
-      // Logic to get the main index (IBC)
-      // Could be part of getStocks response or separate endpoint
       try {
-          // Re-using getStocks if it carries the index data in a real API
-          await this.getStocks();
-          // For now returning mock index structure that matches UI
-          return {
-              value: "55.230,12",
-              changePercent: "1,2%",
-              isPositive: true,
-              volume: "12.5M",
-              opening: "54.575,20"
-          };
+          // Fetch real market data
+          const response = await apiClient.get<ApiStocksResponse>('api/bvc/market', {
+             useCache: true, // Use cache for index as well
+             params: { limit: 1 } // We just need metadata if possible, but endpoint might return all
+          });
+
+          const ibcData = response.indices?.find(i => i.symbol === 'IBC');
+          const stats = response.stats;
+
+          if (ibcData) {
+              const value = ibcData.price;
+              const changePercent = ibcData.changePercent;
+              const changeAmount = ibcData.changeAmount;
+              
+              // Use totalAmount from stats if available, otherwise 0
+              // The user said "total amount" is in stats.
+              const totalAmount = stats?.totalAmount || 0;
+              
+              // Format volume (Total Amount in VES)
+              const volumeStr = this.formatCurrency(totalAmount);
+              
+              // Provide stats
+              const marketStats = stats ? {
+                  titlesUp: stats.titlesUp,
+                  titlesDown: stats.titlesDown,
+                  titlesUnchanged: stats.titlesUnchanged,
+                  totalVolume: stats.totalVolume, // Shares
+                  totalAmount: stats.totalAmount  // Money
+              } : undefined;
+
+              return {
+                  value: this.formatCurrency(value),
+                  changePercent: `${this.formatCurrency(changePercent)}%`,
+                  isPositive: changeAmount >= 0,
+                  volume: volumeStr, // Displaying Total Amount in VES as "Volume" in Hero
+                  stats: marketStats
+              };
+          }
+
+          // Fallback if no IBC data found in indices (should not happen with correct API)
+          return null;
       } catch (e) {
           observabilityService.captureError(e);
           return null;

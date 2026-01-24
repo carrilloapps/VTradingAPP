@@ -115,13 +115,13 @@ const StocksScreen = () => {
         />
 
         {/* Index Hero */}
-        {indexData && (
+            {indexData && (
             <IndexHero 
             value={indexData.value}
             changePercent={indexData.changePercent}
             isPositive={indexData.isPositive}
             volume={indexData.volume}
-            opening={indexData.opening}
+            stats={indexData.stats}
             />
         )}
 

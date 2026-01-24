@@ -4,19 +4,27 @@ import { Text } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
+interface IndexHeroStats {
+  titlesUp: number;
+  titlesDown: number;
+  titlesUnchanged: number;
+  totalVolume: number;
+  totalAmount: number;
+}
+
 interface IndexHeroProps {
   value: string;
   changePercent: string;
   isPositive: boolean;
   volume: string;
-  opening: string;
+  stats?: IndexHeroStats;
 }
 
 const IndexHero: React.FC<IndexHeroProps> = ({
   value,
   changePercent,
   volume,
-  opening,
+  stats
 }) => {
   return (
     <View style={styles.container}>
@@ -54,10 +62,25 @@ const IndexHero: React.FC<IndexHeroProps> = ({
               </Text>
             </View>
             <View style={styles.rightAlign}>
-              <Text variant="labelSmall" style={styles.labelSmall}>APERTURA </Text>
-              <Text variant="bodyMedium" style={styles.whiteBold}>
-                {opening} <Text variant="labelSmall" style={styles.unitText}>Bs.</Text>
-              </Text>
+            <Text variant="labelSmall" style={styles.labelSmall}>TÍTULOS NEGOCIADOS</Text>
+            {stats ? (
+                  <View style={styles.breadthRow}>
+                       <View style={styles.breadthItem}>
+                          <MaterialCommunityIcons name="arrow-up-bold" size={14} color="#6EE7B7" />
+                          <Text variant="bodyMedium" style={[styles.whiteBold, { color: '#6EE7B7' }]}>{stats.titlesUp}</Text>
+                       </View>
+                       <View style={styles.breadthItem}>
+                          <MaterialCommunityIcons name="arrow-down-bold" size={14} color="#F87171" />
+                          <Text variant="bodyMedium" style={[styles.whiteBold, { color: '#F87171' }]}>{stats.titlesDown}</Text>
+                       </View>
+                       <View style={styles.breadthItem}>
+                          <MaterialCommunityIcons name="minus" size={14} color="#D1D5DB" />
+                          <Text variant="bodyMedium" style={[styles.whiteBold, { color: '#D1D5DB' }]}>{stats.titlesUnchanged}</Text>
+                       </View>
+                  </View>
+              ) : (
+                 <Text variant="bodyMedium" style={styles.whiteBold}>-</Text>
+              )}
             </View>
           </View>
         </View>
@@ -150,6 +173,28 @@ const styles = StyleSheet.create({
   },
   rightAlign: {
     alignItems: 'flex-end',
+  },
+  breadthContainer: {
+    marginTop: 12,
+  },
+  separator: {
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    marginBottom: 12,
+  },
+  breadthContent: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+  },
+  breadthRow: {
+    flexDirection: 'row',
+    gap: 16,
+  },
+  breadthItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
   },
 });
 
