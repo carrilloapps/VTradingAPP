@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, useTheme, Switch, IconButton, TouchableRipple } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface AlertItemProps {
   symbol: string;

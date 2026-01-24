@@ -1,7 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Text, useTheme, Switch, Snackbar, Button } from 'react-native-paper';
-import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DeviceInfo from 'react-native-device-info';
 import { fcmService } from '../services/firebase/FCMService';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
@@ -10,6 +10,7 @@ import CustomDialog from '../components/ui/CustomDialog';
 import AboutDialog from '../components/ui/AboutDialog';
 import { useThemeContext } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { storageService, UserAlert } from '../services/StorageService';
 import { AppConfig } from '../constants/AppConfig';
 
@@ -27,6 +28,7 @@ const SettingsScreen = () => {
   const navigation = useNavigation();
   const { themeMode, setThemeMode } = useThemeContext();
   const { user, signOut, updateProfileName, deleteAccount } = useAuth();
+  const { showToast } = useToast();
   
   // App Info State
   const [appName, setAppName] = useState('');
@@ -71,7 +73,7 @@ const SettingsScreen = () => {
             setLoading(false);
           }
         } catch (error) {
-          console.error('Error loading settings:', error);
+          showToast('Error cargando configuración', 'error');
           if (isActive) {
             setLoading(false);
           }
@@ -130,7 +132,7 @@ const SettingsScreen = () => {
       await updateProfileName(newName);
     } catch (error) {
       handleAction("Error al actualizar el perfil");
-      console.error(error);
+      showToast('Error al actualizar el perfil', 'error');
     }
   };
 
@@ -174,7 +176,6 @@ const SettingsScreen = () => {
         
         if (value) {
             await fcmService.subscribeToTopic(topic);
-            console.log(`Subscribed to ${topic}`);
         } else {
             // Check if other active alerts exist for the same symbol
             const otherActiveAlerts = updated.filter(a => 
@@ -183,7 +184,6 @@ const SettingsScreen = () => {
             
             if (otherActiveAlerts.length === 0) {
                 await fcmService.unsubscribeFromTopic(topic);
-                console.log(`Unsubscribed from ${topic}`);
             }
         }
         
@@ -192,7 +192,7 @@ const SettingsScreen = () => {
         handleAction(`Alerta ${value ? 'activada' : 'desactivada'}`);
 
       } catch (err) {
-        console.error('Error toggling alert:', err);
+        showToast('Error al actualizar alerta', 'error');
         // Revert on error
         setAlerts(originalAlerts);
         handleAction('Error al actualizar la alerta');
@@ -218,10 +218,9 @@ const SettingsScreen = () => {
             
             if (otherActiveAlerts.length === 0) {
                 await fcmService.unsubscribeFromTopic(topic);
-                console.log(`Unsubscribed from ${topic}`);
             }
         } catch (err) {
-            console.error('FCM Topic Error:', err);
+            showToast('Error al desuscribir del tema', 'error');
         }
       }
 
@@ -264,7 +263,7 @@ const SettingsScreen = () => {
       <UnifiedHeader
         variant="section"
         title="Configuración"
-        rightActionIcon="info-outline"
+        rightActionIcon="information-outline"
         onActionPress={() => setShowAboutDialog(true)}
       />
 
@@ -290,7 +289,7 @@ const SettingsScreen = () => {
               onPress={handleAddAlert}
               disabled={alerts.length >= 5}
             >
-              <MaterialIcons name="add" size={18} color={theme.colors.primary} />
+              <MaterialCommunityIcons name="plus" size={18} color={theme.colors.primary} />
               <Text style={[styles.newAlertText, { color: theme.colors.primary }]}>Nueva alerta</Text>
             </TouchableOpacity>
           </View>
@@ -307,7 +306,7 @@ const SettingsScreen = () => {
                         justifyContent: 'center',
                         marginBottom: 16
                     }}>
-                        <MaterialIcons name="add-alert" size={32} color={theme.colors.primary} />
+                        <MaterialCommunityIcons name="bell-plus" size={32} color={theme.colors.primary} />
                     </View>
                     <Text style={{ 
                         fontSize: 16, 
@@ -366,7 +365,7 @@ const SettingsScreen = () => {
             <View style={styles.prefRow}>
               <View style={styles.prefLeft}>
                 <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
-                  <MaterialIcons name="notifications" size={20} color={theme.colors.onSurfaceVariant} />
+                  <MaterialCommunityIcons name="notifications" size={20} color={theme.colors.onSurfaceVariant} />
                 </View>
                 <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Notificaciones push</Text>
               </View>
@@ -385,11 +384,11 @@ const SettingsScreen = () => {
                   <View style={styles.prefRow}>
                     <View style={styles.prefLeft}>
                       <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
-                        <MaterialIcons name="widgets" size={20} color={theme.colors.onSurfaceVariant} />
+                        <MaterialCommunityIcons name="widgets" size={20} color={theme.colors.onSurfaceVariant} />
                       </View>
                       <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Personalización de widgets</Text>
                     </View>
-                    <MaterialIcons name="chevron-right" size={24} color={theme.colors.onSurfaceVariant} />
+                    <MaterialCommunityIcons name="chevron-right" size={24} color={theme.colors.onSurfaceVariant} />
                   </View>
                 </TouchableOpacity>
               </>
@@ -401,7 +400,7 @@ const SettingsScreen = () => {
             <View style={styles.prefContent}>
               <View style={styles.prefLeft}>
                 <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
-                  <MaterialIcons name="palette" size={20} color={theme.colors.onSurfaceVariant} />
+                  <MaterialCommunityIcons name="palette" size={20} color={theme.colors.onSurfaceVariant} />
                 </View>
                 <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Apariencia</Text>
               </View>
