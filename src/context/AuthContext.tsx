@@ -3,6 +3,7 @@ import { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { authService } from '../services/firebase/AuthService';
 import { useToast } from './ToastContext';
 import { getCrashlytics, setUserId, setAttributes } from '@react-native-firebase/crashlytics';
+import * as Clarity from '@microsoft/react-native-clarity';
 import { observabilityService } from '../services/ObservabilityService';
 
 interface AuthContextData {
@@ -41,6 +42,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         user_name: user.displayName || '',
         user_email: user.email || '',
       });
+      // Identificar usuario en Clarity para repetición de sesiones
+      Clarity.setCustomUserId(user.uid || 'unknown');
     } else {
       setUserId(crashlytics, '');
       setAttributes(crashlytics, {

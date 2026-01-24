@@ -91,7 +91,7 @@ function App(): React.JSX.Element {
         const hasPermission = await fcmService.requestUserPermission();
         if (hasPermission) {
           await fcmService.getFCMToken();
-          await fcmService.subscribeToDemographics([]);
+          await fcmService.subscribeToDemographics(['all_users']);
         }
       } finally {
         await initTrace.stop();

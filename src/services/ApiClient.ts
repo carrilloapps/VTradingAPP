@@ -141,15 +141,11 @@ class ApiClient {
       }
 
       if (sentryTransaction) {
-        const setTagFn = sentryTransaction.setTag || sentryTransaction.setData;
-        if (typeof setTagFn === 'function') {
-           const safeSetTag = setTagFn.bind(sentryTransaction);
-           if (response.headers.get('Content-Length')) {
-              safeSetTag('content_length', response.headers.get('Content-Length'));
-           }
-           safeSetTag('http.status_code', String(response.status));
-           safeSetTag('has_app_check_token', token ? 'true' : 'false');
+        if (response.headers.get('Content-Length')) {
+           observabilityService.setTransactionAttribute(sentryTransaction, 'content_length', response.headers.get('Content-Length') || '0');
         }
+        observabilityService.setTransactionAttribute(sentryTransaction, 'http.status_code', String(response.status));
+        observabilityService.setTransactionAttribute(sentryTransaction, 'has_app_check_token', token ? 'true' : 'false');
         
         observabilityService.finishTransaction(sentryTransaction, response.ok ? 'ok' : 'unknown_error');
       }

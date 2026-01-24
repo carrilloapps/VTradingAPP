@@ -109,6 +109,40 @@ class ObservabilityService {
       }
     }
   }
+
+  /**
+   * Establece un atributo o etiqueta en una transacción/span de forma segura y compatible.
+   * @param transaction La transacción o span.
+   * @param key La clave del atributo.
+   * @param value El valor del atributo.
+   */
+  setTransactionAttribute(transaction: any, key: string, value: string | number | boolean) {
+    if (!transaction) return;
+    try {
+        // Modern Sentry / OpenTelemetry Span
+        if (typeof transaction.setAttribute === 'function') {
+            transaction.setAttribute(key, value);
+            return;
+        }
+
+        // Legacy Sentry Transaction (setTag para strings, setData para otros)
+        if (typeof transaction.setTag === 'function') {
+            // setTag solo suele aceptar strings en versiones antiguas
+            transaction.setTag(key, String(value));
+            return;
+        }
+        
+        // Fallback muy antiguo
+        if (typeof transaction.setData === 'function') {
+            transaction.setData(key, value);
+            return;
+        }
+    } catch (e) {
+        if (__DEV__) {
+            console.warn('[Observability] Failed to set transaction attribute:', e);
+        }
+    }
+  }
 }
 
 export const observabilityService = new ObservabilityService();

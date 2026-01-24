@@ -11,22 +11,24 @@ class AppCheckService {
   async initialize(): Promise<void> {
     try {
       const app = getApp();
-      // Create a custom provider or use the default one
-      // For development, we might want to use the debug provider
-      // Use config object instead of class instance for modular API compatibility
+      
+      // Manually construct the provider object to match ReactNativeFirebaseAppCheckProvider structure
+      // since the class is not exported as a value in the modular API.
       const provider = {
+        getToken: () => Promise.reject(new Error('Native provider handled internally')),
         providerOptions: {
           android: {
-            provider: (__DEV__ ? 'debug' : 'playIntegrity') as 'debug' | 'playIntegrity',
-            // debugToken: '...', // Si tienes un token persistente registrado en Firebase Console, ponlo aquí
+            provider: (__DEV__ ? 'debug' : 'playIntegrity'),
+            // debugToken: '...', 
           },
           apple: {
-            provider: (__DEV__ ? 'debug' : 'appAttestWithDeviceCheckFallback') as 'debug' | 'appAttestWithDeviceCheckFallback',
-            // debugToken: '...', // Si tienes un token persistente registrado en Firebase Console, ponlo aquí
+            provider: (__DEV__ ? 'debug' : 'appAttestWithDeviceCheckFallback'),
+            // debugToken: '...', 
           },
         }
       };
 
+      // @ts-ignore - provider matches AppCheckProvider interface at runtime
       this.appCheckInstance = await initializeAppCheck(app, {
         provider,
         isTokenAutoRefreshEnabled: true,
