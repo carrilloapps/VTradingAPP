@@ -56,15 +56,20 @@ const NotificationController: React.FC = () => {
              // Format: COP/VES -> COP por VES
              const readableSymbol = symbol.replace('/', ' por ');
              
+             // Smart formatting: 2 decimals for standard values, preserve precision for small crypto
+             const formatPrice = (val: number) => val < 0.01 ? val : val.toFixed(2);
+             const displayCurrent = formatPrice(currentPrice);
+             const displayTarget = formatPrice(targetPrice);
+
              // Construct rich message with inline icon
              const richMessage = (
                <Text>
-                 El precio {actionVerb} a {currentPrice} {readableSymbol}, según tu objetivo de{' '}
+                 El precio {actionVerb} a {displayCurrent} {readableSymbol}, según tu objetivo de{' '}
                  <MaterialCommunityIcons 
                     name={isUp ? 'trending-up' : 'trending-down'} 
                     size={14} 
                  />
-                 {' '}{targetPrice} {readableSymbol}
+                 {' '}{displayTarget} {readableSymbol}
                </Text>
              );
              

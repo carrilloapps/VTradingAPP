@@ -31,6 +31,12 @@ const NotificationDetailModal: React.FC<NotificationDetailModalProps> = ({
   const formattedTime = formatTimeAgo(notification.timestamp);
   const displayTitle = notification.title === 'Notificación' ? iconConfig.fallbackTitle : notification.title;
 
+  const formatPrice = (val: string | number) => {
+      const num = typeof val === 'string' ? parseFloat(val) : val;
+      if (isNaN(num)) return val;
+      return num < 0.01 ? num : num.toFixed(2);
+  };
+
   return (
     <BottomSheetModal
       visible={visible}
@@ -79,7 +85,7 @@ const NotificationDetailModal: React.FC<NotificationDetailModalProps> = ({
                       fontWeight: 'bold' 
                     }}
                    >
-                     Bs. {notification.data.price}
+                     Bs. {formatPrice(notification.data.price)}
                    </Text>
                    {notification.trend && (
                      <MaterialCommunityIcons 

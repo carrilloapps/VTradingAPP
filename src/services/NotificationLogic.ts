@@ -60,9 +60,11 @@ export const handleBackgroundMessage = async (remoteMessage: any) => {
                 const actionVerb = alert.condition === 'above' ? 'subió' : 'bajó';
                 const emoji = alert.condition === 'above' ? '📈' : '📉';
                 
+                const formatPrice = (val: number) => val < 0.01 ? val : val.toFixed(2);
+
                 await notifee.displayNotification({
-                    title: `Alerta: ${alert.symbol} ${emoji} a ${currentPrice}`,
-                    body: `El precio ${actionVerb} de los ${targetPrice}`,
+                    title: `Alerta: ${alert.symbol} ${emoji} a ${formatPrice(currentPrice)}`,
+                    body: `El precio ${actionVerb} de los ${formatPrice(targetPrice)}`,
                     android: {
                         channelId: 'price_alerts',
                         ...ANDROID_NOTIFICATION_DEFAULTS,

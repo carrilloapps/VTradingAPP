@@ -142,7 +142,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         if (remoteMessage.data?.symbol && remoteMessage.data?.price) {
            const symbol = remoteMessage.data.symbol as string;
            const price = parseFloat(remoteMessage.data.price as string);
-           highlightedVal = `${price}`; 
+           
+           const formatPrice = (val: number) => val < 0.01 ? val : val.toFixed(2);
+           highlightedVal = `${formatPrice(price)}`; 
 
            if (!isNaN(price)) {
                // Check if this price matches any active alert
@@ -171,9 +173,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                        
                        // Construct precise body
                        const actionVerb = isUp ? 'subió' : 'bajó';
-                       const targetPrice = alert.target;
+                       const targetPrice = parseFloat(alert.target);
                        
-                       finalBody = `El precio ${actionVerb} a ${price} (Objetivo: ${targetPrice})`;
+                       // formatPrice is already defined above
+                       finalBody = `El precio ${actionVerb} a ${formatPrice(price)} (Objetivo: ${formatPrice(targetPrice)})`;
                    } else {
                        // Price update received but no alert condition met -> Ignore it
                        shouldAdd = false;

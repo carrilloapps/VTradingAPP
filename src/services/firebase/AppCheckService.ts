@@ -18,11 +18,11 @@ class AppCheckService {
         providerOptions: {
           android: {
             provider: (__DEV__ ? 'debug' : 'playIntegrity') as 'debug' | 'playIntegrity',
-            debugToken: '12345678-1234-1234-1234-1234567890ab', // Replace with your debug token from logs
+            // debugToken: '...', // Si tienes un token persistente registrado en Firebase Console, ponlo aquí
           },
           apple: {
             provider: (__DEV__ ? 'debug' : 'appAttestWithDeviceCheckFallback') as 'debug' | 'appAttestWithDeviceCheckFallback',
-            debugToken: '12345678-1234-1234-1234-1234567890ab', // Replace with your debug token from logs
+            // debugToken: '...', // Si tienes un token persistente registrado en Firebase Console, ponlo aquí
           },
         }
       };
@@ -31,8 +31,13 @@ class AppCheckService {
         provider,
         isTokenAutoRefreshEnabled: true,
       });
-    } catch (e) {
-      observabilityService.captureError(e);
+    } catch (e: any) {
+      const message = e.message || String(e);
+      if (__DEV__ && (message.includes('Debug') || message.includes('token'))) {
+         // Ignore initialization errors in DEV with invalid tokens
+      } else {
+         observabilityService.captureError(e);
+      }
       // Ignore error
     }
   }
@@ -68,20 +73,27 @@ class AppCheckService {
       this.lastErrorMessage = '';
       return result.token;
     } catch (e: any) {
-      observabilityService.captureError(e);
+      const message = e.message || String(e);
+      // Suppress specific App Check errors that are expected in development or when quota is exceeded
+      const isExpectedError = 
+          message.includes('App Check API has not been used') || 
+          message.includes('403') || 
+          message.includes('Too many attempts') ||
+          (message.includes('token-error') && __DEV__);
+
+      if (!isExpectedError) {
+          observabilityService.captureError(e);
+      }
+      
       this.lastErrorTime = Date.now();
       this.errorCount++;
 
       // Handle "API not enabled" or configuration errors gracefully
-      const message = e.message || '';
       
       // Silence expected development errors or quota exceeded
-      if (message.includes('App Check API has not been used') || 
-          message.includes('403') || 
-          message.includes('Too many attempts')) {
-         
-         if (__DEV__ && this.errorCount === 1) { // Only warn once per backoff period
-             // Warning: App Check skipped
+      if (isExpectedError) {
+         if (__DEV__ && this.errorCount === 1) { 
+             // Optional: console.log('App Check warning suppressed:', message);
          }
          return undefined;
       }
