@@ -100,7 +100,7 @@ const BankRateCard: React.FC<BankRateCardProps> = ({
         
         {lastUpdated && (
             <View style={[styles.dateBadge, { backgroundColor: theme.colors.elevation.level2 }]}>
-                <MaterialCommunityIcons name="schedule" size={12} color={theme.colors.onSurfaceVariant} style={{ marginRight: 4 }} />
+                <MaterialCommunityIcons name="clock-outline" size={12} color={theme.colors.onSurfaceVariant} style={{ marginRight: 4 }} />
                 <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
                     {formatDate(lastUpdated)}
                 </Text>

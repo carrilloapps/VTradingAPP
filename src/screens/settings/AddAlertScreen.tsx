@@ -97,10 +97,13 @@ const AddAlertScreen = ({ route }: Props) => {
 
         // CODE/VES (e.g. USD/VES)
         const id1 = `${r.code}/VES`;
+        // Determine simple name: Use r.name but if it contains complex description, simplify.
+        // Usually r.name is "Dólar", "Euro", etc.
+        // For standard currencies, just use the name.
         itemsMap.set(id1, {
           id: id1,
           symbol: id1,
-          name: r.name,
+          name: r.name.split('•')[0].trim(), // Remove source details if present
           price: r.value,
           type: r.type === 'crypto' ? 'Cripto' : 'Divisa',
           changePercent: r.changePercent || 0,
@@ -113,7 +116,7 @@ const AddAlertScreen = ({ route }: Props) => {
            itemsMap.set(id2, {
             id: id2,
             symbol: id2,
-            name: `VES vs ${r.name}`,
+            name: `VES vs. ${r.code}`, // Simplified name
             price: 1 / r.value,
             type: r.type === 'crypto' ? 'Cripto' : 'Divisa',
             changePercent: r.changePercent ? -r.changePercent : 0, // Approx inverse change
@@ -129,7 +132,7 @@ const AddAlertScreen = ({ route }: Props) => {
             itemsMap.set(id3, {
                 id: id3,
                 symbol: id3,
-                name: `${r.name} / USD`,
+                name: r.name.split('•')[0].trim(), // Simplified name
                 price: priceUsd,
                 type: 'Cripto',
                 changePercent: r.changePercent || 0,
