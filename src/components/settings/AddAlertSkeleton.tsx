@@ -11,7 +11,6 @@ interface Props {
 const AddAlertSkeleton = ({ variant = 'list' }: Props) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const r = theme.roundness;
 
   if (variant === 'form') {
     return (

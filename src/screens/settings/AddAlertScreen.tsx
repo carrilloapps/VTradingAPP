@@ -35,6 +35,8 @@ interface SymbolItem {
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AddAlert'>;
 
+const ItemSeparator = () => <View style={{ height: 8 }} />;
+
 const AddAlertScreen = ({ route }: Props) => {
   const theme = useAppTheme();
   const navigation = useNavigation();
@@ -78,7 +80,7 @@ const AddAlertScreen = ({ route }: Props) => {
   // Effects moved below
 
 
-  const loadData = async () => {
+  const loadData = React.useCallback(async () => {
     setLoading(true);
     try {
       const [rates, stocks] = await Promise.all([
@@ -88,7 +90,6 @@ const AddAlertScreen = ({ route }: Props) => {
 
       const itemsMap = new Map<string, SymbolItem>();
       const usdRate = rates.find(r => r.code === 'USD')?.value || 1;
-      const usdtRate = rates.find(r => r.code === 'USDT')?.value || usdRate;
 
       // 1. Process Currencies & Crypto
       rates.forEach(r => {
@@ -161,11 +162,11 @@ const AddAlertScreen = ({ route }: Props) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   // Pre-fill if editing
   useEffect(() => {
@@ -440,19 +441,16 @@ const AddAlertScreen = ({ route }: Props) => {
                         const isPositive = diff > 0;
                         
                         let color = theme.colors.onSurfaceVariant;
-                        let bgColor = theme.colors.elevation.level2;
                         let icon = 'minus-circle-outline';
                         let text = 'Igual al precio actual';
                         
                         if (!isDiffNeutral) {
                             if (isPositive) {
                                 color = theme.colors.trendUp;
-                                bgColor = theme.colors.successContainer; // Use theme container if available or fallback
                                 icon = 'trending-up';
                                 text = `+${diff.toFixed(2)}% vs precio actual`;
                             } else {
                                 color = theme.colors.trendDown;
-                                bgColor = theme.colors.errorContainer;
                                 icon = 'trending-down';
                                 text = `${diff.toFixed(2)}% vs precio actual`;
                             }
@@ -587,7 +585,7 @@ const AddAlertScreen = ({ route }: Props) => {
                     renderItem={renderItem}
                     contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 16 }]}
                     showsVerticalScrollIndicator={false}
-                    ItemSeparatorComponent={() => <View style={{ height: 8 }} />}
+                    ItemSeparatorComponent={ItemSeparator}
                     ListEmptyComponent={
                         <View style={styles.centerContainer}>
                             <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>

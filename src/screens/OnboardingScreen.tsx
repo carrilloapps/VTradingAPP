@@ -43,7 +43,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
   const [isPaused, setIsPaused] = useState(false);
   const [notificationPermissionStatus, setNotificationPermissionStatus] = useState<boolean | null>(null);
 
-  const ONBOARDING_DATA: OnboardingItem[] = [
+  const ONBOARDING_DATA = React.useMemo<OnboardingItem[]>(() => [
     {
       key: 'welcome',
       title: 'Bienvenido/a',
@@ -80,7 +80,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
       icon: 'swap-horizontal-bold',
       colorType: 'warning',
     },
-  ];
+  ], []);
 
   const getPageColors = (type: string) => {
     switch (type) {
@@ -154,7 +154,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
     }, STORY_DURATION);
 
     return () => clearInterval(interval);
-  }, [currentPage, isPaused]);
+  }, [currentPage, isPaused, ONBOARDING_DATA.length]);
 
   // Check initial notification permission
   useEffect(() => {

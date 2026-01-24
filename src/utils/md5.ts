@@ -1,3 +1,5 @@
+/* eslint-disable no-bitwise */
+/* eslint-disable @typescript-eslint/no-shadow */
 export function md5(string: string): string {
   function RotateLeft(lValue: number, iShiftBits: number): number {
     return (lValue << iShiftBits) | (lValue >>> (32 - iShiftBits));

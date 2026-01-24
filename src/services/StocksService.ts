@@ -116,6 +116,7 @@ export class StocksService {
     this.listeners.forEach(listener => listener(stocks));
   }
 
+  /* eslint-disable no-bitwise */
   private static getColorForStock(symbol: string): string {
     const colors = ['emerald', 'blue', 'orange', 'amber', 'indigo', 'rose', 'cyan', 'violet'];
     let hash = 0;
@@ -124,6 +125,7 @@ export class StocksService {
     }
     return colors[Math.abs(hash) % colors.length];
   }
+  /* eslint-enable no-bitwise */
 
   private static parsePrice(val: any): number {
     if (val === null || val === undefined) return 0;

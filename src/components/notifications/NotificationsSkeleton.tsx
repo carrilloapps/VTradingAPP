@@ -1,13 +1,10 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Skeleton from '../ui/Skeleton';
 
 const NotificationsSkeleton = () => {
   const theme = useTheme();
-  const insets = useSafeAreaInsets();
-  const r = theme.roundness;
 
   return (
     <View style={styles.container}>

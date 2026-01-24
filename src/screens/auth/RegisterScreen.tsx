@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, KeyboardAvoidingView, Platform, Image } from 'react-native';
+import { View, StyleSheet, ScrollView, StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
 import { Text, TextInput, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuth } from '../../context/AuthContext';

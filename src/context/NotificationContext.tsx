@@ -107,7 +107,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     });
 
     // 2. Background State
-    const unsubscribeOpened = fcmService.onNotificationOpenedApp(remoteMessage => {
+    const unsubscribeOpened = fcmService.onNotificationOpenedApp(_remoteMessage => {
        // Navigate to Notifications Screen
        if (navigationRef.isReady()) {
            try {

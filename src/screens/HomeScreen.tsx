@@ -44,8 +44,6 @@ const HomeScreen = () => {
       // Calculate Spread (Brecha)
       const usdRates = data.filter(r => (r.code === 'USD' || r.code === 'USDT') && r.value > 0);
       let spreadVal: number | null = null;
-      let minVal: number | undefined;
-      let maxVal: number | undefined;
 
       if (usdRates.length >= 2) {
            const values = usdRates.map(r => r.value);
@@ -53,8 +51,6 @@ const HomeScreen = () => {
            const max = Math.max(...values);
            if (min > 0) {
                spreadVal = ((max - min) / min) * 100;
-               minVal = min;
-               maxVal = max;
            }
       }
       setSpread(spreadVal);

@@ -26,7 +26,6 @@ import SettingsSkeleton from '../components/settings/SettingsSkeleton';
 
 const SettingsScreen = () => {
   const theme = useTheme();
-  const colors = theme.colors as any;
   const navigation = useNavigation();
   const { themeMode, setThemeMode } = useThemeContext();
   const { user, signOut, updateProfileName, deleteAccount } = useAuth();
@@ -88,7 +87,7 @@ const SettingsScreen = () => {
       return () => {
         isActive = false;
       };
-    }, [])
+    }, [showToast])
   );
 
   const handleAction = (message: string) => {

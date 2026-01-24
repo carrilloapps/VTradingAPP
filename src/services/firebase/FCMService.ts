@@ -6,16 +6,13 @@ import {
   setBackgroundMessageHandler,
   onNotificationOpenedApp,
   getInitialNotification,
-  subscribeToTopic,
-  unsubscribeFromTopic,
   requestPermission,
   hasPermission,
   AuthorizationStatus,
   RemoteMessage,
   Messaging
 } from '@react-native-firebase/messaging';
-import { PermissionsAndroid, Platform, Appearance } from 'react-native';
-import DeviceInfo from 'react-native-device-info';
+import { PermissionsAndroid, Platform } from 'react-native';
 import { observabilityService } from '../ObservabilityService';
 
 class FCMService {

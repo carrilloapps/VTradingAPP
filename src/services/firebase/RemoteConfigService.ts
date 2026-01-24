@@ -1,4 +1,4 @@
-import { getRemoteConfig, setDefaults, setConfigSettings, fetchAndActivate, getValue } from '@react-native-firebase/remote-config';
+import { getRemoteConfig, setDefaults, fetchAndActivate, getValue } from '@react-native-firebase/remote-config';
 import { observabilityService } from '../ObservabilityService';
 
 class RemoteConfigService {

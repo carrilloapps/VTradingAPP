@@ -121,7 +121,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
       backgroundColor: accentRed,
       borderColor: theme.colors.background,
     }
-  }), [theme, accentGreen, accentRed, buttonBgColor, hideDivider]);
+  }), [theme, accentGreen, accentRed, buttonBgColor, hideDivider, colors.warning]);
 
   const getInitials = (name: string) => {
     return name

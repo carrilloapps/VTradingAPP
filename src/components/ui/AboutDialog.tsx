@@ -26,7 +26,6 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
   const navigation = useNavigation();
   const appName = DeviceInfo.getApplicationName();
   const version = DeviceInfo.getVersion();
-  const buildNumber = DeviceInfo.getBuildNumber();
 
   const openExternalUrl = (url: string, title?: string) => {
     onDismiss();
