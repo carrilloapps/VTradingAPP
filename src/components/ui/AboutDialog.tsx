@@ -64,7 +64,7 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
         <View style={styles.aboutLinksContainer}>
           <View style={[styles.cardContainer, { borderColor: theme.colors.outline, backgroundColor: theme.colors.elevation.level1 }]}>
             <MenuButton
-              icon="policy"
+              icon="shield-account"
               label="Políticas de privacidad"
               onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL, 'Políticas de privacidad')}
             />
