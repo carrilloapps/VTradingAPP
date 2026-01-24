@@ -27,3 +27,8 @@
 *   Maneja la integración con Firebase Cloud Messaging.
 *   **Suscripción Demográfica:** Automáticamente suscribe al dispositivo a topics técnicos (OS, Versión, Build, Tema, Cohorte) al obtener permisos, permitiendo segmentación de notificaciones masivas.
 *   **Gestión de Topics:** Expone métodos para suscribir/desuscribir a alertas de precios (`ticker_xxx`).
+
+### AnalyticsService
+*   Centraliza la lógica de seguimiento de eventos para Google Analytics y Microsoft Clarity.
+*   **Privacidad:** El rastreo se activa automáticamente al inicio (cubierto por Términos y Condiciones).
+*   **Documentación:** Ver [docs/ANALYTICS.md](../../docs/ANALYTICS.md) para el diccionario de eventos.

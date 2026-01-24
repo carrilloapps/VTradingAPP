@@ -201,85 +201,87 @@ const AppNavigator = () => {
   }
 
   return (
-    <NavigationContainer
-      ref={navigationRef}
-      theme={themeWithPaper}
-      onReady={() => {
-        routeNameRef.current = navigationRef.current?.getCurrentRoute()?.name;
-      }}
-      onStateChange={async () => {
-        const previousRouteName = routeNameRef.current;
-        const currentRoute = navigationRef.current?.getCurrentRoute();
-        const currentRouteName = currentRoute?.name;
+    <>
+      <NavigationContainer
+        ref={navigationRef}
+        theme={themeWithPaper}
+        onReady={() => {
+          routeNameRef.current = navigationRef.current?.getCurrentRoute()?.name;
+        }}
+        onStateChange={async () => {
+          const previousRouteName = routeNameRef.current;
+          const currentRoute = navigationRef.current?.getCurrentRoute();
+          const currentRouteName = currentRoute?.name;
 
-        if (previousRouteName !== currentRouteName && currentRouteName) {
-          await analyticsService.logScreenView(currentRouteName, currentRouteName);
-        }
-        routeNameRef.current = currentRouteName;
-      }}
-    >
-      <RootStack.Navigator screenOptions={{ headerShown: false }}>
-        {showOnboarding ? (
-          <RootStack.Screen name="Onboarding">
-            {(props) => <OnboardingScreen {...props} onFinish={() => setShowOnboarding(false)} />}
-          </RootStack.Screen>
-        ) : user ? (
-          <>
-            <RootStack.Screen name="Main" component={MainTabNavigator} />
-            <RootStack.Screen 
-              name="Notifications" 
-              component={NotificationsScreen}
-              options={{ 
-                headerShown: false,
-                animation: 'default',
-              }} 
-            />
-            <RootStack.Screen 
-              name="Widgets" 
-              component={WidgetsScreen}
-              options={{ 
-                headerShown: false,
-                animation: 'default',
-              }} 
-            />
-            <RootStack.Screen 
-              name="AdvancedCalculator" 
-              component={AdvancedCalculatorScreen} 
-              options={{ 
-                headerShown: false, 
-                animation: 'default' 
-              }} 
-            />
-            <RootStack.Screen 
-              name="BankRates" 
-              component={BankRatesScreen} 
-              options={{ 
-                headerShown: false, 
-                animation: 'default' 
-              }} 
-            />
-            <RootStack.Screen 
-              name="WebView" 
-              component={WebViewScreen} 
-              options={{ 
-                headerShown: false, 
-                animation: 'slide_from_bottom' 
-              }} 
-            />
-            <RootStack.Screen 
-              name="AddAlert" 
-              component={AddAlertScreen} 
-              options={{ 
-                headerShown: false, 
-                animation: 'default' 
-              }} 
-            />
-          </>
-        ) : (
-          <RootStack.Screen name="Auth" component={AuthNavigator} />
-        )}
-      </RootStack.Navigator>
-    </NavigationContainer>
+          if (previousRouteName !== currentRouteName && currentRouteName) {
+            await analyticsService.logScreenView(currentRouteName, currentRouteName);
+          }
+          routeNameRef.current = currentRouteName;
+        }}
+      >
+        <RootStack.Navigator screenOptions={{ headerShown: false }}>
+          {showOnboarding ? (
+            <RootStack.Screen name="Onboarding">
+              {(props) => <OnboardingScreen {...props} onFinish={() => setShowOnboarding(false)} />}
+            </RootStack.Screen>
+          ) : user ? (
+            <>
+              <RootStack.Screen name="Main" component={MainTabNavigator} />
+              <RootStack.Screen 
+                name="Notifications" 
+                component={NotificationsScreen}
+                options={{ 
+                  headerShown: false,
+                  animation: 'default',
+                }} 
+              />
+              <RootStack.Screen 
+                name="Widgets" 
+                component={WidgetsScreen}
+                options={{ 
+                  headerShown: false,
+                  animation: 'default',
+                }} 
+              />
+              <RootStack.Screen 
+                name="AdvancedCalculator" 
+                component={AdvancedCalculatorScreen} 
+                options={{ 
+                  headerShown: false, 
+                  animation: 'default' 
+                }} 
+              />
+              <RootStack.Screen 
+                name="BankRates" 
+                component={BankRatesScreen} 
+                options={{ 
+                  headerShown: false, 
+                  animation: 'default' 
+                }} 
+              />
+              <RootStack.Screen 
+                name="WebView" 
+                component={WebViewScreen} 
+                options={{ 
+                  headerShown: false, 
+                  animation: 'slide_from_bottom' 
+                }} 
+              />
+              <RootStack.Screen 
+                name="AddAlert" 
+                component={AddAlertScreen} 
+                options={{ 
+                  headerShown: false, 
+                  animation: 'default' 
+                }} 
+              />
+            </>
+          ) : (
+            <RootStack.Screen name="Auth" component={AuthNavigator} />
+          )}
+        </RootStack.Navigator>
+      </NavigationContainer>
+    </>
   );
 };
 

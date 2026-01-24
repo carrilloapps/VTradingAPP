@@ -37,7 +37,7 @@ globalThis.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
 const isProd = !__DEV__;
 
 Clarity.initialize('v6dxvnsq12', {
-  logLevel: isProd ? Clarity.LogLevel.None : Clarity.LogLevel.Verbose, // Note: Use "LogLevel.Verbose" value while testing to debug initialization issues.
+  logLevel: isProd ? Clarity.LogLevel.None : Clarity.LogLevel.Verbose, 
 });
 
 Sentry.init({
