@@ -254,7 +254,7 @@ const LoginScreen = ({ navigation }: any) => {
             </View>
 
             <CustomButton
-              label="Iniciar Sesión"
+              label="Iniciar sesión"
               onPress={handleLogin}
               loading={isBusy}
               disabled={isBusy}

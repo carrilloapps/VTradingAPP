@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Text, useTheme, Switch, Snackbar, Button } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import DeviceInfo from 'react-native-device-info';
 import { fcmService } from '../services/firebase/FCMService';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import CustomDialog from '../components/ui/CustomDialog';
 import AboutDialog from '../components/ui/AboutDialog';
@@ -48,8 +48,9 @@ const SettingsScreen = () => {
   const [loading, setLoading] = useState(true);
   const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
 
-  useEffect(() => {
-    const loadData = async () => {
+  useFocusEffect(
+    useCallback(() => {
+      const loadData = async () => {
         // App Info
         setAppName(DeviceInfo.getApplicationName());
         setAppVersion(DeviceInfo.getVersion());
@@ -63,10 +64,11 @@ const SettingsScreen = () => {
         setAlerts(savedAlerts);
 
         setLoading(false);
-    };
-    
-    loadData();
-  }, []);
+      };
+      
+      loadData();
+    }, [])
+  );
 
   const handleAction = (message: string) => {
     setSnackbarMessage(message);
