@@ -25,6 +25,7 @@ interface NotificationCardProps {
   onPress: () => void;
   onArchive: () => void;
   onDelete: () => void;
+  showSwipeHint?: boolean;
 }
 
 import { formatTimeAgo } from '../../utils/dateUtils';
@@ -36,6 +37,8 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
   onPress,
   onArchive,
   onDelete,
+  // Control swipe hint visibility (default: false)
+  showSwipeHint = false,
 }) => {
   const theme = useAppTheme();
   const iconConfig = getNotificationIconConfig(notification, theme);
@@ -155,12 +158,14 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
             {renderMessage()}
 
             {/* Swipe Hint */}
-            <View style={styles.swipeHint}>
-              <MaterialIcons name="touch-app" size={12} color={theme.colors.onSurfaceVariant} />
-              <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, marginLeft: 4, textTransform: 'uppercase', fontSize: 10, fontWeight: 'bold' }}>
-                DESLIZA: ARCHIVAR / BORRAR
-              </Text>
-            </View>
+            {showSwipeHint && (
+              <View style={styles.swipeHint}>
+                <MaterialIcons name="touch-app" size={12} color={theme.colors.onSurfaceVariant} />
+                <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, marginLeft: 4, textTransform: 'uppercase', fontSize: 10, fontWeight: 'bold' }}>
+                  DESLIZA: ARCHIVAR / BORRAR
+                </Text>
+              </View>
+            )}
           </View>
         </View>
       </TouchableRipple>
@@ -171,7 +176,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     marginBottom: 12,
-    borderRadius: 16,
+    borderRadius: 24,
     borderWidth: 1,
     overflow: 'hidden',
   },

@@ -129,12 +129,13 @@ const NotificationsScreen: React.FC = () => {
     <FlatList
       data={data}
       keyExtractor={(item) => item.id}
-      renderItem={({ item }) => (
+      renderItem={({ item, index }) => (
         <NotificationCard
           notification={item}
           onPress={() => handleNotificationPress(item.id)}
           onArchive={() => handleArchive(item.id)}
           onDelete={() => handleDelete(item.id)}
+          showSwipeHint={index === 0}
         />
       )}
       contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 20, flexGrow: 1 }}
