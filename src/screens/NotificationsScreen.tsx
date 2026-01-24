@@ -144,13 +144,7 @@ const NotificationsScreen: React.FC = () => {
     />
   );
 
-  if (isLoading) {
-    // We render the skeleton inside the main layout structure now, but for simplicity
-    // let's just use the skeleton component if we want to replace the list content.
-    // However, the user asked to NOT use any type of loading (meaning spinner).
-    // The previous implementation returned early. Now we want to show the header and just skeleton the list.
-    // So we will NOT return early here.
-  }
+
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>

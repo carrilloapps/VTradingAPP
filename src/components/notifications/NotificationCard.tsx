@@ -67,7 +67,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
   };
 
   const renderLeftActions = (
-    progress: Animated.AnimatedInterpolation<number>,
+    _: Animated.AnimatedInterpolation<number>,
     dragX: Animated.AnimatedInterpolation<number>
   ) => {
     const scale = dragX.interpolate({

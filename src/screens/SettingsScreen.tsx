@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Alert, Image, Platform } from 'react-native';
+import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Alert, Platform } from 'react-native';
 import { Text, useTheme, Switch, Snackbar, Button } from 'react-native-paper';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import DeviceInfo from 'react-native-device-info';
