@@ -221,13 +221,16 @@ export class CurrencyService {
                  name = `${apiRate.currency}/VES • ${sourceLabel}`;
 
                  switch(apiRate.currency) {
-                     case 'EUR': iconName = 'euro'; break;
+                     case 'EUR': iconName = 'currency-eur'; break;
                      case 'USD': iconName = 'currency-usd'; break;
-                     case 'CNY': iconName = 'currency-yuan'; break;
-                     case 'RUB': iconName = 'currency-ruble'; break;
-                     case 'TRY': iconName = 'account-balance'; break;
-                     case 'GBP': iconName = 'currency-pound'; break;
-                     case 'JPY': iconName = 'currency-yen'; break;
+                     case 'CNY': iconName = 'currency-cny'; break;
+                     case 'RUB': iconName = 'currency-rub'; break;
+                     case 'TRY': iconName = 'currency-try'; break;
+                     case 'GBP': iconName = 'currency-gbp'; break;
+                     case 'JPY': iconName = 'currency-jpy'; break;
+                     case 'COP': iconName = 'currency-usd'; break;
+                     case 'BRL': iconName = 'currency-brl'; break;
+                     case 'DAI': iconName = 'currency-dai'; break;
                      default: iconName = 'currency-usd';
                  }
 
@@ -336,7 +339,7 @@ export class CurrencyService {
                 value: 1,
                 changePercent: null,
                 type: 'fiat',
-                iconName: 'currency-exchange', // Distinct icon for base
+                iconName: 'cash', // Distinct icon for base
                 lastUpdated: new Date().toISOString()
              });
         }

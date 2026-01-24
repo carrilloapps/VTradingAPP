@@ -514,7 +514,7 @@ const AdvancedCalculatorScreen = () => {
                     style={[styles.addButton, themeStyles.addButton]}
                   >
                       <View style={[styles.addIcon, themeStyles.addIcon]}>
-                        <MaterialCommunityIcons name="add" size={18} color={theme.colors.onSecondaryContainer} />
+                        <MaterialCommunityIcons name="plus" size={18} color={theme.colors.onSecondaryContainer} />
                       </View>
                       <Text style={[styles.addText, themeStyles.textSecondary]}>
                           AÑADIR OTRA DIVISA

@@ -239,7 +239,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
                 borderless
                 rippleColor="rgba(0, 0, 0, .1)"
               >
-                {variant === 'section' && rightActionIcon ? (
+                {rightActionIcon ? (
                   <MaterialCommunityIcons 
                     name={rightActionIcon} 
                     size={24} 
