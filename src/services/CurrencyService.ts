@@ -283,23 +283,24 @@ export class CurrencyService {
         // 2. Process Crypto Rates
         if (response.crypto) {
             response.crypto.forEach((cryptoItem) => {
-                let name = cryptoItem.currency;
+                const currencyCode = cryptoItem.currency.toUpperCase();
+                let name = currencyCode;
                 let iconName = 'currency-bitcoin';
                 
                 const sourceLabel = cryptoItem.source || 'P2P';
                 
-                switch(cryptoItem.currency) {
-                    case 'USDT': name = `Tether • ${sourceLabel}`; iconName = 'currency-usd'; break;
+                switch(currencyCode) {
+                    case 'USDT': name = `USDT • ${sourceLabel}`; iconName = 'currency-usd'; break;
                     case 'BTC': name = `Bitcoin • ${sourceLabel}`; iconName = 'currency-btc'; break;
                     case 'ETH': name = `Ethereum • ${sourceLabel}`; iconName = 'ethereum'; break;
-                    case 'USDC': name = `USD Coin • ${sourceLabel}`; iconName = 'currency-usd'; break;
-                    case 'BNB': name = `Binance Coin • ${sourceLabel}`; iconName = 'hexagon-slice-6'; break;
-                    case 'DAI': name = `Dai • ${sourceLabel}`; iconName = 'currency-usd'; break;
-                    case 'FDUSD': name = `First Digital USD • ${sourceLabel}`; iconName = 'currency-usd'; break;
-                    case 'BUSD': name = `Binance USD • ${sourceLabel}`; iconName = 'currency-usd'; break;
+                    case 'USDC': name = `USDC • ${sourceLabel}`; iconName = 'alpha-u-circle-outline'; break;
+                    case 'BNB': name = `BNB • ${sourceLabel}`; iconName = 'hexagon-slice-6'; break;
+                    case 'DAI': name = `DAI • ${sourceLabel}`; iconName = 'alpha-d-circle-outline'; break;
+                    case 'FDUSD': name = `FDUSD • ${sourceLabel}`; iconName = 'alpha-f-circle-outline'; break;
+                    case 'BUSD': name = `BUSD • ${sourceLabel}`; iconName = 'alpha-b-circle-outline'; break;
                     case 'LTC': name = `Litecoin • ${sourceLabel}`; iconName = 'litecoin'; break;
-                    case 'DOGE': name = `Dogecoin • ${sourceLabel}`; iconName = 'dog'; break; // Fallback icon
-                    default: name = `${cryptoItem.currency} • ${sourceLabel}`; iconName = 'currency-btc';
+                    case 'DOGE': name = `Dogecoin • ${sourceLabel}`; iconName = 'dog'; break;
+                    default: name = `${currencyCode} • ${sourceLabel}`; iconName = 'currency-btc';
                 }
 
                 // Calculate average value
