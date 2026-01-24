@@ -43,8 +43,8 @@ const HomeScreen = () => {
       // Calculate Spread (Brecha)
       const usdRates = data.filter(r => (r.code === 'USD' || r.code === 'USDT') && r.value > 0);
       let spreadVal: number | null = null;
-      let minVal: number | undefined = undefined;
-      let maxVal: number | undefined = undefined;
+      let minVal: number | undefined;
+      let maxVal: number | undefined;
 
       if (usdRates.length >= 2) {
            const values = usdRates.map(r => r.value);
@@ -101,8 +101,8 @@ const HomeScreen = () => {
         }
 
         // Handle potential undefined/null for buy/sell
-        let displayBuyValue = undefined;
-        let displaySellValue = undefined;
+        let displayBuyValue;
+        let displaySellValue;
         
         if (rate.buyValue !== undefined && !isNaN(Number(rate.buyValue))) {
              displayBuyValue = Number(rate.buyValue).toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES });
@@ -113,11 +113,11 @@ const HomeScreen = () => {
         }
 
         // Determine icon and color based on currency type/code
-        let iconName = undefined;
+        let iconName;
         let iconSymbol = '$';
-        let iconColor = undefined;
-        let iconTintColor = undefined;
-        let customIcon = undefined;
+        let iconColor;
+        let iconTintColor;
+        let customIcon;
         
         // Use consistent background color for both modes that supports dark content (#212121)
         // In Dark Mode: primary is #6DDBAC (Light Green)

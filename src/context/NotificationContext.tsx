@@ -133,8 +133,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         let finalBody = notifBody || dataBody || '';
 
         // Special handling for Price Alerts (symbol + price in data)
-        let highlightedVal = undefined;
-        let trendVal: 'up' | 'down' | undefined = undefined;
+        let highlightedVal;
+        let trendVal: 'up' | 'down' | undefined;
         let shouldAdd = true; // Default to true for standard messages
 
         if (remoteMessage.data?.symbol && remoteMessage.data?.price) {
