@@ -10,40 +10,45 @@ const DashboardSkeleton = () => {
   const r = theme.roundness;
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 20 }]}>
-      {/* Header Skeleton */}
+    <View style={[styles.container, { paddingTop: insets.top + 10 }]}>
+      {/* Header Skeleton (matches UnifiedHeader profile) */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <Skeleton width={120} height={20} />
+          <View style={styles.headerLeft}>
+            <Skeleton width={44} height={44} borderRadius={22} />
+            <View style={styles.headerText}>
+              <Skeleton width={80} height={12} style={{ marginBottom: 4 }} />
+              <Skeleton width={120} height={20} />
+            </View>
+          </View>
           <View style={styles.headerIcons}>
-            <Skeleton width={32} height={32} borderRadius={r * 4} />
-            <Skeleton width={32} height={32} borderRadius={r * 4} />
+            <Skeleton width={40} height={40} borderRadius={20} />
+            <Skeleton width={40} height={40} borderRadius={20} />
           </View>
         </View>
-        <Skeleton width={180} height={28} style={styles.headerTitleSkeleton} />
       </View>
 
       {/* Market Status Skeleton */}
-      <View style={styles.section}>
-        <Skeleton width="100%" height={48} borderRadius={r * 3} />
+      <View style={styles.marketStatusContainer}>
+        <Skeleton width="100%" height={56} borderRadius={r * 3} />
       </View>
 
       {/* Exchange Cards Skeleton */}
       <View style={styles.section}>
-        <Skeleton width="100%" height={140} borderRadius={r * 4} style={styles.firstCardSkeleton} />
-        <Skeleton width="100%" height={140} borderRadius={r * 4} />
+        <Skeleton width="100%" height={150} borderRadius={r * 6} style={styles.firstCardSkeleton} />
+        <Skeleton width="100%" height={150} borderRadius={r * 6} />
       </View>
 
       {/* Advanced Calculator CTA Skeleton */}
-      <View style={styles.section}>
-        <Skeleton width="100%" height={130} borderRadius={r * 6} />
+      <View style={styles.ctaContainer}>
+        <Skeleton width="100%" height={100} borderRadius={r * 4} />
       </View>
 
       {/* Stocks List Skeleton */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-          <Skeleton width={32} height={32} borderRadius={r * 2} />
-          <Skeleton width={150} height={20} style={styles.sectionTitleSkeleton} />
+           <Skeleton width={180} height={24} borderRadius={r * 2} />
+           <Skeleton width={80} height={20} borderRadius={r * 2} />
         </View>
         
         {[1, 2, 3].map((_, index) => (
@@ -60,18 +65,23 @@ const DashboardSkeleton = () => {
             ]}
           >
             <View style={styles.stockLeft}>
-              <Skeleton width={48} height={48} borderRadius={r * 4} />
+              <Skeleton width={48} height={48} borderRadius={r * 3} />
               <View style={styles.stockContent}>
-                <Skeleton width={80} height={16} />
-                <Skeleton width={50} height={12} style={styles.stockSubtitleSkeleton} />
+                <Skeleton width={100} height={16} />
+                <Skeleton width={60} height={12} style={styles.stockSubtitleSkeleton} />
               </View>
             </View>
             <View style={styles.stockRight}>
               <Skeleton width={80} height={16} />
-              <Skeleton width={40} height={12} style={styles.stockSubtitleSkeleton} />
+              <Skeleton width={50} height={12} style={styles.stockSubtitleSkeleton} />
             </View>
           </View>
         ))}
+      </View>
+
+      {/* Quick Calculator Skeleton */}
+      <View style={styles.section}>
+         <Skeleton width="100%" height={240} borderRadius={r * 6} />
       </View>
     </View>
   );
@@ -79,7 +89,8 @@ const DashboardSkeleton = () => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    flex: 1,
+    padding: 0, // Removed padding to match HomeScreen
   },
   header: {
     marginBottom: 24,
@@ -88,17 +99,37 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  headerLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  headerText: {
+    justifyContent: 'center',
   },
   headerIcons: {
     flexDirection: 'row',
     gap: 12,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: 20,
+    paddingHorizontal: 20, // Matches HomeScreen styles.section
+  },
+  marketStatusContainer: {
+    paddingHorizontal: 22,
+    marginTop: 10,
+    marginBottom: 20,
+  },
+  ctaContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 16,
   },
   stockItem: {
@@ -106,7 +137,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 16,
     marginBottom: 12,
-    borderWidth: 1, // Will be overridden by inline style for dark mode
+    borderWidth: 1, 
   },
   stockLeft: {
     flexDirection: 'row',

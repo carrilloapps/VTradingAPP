@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, RefreshControl, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView, StatusBar, RefreshControl, TouchableOpacity, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import { useTheme, Text } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
@@ -40,6 +40,23 @@ const HomeScreen = () => {
   const [featuredRates, setFeaturedRates] = useState<ExchangeCardProps[]>([]);
   const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
   const [isMarketOpen, setIsMarketOpen] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(false);
+
+  useEffect(() => {
+    const showSubscription = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      () => setKeyboardVisible(true)
+    );
+    const hideSubscription = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => setKeyboardVisible(false)
+    );
+
+    return () => {
+      showSubscription.remove();
+      hideSubscription.remove();
+    };
+  }, []);
 
   const processRates = useCallback((data: CurrencyRate[]) => {
       // Prioritize USD and USDT for the Home Screen
@@ -274,60 +291,68 @@ const HomeScreen = () => {
         onNotificationPress={() => navigation.navigate('Notifications')}
       />
 
-      <ScrollView 
-        style={styles.scrollView}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.colors.primary]} />
-        }
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        <MarketStatus
-            style={{ paddingHorizontal: 22, paddingTop: 15, paddingBottom: 20 }} 
-            isOpen={isMarketOpen} 
-            updatedAt={lastUpdated} 
-            onRefresh={() => {
-                onRefresh();
-            }}
-        />
+        <ScrollView 
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.colors.primary]} />
+          }
+        >
+          <MarketStatus
+              style={{ paddingHorizontal: 22, paddingTop: 15, paddingBottom: 20 }} 
+              isOpen={isMarketOpen} 
+              updatedAt={lastUpdated} 
+              onRefresh={() => {
+                  onRefresh();
+              }}
+          />
 
-        <View style={styles.section}>
-          {featuredRates.map((item, index) => (
-            <ExchangeCard key={index} {...item} />
-          ))}
-          {featuredRates.length === 0 && (
-             <Text style={[styles.emptyText, themeStyles.emptyText]}>
-               No hay tasas disponibles
-             </Text>
-          )}
-        </View>
-
-        <AdvancedCalculatorCTA spread={spread} />
-
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <Text variant="headlineSmall" style={[styles.titleMedium, themeStyles.sectionTitle]}>
-              Mercado Bursátil
-            </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Markets')}>
-                <Text variant="labelLarge" style={[styles.linkText, themeStyles.linkText]}>VER TODO</Text>
-            </TouchableOpacity>
+          <View style={styles.section}>
+            {featuredRates.map((item, index) => (
+              <ExchangeCard key={index} {...item} />
+            ))}
+            {featuredRates.length === 0 && (
+               <Text style={[styles.emptyText, themeStyles.emptyText]}>
+                 No hay tasas disponibles
+               </Text>
+            )}
           </View>
-          
-          {stocks.map((stock) => (
-            <StockItem 
-              key={stock.id}
-              {...stock}
-              value={`${stock.price.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`}
-              change={`${stock.changePercent > 0 ? '+' : ''}${stock.changePercent.toFixed(2)}%`}
-              onPress={() => navigation.navigate('StockDetail', { stock })}
-            />
-          ))}
-        </View>
 
-        <View style={styles.section}>
-          <Calculator />
-        </View>
-      </ScrollView>
+          <AdvancedCalculatorCTA spread={spread} />
+
+          <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+              <Text variant="headlineSmall" style={[styles.titleMedium, themeStyles.sectionTitle]}>
+                Mercado Bursátil
+              </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Markets')}>
+                  <Text variant="labelLarge" style={[styles.linkText, themeStyles.linkText]}>VER TODO</Text>
+              </TouchableOpacity>
+            </View>
+            
+            {stocks.map((stock) => (
+              <StockItem 
+                key={stock.id}
+                {...stock}
+                value={`${stock.price.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`}
+                change={`${stock.changePercent > 0 ? '+' : ''}${stock.changePercent.toFixed(2)}%`}
+                onPress={() => navigation.navigate('StockDetail', { stock })}
+              />
+            ))}
+          </View>
+
+          <View style={styles.section}>
+            <Calculator />
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </View>
   );
 };
@@ -338,6 +363,9 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
+  },
+  scrollContent: {
+    paddingBottom: 40, 
   },
   section: {
     paddingHorizontal: 20,
