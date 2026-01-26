@@ -9,13 +9,18 @@ class RemoteConfigService {
    */
   async initialize(): Promise<void> {
     try {
+      // Configure settings: 0 interval for dev (instant updates), 30 min for production
+      await this.remoteConfig.setConfigSettings({
+        minimumFetchIntervalMillis: __DEV__ ? 0 : 1800000,
+      });
+
       await setDefaults(this.remoteConfig, {
         welcome_message: 'Bienvenido a VTradingAPP',
         enable_new_feature: false,
         api_timeout: 5000,
         refresh_interval: 60,
       });
-      
+
       // Fetch and activate
       await this.fetchAndActivate();
     } catch (e) {
