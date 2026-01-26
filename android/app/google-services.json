@@ -7,12 +7,41 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:33026454370:android:fd783870ae02a5b7b0323b",
+        "mobilesdk_app_id": "1:33026454370:android:5d5306e39989a93cb0323b",
         "android_client_info": {
           "package_name": "com.vtradingapp"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "33026454370-0m1vmkjjbeljdjdc90e2migjf9aocmj4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.vtradingapp",
+            "certificate_hash": "c2efd3d6e1f1f7454d4db8807437427b03d6d8b7"
+          }
+        },
+        {
+          "client_id": "33026454370-6rsa123b86m20rhl12mqd937j8fojah1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.vtradingapp",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "33026454370-c0coo4q6pgtlfe4eei6q5p4sfnp1o2gr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.vtradingapp",
+            "certificate_hash": "2319e39c0bf10eb6066ec8e5c9b8f00469b25f3a"
+          }
+        },
+        {
+          "client_id": "33026454370-fo8de89amlap9e4vroqg3vf4vehpenhf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCbp_PdPgr516n-hGXwDikpcLla3DHU41Q"
@@ -20,7 +49,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "33026454370-fo8de89amlap9e4vroqg3vf4vehpenhf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
