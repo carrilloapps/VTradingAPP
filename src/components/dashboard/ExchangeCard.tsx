@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Image } from 'react-native';
-import { Text } from 'react-native-paper';
+import { Text, TouchableRipple } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Svg, { Path } from 'react-native-svg';
 import LinearGradient from 'react-native-linear-gradient';
@@ -28,6 +28,7 @@ export interface ExchangeCardProps {
   buyChartPath?: string;
   sellChartPath?: string;
   code?: string;
+  onPress?: () => void;
 }
 
 const ExchangeCard: React.FC<ExchangeCardProps> = ({
@@ -49,7 +50,8 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
   buyChangePercent,
   sellChangePercent,
   buyChartPath,
-  sellChartPath
+  sellChartPath,
+  onPress
 }) => {
   const theme = useAppTheme();
   const isNeutral = changePercent === '0.00%';
@@ -72,120 +74,156 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
     : (isPositive ? "trending-up" : "trending-down");
 
   return (
-    <LinearGradient
-      colors={['#0e4981', '#0b3a67', '#082f54']}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={[styles.card, { 
-        borderRadius: theme.roundness * 6,
-        // Flat style with subtle border for gradient
-        borderColor: theme.colors.exchangeCardBorder,
-        borderWidth: 1,
-        overflow: 'hidden', // Ensure gradient respects border radius
-        position: 'relative'
-      }]}
+    <TouchableRipple 
+      onPress={onPress} 
+      style={{ marginBottom: 12, borderRadius: theme.roundness * 6 }}
+      borderless
     >
-      {/* Background Blur Effect Circle */}
-      <View style={styles.blurCircle} />
-      
-      <View style={[styles.header, { position: 'relative', zIndex: 1 }]}>
-        <View style={styles.leftContent}>
-          <View style={[styles.iconContainer, { borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: theme.roundness * 5 }]}>
-            {customIcon ? (
-              customIcon
-            ) : iconUrl ? (
-              <Image source={{ uri: iconUrl }} style={styles.iconImage} />
-            ) : iconName ? (
-              <View style={[styles.symbolIcon, { backgroundColor: iconColor }]}>
-                {iconName === 'Bs' ? (
-                     <BolivarIcon color={iconTintColor || theme.colors.onPrimaryContainer} size={24} />
-                ) : (
-                  <MaterialCommunityIcons 
-                    name={iconName} size={32} color={iconTintColor || theme.colors.onPrimaryContainer} />
-                )}
-              </View>
-            ) : (
-              <View style={[styles.symbolIcon, { backgroundColor: iconColor }]}>
-                <Text style={styles.symbolText}>{iconSymbol}</Text>
-              </View>
-            )}
-          </View>
-          <View>
-            <Text variant="labelMedium" style={[{ color: 'rgba(255, 255, 255, 0.7)', textTransform: 'uppercase', letterSpacing: 0.5 }, styles.titleText]}>{title}</Text>
-            {subtitle ? <Text variant="bodySmall" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>{subtitle}</Text> : null}
-            <View style={styles.valueContainer}>
-              {buyValue && sellValue ? (
-                  <View style={styles.dualContainer}>
-                      {/* GENERAL (Average/Main) */}
-                      <View>
-                          <Text variant="labelSmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginBottom: 2}}>GENERAL</Text>
-                          <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
-                            <Text variant="titleLarge" style={[{ color: '#FFFFFF', fontWeight: 'bold' }]}>{value}</Text>
-                            <Text variant="bodySmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginLeft: 4}}>{currency}</Text>
-                          </View>
-                          <Text variant="labelSmall" style={{color: trendColor}}>
-                              {changePercent}
-                          </Text>
-                      </View>
-
-                      <View style={[styles.divider, { marginHorizontal: 8 }]} />
-
-                      {/* COMPRA */}
-                      <View>
-                          <Text variant="labelSmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginBottom: 2}}>COMPRA</Text>
-                          <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
-                            <Text variant="titleLarge" style={[{ color: '#FFFFFF', fontWeight: 'bold' }]}>{buyValue}</Text>
-                            <Text variant="bodySmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginLeft: 4}}>{currency}</Text>
-                          </View>
-                          {buyChangePercent && (
-                              <Text variant="labelSmall" style={{color: buyChangePercent.includes('-') ? '#F87171' : buyChangePercent.includes('0.00') ? 'rgba(255, 255, 255, 0.7)' : '#6EE7B7'}}>
-                                  {buyChangePercent}
-                              </Text>
-                          )}
-                      </View>
-
-                      <View style={[styles.divider, { marginHorizontal: 8 }]} />
-
-                      {/* VENTA */}
-                      <View>
-                          <Text variant="labelSmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginBottom: 2}}>VENTA</Text>
-                          <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
-                            <Text variant="titleLarge" style={[{ color: '#FFFFFF', fontWeight: 'bold' }]}>{sellValue}</Text>
-                            <Text variant="bodySmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginLeft: 4}}>{currency}</Text>
-                          </View>
-                          {sellChangePercent && (
-                              <Text variant="labelSmall" style={{color: sellChangePercent.includes('-') ? '#F87171' : sellChangePercent.includes('0.00') ? 'rgba(255, 255, 255, 0.7)' : '#6EE7B7'}}>
-                                  {sellChangePercent}
-                              </Text>
-                          )}
-                      </View>
-                  </View>
+      <LinearGradient
+        colors={['#0e4981', '#0b3a67', '#082f54']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={[styles.card, { 
+          borderRadius: theme.roundness * 6,
+          borderColor: theme.colors.exchangeCardBorder,
+          borderWidth: 1,
+          overflow: 'hidden',
+          position: 'relative'
+        }]}
+      >
+        {/* Background Blur Effect Circle */}
+        <View style={styles.blurCircle} />
+        
+        <View style={[styles.header, { position: 'relative', zIndex: 1 }]}>
+          <View style={styles.leftContent}>
+            <View style={[styles.iconContainer, { borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: theme.roundness * 5 }]}>
+              {customIcon ? (
+                customIcon
+              ) : iconUrl ? (
+                <Image source={{ uri: iconUrl }} style={styles.iconImage} />
+              ) : iconName ? (
+                <View style={[styles.symbolIcon, { backgroundColor: iconColor }]}>
+                  {iconName === 'Bs' ? (
+                       <BolivarIcon color={iconTintColor || theme.colors.onPrimaryContainer} size={24} />
+                  ) : (
+                    <MaterialCommunityIcons 
+                      name={iconName} size={32} color={iconTintColor || theme.colors.onPrimaryContainer} />
+                  )}
+                </View>
               ) : (
-                <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
-                  <Text variant="headlineMedium" style={[styles.valueText, { color: '#FFFFFF' }]}>{value}</Text>
-                  <Text variant="titleMedium" style={[styles.currencyText, { color: 'rgba(255, 255, 255, 0.7)' }]}>{currency}</Text>
+                <View style={[styles.symbolIcon, { backgroundColor: iconColor }]}>
+                  <Text style={styles.symbolText}>{iconSymbol}</Text>
                 </View>
               )}
             </View>
+            <View>
+              <Text variant="labelMedium" style={[{ color: 'rgba(255, 255, 255, 0.7)', textTransform: 'uppercase', letterSpacing: 0.5 }, styles.titleText]}>{title}</Text>
+              {subtitle ? <Text variant="bodySmall" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>{subtitle}</Text> : null}
+              <View style={styles.valueContainer}>
+                {buyValue && sellValue ? (
+                    <View style={styles.dualContainer}>
+                        {/* GENERAL (Average/Main) */}
+                        <View>
+                            <Text variant="labelSmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginBottom: 2}}>GENERAL</Text>
+                            <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
+                              <Text variant="titleLarge" style={[{ color: '#FFFFFF', fontWeight: 'bold' }]}>{value}</Text>
+                              <Text variant="bodySmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginLeft: 4}}>{currency}</Text>
+                            </View>
+                            <Text variant="labelSmall" style={{color: trendColor}}>
+                                {changePercent}
+                            </Text>
+                        </View>
+  
+                        <View style={[styles.divider, { marginHorizontal: 8 }]} />
+  
+                        {/* COMPRA */}
+                        <View>
+                            <Text variant="labelSmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginBottom: 2}}>COMPRA</Text>
+                            <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
+                              <Text variant="titleLarge" style={[{ color: '#FFFFFF', fontWeight: 'bold' }]}>{buyValue}</Text>
+                              <Text variant="bodySmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginLeft: 4}}>{currency}</Text>
+                            </View>
+                            {buyChangePercent && (
+                                <Text variant="labelSmall" style={{color: buyChangePercent.includes('-') ? '#F87171' : buyChangePercent.includes('0.00') ? 'rgba(255, 255, 255, 0.7)' : '#6EE7B7'}}>
+                                    {buyChangePercent}
+                                </Text>
+                            )}
+                        </View>
+  
+                        <View style={[styles.divider, { marginHorizontal: 8 }]} />
+  
+                        {/* VENTA */}
+                        <View>
+                            <Text variant="labelSmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginBottom: 2}}>VENTA</Text>
+                            <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
+                              <Text variant="titleLarge" style={[{ color: '#FFFFFF', fontWeight: 'bold' }]}>{sellValue}</Text>
+                              <Text variant="bodySmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginLeft: 4}}>{currency}</Text>
+                            </View>
+                            {sellChangePercent && (
+                                <Text variant="labelSmall" style={{color: sellChangePercent.includes('-') ? '#F87171' : sellChangePercent.includes('0.00') ? 'rgba(255, 255, 255, 0.7)' : '#6EE7B7'}}>
+                                    {sellChangePercent}
+                                </Text>
+                            )}
+                        </View>
+                    </View>
+                ) : (
+                  <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
+                    <Text variant="headlineMedium" style={[styles.valueText, { color: '#FFFFFF' }]}>{value}</Text>
+                    <Text variant="titleMedium" style={[styles.currencyText, { color: 'rgba(255, 255, 255, 0.7)' }]}>{currency}</Text>
+                  </View>
+                )}
+              </View>
+            </View>
+          </View>
+          
+          <View style={{alignItems: 'flex-end', position: 'relative', zIndex: 1}}>
+              {/* Trend Indicator */}
+              {!buyValue && (
+                  <View style={{flexDirection: 'row', alignItems: 'center', backgroundColor: isNeutral ? 'rgba(255,255,255,0.1)' : (isPositive ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'), paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12}}>
+                      <MaterialCommunityIcons name={trendIcon} size={16} color={trendColor} />
+                      <Text variant="labelMedium" style={[styles.trendText, { color: trendColor }]}>{changePercent}</Text>
+                  </View>
+              )}
           </View>
         </View>
-        
-        <View style={{alignItems: 'flex-end', position: 'relative', zIndex: 1}}>
-            {/* Trend Indicator */}
-            {!buyValue && (
-                <View style={{flexDirection: 'row', alignItems: 'center', backgroundColor: isNeutral ? 'rgba(255,255,255,0.1)' : (isPositive ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'), paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12}}>
-                    <MaterialCommunityIcons name={trendIcon} size={16} color={trendColor} />
-                    <Text variant="labelMedium" style={[styles.trendText, { color: trendColor }]}>{changePercent}</Text>
-                </View>
-            )}
-        </View>
-      </View>
-
-      <View style={{ height: 60, marginTop: 8, position: 'relative', zIndex: 1 }}>
-        <Svg height="100%" width="100%" viewBox="0 0 100 40" preserveAspectRatio="none">
-          {buyChartPath && sellChartPath ? (
-            <>
-              {/* Average Line */}
+  
+        <View style={{ height: 60, marginTop: 8, position: 'relative', zIndex: 1 }}>
+          <Svg height="100%" width="100%" viewBox="0 0 100 40" preserveAspectRatio="none">
+            {buyChartPath && sellChartPath ? (
+              <>
+                {/* Average Line */}
+                <Path
+                  d={chartPath}
+                  fill="none"
+                  stroke={trendColor}
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  opacity={0.6}
+                  strokeDasharray="4, 4"
+                />
+                {/* Buy Line */}
+                <Path
+                  d={buyChartPath}
+                  fill="none"
+                  stroke={buyColor}
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  opacity={0.8}
+                />
+                {/* Sell Line */}
+                <Path
+                  d={sellChartPath}
+                  fill="none"
+                  stroke={sellColor}
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  opacity={0.8}
+                />
+              </>
+            ) : (
               <Path
                 d={chartPath}
                 fill="none"
@@ -193,52 +231,20 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
                 strokeWidth="2.5"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                opacity={0.6}
-                strokeDasharray="4, 4"
               />
-              {/* Buy Line */}
-              <Path
-                d={buyChartPath}
-                fill="none"
-                stroke={buyColor}
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                opacity={0.8}
-              />
-              {/* Sell Line */}
-              <Path
-                d={sellChartPath}
-                fill="none"
-                stroke={sellColor}
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                opacity={0.8}
-              />
-            </>
-          ) : (
-            <Path
-              d={chartPath}
-              fill="none"
-              stroke={trendColor}
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          )}
-        </Svg>
-      </View>
-    </LinearGradient>
+            )}
+          </Svg>
+        </View>
+      </LinearGradient>
+    </TouchableRipple>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
     padding: 16,
-    marginBottom: 12,
     borderWidth: 1,
-    elevation: 0, // Remove default paper shadow for flat look
+    elevation: 0,
   },
   header: {
     flexDirection: 'row',

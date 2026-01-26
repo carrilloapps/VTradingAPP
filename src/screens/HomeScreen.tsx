@@ -189,6 +189,7 @@ const HomeScreen = () => {
             sellChangePercent: rate.sellChangePercent !== undefined ? `${rate.sellChangePercent > 0 ? '+' : ''}${rate.sellChangePercent.toFixed(2)}%` : undefined,
             buyChartPath: getPath(rate.buyChangePercent),
             sellChartPath: getPath(rate.sellChangePercent),
+            onPress: handleShareImage,
         };
       });
       setFeaturedRates(featured);
@@ -408,7 +409,7 @@ const HomeScreen = () => {
 
           <View style={styles.section}>
             {featuredRates.map((item, index) => (
-              <ExchangeCard key={index} {...item} />
+              <ExchangeCard key={index} {...item} onPress={handleShareImage} />
             ))}
             {featuredRates.length === 0 && (
                <Text style={[styles.emptyText, themeStyles.emptyText]}>
