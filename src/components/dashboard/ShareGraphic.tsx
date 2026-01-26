@@ -1,0 +1,287 @@
+import React from 'react';
+import { View, StyleSheet, Image } from 'react-native';
+import { Text, Icon, Surface, useTheme } from 'react-native-paper';
+import LinearGradient from 'react-native-linear-gradient';
+import ViewShot from 'react-native-view-shot';
+import { ExchangeCardProps } from './ExchangeCard';
+
+interface ShareGraphicProps {
+  viewShotRef: React.RefObject<any>;
+  featuredRates: ExchangeCardProps[];
+  spread: number | null;
+  lastUpdated: string;
+}
+
+const ShareGraphic: React.FC<ShareGraphicProps> = ({ 
+  viewShotRef, 
+  featuredRates, 
+  spread, 
+  lastUpdated 
+}) => {
+  const theme = useTheme();
+
+  return (
+    <View style={styles.hiddenTemplate} pointerEvents="none">
+      <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 0.9 }}>
+        <LinearGradient 
+          colors={theme.dark ? ['#051911', '#0A0A0A'] : ['#F0FDF4', '#FFFFFF']} 
+          style={styles.shareTemplate}
+        >
+          {/* Decorative Elements */}
+          <View style={[styles.templateGlow, { backgroundColor: theme.colors.primary, opacity: 0.05 }]} />
+
+          <View style={styles.templateHeader}>
+            <View style={styles.templateLogoRow}>
+              <Surface style={[styles.templateLogoBox, { backgroundColor: theme.colors.primaryContainer }]} elevation={4}>
+                <Image 
+                  source={require('../../assets/images/logo.png')} 
+                  style={styles.templateLogoImage}
+                  resizeMode="contain"
+                />
+              </Surface>
+              <View>
+                <Text style={[styles.templateBrand, { color: theme.colors.primaryContainer }]}>VTrading</Text>
+                <Text style={[styles.templateUrl, { color: theme.colors.onSurfaceVariant }]}>vtrading.app</Text>
+              </View>
+            </View>
+            <View style={styles.templateDateBox}>
+              <Icon source="calendar-clock" size={16} color={theme.colors.onSurfaceVariant} />
+              <Text style={[styles.templateDate, { color: theme.colors.onSurfaceVariant }]}>
+                {new Date().toLocaleDateString('es-VE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} • {lastUpdated}
+              </Text>
+            </View>
+          </View>
+          
+          <View style={styles.templateContent}>
+            {featuredRates.map((rate, idx) => {
+              const isNeutral = rate.changePercent.includes('0.00');
+              const trendColor = isNeutral 
+                ? theme.colors.onSurfaceVariant 
+                : (rate.isPositive ? (theme.colors as any).success || '#6EE7B7' : (theme.colors as any).error || '#F87171');
+              const trendIcon = isNeutral 
+                ? 'minus' 
+                : (rate.isPositive ? 'trending-up' : 'trending-down');
+
+              return (
+                <Surface key={idx} style={[styles.templateCard, { backgroundColor: theme.dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', borderColor: theme.colors.outlineVariant }]} elevation={0}>
+                  <View style={styles.templateCardHeader}>
+                    <View style={[styles.templateIconSmall, { backgroundColor: theme.colors.primary + '20' }]}>
+                      <Icon source={rate.code === 'USDT' || rate.title.includes('USDT') ? 'alpha-t-circle-outline' : 'currency-usd'} size={20} color={theme.colors.primary} />
+                    </View>
+                    <Text style={[styles.templateCardTitle, { color: theme.colors.onSurfaceVariant }]}>{rate.title}</Text>
+                  </View>
+                  <View style={styles.templateValueRow}>
+                    <Text style={[styles.templateValue, { color: theme.colors.onSurface }]}>{rate.value}</Text>
+                    <View style={styles.templateValueLabelColumn}>
+                        <Text style={[styles.templateCurrency, { color: theme.colors.onSurfaceVariant }]}>Bs.</Text>
+                        <View style={[styles.templateTrendBox, { backgroundColor: trendColor + '15' }]}>
+                            <Icon source={trendIcon} size={14} color={trendColor} />
+                            <Text style={[styles.templateTrendText, { color: trendColor }]}>{rate.changePercent}</Text>
+                        </View>
+                    </View>
+                  </View>
+                </Surface>
+              );
+            })}
+
+            {spread !== null && (
+              <View style={[styles.templateSpreadBox, { backgroundColor: ((theme.colors as any).warning || '#F59E0B') + '15', borderColor: ((theme.colors as any).warning || '#F59E0B') + '30' }]}>
+                <Icon source="swap-horizontal" size={18} color={(theme.colors as any).warning || '#F59E0B'} />
+                <Text style={[styles.templateSpreadText, { color: (theme.colors as any).warning || '#F59E0B' }]}>
+                  SPREAD (Diferencia USD vs USDT): <Text style={{ fontWeight: '900' }}>{spread.toFixed(2)}%</Text>
+                </Text>
+              </View>
+            )}
+          </View>
+          
+          <View style={styles.templateFooter}>
+            <LinearGradient 
+              colors={[theme.colors.primary + '00', theme.colors.primary + '10', theme.colors.primary + '00']} 
+              start={{x: 0, y: 0}} end={{x: 1, y: 0}}
+              style={styles.templateDivider}
+            />
+            <View style={styles.templateFooterRow}>
+              <Icon source="shield-check-outline" size={16} color={theme.colors.primary} />
+              <Text style={[styles.templateFooterText, { color: theme.colors.primary }]}>SEGUIMIENTO FINANCIERO PREMIUM</Text>
+            </View>
+          </View>
+        </LinearGradient>
+      </ViewShot>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  hiddenTemplate: {
+    position: 'absolute',
+    left: -2000, 
+    width: 600,
+    height: 600,
+    zIndex: -1,
+  },
+  shareTemplate: {
+    width: 600,
+    height: 600,
+    padding: 40,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  templateGlow: {
+    position: 'absolute',
+    top: -100,
+    right: -100,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: 'white', // Placeholder, opacity handled in view
+  },
+  templateHeader: {
+    alignItems: 'center',
+    width: '100%',
+  },
+  templateLogoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 16,
+  },
+  templateLogoBox: {
+    width: 64,
+    height: 64,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  templateLogoImage: {
+    width: 44,
+    height: 44,
+  },
+  templateBrand: {
+    fontSize: 28,
+    fontWeight: '900',
+    letterSpacing: 1,
+  },
+  templateUrl: {
+    fontSize: 16,
+    fontWeight: '600',
+    opacity: 0.8,
+    marginTop: -2,
+  },
+  templateDateBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: 'rgba(128,128,128,0.05)',
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: 100,
+  },
+  templateDate: {
+    fontSize: 14,
+    fontWeight: '700',
+    textTransform: 'capitalize',
+  },
+  templateContent: {
+    width: '100%',
+    gap: 20,
+  },
+  templateCard: {
+    padding: 24,
+    borderRadius: 24,
+    borderWidth: 1,
+    width: '100%',
+  },
+  templateCardHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 8,
+    justifyContent: 'center',
+  },
+  templateIconSmall: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  templateCardTitle: {
+    fontSize: 16,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  templateValueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 12,
+  },
+  templateValue: {
+    fontSize: 64,
+    fontWeight: '900',
+    letterSpacing: -1.5,
+  },
+  templateValueLabelColumn: {
+    marginLeft: 8,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    gap: 2,
+    height: 64, // Match templateValue fontSize for better center alignment
+  },
+  templateCurrency: {
+    fontSize: 22,
+    fontWeight: '800',
+    opacity: 0.8,
+    marginBottom: -4, // Pull closer to the trend box
+  },
+  templateTrendBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 8,
+  },
+  templateTrendText: {
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  templateSpreadBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    padding: 12,
+    borderRadius: 16,
+    borderWidth: 1,
+    justifyContent: 'center',
+  },
+  templateSpreadText: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  templateFooter: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  templateDivider: {
+    width: '100%',
+    height: 1,
+    marginBottom: 16,
+  },
+  templateFooterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  templateFooterText: {
+    fontSize: 12,
+    fontWeight: '900',
+    letterSpacing: 1.5,
+  }
+});
+
+export default ShareGraphic;

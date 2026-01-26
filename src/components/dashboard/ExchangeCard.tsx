@@ -27,6 +27,7 @@ export interface ExchangeCardProps {
   sellChangePercent?: string;
   buyChartPath?: string;
   sellChartPath?: string;
+  code?: string;
 }
 
 const ExchangeCard: React.FC<ExchangeCardProps> = ({
@@ -126,7 +127,7 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
                               {changePercent}
                           </Text>
                       </View>
-
+2
                       <View style={[styles.divider, { marginHorizontal: 8 }]} />
 
                       {/* COMPRA */}

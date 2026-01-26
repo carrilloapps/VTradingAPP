@@ -1,6 +1,9 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, RefreshControl, TouchableOpacity, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
-import { useTheme, Text } from 'react-native-paper';
+import RNShare from 'react-native-share';
+import ViewShot, { captureRef } from 'react-native-view-shot';
+import LinearGradient from 'react-native-linear-gradient';
+import { useTheme, Text, Icon, Surface } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MarketStatus from '../components/ui/MarketStatus';
@@ -20,6 +23,7 @@ import { CompositeNavigationProp } from '@react-navigation/native';
 import { MaterialTopTabNavigationProp } from '@react-navigation/material-top-tabs';
 import AdvancedCalculatorCTA from '../components/dashboard/AdvancedCalculatorCTA';
 import { observabilityService } from '../services/ObservabilityService';
+import ShareGraphic from '../components/dashboard/ShareGraphic';
 
 const HomeScreen = () => {
   const theme = useTheme();
@@ -41,6 +45,8 @@ const HomeScreen = () => {
   const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
   const [isMarketOpen, setIsMarketOpen] = useState(false);
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const viewShotRef = React.useRef<any>(null);
+  const [sharing, setSharing] = useState(false);
 
   useEffect(() => {
     const showSubscription = Keyboard.addListener(
@@ -219,6 +225,40 @@ const HomeScreen = () => {
     };
   }, [processRates, showToast]);
 
+  const handleShareImage = async () => {
+    if (viewShotRef.current) {
+      setSharing(true);
+      try {
+        const uri = await captureRef(viewShotRef.current, {
+          format: 'jpg',
+          quality: 0.9,
+          result: 'tmpfile', 
+        });
+        
+        if (!uri) {
+           throw new Error("Failed to capture image: URI is empty");
+        }
+
+        // Android sometimes needs the 'file://' prefix explicitly if captureRef doesn't provide it
+        const sharePath = uri.startsWith('file://') ? uri : `file://${uri}`;
+
+        await RNShare.open({
+          url: sharePath,
+          type: 'image/jpeg',
+          message: `Tasas de cambio actualizadas en VTradingAPP al ${lastUpdated}`,
+        });
+      } catch (e) {
+        if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
+            const errorMsg = e instanceof Error ? e.message : 'Unknown sharing error';
+            observabilityService.captureError(e, { context: 'HomeScreen_handleShareImage' });
+            showToast(`No se pudo compartir: ${errorMsg}`, 'error');
+        }
+      } finally {
+        setSharing(false);
+      }
+    }
+  };
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
@@ -289,6 +329,16 @@ const HomeScreen = () => {
         isPremium={userData.isPremium} 
         onProfilePress={() => navigation.navigate('Settings')}
         onNotificationPress={() => navigation.navigate('Notifications')}
+        showSecondaryAction
+        onSecondaryActionPress={handleShareImage}
+        secondaryActionIcon="share-variant"
+      />
+
+      <ShareGraphic 
+        viewShotRef={viewShotRef}
+        featuredRates={featuredRates}
+        spread={spread}
+        lastUpdated={lastUpdated}
       />
 
       <KeyboardAvoidingView 

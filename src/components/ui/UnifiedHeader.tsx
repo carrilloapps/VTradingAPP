@@ -21,12 +21,15 @@ interface UnifiedHeaderProps {
   isPremium?: boolean;
   notificationCount?: number;
   onActionPress?: () => void;
+  onSecondaryActionPress?: () => void;
   onNotificationPress?: () => void;
   onBackPress?: () => void;
   onProfilePress?: () => void;
   rightActionIcon?: string;
+  secondaryActionIcon?: string;
   notificationIcon?: string;
   showNotification?: boolean;
+  showSecondaryAction?: boolean;
   showAd?: boolean;
   hideDivider?: boolean;
   style?: ViewStyle;
@@ -42,12 +45,15 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   notificationCount: _notificationCount = 0,
   isPremium,
   onActionPress,
+  onSecondaryActionPress,
   onNotificationPress: _onNotificationPress,
   onBackPress,
   onProfilePress,
   rightActionIcon = 'refresh',
+  secondaryActionIcon = 'share-variant',
   notificationIcon = 'bell-outline',
   showNotification = true,
+  showSecondaryAction = false,
   showAd = true,
   hideDivider = false,
   style,
@@ -252,6 +258,21 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
                     color={theme.colors.onSurfaceVariant} 
                   />
                 )}
+              </TouchableRipple>
+            )}
+
+            {showSecondaryAction && onSecondaryActionPress && (
+              <TouchableRipple 
+                onPress={onSecondaryActionPress} 
+                style={[styles.iconButton, themeStyles.iconButton]}
+                borderless
+                rippleColor="rgba(0, 0, 0, .1)"
+              >
+                <MaterialCommunityIcons 
+                  name={secondaryActionIcon} 
+                  size={24} 
+                  color={theme.colors.onSurface}
+                />
               </TouchableRipple>
             )}
 
