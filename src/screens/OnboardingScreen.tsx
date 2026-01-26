@@ -191,12 +191,14 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
   const handlePausePressOut = () => setIsPaused(false);
 
   const requestNotificationPermission = async () => {
+    console.log('[Onboarding] Requesting notification permission...');
     setIsPaused(true); // Pause while system dialog is open
     try {
       const hasPermission = await fcmService.requestUserPermission();
       setNotificationPermissionStatus(hasPermission);
       if (hasPermission) {
         await fcmService.getFCMToken();
+        await fcmService.subscribeToDemographics(['all_users']);
       }
     } catch (e) {
       observabilityService.captureError(e);
@@ -209,6 +211,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
   };
 
   const finishOnboarding = async () => {
+    console.log('[Onboarding] Finishing onboarding...');
     await storageService.setHasSeenOnboarding(true);
     if (onFinish) {
       onFinish();
@@ -281,6 +284,24 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
                 start={{ x: 0, y: 0 }}
                 end={{ x: 0, y: 1 }}
               >
+                {/* Touch Overlays for Navigation - Internal to page to allow button interaction */}
+                <View style={styles.touchOverlay} pointerEvents="box-none">
+                  <TouchableOpacity 
+                    style={styles.touchLeft} 
+                    onPress={handlePrev} 
+                    onLongPress={handlePausePressIn}
+                    onPressOut={handlePausePressOut}
+                    activeOpacity={1}
+                  />
+                  <TouchableOpacity 
+                    style={styles.touchRight} 
+                    onPress={handleNext} 
+                    onLongPress={handlePausePressIn}
+                    onPressOut={handlePausePressOut}
+                    activeOpacity={1}
+                  />
+                </View>
+
                 <View style={[styles.contentContainer, { width: contentWidth }]}>
                   <View style={[
                     styles.iconContainer, 
@@ -339,24 +360,6 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
           );
         })}
       </PagerView>
-
-      {/* Touch Overlays for Navigation */}
-      <View style={styles.touchOverlay}>
-        <TouchableOpacity 
-          style={styles.touchLeft} 
-          onPress={handlePrev} 
-          onLongPress={handlePausePressIn}
-          onPressOut={handlePausePressOut}
-          activeOpacity={1}
-        />
-        <TouchableOpacity 
-          style={styles.touchRight} 
-          onPress={handleNext} 
-          onLongPress={handlePausePressIn}
-          onPressOut={handlePausePressOut}
-          activeOpacity={1}
-        />
-      </View>
     </View>
   );
 };
@@ -425,6 +428,7 @@ const styles = StyleSheet.create({
   actionButton: {
     marginTop: 16,
     width: '100%',
+    zIndex: 10,
   },
   footer: {
     position: 'absolute',
@@ -433,12 +437,14 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: 'center',
     justifyContent: 'flex-end',
+    zIndex: 10,
   },
   startBtn: {
     width: '80%',
     borderRadius: 30,
     backgroundColor: 'white',
     marginBottom: 20,
+    zIndex: 10,
   },
   tapHint: {
     fontSize: 12,
@@ -448,7 +454,7 @@ const styles = StyleSheet.create({
   touchOverlay: {
     ...StyleSheet.absoluteFillObject,
     flexDirection: 'row',
-    zIndex: 5, // Below progress bar but above content (except buttons)
+    zIndex: 1, // Lower than buttons (10)
   },
   touchLeft: {
     flex: 0.3,

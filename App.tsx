@@ -18,7 +18,6 @@ import { ToastProvider } from './src/context/ToastContext';
 import { NotificationProvider } from './src/context/NotificationContext';
 import { NetworkProvider } from './src/context/NetworkContext';
 import AppNavigator from './src/navigation/AppNavigator';
-import { fcmService } from './src/services/firebase/FCMService';
 import { inAppMessagingService } from './src/services/firebase/InAppMessagingService';
 import { appCheckService } from './src/services/firebase/AppCheckService';
 import { remoteConfigService } from './src/services/firebase/RemoteConfigService';
@@ -89,12 +88,6 @@ function App(): React.JSX.Element {
         await inAppMessagingService.initialize();
 
         await appDistributionService.checkForUpdate();
-
-        const hasPermission = await fcmService.requestUserPermission();
-        if (hasPermission) {
-          await fcmService.getFCMToken();
-          await fcmService.subscribeToDemographics(['all_users']);
-        }
       } catch (e) {
         // Safe catch to ensure app continues even if initialization fails
         console.error('Firebase initialization error:', e);

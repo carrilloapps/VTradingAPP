@@ -13,6 +13,7 @@ import {
   Messaging
 } from '@react-native-firebase/messaging';
 import { PermissionsAndroid, Platform } from 'react-native';
+import DeviceInfo from 'react-native-device-info';
 import { observabilityService } from '../ObservabilityService';
 
 class FCMService {
@@ -107,7 +108,7 @@ class FCMService {
   async getInitialNotification(): Promise<RemoteMessage | null> {
     return getInitialNotification(this.messaging);
   }
-  
+
   /**
    * Subscribe to a topic
    */
@@ -126,9 +127,25 @@ class FCMService {
    * Subscribe to demographic topics for targeted notifications
    * Captures: Build, OS, Theme, OS Version, App Version, Install Cohort
    */
-  async subscribeToDemographics(topics: string[]): Promise<void> {
+  async subscribeToDemographics(extraTopics: string[] = []): Promise<void> {
     try {
+      const topics = [...extraTopics];
+
+      // Technical Topics
+      topics.push(`os_${Platform.OS}`);
+      topics.push(`app_version_${DeviceInfo.getVersion().replace(/\./g, '_')}`);
+      topics.push(`build_${DeviceInfo.getBuildNumber()}`);
+      topics.push(`sys_version_${Platform.Version}`);
+
+      // Get Device Type (tablet/phone)
+      if (DeviceInfo.isTablet()) {
+        topics.push('device_tablet');
+      } else {
+        topics.push('device_phone');
+      }
+
       await Promise.all(topics.map(topic => this.subscribeToTopic(topic)));
+      console.log('Subscribed to demographics:', topics);
     } catch (e) {
       observabilityService.captureError(e);
       // Ignore error
