@@ -77,59 +77,81 @@ const StockDetailScreen = () => {
         onActionPress={handleShare}
       />
       
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Header Section */}
-        <Surface style={[styles.headerCard, { backgroundColor: theme.colors.surface }]} elevation={0}>
-            <View style={styles.headerTop}>
-                <View style={[styles.iconContainer, { backgroundColor: theme.colors.elevation.level2 }]}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+        {/* Header Section - Immersive Design */}
+        <View style={styles.immersiveHeader}>
+            <View style={styles.iconWrapper}>
+                {/* Halo Glow effect behind the stock icon */}
+                <View style={[
+                  styles.haloEffect, 
+                  { backgroundColor: trendColor, opacity: theme.dark ? 0.15 : 0.1 }
+                ]} />
+                
+                <View style={[
+                  styles.iconContainer, 
+                  { 
+                    backgroundColor: theme.dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                    borderColor: theme.dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
+                    borderWidth: 1,
+                  }
+                ]}>
                      {stock.iconUrl ? (
-                        // If we had an Image component here for iconUrl
-                        <MaterialCommunityIcons name="chart-box-outline" size={32} color={theme.colors.primary} />
+                         <MaterialCommunityIcons name="chart-box-outline" size={32} color={trendColor} />
                      ) : (
-                        <Text style={[styles.initials, { color: theme.colors.primary }]}>{stock.initials || stock.symbol.substring(0, 2)}</Text>
+                        <Text style={[styles.initials, { color: trendColor }]}>{stock.initials || stock.symbol.substring(0, 2)}</Text>
                      )}
                 </View>
-                <View style={styles.headerInfo}>
-                    <Text variant="titleMedium" style={{ color: theme.colors.onSurfaceVariant }}>{stock.name}</Text>
-                    <Chip style={styles.chip} textStyle={{ fontSize: 12 }}>{stock.category || 'General'}</Chip>
-                </View>
+            </View>
+
+            <View style={styles.headerInfo}>
+                <Text variant="headlineSmall" style={[styles.stockName, { color: theme.colors.onSurface }]}>{stock.name}</Text>
+                <Chip 
+                  style={[styles.chip, { backgroundColor: theme.colors.elevation.level2 }]} 
+                  textStyle={{ fontSize: 11, color: theme.colors.onSurfaceVariant, fontWeight: '700' }}
+                >
+                  {stock.category || 'General'}
+                </Chip>
             </View>
 
             <View style={styles.priceContainer}>
                 <View style={styles.currencyRow}>
-                    <Text variant="displaySmall" style={{ color: theme.colors.onSurface, fontWeight: 'bold' }}>
+                    <Text variant="headlineLarge" style={{ color: theme.colors.onSurface, fontWeight: '900', letterSpacing: -1 }}>
                         {stock.price.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                     </Text>
                     <View style={styles.bolivarIcon}>
-                        <BolivarIcon size={24} color={theme.colors.onSurface} />
+                        <BolivarIcon size={24} color={theme.colors.onSurface}  />
                     </View>
                 </View>
                 
-                <View style={[styles.trendBadge, { backgroundColor: trendColor + '20' }]}>
-                    <MaterialCommunityIcons name={trendIcon} size={16} color={trendColor} />
+                <View style={[styles.trendBadge, { backgroundColor: trendColor + (theme.dark ? '30' : '15') }]}>
+                    <MaterialCommunityIcons name={trendIcon} size={18} color={trendColor} />
                     <Text style={[styles.trendText, { color: trendColor }]}>
                         {isPositive ? '+' : ''}{stock.changePercent.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%
                     </Text>
                     {stock.changeAmount !== undefined && stock.changeAmount !== 0 && (
-                        <Text style={[styles.trendText, { color: trendColor, marginLeft: 8, opacity: 0.8 }]}>
+                        <Text style={[styles.trendAmount, { color: trendColor, opacity: 0.8 }]}>
                             ({isPositive ? '+' : ''}{stock.changeAmount.toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bs)
                         </Text>
                     )}
                 </View>
             </View>
-        </Surface>
+        </View>
 
-        {/* Stats Grid */}
-        <Text variant="titleMedium" style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>Estadísticas</Text>
+        {/* Stats Section */}
+        <View style={styles.sectionHeader}>
+            <Text variant="titleSmall" style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant, letterSpacing: 1 }]}>ESTADÍSTICAS</Text>
+        </View>
         
         <View style={styles.statsGrid}>
             <Surface style={[styles.statCard, { backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outline }]} elevation={0}>
                 <View style={styles.statHeader}>
-                    <MaterialCommunityIcons name={primaryStatIcon} size={20} color={theme.colors.onSurfaceVariant} />
-                    <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>{primaryStatLabel}</Text>
+                    <View style={[styles.statIconBox, { backgroundColor: theme.colors.surfaceVariant }]}>
+                        <MaterialCommunityIcons name={primaryStatIcon} size={18} color={theme.colors.primary} />
+                    </View>
+                    <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '700' }}>{primaryStatLabel.toUpperCase()}</Text>
                 </View>
                 <View style={styles.statValueRow}>
-                    <Text variant="titleLarge" style={{ color: theme.colors.onSurface }}>
+                    <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: '800' }}>
                         {primaryStatValue ? primaryStatValue.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}
                     </Text>
                     <BolivarIcon size={14} color={theme.colors.onSurface} />
@@ -138,11 +160,13 @@ const StockDetailScreen = () => {
 
             <Surface style={[styles.statCard, { backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outline }]} elevation={0}>
                 <View style={styles.statHeader}>
-                    <MaterialCommunityIcons name="history" size={20} color={theme.colors.onSurfaceVariant} />
-                    <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>Cierre Ant.</Text>
+                    <View style={[styles.statIconBox, { backgroundColor: theme.colors.surfaceVariant }]}>
+                        <MaterialCommunityIcons name="history" size={18} color={theme.colors.primary} />
+                    </View>
+                    <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '700' }}>CIERRE ANT.</Text>
                 </View>
                 <View style={styles.statValueRow}>
-                    <Text variant="titleLarge" style={{ color: theme.colors.onSurface }}>
+                    <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: '800' }}>
                         {previousClose.toLocaleString('es-VE', { minimumFractionDigits: 2 })}
                     </Text>
                     <BolivarIcon size={14} color={theme.colors.onSurface} />
@@ -153,32 +177,40 @@ const StockDetailScreen = () => {
         <View style={styles.statsGrid}>
              <Surface style={[styles.statCard, { backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outline }]} elevation={0}>
                 <View style={styles.statHeader}>
-                    <MaterialCommunityIcons name="chart-bar" size={20} color={theme.colors.onSurfaceVariant} />
-                    <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>Volumen (Títulos)</Text>
+                    <View style={[styles.statIconBox, { backgroundColor: theme.colors.surfaceVariant }]}>
+                        <MaterialCommunityIcons name="chart-bar" size={18} color={theme.colors.primary} />
+                    </View>
+                    <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '700' }}>VOL. TÍTULOS</Text>
                 </View>
-                <Text variant="titleLarge" style={{ color: theme.colors.onSurface }}>
+                <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: '800' }}>
                     {stock.volumeShares ? formatCompactNumber(stock.volumeShares) : (stock.volume || '-')}
                 </Text>
             </Surface>
 
              <Surface style={[styles.statCard, { backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outline }]} elevation={0}>
                 <View style={styles.statHeader}>
-                    <MaterialCommunityIcons name="cash" size={20} color={theme.colors.onSurfaceVariant} />
-                    <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant }}>Volumen (Bs)</Text>
+                    <View style={[styles.statIconBox, { backgroundColor: theme.colors.surfaceVariant }]}>
+                        <MaterialCommunityIcons name="cash-multiple" size={18} color={theme.colors.primary} />
+                    </View>
+                    <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '700' }}>VOL. BS</Text>
                 </View>
                  <View style={styles.statValueRow}>
-                    <Text variant="titleLarge" style={{ color: theme.colors.onSurface }}>
+                    <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: '800' }}>
                          {stock.volumeAmount ? formatCompactNumber(stock.volumeAmount, true) : '-'}
                     </Text>
-                    <BolivarIcon size={14} color={theme.colors.onSurface} />
+                    <BolivarIcon size={14} color={theme.colors.onSurface}  />
                 </View>
             </Surface>
         </View>
 
          {/* Additional Info / Placeholder for Chart */}
+         <View style={styles.sectionHeader}>
+            <Text variant="titleSmall" style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant, letterSpacing: 1 }]}>ANÁLISIS TÉCNICO</Text>
+        </View>
          <Surface style={[styles.chartPlaceholder, { backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outline }]} elevation={0}>
+            <View style={[styles.chartIconGlow, { backgroundColor: theme.colors.primary, opacity: 0.05 }]} />
             <MaterialCommunityIcons name="chart-timeline-variant" size={48} color={theme.colors.outline} />
-            <Text style={{ color: theme.colors.onSurfaceVariant, marginTop: 8 }}>Gráfico histórico próximamente</Text>
+            <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, marginTop: 12, fontWeight: '600' }}>Gráfico histórico próximamente</Text>
          </Surface>
 
       </ScrollView>
@@ -191,82 +223,118 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: 16,
-    paddingBottom: 32,
+    paddingHorizontal: 20,
+    paddingTop: 10,
+    paddingBottom: 40,
   },
-  headerCard: {
-    padding: 24,
-    borderRadius: 24,
-    marginBottom: 24,
-  },
-  headerTop: {
-    flexDirection: 'row',
+  immersiveHeader: {
     alignItems: 'center',
-    marginBottom: 24,
+    paddingVertical: 24,
+    marginBottom: 16,
   },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
+  iconWrapper: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 16,
+    position: 'relative',
+    marginBottom: 20,
+  },
+  haloEffect: {
+    position: 'absolute',
+    width: 140,
+    height: 140,
+    borderRadius: 70,
+    filter: 'blur(30px)',
+    zIndex: -1,
+  },
+  iconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    elevation: 6,
   },
   initials: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 28,
+    fontWeight: '900',
   },
   headerInfo: {
-    flex: 1,
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  stockName: {
+    fontWeight: '800',
+    marginBottom: 8,
+    textAlign: 'center',
   },
   chip: {
-    marginTop: 4,
+    borderRadius: 12,
+    height: 28,
   },
   priceContainer: {
     alignItems: 'center',
   },
   currencyRow: {
     flexDirection: 'row',
-    alignItems: 'center', // Center icon vertically with text
+    alignItems: 'center',
     justifyContent: 'center',
   },
   bolivarIcon: {
-    marginLeft: 8, // More spacing
-    // No transform needed for center alignment
+    marginLeft: 8,
   },
   trendBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 100,
-    marginTop: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 16,
+    marginTop: 12,
+    gap: 4,
   },
   trendText: {
-    fontWeight: 'bold',
+    fontWeight: '900',
+    fontSize: 16,
+  },
+  trendAmount: {
+    fontWeight: '700',
+    fontSize: 14,
     marginLeft: 4,
   },
-  sectionTitle: {
+  sectionHeader: {
+    marginTop: 16,
     marginBottom: 16,
-    fontWeight: 'bold',
+  },
+  sectionTitle: {
+    fontWeight: '900',
+    fontSize: 12,
   },
   statsGrid: {
     flexDirection: 'row',
     gap: 16,
-    marginBottom: 24,
+    marginBottom: 16,
   },
   statCard: {
     flex: 1,
     padding: 16,
-    borderRadius: 16,
+    borderRadius: 24, // Matches standard card radius (roundness * 6)
     borderWidth: 1,
+  },
+  statIconBox: {
+    width: 32,
+    height: 32,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   statHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
+    gap: 10,
+    marginBottom: 12,
   },
   statValueRow: {
     flexDirection: 'row',
@@ -274,13 +342,22 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   chartPlaceholder: {
-    height: 200,
-    borderRadius: 16,
+    height: 220,
+    borderRadius: 24,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 24,
-    borderStyle: 'dashed',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  chartIconGlow: {
+    position: 'absolute',
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    filter: 'blur(40px)',
+    top: '30%',
   }
 });
 
