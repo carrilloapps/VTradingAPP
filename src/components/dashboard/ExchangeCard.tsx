@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet, Image, useWindowDimensions } from 'react-native';
 import { Text, TouchableRipple } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Svg, { Path } from 'react-native-svg';
@@ -54,6 +54,10 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
   onPress
 }) => {
   const theme = useAppTheme();
+  const { width } = useWindowDimensions();
+  const isSmallScreen = width < 380;
+  const isTinyScreen = width < 350;
+
   const isNeutral = changePercent === '0.00%';
   
   const trendColor = isNeutral 
@@ -121,46 +125,46 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
               {subtitle ? <Text variant="bodySmall" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>{subtitle}</Text> : null}
               <View style={styles.valueContainer}>
                 {buyValue && sellValue ? (
-                    <View style={styles.dualContainer}>
+                    <View style={[styles.dualContainer, isSmallScreen && { gap: 4 }]}>
                         {/* GENERAL (Average/Main) */}
-                        <View>
-                            <Text variant="labelSmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginBottom: 2}}>GENERAL</Text>
+                        <View style={{ flexShrink: 1 }}>
+                            <Text variant="labelSmall" style={{color: 'rgba(255, 255, 255, 0.7)', fontSize: isSmallScreen ? 8 : 10, marginBottom: 2}}>GENERAL</Text>
                             <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
-                              <Text variant="titleLarge" style={[{ color: '#FFFFFF', fontWeight: 'bold' }]}>{value}</Text>
-                              <Text variant="bodySmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginLeft: 4}}>{currency}</Text>
+                              <Text variant={isSmallScreen ? "titleMedium" : "titleLarge"} style={[{ color: '#FFFFFF', fontWeight: 'bold' }]}>{value}</Text>
+                              <Text variant="bodySmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginLeft: 2, fontSize: isSmallScreen ? 10 : 12}}>{currency}</Text>
                             </View>
-                            <Text variant="labelSmall" style={{color: trendColor}}>
+                            <Text variant="labelSmall" style={{color: trendColor, fontSize: isSmallScreen ? 8 : 10}}>
                                 {changePercent}
                             </Text>
                         </View>
   
-                        <View style={[styles.divider, { marginHorizontal: 8 }]} />
+                        <View style={[styles.divider, { marginHorizontal: isSmallScreen ? 4 : 8 }]} />
   
                         {/* COMPRA */}
-                        <View>
-                            <Text variant="labelSmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginBottom: 2}}>COMPRA</Text>
+                        <View style={{ flexShrink: 1 }}>
+                            <Text variant="labelSmall" style={{color: 'rgba(255, 255, 255, 0.7)', fontSize: isSmallScreen ? 8 : 10, marginBottom: 2}}>COMPRA</Text>
                             <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
-                              <Text variant="titleLarge" style={[{ color: '#FFFFFF', fontWeight: 'bold' }]}>{buyValue}</Text>
-                              <Text variant="bodySmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginLeft: 4}}>{currency}</Text>
+                              <Text variant={isSmallScreen ? "titleMedium" : "titleLarge"} style={[{ color: '#FFFFFF', fontWeight: 'bold' }]}>{buyValue}</Text>
+                              <Text variant="bodySmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginLeft: 2, fontSize: isSmallScreen ? 10 : 12}}>{currency}</Text>
                             </View>
                             {buyChangePercent && (
-                                <Text variant="labelSmall" style={{color: buyChangePercent.includes('-') ? '#F87171' : buyChangePercent.includes('0.00') ? 'rgba(255, 255, 255, 0.7)' : '#6EE7B7'}}>
+                                <Text variant="labelSmall" style={{color: buyChangePercent.includes('-') ? '#F87171' : buyChangePercent.includes('0.00') ? 'rgba(255, 255, 255, 0.7)' : '#6EE7B7', fontSize: isSmallScreen ? 8 : 10}}>
                                     {buyChangePercent}
                                 </Text>
                             )}
                         </View>
   
-                        <View style={[styles.divider, { marginHorizontal: 8 }]} />
+                        <View style={[styles.divider, { marginHorizontal: isSmallScreen ? 4 : 8 }]} />
   
                         {/* VENTA */}
-                        <View>
-                            <Text variant="labelSmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginBottom: 2}}>VENTA</Text>
+                        <View style={{ flexShrink: 1 }}>
+                            <Text variant="labelSmall" style={{color: 'rgba(255, 255, 255, 0.7)', fontSize: isSmallScreen ? 8 : 10, marginBottom: 2}}>VENTA</Text>
                             <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
-                              <Text variant="titleLarge" style={[{ color: '#FFFFFF', fontWeight: 'bold' }]}>{sellValue}</Text>
-                              <Text variant="bodySmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginLeft: 4}}>{currency}</Text>
+                              <Text variant={isSmallScreen ? "titleMedium" : "titleLarge"} style={[{ color: '#FFFFFF', fontWeight: 'bold' }]}>{sellValue}</Text>
+                              <Text variant="bodySmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginLeft: 2, fontSize: isSmallScreen ? 10 : 12}}>{currency}</Text>
                             </View>
                             {sellChangePercent && (
-                                <Text variant="labelSmall" style={{color: sellChangePercent.includes('-') ? '#F87171' : sellChangePercent.includes('0.00') ? 'rgba(255, 255, 255, 0.7)' : '#6EE7B7'}}>
+                                <Text variant="labelSmall" style={{color: sellChangePercent.includes('-') ? '#F87171' : sellChangePercent.includes('0.00') ? 'rgba(255, 255, 255, 0.7)' : '#6EE7B7', fontSize: isSmallScreen ? 8 : 10}}>
                                     {sellChangePercent}
                                 </Text>
                             )}
