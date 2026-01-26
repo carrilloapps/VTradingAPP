@@ -9,15 +9,15 @@ class AnalyticsService {
   async logEvent(name: string, params?: Record<string, any>): Promise<void> {
     try {
       await logEvent(getAnalytics(), name, params);
-      
+
       // Mirror important events to Clarity
       // Clarity custom tags are key-value pairs, or we can send a custom event
       Clarity.sendCustomEvent(name);
-      
+
       // If we have critical params, we might want to tag the session
       if (params && params.screen_name) {
-          // Note: Clarity doesn't have a direct "screen_view" concept, but we can tag it
-          // Clarity.setCustomTag('current_screen', params.screen_name);
+        // Note: Clarity doesn't have a direct "screen_view" concept, but we can tag it
+        // Clarity.setCustomTag('current_screen', params.screen_name);
       }
     } catch (e) {
       observabilityService.captureError(e);
@@ -54,9 +54,20 @@ class AnalyticsService {
    * Log select content event (e.g. clicking a stock)
    */
   async logSelectContent(contentType: string, itemId: string): Promise<void> {
-    return this.logEvent('select_content', { 
-        content_type: contentType, 
-        item_id: itemId 
+    return this.logEvent('select_content', {
+      content_type: contentType,
+      item_id: itemId
+    });
+  }
+
+  /**
+   * Log share event
+   */
+  async logShare(contentType: string, itemId: string, method: string): Promise<void> {
+    return this.logEvent('share', {
+      content_type: contentType,
+      item_id: itemId,
+      method: method // e.g. "image_square", "image_story", "text"
     });
   }
 
@@ -94,7 +105,7 @@ class AnalyticsService {
     try {
       await setUserId(getAnalytics(), userId);
       if (userId) {
-          Clarity.setCustomUserId(userId);
+        Clarity.setCustomUserId(userId);
       }
     } catch (e) {
       observabilityService.captureError(e);
@@ -110,9 +121,9 @@ class AnalyticsService {
       await getAnalytics().setAnalyticsCollectionEnabled(enabled);
       // Mirror to Clarity
       if (enabled) {
-          Clarity.resume();
+        Clarity.resume();
       } else {
-          Clarity.pause();
+        Clarity.pause();
       }
     } catch (e) {
       observabilityService.captureError(e);

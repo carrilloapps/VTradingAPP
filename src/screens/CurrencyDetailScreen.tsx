@@ -14,6 +14,7 @@ import CustomDialog from '../components/ui/CustomDialog';
 import CustomButton from '../components/ui/CustomButton';
 import CurrencyShareGraphic from '../components/dashboard/CurrencyShareGraphic';
 import { observabilityService } from '../services/ObservabilityService';
+import { analyticsService } from '../services/firebase/AnalyticsService';
 import { useToast } from '../context/ToastContext';
 
 type CurrencyDetailRouteProp = RouteProp<RootStackParamList, 'CurrencyDetail'>;
@@ -73,8 +74,10 @@ const CurrencyDetailScreen = () => {
         await Share.open({
           url: sharePath,
           type: 'image/jpeg',
-          message: `Tasa de cambio: ${rate.code}/VES (${rate.name}) - VTrading Monitoring`,
+          message: `Tasa de cambio: ${rate.code}/VES (${rate.name}) - VTrading`,
         });
+
+        analyticsService.logShare('currency', rate.code, format === '1:1' ? 'image_square' : 'image_story');
       } catch (e) {
         if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
             observabilityService.captureError(e, { context: 'CurrencyDetail_generateShareImage' });
@@ -97,6 +100,7 @@ const CurrencyDetailScreen = () => {
         `🌐 vtrading.app`;
 
       await Share.open({ message });
+      analyticsService.logShare('currency', rate.code, 'text');
     } catch (e) {
        if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
         showToast('Error al compartir texto', 'error');
@@ -267,21 +271,21 @@ const CurrencyDetailScreen = () => {
         <View style={{ gap: 12 }}>
           <CustomButton 
             variant="primary"
-            label="Post Cuadrado (IG/WS)"
+            label="Imágen cuadrada"
             icon="view-grid-outline"
             onPress={() => generateShareImage('1:1')}
             fullWidth
           />
           <CustomButton 
             variant="secondary"
-            label="Story Vertical (16:9)"
+            label="Imágen vertical"
             icon="cellphone"
             onPress={() => generateShareImage('16:9')}
             fullWidth
           />
           <CustomButton 
             variant="outlined"
-            label="Solo información de texto"
+            label="Solo texto"
             icon="text-short"
             onPress={handleShareText}
             fullWidth

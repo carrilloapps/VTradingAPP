@@ -23,6 +23,7 @@ import { CompositeNavigationProp } from '@react-navigation/native';
 import { MaterialTopTabNavigationProp } from '@react-navigation/material-top-tabs';
 import AdvancedCalculatorCTA from '../components/dashboard/AdvancedCalculatorCTA';
 import { observabilityService } from '../services/ObservabilityService';
+import { analyticsService } from '../services/firebase/AnalyticsService';
 import ShareGraphic from '../components/dashboard/ShareGraphic';
 import CustomDialog from '../components/ui/CustomDialog';
 import CustomButton from '../components/ui/CustomButton';
@@ -274,6 +275,8 @@ const HomeScreen = () => {
           type: 'image/jpeg',
           message: `Tasas actualizadas en VTrading (${format})`,
         });
+
+        analyticsService.logShare('dashboard_report', 'all', format === '1:1' ? 'image_square' : 'image_story');
       } catch (e) {
         if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
             const errorMsg = e instanceof Error ? e.message : 'Unknown sharing error';
@@ -302,6 +305,7 @@ const HomeScreen = () => {
       await Share.open({
         message: message,
       });
+      analyticsService.logShare('dashboard_report', 'all', 'text');
     } catch (e) {
       if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
         showToast('Error al compartir texto', 'error');

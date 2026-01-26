@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView, Platform, Image } from 'react-native';
+import { View, StyleSheet, ScrollView, Image } from 'react-native';
 import Share from 'react-native-share';
 import { Surface, Text, Chip } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -14,6 +14,7 @@ import CustomDialog from '../components/ui/CustomDialog';
 import CustomButton from '../components/ui/CustomButton';
 import StockShareGraphic from '../components/stocks/StockShareGraphic';
 import { observabilityService } from '../services/ObservabilityService';
+import { analyticsService } from '../services/firebase/AnalyticsService';
 import { useToast } from '../context/ToastContext';
 
 type StockDetailRouteProp = RouteProp<RootStackParamList, 'StockDetail'>;
@@ -75,6 +76,8 @@ const StockDetailScreen = () => {
           type: 'image/jpeg',
           message: `Acción: ${stock.name} (${stock.symbol}) - VTrading`,
         });
+
+        analyticsService.logShare('stock', stock.symbol, format === '1:1' ? 'image_square' : 'image_story');
       } catch (e) {
         if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
             observabilityService.captureError(e, { context: 'StockDetail_generateShareImage' });
@@ -96,6 +99,7 @@ const StockDetailScreen = () => {
         `🌐 vtrading.app`;
 
       await Share.open({ message });
+      analyticsService.logShare('stock', stock.symbol, 'text');
     } catch (e) {
        if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
         showToast('Error al compartir texto', 'error');
