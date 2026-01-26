@@ -46,47 +46,41 @@ const BankRatesSkeleton = () => {
   );
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 20, backgroundColor: theme.colors.background }]}>
-      {/* Unified Header Skeleton */}
-      <View style={styles.header}>
-        <Skeleton width={24} height={24} borderRadius={12} />
-        <Skeleton width={150} height={24} style={{ marginLeft: 16 }} />
-        <View style={{ flex: 1 }} />
-        <Skeleton width={24} height={24} borderRadius={12} />
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      {/* Search Bar Skeleton sync with searchArea style */}
+      <View style={styles.searchArea}>
+          <Skeleton width="100%" height={56} borderRadius={r * 3} />
       </View>
 
-      {/* Search Bar Skeleton */}
-      <View style={styles.searchBar}>
-        <Skeleton width="100%" height={48} borderRadius={r * 3} />
-      </View>
-
-      {/* BCV Section Skeleton */}
-      <View style={styles.bcvSection}>
-        <View style={styles.sectionHeader}>
-            <Skeleton width={120} height={16} />
-            <Skeleton width={60} height={20} borderRadius={4} />
+      <View style={styles.listContent}>
+        {/* BCV Section Skeleton */}
+        <View style={styles.bcvSection}>
+            <View style={styles.sectionHeader}>
+                <Skeleton width={120} height={16} />
+                <Skeleton width={70} height={20} borderRadius={4} />
+            </View>
+            <Skeleton width="100%" height={160} borderRadius={28} />
         </View>
-        <Skeleton width="100%" height={160} borderRadius={28} />
-      </View>
 
-      {/* Filter Chips Skeleton */}
-      <View style={styles.chipsContainer}>
-        {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} width={80} height={32} borderRadius={16} style={{ marginRight: 8 }} />
-        ))}
-      </View>
-      
-      {/* List Header Skeleton */}
-      <View style={styles.listHeader}>
-         <Skeleton width={150} height={16} />
-         <Skeleton width={60} height={24} borderRadius={8} />
-      </View>
+        {/* List Header Skeleton */}
+        <View style={styles.listHeaderLegacy}>
+            <Skeleton width={150} height={16} />
+            <Skeleton width={60} height={24} borderRadius={8} />
+        </View>
+        
+        {/* Filter Chips Skeleton */}
+        <View style={styles.chipsContainer}>
+            {[1, 2, 3].map((i) => (
+                <Skeleton key={i} width={i === 1 ? 60 : 100} height={32} borderRadius={16} style={{ marginRight: 8 }} />
+            ))}
+        </View>
 
-      {/* Bank Cards List */}
-      <View style={styles.list}>
-        {renderRateCardSkeleton(1)}
-        {renderRateCardSkeleton(2)}
-        {renderRateCardSkeleton(3)}
+        {/* Bank Cards List */}
+        <View style={styles.list}>
+            {renderRateCardSkeleton(1)}
+            {renderRateCardSkeleton(2)}
+            {renderRateCardSkeleton(3)}
+        </View>
       </View>
     </View>
   );
@@ -95,15 +89,15 @@ const BankRatesSkeleton = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  searchArea: {
     paddingHorizontal: 20,
+    marginTop: 8,
+    paddingBottom: 8,
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  searchBar: {
-    marginBottom: 24,
+  listContent: {
+    padding: 20,
+    paddingTop: 10,
   },
   bcvSection: {
     marginBottom: 28,
@@ -111,16 +105,21 @@ const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 14,
+    paddingHorizontal: 4,
+  },
+  listHeaderLegacy: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 14,
+    paddingHorizontal: 4,
   },
   chipsContainer: {
     flexDirection: 'row',
-    marginBottom: 24,
-  },
-  listHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 14,
+    marginBottom: 16,
+    marginTop: -8,
   },
   list: {
     gap: 16,

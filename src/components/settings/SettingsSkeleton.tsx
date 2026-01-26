@@ -11,11 +11,13 @@ const SettingsSkeleton = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      {/* Header Skeleton */}
-      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+      {/* Header Skeleton matches UnifiedHeader section variant */}
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
          <View style={styles.headerContent}>
-            <Skeleton width={150} height={32} />
-            <Skeleton width={24} height={24} borderRadius={12} />
+            <View>
+                <Skeleton width={150} height={28} />
+            </View>
+            <Skeleton width={40} height={40} borderRadius={20} />
          </View>
       </View>
 
@@ -29,26 +31,26 @@ const SettingsSkeleton = () => {
               { 
                 backgroundColor: theme.colors.elevation.level1,
                 borderColor: theme.colors.outline,
-                borderRadius: r * 6,
+                borderRadius: 24, // Matches standard in UserProfileCard
               }
             ]}
           >
             <View style={styles.profileContent}>
               <Skeleton width={56} height={56} borderRadius={28} />
               <View style={styles.profileText}>
-                <Skeleton width={150} height={24} style={styles.profileName} />
-                <Skeleton width={100} height={16} />
+                <Skeleton width={150} height={20} style={styles.profileName} />
+                <Skeleton width={100} height={14} />
               </View>
             </View>
-            <Skeleton width={24} height={24} borderRadius={12} />
+            <Skeleton width={32} height={32} borderRadius={16} />
           </View>
         </View>
 
         {/* Alerts Section Skeleton */}
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <Skeleton width={120} height={20} />
-            <Skeleton width={80} height={20} />
+            <Skeleton width={120} height={14} />
+            <Skeleton width={100} height={20} borderRadius={4} />
           </View>
           
           <View 
@@ -57,17 +59,17 @@ const SettingsSkeleton = () => {
               { 
                 backgroundColor: theme.colors.elevation.level1,
                 borderColor: theme.colors.outline,
-                borderRadius: r * 6,
+                borderRadius: 24,
               }
             ]}
           >
             {[1, 2].map((_, index) => (
-              <View key={index} style={styles.itemRow}>
+              <View key={index} style={[styles.itemRow, index === 1 && { marginBottom: 0 }]}>
                 <View style={styles.itemLeft}>
-                    <Skeleton width={40} height={40} borderRadius={12} />
+                    <Skeleton width={40} height={40} borderRadius={20} />
                     <View style={styles.itemText}>
-                        <Skeleton width={80} height={20} />
-                        <Skeleton width={100} height={16} style={{marginTop: 4}} />
+                        <Skeleton width={80} height={16} />
+                        <Skeleton width={100} height={12} style={{marginTop: 6}} />
                     </View>
                 </View>
                 <Skeleton width={40} height={24} borderRadius={12} />
@@ -78,7 +80,7 @@ const SettingsSkeleton = () => {
 
         {/* Preferences Section Skeleton */}
         <View style={styles.section}>
-          <Skeleton width={100} height={20} style={styles.sectionTitle} />
+          <Skeleton width={100} height={14} style={styles.sectionTitle} />
           
           <View 
             style={[
@@ -86,15 +88,15 @@ const SettingsSkeleton = () => {
               { 
                 backgroundColor: theme.colors.elevation.level1,
                 borderColor: theme.colors.outline,
-                borderRadius: r * 6,
+                borderRadius: 24,
               }
             ]}
           >
             {[1, 2].map((_, index) => (
-              <View key={index} style={styles.itemRow}>
+              <View key={index} style={[styles.itemRow, index === 1 && { marginBottom: 0 }]}>
                 <View style={styles.itemLeft}>
                     <Skeleton width={32} height={32} borderRadius={8} />
-                    <Skeleton width={120} height={20} style={{marginLeft: 12}} />
+                    <Skeleton width={120} height={16} style={{marginLeft: 12}} />
                 </View>
                 <Skeleton width={40} height={24} borderRadius={12} />
               </View>
@@ -104,7 +106,7 @@ const SettingsSkeleton = () => {
 
         {/* Account Section Skeleton */}
         <View style={styles.section}>
-          <Skeleton width={60} height={20} style={styles.sectionTitle} />
+          <Skeleton width={60} height={14} style={styles.sectionTitle} />
           
           <View 
             style={[
@@ -112,15 +114,15 @@ const SettingsSkeleton = () => {
               { 
                 backgroundColor: theme.colors.elevation.level1,
                 borderColor: theme.colors.outline,
-                borderRadius: r * 6,
+                borderRadius: 24,
               }
             ]}
           >
              {[1, 2, 3].map((_, index) => (
-              <View key={index} style={styles.itemRow}>
+              <View key={index} style={[styles.itemRow, index === 2 && { marginBottom: 0 }]}>
                 <View style={styles.itemLeft}>
                     <Skeleton width={24} height={24} borderRadius={4} />
-                    <Skeleton width={150} height={20} style={{marginLeft: 12}} />
+                    <Skeleton width={150} height={16} style={{marginLeft: 12}} />
                 </View>
                 <Skeleton width={20} height={20} borderRadius={10} />
               </View>
@@ -128,8 +130,8 @@ const SettingsSkeleton = () => {
           </View>
           
           <View style={styles.footer}>
-             <Skeleton width={200} height={16} style={{marginBottom: 8}} />
-             <Skeleton width={150} height={16} />
+             <Skeleton width={200} height={14} style={{marginBottom: 8}} />
+             <Skeleton width={150} height={12} />
           </View>
         </View>
 
@@ -143,21 +145,23 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
     paddingBottom: 10,
     justifyContent: 'center',
   },
   headerContent: {
+    paddingHorizontal: 20,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   content: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 0,
     paddingTop: 20,
     paddingBottom: 40,
   },
   section: {
+    paddingHorizontal: 20,
     marginBottom: 24,
   },
   profileCard: {
@@ -173,7 +177,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   profileText: {
-    gap: 4,
+    justifyContent: 'center',
   },
   profileName: {
     marginBottom: 4,
@@ -181,9 +185,12 @@ const styles = StyleSheet.create({
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 12,
   },
   sectionTitle: {
+    fontSize: 12,
+    fontWeight: 'bold',
     marginBottom: 12,
   },
   cardContainer: {
@@ -206,7 +213,7 @@ const styles = StyleSheet.create({
   },
   footer: {
       alignItems: 'center',
-      marginTop: 24,
+      marginTop: 32,
   }
 });
 

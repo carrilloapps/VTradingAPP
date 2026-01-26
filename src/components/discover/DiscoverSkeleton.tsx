@@ -11,8 +11,8 @@ const DiscoverSkeleton = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      {/* Header Skeleton */}
-      <View style={[styles.header, { paddingTop: insets.top + 10 }]}>
+      {/* Header Skeleton matches UnifiedHeader section variant */}
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
          <Skeleton width={150} height={32} />
       </View>
 
@@ -24,9 +24,9 @@ const DiscoverSkeleton = () => {
             <Skeleton width={120} height={120} borderRadius={60} />
           </View>
           
-          <Skeleton width={120} height={24} borderRadius={20} style={styles.badge} />
+          <Skeleton width={140} height={32} borderRadius={20} style={styles.badge} />
           
-          <Skeleton width={200} height={32} style={styles.title} />
+          <Skeleton width={200} height={36} style={styles.title} />
           <Skeleton width="90%" height={20} style={styles.description} />
           <Skeleton width="80%" height={20} style={styles.descriptionLine} />
         </View>
@@ -34,8 +34,8 @@ const DiscoverSkeleton = () => {
         {/* Progress Section */}
         <View style={styles.progressSection}>
           <View style={styles.progressHeader}>
-            <Skeleton width={150} height={20} />
-            <Skeleton width={40} height={20} />
+            <Skeleton width={150} height={16} />
+            <Skeleton width={40} height={16} />
           </View>
           <Skeleton width="100%" height={8} borderRadius={4} />
         </View>
@@ -52,14 +52,14 @@ const DiscoverSkeleton = () => {
                 { 
                   backgroundColor: theme.colors.elevation.level1,
                   borderColor: theme.colors.outline,
-                  borderRadius: r * 6,
+                  borderRadius: 24, // Matches standard in DiscoverScreen
                 }
               ]}
             >
               <Skeleton width={48} height={48} borderRadius={12} />
               <View style={styles.featureText}>
                 <Skeleton width={150} height={20} style={styles.featureTitleSkeleton} />
-                <Skeleton width={200} height={16} style={styles.featureDescSkeleton} />
+                <Skeleton width="100%" height={14} style={styles.featureDescSkeleton} />
               </View>
             </View>
           ))}
@@ -68,7 +68,7 @@ const DiscoverSkeleton = () => {
         {/* Action Button */}
         <View style={styles.actionContainer}>
           <Skeleton width="100%" height={48} borderRadius={12} />
-          <Skeleton width={250} height={16} style={styles.notificationText} />
+          <Skeleton width={250} height={14} style={styles.notificationText} />
         </View>
 
       </ScrollView>
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   featureDescSkeleton: {
-    marginTop: 0,
+    marginTop: 2,
   },
   actionContainer: {
     width: '100%',

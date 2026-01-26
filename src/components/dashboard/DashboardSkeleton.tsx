@@ -10,7 +10,7 @@ const DashboardSkeleton = () => {
   const r = theme.roundness;
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 10 }]}>
+    <View style={[styles.container, { paddingTop: insets.top }]}>
       {/* Header Skeleton (matches UnifiedHeader profile) */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
@@ -90,10 +90,10 @@ const DashboardSkeleton = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 0, // Removed padding to match HomeScreen
   },
   header: {
-    marginBottom: 24,
+    paddingTop: 12,
+    marginBottom: 16,
   },
   headerTop: {
     flexDirection: 'row',
@@ -114,23 +114,24 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   section: {
-    marginBottom: 20,
-    paddingHorizontal: 20, // Matches HomeScreen styles.section
+    marginBottom: 8,
+    paddingHorizontal: 20,
   },
   marketStatusContainer: {
     paddingHorizontal: 22,
-    marginTop: 10,
-    marginBottom: 20,
+    paddingTop: 15,
+    paddingBottom: 20,
   },
   ctaContainer: {
     paddingHorizontal: 20,
-    marginBottom: 20,
+    marginBottom: 8,
   },
   sectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 16,
+    marginTop: 8,
   },
   stockItem: {
     flexDirection: 'row',
@@ -147,14 +148,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'center',
   },
-  headerTitleSkeleton: {
-    marginTop: 8,
-  },
   firstCardSkeleton: {
     marginBottom: 12,
-  },
-  sectionTitleSkeleton: {
-    marginLeft: 8,
   },
   stockContent: {
     marginLeft: 16,

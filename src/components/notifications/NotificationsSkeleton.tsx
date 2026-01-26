@@ -18,7 +18,7 @@ const NotificationsSkeleton = () => {
               { 
                 borderColor: theme.colors.outline,
                 backgroundColor: theme.colors.elevation.level1,
-                borderRadius: 16
+                borderRadius: 24 // Matches NotificationCard standard
               }
             ]}
           >
@@ -30,7 +30,7 @@ const NotificationsSkeleton = () => {
                   <Skeleton width={60} height={12} />
                 </View>
                 <Skeleton width="90%" height={14} style={{ marginTop: 8 }} />
-                <Skeleton width="60%" height={14} style={{ marginTop: 4 }} />
+                <Skeleton width="60%" height={14} style={{ marginTop: 6 }} />
               </View>
             </View>
           </View>
@@ -45,6 +45,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: 20,
     paddingTop: 10,
+    paddingBottom: 20,
   },
   list: {
     gap: 12,

@@ -36,36 +36,50 @@ const ExchangeRatesSkeleton = () => {
   );
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 20 }]}>
-      {/* Header Skeleton */}
-      <View style={styles.header}>
-        <Skeleton width={150} height={28} style={{ marginBottom: 4 }} />
-        <Skeleton width={200} height={16} />
-      </View>
-      
-      {/* Search Bar Skeleton */}
-      <View style={styles.searchBar}>
-        <Skeleton width="100%" height={48} borderRadius={r * 3} />
-      </View>
-
-      {/* Filter Chips Skeleton */}
-      <View style={styles.chipsContainer}>
-        {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} width={80} height={32} borderRadius={16} style={{ marginRight: 8 }} />
-        ))}
-      </View>
-
-      {/* Sections Skeleton */}
-      <View style={styles.section}>
-        <Skeleton width={150} height={16} style={{ marginBottom: 12 }} />
-        {renderRateCardSkeleton(1)}
-        {renderRateCardSkeleton(2)}
+    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: theme.colors.background }]}>
+      {/* Header Skeleton matches UnifiedHeader section variant */}
+      <View style={styles.headerContainer}>
+        <View style={styles.header}>
+            <View style={styles.headerTop}>
+                <View style={styles.headerLeft}>
+                    <Skeleton width={150} height={28} />
+                    <Skeleton width={200} height={14} style={{ marginTop: 8 }} />
+                </View>
+                <Skeleton width={40} height={40} borderRadius={20} />
+            </View>
+        </View>
+        
+        {/* Search Bar Skeleton */}
+        <View style={styles.searchBar}>
+            <Skeleton width="100%" height={56} borderRadius={r * 3} />
+        </View>
       </View>
 
-      <View style={styles.section}>
-        <Skeleton width={180} height={16} style={{ marginBottom: 12 }} />
-        {renderRateCardSkeleton(3)}
-        {renderRateCardSkeleton(4)}
+      <View style={styles.scrollContent}>
+        {/* Filter Chips Skeleton */}
+        <View style={styles.chipsContainer}>
+            {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} width={i === 1 ? 60 : 80} height={32} borderRadius={16} style={{ marginRight: 8 }} />
+            ))}
+        </View>
+
+        {/* Sections Skeleton */}
+        <View style={styles.section}>
+            <View style={styles.sectionHeader}>
+                <Skeleton width={150} height={12} />
+                <Skeleton width={120} height={20} borderRadius={4} />
+            </View>
+            {renderRateCardSkeleton(1)}
+            {renderRateCardSkeleton(2)}
+        </View>
+
+        <View style={styles.section}>
+             <View style={styles.sectionHeader}>
+                <Skeleton width={180} height={12} />
+            </View>
+            {renderRateCardSkeleton(3)}
+            {renderRateCardSkeleton(4)}
+        </View>
       </View>
     </View>
   );
@@ -73,20 +87,49 @@ const ExchangeRatesSkeleton = () => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    flex: 1,
+  },
+  headerContainer: {
+    paddingBottom: 8,
   },
   header: {
-    marginBottom: 20,
+    paddingTop: 12,
+    paddingBottom: 0,
+    marginBottom: 0,
+  },
+  headerTop: {
+    paddingHorizontal: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  headerLeft: {
+    justifyContent: 'center',
   },
   searchBar: {
-    marginBottom: 16,
+    paddingHorizontal: 20,
+    marginTop: 8,
+    marginBottom: 8,
+  },
+  scrollContent: {
+    flex: 1,
   },
   chipsContainer: {
     flexDirection: 'row',
-    marginBottom: 24,
+    marginTop: 16,
+    paddingHorizontal: 20,
+    marginBottom: 16,
   },
   section: {
     marginBottom: 24,
+    paddingHorizontal: 20,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 12,
   },
   card: {
     padding: 16,

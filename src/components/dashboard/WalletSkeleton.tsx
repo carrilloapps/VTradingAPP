@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Skeleton from '../ui/Skeleton';
@@ -10,75 +10,78 @@ const WalletSkeleton = () => {
   const r = theme.roundness;
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top + 20 }]}>
-      {/* Header Skeleton */}
-      <View style={styles.header}>
-        <Skeleton width={120} height={28} />
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      {/* Header Skeleton matches UnifiedHeader section variant */}
+      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+         <Skeleton width={150} height={32} />
       </View>
-      
-      {/* Hero Section */}
-      <View style={styles.heroSection}>
-        <View style={styles.iconContainer}>
-            <Skeleton width={80} height={80} borderRadius={40} />
-            <View style={styles.gearIcon}>
-                <Skeleton width={32} height={32} borderRadius={16} />
-            </View>
-        </View>
+
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         
-        <View style={styles.statusBadge}>
-            <Skeleton width={100} height={24} borderRadius={12} />
+        {/* Hero Section */}
+        <View style={styles.heroSection}>
+          <View style={styles.iconContainer}>
+            <Skeleton width={120} height={120} borderRadius={60} />
+          </View>
+          
+          <Skeleton width={140} height={32} borderRadius={20} style={styles.badge} />
+          
+          <Skeleton width={200} height={36} style={styles.title} />
+          <Skeleton width="90%" height={20} style={styles.description} />
+          <Skeleton width="80%" height={20} style={styles.descriptionLine} />
         </View>
 
-        <Skeleton width={200} height={32} style={styles.titleSkeleton} />
-        <Skeleton width={280} height={16} style={styles.textSkeleton} />
-        <Skeleton width={240} height={16} style={styles.textSkeleton} />
-      </View>
-
-      {/* Progress Section */}
-      <View style={styles.progressSection}>
-        <View style={styles.progressHeader}>
-            <Skeleton width={120} height={16} />
+        {/* Progress Section */}
+        <View style={styles.progressSection}>
+          <View style={styles.progressHeader}>
+            <Skeleton width={150} height={16} />
             <Skeleton width={40} height={16} />
+          </View>
+          <Skeleton width="100%" height={8} borderRadius={4} />
         </View>
-        <Skeleton width="100%" height={6} borderRadius={3} />
-      </View>
 
-      {/* Features Preview */}
-      <View style={styles.featuresContainer}>
-        <Skeleton width={100} height={20} style={styles.sectionTitle} />
-        
-        {[1, 2, 3].map((_, index) => (
+        {/* Features Preview */}
+        <View style={styles.featuresContainer}>
+          <Skeleton width={120} height={24} style={styles.featuresTitle} />
+          
+          {[1, 2, 3].map((_, index) => (
             <View 
-                key={index} 
-                style={[
-                        styles.featureItem, 
-                        { 
-                            backgroundColor: theme.colors.elevation.level1,
-                            borderColor: theme.colors.outline,
-                            borderWidth: 1,
-                            borderRadius: r * 6, // Matches new standard
-                            elevation: 0,
-                        }
-                    ]}
+              key={index} 
+              style={[
+                styles.featureItem, 
+                { 
+                  backgroundColor: theme.colors.elevation.level1,
+                  borderColor: theme.colors.outline,
+                  borderRadius: 24,
+                }
+              ]}
             >
-                <Skeleton width={40} height={40} borderRadius={r * 2} />
-                <View style={styles.featureText}>
-                    <Skeleton width={120} height={16} />
-                    <Skeleton width={180} height={12} style={styles.subtitleSkeleton} />
-                </View>
+              <Skeleton width={48} height={48} borderRadius={12} />
+              <View style={styles.featureText}>
+                <Skeleton width={150} height={20} style={styles.featureTitleSkeleton} />
+                <Skeleton width="100%" height={14} style={styles.featureDescSkeleton} />
+              </View>
             </View>
-        ))}
-      </View>
+          ))}
+        </View>
+      </ScrollView>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 20,
+    flex: 1,
   },
   header: {
-    marginBottom: 32,
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+    justifyContent: 'center',
+  },
+  content: {
+    paddingHorizontal: 20,
+    paddingTop: 20,
+    paddingBottom: 40,
   },
   heroSection: {
     alignItems: 'center',
@@ -86,24 +89,23 @@ const styles = StyleSheet.create({
   },
   iconContainer: {
     marginBottom: 24,
-    position: 'relative',
   },
-  gearIcon: {
-    position: 'absolute',
-    bottom: 0,
-    right: -10,
-  },
-  statusBadge: {
+  badge: {
     marginBottom: 16,
   },
-  titleSkeleton: {
+  title: {
     marginBottom: 12,
   },
-  textSkeleton: {
+  description: {
     marginBottom: 8,
   },
+  descriptionLine: {
+    marginBottom: 0,
+  },
   progressSection: {
+    width: '100%',
     marginBottom: 32,
+    paddingHorizontal: 10,
   },
   progressHeader: {
     flexDirection: 'row',
@@ -111,23 +113,29 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   featuresContainer: {
-    gap: 12,
+    width: '100%',
+    marginBottom: 32,
   },
-  sectionTitle: {
-    marginBottom: 8,
+  featuresTitle: {
+    marginBottom: 16,
+    marginLeft: 4,
   },
   featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    gap: 16,
+    marginBottom: 12,
     borderWidth: 1,
+    gap: 16,
   },
   featureText: {
     flex: 1,
   },
-  subtitleSkeleton: {
-    marginTop: 6,
+  featureTitleSkeleton: {
+    marginBottom: 8,
+  },
+  featureDescSkeleton: {
+    marginTop: 2,
   },
 });
 
