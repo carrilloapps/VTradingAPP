@@ -64,7 +64,9 @@ const WidgetsScreen = () => {
 
   const loadData = useCallback(async () => {
     try {
-        const rates = await CurrencyService.getRates();
+        const allRates = await CurrencyService.getRates();
+        // Filtrar VES ya que es la moneda base y no tiene sentido monitorizarla contra sí misma
+        const rates = allRates.filter(r => r.code !== 'VES');
         setAvailableRates(rates);
         
         // Load saved config
@@ -82,7 +84,7 @@ const WidgetsScreen = () => {
                 // Restore selected rates maintaining order
                 const restoredRates = config.selectedCurrencyIds
                     .map(id => rates.find(r => r.id === id))
-                    .filter(r => r !== undefined) as CurrencyRate[];
+                    .filter(r => r !== undefined && r.code !== 'VES') as CurrencyRate[];
                     
                 if (restoredRates.length > 0) {
                     setSelectedRates(restoredRates);
@@ -420,6 +422,7 @@ const WidgetsScreen = () => {
         onToggle={toggleRateSelection}
         title="Seleccionar Divisas"
         maxSelected={4}
+        excludedCodes={['VES']}
       />
     </View>
   );
