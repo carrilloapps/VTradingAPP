@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, RefreshControl, TouchableOpacity, KeyboardAvoidingView, Platform, Keyboard, Alert, ActionSheetIOS } from 'react-native';
 import Share from 'react-native-share';
-import ViewShot, { captureRef } from 'react-native-view-shot';
-import LinearGradient from 'react-native-linear-gradient';
-import { useTheme, Text, Icon, Surface } from 'react-native-paper';
+import { captureRef } from 'react-native-view-shot';
+import { useTheme, Text } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MarketStatus from '../components/ui/MarketStatus';
@@ -27,7 +26,6 @@ import { analyticsService } from '../services/firebase/AnalyticsService';
 import ShareGraphic from '../components/dashboard/ShareGraphic';
 import CustomDialog from '../components/ui/CustomDialog';
 import CustomButton from '../components/ui/CustomButton';
-import { List } from 'react-native-paper';
 
 const HomeScreen = () => {
   const theme = useTheme();

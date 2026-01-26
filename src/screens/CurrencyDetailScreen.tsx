@@ -1,7 +1,7 @@
 import React, { useRef, useState } from 'react';
-import { View, StyleSheet, ScrollView, Platform, Image } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import Share from 'react-native-share';
-import { Surface, Text, Chip, Icon } from 'react-native-paper';
+import { Surface, Text, Icon } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { captureRef } from 'react-native-view-shot';
