@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, ViewStyle, TextStyle } from 'react-native';
+import { StyleSheet, ViewStyle, TextStyle, StyleProp } from 'react-native';
 import { Button, useTheme } from 'react-native-paper';
 import { AppTheme } from '../../theme/theme';
 
@@ -19,8 +19,8 @@ interface CustomButtonProps {
   icon?: string;
   loading?: boolean;
   disabled?: boolean;
-  style?: ViewStyle;
-  labelStyle?: TextStyle;
+  style?: StyleProp<ViewStyle>;
+  labelStyle?: StyleProp<TextStyle>;
   fullWidth?: boolean;
   compact?: boolean;
   testID?: string;

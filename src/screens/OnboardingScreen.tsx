@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, StatusBar, useWindowDimensions } from 'react-native';
-import { Text, Button, Icon } from 'react-native-paper';
+import { Text, Icon } from 'react-native-paper';
 import PagerView from 'react-native-pager-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -10,6 +10,7 @@ import { fcmService } from '../services/firebase/FCMService';
 import { useAppTheme } from '../theme/theme';
 import { useToast } from '../context/ToastContext';
 import { observabilityService } from '../services/ObservabilityService';
+import CustomButton from '../components/ui/CustomButton';
 
 const STORY_DURATION = 6000; // 6 seconds per slide
 
@@ -64,80 +65,33 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
       title: 'Bolsa de Valores de Caracas',
       description: 'Sigue el pulso del mercado bursátil venezolano. Acciones, variaciones y tendencias de la BVC directamente en tu bolsillo.',
       icon: 'domain',
-      colorType: 'secondary',
+      colorType: 'primary',
     },
     {
       key: 'bcv',
       title: 'Banco Central de Venezuela',
       description: 'Información oficial y actualizada. Monitorea las tasas oficiales del BCV y su histórico de comportamiento.',
       icon: 'bank',
-      colorType: 'info',
+      colorType: 'primary',
     },
     {
       key: 'p2p',
       title: 'Mercado P2P y Frontera',
       description: 'Conoce el mercado, tasas de cambio en monedas fronterizas y arbitraje P2P en plataformas.',
       icon: 'swap-horizontal-bold',
-      colorType: 'warning',
+      colorType: 'primary',
     },
   ], []);
 
   const getPageColors = (type: string) => {
-    switch (type) {
-      case 'primary':
-        return { 
-          gradientStart: theme.colors.primaryContainer, 
-          icon: theme.colors.primary,
-          text: theme.colors.onSurface,
-          buttonText: theme.colors.onPrimary,
-        };
-      case 'secondary':
-        return { 
-          gradientStart: theme.colors.secondaryContainer, 
-          icon: theme.colors.secondary,
-          text: theme.colors.onSurface,
-          buttonText: theme.colors.onSecondary,
-        };
-      case 'tertiary':
-        return { 
-          gradientStart: theme.colors.tertiaryContainer, 
-          icon: theme.colors.tertiary,
-          text: theme.colors.onSurface,
-          buttonText: theme.colors.onTertiary,
-        };
-      case 'error':
-        return { 
-          gradientStart: theme.colors.errorContainer, 
-          icon: theme.colors.error,
-          text: theme.colors.onSurface,
-          buttonText: theme.colors.onError,
-        };
-      case 'warning':
-        // Fallback manual para warningContainer que no existe en el tema por defecto
-        const isDark = theme.dark;
-        return { 
-          gradientStart: isDark ? '#4A3B00' : '#FFDEA6', 
-          icon: theme.colors.warning,
-          text: theme.colors.onSurface,
-          buttonText: isDark ? '#3E2D00' : '#FFFFFF', // Contrast text for warning
-        };
-      case 'info':
-        // Blue theme for BCV (Official/Bank look)
-        const isDarkInfo = theme.dark;
-        return { 
-          gradientStart: isDarkInfo ? '#004A77' : '#D1E4FF', // Blue Container
-          icon: isDarkInfo ? '#A8C7FA' : '#0061A4', // Blue Primary
-          text: theme.colors.onSurface,
-          buttonText: isDarkInfo ? '#00325B' : '#FFFFFF',
-        };
-      default:
-        return {  
-          gradientStart: theme.colors.surface, 
-          icon: theme.colors.primary,
-          text: theme.colors.onSurface,
-          buttonText: theme.colors.onPrimary,
-        };
-    }
+    // Unify all under the primary financial green theme
+    return { 
+      gradientStart: theme.colors.primaryContainer, 
+      icon: theme.colors.primary,
+      text: theme.colors.onSurface,
+      buttonText: theme.colors.onPrimary,
+      surfaceVariant: theme.colors.surfaceVariant,
+    };
   };
 
   // Auto-advance logic
@@ -230,14 +184,12 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
         {ONBOARDING_DATA.map((item, index) => {
           const isActive = index === currentPage;
           const isPassed = index < currentPage;
-          const pageColors = getPageColors(item.colorType);
           
-          // Dynamic progress colors
-          const activeColor = pageColors.icon;
-          // Inactive track: same hue but transparent/lighter
+          // Uniform progress colors based on MD3 primary
+          const activeColor = theme.colors.primary;
           const inactiveColor = theme.dark 
-            ? 'rgba(255, 255, 255, 0.2)' 
-            : 'rgba(0, 0, 0, 0.1)'; 
+            ? 'rgba(255, 255, 255, 0.12)' 
+            : 'rgba(0, 0, 0, 0.08)'; 
           
           return (
             <View key={index} style={[styles.progressBarBackground, { backgroundColor: inactiveColor }]}>
@@ -245,7 +197,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
                 style={[
                   styles.progressBarFill, 
                   { 
-                    width: isPassed ? '100%' : isActive ? '100%' : '0%',
+                    width: isPassed ? '100%' : isActive ? '100%' : '0%', // Full for passed and active (story style)
                     backgroundColor: activeColor,
                   }
                 ]} 
@@ -303,18 +255,35 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
                 </View>
 
                 <View style={[styles.contentContainer, { width: contentWidth }]}>
-                  <View style={[
-                    styles.iconContainer, 
-                    { 
-                      backgroundColor: theme.colors.surfaceVariant,
-                      marginBottom: verticalSpacing,
-                      padding: iconSize * 0.25 // Responsive padding
-                    }
-                  ]}>
-                    <Icon source={item.icon} size={iconSize} color={pageColors.icon} />
+                  <View style={styles.iconWrapper}>
+                    {/* Halo Glow effect behind the icon */}
+                    <View style={[
+                      styles.haloEffect, 
+                      { backgroundColor: theme.colors.primary, opacity: theme.dark ? 0.15 : 0.1 }
+                    ]} />
+                    
+                    <View style={[
+                      styles.iconContainer, 
+                      { 
+                        // All pages now have the 'Floating' look (no rigid box)
+                        backgroundColor: 'transparent',
+                        borderColor: 'transparent',
+                        borderWidth: 0,
+                        marginBottom: verticalSpacing,
+                        padding: 0, 
+                        elevation: 0, // No shadow for container itself, Halo handles the 'glow'
+                        shadowOpacity: 0
+                      }
+                    ]}>
+                      <Icon 
+                        source={item.icon} 
+                        size={item.key === 'welcome' ? iconSize * 1.5 : iconSize * 1.2} 
+                        color={pageColors.icon} 
+                      />
+                    </View>
                   </View>
                   
-                  <Text variant="displaySmall" style={[styles.title, { color: theme.colors.onSurface }]}>
+                  <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.onSurface }]}>
                     {item.title}
                   </Text>
                   
@@ -323,34 +292,30 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
                   </Text>
 
                   {item.key === 'notifications' && (
-                    <Button 
-                      mode="contained" 
-                      onPress={requestNotificationPermission}
-                      style={styles.actionButton}
-                      buttonColor={pageColors.icon}
-                      textColor={pageColors.buttonText}
-                      icon={notificationPermissionStatus ? "check" : "bell-ring"}
-                      disabled={notificationPermissionStatus === true}
-                    >
-                      {notificationPermissionStatus === true 
+                    <CustomButton 
+                      label={notificationPermissionStatus === true 
                         ? 'Notificaciones activas' 
                         : 'Activar notificaciones'}
-                    </Button>
+                      onPress={requestNotificationPermission}
+                      variant="primary"
+                      icon={notificationPermissionStatus ? "check" : "bell-ring"}
+                      disabled={notificationPermissionStatus === true}
+                      style={[styles.actionButton, { backgroundColor: pageColors.icon }]}
+                      labelStyle={{ color: pageColors.buttonText }}
+                    />
                   )}
                 </View>
 
                 <View style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
                   {index === ONBOARDING_DATA.length - 1 ? (
-                    <Button 
-                      mode="contained" 
+                    <CustomButton 
+                      label="Comenzar"
                       onPress={finishOnboarding}
-                      style={styles.startBtn}
-                      contentStyle={{ paddingVertical: 8 }}
-                      buttonColor={pageColors.icon}
-                      textColor={pageColors.buttonText}
-                    >
-                      Comenzar
-                    </Button>
+                      variant="primary"
+                      style={[styles.startBtn, { backgroundColor: pageColors.icon }]}
+                      labelStyle={{ color: pageColors.buttonText }}
+                      fullWidth
+                    />
                   ) : (
                     <Text style={[styles.tapHint, { color: theme.colors.onSurfaceVariant }]}>Toca para continuar</Text>
                   )}
@@ -367,7 +332,6 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'black',
   },
   pagerView: {
     flex: 1,
@@ -383,18 +347,17 @@ const styles = StyleSheet.create({
   },
   progressContainer: {
     position: 'absolute',
-    left: 10,
-    right: 10,
-    zIndex: 10,
+    left: 20,
+    right: 20,
+    zIndex: 20, // High depth
     flexDirection: 'row',
-    height: 4,
-    gap: 4,
+    height: 3, // Thinner, modern MD3 look
+    gap: 6,
   },
   progressBarBackground: {
     flex: 1,
     height: '100%',
-    backgroundColor: 'rgba(255,255,255,0.3)',
-    borderRadius: 2,
+    borderRadius: 8,
     overflow: 'hidden',
   },
   progressBarFill: {
@@ -406,20 +369,38 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 400,
   },
-  iconContainer: {
+  iconWrapper: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'relative',
     marginBottom: 40,
-    padding: 20,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    borderRadius: 100,
+  },
+  haloEffect: {
+    position: 'absolute',
+    width: 140, // Slightly larger than container
+    height: 140,
+    borderRadius: 70,
+    filter: 'blur(30px)', // Creates the ethereal glow
+    zIndex: -1,
+  },
+  iconContainer: {
+    borderRadius: 32, // More rounded/premium
+    justifyContent: 'center',
+    alignItems: 'center',
+    // Soft shadow for depth
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.12,
+    shadowRadius: 12,
+    elevation: 8,
   },
   title: {
-    color: 'white',
-    fontWeight: 'bold',
+    fontWeight: '900',
     textAlign: 'center',
     marginBottom: 16,
+    letterSpacing: -1,
   },
   description: {
-    color: 'rgba(255,255,255,0.9)',
     textAlign: 'center',
     fontSize: 18,
     lineHeight: 26,
@@ -440,16 +421,17 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   startBtn: {
-    width: '80%',
-    borderRadius: 30,
-    backgroundColor: 'white',
+    width: '90%',
+    borderRadius: 12,
     marginBottom: 20,
     zIndex: 10,
   },
   tapHint: {
-    fontSize: 12,
+    fontSize: 13,
     marginBottom: 20,
     opacity: 0.7,
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
   touchOverlay: {
     ...StyleSheet.absoluteFillObject,
