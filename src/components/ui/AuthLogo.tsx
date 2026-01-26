@@ -17,6 +17,7 @@ const AuthLogo: React.FC<AuthLogoProps> = ({
   containerStyle 
 }) => {
   const theme = useAppTheme();
+  const resolvedTintColor = tintColor || (theme.dark ? undefined : '#212121');
 
   return (
     <View style={[styles.logoRow, containerStyle]}>
@@ -25,7 +26,7 @@ const AuthLogo: React.FC<AuthLogoProps> = ({
         style={[
           styles.logo, 
           { width: size, height: size },
-          tintColor ? { tintColor } : null
+          resolvedTintColor ? { tintColor: resolvedTintColor } : null
         ] as ImageStyle[]} 
       />
       {showBadge && (
