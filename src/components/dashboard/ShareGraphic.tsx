@@ -10,13 +10,15 @@ interface ShareGraphicProps {
   featuredRates: ExchangeCardProps[];
   spread: number | null;
   lastUpdated: string;
+  isPremium?: boolean;
 }
 
 const ShareGraphic: React.FC<ShareGraphicProps> = ({ 
   viewShotRef, 
   featuredRates, 
   spread, 
-  lastUpdated 
+  lastUpdated,
+  isPremium = false
 }) => {
   const theme = useTheme();
 
@@ -30,22 +32,37 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
           {/* Decorative Elements */}
           <View style={[styles.templateGlow, { backgroundColor: theme.colors.primary, opacity: 0.05 }]} />
 
+          {/* Platform Badges */}
+          <View style={styles.platformBadgesContainer}>
+            <Surface style={[styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }]} elevation={1}>
+              <Icon source="google-play" size={16} color={theme.colors.onSurfaceVariant} />
+              <Text style={[styles.platformText, { color: theme.colors.onSurfaceVariant }]}>Android</Text>
+            </Surface>
+            <View style={{ flex: 1 }} />
+            <Surface style={[styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }]} elevation={1}>
+              <Icon source="apple" size={16} color={theme.colors.onSurfaceVariant} />
+              <Text style={[styles.platformText, { color: theme.colors.onSurfaceVariant }]}>iOS App</Text>
+            </Surface>
+          </View>
+
           <View style={styles.templateHeader}>
-            <View style={styles.templateLogoRow}>
-              <Surface style={[styles.templateLogoBox, { backgroundColor: theme.colors.primaryContainer }]} elevation={4}>
-                <Image 
-                  source={require('../../assets/images/logo.png')} 
-                  style={styles.templateLogoImage}
-                  resizeMode="contain"
-                />
-              </Surface>
-              <View>
-                <Text style={[styles.templateBrand, { color: theme.colors.primaryContainer }]}>VTrading</Text>
-                <Text style={[styles.templateUrl, { color: theme.colors.onSurfaceVariant }]}>vtrading.app</Text>
-              </View>
+            <View style={styles.logoAndBadgeRow}>
+              <Image 
+                source={require('../../assets/images/logotipo.png')} 
+                style={styles.templateMainLogo}
+                resizeMode="contain"
+              />
+              {!isPremium && (
+                <Surface style={[styles.freeBadge, { backgroundColor: (theme.colors as any).error || '#FF5252' }]} elevation={2}>
+                  <Text style={styles.freeBadgeText}>FREE</Text>
+                </Surface>
+              )}
+            </View>
+            <View style={[styles.templateUrlBadge, { backgroundColor: theme.colors.primary + '15', marginBottom: 8 }]}>
+              <Text style={[styles.templateUrlText, { color: theme.colors.primary }]}>vtrading.app</Text>
             </View>
             <View style={styles.templateDateBox}>
-              <Icon source="calendar-clock" size={16} color={theme.colors.onSurfaceVariant} />
+              <Icon source="calendar-clock" size={14} color={theme.colors.onSurfaceVariant} />
               <Text style={[styles.templateDate, { color: theme.colors.onSurfaceVariant }]}>
                 {new Date().toLocaleDateString('es-VE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} • {lastUpdated}
               </Text>
@@ -101,8 +118,10 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
               style={styles.templateDivider}
             />
             <View style={styles.templateFooterRow}>
-              <Icon source="shield-check-outline" size={16} color={theme.colors.primary} />
-              <Text style={[styles.templateFooterText, { color: theme.colors.primary }]}>SEGUIMIENTO FINANCIERO PREMIUM</Text>
+              <Icon source={isPremium ? "shield-check-outline" : "shield-outline"} size={16} color={theme.colors.primary} />
+              <Text style={[styles.templateFooterText, { color: theme.colors.primary }]}>
+                MONITOREO DE MONITOREO FINANCIERO{isPremium ? ' PREMIUM' : ''}
+              </Text>
             </View>
           </View>
         </LinearGradient>
@@ -140,76 +159,93 @@ const styles = StyleSheet.create({
   templateHeader: {
     alignItems: 'center',
     width: '100%',
+    marginTop: 0,
   },
-  templateLogoRow: {
+  platformBadgesContainer: {
+    position: 'absolute',
+    top: 15,
+    left: 20,
+    right: 20,
+    flexDirection: 'row',
+    zIndex: 10,
+  },
+  platformBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-    marginBottom: 16,
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(128,128,128,0.1)',
   },
-  templateLogoBox: {
-    width: 64,
-    height: 64,
-    borderRadius: 18,
-    alignItems: 'center',
+  platformText: {
+    fontSize: 9,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  logoAndBadgeRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     justifyContent: 'center',
-    overflow: 'hidden',
+    marginBottom: 4,
   },
-  templateLogoImage: {
-    width: 44,
-    height: 44,
+  templateMainLogo: {
+    width: 160,
+    height: 42,
   },
-  templateBrand: {
-    fontSize: 28,
-    fontWeight: '900',
-    letterSpacing: 1,
-  },
-  templateUrl: {
-    fontSize: 16,
-    fontWeight: '600',
-    opacity: 0.8,
+  freeBadge: {
+    paddingHorizontal: 5,
+    paddingVertical: 1,
+    borderRadius: 4,
+    marginLeft: -8, 
     marginTop: -2,
+  },
+  freeBadgeText: {
+    color: 'white',
+    fontSize: 7,
+    fontWeight: '900',
   },
   templateDateBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
     backgroundColor: 'rgba(128,128,128,0.05)',
-    paddingHorizontal: 16,
-    paddingVertical: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 4,
     borderRadius: 100,
   },
   templateDate: {
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: '700',
     textTransform: 'capitalize',
   },
   templateContent: {
     width: '100%',
-    gap: 20,
+    gap: 10,
   },
   templateCard: {
-    padding: 24,
-    borderRadius: 24,
+    padding: 14,
+    borderRadius: 18,
     borderWidth: 1,
     width: '100%',
   },
   templateCardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    marginBottom: 8,
+    gap: 8,
+    marginBottom: 2,
     justifyContent: 'center',
   },
   templateIconSmall: {
-    width: 32,
-    height: 32,
+    width: 26,
+    height: 26,
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
   templateCardTitle: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '800',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -218,69 +254,82 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
+    gap: 10,
   },
   templateValue: {
-    fontSize: 64,
+    fontSize: 54,
     fontWeight: '900',
     letterSpacing: -1.5,
   },
   templateValueLabelColumn: {
-    marginLeft: 8,
+    marginLeft: 6,
     alignItems: 'flex-start',
     justifyContent: 'center',
-    gap: 2,
-    height: 64, // Match templateValue fontSize for better center alignment
+    gap: 1,
+    height: 54, 
   },
   templateCurrency: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: '800',
     opacity: 0.8,
-    marginBottom: -4, // Pull closer to the trend box
+    marginBottom: -2,
   },
   templateTrendBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
+    gap: 3,
+    paddingHorizontal: 6,
     paddingVertical: 2,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   templateTrendText: {
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: '800',
   },
   templateSpreadBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    padding: 12,
-    borderRadius: 16,
+    gap: 6,
+    padding: 8,
+    borderRadius: 12,
     borderWidth: 1,
     justifyContent: 'center',
   },
   templateSpreadText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '600',
   },
   templateFooter: {
     width: '100%',
     alignItems: 'center',
+    paddingTop: 8,
+  },
+  templateUrlBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(128,128,128,0.1)',
+  },
+  templateUrlText: {
+    fontSize: 13,
+    fontWeight: '900',
+    letterSpacing: 0.5,
   },
   templateDivider: {
     width: '100%',
     height: 1,
-    marginBottom: 16,
+    marginBottom: 8,
   },
   templateFooterRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
   },
   templateFooterText: {
-    fontSize: 12,
+    fontSize: 9,
     fontWeight: '900',
-    letterSpacing: 1.5,
+    letterSpacing: 1.2,
   }
 });
 

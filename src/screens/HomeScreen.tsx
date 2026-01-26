@@ -339,6 +339,7 @@ const HomeScreen = () => {
         featuredRates={featuredRates}
         spread={spread}
         lastUpdated={lastUpdated}
+        isPremium={userData.isPremium}
       />
 
       <KeyboardAvoidingView 

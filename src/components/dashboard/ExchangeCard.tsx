@@ -127,7 +127,7 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
                               {changePercent}
                           </Text>
                       </View>
-2
+
                       <View style={[styles.divider, { marginHorizontal: 8 }]} />
 
                       {/* COMPRA */}
