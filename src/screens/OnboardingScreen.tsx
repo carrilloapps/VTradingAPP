@@ -296,12 +296,22 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
                       label={notificationPermissionStatus === true 
                         ? 'Notificaciones activas' 
                         : 'Activar notificaciones'}
-                      onPress={requestNotificationPermission}
+                      onPress={notificationPermissionStatus === true ? () => {} : requestNotificationPermission}
                       variant="primary"
-                      icon={notificationPermissionStatus ? "check" : "bell-ring"}
-                      disabled={notificationPermissionStatus === true}
-                      style={[styles.actionButton, { backgroundColor: pageColors.icon }]}
-                      labelStyle={{ color: pageColors.buttonText }}
+                      icon={notificationPermissionStatus ? "check-circle" : "bell-ring"}
+                      style={[
+                        styles.actionButton, 
+                        { 
+                          backgroundColor: notificationPermissionStatus === true 
+                            ? theme.colors.successContainer 
+                            : pageColors.icon 
+                        }
+                      ]}
+                      labelStyle={{ 
+                        color: notificationPermissionStatus === true 
+                          ? theme.colors.success 
+                          : pageColors.buttonText 
+                      }}
                     />
                   )}
                 </View>
