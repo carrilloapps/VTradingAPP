@@ -17,7 +17,10 @@ class ObservabilityService {
       errorMsg.includes('connection error') ||
       errorMsg.includes('service_not_available') ||
       errorMsg.includes('app distribution') ||
-      errorMsg.includes('not supported');
+      errorMsg.includes('not supported') ||
+      errorMsg.includes('app check') ||
+      errorMsg.includes('app not registered') ||
+      errorMsg.includes('token-error');
 
     if (isIgnoredError) {
       if (__DEV__) console.log('[Observability] Non-critical error ignored for reporting:', errorMsg);
