@@ -14,6 +14,7 @@ import StocksScreen from '../screens/StocksScreen';
 import AdvancedCalculatorScreen from '../screens/AdvancedCalculatorScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
 import BankRatesScreen from '../screens/BankRatesScreen';
+import CurrencyDetailScreen from '../screens/CurrencyDetailScreen';
 import { useThemeContext } from '../theme/ThemeContext';
 import { useAuth } from '../context/AuthContext';
 import { analyticsService } from '../services/firebase/AnalyticsService';
@@ -32,6 +33,7 @@ import { UserAlert } from '../services/StorageService';
 import AuthLoading from '../components/auth/AuthLoading';
 import StockDetailScreen from '../screens/StockDetailScreen';
 import { StockData } from '../services/StocksService';
+import { CurrencyRate } from '../services/CurrencyService';
 
 export type RootStackParamList = {
   Onboarding: undefined;
@@ -44,6 +46,7 @@ export type RootStackParamList = {
   WebView: { url: string; title?: string };
   AddAlert: { editAlert?: UserAlert };
   StockDetail: { stock: StockData };
+  CurrencyDetail: { rate: CurrencyRate };
 };
 
 export type MainTabParamList = {
@@ -289,6 +292,14 @@ const AppNavigator = () => {
               <RootStack.Screen 
                 name="AddAlert" 
                 component={AddAlertScreen} 
+                options={{ 
+                  headerShown: false, 
+                  animation: 'default' 
+                }} 
+              />
+              <RootStack.Screen 
+                name="CurrencyDetail" 
+                component={CurrencyDetailScreen} 
                 options={{ 
                   headerShown: false, 
                   animation: 'default' 

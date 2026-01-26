@@ -163,6 +163,7 @@ const ExchangeRatesScreen = () => {
       iconName={rate.iconName || 'currency-usd'}
       iconBgColor={rate.type === 'crypto' ? undefined : colors.infoContainer}
       iconColor={rate.type === 'crypto' ? undefined : colors.info}
+      onPress={() => navigation.navigate('CurrencyDetail', { rate })}
     />
   );
 

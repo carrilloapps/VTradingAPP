@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Text, useTheme, Surface } from 'react-native-paper';
+import { Text, useTheme, Surface, TouchableRipple } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { BolivarIcon } from '../ui/BolivarIcon';
@@ -14,6 +14,7 @@ interface RateCardProps {
   iconName: string;
   iconBgColor?: string;
   iconColor?: string;
+  onPress?: () => void;
 }
 
 const RateCard: React.FC<RateCardProps> = ({
@@ -24,7 +25,8 @@ const RateCard: React.FC<RateCardProps> = ({
   isPositive,
   iconName,
   iconBgColor,
-  iconColor
+  iconColor,
+  onPress
 }) => {
   const theme = useTheme();
   const colors = theme.colors as any;
@@ -46,53 +48,59 @@ const RateCard: React.FC<RateCardProps> = ({
   const finalIconColor = iconColor || colors.info;
 
   return (
-    <Surface 
-      elevation={0}
-      style={[styles.card, { 
-      backgroundColor: theme.colors.elevation.level1, 
-      borderColor: theme.colors.outline,
-      borderRadius: theme.roundness * 6
-    }]}>
-      <View style={styles.leftContent}>
-        <View style={[styles.iconContainer, { 
-          backgroundColor: finalIconBgColor,
-          borderRadius: theme.roundness * 4
-        }]}>
-          {iconName === 'Bs' ? (
-            <BolivarIcon color={finalIconColor} size={24} />
-          ) : (
-            <MaterialCommunityIcons name={iconName} size={24} color={finalIconColor} />
-          )}
+    <TouchableRipple 
+      onPress={onPress}
+      style={{ marginBottom: 12, borderRadius: theme.roundness * 6 }}
+      borderless
+    >
+      <Surface 
+        elevation={0}
+        style={[styles.card, { 
+          backgroundColor: theme.colors.elevation.level1, 
+          borderColor: theme.colors.outline,
+          borderRadius: theme.roundness * 6
+        }]}
+      >
+        <View style={styles.leftContent}>
+          <View style={[styles.iconContainer, { 
+            backgroundColor: finalIconBgColor,
+            borderRadius: theme.roundness * 4
+          }]}>
+            {iconName === 'Bs' ? (
+              <BolivarIcon color={finalIconColor} size={24} />
+            ) : (
+              <MaterialCommunityIcons name={iconName} size={24} color={finalIconColor} />
+            )}
+          </View>
+          <View>
+            <Text variant="titleMedium" style={[styles.titleText, { color: theme.colors.onSurface }]}>{title}</Text>
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{subtitle}</Text>
+          </View>
         </View>
-        <View>
-          <Text variant="titleMedium" style={[styles.titleText, { color: theme.colors.onSurface }]}>{title}</Text>
-          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{subtitle}</Text>
-        </View>
-      </View>
 
-      <View style={styles.rightContent}>
-        <Text variant="headlineSmall" style={[styles.valueText, { color: theme.colors.onSurface }]}>
-          {value}
-        </Text>
-        <View style={styles.trendContainer}>
-          <MaterialCommunityIcons 
-            name={trendIcon} 
-            size={16} 
-            color={trendColor} 
-          />
-          <Text variant="labelMedium" style={[styles.trendText, { color: trendColor }]}>
-            {isNeutral ? '' : (isPositive ? '+' : '')}{changePercent}
+        <View style={styles.rightContent}>
+          <Text variant="headlineSmall" style={[styles.valueText, { color: theme.colors.onSurface }]}>
+            {value}
           </Text>
+          <View style={styles.trendContainer}>
+            <MaterialCommunityIcons 
+              name={trendIcon} 
+              size={16} 
+              color={trendColor} 
+            />
+            <Text variant="labelMedium" style={[styles.trendText, { color: trendColor }]}>
+              {isNeutral ? '' : (isPositive ? '+' : '')}{changePercent}
+            </Text>
+          </View>
         </View>
-      </View>
-    </Surface>
+      </Surface>
+    </TouchableRipple>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
     padding: 16,
-    marginBottom: 12,
     borderWidth: 1,
     elevation: 0,
     flexDirection: 'row',
@@ -110,10 +118,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  subtitle: {
-    fontSize: 12,
-    fontWeight: '500',
-  },
   rightContent: {
     alignItems: 'flex-end',
   },
@@ -126,11 +130,6 @@ const styles = StyleSheet.create({
   trendText: {
     fontWeight: 'bold',
     marginLeft: 2,
-  },
-  value: {
-    fontSize: 17,
-    fontWeight: '800',
-    letterSpacing: -0.5,
   },
   trendContainer: {
     flexDirection: 'row',

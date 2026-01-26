@@ -231,6 +231,19 @@ const HomeScreen = () => {
     };
   }, [processRates, showToast]);
 
+  const handleRatePress = (rate: any) => {
+    // Basic rate extraction from the featured object if needed, 
+    // but the original 'rate' object from CurrencyService is better if we had it.
+    // Since featuredRates is mapping to CurrencyDetail params, we might need to find the raw rate
+    const rawRate = rates.find(r => r.name === rate.title);
+    if (rawRate) {
+        navigation.navigate('CurrencyDetail', { rate: rawRate });
+    } else {
+        // Fallback for custom cards (like Spread) - currently redirecting to calculator or ignoring
+        // Spread detail screen doesn't exist yet, keeping as share only or ignoring for now
+    }
+  };
+
   const generateShareImage = async (format: '1:1' | '16:9') => {
     setShareDialogVisible(false);
     setShareFormat(format);
@@ -409,7 +422,16 @@ const HomeScreen = () => {
 
           <View style={styles.section}>
             {featuredRates.map((item, index) => (
-              <ExchangeCard key={index} {...item} onPress={handleShareImage} />
+              <ExchangeCard 
+                key={index} 
+                {...item} 
+                onPress={() => {
+                    const rawRate = rates.find(r => r.name === item.title);
+                    if (rawRate) {
+                        navigation.navigate('CurrencyDetail', { rate: rawRate });
+                    }
+                }} 
+              />
             ))}
             {featuredRates.length === 0 && (
                <Text style={[styles.emptyText, themeStyles.emptyText]}>
