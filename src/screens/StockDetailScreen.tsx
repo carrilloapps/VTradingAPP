@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView, Platform } from 'react-native';
+import { View, StyleSheet, ScrollView, Platform, Image } from 'react-native';
 import Share from 'react-native-share';
 import { Surface, Text, Chip } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -73,7 +73,7 @@ const StockDetailScreen = () => {
         await Share.open({
           url: sharePath,
           type: 'image/jpeg',
-          message: `Acción: ${stock.name} (${stock.symbol}) - VTradingAPP`,
+          message: `Acción: ${stock.name} (${stock.symbol}) - VTrading`,
         });
       } catch (e) {
         if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
@@ -156,13 +156,17 @@ const StockDetailScreen = () => {
                 <View style={[
                   styles.iconContainer, 
                   { 
-                    backgroundColor: theme.dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                    backgroundColor: stock.iconUrl ? '#FFFFFF' : (theme.dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'),
                     borderColor: theme.dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
                     borderWidth: 1,
                   }
                 ]}>
                      {stock.iconUrl ? (
-                         <MaterialCommunityIcons name="chart-box-outline" size={32} color={trendColor} />
+                         <Image 
+                            source={{ uri: stock.iconUrl }} 
+                            style={styles.logoImage}
+                            resizeMode="contain"
+                         />
                      ) : (
                         <Text style={[styles.initials, { color: trendColor }]}>{stock.initials || stock.symbol.substring(0, 2)}</Text>
                      )}
@@ -369,6 +373,11 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 10,
     elevation: 6,
+    overflow: 'hidden',
+  },
+  logoImage: {
+    width: '100%',
+    height: '100%',
   },
   initials: {
     fontSize: 28,

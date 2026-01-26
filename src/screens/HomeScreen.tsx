@@ -258,7 +258,7 @@ const HomeScreen = () => {
         await Share.open({
           url: sharePath,
           type: 'image/jpeg',
-          message: `Tasas actualizadas en VTradingAPP (${format})`,
+          message: `Tasas actualizadas en VTrading (${format})`,
         });
       } catch (e) {
         if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
@@ -278,7 +278,7 @@ const HomeScreen = () => {
       const bcv = rates.find(r => r.code === 'USD');
       const p2p = rates.find(r => r.code === 'USDT');
       
-      const message = `📊 *VTradingAPP - Reporte Diario*\n\n` +
+      const message = `📊 *VTrading - Reporte Diario*\n\n` +
         (bcv ? `💵 *USD BCV:* ${Number(bcv.value).toFixed(2)} Bs\n` : '') +
         (p2p ? `🔶 *USDT P2P:* ${Number(p2p.value).toFixed(2)} Bs\n` : '') +
         (spread ? `⚖️ *Spread:* ${spread.toFixed(2)}%\n` : '') +

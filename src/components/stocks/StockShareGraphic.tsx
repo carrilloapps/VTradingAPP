@@ -115,8 +115,14 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
             <Surface style={[styles.mainCard, isVertical && styles.mainCardVertical, { backgroundColor: theme.dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', borderColor: theme.colors.outlineVariant }]} elevation={0}>
                 {/* Stock Identification */}
                 <View style={styles.stockIdentityRow}>
-                    <View style={[styles.stockIconContainer, { backgroundColor: trendColor + '20' }]}>
-                        {stock.initials ? (
+                    <View style={[styles.stockIconContainer, { backgroundColor: stock.iconUrl ? '#FFFFFF' : trendColor + '20' }]}>
+                        {stock.iconUrl ? (
+                            <Image 
+                                source={{ uri: stock.iconUrl }} 
+                                style={styles.stockIconImage}
+                                resizeMode="contain"
+                            />
+                        ) : stock.initials ? (
                             <Text style={[styles.stockInitialsText, { color: trendColor }]}>{stock.initials}</Text>
                         ) : (
                             <Icon source="chart-box-outline" size={32} color={trendColor} />
@@ -328,6 +334,11 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  stockIconImage: {
+    width: '100%',
+    height: '100%',
   },
   stockInitialsText: {
     fontSize: 20,
