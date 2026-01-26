@@ -11,14 +11,16 @@ class ObservabilityService {
     // Log en consola siempre para desarrollo y depuración local
     console.error('[Observability] Error caught:', error);
 
-    // Filtro para ignorar errores de conectividad (ya manejados por el UI)
+    // Filtro para ignorar errores de conectividad o plataforma (ya manejados o irrelevantes)
     const errorMsg = String(error?.message || error || '').toLowerCase();
-    const isNetworkError = errorMsg.includes('network request failed') ||
+    const isIgnoredError = errorMsg.includes('network request failed') ||
       errorMsg.includes('connection error') ||
-      errorMsg.includes('service_not_available');
+      errorMsg.includes('service_not_available') ||
+      errorMsg.includes('app distribution') ||
+      errorMsg.includes('not supported');
 
-    if (isNetworkError) {
-      if (__DEV__) console.log('[Observability] Network error ignored for reporting');
+    if (isIgnoredError) {
+      if (__DEV__) console.log('[Observability] Non-critical error ignored for reporting:', errorMsg);
       return;
     }
 

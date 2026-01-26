@@ -17,13 +17,23 @@ class AppDistributionService {
 
     try {
       const appDistribution = getAppDistribution();
+
+      // Secondary check: only continue if tester is actually signed in or it's a known tester environment
+      // This helps avoid general production users from seeing support errors
+      const isTester = await appDistribution.isTesterSignedIn();
+      if (!isTester) return;
+
       await checkForUpdate(appDistribution);
-    } catch (e) {
-      observabilityService.captureError(e);
-      const message = e instanceof Error ? e.message : String(e);
-      if (message.includes('not supported')) {
+    } catch (e: any) {
+      const message = String(e?.message || e || '').toLowerCase();
+
+      // Silence known non-critical platform messages
+      if (message.includes('not supported') || message.includes('not available')) {
+        if (__DEV__) console.log('[AppDistribution] Check skipped: platform not supported');
         return;
       }
+
+      observabilityService.captureError(e, { context: 'AppDistribution_checkForUpdate' });
     }
   }
 }
