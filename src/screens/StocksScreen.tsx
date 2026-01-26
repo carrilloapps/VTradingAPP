@@ -16,6 +16,13 @@ import { StocksService, StockData } from '../services/StocksService';
 import { useToast } from '../context/ToastContext';
 import StocksSkeleton from '../components/stocks/StocksSkeleton';
 import { observabilityService } from '../services/ObservabilityService';
+import { useAuth } from '../context/AuthContext';
+import CustomDialog from '../components/ui/CustomDialog';
+import CustomButton from '../components/ui/CustomButton';
+import ViewShot, { captureRef } from 'react-native-view-shot';
+import Share from 'react-native-share';
+import MarketShareGraphic from '../components/stocks/MarketShareGraphic';
+import { AppConfig } from '../constants/AppConfig';
 
 const StocksScreen = () => {
   const theme = useTheme();
@@ -31,6 +38,14 @@ const StocksScreen = () => {
   const [indexData, setIndexData] = useState<any>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [isMarketOpen, setIsMarketOpen] = useState(false);
+  const { user } = useAuth();
+  
+  const [isShareDialogVisible, setShareDialogVisible] = useState(false);
+  const [shareFormat, setShareFormat] = useState<'1:1' | '16:9'>('1:1');
+  const [sharing, setSharing] = useState(false);
+  const viewShotRef = React.useRef<any>(null);
+
+  const isPremium = !!(user && !user.isAnonymous);
 
   useEffect(() => {
     const unsubscribe = StocksService.subscribe((data) => {
@@ -112,6 +127,63 @@ const StocksScreen = () => {
     navigation.navigate('StockDetail', { stock });
   };
 
+  const handleShare = () => {
+    setShareDialogVisible(true);
+  };
+
+  const generateShareImage = async (format: '1:1' | '16:9') => {
+    setShareDialogVisible(false);
+    setShareFormat(format);
+    setSharing(true);
+    
+    await new Promise(resolve => setTimeout(() => resolve(null), 300));
+
+    if (viewShotRef.current) {
+      try {
+        const uri = await captureRef(viewShotRef.current, {
+          format: 'jpg',
+          quality: 1.0,
+          result: 'tmpfile',
+          width: 1080,
+          height: format === '1:1' ? 1080 : 1920,
+        });
+        
+        if (!uri) throw new Error("Capture failed");
+
+        const sharePath = uri.startsWith('file://') ? uri : `file://${uri}`;
+
+        await Share.open({
+          url: sharePath,
+          type: 'image/jpeg',
+          message: `Resumen del Mercado Bursátil - VTradingAPP`,
+        });
+      } catch (e) {
+        if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
+            observabilityService.captureError(e, { context: 'StocksScreen_generateShareImage' });
+            showToast('No se pudo compartir la imagen', 'error');
+        }
+      } finally {
+        setSharing(false);
+      }
+    }
+  };
+
+  const handleShareText = async () => {
+    setShareDialogVisible(false);
+    try {
+      const message = `📊 *VTradingAPP - Mercado de Valores*\n\n` +
+        (indexData ? `📉 *Índice IBC:* ${indexData.value} (${indexData.changePercent})\n` : '') +
+        (stocks.length > 0 ? `🚀 *Top Stock:* ${stocks[0].symbol} @ ${stocks[0].price.toFixed(2)} Bs\n` : '') +
+        `🌐 vtrading.app`;
+
+      await Share.open({ message });
+    } catch (e) {
+       if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
+        showToast('Error al compartir texto', 'error');
+      }
+    }
+  };
+
   const renderHeader = () => (
       <View style={styles.headerContainer}>
         {/* Market Status */}
@@ -187,6 +259,9 @@ const StocksScreen = () => {
           subtitle="Acciones • ETFs"
           onActionPress={onRefresh}
           rightActionIcon="refresh"
+          showSecondaryAction
+          onSecondaryActionPress={handleShare}
+          secondaryActionIcon="share-variant"
           onNotificationPress={() => {}}
           notificationCount={1}
           style={styles.headerStyle}
@@ -229,6 +304,53 @@ const StocksScreen = () => {
             </View>
         }
       />
+
+      {/* Sharing Assets */}
+      <MarketShareGraphic
+        viewShotRef={viewShotRef}
+        indexData={indexData || { value: '0.00', changePercent: '0.00%', isPositive: true, volume: '0.00' }}
+        topStocks={stocks.slice(0, 6)}
+        lastUpdated={new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        isPremium={isPremium}
+        aspectRatio={shareFormat}
+      />
+
+      <CustomDialog
+        visible={isShareDialogVisible}
+        onDismiss={() => setShareDialogVisible(false)}
+        title="Compartir reporte"
+        showCancel={false}
+        confirmLabel="Cerrar"
+        onConfirm={() => setShareDialogVisible(false)}
+      >
+        <Text variant="bodyMedium" style={{ textAlign: 'center', marginBottom: 20, color: theme.colors.onSurfaceVariant }}>
+          Selecciona el formato ideal para compartir el resumen del mercado
+        </Text>
+        
+        <View style={{ gap: 12 }}>
+          <CustomButton 
+            variant="primary"
+            label="Imagen cuadrada"
+            icon="view-grid-outline"
+            onPress={() => generateShareImage('1:1')}
+            fullWidth
+          />
+          <CustomButton 
+            variant="secondary"
+            label="Imagen vertical"
+            icon="cellphone"
+            onPress={() => generateShareImage('16:9')}
+            fullWidth
+          />
+          <CustomButton 
+            variant="outlined"
+            label="Solo texto"
+            icon="text-short"
+            onPress={handleShareText}
+            fullWidth
+          />
+        </View>
+      </CustomDialog>
     </View>
   );
 };

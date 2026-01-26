@@ -1,12 +1,20 @@
 import React from 'react';
-import { View, StyleSheet, ScrollView, Share } from 'react-native';
+import { View, StyleSheet, ScrollView, Platform } from 'react-native';
+import Share from 'react-native-share';
 import { Surface, Text, Chip } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import ViewShot, { captureRef } from 'react-native-view-shot';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import { useAppTheme } from '../theme/theme';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { BolivarIcon } from '../components/ui/BolivarIcon';
+import { useAuth } from '../context/AuthContext';
+import CustomDialog from '../components/ui/CustomDialog';
+import CustomButton from '../components/ui/CustomButton';
+import StockShareGraphic from '../components/stocks/StockShareGraphic';
+import { observabilityService } from '../services/ObservabilityService';
+import { useToast } from '../context/ToastContext';
 
 type StockDetailRouteProp = RouteProp<RootStackParamList, 'StockDetail'>;
 
@@ -15,6 +23,15 @@ const StockDetailScreen = () => {
   const navigation = useNavigation();
   const route = useRoute<StockDetailRouteProp>();
   const { stock } = route.params;
+  const { user } = useAuth();
+  const { showToast } = useToast();
+
+  const [isShareDialogVisible, setShareDialogVisible] = React.useState(false);
+  const [shareFormat, setShareFormat] = React.useState<'1:1' | '16:9'>('1:1');
+  const [sharing, setSharing] = React.useState(false);
+  const viewShotRef = React.useRef<any>(null);
+
+  const isPremium = !!(user && !user.isAnonymous);
 
   const isPositive = stock.changePercent > 0;
   const isNegative = stock.changePercent < 0;
@@ -31,14 +48,63 @@ const StockDetailScreen = () => {
       ? 'trending-down' 
       : 'minus';
 
-  const handleShare = async () => {
-    try {
-      await Share.share({
-        message: `Revisa ${stock.name} (${stock.symbol}) en VTradingAPP! Precio: ${stock.price} Bs (${stock.changePercent}%)`,
-      });
-    } catch (error) {
-      console.error(error);
+  const generateShareImage = async (format: '1:1' | '16:9') => {
+    setShareDialogVisible(false);
+    setShareFormat(format);
+    setSharing(true);
+    
+    // Wait for layout update
+    await new Promise(resolve => setTimeout(() => resolve(null), 300));
+
+    if (viewShotRef.current) {
+      try {
+        const uri = await captureRef(viewShotRef.current, {
+          format: 'jpg',
+          quality: 1.0,
+          result: 'tmpfile',
+          width: 1080,
+          height: format === '1:1' ? 1080 : 1920,
+        });
+        
+        if (!uri) throw new Error("Capture failed");
+
+        const sharePath = uri.startsWith('file://') ? uri : `file://${uri}`;
+
+        await Share.open({
+          url: sharePath,
+          type: 'image/jpeg',
+          message: `Acción: ${stock.name} (${stock.symbol}) - VTradingAPP`,
+        });
+      } catch (e) {
+        if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
+            observabilityService.captureError(e, { context: 'StockDetail_generateShareImage' });
+            showToast('No se pudo compartir la imagen', 'error');
+        }
+      } finally {
+        setSharing(false);
+      }
     }
+  };
+
+  const handleShareText = async () => {
+    setShareDialogVisible(false);
+    try {
+      const message = `📊 *VTradingAPP - Mercado Bursátil*\n\n` +
+        `📈 *Acción:* ${stock.name} (${stock.symbol})\n` +
+        `💰 *Precio:* ${stock.price.toFixed(2)} Bs\n` +
+        `📉 *Variación:* ${stock.changePercent > 0 ? '+' : ''}${stock.changePercent.toFixed(2)}%\n` +
+        `🌐 vtrading.app`;
+
+      await Share.open({ message });
+    } catch (e) {
+       if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
+        showToast('Error al compartir texto', 'error');
+      }
+    }
+  };
+
+  const handleShare = () => {
+    setShareDialogVisible(true);
   };
 
   const averagePrice = (stock.volumeAmount && stock.volumeShares) 
@@ -214,6 +280,52 @@ const StockDetailScreen = () => {
          </Surface>
 
       </ScrollView>
+
+      {/* Sharing Assets */}
+      <StockShareGraphic
+        viewShotRef={viewShotRef}
+        stock={stock}
+        lastUpdated={new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        isPremium={isPremium}
+        aspectRatio={shareFormat}
+      />
+
+      <CustomDialog
+        visible={isShareDialogVisible}
+        onDismiss={() => setShareDialogVisible(false)}
+        title="Compartir reporte"
+        showCancel={false}
+        confirmLabel="Cerrar"
+        onConfirm={() => setShareDialogVisible(false)}
+      >
+        <Text variant="bodyMedium" style={{ textAlign: 'center', marginBottom: 20, color: theme.colors.onSurfaceVariant }}>
+          Selecciona el formato ideal para compartir los datos de {stock.symbol}
+        </Text>
+        
+        <View style={{ gap: 12 }}>
+          <CustomButton 
+            variant="primary"
+            label="Imagen cuadrada"
+            icon="view-grid-outline"
+            onPress={() => generateShareImage('1:1')}
+            fullWidth
+          />
+          <CustomButton 
+            variant="secondary"
+            label="Imagen vertical"
+            icon="cellphone"
+            onPress={() => generateShareImage('16:9')}
+            fullWidth
+          />
+          <CustomButton 
+            variant="outlined"
+            label="Solo texto"
+            icon="text-short"
+            onPress={handleShareText}
+            fullWidth
+          />
+        </View>
+      </CustomDialog>
     </View>
   );
 };
