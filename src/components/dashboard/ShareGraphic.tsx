@@ -11,6 +11,7 @@ interface ShareGraphicProps {
   spread: number | null;
   lastUpdated: string;
   isPremium?: boolean;
+  aspectRatio?: '1:1' | '16:9';
 }
 
 const ShareGraphic: React.FC<ShareGraphicProps> = ({ 
@@ -18,7 +19,8 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
   featuredRates, 
   spread, 
   lastUpdated,
-  isPremium = false
+  isPremium = false,
+  aspectRatio = '1:1'
 }) => {
   const theme = useTheme();
 
@@ -27,7 +29,10 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
       <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 0.9 }}>
         <LinearGradient 
           colors={theme.dark ? ['#051911', '#0A0A0A'] : ['#F0FDF4', '#FFFFFF']} 
-          style={styles.shareTemplate}
+          style={[
+            styles.shareTemplate, 
+            aspectRatio === '16:9' ? styles.shareTemplateVertical : styles.shareTemplateSquare
+          ]}
         >
           {/* Decorative Elements */}
           <View style={[styles.templateGlow, { backgroundColor: theme.colors.primary, opacity: 0.05 }]} />
@@ -41,7 +46,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
             <View style={{ flex: 1 }} />
             <Surface style={[styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }]} elevation={1}>
               <Icon source="apple" size={16} color={theme.colors.onSurfaceVariant} />
-              <Text style={[styles.platformText, { color: theme.colors.onSurfaceVariant }]}>iOS App</Text>
+              <Text style={[styles.platformText, { color: theme.colors.onSurfaceVariant }]}>iOS</Text>
             </Surface>
           </View>
 
@@ -69,7 +74,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
             </View>
           </View>
           
-          <View style={styles.templateContent}>
+          <View style={[styles.templateContent, aspectRatio === '16:9' && { flex: 1, justifyContent: 'center', gap: 24 }]}>
             {featuredRates.map((rate, idx) => {
               const isNeutral = rate.changePercent.includes('0.00');
               const trendColor = isNeutral 
@@ -79,24 +84,41 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
                 ? 'minus' 
                 : (rate.isPositive ? 'trending-up' : 'trending-down');
 
+              const isVertical = aspectRatio === '16:9';
+
               return (
-                <Surface key={idx} style={[styles.templateCard, { backgroundColor: theme.dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', borderColor: theme.colors.outlineVariant }]} elevation={0}>
-                  <View style={styles.templateCardHeader}>
-                    <View style={[styles.templateIconSmall, { backgroundColor: theme.colors.primary + '20' }]}>
-                      <Icon source={rate.code === 'USDT' || rate.title.includes('USDT') ? 'alpha-t-circle-outline' : 'currency-usd'} size={20} color={theme.colors.primary} />
+                <Surface key={idx} style={[styles.templateCard, isVertical && styles.templateCardVertical, { backgroundColor: theme.dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', borderColor: theme.colors.outlineVariant }]} elevation={0}>
+                  <View style={[styles.templateCardHeader, isVertical && { marginBottom: 12 }]}>
+                    <View style={[styles.templateIconSmall, isVertical && { width: 36, height: 36 }, { backgroundColor: theme.colors.primary + '20' }]}>
+                      <Icon source={rate.code === 'USDT' || rate.title.includes('USDT') ? 'alpha-t-circle-outline' : 'currency-usd'} size={isVertical ? 24 : 20} color={theme.colors.primary} />
                     </View>
-                    <Text style={[styles.templateCardTitle, { color: theme.colors.onSurfaceVariant }]}>{rate.title}</Text>
+                    <Text style={[styles.templateCardTitle, isVertical && { fontSize: 18 }, { color: theme.colors.onSurfaceVariant }]}>{rate.title}</Text>
                   </View>
+                  
                   <View style={styles.templateValueRow}>
-                    <Text style={[styles.templateValue, { color: theme.colors.onSurface }]}>{rate.value}</Text>
-                    <View style={styles.templateValueLabelColumn}>
-                        <Text style={[styles.templateCurrency, { color: theme.colors.onSurfaceVariant }]}>Bs.</Text>
+                    <Text style={[styles.templateValue, isVertical && { fontSize: 68 }, { color: theme.colors.onSurface }]}>{rate.value}</Text>
+                    <View style={[styles.templateValueLabelColumn, isVertical && { height: 68 }]}>
+                        <Text style={[styles.templateCurrency, isVertical && { fontSize: 24 }, { color: theme.colors.onSurfaceVariant }]}>Bs.</Text>
                         <View style={[styles.templateTrendBox, { backgroundColor: trendColor + '15' }]}>
                             <Icon source={trendIcon} size={14} color={trendColor} />
                             <Text style={[styles.templateTrendText, { color: trendColor }]}>{rate.changePercent}</Text>
                         </View>
                     </View>
                   </View>
+
+                  {isVertical && (rate.buyValue || rate.sellValue) && (
+                    <View style={styles.templateVerticalDetails}>
+                      <View style={styles.templateDetailItem}>
+                        <Text style={styles.templateDetailLabel}>COMPRA</Text>
+                        <Text style={styles.templateDetailValue}>{rate.buyValue || '--'} <Text style={styles.templateDetailCurrency}>Bs.</Text></Text>
+                      </View>
+                      <View style={styles.templateVerticalDivider} />
+                      <View style={styles.templateDetailItem}>
+                        <Text style={styles.templateDetailLabel}>VENTA</Text>
+                        <Text style={styles.templateDetailValue}>{rate.sellValue || '--'} <Text style={styles.templateDetailCurrency}>Bs.</Text></Text>
+                      </View>
+                    </View>
+                  )}
                 </Surface>
               );
             })}
@@ -120,7 +142,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
             <View style={styles.templateFooterRow}>
               <Icon source={isPremium ? "shield-check-outline" : "shield-outline"} size={16} color={theme.colors.primary} />
               <Text style={[styles.templateFooterText, { color: theme.colors.primary }]}>
-                MONITOREO DE MONITOREO FINANCIERO{isPremium ? ' PREMIUM' : ''}
+                MONITOREO FINANCIERO{isPremium ? ' PREMIUM' : ''}
               </Text>
             </View>
           </View>
@@ -135,17 +157,24 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: -2000, 
     width: 600,
-    height: 600,
     zIndex: -1,
   },
   shareTemplate: {
-    width: 600,
-    height: 600,
     padding: 40,
     justifyContent: 'space-between',
     alignItems: 'center',
     position: 'relative',
     overflow: 'hidden',
+  },
+  shareTemplateSquare: {
+    width: 600,
+    height: 600,
+  },
+  shareTemplateVertical: {
+    width: 600,
+    height: 1066, 
+    paddingVertical: 100,
+    paddingHorizontal: 40,
   },
   templateGlow: {
     position: 'absolute',
@@ -154,7 +183,7 @@ const styles = StyleSheet.create({
     width: 300,
     height: 300,
     borderRadius: 150,
-    backgroundColor: 'white', // Placeholder, opacity handled in view
+    backgroundColor: 'white', 
   },
   templateHeader: {
     alignItems: 'center',
@@ -225,10 +254,14 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   templateCard: {
-    padding: 14,
-    borderRadius: 18,
+    padding: 16,
+    borderRadius: 20,
     borderWidth: 1,
     width: '100%',
+  },
+  templateCardVertical: {
+    padding: 24,
+    borderRadius: 28,
   },
   templateCardHeader: {
     flexDirection: 'row',
@@ -330,6 +363,38 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: '900',
     letterSpacing: 1.2,
+  },
+  templateVerticalDetails: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    marginTop: 16,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(128,128,128,0.1)',
+  },
+  templateDetailItem: {
+    alignItems: 'center',
+  },
+  templateDetailLabel: {
+    fontSize: 10,
+    fontWeight: '900',
+    opacity: 0.6,
+    marginBottom: 4,
+    letterSpacing: 1,
+  },
+  templateDetailValue: {
+    fontSize: 20,
+    fontWeight: '800',
+  },
+  templateDetailCurrency: {
+    fontSize: 12,
+    opacity: 0.6,
+  },
+  templateVerticalDivider: {
+    width: 1,
+    height: 30,
+    backgroundColor: 'rgba(128,128,128,0.2)',
   }
 });
 

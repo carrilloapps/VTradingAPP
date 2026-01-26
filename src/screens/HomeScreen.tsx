@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, RefreshControl, TouchableOpacity, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
-import RNShare from 'react-native-share';
+import { View, StyleSheet, ScrollView, StatusBar, RefreshControl, TouchableOpacity, KeyboardAvoidingView, Platform, Keyboard, Alert, ActionSheetIOS } from 'react-native';
+import Share from 'react-native-share';
 import ViewShot, { captureRef } from 'react-native-view-shot';
 import LinearGradient from 'react-native-linear-gradient';
 import { useTheme, Text, Icon, Surface } from 'react-native-paper';
@@ -24,6 +24,9 @@ import { MaterialTopTabNavigationProp } from '@react-navigation/material-top-tab
 import AdvancedCalculatorCTA from '../components/dashboard/AdvancedCalculatorCTA';
 import { observabilityService } from '../services/ObservabilityService';
 import ShareGraphic from '../components/dashboard/ShareGraphic';
+import CustomDialog from '../components/ui/CustomDialog';
+import CustomButton from '../components/ui/CustomButton';
+import { List } from 'react-native-paper';
 
 const HomeScreen = () => {
   const theme = useTheme();
@@ -47,6 +50,8 @@ const HomeScreen = () => {
   const [keyboardVisible, setKeyboardVisible] = useState(false);
   const viewShotRef = React.useRef<any>(null);
   const [sharing, setSharing] = useState(false);
+  const [shareFormat, setShareFormat] = useState<'1:1' | '16:9'>('1:1');
+  const [isShareDialogVisible, setShareDialogVisible] = useState(false);
 
   useEffect(() => {
     const showSubscription = Keyboard.addListener(
@@ -225,27 +230,35 @@ const HomeScreen = () => {
     };
   }, [processRates, showToast]);
 
-  const handleShareImage = async () => {
+  const generateShareImage = async (format: '1:1' | '16:9') => {
+    setShareDialogVisible(false);
+    setShareFormat(format);
+    setSharing(true);
+    
+    // Wait a brief moment for the hidden template to re-render with the new ratio
+    await new Promise(resolve => setTimeout(() => resolve(null), 300));
+
     if (viewShotRef.current) {
-      setSharing(true);
       try {
         const uri = await captureRef(viewShotRef.current, {
           format: 'jpg',
-          quality: 0.9,
+          quality: 1.0,
           result: 'tmpfile', 
+          // 1080p base resolution for high quality
+          width: 1080,
+          height: format === '1:1' ? 1080 : 1920,
         });
         
         if (!uri) {
            throw new Error("Failed to capture image: URI is empty");
         }
 
-        // Android sometimes needs the 'file://' prefix explicitly if captureRef doesn't provide it
         const sharePath = uri.startsWith('file://') ? uri : `file://${uri}`;
 
-        await RNShare.open({
+        await Share.open({
           url: sharePath,
           type: 'image/jpeg',
-          message: `Tasas de cambio actualizadas en VTradingAPP al ${lastUpdated}`,
+          message: `Tasas actualizadas en VTradingAPP (${format})`,
         });
       } catch (e) {
         if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
@@ -257,6 +270,33 @@ const HomeScreen = () => {
         setSharing(false);
       }
     }
+  };
+
+  const handleShareText = async () => {
+    setShareDialogVisible(false);
+    try {
+      const bcv = rates.find(r => r.code === 'USD');
+      const p2p = rates.find(r => r.code === 'USDT');
+      
+      const message = `📊 *VTradingAPP - Reporte Diario*\n\n` +
+        (bcv ? `💵 *USD BCV:* ${Number(bcv.value).toFixed(2)} Bs\n` : '') +
+        (p2p ? `🔶 *USDT P2P:* ${Number(p2p.value).toFixed(2)} Bs\n` : '') +
+        (spread ? `⚖️ *Spread:* ${spread.toFixed(2)}%\n` : '') +
+        `⏱️ _Act: ${lastUpdated}_\n\n` +
+        `🌐 vtrading.app`;
+
+      await Share.open({
+        message: message,
+      });
+    } catch (e) {
+      if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
+        showToast('Error al compartir texto', 'error');
+      }
+    }
+  };
+
+  const handleShareImage = () => {
+    setShareDialogVisible(true);
   };
 
   const onRefresh = useCallback(async () => {
@@ -340,6 +380,7 @@ const HomeScreen = () => {
         spread={spread}
         lastUpdated={lastUpdated}
         isPremium={userData.isPremium}
+        aspectRatio={shareFormat}
       />
 
       <KeyboardAvoidingView 
@@ -404,6 +445,42 @@ const HomeScreen = () => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+      <CustomDialog
+        visible={isShareDialogVisible}
+        onDismiss={() => setShareDialogVisible(false)}
+        title="Compartir reporte"
+        showCancel={false}
+        confirmLabel="Cerrar"
+        onConfirm={() => setShareDialogVisible(false)}
+      >
+        <Text variant="bodyMedium" style={{ textAlign: 'center', marginBottom: 20, color: theme.colors.onSurfaceVariant }}>
+          Selecciona el formato ideal para compartir en tus redes sociales
+        </Text>
+        
+        <View style={{ gap: 12 }}>
+          <CustomButton 
+            variant="primary"
+            label="Imagen cuadrada"
+            icon="view-grid-outline"
+            onPress={() => generateShareImage('1:1')}
+            fullWidth
+          />
+          <CustomButton 
+            variant="secondary"
+            label="Imagen vertical"
+            icon="cellphone"
+            onPress={() => generateShareImage('16:9')}
+            fullWidth
+          />
+          <CustomButton 
+            variant="outlined"
+            label="Solo texto"
+            icon="text-short"
+            onPress={handleShareText}
+            fullWidth
+          />
+        </View>
+      </CustomDialog>
     </View>
   );
 };
