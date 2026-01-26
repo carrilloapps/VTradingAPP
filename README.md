@@ -1,6 +1,6 @@
-# VTradingAPP 🚀
+# VTrading 🚀
 
-VTradingAPP es una plataforma financiera avanzada desarrollada con React Native, diseñada para ofrecer seguimiento en tiempo real de mercados de divisas y acciones, cálculos financieros complejos y una experiencia de usuario premium con soporte multiplataforma.
+VTrading es una plataforma financiera avanzada desarrollada con React Native, diseñada para ofrecer seguimiento en tiempo real de mercados de divisas y acciones, cálculos financieros complejos y una experiencia de usuario premium con soporte multiplataforma.
 
 ![Status](https://img.shields.io/badge/Status-Active-success)
 ![React Native](https://img.shields.io/badge/ReactNative-0.83.1-blue)
