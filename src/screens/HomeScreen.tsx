@@ -14,12 +14,21 @@ import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { AppConfig } from '../constants/AppConfig';
 import { TetherIcon } from '../components/ui/TetherIcon';
+import { RootStackParamList, MainTabParamList } from '../navigation/AppNavigator';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { CompositeNavigationProp } from '@react-navigation/native';
+import { MaterialTopTabNavigationProp } from '@react-navigation/material-top-tabs';
 import AdvancedCalculatorCTA from '../components/dashboard/AdvancedCalculatorCTA';
 import { observabilityService } from '../services/ObservabilityService';
 
 const HomeScreen = () => {
   const theme = useTheme();
-  const navigation = useNavigation<any>();
+  const navigation = useNavigation<
+    CompositeNavigationProp<
+      NativeStackNavigationProp<RootStackParamList>,
+      MaterialTopTabNavigationProp<MainTabParamList>
+    >
+  >();
   const { user } = useAuth();
   const { showToast } = useToast();
   
@@ -310,6 +319,7 @@ const HomeScreen = () => {
               {...stock}
               value={`${stock.price.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`}
               change={`${stock.changePercent > 0 ? '+' : ''}${stock.changePercent.toFixed(2)}%`}
+              onPress={() => navigation.navigate('StockDetail', { stock })}
             />
           ))}
         </View>

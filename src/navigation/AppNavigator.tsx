@@ -46,6 +46,14 @@ export type RootStackParamList = {
   StockDetail: { stock: StockData };
 };
 
+export type MainTabParamList = {
+  Markets: undefined;
+  Rates: undefined;
+  Home: undefined;
+  Discover: undefined;
+  Settings: undefined;
+};
+
 // Root Stack that includes Splash
 const RootStack = createNativeStackNavigator<RootStackParamList>();
 
@@ -76,7 +84,7 @@ function AuthNavigator() {
 }
 
 // Tabs Principales
-const Tab = createMaterialTopTabNavigator();
+const Tab = createMaterialTopTabNavigator<MainTabParamList>();
 
 function MainTabNavigator() {
   return (
