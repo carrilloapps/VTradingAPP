@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { View, StyleSheet } from 'react-native';
-import { Portal, Dialog, Text } from 'react-native-paper';
+import { View, StyleSheet, Modal, StatusBar } from 'react-native';
+import { Surface, Text, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import LinearGradient from 'react-native-linear-gradient';
 import NetInfo from '@react-native-community/netinfo';
 import { useAppTheme } from '../../theme/theme';
 import { useNetwork } from '../../context/NetworkContext';
@@ -10,93 +11,184 @@ import CustomButton from './CustomButton';
 const NoInternetModal = () => {
   const { isConnected } = useNetwork();
   const theme = useAppTheme();
+  const paperTheme = useTheme();
   const [isChecking, setIsChecking] = useState(false);
 
-  // Show modal when explicitly disconnected.
-  // We check for isConnected === false.
-  // If isConnected is null (initial unknown state), we don't show it.
+  // Show when explicitly disconnected
   const visible = isConnected === false;
 
   const handleRetry = async () => {
     setIsChecking(true);
+    // Fetch force a refresh of the network state
     await NetInfo.fetch();
-    // The listener in context will update the state automatically if changed
-    setTimeout(() => setIsChecking(false), 1000); // Visual delay
+    // Small delay for UX feel
+    setTimeout(() => setIsChecking(false), 1200);
   };
 
+  if (!visible) return null;
+
   return (
-    <Portal>
-      <Dialog 
-        visible={visible} 
-        onDismiss={() => {}} 
-        dismissable={false}
-        style={{ 
-          backgroundColor: theme.colors.elevation.level3, 
-          borderRadius: 28, 
-          borderColor: theme.colors.outline,
-          borderWidth: 1,
-          elevation: 0,
-        }}
-      >
-        <Dialog.Content>
-          <View style={styles.contentContainer}>
-            <View style={[styles.iconContainer, { backgroundColor: theme.colors.errorContainer }]}>
-              <MaterialCommunityIcons 
-                name="wifi-off" 
-                size={48} 
-                color={theme.colors.error} 
-              />
+    <Modal
+      transparent
+      visible={visible}
+      animationType="fade"
+      statusBarTranslucent
+    >
+      <View style={styles.overlay}>
+        <StatusBar backgroundColor="rgba(0,0,0,0.5)" barStyle="light-content" />
+        
+        <Surface 
+            style={[
+                styles.modalContainer, 
+                { 
+                    backgroundColor: theme.dark ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                    borderColor: theme.colors.outlineVariant,
+                }
+            ]} 
+            elevation={5}
+        >
+          {/* Decorative Glow */}
+          <View style={[styles.glowEffect, { backgroundColor: theme.colors.error, opacity: theme.dark ? 0.15 : 0.1 }]} />
+
+          <View style={styles.content}>
+            <View style={[styles.iconWrapper, { backgroundColor: theme.colors.error + '15' }]}>
+                <View style={[styles.pulseCircle, { borderColor: theme.colors.error + '30' }]} />
+                <MaterialCommunityIcons 
+                    name="wifi-off" 
+                    size={48} 
+                    color={theme.colors.error} 
+                />
             </View>
-            
+
             <Text variant="headlineSmall" style={[styles.title, { color: theme.colors.onSurface }]}>
-              Sin Conexión
+              Sin conexión
             </Text>
             
             <Text variant="bodyMedium" style={[styles.message, { color: theme.colors.onSurfaceVariant }]}>
-              No se ha detectado conexión a internet. Por favor, verifica tu red para continuar usando VTradingAPP.
+              Parece que tienes problemas con tu red. Verifica tu conexión para continuar operando en VTrading.
             </Text>
 
-            <View style={styles.buttonContainer}>
-               <CustomButton 
-                  variant="primary"
-                  label="Reintentar"
-                  onPress={handleRetry}
-                  loading={isChecking}
-                  fullWidth
-               />
+            <View style={styles.footer}>
+              <CustomButton 
+                variant="primary"
+                label="Reintentar conexión"
+                onPress={handleRetry}
+                loading={isChecking}
+                fullWidth
+                style={styles.button}
+                contentStyle={{ height: 56 }}
+              />
+              
+              <View style={styles.statusIndicator}>
+                 <View style={[styles.statusDot, { backgroundColor: theme.colors.error }]} />
+                 <Text style={[styles.statusText, { color: theme.colors.onSurfaceVariant }]}>
+                    Servidores fuera de alcance
+                 </Text>
+              </View>
             </View>
           </View>
-        </Dialog.Content>
-      </Dialog>
-    </Portal>
+
+          {/* Bottom Gradient Accent */}
+          <LinearGradient 
+            colors={[theme.colors.error + '00', theme.colors.error + '20']} 
+            style={styles.bottomAccent}
+          />
+        </Surface>
+      </View>
+    </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  contentContainer: {
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: 8,
+    padding: 24,
   },
-  iconContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+  modalContainer: {
+    width: '100%',
+    maxWidth: 400,
+    borderRadius: 32,
+    borderWidth: 1,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  glowEffect: {
+    position: 'absolute',
+    top: -50,
+    alignSelf: 'center',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    filter: 'blur(40px)',
+  },
+  content: {
+    padding: 32,
+    alignItems: 'center',
+    zIndex: 1,
+  },
+  iconWrapper: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 24,
+    position: 'relative',
+  },
+  pulseCircle: {
+      position: 'absolute',
+      width: 110,
+      height: 110,
+      borderRadius: 55,
+      borderWidth: 1,
   },
   title: {
+    fontWeight: '900',
+    marginBottom: 12,
     textAlign: 'center',
-    marginBottom: 16,
-    fontWeight: 'bold',
+    letterSpacing: -0.5,
   },
   message: {
     textAlign: 'center',
     marginBottom: 32,
     lineHeight: 22,
+    opacity: 0.8,
   },
-  buttonContainer: {
+  footer: {
     width: '100%',
+    alignItems: 'center',
+  },
+  button: {
+      borderRadius: 16,
+      overflow: 'hidden',
+  },
+  statusIndicator: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 20,
+      gap: 8,
+  },
+  statusDot: {
+      width: 8,
+      height: 8,
+      borderRadius: 4,
+  },
+  statusText: {
+      fontSize: 12,
+      fontWeight: '700',
+      textTransform: 'uppercase',
+      letterSpacing: 1,
+  },
+  bottomAccent: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      height: 80,
+      zIndex: 0,
   }
 });
 

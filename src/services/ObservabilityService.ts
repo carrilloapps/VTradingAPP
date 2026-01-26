@@ -10,6 +10,18 @@ class ObservabilityService {
   captureError(error: any, context?: Record<string, any>) {
     // Log en consola siempre para desarrollo y depuración local
     console.error('[Observability] Error caught:', error);
+
+    // Filtro para ignorar errores de conectividad (ya manejados por el UI)
+    const errorMsg = String(error?.message || error || '').toLowerCase();
+    const isNetworkError = errorMsg.includes('network request failed') ||
+      errorMsg.includes('connection error') ||
+      errorMsg.includes('service_not_available');
+
+    if (isNetworkError) {
+      if (__DEV__) console.log('[Observability] Network error ignored for reporting');
+      return;
+    }
+
     if (context) {
       console.log('[Observability] Context:', context);
     }
@@ -23,7 +35,7 @@ class ObservabilityService {
       // Enviar a Crashlytics
       const crashlytics = getCrashlytics();
       crashlytics.recordError(error instanceof Error ? error : new Error(String(error)));
-      
+
       if (context) {
         Object.entries(context).forEach(([key, value]) => {
           crashlytics.setAttribute(key, String(value));
@@ -64,12 +76,12 @@ class ObservabilityService {
       // Usamos startInactiveSpan que es el reemplazo moderno para startTransaction en trazas manuales
       // sin callbacks.
       if (typeof Sentry.startInactiveSpan === 'function') {
-         return Sentry.startInactiveSpan({ name, op });
+        return Sentry.startInactiveSpan({ name, op });
       }
-      
+
       // Fallback para versiones antiguas (aunque startTransaction no existe en esta version)
       if (typeof (Sentry as any).startTransaction === 'function') {
-         return (Sentry as any).startTransaction({ name, op });
+        return (Sentry as any).startTransaction({ name, op });
       }
 
       return null;
@@ -91,12 +103,12 @@ class ObservabilityService {
     try {
       // Mapear status de string a span status si es necesario, o usar setStatus
       if (status) {
-         // Sentry Span status handling
-         if (typeof transaction.setStatus === 'function') {
-             transaction.setStatus(status);
-         }
+        // Sentry Span status handling
+        if (typeof transaction.setStatus === 'function') {
+          transaction.setStatus(status);
+        }
       }
-      
+
       // En la nueva API, end() reemplaza a finish(), pero finish() suele mantenerse por compatibilidad en objetos Span
       if (typeof transaction.end === 'function') {
         transaction.end();
@@ -119,28 +131,28 @@ class ObservabilityService {
   setTransactionAttribute(transaction: any, key: string, value: string | number | boolean) {
     if (!transaction) return;
     try {
-        // Modern Sentry / OpenTelemetry Span
-        if (typeof transaction.setAttribute === 'function') {
-            transaction.setAttribute(key, value);
-            return;
-        }
+      // Modern Sentry / OpenTelemetry Span
+      if (typeof transaction.setAttribute === 'function') {
+        transaction.setAttribute(key, value);
+        return;
+      }
 
-        // Legacy Sentry Transaction (setTag para strings, setData para otros)
-        if (typeof transaction.setTag === 'function') {
-            // setTag solo suele aceptar strings en versiones antiguas
-            transaction.setTag(key, String(value));
-            return;
-        }
-        
-        // Fallback muy antiguo
-        if (typeof transaction.setData === 'function') {
-            transaction.setData(key, value);
-            return;
-        }
+      // Legacy Sentry Transaction (setTag para strings, setData para otros)
+      if (typeof transaction.setTag === 'function') {
+        // setTag solo suele aceptar strings en versiones antiguas
+        transaction.setTag(key, String(value));
+        return;
+      }
+
+      // Fallback muy antiguo
+      if (typeof transaction.setData === 'function') {
+        transaction.setData(key, value);
+        return;
+      }
     } catch (e) {
-        if (__DEV__) {
-            console.warn('[Observability] Failed to set transaction attribute:', e);
-        }
+      if (__DEV__) {
+        console.warn('[Observability] Failed to set transaction attribute:', e);
+      }
     }
   }
 }

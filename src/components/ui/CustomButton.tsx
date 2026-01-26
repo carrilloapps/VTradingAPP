@@ -20,9 +20,11 @@ interface CustomButtonProps {
   loading?: boolean;
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
+  contentStyle?: StyleProp<ViewStyle>;
   labelStyle?: StyleProp<TextStyle>;
   fullWidth?: boolean;
   compact?: boolean;
+  mode?: 'text' | 'outlined' | 'contained' | 'elevated' | 'contained-tonal';
   testID?: string;
 }
 
@@ -34,9 +36,11 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   loading = false,
   disabled = false,
   style,
+  contentStyle,
   labelStyle,
   fullWidth = false,
   compact = false,
+  mode: propMode,
   testID,
 }) => {
   const theme = useTheme<AppTheme>();
@@ -113,7 +117,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
 
   return (
     <Button
-      mode={getMode()}
+      mode={propMode || getMode()}
       onPress={onPress}
       icon={icon}
       loading={loading}
@@ -129,6 +133,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
         variant === 'link' && styles.linkButton,
         style
       ]}
+      contentStyle={contentStyle}
       labelStyle={[
         styles.label,
         variant === 'link' && styles.linkLabel,
