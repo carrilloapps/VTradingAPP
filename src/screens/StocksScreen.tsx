@@ -19,10 +19,9 @@ import { observabilityService } from '../services/ObservabilityService';
 import { useAuth } from '../context/AuthContext';
 import CustomDialog from '../components/ui/CustomDialog';
 import CustomButton from '../components/ui/CustomButton';
-import ViewShot, { captureRef } from 'react-native-view-shot';
+import { captureRef } from 'react-native-view-shot';
 import Share from 'react-native-share';
 import MarketShareGraphic from '../components/stocks/MarketShareGraphic';
-import { AppConfig } from '../constants/AppConfig';
 
 const StocksScreen = () => {
   const theme = useTheme();
