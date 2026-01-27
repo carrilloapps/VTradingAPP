@@ -65,8 +65,6 @@ const DiscoverScreen = () => {
         const stringsConfig = remoteConfigService.getJson<any>('strings');
         const isSimpleActive = stringsConfig?.screens?.discovery === true;
 
-        console.log('Discover Advanced:', isFeatureActive, 'Simple:', isSimpleActive);
-        
         // Enable if either method allows it
         setIsDiscoveryActive(isFeatureActive || isSimpleActive);
 
@@ -80,7 +78,7 @@ const DiscoverScreen = () => {
       // Simulate backend data fetching for real-time progress
       setTimeout(() => {
         // This value would come from the backend: { "progress": 0.75 }
-        setProgress(0.75);
+        setProgress(0.90);
         setIsLoading(false);
       }, 1000);
     };
@@ -240,13 +238,13 @@ const DiscoverScreen = () => {
             <FeatureItem 
               icon="apps" 
               title="Apps Recomendadas" 
-              description="Selección curada de las mejores herramientas y billeteras."
+              description="Selección seleccionada de las mejores herramientas y billeteras."
               theme={theme}
             />
             <FeatureItem 
               icon="trending-up" 
               title="Oportunidades" 
-              description="Análisis y señales para mejorar tus decisiones de inversión."
+              description="Análisis técnico y señales para mejorar tus decisiones de inversión."
               theme={theme}
             />
           </View>
