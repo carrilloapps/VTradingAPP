@@ -1,6 +1,6 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, Image, Dimensions, FlatList, ImageBackground, TouchableOpacity } from 'react-native';
-import { Text, Surface, Chip, Button, IconButton, useTheme, TouchableRipple } from 'react-native-paper';
+import { Text, Surface, Chip, Button, IconButton, useTheme, TouchableRipple, Divider } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '../../theme/theme';
@@ -97,6 +97,36 @@ const NEWS_LIST = [
   }
 ];
 
+const PROMOTED_ARTICLES = [
+    {
+        id: 'p1',
+        title: 'Las 5 Mejores Wallets Frías de 2024',
+        source: 'Publicidad',
+        image: 'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?q=80&w=1000&auto=format&fit=crop',
+        isPromo: true
+    },
+    {
+        id: 'p2',
+        title: 'Invierte en startups tecnológicas con alto potencial',
+        source: 'Patrocinado',
+        image: 'https://images.unsplash.com/photo-1559526324-4b87b5e36e44?q=80&w=1000&auto=format&fit=crop',
+        isPromo: true
+    }
+];
+
+const RECOMMENDED_APPS = [
+    { id: 'app1', name: 'TradingView', icon: 'chart-box-outline', color: '#000000' },
+    { id: 'app2', name: 'MetaMask', icon: 'wallet-outline', color: '#F6851B' },
+    { id: 'app3', name: 'Binance', icon: 'bitcoin', color: '#F3BA2F' },
+    { id: 'app4', name: 'CoinGecko', icon: 'finance', color: '#8DC351' },
+];
+
+const PARTNERS = [
+    { id: 'part1', name: 'AWS', image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/93/Amazon_Web_Services_Logo.svg/1024px-Amazon_Web_Services_Logo.svg.png' },
+    { id: 'part2', name: 'Firebase', image: 'https://firebase.google.com/static/images/brand-guidelines/logo-vertical.png' },
+    { id: 'part3', name: 'Google Cloud', image: 'https://cloud.google.com/images/social-icon-google-cloud-1200-630.png' },
+];
+
 // --- Components ---
 
 const AdCard = ({ item }: { item: typeof ADS[0] }) => {
@@ -165,43 +195,49 @@ const FeaturedHero = ({ item }: { item: typeof FEATURED_NEWS }) => {
     );
 };
 
-const NewsListItem = ({ item }: { item: typeof NEWS_LIST[0] }) => {
+const NewsListItem = ({ item }: { item: any }) => {
     const theme = useAppTheme();
+    const isPromo = item.isPromo;
     
     return (
         <TouchableRipple onPress={() => {}} style={{ borderRadius: theme.roundness * 3, marginHorizontal: 20, marginBottom: 16 }} borderless>
-            <Surface style={[styles.newsItem, { backgroundColor: theme.colors.elevation.level1 }]} elevation={1}>
+            <Surface style={[styles.newsItem, { backgroundColor: isPromo ? (theme.dark ? '#1e293b' : '#f0f9ff') : theme.colors.elevation.level1 }]} elevation={1}>
                 <View style={styles.newsContent}>
                     <View style={styles.newsHeader}>
-                        <Surface style={[styles.sourceChip, { backgroundColor: theme.colors.secondaryContainer }]} elevation={0}>
-                            <Text style={[styles.sourceText, { color: theme.colors.onSecondaryContainer }]}>{item.source}</Text>
+                        <Surface style={[styles.sourceChip, { backgroundColor: isPromo ? theme.colors.primaryContainer : theme.colors.secondaryContainer }]} elevation={0}>
+                            <Text style={[styles.sourceText, { color: isPromo ? theme.colors.onPrimaryContainer : theme.colors.onSecondaryContainer }]}>{item.source}</Text>
                         </Surface>
-                        <Text style={[styles.newsTime, { color: theme.colors.outline }]}>{item.time}</Text>
+                        {!isPromo && <Text style={[styles.newsTime, { color: theme.colors.outline }]}>{item.time}</Text>}
                     </View>
                     
                     <Text variant="titleMedium" style={[styles.newsTitle, { color: theme.colors.onSurface }]} numberOfLines={3}>
                         {item.title}
                     </Text>
                     
-                    <View style={styles.newsFooter}>
-                        <Text variant="bodySmall" style={{ color: theme.colors.outline }}>{item.readTime} de lectura</Text>
-                        <View style={styles.actionsRow}>
-                            <IconButton 
-                                icon="bookmark-outline" 
-                                size={20} 
-                                iconColor={theme.colors.onSurfaceVariant}
-                                onPress={() => {}}
-                                style={{ margin: 0 }}
-                            />
-                            <IconButton 
-                                icon="share-variant-outline" 
-                                size={20} 
-                                iconColor={theme.colors.onSurfaceVariant}
-                                onPress={() => {}} 
-                                style={{ margin: 0 }}
-                            />
+                    {!isPromo && (
+                        <View style={styles.newsFooter}>
+                            <Text variant="bodySmall" style={{ color: theme.colors.outline }}>{item.readTime} de lectura</Text>
+                            <View style={styles.actionsRow}>
+                                <IconButton 
+                                    icon="bookmark-outline" 
+                                    size={20} 
+                                    iconColor={theme.colors.onSurfaceVariant}
+                                    onPress={() => {}}
+                                    style={{ margin: 0 }}
+                                />
+                                <IconButton 
+                                    icon="share-variant-outline" 
+                                    size={20} 
+                                    iconColor={theme.colors.onSurfaceVariant}
+                                    onPress={() => {}} 
+                                    style={{ margin: 0 }}
+                                />
+                            </View>
                         </View>
-                    </View>
+                    )}
+                    {isPromo && (
+                       <Text variant="labelSmall" style={{ color: theme.colors.outline, marginTop: 8 }}>Anuncio sugerido</Text>
+                    )}
                 </View>
                 
                 <View style={styles.imageWrapper}>
@@ -209,6 +245,34 @@ const NewsListItem = ({ item }: { item: typeof NEWS_LIST[0] }) => {
                 </View>
             </Surface>
         </TouchableRipple>
+    );
+};
+
+const PartnersSection = () => {
+    const theme = useAppTheme();
+    return (
+        <View style={styles.partnersContainer}>
+            <Text variant="titleMedium" style={[styles.sectionTitle, { color: theme.colors.onSurface, marginBottom: 12 }]}>Apps Recomendadas</Text>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.appsScroll}>
+                {RECOMMENDED_APPS.map(app => (
+                    <Surface key={app.id} style={[styles.appCard, { backgroundColor: theme.colors.elevation.level2 }]} elevation={1}>
+                        <IconButton icon={app.icon} iconColor={app.color} size={28} style={{ margin: 0 }} />
+                        <Text variant="labelSmall" style={{ marginTop: 4 }}>{app.name}</Text>
+                    </Surface>
+                ))}
+            </ScrollView>
+
+            <View style={styles.dividerContainer}>
+                <Divider />
+            </View>
+
+            <Text variant="bodySmall" style={[styles.partnersTitle, { color: theme.colors.outline }]}>PARTNERS OFICIALES</Text>
+            <View style={styles.partnersRow}>
+                {PARTNERS.map(p => (
+                    <Text key={p.id} style={{ fontSize: 16, fontWeight: '700', color: theme.colors.onSurfaceVariant, opacity: 0.6 }}>{p.name}</Text>
+                ))}
+            </View>
+        </View>
     );
 };
 
@@ -231,10 +295,60 @@ const DiscoverFeed = () => {
     return () => clearInterval(interval);
   }, [adIndex]);
 
+  // Mix news with promoted articles
+  const feedData = useMemo(() => {
+      const items = [];
+      let promoIdx = 0;
+      for (let i = 0; i < NEWS_LIST.length; i++) {
+          items.push(NEWS_LIST[i]);
+          // Insert promo every 2 items
+          if ((i + 1) % 2 === 0 && promoIdx < PROMOTED_ARTICLES.length) {
+              items.push(PROMOTED_ARTICLES[promoIdx]);
+              promoIdx++;
+          }
+      }
+      return items;
+  }, []);
+
   const renderHeader = () => (
     <View style={styles.headerContent}>
-        {/* Ads Carousel */}
+        {/* 1. Featured Hero */}
+        <FeaturedHero item={FEATURED_NEWS} />
+
+        {/* 2. Categories */}
+        <ScrollView 
+            horizontal 
+            showsHorizontalScrollIndicator={false} 
+            contentContainerStyle={styles.categoriesContainer}
+        >
+            {CATEGORIES.map((cat) => (
+                <Chip 
+                    key={cat.id} 
+                    icon={selectedCategory === cat.id ? 'check' : cat.icon}
+                    selected={selectedCategory === cat.id} 
+                    onPress={() => setSelectedCategory(cat.id)}
+                    style={[
+                        styles.categoryChip, 
+                        selectedCategory === cat.id && { backgroundColor: theme.colors.secondaryContainer },
+                        { borderColor: theme.colors.outlineVariant }
+                    ]}
+                    textStyle={{
+                        color: selectedCategory === cat.id ? theme.colors.onSecondaryContainer : theme.colors.onSurfaceVariant
+                    }}
+                    mode="outlined"
+                    showSelectedOverlay
+                >
+                    {cat.label}
+                </Chip>
+            ))}
+        </ScrollView>
+
+        {/* 3. Ads Carousel */}
         <View style={styles.adsContainer}>
+            <View style={styles.adsHeader}>
+                <Text variant="titleMedium" style={[styles.sectionTitle, { color: theme.colors.onSurface, paddingHorizontal: 0, marginBottom: 0 }]}>Promociones</Text>
+                <Chip icon="star" style={{ height: 24, backgroundColor: 'rgba(245, 158, 11, 0.1)' }} textStyle={{ fontSize: 10, color: '#F59E0B', marginVertical: 0, marginHorizontal: 2 }}>Exclusive</Chip>
+            </View>
             <FlatList 
                 ref={adsRef}
                 data={ADS}
@@ -268,38 +382,6 @@ const DiscoverFeed = () => {
             </View>
         </View>
 
-        {/* Categories */}
-        <ScrollView 
-            horizontal 
-            showsHorizontalScrollIndicator={false} 
-            contentContainerStyle={styles.categoriesContainer}
-        >
-            {CATEGORIES.map((cat) => (
-                <Chip 
-                    key={cat.id} 
-                    icon={selectedCategory === cat.id ? 'check' : cat.icon}
-                    selected={selectedCategory === cat.id} 
-                    onPress={() => setSelectedCategory(cat.id)}
-                    style={[
-                        styles.categoryChip, 
-                        selectedCategory === cat.id && { backgroundColor: theme.colors.secondaryContainer },
-                        { borderColor: theme.colors.outlineVariant }
-                    ]}
-                    textStyle={{
-                        color: selectedCategory === cat.id ? theme.colors.onSecondaryContainer : theme.colors.onSurfaceVariant
-                    }}
-                    mode="outlined"
-                    showSelectedOverlay
-                >
-                    {cat.label}
-                </Chip>
-            ))}
-        </ScrollView>
-
-        {/* Featured Hero */}
-        <Text variant="headlineSmall" style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>Destacado</Text>
-        <FeaturedHero item={FEATURED_NEWS} />
-
         <View style={styles.listHeader}>
             <Text variant="headlineSmall" style={[styles.sectionTitle, { color: theme.colors.onSurface, marginBottom: 0 }]}>Más Noticias</Text>
             <Button mode="text" compact onPress={() => {}}>Ver todo</Button>
@@ -310,10 +392,11 @@ const DiscoverFeed = () => {
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <FlatList 
-        data={NEWS_LIST}
+        data={feedData}
         renderItem={({ item }) => <NewsListItem item={item} />}
         keyExtractor={item => item.id}
         ListHeaderComponent={renderHeader}
+        ListFooterComponent={PartnersSection}
         contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 80 }]}
         showsVerticalScrollIndicator={false}
       />
@@ -326,22 +409,30 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContent: {
-    paddingTop: 0,
+    paddingTop: 16,
   },
   headerContent: {
     marginBottom: 8,
   },
   // ADS
   adsContainer: {
-    marginBottom: 20,
+    marginBottom: 24,
     alignItems: 'center',
+  },
+  adsHeader: {
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    width: '100%', 
+    paddingHorizontal: 20, 
+    alignItems: 'center', 
+    marginBottom: 8
   },
   adCard: {
     width: width - 40,
     height: 180,
     marginHorizontal: 20,
     overflow: 'hidden',
-    marginTop: 16,
+    marginTop: 8,
   },
   adBackground: {
     width: '100%',
@@ -530,6 +621,41 @@ const styles = StyleSheet.create({
     width: 90,
     height: 90,
     backgroundColor: '#eee',
+  },
+  
+  // Partners Section
+  partnersContainer: {
+      paddingBottom: 20,
+      paddingTop: 10,
+  },
+  appsScroll: {
+      paddingHorizontal: 20,
+      gap: 12,
+      paddingBottom: 10,
+  },
+  appCard: {
+      width: 90,
+      height: 90,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 16,
+  },
+  dividerContainer: {
+      paddingHorizontal: 20,
+      marginVertical: 20,
+  },
+  partnersTitle: {
+      textAlign: 'center',
+      fontWeight: 'bold',
+      letterSpacing: 2,
+      marginBottom: 16,
+  },
+  partnersRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-evenly',
+      alignItems: 'center',
+      paddingHorizontal: 20,
+      marginBottom: 20,
   },
 });
 
