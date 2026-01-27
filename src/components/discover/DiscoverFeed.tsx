@@ -132,7 +132,7 @@ const PARTNERS = [
 const AdCard = ({ item }: { item: typeof ADS[0] }) => {
     const theme = useAppTheme();
     return (
-        <Surface style={[styles.adCard, { borderRadius: theme.roundness * 4, backgroundColor: theme.colors.surface }]} elevation={3}>
+        <Surface style={[styles.adCard, { borderRadius: theme.roundness * 4, backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.outlineVariant }]} elevation={0}>
             <ImageBackground source={{ uri: item.image }} style={styles.adBackground} imageStyle={{ borderRadius: theme.roundness * 4 }}>
                 <LinearGradient 
                     colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.85)']} 
@@ -169,7 +169,7 @@ const FeaturedHero = ({ item }: { item: typeof FEATURED_NEWS }) => {
     const theme = useAppTheme();
     return (
         <View style={styles.heroContainer}>
-            <Surface style={[styles.heroCard, { borderRadius: theme.roundness * 5 }]} elevation={4}>
+            <Surface style={[styles.heroCard, { borderRadius: theme.roundness * 5, borderWidth: 1, borderColor: theme.colors.outlineVariant }]} elevation={0}>
                 <ImageBackground source={{ uri: item.image }} style={styles.heroBackground} imageStyle={{ borderRadius: theme.roundness * 5 }}>
                     <LinearGradient 
                         colors={['transparent', 'rgba(0,0,0,0.3)', 'rgba(0,0,0,0.95)']} 
@@ -201,7 +201,14 @@ const NewsListItem = ({ item }: { item: any }) => {
     
     return (
         <TouchableRipple onPress={() => {}} style={{ borderRadius: theme.roundness * 3, marginHorizontal: 20, marginBottom: 16 }} borderless>
-            <Surface style={[styles.newsItem, { backgroundColor: isPromo ? (theme.dark ? '#1e293b' : '#f0f9ff') : theme.colors.elevation.level1 }]} elevation={1}>
+            <Surface style={[
+                styles.newsItem, 
+                { 
+                    backgroundColor: isPromo ? (theme.dark ? '#1e293b' : '#f0f9ff') : theme.colors.elevation.level1,
+                    borderWidth: 1,
+                    borderColor: theme.colors.outlineVariant
+                }
+            ]} elevation={0}>
                 <View style={styles.newsContent}>
                     <View style={styles.newsHeader}>
                         <Surface style={[styles.sourceChip, { backgroundColor: isPromo ? theme.colors.primaryContainer : theme.colors.secondaryContainer }]} elevation={0}>
@@ -255,7 +262,18 @@ const PartnersSection = () => {
             <Text variant="titleMedium" style={[styles.sectionTitle, { color: theme.colors.onSurface, marginBottom: 12 }]}>Apps Recomendadas</Text>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.appsScroll}>
                 {RECOMMENDED_APPS.map(app => (
-                    <Surface key={app.id} style={[styles.appCard, { backgroundColor: theme.colors.elevation.level2 }]} elevation={1}>
+                    <Surface 
+                        key={app.id} 
+                        style={[
+                            styles.appCard, 
+                            { 
+                                backgroundColor: theme.colors.elevation.level2,
+                                borderWidth: 1,
+                                borderColor: theme.colors.outlineVariant
+                            }
+                        ]} 
+                        elevation={0}
+                    >
                         <IconButton icon={app.icon} iconColor={app.color} size={28} style={{ margin: 0 }} />
                         <Text variant="labelSmall" style={{ marginTop: 4 }}>{app.name}</Text>
                     </Surface>
