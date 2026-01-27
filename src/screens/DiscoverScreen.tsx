@@ -11,6 +11,7 @@ import { useToast } from '../context/ToastContext';
 import { observabilityService } from '../services/ObservabilityService';
 
 import { remoteConfigService } from '../services/firebase/RemoteConfigService';
+import DiscoverFeed from '../components/discover/DiscoverFeed';
 
 const FeatureItem = ({ icon, title, description, theme }: any) => {
   const iconBgColor = theme.dark ? 'rgba(16, 185, 129, 0.1)' : '#E6FFFA';
@@ -66,7 +67,8 @@ const DiscoverScreen = () => {
         const isSimpleActive = stringsConfig?.screens?.discovery === true;
 
         // Enable if either method allows it
-        setIsDiscoveryActive(isFeatureActive || isSimpleActive);
+        // setIsDiscoveryActive(isFeatureActive || isSimpleActive);
+        setIsDiscoveryActive(true);
 
       } catch (e) {
         observabilityService.captureError(e);
@@ -160,13 +162,17 @@ const DiscoverScreen = () => {
 
   if (isDiscoveryActive) {
       return (
-        <View style={[styles.container, { backgroundColor: theme.colors.background, justifyContent: 'center', alignItems: 'center' }]}>
+        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
             <StatusBar 
                 backgroundColor="transparent"
                 translucent 
                 barStyle={theme.dark ? 'light-content' : 'dark-content'} 
             />
-            <Text variant="headlineMedium" style={{ fontWeight: 'bold' }}>Activa</Text>
+            <UnifiedHeader 
+                variant="section" 
+                title="Descubre" 
+            />
+            <DiscoverFeed />
         </View>
       );
   }
