@@ -115,7 +115,7 @@ const PROMOTED_ARTICLES = [
 ];
 
 const RECOMMENDED_APPS = [
-    { id: 'app1', name: 'TradingView', icon: 'chart-box-outline', color: '#000000' },
+    { id: 'app1', name: 'TradingView', icon: 'chart-box-outline', color: 'adaptive' },
     { id: 'app2', name: 'MetaMask', icon: 'wallet-outline', color: '#F6851B' },
     { id: 'app3', name: 'Binance', icon: 'bitcoin', color: '#F3BA2F' },
     { id: 'app4', name: 'CoinGecko', icon: 'finance', color: '#8DC351' },
@@ -214,7 +214,7 @@ const NewsListItem = ({ item }: { item: any }) => {
                         <Surface style={[styles.sourceChip, { backgroundColor: isPromo ? theme.colors.primaryContainer : theme.colors.secondaryContainer }]} elevation={0}>
                             <Text style={[styles.sourceText, { color: isPromo ? theme.colors.onPrimaryContainer : theme.colors.onSecondaryContainer }]}>{item.source}</Text>
                         </Surface>
-                        {!isPromo && <Text style={[styles.newsTime, { color: theme.colors.outline }]}>{item.time}</Text>}
+                        {!isPromo && <Text style={[styles.newsTime, { color: theme.colors.onSurfaceVariant }]}>{item.time}</Text>}
                     </View>
                     
                     <Text variant="titleMedium" style={[styles.newsTitle, { color: theme.colors.onSurface }]} numberOfLines={3}>
@@ -223,7 +223,7 @@ const NewsListItem = ({ item }: { item: any }) => {
                     
                     {!isPromo && (
                         <View style={styles.newsFooter}>
-                            <Text variant="bodySmall" style={{ color: theme.colors.outline }}>{item.readTime} de lectura</Text>
+                            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '500' }}>{item.readTime} de lectura</Text>
                             <View style={styles.actionsRow}>
                                 <IconButton 
                                     icon="bookmark-outline" 
@@ -243,7 +243,7 @@ const NewsListItem = ({ item }: { item: any }) => {
                         </View>
                     )}
                     {isPromo && (
-                       <Text variant="labelSmall" style={{ color: theme.colors.outline, marginTop: 8 }}>Anuncio sugerido</Text>
+                       <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, marginTop: 8 }}>Anuncio sugerido</Text>
                     )}
                 </View>
                 
@@ -274,20 +274,25 @@ const PartnersSection = () => {
                         ]} 
                         elevation={0}
                     >
-                        <IconButton icon={app.icon} iconColor={app.color} size={28} style={{ margin: 0 }} />
-                        <Text variant="labelSmall" style={{ marginTop: 4 }}>{app.name}</Text>
+                        <IconButton 
+                            icon={app.icon} 
+                            iconColor={app.color === 'adaptive' ? theme.colors.onSurface : app.color} 
+                            size={28} 
+                            style={{ margin: 0 }} 
+                        />
+                        <Text variant="labelSmall" style={{ marginTop: 4, color: theme.colors.onSurface }}>{app.name}</Text>
                     </Surface>
                 ))}
             </ScrollView>
 
             <View style={styles.dividerContainer}>
-                <Divider />
+                <Divider style={{ backgroundColor: theme.colors.outlineVariant }} />
             </View>
 
-            <Text variant="bodySmall" style={[styles.partnersTitle, { color: theme.colors.outline }]}>PARTNERS OFICIALES</Text>
+            <Text variant="labelMedium" style={[styles.partnersTitle, { color: theme.colors.onSurfaceVariant, opacity: 0.8 }]}>PARTNERS OFICIALES</Text>
             <View style={styles.partnersRow}>
                 {PARTNERS.map(p => (
-                    <Text key={p.id} style={{ fontSize: 16, fontWeight: '700', color: theme.colors.onSurfaceVariant, opacity: 0.6 }}>{p.name}</Text>
+                    <Text key={p.id} style={{ fontSize: 16, fontWeight: '700', color: theme.colors.onSurfaceVariant, opacity: 0.9 }}>{p.name}</Text>
                 ))}
             </View>
         </View>
