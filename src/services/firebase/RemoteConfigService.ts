@@ -1,5 +1,6 @@
 import { getRemoteConfig, setDefaults, fetchAndActivate, getValue } from '@react-native-firebase/remote-config';
 import { observabilityService } from '../ObservabilityService';
+import { featureFlagService, RemoteConfigSchema } from '../FeatureFlagService';
 
 class RemoteConfigService {
   private remoteConfig = getRemoteConfig();
@@ -57,10 +58,37 @@ class RemoteConfigService {
   }
 
   /**
+   * Get a object value parsed from JSON string
+   */
+  getJson<T>(key: string): T | null {
+    try {
+      const value = getValue(this.remoteConfig, key).asString();
+      if (!value) return null;
+      return JSON.parse(value) as T;
+    } catch (e) {
+      observabilityService.captureError(e);
+      return null;
+    }
+  }
+
+  /**
    * Get a boolean value
    */
   getBoolean(key: string): boolean {
     return getValue(this.remoteConfig, key).asBoolean();
+  }
+
+  /**
+   * Evaluate a feature flag using advanced segmentation rules
+   */
+  async getFeature(featureName: string): Promise<boolean> {
+    try {
+      const configJson = this.getJson<RemoteConfigSchema>('settings');
+      return await featureFlagService.evaluate(featureName, configJson);
+    } catch (e) {
+      observabilityService.captureError(e);
+      return false;
+    }
   }
 }
 

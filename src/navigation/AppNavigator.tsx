@@ -1,5 +1,5 @@
 import React from 'react';
-import { Text, Platform, View } from 'react-native';
+import { Text, Platform, View, StatusBar } from 'react-native';
 import { NavigationContainer, DefaultTheme as NavDefaultTheme, DarkTheme as NavDarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
@@ -34,6 +34,9 @@ import AuthLoading from '../components/auth/AuthLoading';
 import StockDetailScreen from '../screens/StockDetailScreen';
 import { StockData } from '../services/StocksService';
 import { CurrencyRate } from '../services/CurrencyService';
+import DeviceInfo from 'react-native-device-info';
+import { remoteConfigService } from '../services/firebase/RemoteConfigService';
+import ForceUpdateModal from '../components/ui/ForceUpdateModal';
 
 export type RootStackParamList = {
   Onboarding: undefined;
@@ -186,15 +189,36 @@ const AppNavigator = () => {
   const { user, isLoading: authLoading } = useAuth();
   const [isReady, setIsReady] = React.useState(false);
   const [showOnboarding, setShowOnboarding] = React.useState(false);
+  const [showForceUpdate, setShowForceUpdate] = React.useState(false);
   const routeNameRef = React.useRef<string | undefined>(undefined);
   
   React.useEffect(() => {
-    const checkOnboarding = async () => {
+    const initApp = async () => {
+      // 1. Check Onboarding
       const hasSeen = await storageService.getHasSeenOnboarding();
       setShowOnboarding(!hasSeen);
+
+      // 2. Check Force Update
+      try {
+        await remoteConfigService.fetchAndActivate();
+        const config = remoteConfigService.getJson<any>('strings'); // Using 'strings' key as requested
+        
+        if (config && config.forceUpdate) {
+            const currentBuild = parseInt(DeviceInfo.getBuildNumber(), 10);
+            const requiredBuild = config.forceUpdate.build;
+            
+            if (currentBuild < requiredBuild) {
+                setShowForceUpdate(true);
+            }
+        }
+      } catch (e) {
+        // Fail silently on config check, don't block app unless confirmed
+        console.warn('Failed to check force update', e);
+      }
+
       setIsReady(true);
     };
-    checkOnboarding();
+    initApp();
   }, []);
 
   const navigationTheme = isDark ? NavDarkTheme : NavDefaultTheme;
@@ -212,6 +236,15 @@ const AppNavigator = () => {
 
   if (authLoading || !isReady) {
     return <AuthLoading />;
+  }
+
+  if (showForceUpdate) {
+      return (
+        <React.Fragment>
+            <StatusBar backgroundColor="transparent" translucent barStyle="light-content" />
+            <ForceUpdateModal visible={true} />
+        </React.Fragment>
+      );
   }
 
   return (

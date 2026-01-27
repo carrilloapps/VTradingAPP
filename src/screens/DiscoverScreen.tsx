@@ -10,6 +10,8 @@ import { fcmService } from '../services/firebase/FCMService';
 import { useToast } from '../context/ToastContext';
 import { observabilityService } from '../services/ObservabilityService';
 
+import { remoteConfigService } from '../services/firebase/RemoteConfigService';
+
 const FeatureItem = ({ icon, title, description, theme }: any) => {
   const iconBgColor = theme.dark ? 'rgba(16, 185, 129, 0.1)' : '#E6FFFA';
   
@@ -43,6 +45,7 @@ const DiscoverScreen = () => {
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
   const [progress, setProgress] = useState(0);
+  const [isDiscoveryActive, setIsDiscoveryActive] = useState(false);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -51,6 +54,22 @@ const DiscoverScreen = () => {
       try {
         const settings = await storageService.getSettings();
         setIsSubscribed(settings.newsSubscription ?? false);
+        
+        // Fetch Remote Config & Evaluate Feature Flag
+        await remoteConfigService.fetchAndActivate();
+        
+        // 1. Check Advanced Feature Flag (settings key)
+        const isFeatureActive = await remoteConfigService.getFeature('discover');
+        
+        // 2. Check Simple Config (strings key)
+        const stringsConfig = remoteConfigService.getJson<any>('strings');
+        const isSimpleActive = stringsConfig?.screens?.discovery === true;
+
+        console.log('Discover Advanced:', isFeatureActive, 'Simple:', isSimpleActive);
+        
+        // Enable if either method allows it
+        setIsDiscoveryActive(isFeatureActive || isSimpleActive);
+
       } catch (e) {
         observabilityService.captureError(e);
         // Failed to load subscription state
@@ -139,6 +158,19 @@ const DiscoverScreen = () => {
 
   if (isLoading) {
     return <DiscoverSkeleton />;
+  }
+
+  if (isDiscoveryActive) {
+      return (
+        <View style={[styles.container, { backgroundColor: theme.colors.background, justifyContent: 'center', alignItems: 'center' }]}>
+            <StatusBar 
+                backgroundColor="transparent"
+                translucent 
+                barStyle={theme.dark ? 'light-content' : 'dark-content'} 
+            />
+            <Text variant="headlineMedium" style={{ fontWeight: 'bold' }}>Activa</Text>
+        </View>
+      );
   }
 
   return (
@@ -233,7 +265,7 @@ const DiscoverScreen = () => {
               {isSubscribed ? "Desactivar notificaciones" : "Suscribirme a noticias"}
             </Button>
             {!isSubscribed && (
-               <Text variant="bodySmall" style={[styles.notificationText, { color: theme.colors.outline }]}>
+               <Text variant="bodySmall" style={[styles.notificationText, { color: theme.colors.onSurfaceVariant }]}>
                  Recibirás una notificación cuando publiquemos novedades.
                </Text>
             )}
