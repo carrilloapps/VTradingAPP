@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { View, StyleSheet, Image, Animated, Share, StatusBar } from 'react-native';
+import { View, StyleSheet, Image, Animated, Share, StatusBar, useWindowDimensions } from 'react-native';
 import { Text, Surface, IconButton, Chip, Divider, Avatar } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -78,12 +78,19 @@ const ArticleDetailScreen = () => {
   const navigation = useNavigation();
   const route = useRoute();
   const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+
+  // Safe width calculation for centered title
+  // We have more buttons on the right (2) than left (1).
+  // To keep text truly centered, we must respect the wider side (Right ~110px).
+  // Max width = ScreenWidth - (110px * 2) = ScreenWidth - 220px.
+  const maxTitleWidth = width - 220;
   
   // Use passed params merged with mock fallback to ensure all fields exist (like author, content)
   const incomingArticle = (route.params as any)?.article;
   const article = {
-      ...MOCK_ARTICLE, // Base structure with all fields
-      ...incomingArticle, // Override with passed data (id, title, image, etc.)
+      ...MOCK_ARTICLE, 
+      ...incomingArticle, 
       author: {
           ...MOCK_ARTICLE.author,
           ...(incomingArticle?.author || {})
@@ -119,51 +126,75 @@ const ArticleDetailScreen = () => {
       extrapolate: 'clamp'
   });
 
+  // Buttons opacity: Inverse of header (optional, but nice to keep them distinct)
+  // Actually standard pattern is buttons stay, bg fades in. 
+  // We will keep buttons always visible but add a background to them for contrast.
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
         
-        {/* Animated Header Bar */}
+        {/* Sticky Header Background (Fades In) */}
         <Animated.View style={[styles.headerBar, { 
-            paddingTop: insets.top, 
-            height: 60 + insets.top,
+            height: 56 + insets.top,
             backgroundColor: theme.colors.background,
             opacity: headerOpacity,
             borderBottomWidth: 1,
             borderBottomColor: theme.colors.outlineVariant
-        }]}>
-            <View style={styles.headerBarContent}>
-                <Text variant="titleMedium" numberOfLines={1} style={{ textAlign: 'center', fontWeight: 'bold' }}>{article.title}</Text>
-            </View>
-        </Animated.View>
+        }]} />
 
-        {/* Floating Back Button (Always Visible) */}
-        <View style={[styles.floatingHeader, { top: insets.top + 8 }]}>
-            <IconButton 
-                icon="arrow-left" 
-                containerColor={theme.colors.background}
-                iconColor={theme.colors.onSurface}
-                size={20}
-                onPress={() => navigation.goBack()}
-                style={styles.backButtonShadow}
-            />
-            <View style={{ flex: 1 }} />
-            <IconButton 
-                icon="bookmark-outline" 
-                containerColor={theme.colors.background}
-                iconColor={theme.colors.onSurface}
-                size={20}
-                onPress={() => {}}
-                style={styles.backButtonShadow}
-            />
-            <IconButton 
-                icon="share-variant" 
-                containerColor={theme.colors.background}
-                iconColor={theme.colors.onSurface}
-                size={20}
-                onPress={handleShare}
-                style={styles.backButtonShadow}
-            />
+        {/* Header Content (Title fades in, Buttons always visible) */}
+        <View style={[styles.headerOverlay, { top: insets.top, height: 56 }]}>
+            
+            {/* Left Button */}
+            <View style={styles.leftButtonContainer}>
+                <Surface style={[styles.roundButton, { backgroundColor: theme.colors.background }]} elevation={2}>
+                    <IconButton 
+                        icon="arrow-left" 
+                        iconColor={theme.colors.onSurface}
+                        size={24}
+                        onPress={() => navigation.goBack()}
+                        style={{ margin: 0 }}
+                    />
+                </Surface>
+            </View>
+
+            {/* Centered Title (Fades In) */}
+            <Animated.View style={[styles.titleContainer, { opacity: headerOpacity, maxWidth: maxTitleWidth }]}>
+                <Text 
+                    variant="titleMedium" 
+                    numberOfLines={1} 
+                    style={{ 
+                        textAlign: 'center', 
+                        fontWeight: 'bold',
+                        color: theme.colors.onBackground
+                    }}
+                >
+                    {article.title}
+                </Text>
+            </Animated.View>
+
+            {/* Right Buttons */}
+            <View style={styles.rightButtonsContainer}>
+                <Surface style={[styles.roundButton, { backgroundColor: theme.colors.background, marginRight: 8 }]} elevation={2}>
+                    <IconButton 
+                        icon="bookmark-outline" 
+                        iconColor={theme.colors.onSurface}
+                        size={24}
+                        onPress={() => {}}
+                        style={{ margin: 0 }}
+                    />
+                </Surface>
+                <Surface style={[styles.roundButton, { backgroundColor: theme.colors.background }]} elevation={2}>
+                    <IconButton 
+                        icon="share-variant" 
+                        iconColor={theme.colors.onSurface}
+                        size={24}
+                        onPress={handleShare}
+                        style={{ margin: 0 }}
+                    />
+                </Surface>
+            </View>
         </View>
 
         <Animated.ScrollView 
@@ -178,7 +209,7 @@ const ArticleDetailScreen = () => {
             <View style={styles.heroContainer}>
                 <Image source={{ uri: article.featuredImage }} style={styles.heroImage} />
                 <LinearGradient 
-                    colors={['transparent', 'rgba(0,0,0,0.8)']} 
+                    colors={['transparent', 'rgba(0,0,0,0.6)', 'rgba(0,0,0,0.9)']} 
                     style={styles.heroGradient}
                 >
                     <Chip style={styles.categoryChip} textStyle={{ color: 'white', fontWeight: 'bold' }}>{article.category}</Chip>
@@ -274,29 +305,43 @@ const styles = StyleSheet.create({
       left: 0,
       right: 0,
       zIndex: 10,
-      paddingHorizontal: 50, // Space for back button
-      justifyContent: 'center',
   },
-  headerBarContent: {
-      flex: 1, 
-      alignItems: 'center',
-      justifyContent: 'center',
-      paddingHorizontal: 40, // Ensure text doesn't touch buttons
-  },
-  floatingHeader: {
+  headerOverlay: {
       position: 'absolute',
-      left: 16,
-      right: 16,
-      flexDirection: 'row',
+      left: 0,
+      right: 0,
       zIndex: 20,
+      flexDirection: 'row',
       alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: 16,
+      pointerEvents: 'box-none',
   },
-  backButtonShadow: {
-      elevation: 4,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.2,
-      shadowRadius: 4,
+  roundButton: {
+      borderRadius: 20,
+      width: 40,
+      height: 40,
+      alignItems: 'center',
+      justifyContent: 'center',
+      overflow: 'hidden',
+  },
+  leftButtonContainer: {
+      zIndex: 25,
+  },
+  rightButtonsContainer: {
+      flexDirection: 'row',
+      zIndex: 25,
+      gap: 8,
+  },
+  titleContainer: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 15,
+      height: '100%',
+      pointerEvents: 'none',
   },
   heroContainer: {
       height: 350,
@@ -312,10 +357,10 @@ const styles = StyleSheet.create({
       bottom: 0,
       left: 0,
       right: 0,
-      height: 180, // Increased height for better gradient
+      height: 180,
       justifyContent: 'flex-end',
       padding: 24,
-      paddingBottom: 40, // Increased padding to clear the -20 overlap
+      paddingBottom: 40,
   },
   categoryChip: {
       alignSelf: 'flex-start',
@@ -324,10 +369,10 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
       padding: 24,
-      marginTop: -20, // Overlap effect
+      marginTop: -20,
       borderTopLeftRadius: 24,
       borderTopRightRadius: 24,
-      backgroundColor: 'transparent', // Let parent bg show, but we might want solid if overlapping
+      backgroundColor: 'transparent',
   },
   title: {
       fontWeight: 'bold',
@@ -359,7 +404,7 @@ const styles = StyleSheet.create({
   },
   quoteIcon: {
       marginBottom: 8,
-      opacity: 0.5,
+      opacity: 0.8, // Increased opacity for visibility
   },
   quoteText: {
       fontStyle: 'italic',
@@ -418,7 +463,6 @@ const styles = StyleSheet.create({
       padding: 16,
       borderRadius: 12,
       borderWidth: 1,
-      borderColor: 'rgba(0,0,0,0.05)',
   },
   commentsSection: {
       marginTop: 8,

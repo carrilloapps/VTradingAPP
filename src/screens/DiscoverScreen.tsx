@@ -67,8 +67,8 @@ const DiscoverScreen = () => {
         const isSimpleActive = stringsConfig?.screens?.discovery === true;
 
         // Enable if either method allows it
-        // setIsDiscoveryActive(isFeatureActive || isSimpleActive);
-        setIsDiscoveryActive(true);
+        setIsDiscoveryActive(isFeatureActive || isSimpleActive);
+        //setIsDiscoveryActive(true);
 
       } catch (e) {
         observabilityService.captureError(e);
