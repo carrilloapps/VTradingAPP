@@ -37,6 +37,7 @@ import { CurrencyRate } from '../services/CurrencyService';
 import DeviceInfo from 'react-native-device-info';
 import { remoteConfigService } from '../services/firebase/RemoteConfigService';
 import ForceUpdateModal from '../components/ui/ForceUpdateModal';
+import ArticleDetailScreen from '../screens/ArticleDetailScreen';
 
 export type RootStackParamList = {
   Onboarding: undefined;
@@ -50,6 +51,7 @@ export type RootStackParamList = {
   AddAlert: { editAlert?: UserAlert };
   StockDetail: { stock: StockData };
   CurrencyDetail: { rate: CurrencyRate };
+  ArticleDetail: { article?: any }; // Added ArticleDetail type
 };
 
 export type MainTabParamList = {
@@ -336,6 +338,14 @@ const AppNavigator = () => {
                 options={{ 
                   headerShown: false, 
                   animation: 'default' 
+                }} 
+              />
+              <RootStack.Screen 
+                name="ArticleDetail" 
+                component={ArticleDetailScreen} 
+                options={{ 
+                  headerShown: false, 
+                  animation: 'slide_from_right' 
                 }} 
               />
             </>

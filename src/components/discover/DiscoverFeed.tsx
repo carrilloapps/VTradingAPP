@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, Image, Dimensions, FlatList, ImageBackground, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { Text, Surface, Chip, Button, IconButton, useTheme, TouchableRipple, Divider } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -195,12 +196,24 @@ const FeaturedHero = ({ item }: { item: typeof FEATURED_NEWS }) => {
     );
 };
 
+// ...
+
 const NewsListItem = ({ item }: { item: any }) => {
     const theme = useAppTheme();
+    const navigation = useNavigation<any>();
     const isPromo = item.isPromo;
     
     return (
-        <TouchableRipple onPress={() => {}} style={{ borderRadius: theme.roundness * 3, marginHorizontal: 20, marginBottom: 16 }} borderless>
+        <TouchableRipple 
+            onPress={() => {
+                // Determine if it's an article to open or just a promo link
+                if (!isPromo) {
+                    navigation.navigate('ArticleDetail', { article: item });
+                }
+            }} 
+            style={{ borderRadius: theme.roundness * 3, marginHorizontal: 20, marginBottom: 16 }} 
+            borderless
+        >
             <Surface style={[
                 styles.newsItem, 
                 { 
