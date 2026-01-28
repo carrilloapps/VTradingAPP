@@ -81,15 +81,15 @@ export default function VTradingWidget({
             truncate="END"
           />
         </FlexWidget>
-        <TextWidget 
-          text={'\uF0450'} 
-          style={{ 
-            fontSize: 24, 
-            color: refreshColor,
-            fontFamily: 'mdi_font'
-          }} 
-          clickAction="REFRESH_WIDGET" 
-        />
+          <TextWidget 
+            text={String.fromCodePoint(0xF0450)} 
+            style={{ 
+              fontSize: 24, 
+              color: refreshColor,
+              fontFamily: 'widget_icons' 
+            }}
+            clickAction="REFRESH_WIDGET"
+          />
       </FlexWidget>
 
       {limitedItems.length === 0 ? (
@@ -127,11 +127,15 @@ export default function VTradingWidget({
               </FlexWidget>
               <FlexWidget style={{ backgroundColor: item.trendBg, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8, flexDirection: 'row', alignItems: 'center', flexGap: 2 }}>
                 <TextWidget
-                  text={item.trend === 'up' ? '\uF0535' : item.trend === 'down' ? '\uF0533' : '\uF0534'}
+                  text={
+                    item.trend === 'up' ? String.fromCodePoint(0xF0535) : 
+                    item.trend === 'down' ? String.fromCodePoint(0xF0533) : 
+                    String.fromCodePoint(0xF0534)
+                  }
                   style={{ 
                     fontSize: 14, 
                     color: item.trendColor,
-                    fontFamily: 'mdi_font'
+                    fontFamily: 'widget_icons'
                   }}
                 />
                 {showGraph && (

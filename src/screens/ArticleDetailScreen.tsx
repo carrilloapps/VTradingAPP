@@ -57,7 +57,12 @@ const BlockQuote = ({ text, author, theme }: any) => (
 
 const BlockImage = ({ url, caption, theme }: any) => (
     <View style={styles.imageBlock}>
-        <Image source={{ uri: url }} style={styles.contentImage} />
+        <Image 
+          source={{ uri: url }} 
+          style={styles.contentImage} 
+          accessibilityRole="image"
+          accessibilityLabel={caption || 'Imagen del artículo'}
+        />
         {caption && <Text style={[styles.imageCaption, { color: theme.colors.outline }]}>{caption}</Text>}
     </View>
 );
@@ -155,6 +160,9 @@ const ArticleDetailScreen = () => {
                         size={24}
                         onPress={() => navigation.goBack()}
                         style={{ margin: 0 }}
+                        accessibilityLabel="Regresar"
+                        accessibilityHint="Volver a la pantalla anterior"
+                        accessibilityRole="button"
                     />
                 </Surface>
             </View>
@@ -183,6 +191,9 @@ const ArticleDetailScreen = () => {
                         size={24}
                         onPress={() => {}}
                         style={{ margin: 0 }}
+                        accessibilityLabel="Guardar artículo"
+                        accessibilityHint="Guarda este artículo en tus marcadores"
+                        accessibilityRole="button"
                     />
                 </Surface>
                 <Surface style={[styles.roundButton, { backgroundColor: theme.colors.background }]} elevation={2}>
@@ -192,6 +203,9 @@ const ArticleDetailScreen = () => {
                         size={24}
                         onPress={handleShare}
                         style={{ margin: 0 }}
+                        accessibilityLabel="Compartir artículo"
+                        accessibilityHint="Comparte este artículo con otras aplicaciones"
+                        accessibilityRole="button"
                     />
                 </Surface>
             </View>
@@ -260,8 +274,19 @@ const ArticleDetailScreen = () => {
                     
                     {/* Comment Input */}
                     <View style={styles.commentInputRow}>
-                        <Avatar.Text size={32} label="YO" style={{ backgroundColor: theme.colors.secondaryContainer }} />
-                        <Surface style={[styles.commentInput, { backgroundColor: theme.colors.surfaceVariant }]} elevation={0}>
+                        <Avatar.Text 
+                            size={32} 
+                            label="YO" 
+                            style={{ backgroundColor: theme.colors.secondaryContainer }} 
+                            accessibilityLabel="Tu avatar"
+                        />
+                        <Surface 
+                            style={[styles.commentInput, { backgroundColor: theme.colors.surfaceVariant }]} 
+                            elevation={0}
+                            accessibilityRole="button"
+                            accessibilityLabel="Escribir un comentario"
+                            accessibilityHint="Abre el teclado para escribir un comentario"
+                        >
                             <Text style={{ color: theme.colors.outline }}>Escribe un comentario...</Text>
                         </Surface>
                     </View>
