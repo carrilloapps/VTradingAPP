@@ -32,13 +32,58 @@ class RemoteConfigService {
 
   /**
    * Fetch and activate latest values
+   * Implements retry logic with exponential backoff for network errors
    */
-  async fetchAndActivate(): Promise<boolean> {
+  async fetchAndActivate(retryCount = 0): Promise<boolean> {
+    const MAX_RETRIES = 3;
+    const TIMEOUT_MS = 10000; // 10 seconds
+
     try {
-      const fetched = await fetchAndActivate(this.remoteConfig);
+      // Create a timeout promise
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Remote Config fetch timeout')), TIMEOUT_MS)
+      );
+
+      // Race between fetch and timeout
+      const fetchPromise = fetchAndActivate(this.remoteConfig);
+      const fetched = await Promise.race([fetchPromise, timeoutPromise]) as boolean;
+
       return fetched;
-    } catch (e) {
-      observabilityService.captureError(e);
+    } catch (e: any) {
+      const error = e instanceof Error ? e : new Error(String(e));
+      const errorMessage = error.message.toLowerCase();
+
+      // Check if it's a network/timeout error
+      const isNetworkError = errorMessage.includes('network') ||
+        errorMessage.includes('timeout') ||
+        errorMessage.includes('fetch') ||
+        errorMessage.includes('connection');
+
+      // Retry on network errors
+      if (isNetworkError && retryCount < MAX_RETRIES) {
+        const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 1s, 2s, 4s
+        console.warn(
+          `[RemoteConfig] Fetch failed, retrying in ${delay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`,
+          errorMessage
+        );
+
+        await new Promise<void>(resolve => setTimeout(() => resolve(), delay));
+        return this.fetchAndActivate(retryCount + 1);
+      }
+
+      // Only report to Sentry after all retries failed
+      if (retryCount >= MAX_RETRIES || !isNetworkError) {
+        observabilityService.captureError(error, {
+          context: 'RemoteConfig_fetchAndActivate',
+          retryCount,
+          errorType: isNetworkError ? 'network' : 'server',
+        });
+      }
+
+      console.error('[RemoteConfig] Fetch failed after retries:', errorMessage);
+
+      // Return false instead of throwing to prevent app crash
+      // App will use default values
       return false;
     }
   }

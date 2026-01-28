@@ -11,7 +11,7 @@ class AppCheckService {
   async initialize(): Promise<void> {
     try {
       const app = getApp();
-      
+
       // Manually construct the provider object to match ReactNativeFirebaseAppCheckProvider structure
       // since the class is not exported as a value in the modular API.
       const provider = {
@@ -36,9 +36,9 @@ class AppCheckService {
     } catch (e: any) {
       const message = e.message || String(e);
       if (__DEV__ && (message.includes('Debug') || message.includes('token'))) {
-         // Ignore initialization errors in DEV with invalid tokens
+        // Ignore initialization errors in DEV with invalid tokens
       } else {
-         observabilityService.captureError(e);
+        observabilityService.captureError(e);
       }
       // Ignore error
     }
@@ -56,18 +56,18 @@ class AppCheckService {
       if (!this.appCheckInstance) {
         // Suppress warning if repeated too frequently
         if (Date.now() - this.lastErrorTime > 60000) {
-            // Instance not initialized
-            this.lastErrorTime = Date.now();
+          // Instance not initialized
+          this.lastErrorTime = Date.now();
         }
         return undefined;
       }
-      
+
       // Prevent rapid retries if we are hitting "Too many attempts"
       // Exponential backoff: 1min, 2min, 4min, etc. capped at 1 hour
       const backoffTime = Math.min(60000 * Math.pow(2, this.errorCount - 3), 3600000);
-      
+
       if (this.errorCount > 3 && Date.now() - this.lastErrorTime < backoffTime) {
-          return undefined; 
+        return undefined;
       }
 
       const result = await getToken(this.appCheckInstance);
@@ -76,35 +76,65 @@ class AppCheckService {
       return result.token;
     } catch (e: any) {
       const message = e.message || String(e);
-      // Suppress specific App Check errors that are expected in development or when quota is exceeded
-      const isExpectedError = 
-          message.includes('App Check API has not been used') || 
-          message.includes('403') || 
-          message.includes('Too many attempts') ||
-          (message.includes('token-error') && __DEV__);
 
-      if (!isExpectedError) {
-          observabilityService.captureError(e);
+      // Check for "App not registered" error - this is a configuration issue
+      if (message.includes('App not registered') ||
+        (message.includes('code: 400') && message.includes('App not registered'))) {
+        console.error('[AppCheck] App not registered in Firebase Console');
+        console.error('[AppCheck] Please verify the Android/iOS app is registered in Firebase');
+        console.error('[AppCheck] Error details:', message);
+
+        // Only report this configuration error once to avoid spam
+        if (this.errorCount === 0) {
+          observabilityService.captureError(
+            new Error(`AppCheck configuration error: App not registered in Firebase Console`),
+            {
+              context: 'AppCheck_getToken',
+              errorDetails: message,
+              recommendation: 'Verify app registration in Firebase Console'
+            }
+          );
+        }
+
+        this.lastErrorTime = Date.now();
+        this.errorCount++;
+        this.lastErrorMessage = message;
+
+        // Return undefined to allow app to continue without App Check
+        return undefined;
       }
-      
+
+      // Check for other expected errors
+      const isExpectedError =
+        message.includes('App Check API has not been used') ||
+        message.includes('403') ||
+        message.includes('Too many attempts') ||
+        (message.includes('token-error') && __DEV__);
+
+      // Report unexpected errors to Sentry
+      if (!isExpectedError) {
+        observabilityService.captureError(e, {
+          context: 'AppCheck_getToken',
+          errorCount: this.errorCount
+        });
+      }
+
       this.lastErrorTime = Date.now();
       this.errorCount++;
 
-      // Handle "API not enabled" or configuration errors gracefully
-      
       // Silence expected development errors or quota exceeded
       if (isExpectedError) {
-         if (__DEV__ && this.errorCount === 1) { 
-             // Optional: console.log('App Check warning suppressed:', message);
-         }
-         return undefined;
+        if (__DEV__ && this.errorCount === 1) {
+          console.log('[AppCheck] Expected error suppressed:', message);
+        }
+        return undefined;
       }
 
       // Avoid spamming the same error
       if (message !== this.lastErrorMessage) {
-          this.lastErrorMessage = message;
+        this.lastErrorMessage = message;
       }
-      
+
       return undefined;
     }
   }

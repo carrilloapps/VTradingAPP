@@ -111,7 +111,7 @@ export default function VTradingWidget({
                   truncate="END"
                 />
                 <TextWidget
-                  text={`${item.value} ${item.currency}`}
+                  text={item.value + ' ' + item.currency}
                   style={{ fontSize: 14, fontWeight: '700', color: textColor, adjustsFontSizeToFit: true }}
                   maxLines={1}
                   truncate="END"
@@ -119,7 +119,10 @@ export default function VTradingWidget({
               </FlexWidget>
               <FlexWidget style={{ backgroundColor: item.trendBg, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8, flexDirection: 'row', alignItems: 'center', flexGap: 2 }}>
                 <TextWidget
-                  text={`${item.trend === 'up' ? '▲' : item.trend === 'down' ? '▼' : '−'}${showGraph ? ` ${item.trendValue}` : ''}`}
+                  text={
+                    (item.trend === 'up' ? '▲' : item.trend === 'down' ? '▼' : '−') + 
+                    (showGraph ? ' ' + item.trendValue : '')
+                  }
                   style={{ fontSize: 11, fontWeight: '700', color: item.trendColor, adjustsFontSizeToFit: true }}
                   maxLines={1}
                   truncate="END"
@@ -131,7 +134,7 @@ export default function VTradingWidget({
       )}
 
       <FlexWidget style={{ marginTop: 12, flexDirection: 'row', justifyContent: 'flex-end', alignItems: 'center', width: 'match_parent' }}>
-        <TextWidget text={lastUpdated ? `Actualizado: ${lastUpdated}` : 'Actualizado: hace poco'} style={{ fontSize: 10, color: subTextColor }} />
+        <TextWidget text={lastUpdated ? 'Actualizado: ' + lastUpdated : 'Actualizado: hace poco'} style={{ fontSize: 10, color: subTextColor }} />
       </FlexWidget>
     </FlexWidget>
   );

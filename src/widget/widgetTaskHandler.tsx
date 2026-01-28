@@ -7,6 +7,12 @@ import { WidgetItem } from './types';
 import { observabilityService } from '../services/ObservabilityService';
 
 export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false) {
+  console.log('[Widget] buildWidgetElement called', { 
+    hasInfo: !!info, 
+    forceRefresh,
+    widgetId: info?.widgetId 
+  });
+  
   // MOCK DATA Fallback to prevent white screen if Services fail in Headless mode
   let finalConfig: any = {
     title: 'VTrading',
@@ -60,8 +66,14 @@ export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false
   // If services failed completely, use dummy data to prove render
   const widgetItems: WidgetItem[] = [];
 
-  const formatCurrency = (val: number) => {
-    return val.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const formatCurrency = (val: number): string => {
+    try {
+      return val.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    } catch (e) {
+      // Fallback to manual formatting if locale not supported
+      console.warn('[Widget] toLocaleString failed, using fallback');
+      return val.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
   };
 
   const formatTrendValue = (val: number | null) => {
@@ -119,6 +131,14 @@ export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false
        );
   }
 
+  console.log('[Widget] Final widget data:', {
+    itemsCount: widgetItems.length,
+    title: finalConfig.title,
+    hasRates: rates.length > 0,
+    didFetchFresh,
+    showGraph: finalConfig.showGraph
+  });
+
   // Directly invoke the component function to return the View tree
   // This avoids "jsxTree.type is not a function" errors in some Headless JS environments
   // where custom component resolution might fail in the widget renderer.
@@ -139,14 +159,21 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
   const { widgetInfo, widgetAction, clickAction } = props;
   
   try {
-    // Updating widget
+    console.log('[Widget] widgetTaskHandler called', { widgetAction, clickAction });
+
+    if (widgetAction === 'WIDGET_ADDED') {
+      console.log('[Widget] Widget added, initializing refresh metadata');
+      await storageService.saveWidgetRefreshMeta({ lastRefreshAt: Date.now() });
+    }
 
     if (widgetAction === 'WIDGET_DELETED') {
+      console.log('[Widget] Widget deleted, clearing metadata');
       await storageService.saveWidgetRefreshMeta({ lastRefreshAt: 0 });
       return;
     }
 
     if (widgetAction === 'WIDGET_CLICK' && clickAction === 'REFRESH_WIDGET') {
+      console.log('[Widget] Manual refresh triggered');
       // Updating widget
       const element = await buildWidgetElement(widgetInfo, true);
       await props.renderWidget(element);

@@ -1,10 +1,10 @@
-import { 
-  getAuth, 
-  onAuthStateChanged, 
-  signInWithEmailAndPassword, 
-  createUserWithEmailAndPassword, 
-  signInWithCredential, 
-  signInAnonymously, 
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signInWithCredential,
+  signInAnonymously,
   signOut,
   GoogleAuthProvider,
   FirebaseAuthTypes,
@@ -69,13 +69,41 @@ class AuthService {
     try {
       // Check if Google Play Services is available
       await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
-      
+
       // Get the users ID token
       const signInResult = await GoogleSignin.signIn();
+
+      // Validate sign-in result
+      if (!signInResult || !signInResult.data) {
+        console.error('[Auth] Google Sign-In returned invalid result:', {
+          hasResult: !!signInResult,
+          hasData: !!signInResult?.data,
+        });
+        throw new Error('Google Sign-In was cancelled or returned invalid data. Please try again.');
+      }
+
       const idToken = signInResult.data?.idToken;
 
+      // Validate ID token exists
       if (!idToken) {
-        throw new Error('No ID token found');
+        // Log additional context for debugging
+        console.error('[Auth] No ID token in sign-in result:', {
+          hasData: !!signInResult.data,
+          dataKeys: signInResult.data ? Object.keys(signInResult.data) : [],
+        });
+
+        // Capture error with context for investigation
+        observabilityService.captureError(
+          new Error('No ID token found in Google Sign-In result'),
+          {
+            context: 'AuthService_signInWithGoogle',
+            errorType: 'missing_id_token',
+            hasSignInResult: !!signInResult,
+            hasData: !!signInResult?.data,
+          }
+        );
+
+        throw new Error('No se pudo obtener el token de autenticación de Google. Por favor, intenta nuevamente.');
       }
 
       // Create a Google credential with the token
@@ -84,18 +112,35 @@ class AuthService {
       // Sign-in the user with the credential
       return await signInWithCredential(getAuth(), googleCredential);
     } catch (e: any) {
-      observabilityService.captureError(e);
+      // Check if user cancelled the sign-in
       if (e.code === statusCodes.SIGN_IN_CANCELLED) {
-        // user cancelled the login flow
+        // Don't report user cancellations to Sentry
+        console.log('[Auth] User cancelled Google Sign-In');
         return null;
       } else if (e.code === statusCodes.IN_PROGRESS) {
         // operation (e.g. sign in) is in progress already
+        console.log('[Auth] Google Sign-In already in progress');
         return null;
       } else if (e.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
-        // play services not available or outdated
-        throw new Error('Google Play Services not available');
+        // Report Play Services errors as they indicate device issues
+        observabilityService.captureError(e, {
+          context: 'AuthService_signInWithGoogle',
+          errorType: 'play_services_unavailable',
+        });
+        throw new Error('Google Play Services no está disponible o está desactualizado');
       } else {
-        // some other error happened
+        // Report unexpected errors with context
+        const isIdTokenError = e.message?.includes('No ID token') ||
+          e.message?.includes('No se pudo obtener el token');
+
+        if (!isIdTokenError) {
+          // Only report if not already reported above
+          observabilityService.captureError(e, {
+            context: 'AuthService_signInWithGoogle',
+            errorType: 'sign_in_failed',
+          });
+        }
+
         throw this.handleError(e);
       }
     }
@@ -124,7 +169,7 @@ class AuthService {
         const isGoogleUser = currentUser.providerData.some(
           provider => provider.providerId === 'google.com'
         );
-        
+
         if (isGoogleUser) {
           try {
             await GoogleSignin.signOut();
@@ -134,7 +179,7 @@ class AuthService {
           }
         }
       }
-      
+
       await signOut(getAuth());
     } catch (e) {
       observabilityService.captureError(e);
@@ -193,78 +238,78 @@ class AuthService {
   private handleError(error: any): Error {
     let message = 'Ocurrió un error inesperado';
     if (error.code) {
-        switch (error.code) {
-            // Registro y Email
-            case 'auth/email-already-in-use':
-                message = 'Este correo electrónico ya está registrado. Intenta iniciar sesión.';
-                break;
-            case 'auth/invalid-email':
-                message = 'El formato del correo electrónico no es válido.';
-                break;
-            case 'auth/operation-not-allowed':
-                message = 'El método de autenticación no está habilitado.';
-                break;
-            case 'auth/weak-password':
-                message = 'La contraseña es muy débil. Usa al menos 6 caracteres con letras y números.';
-                break;
-            
-            // Inicio de Sesión
-            case 'auth/user-disabled':
-                message = 'Esta cuenta ha sido deshabilitada. Contacta al soporte.';
-                break;
-            case 'auth/user-not-found':
-            case 'auth/wrong-password':
-            case 'auth/invalid-credential':
-                message = 'Correo o contraseña incorrectos.';
-                break;
-            case 'auth/too-many-requests':
-                message = 'Demasiados intentos fallidos. Tu cuenta ha sido bloqueada temporalmente por seguridad. Intenta más tarde.';
-                break;
-            case 'auth/user-token-expired':
-                message = 'Tu sesión ha expirado. Por favor, inicia sesión de nuevo.';
-                break;
+      switch (error.code) {
+        // Registro y Email
+        case 'auth/email-already-in-use':
+          message = 'Este correo electrónico ya está registrado. Intenta iniciar sesión.';
+          break;
+        case 'auth/invalid-email':
+          message = 'El formato del correo electrónico no es válido.';
+          break;
+        case 'auth/operation-not-allowed':
+          message = 'El método de autenticación no está habilitado.';
+          break;
+        case 'auth/weak-password':
+          message = 'La contraseña es muy débil. Usa al menos 6 caracteres con letras y números.';
+          break;
 
-            // Google Sign-In y Credenciales
-            case 'auth/account-exists-with-different-credential':
-                message = 'Ya existe una cuenta vinculada a este correo con otro método de inicio de sesión.';
-                break;
-            case 'auth/credential-already-in-use':
-                message = 'Esta credencial ya está vinculada a otro usuario.';
-                break;
+        // Inicio de Sesión
+        case 'auth/user-disabled':
+          message = 'Esta cuenta ha sido deshabilitada. Contacta al soporte.';
+          break;
+        case 'auth/user-not-found':
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential':
+          message = 'Correo o contraseña incorrectos.';
+          break;
+        case 'auth/too-many-requests':
+          message = 'Demasiados intentos fallidos. Tu cuenta ha sido bloqueada temporalmente por seguridad. Intenta más tarde.';
+          break;
+        case 'auth/user-token-expired':
+          message = 'Tu sesión ha expirado. Por favor, inicia sesión de nuevo.';
+          break;
 
-            // Acciones de Usuario
-            case 'auth/requires-recent-login':
-                message = 'Por seguridad, debes haber iniciado sesión recientemente para realizar esta acción. Vuelve a ingresar.';
-                break;
-            case 'auth/no-current-user':
-                message = 'No se encontró una sesión activa.';
-                break;
-            
-            // Red y Errores Generales
-            case 'auth/network-request-failed':
-                message = 'Error de conexión. Verifica tu conexión a internet e intenta de nuevo.';
-                break;
-            case 'auth/internal-error':
-                message = 'Error interno del servidor. Intenta de nuevo en unos minutos.';
-                break;
-            case 'auth/timeout':
-                message = 'La operación ha tardado demasiado. Reintenta de nuevo.';
-                break;
+        // Google Sign-In y Credenciales
+        case 'auth/account-exists-with-different-credential':
+          message = 'Ya existe una cuenta vinculada a este correo con otro método de inicio de sesión.';
+          break;
+        case 'auth/credential-already-in-use':
+          message = 'Esta credencial ya está vinculada a otro usuario.';
+          break;
 
-            // Google Sign-In específico (si el error viene con estos códigos)
-            case 'SIGN_IN_CANCELLED':
-                message = 'Inicio de sesión cancelado.';
-                break;
-            case 'PLAY_SERVICES_NOT_AVAILABLE':
-                message = 'Los servicios de Google Play no están disponibles o están desactualizados.';
-                break;
+        // Acciones de Usuario
+        case 'auth/requires-recent-login':
+          message = 'Por seguridad, debes haber iniciado sesión recientemente para realizar esta acción. Vuelve a ingresar.';
+          break;
+        case 'auth/no-current-user':
+          message = 'No se encontró una sesión activa.';
+          break;
 
-            default:
-                // Si es un error de Firebase pero no mapeado, intentamos usar el mensaje técnico si es legible
-                message = error.message || message;
-        }
+        // Red y Errores Generales
+        case 'auth/network-request-failed':
+          message = 'Error de conexión. Verifica tu conexión a internet e intenta de nuevo.';
+          break;
+        case 'auth/internal-error':
+          message = 'Error interno del servidor. Intenta de nuevo en unos minutos.';
+          break;
+        case 'auth/timeout':
+          message = 'La operación ha tardado demasiado. Reintenta de nuevo.';
+          break;
+
+        // Google Sign-In específico (si el error viene con estos códigos)
+        case 'SIGN_IN_CANCELLED':
+          message = 'Inicio de sesión cancelado.';
+          break;
+        case 'PLAY_SERVICES_NOT_AVAILABLE':
+          message = 'Los servicios de Google Play no están disponibles o están desactualizados.';
+          break;
+
+        default:
+          // Si es un error de Firebase pero no mapeado, intentamos usar el mensaje técnico si es legible
+          message = error.message || message;
+      }
     } else if (error.message) {
-        message = error.message;
+      message = error.message;
     }
     return new Error(message);
   }
