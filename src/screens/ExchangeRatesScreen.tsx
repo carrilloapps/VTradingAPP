@@ -271,6 +271,8 @@ const ExchangeRatesScreen = () => {
                   <TouchableOpacity 
                     onPress={() => navigation.navigate('BankRates')}
                     activeOpacity={0.7}
+                    accessibilityRole="button"
+                    accessibilityLabel="Ver mesas de cambio"
                     style={[styles.tag, { 
                       backgroundColor: theme.colors.primaryContainer,
                       flexDirection: 'row',

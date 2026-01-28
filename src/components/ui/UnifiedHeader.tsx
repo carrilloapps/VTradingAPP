@@ -146,6 +146,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
         <Avatar.Image 
           size={44} 
           source={{ uri: avatarUrl }} 
+          accessibilityLabel={`Foto de perfil de ${userName || 'Usuario'}`}
           style={[styles.avatar as ViewStyle, themeStyles.avatar]}
         />
       );
@@ -160,6 +161,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
           size={44} 
           source={{ uri: gravatarUrl }} 
           onError={() => setImageError(true)}
+          accessibilityLabel={`Foto de perfil de ${userName || 'Usuario'}`}
           style={[styles.avatar as ViewStyle, themeStyles.avatar]}
         />
       );
@@ -172,12 +174,20 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
         label={getInitials(userName || 'User')} 
         style={[styles.avatar as ViewStyle, { backgroundColor: theme.colors.primaryContainer, borderColor: theme.colors.outline }]}
         color={theme.colors.onPrimaryContainer}
+        accessibilityLabel={`Iniciales de perfil de ${userName || 'Usuario'}`}
       />
     );
   };
 
   const renderProfileContent = () => (
-    <TouchableOpacity onPress={onProfilePress} style={styles.userInfo} activeOpacity={0.7}>
+    <TouchableOpacity 
+      onPress={onProfilePress} 
+      style={styles.userInfo} 
+      activeOpacity={0.7}
+      accessibilityRole="button"
+      accessibilityLabel={`Perfil de ${userName || 'Usuario'}. ${resolvedIsPremium ? 'Plan Premium' : 'Plan Gratuito'}`}
+      accessibilityHint="Navegar al perfil de usuario"
+    >
       <View style={styles.avatarContainer}>
         {renderAvatar()}
         <View style={[styles.statusDot, themeStyles.statusDot]} />
@@ -195,7 +205,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   );
 
   const renderSectionContent = () => (
-    <View style={styles.textContainer}>
+    <View style={styles.textContainer} accessibilityRole="header">
       <Text variant="headlineSmall" style={[styles.sectionTitle, themeStyles.sectionTitle]}>
         {title}
       </Text>
@@ -208,7 +218,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   );
 
   const renderSimpleContent = () => (
-    <View style={[styles.textContainer, styles.simpleHeaderContainer]}>
+    <View style={[styles.textContainer, styles.simpleHeaderContainer]} accessibilityRole="header">
        <Text variant="titleLarge" style={[styles.simpleTitle, themeStyles.simpleTitle]}>
           {title}
         </Text>
@@ -227,6 +237,10 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
               style={[styles.iconButton, themeStyles.iconButton, { marginRight: 8 }]}
               borderless
               rippleColor="rgba(0, 0, 0, .1)"
+              accessibilityRole="button"
+              accessibilityLabel="Regresar"
+              accessibilityHint="Volver a la pantalla anterior"
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
               <MaterialCommunityIcons name="arrow-left" size={22} color={theme.colors.onSurface} />
             </TouchableRipple>
@@ -244,12 +258,16 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
                 style={[styles.iconButton, themeStyles.iconButton]}
                 borderless
                 rippleColor="rgba(0, 0, 0, .1)"
+                accessibilityRole="button"
+                accessibilityLabel={rightActionIcon === 'refresh' ? "Actualizar datos" : "Más opciones"}
+                accessibilityHint={rightActionIcon === 'refresh' ? "Refrescar el contenido de la pantalla" : "Mostrar menú de acciones adicionales"}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
                 {rightActionIcon ? (
                   <MaterialCommunityIcons 
                     name={rightActionIcon} 
                     size={24} 
-                    color={theme.colors.onSurface} // Changed from onSurfaceVariant for better visibility
+                    color={theme.colors.onSurface} 
                   />
                 ) : (
                   <MaterialCommunityIcons 
@@ -267,6 +285,10 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
                 style={[styles.iconButton, themeStyles.iconButton]}
                 borderless
                 rippleColor="rgba(0, 0, 0, .1)"
+                accessibilityRole="button"
+                accessibilityLabel={secondaryActionIcon === 'share-variant' ? "Compartir" : "Acción secundaria"}
+                accessibilityHint={secondaryActionIcon === 'share-variant' ? "Compartir este contenido" : ""}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
                 <MaterialCommunityIcons 
                   name={secondaryActionIcon} 

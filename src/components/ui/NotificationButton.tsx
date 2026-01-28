@@ -64,6 +64,10 @@ const NotificationButton: React.FC<NotificationButtonProps> = ({
       ]}
       borderless
       rippleColor="rgba(0, 0, 0, .1)"
+      accessibilityRole="button"
+      accessibilityLabel={`Notificaciones, ${unreadCount} ${unreadCount === 1 ? 'nueva' : 'nuevas'}`}
+      accessibilityHint="Navega a la pantalla de notificaciones"
+      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
     >
       <View style={styles.content}>
         <MaterialCommunityIcons name={icon} size={size} color={iconColor} />

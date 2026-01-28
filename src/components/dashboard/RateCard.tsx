@@ -52,6 +52,9 @@ const RateCard: React.FC<RateCardProps> = ({
       onPress={onPress}
       style={{ marginBottom: 12, borderRadius: theme.roundness * 6 }}
       borderless
+      accessibilityRole="button"
+      accessibilityLabel={`${title}, valor: ${value}. ${isNeutral ? 'Sin cambios' : `Cambio: ${changePercent} ${isPositive ? 'positivo' : 'negativo'}`}`}
+      accessibilityHint="Toca para ver detalles de esta tasa"
     >
       <Surface 
         elevation={0}
@@ -87,6 +90,7 @@ const RateCard: React.FC<RateCardProps> = ({
               name={trendIcon} 
               size={16} 
               color={trendColor} 
+              importantForAccessibility="no-hide-descendants"
             />
             <Text variant="labelMedium" style={[styles.trendText, { color: trendColor }]}>
               {isNeutral ? '' : (isPositive ? '+' : '')}{changePercent}
