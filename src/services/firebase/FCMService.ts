@@ -1,26 +1,14 @@
-import {
-  getMessaging,
-  getToken,
-  onTokenRefresh,
-  onMessage,
-  setBackgroundMessageHandler,
-  onNotificationOpenedApp,
-  getInitialNotification,
-  requestPermission,
-  hasPermission,
-  AuthorizationStatus,
-  RemoteMessage,
-  Messaging
-} from '@react-native-firebase/messaging';
+import messaging from '@react-native-firebase/messaging';
 import { PermissionsAndroid, Platform } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
+import SafeLogger from '../../utils/safeLogger';
 import { observabilityService } from '../ObservabilityService';
 
 class FCMService {
-  private messaging: Messaging;
+  private messaging: ReturnType<typeof messaging>;
 
   constructor() {
-    this.messaging = getMessaging();
+    this.messaging = messaging();
   }
 
   /**
@@ -28,10 +16,10 @@ class FCMService {
    */
   async checkPermission(): Promise<boolean> {
     if (Platform.OS === 'ios') {
-      const authStatus = await hasPermission(this.messaging);
+      const authStatus = await this.messaging.hasPermission();
       return (
-        authStatus === AuthorizationStatus.AUTHORIZED ||
-        authStatus === AuthorizationStatus.PROVISIONAL
+        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+        authStatus === messaging.AuthorizationStatus.PROVISIONAL
       );
     } else if (Platform.OS === 'android' && Platform.Version >= 33) {
       return await PermissionsAndroid.check(
@@ -46,10 +34,10 @@ class FCMService {
    */
   async requestUserPermission(): Promise<boolean> {
     if (Platform.OS === 'ios') {
-      const authStatus = await requestPermission(this.messaging);
+      const authStatus = await this.messaging.requestPermission();
       const enabled =
-        authStatus === AuthorizationStatus.AUTHORIZED ||
-        authStatus === AuthorizationStatus.PROVISIONAL;
+        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
       return enabled;
     } else if (Platform.OS === 'android' && Platform.Version >= 33) {
       const granted = await PermissionsAndroid.request(
@@ -65,8 +53,8 @@ class FCMService {
    */
   async getFCMToken(): Promise<string | null> {
     try {
-      const token = await getToken(this.messaging);
-      console.log('FCM Token:', token);
+      const token = await this.messaging.getToken();
+      SafeLogger.sensitive('FCM', token);
       return token;
     } catch (e) {
       observabilityService.captureError(e);
@@ -78,35 +66,35 @@ class FCMService {
    * Refresh FCM token listener
    */
   onTokenRefresh(callback: (token: string) => void): () => void {
-    return onTokenRefresh(this.messaging, callback);
+    return this.messaging.onTokenRefresh(callback);
   }
 
   /**
    * Foreground message handler
    */
-  onMessage(callback: (remoteMessage: RemoteMessage) => void): () => void {
-    return onMessage(this.messaging, callback);
+  onMessage(callback: (remoteMessage: any) => void): () => void {
+    return this.messaging.onMessage(callback);
   }
 
   /**
    * Background message handler (must be called outside of UI components)
    */
-  setBackgroundMessageHandler(handler: (remoteMessage: RemoteMessage) => Promise<any>): void {
-    setBackgroundMessageHandler(this.messaging, handler);
+  setBackgroundMessageHandler(handler: (remoteMessage: any) => Promise<any>): void {
+    this.messaging.setBackgroundMessageHandler(handler);
   }
 
   /**
    * Notification opened from background state
    */
-  onNotificationOpenedApp(callback: (remoteMessage: RemoteMessage) => void): () => void {
-    return onNotificationOpenedApp(this.messaging, callback);
+  onNotificationOpenedApp(callback: (remoteMessage: any) => void): () => void {
+    return this.messaging.onNotificationOpenedApp(callback);
   }
 
   /**
    * Check if app was opened from a notification (Quit state)
    */
-  async getInitialNotification(): Promise<RemoteMessage | null> {
-    return getInitialNotification(this.messaging);
+  async getInitialNotification(): Promise<any | null> {
+    return this.messaging.getInitialNotification();
   }
 
   /**
@@ -145,7 +133,7 @@ class FCMService {
       }
 
       await Promise.all(topics.map(topic => this.subscribeToTopic(topic)));
-      console.log('Subscribed to demographics:', topics);
+      SafeLogger.log('[FCM] Subscribed to demographics', { topicsCount: topics.length });
     } catch (e) {
       observabilityService.captureError(e);
       // Ignore error

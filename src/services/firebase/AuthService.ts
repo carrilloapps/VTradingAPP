@@ -13,6 +13,7 @@ import {
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { AppConfig } from '../../constants/AppConfig';
 import { observabilityService } from '../ObservabilityService';
+import SafeLogger from '../../utils/safeLogger';
 
 class AuthService {
   private googleWebClientId: string | null;
@@ -114,13 +115,11 @@ class AuthService {
     } catch (e: any) {
       // Check if user cancelled the sign-in
       if (e.code === statusCodes.SIGN_IN_CANCELLED) {
-        // Don't report user cancellations to Sentry
-        console.log('[Auth] User cancelled Google Sign-In');
-        return null;
+        SafeLogger.log('[Auth] User cancelled Google Sign-In');
+        throw new Error('USER_CANCELLED_LOGIN');
       } else if (e.code === statusCodes.IN_PROGRESS) {
-        // operation (e.g. sign in) is in progress already
-        console.log('[Auth] Google Sign-In already in progress');
-        return null;
+        SafeLogger.log('[Auth] Google Sign-In already in progress');
+        throw new Error('SIGN_IN_IN_PROGRESS');
       } else if (e.code === statusCodes.PLAY_SERVICES_NOT_AVAILABLE) {
         // Report Play Services errors as they indicate device issues
         observabilityService.captureError(e, {
