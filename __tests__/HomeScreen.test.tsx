@@ -1,8 +1,53 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react-native';
 import HomeScreen from '../src/screens/HomeScreen';
-import { ThemeProvider } from '../src/theme/ThemeContext';
+import { Provider as PaperProvider, MD3LightTheme } from 'react-native-paper';
 import { NavigationContainer } from '@react-navigation/native';
+
+jest.mock('react-native-paper', () => {
+  const Actual = jest.requireActual('react-native-paper');
+  const theme = {
+    ...Actual.MD3LightTheme,
+    colors: {
+      ...Actual.MD3LightTheme.colors,
+      background: '#ffffff',
+      onSurface: '#000000',
+      onSurfaceVariant: '#666666',
+      primary: '#6200ee',
+      inversePrimary: '#b39ddb',
+      outline: '#cccccc',
+      elevation: {
+          level1: '#f5f5f5',
+      }
+    },
+    spacing: { xs: 4, s: 8, m: 12, l: 16, xl: 20, xxl: 24 },
+    roundness: 4,
+    dark: false,
+  };
+  return {
+    ...Actual,
+    useTheme: () => theme,
+  };
+});
+
+const mockTheme = {
+  ...MD3LightTheme,
+  colors: {
+    ...MD3LightTheme.colors,
+    background: '#ffffff',
+    onSurface: '#000000',
+    onSurfaceVariant: '#666666',
+    primary: '#6200ee',
+    inversePrimary: '#b39ddb',
+    outline: '#cccccc',
+    elevation: {
+        level1: '#f5f5f5',
+    }
+  },
+  spacing: { xs: 4, s: 8, m: 12, l: 16, xl: 20, xxl: 24 },
+  roundness: 4,
+  dark: false,
+};
 
 // Mock AuthContext
 jest.mock('../src/context/AuthContext', () => ({
@@ -12,9 +57,10 @@ jest.mock('../src/context/AuthContext', () => ({
 }));
 
 // Mock ToastContext
+const mockShowToast = jest.fn();
 jest.mock('../src/context/ToastContext', () => ({
   useToast: () => ({
-    showToast: jest.fn(),
+    showToast: mockShowToast,
   }),
 }));
 
@@ -41,32 +87,63 @@ jest.mock('../src/components/dashboard/Calculator', () => {
   );
 });
 
+jest.mock('../src/components/dashboard/ShareGraphic', () => 'ShareGraphic');
+jest.mock('../src/components/ui/MarketStatus', () => {
+  const { View, Text } = require('react-native');
+  return () => <View><Text>MERCADO ABIERTO</Text></View>;
+});
+jest.mock('../src/components/dashboard/ExchangeCard', () => {
+  const { View, Text } = require('react-native');
+  return ({ title }: { title: string }) => <View><Text>{title}</Text></View>;
+});
+jest.mock('../src/components/stocks/StockItem', () => 'StockItem');
+jest.mock('../src/components/ui/UnifiedHeader', () => {
+  const { View, Text } = require('react-native');
+  return ({ userName }: { userName: string }) => <View><Text>Hola, {userName}</Text></View>;
+});
+
+jest.mock('../src/services/firebase/AnalyticsService', () => ({
+  analyticsService: {
+    logEvent: jest.fn(),
+    logScreenView: jest.fn(),
+    logShare: jest.fn(),
+  },
+}));
+
+jest.mock('../src/services/ObservabilityService', () => ({
+  observabilityService: {
+    captureError: jest.fn(),
+  },
+}));
+
 jest.mock('../src/services/CurrencyService', () => ({
-  CurrencyService: {
-    getRates: jest.fn(() => Promise.resolve([
-      {
-        id: '1',
-        code: 'USD',
-        name: 'Dólar Estadounidense (BCV)',
-        value: 36.58,
-        changePercent: 0.14,
-        type: 'fiat',
-        iconName: 'account-balance',
-        lastUpdated: new Date().toISOString(),
-      },
-      {
-        id: '4',
-        code: 'BTC',
-        name: 'Bitcoin',
-        value: 2345901.00,
-        changePercent: 2.45,
-        type: 'crypto',
-        iconName: 'currency-bitcoin',
-        lastUpdated: new Date().toISOString(),
-      }
-    ])),
-    subscribe: jest.fn((callback) => {
-        // Immediately callback with data to simulate load
+    CurrencyService: {
+      getRates: jest.fn(() => Promise.resolve([
+        {
+          id: '1',
+          code: 'USD',
+          name: 'Dólar Estadounidense (BCV)',
+          value: 36.58,
+          changePercent: 0.14,
+          type: 'fiat',
+          iconName: 'account-balance',
+          lastUpdated: new Date().toISOString(),
+        },
+        {
+          id: '4',
+          code: 'BTC',
+          name: 'Bitcoin',
+          value: 2345901.00,
+          changePercent: 2.45,
+          type: 'crypto',
+          iconName: 'currency-bitcoin',
+          lastUpdated: new Date().toISOString(),
+        }
+      ])),
+      getAvailableTargetRates: jest.fn(() => []), // Add this for AdvancedCalculatorScreen
+      subscribe: jest.fn((callback) => {
+      // Use setTimeout to break the synchronous loop and avoid maximum update depth exceeded
+      setTimeout(() => {
         callback([
           {
             id: '1',
@@ -89,7 +166,8 @@ jest.mock('../src/services/CurrencyService', () => ({
             lastUpdated: new Date().toISOString(),
           }
         ]);
-        return () => {};
+      }, 0);
+      return () => {};
     }),
   },
 }));
@@ -97,11 +175,9 @@ jest.mock('../src/services/CurrencyService', () => ({
 // Helper to wrap component with necessary providers
 const renderWithProviders = (component: React.ReactNode) => {
   return render(
-    <NavigationContainer>
-      <ThemeProvider>
-        {component}
-      </ThemeProvider>
-    </NavigationContainer>
+    <PaperProvider theme={mockTheme}>
+      {component}
+    </PaperProvider>
   );
 };
 

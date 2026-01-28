@@ -1,5 +1,5 @@
 import { fcmService } from '../../src/services/firebase/FCMService';
-import { getMessaging, subscribeToTopic, unsubscribeFromTopic } from '@react-native-firebase/messaging';
+import { getMessaging } from '@react-native-firebase/messaging';
 
 describe('FCMService', () => {
   it('requests permission', async () => {
@@ -14,11 +14,13 @@ describe('FCMService', () => {
 
   it('subscribes to topic', async () => {
     await fcmService.subscribeToTopic('news');
-    expect(subscribeToTopic).toHaveBeenCalledWith(getMessaging(), 'news');
+    const messaging = getMessaging();
+    expect(messaging.subscribeToTopic).toHaveBeenCalledWith('news');
   });
 
   it('unsubscribes from topic', async () => {
     await fcmService.unsubscribeFromTopic('news');
-    expect(unsubscribeFromTopic).toHaveBeenCalledWith(getMessaging(), 'news');
+    const messaging = getMessaging();
+    expect(messaging.unsubscribeFromTopic).toHaveBeenCalledWith('news');
   });
 });

@@ -50,6 +50,7 @@ jest.mock('../src/services/CurrencyService', () => ({
       return () => {};
     }),
     getRates: jest.fn(() => Promise.resolve(mockRates)),
+    getAvailableTargetRates: jest.fn((source, rates) => rates), // Simple mock returning all rates
   },
 }));
 

@@ -61,6 +61,12 @@ jest.mock('@react-navigation/native', () => {
       goBack: jest.fn(),
       dispatch: jest.fn(),
     }),
+    useFocusEffect: jest.fn((callback) => callback()),
+    createNavigationContainerRef: jest.fn(() => ({
+      isReady: jest.fn().mockReturnValue(true),
+      navigate: jest.fn(),
+      dispatch: jest.fn(),
+    })),
   };
 });
 
@@ -110,7 +116,7 @@ jest.mock('react-native-reanimated', () => {
 });
 
 jest.mock('@react-native-firebase/auth', () => {
-  return () => ({
+  const authInstance = {
     onAuthStateChanged: jest.fn(),
     currentUser: {
       email: 'test@test.com',
@@ -121,7 +127,17 @@ jest.mock('@react-native-firebase/auth', () => {
     signInWithEmailAndPassword: jest.fn(),
     createUserWithEmailAndPassword: jest.fn(),
     sendPasswordResetEmail: jest.fn(),
-  });
+  };
+  return {
+    __esModule: true,
+    default: () => authInstance,
+    getAuth: () => authInstance,
+    onAuthStateChanged: jest.fn(),
+    signInWithEmailAndPassword: jest.fn(),
+    createUserWithEmailAndPassword: jest.fn(),
+    signOut: jest.fn(),
+    sendPasswordResetEmail: jest.fn(),
+  };
 });
 
 jest.mock('react-native-webview', () => {
@@ -141,33 +157,59 @@ jest.mock('@react-native-google-signin/google-signin', () => ({
 }));
 
 jest.mock('@react-native-firebase/in-app-messaging', () => {
-  return () => ({
+  const inAppMessagingMock = {
     setMessagesDisplaySuppressed: jest.fn(),
     triggerEvent: jest.fn(),
-  });
+  };
+  return {
+    __esModule: true,
+    default: () => inAppMessagingMock,
+    getInAppMessaging: () => inAppMessagingMock,
+    setMessagesDisplaySuppressed: jest.fn(),
+  };
 });
 
 jest.mock('@react-native-firebase/analytics', () => {
-  return () => ({
+  const analyticsInstance = {
     logEvent: jest.fn(),
     logScreenView: jest.fn(),
     setUserProperty: jest.fn(),
     setUserId: jest.fn(),
-  });
+  };
+  return {
+    __esModule: true,
+    default: () => analyticsInstance,
+    getAnalytics: () => analyticsInstance,
+    logEvent: jest.fn(),
+    logScreenView: jest.fn(),
+    setUserProperty: jest.fn(),
+    setUserId: jest.fn(),
+  };
 });
 
 jest.mock(
   '@react-native-firebase/crashlytics',
-  () => ({
-    getCrashlytics: () => ({
+  () => {
+    const crashlyticsInstance = {
       log: jest.fn(),
       recordError: jest.fn(),
       crash: jest.fn(),
       setCrashlyticsCollectionEnabled: jest.fn(() => Promise.resolve()),
       setUserId: jest.fn(() => Promise.resolve()),
       setAttributes: jest.fn(() => Promise.resolve()),
-    }),
-  }),
+      setAttribute: jest.fn(() => Promise.resolve()),
+    };
+    return {
+      __esModule: true,
+      getCrashlytics: () => crashlyticsInstance,
+      setUserId: jest.fn((instance, id) => Promise.resolve()),
+      setAttributes: jest.fn((instance, attrs) => Promise.resolve()),
+      setAttribute: jest.fn((instance, key, val) => Promise.resolve()),
+      setCrashlyticsCollectionEnabled: jest.fn((instance, enabled) => Promise.resolve()),
+      log: jest.fn((instance, msg) => Promise.resolve()),
+      recordError: jest.fn((instance, error) => Promise.resolve()),
+    };
+  },
   { virtual: true }
 );
 
@@ -181,7 +223,7 @@ jest.mock('@react-native-firebase/app', () => ({
 }));
 
 jest.mock('@react-native-firebase/remote-config', () => {
-  return () => ({
+  const remoteConfigMock = {
     setDefaults: jest.fn(),
     fetchAndActivate: jest.fn(() => Promise.resolve(true)),
     setConfigSettings: jest.fn(),
@@ -190,7 +232,19 @@ jest.mock('@react-native-firebase/remote-config', () => {
       asNumber: () => 123,
       asBoolean: () => true,
     })),
-  });
+  };
+  return {
+    __esModule: true,
+    default: () => remoteConfigMock,
+    getRemoteConfig: () => remoteConfigMock,
+    setDefaults: jest.fn(),
+    fetchAndActivate: jest.fn(() => Promise.resolve(true)),
+    getValue: jest.fn((rc, key) => ({
+      asString: () => '{}', // Return valid JSON by default
+      asNumber: () => 123,
+      asBoolean: () => true,
+    })),
+  };
 });
 
 jest.mock('@react-native-firebase/perf', () => {
@@ -228,6 +282,10 @@ jest.mock('@react-native-firebase/app-distribution', () => {
 });
 
 jest.mock('react-native-google-mobile-ads', () => ({
+  __esModule: true,
+  default: () => ({
+    initialize: jest.fn(() => Promise.resolve()),
+  }),
   BannerAd: 'BannerAd',
   BannerAdSize: {
     BANNER: 'BANNER',
@@ -239,4 +297,96 @@ jest.mock('react-native-google-mobile-ads', () => ({
   TestIds: {
     BANNER: 'test-banner',
   },
+}));
+
+// --- New Mocks ---
+
+jest.mock('@sentry/react-native', () => ({
+  init: jest.fn(),
+  wrap: jest.fn((c) => c),
+  captureException: jest.fn(),
+  captureMessage: jest.fn(),
+  startTransaction: jest.fn(() => ({
+    finish: jest.fn(),
+    setTag: jest.fn(),
+    setData: jest.fn(),
+  })),
+  startInactiveSpan: jest.fn(() => ({
+    end: jest.fn(),
+    setStatus: jest.fn(),
+    setAttribute: jest.fn(),
+  })),
+  mobileReplayIntegration: jest.fn(),
+  feedbackIntegration: jest.fn(),
+}));
+
+jest.mock('react-native-share', () => ({
+  default: {
+    open: jest.fn(),
+    shareSingle: jest.fn(),
+  },
+}));
+
+jest.mock('@microsoft/react-native-clarity', () => ({
+  initialize: jest.fn(),
+  setCustomUserId: jest.fn(),
+  setCustomTag: jest.fn(),
+  sendCustomEvent: jest.fn(),
+  LogLevel: {
+    None: 0,
+    Verbose: 1,
+  },
+}));
+
+jest.mock('react-native-view-shot', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  return {
+    captureRef: jest.fn(() => Promise.resolve('mock-uri')),
+    default: (props) => React.createElement(View, props),
+    __esModule: true,
+  };
+});
+
+jest.mock('@react-native-community/netinfo', () => ({
+  useNetInfo: jest.fn(() => ({
+    isConnected: true,
+    isInternetReachable: true,
+  })),
+  addEventListener: jest.fn(() => jest.fn()),
+  fetch: jest.fn(() => Promise.resolve({ isConnected: true })),
+}));
+
+jest.mock('react-native-svg', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  const Svg = (props) => React.createElement(View, props);
+  const Circle = (props) => React.createElement(View, props);
+  const Rect = (props) => React.createElement(View, props);
+  const Path = (props) => React.createElement(View, props);
+  return {
+    __esModule: true,
+    default: Svg,
+    Circle,
+    Rect,
+    Path,
+    Svg,
+    G: (props) => React.createElement(View, props),
+    Defs: (props) => React.createElement(View, props),
+    ClipPath: (props) => React.createElement(View, props),
+    LinearGradient: (props) => React.createElement(View, props),
+    Stop: (props) => React.createElement(View, props),
+  };
+});
+
+jest.mock('react-native-pager-view', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+  return (props) => React.createElement(View, props);
+});
+
+jest.mock('react-native-screens', () => ({
+  enableScreens: jest.fn(),
+  Screen: ({ children }) => children,
+  ScreenContainer: ({ children }) => children,
 }));

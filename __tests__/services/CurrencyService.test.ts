@@ -14,8 +14,8 @@ describe('CurrencyService', () => {
   const mockApiResponse = {
     source: 'BCV',
     rates: [
-      { currency: 'EUR', rate: 55.45 },
-      { currency: 'USD', rate: 36.58 }
+      { currency: 'EUR', rate: { average: 55.45 } },
+      { currency: 'USD', rate: { average: 36.58 } }
     ],
     publicationDate: '2024-01-16T00:00:00.000Z',
     timestamp: 'string'
@@ -32,9 +32,9 @@ describe('CurrencyService', () => {
     expect(apiClient.get).toHaveBeenCalledWith('api/rates', expect.objectContaining({
       headers: {
         'Accept': '*/*',
-        'X-API-Key': 'admin_key'
       },
-      useCache: true
+      useCache: false,
+      cacheTTL: 0
     }));
 
     expect(rates).toHaveLength(3); // VES + 2 mocked rates
@@ -42,11 +42,11 @@ describe('CurrencyService', () => {
     
     expect(rates[1].code).toBe('EUR');
     expect(rates[1].value).toBe(55.45);
-    expect(rates[1].name).toBe('Euro (BCV)');
+    expect(rates[1].name).toBe('EUR/VES • BCV');
     
     expect(rates[2].code).toBe('USD');
     expect(rates[2].value).toBe(36.58);
-    expect(rates[2].name).toBe('Dólar (BCV)');
+    expect(rates[2].name).toBe('USD/VES • BCV');
 
     expect(performanceService.startTrace).toHaveBeenCalledWith('get_currency_rates_service');
     expect(performanceService.stopTrace).toHaveBeenCalledWith(traceMock);
