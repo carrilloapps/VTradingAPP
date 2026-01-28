@@ -5,6 +5,7 @@ import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
 import VTradingWidget from './VTradingWidget';
 import { WidgetItem } from './types';
 import { observabilityService } from '../services/ObservabilityService';
+import { getTrend } from '../utils/trendUtils';
 
 export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false) {
   console.log('[Widget] buildWidgetElement called', { 
@@ -91,18 +92,17 @@ export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false
           // Only add rates that are not the base currency (value !== 1)
           if (rate && rate.value !== 1) {
               const change = Number((rate.changePercent || 0).toFixed(2));
-              const isUp = change > 0;
-              const isDown = change < 0;
+              const trend = getTrend(change);
               
               widgetItems.push({
                   id: rate.id,
                   label: rate.name,
                   value: formatCurrency(rate.value),
                   currency: 'Bs',
-                  trend: isUp ? 'up' : isDown ? 'down' : 'neutral',
+                  trend: trend,
                   trendValue: formatTrendValue(rate.changePercent || 0),
-                  trendBg: isUp ? 'rgba(0, 168, 107, 0.15)' : isDown ? 'rgba(255, 59, 48, 0.15)' : 'rgba(100, 116, 139, 0.15)',
-                  trendColor: isUp ? '#00A86B' : isDown ? '#FF3B30' : '#64748B'
+                  trendBg: trend === 'up' ? 'rgba(110, 231, 183, 0.15)' : trend === 'down' ? 'rgba(248, 113, 113, 0.15)' : 'rgba(255, 255, 255, 0.1)',
+                  trendColor: trend === 'up' ? '#6EE7B7' : trend === 'down' ? '#F87171' : '#D1D5DB'
               });
           }
       }
@@ -112,25 +112,25 @@ export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false
           const defaultFilter = rates.filter(r => r.value !== 1).slice(0, 4);
           defaultFilter.forEach(rate => {
               const change = Number((rate.changePercent || 0).toFixed(2));
-              const isUp = change > 0;
-              const isDown = change < 0;
+              const trend = getTrend(change);
+              
               widgetItems.push({
                   id: rate.id,
                   label: rate.name,
                   value: formatCurrency(rate.value),
                   currency: 'Bs',
-                  trend: isUp ? 'up' : isDown ? 'down' : 'neutral',
+                  trend: trend,
                   trendValue: formatTrendValue(rate.changePercent || 0),
-                  trendBg: isUp ? 'rgba(0, 168, 107, 0.15)' : isDown ? 'rgba(255, 59, 48, 0.15)' : 'rgba(100, 116, 139, 0.15)',
-                  trendColor: isUp ? '#00A86B' : isDown ? '#FF3B30' : '#64748B'
+                  trendBg: trend === 'up' ? 'rgba(110, 231, 183, 0.15)' : trend === 'down' ? 'rgba(248, 113, 113, 0.15)' : 'rgba(255, 255, 255, 0.1)',
+                  trendColor: trend === 'up' ? '#6EE7B7' : trend === 'down' ? '#F87171' : '#D1D5DB'
               });
           });
       }
   } else {
       // Emergency Mock Data if Rate Fetch Fails
        widgetItems.push(
-        { id: '1', label: 'USD/VES', value: '0.00', currency: 'Bs', trend: 'up', trendValue: '0.00%', trendBg: 'rgba(0, 168, 107, 0.15)', trendColor: '#00A86B' },
-        { id: '2', label: 'USDT/VES', value: '0.00', currency: 'Bs', trend: 'down', trendValue: '0.00%', trendBg: 'rgba(255, 59, 48, 0.15)', trendColor: '#FF3B30' }
+        { id: '1', label: 'USD/VES', value: '0.00', currency: 'Bs', trend: 'up', trendValue: '0.00%', trendBg: 'rgba(110, 231, 183, 0.15)', trendColor: '#6EE7B7' },
+        { id: '2', label: 'USDT/VES', value: '0.00', currency: 'Bs', trend: 'down', trendValue: '0.00%', trendBg: 'rgba(248, 113, 113, 0.15)', trendColor: '#F87171' }
        );
   }
 

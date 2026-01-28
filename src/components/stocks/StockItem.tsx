@@ -127,7 +127,7 @@ const StockItem: React.FC<StockData> = ({
             <Image 
               source={{ uri: iconUrl }} 
               style={styles.iconImage} 
-              resizeMode="contain"
+              resizeMode="cover"
             />
           ) : (
             <Text style={[
@@ -196,8 +196,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden', // Ensure image respects radius
   },
   iconImage: {
-    width: '80%',
-    height: '80%',
+    width: '100%',
+    height: '100%',
   },
   initials: {
     fontSize: 11,

@@ -83,12 +83,13 @@ export default function VTradingWidget({
         </FlexWidget>
           <TextWidget 
             text={String.fromCodePoint(0xF0450)} 
+            clickAction="REFRESH_WIDGET"
             style={{ 
               fontSize: 24, 
               color: refreshColor,
-              fontFamily: 'widget_icons' 
+              fontFamily: 'widget_icons',
+              padding: 4
             }}
-            clickAction="REFRESH_WIDGET"
           />
       </FlexWidget>
 

@@ -4,7 +4,7 @@ import { Text, Icon, Surface, useTheme } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import ViewShot from 'react-native-view-shot';
 import { StockData } from '../../services/StocksService';
-import { BolivarIcon } from '../ui/BolivarIcon';
+import { getTrend, getTrendColor, getTrendIcon } from '../../utils/trendUtils';
 
 interface StockShareGraphicProps {
   viewShotRef: React.RefObject<any>;
@@ -23,21 +23,10 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
 }) => {
   const theme = useTheme();
 
-  const isPositive = stock.changePercent > 0;
-  const isNegative = stock.changePercent < 0;
-  const isNeutral = stock.changePercent === 0;
-
-  const trendColor = isPositive 
-    ? (theme.colors as any).success || '#6EE7B7' 
-    : isNegative 
-      ? (theme.colors as any).error || '#F87171' 
-      : theme.colors.outline;
-
-  const trendIcon = isPositive 
-    ? 'trending-up' 
-    : isNegative 
-      ? 'trending-down' 
-      : 'minus';
+  const trend = getTrend(stock.changePercent);
+  const trendColor = getTrendColor(trend, theme);
+  const trendIcon = getTrendIcon(trend);
+  const isPositive = trend === 'up';
 
   const isVertical = aspectRatio === '16:9';
   

@@ -4,6 +4,7 @@ import { Text, Icon, Surface, useTheme } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import ViewShot from 'react-native-view-shot';
 import { StockData } from '../../services/StocksService';
+import { getTrend, getTrendColor, getTrendIcon } from '../../utils/trendUtils';
 
 interface MarketShareGraphicProps {
   viewShotRef: React.RefObject<any>;
@@ -30,9 +31,10 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
   const theme = useTheme();
   const isVertical = aspectRatio === '16:9';
 
-  const trendColor = indexData.isPositive 
-    ? (theme.colors as any).success || '#6EE7B7' 
-    : (theme.colors as any).error || '#F87171';
+  // Standardized Index Trend
+  const idxTrend = getTrend(indexData.changePercent);
+  const trendColor = getTrendColor(idxTrend, theme);
+  const trendIcon = getTrendIcon(idxTrend);
 
   return (
     <View style={styles.hiddenTemplate} pointerEvents="none">
@@ -91,7 +93,7 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
              <View style={styles.indexValueRow}>
                 <Text style={[styles.indexValue, { color: theme.colors.onSurface }]}>{indexData.value}</Text>
                 <View style={[styles.indexTrendBadge, { backgroundColor: trendColor + '15' }]}>
-                    <Icon source={indexData.isPositive ? 'trending-up' : 'trending-down'} size={18} color={trendColor} />
+                    <Icon source={trendIcon} size={18} color={trendColor} />
                     <Text style={[styles.indexTrendText, { color: trendColor }]}>{indexData.changePercent}</Text>
                 </View>
              </View>
@@ -101,7 +103,10 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
           {/* Stocks List Content */}
           <View style={[styles.templateContent, isVertical && { flex: 1, gap: 16 }]}>
             <Text style={[styles.sectionLabel, { color: theme.colors.onSurfaceVariant, marginBottom: 4 }]}>ACCIONES DESTACADAS</Text>
-            {topStocks.slice(0, isVertical ? 6 : 3).map((stock, idx) => (
+            {topStocks.slice(0, isVertical ? 6 : 3).map((stock, idx) => {
+               const sTrend = getTrend(stock.changePercent);
+               const sColor = getTrendColor(sTrend, theme);
+               return (
               <Surface key={idx} style={[styles.stockCard, { backgroundColor: theme.dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', borderColor: theme.colors.outlineVariant }]} elevation={0}>
                 <View style={styles.stockInfo}>
                     <Text style={[styles.stockSymbol, { color: theme.colors.onSurface }]}>{stock.symbol}</Text>
@@ -109,12 +114,12 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
                 </View>
                 <View style={styles.stockPriceInfo}>
                     <Text style={[styles.stockPrice, { color: theme.colors.onSurface }]}>{stock.price.toLocaleString('es-VE', { minimumFractionDigits: 2 })}</Text>
-                    <Text style={[styles.stockTrend, { color: stock.changePercent >= 0 ? ((theme.colors as any).success || '#6EE7B7') : ((theme.colors as any).error || '#F87171') }]}>
-                        {stock.changePercent >= 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
+                    <Text style={[styles.stockTrend, { color: sColor }]}>
+                        {stock.changePercent > 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
                     </Text>
                 </View>
               </Surface>
-            ))}
+            )})}
           </View>
           
           {/* Footer */}

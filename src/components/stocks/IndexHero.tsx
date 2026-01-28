@@ -3,6 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { getTrend, getTrendIcon } from '../../utils/trendUtils';
 
 interface IndexHeroStats {
   titlesUp: number;
@@ -18,14 +19,21 @@ interface IndexHeroProps {
   isPositive: boolean;
   volume: string;
   stats?: IndexHeroStats;
+  labelOverride?: string;
+  fallbackValue?: string;
 }
 
 const IndexHero: React.FC<IndexHeroProps> = ({
   value,
   changePercent,
   volume,
-  stats
+  stats,
+  labelOverride,
+  fallbackValue
 }) => {
+  const trend = getTrend(changePercent);
+  const trendIcon = getTrendIcon(trend);
+  
   return (
     <View style={styles.container}>
       <LinearGradient
@@ -40,7 +48,7 @@ const IndexHero: React.FC<IndexHeroProps> = ({
         {/* Content */}
         <View style={styles.contentContainer}>
           <View style={styles.headerRow}>
-            <Text variant="labelMedium" style={styles.headerText}>INDICE BURSÁTIL CARACAS</Text>
+            <Text variant="labelMedium" style={styles.headerText}>ÍNDICE BURSÁTIL CARACAS</Text>
             <View style={styles.iconContainer}>
               <MaterialCommunityIcons name="chart-line-variant" size={18} color="white" />
             </View>
@@ -48,9 +56,9 @@ const IndexHero: React.FC<IndexHeroProps> = ({
 
           <View style={styles.mainValueRow}>
             <Text variant="displaySmall" style={styles.valueText}>Bs. {value}</Text>
-            <View style={styles.changeBadge}>
-              <MaterialCommunityIcons name="trending-up" size={16} color="#6EE7B7" />
-              <Text variant="labelLarge" style={styles.changeText}>{changePercent}</Text>
+            <View style={[styles.changeBadge, { backgroundColor: trend === 'neutral' ? 'rgba(255,255,255,0.1)' : 'rgba(110, 231, 183, 0.15)' }]}>
+              <MaterialCommunityIcons name={trendIcon} size={16} color={trend === 'neutral' ? '#D1D5DB' : '#6EE7B7'} />
+              <Text variant="labelLarge" style={[styles.changeText, { color: trend === 'neutral' ? '#D1D5DB' : '#6EE7B7' }]}>{changePercent}</Text>
             </View>
           </View>
 
@@ -62,7 +70,7 @@ const IndexHero: React.FC<IndexHeroProps> = ({
               </Text>
             </View>
             <View style={styles.rightAlign}>
-            <Text variant="labelSmall" style={styles.labelSmall}>TÍTULOS NEGOCIADOS</Text>
+            <Text variant="labelSmall" style={styles.labelSmall}>{labelOverride || 'TÍTULOS NEGOCIADOS'}</Text>
             {stats ? (
                   <View style={styles.breadthRow}>
                        <View style={styles.breadthItem}>
@@ -79,7 +87,7 @@ const IndexHero: React.FC<IndexHeroProps> = ({
                        </View>
                   </View>
               ) : (
-                 <Text variant="bodyMedium" style={styles.whiteBold}>-</Text>
+                 <Text variant="bodyMedium" style={styles.whiteBold}>{fallbackValue || '-'}</Text>
               )}
             </View>
           </View>
@@ -132,7 +140,6 @@ const styles = StyleSheet.create({
   changeBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(110, 231, 183, 0.15)',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 8,
@@ -156,7 +163,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   changeText: {
-    color: '#6EE7B7',
     fontWeight: 'bold',
     marginLeft: 4,
   },
@@ -173,19 +179,6 @@ const styles = StyleSheet.create({
   },
   rightAlign: {
     alignItems: 'flex-end',
-  },
-  breadthContainer: {
-    marginTop: 12,
-  },
-  separator: {
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    marginBottom: 12,
-  },
-  breadthContent: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
   },
   breadthRow: {
     flexDirection: 'row',

@@ -202,15 +202,45 @@ const StocksScreen = ({ navigation, route }: any) => {
         />
 
         {/* Index Hero */}
-            {indexData && (
-            <IndexHero 
-            value={indexData.value}
-            changePercent={indexData.changePercent}
-            isPositive={indexData.isPositive}
-            volume={indexData.volume}
-            stats={indexData.stats}
-            />
-        )}
+            {indexData && (() => {
+                const stats = indexData.stats;
+                const hasValidStats = stats && 
+                                      stats.titlesUp !== 0 && 
+                                      stats.titlesDown !== 0 && 
+                                      stats.titlesUnchanged !== 0; // "todos son diferentes a cero"
+
+                let labelOverride = undefined;
+                let fallbackValue = undefined;
+                let statsToPass = undefined;
+
+                if (hasValidStats) {
+                    statsToPass = stats;
+                } else {
+                    // Fallback logic
+                    if (indexData.statusState && indexData.statusState !== 'ABIERTO') { 
+                       // "otro valor que tengas desde la api" (e.g. State if not OPEN/implied running)
+                       // Or generally just whatever status is.
+                       labelOverride = 'ESTADO DEL MERCADO';
+                       fallbackValue = indexData.statusState;
+                    } else {
+                       // "de lo contrario, solo muestra la fecha"
+                       labelOverride = 'FECHA';
+                       fallbackValue = indexData.updateDate;
+                    }
+                }
+                
+                return (
+                    <IndexHero 
+                        value={indexData.value}
+                        changePercent={indexData.changePercent}
+                        isPositive={indexData.isPositive}
+                        volume={indexData.volume}
+                        stats={statsToPass}
+                        labelOverride={labelOverride}
+                        fallbackValue={fallbackValue}
+                    />
+                );
+            })()}
 
         {/* Filters */}
         <FilterSection
