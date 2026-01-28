@@ -124,8 +124,9 @@ class AppCheckService {
 
       // Silence expected development errors or quota exceeded
       if (isExpectedError) {
-        if (__DEV__ && this.errorCount === 1) {
-          console.log('[AppCheck] Expected error suppressed:', message);
+        if (__DEV__) {
+          // Use debug instead of log to keep console clean
+          console.debug('[AppCheck] Suppressed:', message);
         }
         return undefined;
       }

@@ -134,7 +134,7 @@ const WidgetCard: React.FC<WidgetCardProps> = ({
                     ? 'trending-up'
                     : item.trend === 'down'
                     ? 'trending-down'
-                    : 'minus'
+                    : 'trending-neutral'
                 }
                 size={14}
                 color={item.trendColor}

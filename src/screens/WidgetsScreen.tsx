@@ -25,8 +25,9 @@ const APP_VERSION = DeviceInfo.getVersion();
 
 // Helper to format rate for widget display
 const mapRateToWidgetItem = (rate: CurrencyRate): WidgetItem => {
-    const isUp = (rate.changePercent || 0) > 0;
-    const isDown = (rate.changePercent || 0) < 0;
+    const change = Number((rate.changePercent || 0).toFixed(2));
+    const isUp = change > 0;
+    const isDown = change < 0;
     
     return {
         id: rate.id,
@@ -36,8 +37,8 @@ const mapRateToWidgetItem = (rate: CurrencyRate): WidgetItem => {
         currency: 'VES',
         trend: isUp ? 'up' : isDown ? 'down' : 'neutral',
         trendValue: `${isUp ? '+' : ''}${rate.changePercent || 0}%`,
-        trendColor: isUp ? '#2E8B57' : isDown ? '#AE4158' : '#64748B',
-        trendBg: isUp ? 'rgba(46, 139, 87, 0.15)' : isDown ? 'rgba(174, 65, 88, 0.15)' : 'rgba(100, 116, 139, 0.15)'
+        trendColor: isUp ? '#00A86B' : isDown ? '#FF3B30' : '#64748B',
+        trendBg: isUp ? 'rgba(0, 168, 107, 0.15)' : isDown ? 'rgba(255, 59, 48, 0.15)' : 'rgba(100, 116, 139, 0.15)'
     };
 };
 

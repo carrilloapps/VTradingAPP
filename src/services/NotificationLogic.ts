@@ -32,8 +32,8 @@ export const handleBackgroundMessage = async (remoteMessage: any) => {
         const alerts = await storageService.getAlerts();
 
         // Filtramos alertas activas para este símbolo
-        const activeAlerts = alerts.filter((a: any) => 
-            a.isActive && 
+        const activeAlerts = alerts.filter((a: any) =>
+            a.isActive &&
             a.symbol === symbol
         );
 
@@ -43,6 +43,15 @@ export const handleBackgroundMessage = async (remoteMessage: any) => {
                 name: 'Alertas de Precio',
                 importance: AndroidImportance.HIGH,
                 sound: 'default',
+            });
+
+            // Trigger widget update to show latest data
+            const { requestWidgetUpdate } = require('react-native-android-widget');
+            const { buildWidgetElement } = require('../widget/widgetTaskHandler');
+
+            requestWidgetUpdate({
+                widgetName: 'VTradingWidget',
+                renderWidget: buildWidgetElement,
             });
         }
 
@@ -57,19 +66,46 @@ export const handleBackgroundMessage = async (remoteMessage: any) => {
             }
 
             if (triggered) {
-                const actionVerb = alert.condition === 'above' ? 'subió' : 'bajó';
-                const emoji = alert.condition === 'above' ? '📈' : '📉';
-                
+                const isUp = alert.condition === 'above';
+                const actionVerb = isUp ? 'subió' : 'bajó';
+                const directionText = isUp ? 'subida' : 'bajada';
+
                 const formatPrice = (val: number) => val < 0.01 ? val : val.toFixed(2);
+                const currentPriceFormatted = formatPrice(currentPrice);
+                const targetPriceFormatted = formatPrice(targetPrice);
+
+                const notificationId = `price_${symbol}_${Date.now()}`;
+                const finalTitle = `Alerta de ${directionText}: ${symbol} a ${currentPriceFormatted}`;
+                const finalBody = `El precio ${actionVerb} de los ${targetPriceFormatted}`;
 
                 await notifee.displayNotification({
-                    title: `Alerta: ${alert.symbol} ${emoji} a ${formatPrice(currentPrice)}`,
-                    body: `El precio ${actionVerb} de los ${formatPrice(targetPrice)}`,
+                    id: notificationId,
+                    title: finalTitle,
+                    body: finalBody,
                     android: {
                         channelId: 'price_alerts',
                         ...ANDROID_NOTIFICATION_DEFAULTS,
                     },
                 });
+
+                // Persist notification for the UI
+                try {
+                    const stored = await storageService.getNotifications();
+                    const newNotif = {
+                        id: notificationId,
+                        type: 'price_alert' as const,
+                        title: finalTitle,
+                        message: finalBody,
+                        timestamp: new Date().toISOString(),
+                        isRead: false,
+                        trend: (isUp ? 'up' : 'down') as 'up' | 'down',
+                        highlightedValue: currentPriceFormatted.toString(),
+                        data: { symbol, price: currentPrice }
+                    };
+                    await storageService.saveNotifications([newNotif, ...stored]);
+                } catch (e) {
+                    // Fail silently
+                }
             }
         }
         return; // Detener procesamiento aquí si era una alerta de precio
@@ -85,7 +121,10 @@ export const handleBackgroundMessage = async (remoteMessage: any) => {
             importance: AndroidImportance.DEFAULT,
         });
 
+        const notificationId = `gen_${Date.now()}`;
+
         await notifee.displayNotification({
+            id: notificationId,
             title,
             body,
             android: {
@@ -93,5 +132,22 @@ export const handleBackgroundMessage = async (remoteMessage: any) => {
                 ...ANDROID_NOTIFICATION_DEFAULTS,
             },
         });
+
+        // Persist notification for the UI
+        try {
+            const stored = await storageService.getNotifications();
+            const newNotif = {
+                id: notificationId,
+                type: (remoteMessage.data?.type as any) || 'system',
+                title,
+                message: body,
+                timestamp: new Date().toISOString(),
+                isRead: false,
+                data: remoteMessage.data
+            };
+            await storageService.saveNotifications([newNotif, ...stored]);
+        } catch (e) {
+            // Fail silently
+        }
     }
 };

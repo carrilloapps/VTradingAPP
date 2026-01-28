@@ -166,17 +166,16 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                        const isUp = alert.condition === 'above';
                        
                        trendVal = isUp ? 'up' : 'down';
-                       
-                       if (finalTitle === 'Notificación') {
-                           finalTitle = `Alerta de ${isUp ? 'subida' : 'bajada'} para ${symbol}`;
-                       }
-                       
-                       // Construct precise body
+                       const directionText = isUp ? 'subida' : 'bajada';
                        const actionVerb = isUp ? 'subió' : 'bajó';
                        const targetPrice = parseFloat(alert.target);
+                       const formatPrice = (val: number) => val < 0.01 ? val : val.toFixed(2);
+                       const currentPriceFormatted = formatPrice(price);
+                       const targetPriceFormatted = formatPrice(targetPrice);
                        
-                       // formatPrice is already defined above
-                       finalBody = `El precio ${actionVerb} a ${formatPrice(price)} (Objetivo: ${formatPrice(targetPrice)})`;
+                       // Unified title and body
+                       finalTitle = `Alerta de ${directionText}: ${symbol} a ${currentPriceFormatted}`;
+                       finalBody = `El precio ${actionVerb} de los ${targetPriceFormatted}`;
                    } else {
                        // Price update received but no alert condition met -> Ignore it
                        shouldAdd = false;

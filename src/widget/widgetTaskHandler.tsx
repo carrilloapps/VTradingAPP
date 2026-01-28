@@ -89,8 +89,9 @@ export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false
       for (const id of selectedIds) {
           const rate = rates.find(r => r.id === id || r.code === id);
           if (rate) {
-              const isUp = (rate.changePercent || 0) > 0;
-              const isDown = (rate.changePercent || 0) < 0;
+              const change = Number((rate.changePercent || 0).toFixed(2));
+              const isUp = change > 0;
+              const isDown = change < 0;
               
               widgetItems.push({
                   id: rate.id,
@@ -109,8 +110,9 @@ export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false
       if (widgetItems.length === 0) {
           const defaultRates = rates.slice(0, 4);
           defaultRates.forEach(rate => {
-              const isUp = (rate.changePercent || 0) > 0;
-              const isDown = (rate.changePercent || 0) < 0;
+              const change = Number((rate.changePercent || 0).toFixed(2));
+              const isUp = change > 0;
+              const isDown = change < 0;
               widgetItems.push({
                   id: rate.id,
                   label: rate.name,

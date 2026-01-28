@@ -81,7 +81,15 @@ export default function VTradingWidget({
             truncate="END"
           />
         </FlexWidget>
-        <TextWidget text="↻" style={{ fontSize: 28, color: refreshColor }} clickAction="REFRESH_WIDGET" />
+        <TextWidget 
+          text={'\uF0450'} 
+          style={{ 
+            fontSize: 24, 
+            color: refreshColor,
+            fontFamily: 'materialcommunityicons'
+          }} 
+          clickAction="REFRESH_WIDGET" 
+        />
       </FlexWidget>
 
       {limitedItems.length === 0 ? (
@@ -119,14 +127,21 @@ export default function VTradingWidget({
               </FlexWidget>
               <FlexWidget style={{ backgroundColor: item.trendBg, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8, flexDirection: 'row', alignItems: 'center', flexGap: 2 }}>
                 <TextWidget
-                  text={
-                    (item.trend === 'up' ? '▲' : item.trend === 'down' ? '▼' : '−') + 
-                    (showGraph ? ' ' + item.trendValue : '')
-                  }
-                  style={{ fontSize: 11, fontWeight: '700', color: item.trendColor, adjustsFontSizeToFit: true }}
-                  maxLines={1}
-                  truncate="END"
+                  text={item.trend === 'up' ? '\uF05E3' : item.trend === 'down' ? '\uF05E5' : '\uF05E4'}
+                  style={{ 
+                    fontSize: 14, 
+                    color: item.trendColor,
+                    fontFamily: 'materialcommunityicons'
+                  }}
                 />
+                {showGraph && (
+                  <TextWidget
+                    text={item.trendValue}
+                    style={{ fontSize: 11, fontWeight: '700', color: item.trendColor, adjustsFontSizeToFit: true }}
+                    maxLines={1}
+                    truncate="END"
+                  />
+                )}
               </FlexWidget>
             </FlexWidget>
           ))}

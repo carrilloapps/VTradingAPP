@@ -25,7 +25,9 @@ class ApiClient {
   }
 
   async get<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-    let url = `${this.baseUrl}${endpoint}`;
+    const cleanBaseUrl = this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl;
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    let url = `${cleanBaseUrl}${cleanEndpoint}`;
 
     // Append query params if present
     if (options.params) {
@@ -75,8 +77,6 @@ class ApiClient {
       // Sentry Perf
       sentryTransaction = observabilityService.startTransaction(`GET ${endpoint}`, 'http.client');
       if (sentryTransaction) {
-        // En versiones nuevas de Sentry SDK, se usa setTag o setAttribute (para spans)
-        // setData fue removido o renombrado. Usaremos setTag para compatibilidad segura.
         const setTagFn = sentryTransaction.setTag || sentryTransaction.setData;
         if (typeof setTagFn === 'function') {
           const safeSetTag = setTagFn.bind(sentryTransaction);
@@ -112,10 +112,18 @@ class ApiClient {
 
     try {
       // 4. Perform Request
+      if (__DEV__) {
+        console.log(`[ApiClient] Fetching: ${url}`, { headers });
+      }
+
       const response = await fetch(url, {
         method: 'GET',
         headers,
       });
+
+      if (__DEV__) {
+        console.log(`[ApiClient] Status: ${response.status} for ${url}`);
+      }
 
       // 5. Record Performance Data
       if (metric) {
@@ -173,13 +181,25 @@ class ApiClient {
 
       return data;
     } catch (e: any) {
-      observabilityService.captureError(e);
+      const isNetworkError = e instanceof TypeError && e.message === 'Network request failed';
+
+      if (!isNetworkError) {
+        observabilityService.captureError(e);
+      }
+
       if (metric) {
-        try { await metric.stop(); } catch (stopError) { observabilityService.captureError(stopError); }
+        try {
+          // Set a failure response code to avoid Firebase warnings when request fails prematurely
+          // 0 is a common convention for network/corrupted requests in analytics
+          metric.setHttpResponseCode(0);
+          await metric.stop();
+        } catch (stopError) {
+          if (!isNetworkError) observabilityService.captureError(stopError);
+        }
       }
 
       if (sentryTransaction) {
-        observabilityService.finishTransaction(sentryTransaction, 'internal_error');
+        observabilityService.finishTransaction(sentryTransaction, isNetworkError ? 'deadline_exceeded' : 'internal_error');
       }
 
       // Return stale cache if available on network error
