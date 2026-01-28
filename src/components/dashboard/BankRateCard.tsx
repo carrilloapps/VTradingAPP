@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { Text, Surface, Tooltip } from 'react-native-paper';
+import { Text, Surface, Tooltip, TouchableRipple } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../theme/theme';
 import { useToastStore } from '../../stores/toastStore';
@@ -14,6 +14,7 @@ interface BankRateCardProps {
   lastUpdated?: string;
   buyPercentage?: number;
   sellPercentage?: number;
+  onPress?: () => void;
 }
 
 const BankRateCard: React.FC<BankRateCardProps> = ({
@@ -22,7 +23,8 @@ const BankRateCard: React.FC<BankRateCardProps> = ({
   sellValue,
   lastUpdated,
   buyPercentage,
-  sellPercentage
+  sellPercentage,
+  onPress
 }) => {
   const theme = useAppTheme();
   const showToast = useToastStore((state) => state.showToast);
@@ -68,90 +70,104 @@ const BankRateCard: React.FC<BankRateCardProps> = ({
       );
   };
 
+  const getTrendIconName = (percent?: number) => {
+      if (percent === undefined || percent === 0) return 'minus-circle-outline';
+      return percent > 0 ? 'arrow-up-circle-outline' : 'arrow-down-circle-outline';
+  };
+
   return (
-    <Surface
-      elevation={0}
-      style={[styles.card, {
-        backgroundColor: theme.colors.elevation.level1,
-        borderColor: theme.colors.outline,
-        borderRadius: theme.roundness * 6,
-      }]}
+    <TouchableRipple
+      onPress={onPress}
+      style={{ marginBottom: 12, borderRadius: theme.roundness * 6 }}
+      borderless
     >
-      {/* Header Section: Icon, Name, Date */}
-      <View style={styles.header}>
-        <View style={styles.leftHeader}>
-            <View style={[styles.iconContainer, { 
-                backgroundColor: theme.dark ? 'rgba(80, 200, 120, 0.1)' : theme.colors.secondaryContainer 
-            }]}>
-                <MaterialCommunityIcons 
-                    name="bank" 
-                    size={20} 
-                    color={theme.dark ? '#50C878' : theme.colors.secondary} 
-                />
-            </View>
-            <Text 
-                variant="titleMedium" 
-                numberOfLines={1} 
-                ellipsizeMode="tail"
-                style={[styles.bankName, { color: theme.colors.onSurface }]}
-            >
-                {bankName}
-            </Text>
-        </View>
-        
-        {lastUpdated && (
-            <View style={[styles.dateBadge, { backgroundColor: theme.colors.elevation.level2 }]}>
-                <MaterialCommunityIcons name="clock-outline" size={12} color={theme.colors.onSurfaceVariant} style={{ marginRight: 4 }} />
-                <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
-                    {formatDate(lastUpdated)}
-                </Text>
-            </View>
-        )}
-      </View>
-
-      {/* Rates Section */}
-      <View style={[styles.ratesContainer, { 
-          backgroundColor: theme.dark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
-          borderColor: theme.colors.outlineVariant
-      }]}>
-        {/* Compra */}
-        <View style={styles.rateColumn}>
-             <View style={styles.labelRow}>
-                <MaterialCommunityIcons name="arrow-down-circle-outline" size={16} color={theme.colors.secondary} />
-                <Text variant="labelSmall" style={[styles.rateLabel, { color: theme.colors.secondary }]}>COMPRA</Text>
-                {renderPercentage(buyPercentage)}
-             </View>
-             <View style={styles.valueWrapper}>
-                <Text variant="titleLarge" style={[styles.rateValue, { color: theme.colors.onSurface }]}>
-                    Bs. {buyValue.replace(' Bs', '')}
-                </Text>
-             </View>
+      <Surface
+        elevation={0}
+        style={[styles.card, {
+          backgroundColor: theme.colors.elevation.level1,
+          borderColor: theme.colors.outline,
+          borderRadius: theme.roundness * 6,
+          marginBottom: 0, // removed margin from surface as it's now on ripple
+        }]}
+      >
+        {/* Header Section: Icon, Name, Date */}
+        <View style={styles.header}>
+          <View style={styles.leftHeader}>
+              <View style={[styles.iconContainer, { 
+                  backgroundColor: theme.dark ? 'rgba(80, 200, 120, 0.1)' : theme.colors.secondaryContainer 
+              }]}>
+                  <MaterialCommunityIcons 
+                      name="bank" 
+                      size={20} 
+                      color={theme.dark ? '#50C878' : theme.colors.secondary} 
+                  />
+              </View>
+              <Text 
+                  variant="titleMedium" 
+                  numberOfLines={1} 
+                  ellipsizeMode="tail"
+                  style={[styles.bankName, { color: theme.colors.onSurface }]}
+              >
+                  {bankName}
+              </Text>
+          </View>
+          
+          {lastUpdated && (
+              <View style={[styles.dateBadge, { backgroundColor: theme.colors.elevation.level2 }]}>
+                  <MaterialCommunityIcons name="clock-outline" size={12} color={theme.colors.onSurfaceVariant} style={{ marginRight: 4 }} />
+                  <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                      {formatDate(lastUpdated)}
+                  </Text>
+              </View>
+          )}
         </View>
 
-        {/* Divider */}
-        <View style={[styles.verticalDivider, { backgroundColor: theme.colors.outlineVariant }]} />
+        {/* Rates Section */}
+        <View style={[styles.ratesContainer, { 
+            backgroundColor: theme.dark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
+            borderColor: theme.colors.outlineVariant
+        }]}>
+          {/* Compra */}
+          <View style={styles.rateColumn}>
+              <View style={styles.labelRow}>
+                  <MaterialCommunityIcons name={getTrendIconName(buyPercentage)} size={16} color={theme.colors.secondary} />
+                  <Text variant="labelSmall" style={[styles.rateLabel, { color: theme.colors.secondary }]}>COMPRA</Text>
+                  {renderPercentage(buyPercentage)}
+              </View>
+              <View style={styles.valueWrapper}>
+                  <Text variant="titleLarge" style={[styles.rateValue, { color: theme.colors.onSurface }]}>
+                      {buyValue.replace(' Bs', '')}
+                  </Text>
+                  <BolivarIcon size={16} color={theme.colors.onSurface} style={{ marginLeft: 4 }} />
+              </View>
+          </View>
 
-        {/* Venta */}
-        <View style={styles.rateColumn}>
-             <View style={styles.labelRow}>
-                <MaterialCommunityIcons name="arrow-up-circle-outline" size={16} color={theme.colors.primary} />
-                <Text variant="labelSmall" style={[styles.rateLabel, { color: theme.colors.primary }]}>VENTA</Text>
-                {renderPercentage(sellPercentage)}
-             </View>
-             <View style={styles.valueWrapper}>
-                <Text variant="titleLarge" style={[styles.rateValue, { color: theme.colors.onSurface }]}>
-                    Bs. {sellValue.replace(' Bs', '')}
-                </Text>
-             </View>
+          {/* Divider */}
+          <View style={[styles.verticalDivider, { backgroundColor: theme.colors.outlineVariant }]} />
+
+          {/* Venta */}
+          <View style={styles.rateColumn}>
+              <View style={styles.labelRow}>
+                  <MaterialCommunityIcons name={getTrendIconName(sellPercentage)} size={16} color={theme.colors.primary} />
+                  <Text variant="labelSmall" style={[styles.rateLabel, { color: theme.colors.primary }]}>VENTA</Text>
+                  {renderPercentage(sellPercentage)}
+              </View>
+              <View style={styles.valueWrapper}>
+                  <Text variant="titleLarge" style={[styles.rateValue, { color: theme.colors.onSurface }]}>
+                      {sellValue.replace(' Bs', '')}
+                  </Text>
+                  <BolivarIcon size={16} color={theme.colors.onSurface} style={{ marginLeft: 4 }} />
+              </View>
+          </View>
         </View>
-      </View>
-    </Surface>
+      </Surface>
+    </TouchableRipple>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    marginBottom: 12,
+    // marginBottom: 12, // Moved to TouchableRipple
     borderWidth: 1,
     overflow: 'hidden', // Ensures inner container rounding respects card
   },
@@ -224,7 +240,7 @@ const styles = StyleSheet.create({
   },
   valueWrapper: {
       flexDirection: 'row',
-      alignItems: 'baseline',
+      alignItems: 'center',
   },
   rateValue: {
       fontWeight: '800',

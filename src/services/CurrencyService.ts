@@ -409,7 +409,7 @@ export class CurrencyService {
         value: (rate.buy + rate.sell) / 2,
         changePercent: 0,
         type: 'fiat',
-        iconName: 'account-balance',
+        iconName: 'bank',
         lastUpdated: rate.indicatorDate,
         source: rate.bank,
         buyValue: rate.buy,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, StyleSheet, StatusBar, ActivityIndicator, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { View, StyleSheet, StatusBar, ActivityIndicator, LayoutAnimation, Platform, UIManager, RefreshControl } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { Text, useTheme } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
@@ -168,9 +168,10 @@ const BankRatesScreen = () => {
             lastUpdated={item.lastUpdated}
             buyPercentage={buyPercentage}
             sellPercentage={sellPercentage}
+            onPress={() => (navigation as any).navigate('CurrencyDetail', { rate: item, currencyId: item.id })}
         />
     );
-  }, [bcvRate]);
+  }, [bcvRate, navigation]);
 
   const renderFooter = () => {
       if (!loadingMore) return null;
@@ -305,8 +306,15 @@ const BankRatesScreen = () => {
             renderItem={renderItem}
             keyExtractor={item => item.id}
             contentContainerStyle={styles.listContent}
-            refreshing={refreshing}
-            onRefresh={onRefresh}
+            refreshControl={
+                <RefreshControl 
+                    refreshing={refreshing} 
+                    onRefresh={onRefresh} 
+                    colors={[theme.colors.primary]} 
+                    progressBackgroundColor={theme.colors.elevation.level2}
+                    tintColor={theme.colors.primary}
+                />
+            }
             onEndReached={loadMore}
             onEndReachedThreshold={0.5}
             ListHeaderComponent={renderHeader}
