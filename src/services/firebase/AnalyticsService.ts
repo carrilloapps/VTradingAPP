@@ -1,5 +1,6 @@
 import { getAnalytics, logEvent, setUserProperty, setUserId } from '@react-native-firebase/analytics';
 import * as Clarity from '@microsoft/react-native-clarity';
+import * as Sentry from '@sentry/react-native';
 import { observabilityService } from '../ObservabilityService';
 
 class AnalyticsService {
@@ -13,6 +14,13 @@ class AnalyticsService {
       // Mirror important events to Clarity
       // Clarity custom tags are key-value pairs, or we can send a custom event
       Clarity.sendCustomEvent(name);
+
+      Sentry.addBreadcrumb({
+        category: 'analytics',
+        message: name,
+        data: params,
+        level: 'info',
+      });
 
       // If we have critical params, we might want to tag the session
       if (params && params.screen_name) {
@@ -34,6 +42,11 @@ class AnalyticsService {
       await logEvent(getAnalytics(), 'screen_view', {
         screen_name: screenName,
         screen_class: screenClass || screenName,
+      });
+      Sentry.addBreadcrumb({
+        category: 'navigation',
+        message: `Viewed ${screenName}`,
+        level: 'info',
       });
       // Tag Clarity session with current screen to filter sessions by screen
       Clarity.setCustomTag('screen_view', screenName);

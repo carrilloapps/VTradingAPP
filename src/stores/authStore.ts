@@ -65,6 +65,7 @@ export const useAuthStore = create<AuthState>()(
             signIn: async (email, password, showToast) => {
                 try {
                     await authService.signInWithEmail(email, password);
+                    await analyticsService.logLogin('email');
                     showToast('Bienvenido de nuevo', 'success');
                 } catch (e: any) {
                     observabilityService.captureError(e);
@@ -76,6 +77,7 @@ export const useAuthStore = create<AuthState>()(
             signUp: async (email, password, showToast) => {
                 try {
                     await authService.signUpWithEmail(email, password);
+                    await analyticsService.logSignUp('email');
                     showToast('Cuenta creada exitosamente', 'success');
                 } catch (e: any) {
                     observabilityService.captureError(e);
@@ -87,6 +89,7 @@ export const useAuthStore = create<AuthState>()(
             signOut: async (showToast) => {
                 try {
                     await authService.signOut();
+                    await analyticsService.logEvent('logout');
                     showToast('Sesión cerrada', 'info');
                 } catch (e: any) {
                     observabilityService.captureError(e);
@@ -98,6 +101,7 @@ export const useAuthStore = create<AuthState>()(
             deleteAccount: async (showToast) => {
                 try {
                     await authService.deleteAccount();
+                    await analyticsService.logEvent('delete_account');
                     showToast('Cuenta eliminada', 'success');
                 } catch (e: any) {
                     observabilityService.captureError(e);
@@ -124,6 +128,7 @@ export const useAuthStore = create<AuthState>()(
             resetPassword: async (email, showToast) => {
                 try {
                     await authService.sendPasswordResetEmail(email);
+                    await analyticsService.logEvent('reset_password_request');
                     showToast('Correo de recuperación enviado', 'success');
                 } catch (e: any) {
                     observabilityService.captureError(e);
@@ -135,6 +140,7 @@ export const useAuthStore = create<AuthState>()(
             signInAnonymously: async (showToast) => {
                 try {
                     await authService.signInAnonymously();
+                    await analyticsService.logLogin('anonymous');
                     showToast('Ingresaste como invitado', 'warning');
                 } catch (e: any) {
                     observabilityService.captureError(e);
@@ -147,6 +153,7 @@ export const useAuthStore = create<AuthState>()(
                 try {
                     const updatedUser = await authService.updateProfileName(newName);
                     set({ user: updatedUser });
+                    await analyticsService.logEvent('update_profile_name');
                     showToast('Perfil actualizado correctamente', 'success');
                 } catch (e: any) {
                     observabilityService.captureError(e);

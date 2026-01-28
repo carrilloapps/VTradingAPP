@@ -298,6 +298,7 @@ const AdvancedCalculatorScreen = () => {
       }));
       
       showToast(`Base cambiada a ${currency.code}`, 'success');
+      analyticsService.logEvent('calculator_set_base', { currency: currency.code });
       setPickerVisible(false);
   };
 

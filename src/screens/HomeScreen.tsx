@@ -314,6 +314,7 @@ const HomeScreen = ({ navigation }: any) => {
         setIsMarketOpen(StocksService.isMarketOpen());
         showToast('Datos actualizados', 'success');
         setLastRefreshTime(new Date()); // Force update time immediately on success
+        analyticsService.logEvent('dashboard_refresh');
     } catch (e) {
         observabilityService.captureError(e);
         showToast('Error al actualizar', 'error');
@@ -419,6 +420,7 @@ const HomeScreen = ({ navigation }: any) => {
                 onPress={() => {
                     const rawRate = rates.find(r => r.name === item.title);
                     if (rawRate) {
+                        analyticsService.logEvent('click_currency_detail', { currency: rawRate.code });
                         navigation.navigate('CurrencyDetail', { rate: rawRate });
                     }
                 }} 
@@ -449,7 +451,10 @@ const HomeScreen = ({ navigation }: any) => {
                 {...stock}
                 value={`${stock.price.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`}
                 change={`${stock.changePercent > 0 ? '+' : ''}${stock.changePercent.toFixed(2)}%`}
-                onPress={() => navigation.navigate('StockDetail', { stock })}
+                onPress={() => {
+                   analyticsService.logEvent('click_stock_detail', { symbol: stock.symbol });
+                   navigation.navigate('StockDetail', { stock });
+                }}
               />
             ))}
           </View>

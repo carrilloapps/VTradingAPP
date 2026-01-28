@@ -14,6 +14,7 @@ import { useToastStore } from '../stores/toastStore';
 import { AppTheme } from '../theme/theme';
 import { useNavigation } from '@react-navigation/native';
 import { observabilityService } from '../services/ObservabilityService';
+import { analyticsService } from '../services/firebase/AnalyticsService';
 import { BolivarIcon } from '../components/ui/BolivarIcon';
 
 const isFabricEnabled = !!(globalThis as any).nativeFabricUIManager;
@@ -86,6 +87,7 @@ const BankRatesScreen = () => {
   const onRefresh = useCallback(() => {
       setRefreshing(true);
       fetchRates(true, { page: 1 });
+      analyticsService.logEvent('bank_rates_refresh');
   }, [fetchRates]);
 
   const loadMore = useCallback(() => {
@@ -168,7 +170,10 @@ const BankRatesScreen = () => {
             lastUpdated={item.lastUpdated}
             buyPercentage={buyPercentage}
             sellPercentage={sellPercentage}
-            onPress={() => (navigation as any).navigate('CurrencyDetail', { rate: item, currencyId: item.id })}
+            onPress={() => {
+                analyticsService.logEvent('click_bank_rate', { bank: item.name, code: item.code });
+                (navigation as any).navigate('CurrencyDetail', { rate: item, currencyId: item.id });
+            }}
         />
     );
   }, [bcvRate, navigation]);
