@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, Switch } from 'react-native';
-import { Text, TextInput, IconButton, Button, SegmentedButtons, Icon, Avatar } from 'react-native-paper';
+import { Text, TextInput, IconButton, Button, SegmentedButtons, Avatar } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -15,6 +15,7 @@ import { WidgetItem } from '../widget/types';
 import CurrencyPickerModal from '../components/dashboard/CurrencyPickerModal';
 import { storageService, WidgetConfig } from '../services/StorageService';
 import { useToastStore } from '../stores/toastStore';
+import { analyticsService } from '../services/firebase/AnalyticsService';
 import { requestWidgetUpdate } from 'react-native-android-widget';
 import { buildWidgetElement } from '../widget/widgetTaskHandler';
 import { observabilityService } from '../services/ObservabilityService';
@@ -127,6 +128,8 @@ const WidgetsScreen = () => {
     setSelectedRates(defaults);
   };
 
+
+
   const handleSave = async () => {
     try {
         const config: WidgetConfig = {
@@ -140,6 +143,14 @@ const WidgetsScreen = () => {
         };
         await storageService.saveWidgetConfig(config);
         
+        await analyticsService.logEvent('widget_save_config', {
+            transparent: isTransparent,
+            dark_mode: isWidgetDarkMode,
+            show_graph: showGraph,
+            currency_count: selectedRates.length,
+            refresh: refreshInterval
+        });
+
         // Request widget update
         requestWidgetUpdate({
             widgetName: 'VTradingWidget',
@@ -153,6 +164,10 @@ const WidgetsScreen = () => {
         showToast('Error al guardar', 'error');
     }
   };
+
+  useEffect(() => {
+    analyticsService.logScreenView('WidgetsScreen', 'WidgetsScreen');
+  }, []);
 
   // Order & Selection Handlers
   const moveRate = (index: number, direction: 'up' | 'down') => {

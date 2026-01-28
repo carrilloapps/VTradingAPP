@@ -130,6 +130,7 @@ const SettingsScreen = () => {
 
   const handleEditProfile = () => {
     setShowEditProfileDialog(true);
+    analyticsService.logEvent('edit_profile_click');
   };
 
   const saveProfileName = async (newName: string) => {
@@ -145,6 +146,7 @@ const SettingsScreen = () => {
   const openExternalUrl = (url: string, title?: string) => {
     // @ts-ignore
     navigation.navigate('WebView', { url, title: title || 'Navegador' });
+    analyticsService.logEvent('open_external_link', { url, title });
   };
 
   const togglePush = async (value: boolean) => {
@@ -262,6 +264,7 @@ const SettingsScreen = () => {
          return;
       }
       (navigation as any).navigate('AddAlert');
+      analyticsService.logEvent('create_alert_click');
   };
 
   if (loading) {
@@ -286,7 +289,10 @@ const SettingsScreen = () => {
         variant="section"
         title="Configuración"
         rightActionIcon="information-outline"
-        onActionPress={() => setShowAboutDialog(true)}
+        onActionPress={() => {
+          setShowAboutDialog(true);
+          analyticsService.logEvent('view_about_dialog');
+        }}
       />
 
       <ScrollView 

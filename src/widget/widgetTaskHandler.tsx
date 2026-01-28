@@ -6,6 +6,7 @@ import VTradingWidget from './VTradingWidget';
 import { WidgetItem } from './types';
 import { observabilityService } from '../services/ObservabilityService';
 import { getTrend } from '../utils/trendUtils';
+import { analyticsService } from '../services/firebase/AnalyticsService';
 
 export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false) {
   console.log('[Widget] buildWidgetElement called', { 
@@ -167,16 +168,21 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
     if (widgetAction === 'WIDGET_ADDED') {
       console.log('[Widget] Widget added, initializing refresh metadata');
       await storageService.saveWidgetRefreshMeta({ lastRefreshAt: Date.now() });
+      await analyticsService.logEvent('widget_added', { widgetId: widgetInfo?.widgetId });
+      await analyticsService.setUserProperty('has_widget', 'true');
     }
 
     if (widgetAction === 'WIDGET_DELETED') {
       console.log('[Widget] Widget deleted, clearing metadata');
       await storageService.saveWidgetRefreshMeta({ lastRefreshAt: 0 });
+      await analyticsService.logEvent('widget_deleted', { widgetId: widgetInfo?.widgetId });
+      await analyticsService.setUserProperty('has_widget', 'false');
       return;
     }
 
     if (widgetAction === 'WIDGET_CLICK' && clickAction === 'REFRESH_WIDGET') {
       console.log('[Widget] Manual refresh triggered');
+      await analyticsService.logEvent('widget_refresh_manual', { widgetId: widgetInfo?.widgetId });
       // Updating widget
       const element = await buildWidgetElement(widgetInfo, true);
       await props.renderWidget(element);
@@ -187,6 +193,7 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
     await props.renderWidget(element);
   } catch (e) {
     observabilityService.captureError(e);
+    await analyticsService.logEvent('widget_error', { action: widgetAction });
     // WidgetTaskHandler Error
   }
 }
