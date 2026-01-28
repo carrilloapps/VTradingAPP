@@ -131,7 +131,7 @@ export default function VTradingWidget({
                   style={{ 
                     fontSize: 14, 
                     color: item.trendColor,
-                    fontFamily: 'materialcommunityicons'
+                    fontFamily: 'mdi_font'
                   }}
                 />
                 {showGraph && (

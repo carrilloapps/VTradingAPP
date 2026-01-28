@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, Switch } from 'react-native';
-import { Text, TextInput, IconButton, Button, SegmentedButtons } from 'react-native-paper';
+import { Text, TextInput, IconButton, Button, SegmentedButtons, Icon, Avatar } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -10,7 +10,6 @@ import { useAppTheme } from '../theme/theme';
 import CustomButton from '../components/ui/CustomButton';
 import DeviceInfo from 'react-native-device-info';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
-import { TetherIcon } from '../components/ui/TetherIcon';
 import WidgetPreview from '../components/widgets/WidgetPreview';
 import { WidgetItem } from '../widget/types';
 import CurrencyPickerModal from '../components/dashboard/CurrencyPickerModal';
@@ -255,28 +254,23 @@ const WidgetsScreen = () => {
 
                 {/* Currency List */}
                 {selectedRates.map((rate, index) => {
-                    let iconElement;
+                    let iconName = 'currency-usd';
+                    let iconColor = theme.colors.onSurfaceVariant;
+                    let iconBg = theme.colors.elevation.level2;
+
+                    // Standardize icons using MaterialCommunityIcons via react-native-paper
                     if (rate.code === 'USDT') {
-                        iconElement = (
-                            <View style={{ width: 24, height: 24, borderRadius: 12, overflow: 'hidden' }}>
-                                <TetherIcon backgroundColor={theme.colors.secondaryContainer} contentColor={theme.colors.onSecondaryContainer} />
-                            </View>
-                        );
+                        iconName = 'alpha-t-circle-outline';
+                        iconColor = theme.colors.onSecondaryContainer;
+                        iconBg = theme.colors.secondaryContainer;
                     } else if (rate.type === 'crypto') {
-                        iconElement = (
-                            <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: '#F7931A', alignItems: 'center', justifyContent: 'center' }}>
-                                <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 14 }}>₿</Text>
-                            </View>
-                        );
+                        iconName = rate.iconName === 'ethereum' ? 'ethereum' : 'bitcoin';
+                        iconColor = '#FFFFFF';
+                        iconBg = rate.iconName === 'ethereum' ? '#627EEA' : '#F7931A';
                     } else if (rate.code === 'VES' || rate.iconName === 'Bs') {
-                        iconElement = (
-                            <BolivarIcon color={theme.colors.onSurfaceVariant} size={24} />
-                        );
-                    } else {
-                        // Map specific icons if needed, otherwise fallback to currency-usd
-                        // For BCV/Monitor which use 'attach-money', we use 'currency-usd'
-                        const iconName = (rate.iconName === 'attach-money' || !rate.iconName) ? 'currency-usd' : rate.iconName;
-                        iconElement = <MaterialCommunityIcons name={iconName} size={24} color={theme.colors.onSurfaceVariant} />;
+                        iconName = 'cash-multiple';
+                    } else if (rate.iconName && rate.iconName !== 'attach-money') {
+                        iconName = rate.iconName;
                     }
 
                     return (
@@ -284,7 +278,18 @@ const WidgetsScreen = () => {
                              <View style={[styles.separator, { backgroundColor: theme.colors.outline }]} />
                              <View style={[styles.prefRow, { paddingVertical: 8 }]}>
                                 <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                                     {iconElement}
+                                     { (rate.code === 'VES' || rate.iconName === 'Bs') ? (
+                                         <View style={[styles.iconBox, { backgroundColor: iconBg, width: 32, height: 32, borderRadius: 8 }]}>
+                                             <BolivarIcon color={iconColor} size={20} />
+                                         </View>
+                                     ) : (
+                                         <Avatar.Icon 
+                                            size={32} 
+                                            icon={iconName} 
+                                            color={iconColor} 
+                                            style={{ backgroundColor: iconBg, borderRadius: 8 }} 
+                                         />
+                                     )}
                                      <Text variant="bodyMedium" numberOfLines={1} style={{ flex: 1, color: theme.colors.onSurface }}>{rate.name}</Text>
                                 </View>
                                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, SectionList } from 'react-native';
-import { Text, useTheme, Searchbar, Button } from 'react-native-paper';
+import { Text, useTheme, Searchbar, Button, Icon } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { CurrencyRate } from '../../services/CurrencyService';
 import { BottomSheetModal } from '../ui/BottomSheetModal';
@@ -156,11 +156,11 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
                             styles.iconPlaceholder, 
                             isSelected ? themeStyles.iconPlaceholderSelected : themeStyles.iconPlaceholderNormal
                         ]}>
-                             {(item.iconName === 'Bs' || item.code === 'VES') ? (
+                             {(item.code === 'VES' || item.iconName === 'Bs') ? (
                                 <BolivarIcon color={isSelected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant} size={24} />
                              ) : (
-                                <MaterialCommunityIcons 
-                                    name={item.iconName || 'currency-usd'} 
+                                <Icon 
+                                    source={item.iconName && item.iconName !== 'attach-money' ? item.iconName : 'currency-usd'} 
                                     size={24} 
                                     color={isSelected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant} 
                                 />
