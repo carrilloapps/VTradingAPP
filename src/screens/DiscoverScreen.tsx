@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, ScrollView, Animated, Easing, StatusBar } from 'react-native';
+import { View, StyleSheet, ScrollView, Animated, Easing, StatusBar, RefreshControl } from 'react-native';
 import { Text, useTheme, Button, ProgressBar, Surface } from 'react-native-paper';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -11,6 +11,7 @@ import { useToastStore } from '../stores/toastStore';
 import { observabilityService } from '../services/ObservabilityService';
 
 import { remoteConfigService } from '../services/firebase/RemoteConfigService';
+import { wordPressService, FormattedPost, WordPressCategory } from '../services/WordPressService';
 import DiscoverFeed from '../components/discover/DiscoverFeed';
 
 const FeatureItem = ({ icon, title, description, theme }: any) => {
@@ -47,6 +48,11 @@ const DiscoverScreen = () => {
   const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
   const [progress, setProgress] = useState(0);
   const [isDiscoveryActive, setIsDiscoveryActive] = useState(false);
+  const [posts, setPosts] = useState<FormattedPost[]>([]);
+  const [categories, setCategories] = useState<WordPressCategory[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<number | undefined>(undefined);
+  const [refreshing, setRefreshing] = useState(false);
+  const [featuredPost, setFeaturedPost] = useState<FormattedPost | undefined>(undefined);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -59,16 +65,39 @@ const DiscoverScreen = () => {
         // Fetch Remote Config & Evaluate Feature Flag
         await remoteConfigService.fetchAndActivate();
         
-        // 1. Check Advanced Feature Flag (settings key)
+        // 1. Check Advanced Feature Flag (feature_flags key)
         const isFeatureActive = await remoteConfigService.getFeature('discover');
         
-        // 2. Check Simple Config (strings key)
-        const stringsConfig = remoteConfigService.getJson<any>('strings');
-        const isSimpleActive = stringsConfig?.screens?.discovery === true;
+        // 2. Check Simple Config (strings key) - Optional fallback
+        // const stringsConfig = remoteConfigService.getJson<any>('strings');
+        // const isSimpleActive = stringsConfig?.screens?.discovery === true;
 
         // Enable if either method allows it
-        setIsDiscoveryActive(isFeatureActive || isSimpleActive);
-        //setIsDiscoveryActive(true);
+        const active = isFeatureActive; // || isSimpleActive;
+        setIsDiscoveryActive(active);
+
+        if (active) {
+          try {
+             // Fetch WP categories and posts
+             const [fetchedCategories, fetchedPosts] = await Promise.all([
+               wordPressService.getCategories(),
+               wordPressService.getPosts()
+             ]);
+             
+             setCategories(fetchedCategories);
+             setPosts(fetchedPosts);
+             
+             // Set featured post: latest with 'trending' tag or most recent post
+             const trendingPost = fetchedPosts.find(post => 
+               post.tags?.some(tag => tag.slug.toLowerCase() === 'trending')
+             );
+             setFeaturedPost(trendingPost || fetchedPosts[0]);
+          } catch (err) {
+             console.error('Failed to load discovery data', err);
+             observabilityService.captureError(err, { context: 'DiscoverScreen.loadData' });
+             showToast('Error al cargar contenido de Discovery', 'error');
+          }
+        }
 
       } catch (e) {
         observabilityService.captureError(e);
@@ -156,6 +185,46 @@ const DiscoverScreen = () => {
     }
   };
 
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    
+    try {
+      // Force bypass cache to get fresh data
+      const [fetchedCategories, fetchedPosts] = await Promise.all([
+        wordPressService.getCategories(true), // bypassCache = true
+        wordPressService.getPosts(1, 10, selectedCategory, undefined, true) // bypassCache = true
+      ]);
+      
+      setCategories(fetchedCategories);
+      setPosts(fetchedPosts);
+      
+      // Update featured post
+      const trendingPost = fetchedPosts.find(post => 
+        post.tags?.some(tag => tag.slug.toLowerCase() === 'trending')
+      );
+      setFeaturedPost(trendingPost || fetchedPosts[0]);
+      
+      showToast('Contenido actualizado', 'success');
+    } catch (err) {
+      observabilityService.captureError(err, { context: 'DiscoverScreen.handleRefresh' });
+      showToast('Error al actualizar contenido', 'error');
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  const handleCategorySelect = async (categoryId: number | undefined) => {
+    setSelectedCategory(categoryId);
+    
+    try {
+      const fetchedPosts = await wordPressService.getPosts(1, 10, categoryId);
+      setPosts(fetchedPosts);
+    } catch (err) {
+      observabilityService.captureError(err, { context: 'DiscoverScreen.handleCategorySelect' });
+      showToast('Error al filtrar por categoría', 'error');
+    }
+  };
+
   if (isLoading) {
     return <DiscoverSkeleton />;
   }
@@ -172,7 +241,21 @@ const DiscoverScreen = () => {
                 variant="section" 
                 title="Descubre" 
             />
-            <DiscoverFeed />
+            <DiscoverFeed 
+                items={posts} 
+                categories={categories}
+                selectedCategory={selectedCategory}
+                onCategorySelect={handleCategorySelect}
+                featuredPost={featuredPost}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={refreshing}
+                    onRefresh={handleRefresh}
+                    colors={[theme.colors.primary]}
+                    tintColor={theme.colors.primary}
+                  />
+                }
+            />
         </View>
       );
   }

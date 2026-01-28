@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { View, StyleSheet, Image, Animated, Share, StatusBar, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, Image, Animated, Share, StatusBar, useWindowDimensions, RefreshControl, ActivityIndicator } from 'react-native';
 import { Text, Surface, IconButton, Chip, Divider, Avatar } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -7,6 +7,10 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import LinearGradient from 'react-native-linear-gradient';
 import { useAppTheme } from '../theme/theme';
 import { analyticsService } from '../services/firebase/AnalyticsService';
+import { wordPressService, FormattedComment, WordPressTag } from '../services/WordPressService';
+import { remoteConfigService } from '../services/firebase/RemoteConfigService';
+import { observabilityService } from '../services/ObservabilityService';
+import { CommentsList } from '../components/discover/CommentsList';
 
 // --- Mock Content (Simulating Headless WP JSON) ---
 const MOCK_ARTICLE = {
@@ -79,22 +83,28 @@ const BlockList = ({ items, theme }: any) => (
     </View>
 );
 
+import { WebView } from 'react-native-webview';
+
+// ... (Existing Imports)
+
+// ... (Existing Block Components)
+
 const ArticleDetailScreen = () => {
   const theme = useAppTheme();
   const navigation = useNavigation();
   const route = useRoute();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
+  const [webViewHeight, setWebViewHeight] = React.useState(100);
+  const [comments, setComments] = React.useState<FormattedComment[]>([]);
+  const [commentsLoading, setCommentsLoading] = React.useState(false);
+  const [commentsEnabled, setCommentsEnabled] = React.useState(false);
+  const [refreshing, setRefreshing] = React.useState(false);
 
   // Safe width calculation for centered title
-  // We have more buttons on the right (2) than left (1).
-  // To keep text truly centered, we must respect the wider side (Right ~110px).
-  // Max width = ScreenWidth - (110px * 2) = ScreenWidth - 220px.
   const maxTitleWidth = width - 220;
   
-
-
-  // Use passed params merged with mock fallback to ensure all fields exist (like author, content)
+  // Use passed params merged with mock fallback
   const incomingArticle = (route.params as any)?.article;
   const article = {
       ...MOCK_ARTICLE, 
@@ -102,7 +112,13 @@ const ArticleDetailScreen = () => {
       author: {
           ...MOCK_ARTICLE.author,
           ...(incomingArticle?.author || {})
-      }
+      },
+      // Use WordPress tags if available, otherwise use mock tags
+      tags: incomingArticle?.tags?.map((tag: any) => tag.name) || MOCK_ARTICLE.tags,
+      // Use WordPress categories if available
+      categories: incomingArticle?.categories || [],
+      // Use Yoast SEO description if available
+      seoDescription: incomingArticle?.yoastSEO?.description || incomingArticle?.seoDescription || MOCK_ARTICLE.seoDescription,
   };
 
   React.useEffect(() => {
@@ -111,17 +127,74 @@ const ArticleDetailScreen = () => {
     }
   }, [article?.id, article?.title]);
 
-  const scrollY = useRef(new Animated.Value(0)).current;
-
-  const handleShare = async () => {
+  // Check comments feature flag and fetch comments
+  React.useEffect(() => {
+    const loadCommentsFeature = async () => {
       try {
-          await Share.share({
-              message: `${article.title} - Lee más en VTradingAPP`
-          });
+        await remoteConfigService.fetchAndActivate();
+        const isCommentsActive = await remoteConfigService.getFeature('comments');
+        setCommentsEnabled(isCommentsActive);
+
+        if (isCommentsActive && article?.id) {
+          setCommentsLoading(true);
+          const fetchedComments = await wordPressService.getComments(Number(article.id));
+          setComments(fetchedComments);
+          setCommentsLoading(false);
+        }
       } catch (error) {
-          console.log(error);
+        observabilityService.captureError(error, { context: 'ArticleDetailScreen.loadCommentsFeature' });
+        setCommentsLoading(false);
       }
+    };
+
+    loadCommentsFeature();
+  }, [article?.id]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    
+    try {
+      if (commentsEnabled && article?.id) {
+        // Force bypass cache to get fresh comments
+        const fetchedComments = await wordPressService.getComments(Number(article.id), 1, 100, true);
+        setComments(fetchedComments);
+      }
+    } catch (error) {
+      observabilityService.captureError(error, { context: 'ArticleDetailScreen.handleRefresh' });
+    } finally {
+      setRefreshing(false);
+    }
   };
+
+  // Enhanced Share with Deep Links
+  const handleShare = async () => {
+    try {
+      // Generate deep link for the article
+      const articleId = article.id || article.slug || 'unknown';
+      const deepLink = `vtrading://article/${articleId}`;
+      const webLink = `https://discover.vtrading.app/article/${articleId}`;
+      
+      const shareMessage = `📰 ${article.title}\n\n${article.excerpt || ''}\n\n🔗 Leer más: ${webLink}\n\nAbrir en la app: ${deepLink}`;
+      
+      const result = await Share.share({
+        message: shareMessage,
+        title: article.title,
+        url: webLink, // iOS uses this
+      });
+      
+      if (result.action === Share.sharedAction) {
+        analyticsService.logEvent('article_shared', {
+          article_id: articleId,
+          article_title: article.title,
+          share_method: result.activityType || 'unknown',
+        });
+      }
+    } catch (error) {
+      observabilityService.captureError(error, { context: 'ArticleDetailScreen.handleShare' });
+    }
+  };
+
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   const renderBlock = (block: any, index: number) => {
       switch (block.type) {
@@ -139,10 +212,67 @@ const ArticleDetailScreen = () => {
       outputRange: [0, 1],
       extrapolate: 'clamp'
   });
+  
+  // HTML Content Renderer (WebView)
+  const renderHtmlContent = () => {
+      const textColor = theme.colors.onSurface;
+      const linkColor = theme.colors.primary;
+      
+      const htmlContent = `
+        <html>
+          <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            <style>
+              body { 
+                font-family: -apple-system, Roboto, sans-serif; 
+                font-size: 16px; 
+                line-height: 1.6; 
+                color: ${textColor}; 
+                background-color: transparent;
+                margin: 0;
+                padding: 0;
+              }
+              h1, h2, h3 { color: ${textColor}; font-weight: bold; margin-top: 24px; margin-bottom: 12px; }
+              p { margin-bottom: 16px; }
+              a { color: ${linkColor}; text-decoration: none; }
+              img { max-width: 100%; height: auto; border-radius: 8px; margin: 16px 0; }
+              blockquote { 
+                border-left: 4px solid ${theme.colors.primary};
+                padding-left: 16px;
+                margin-left: 0;
+                font-style: italic;
+                color: ${theme.colors.onSurfaceVariant};
+              }
+              ul, ol { padding-left: 20px; }
+              li { margin-bottom: 8px; }
+            </style>
+          </head>
+          <body>
+            ${article.content}
+            <script>
+              const resizeObserver = new ResizeObserver(entries => {
+                window.ReactNativeWebView.postMessage(document.body.scrollHeight);
+              });
+              resizeObserver.observe(document.body);
+            </script>
+          </body>
+        </html>
+      `;
 
-  // Buttons opacity: Inverse of header (optional, but nice to keep them distinct)
-  // Actually standard pattern is buttons stay, bg fades in. 
-  // We will keep buttons always visible but add a background to them for contrast.
+      return (
+        <WebView
+          originWhitelist={['*']}
+          source={{ html: htmlContent }}
+          style={{ height: webViewHeight, backgroundColor: 'transparent' }}
+          scrollEnabled={false}
+          onMessage={(event) => {
+            setWebViewHeight(Number(event.nativeEvent.data));
+          }}
+          javaScriptEnabled={true}
+          showsVerticalScrollIndicator={false}
+        />
+      );
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -227,102 +357,145 @@ const ArticleDetailScreen = () => {
             )}
             scrollEventThrottle={16}
             contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
+                colors={[theme.colors.primary]}
+                tintColor={theme.colors.primary}
+              />
+            }
         >
-            {/* Hero Image */}
-            <View style={styles.heroContainer}>
-                <Image source={{ uri: article.featuredImage }} style={styles.heroImage} />
-                <LinearGradient 
-                    colors={['transparent', 'rgba(0,0,0,0.6)', 'rgba(0,0,0,0.9)']} 
-                    style={styles.heroGradient}
-                >
-                    <Chip style={styles.categoryChip} textStyle={{ color: 'white', fontWeight: 'bold' }}>{article.category}</Chip>
-                </LinearGradient>
-            </View>
+            {/* Hero Image with Theme-Aware Gradient */}
+            {article.image ? (
+              <View style={styles.heroContainer}>
+                  <Image source={{ uri: article.image }} style={styles.heroImage} />
+                  <LinearGradient 
+                      colors={[
+                        'transparent', 
+                        theme.dark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.3)',
+                        theme.colors.background
+                      ]} 
+                      style={styles.heroGradient}
+                  />
+              </View>
+            ) : (
+              <View style={[styles.heroContainer, { backgroundColor: theme.colors.surfaceVariant, height: 280 }]}>
+                  <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+                    <MaterialCommunityIcons 
+                      name="newspaper-variant-outline" 
+                      size={64} 
+                      color={theme.colors.onSurfaceVariant}
+                      style={{ opacity: 0.3 }}
+                    />
+                  </View>
+              </View>
+            )}
 
             <View style={styles.contentContainer}>
-                <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.onSurface }]}>{article.title}</Text>
+                {/* Category Badge */}
+                {article.categories && article.categories.length > 0 && (
+                  <Chip 
+                    style={[styles.categoryBadge, { backgroundColor: theme.colors.primaryContainer }]} 
+                    textStyle={{ color: theme.colors.onPrimaryContainer, fontWeight: '600', fontSize: 11, letterSpacing: 0.5 }}
+                    compact
+                  >
+                    {article.categories[0].name.toUpperCase()}
+                  </Chip>
+                )}
                 
-                {/* Author Meta */}
-                <View style={styles.metaContainer}>
+                {/* Title */}
+                <Text variant="headlineLarge" style={[styles.title, { color: theme.colors.onSurface }]}>
+                  {article.title}
+                </Text>
+                
+                {/* Compact Author Metadata - Single Line */}
+                <View style={styles.compactMetadata}>
+                  {article.author ? (
                     <Avatar.Image size={40} source={{ uri: article.author.avatar }} />
-                    <View style={{ marginLeft: 12, flex: 1 }}>
-                        <Text variant="labelLarge" style={{ fontWeight: 'bold', color: theme.colors.onSurface }}>{article.author.name}</Text>
-                        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{article.author.role} • {article.date}</Text>
+                  ) : (
+                    <Avatar.Text size={40} label={article.source[0]} />
+                  )}
+                  
+                  <View style={styles.metadataText}>
+                    <View style={styles.metadataRow}>
+                      <Text variant="labelLarge" style={{ fontWeight: '600', color: theme.colors.onSurface }}>
+                        {article.author?.name || article.source}
+                      </Text>
+                      {article.author?.role && (
+                        <>
+                          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginHorizontal: 6 }}>•</Text>
+                          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                            {article.author.role}
+                          </Text>
+                        </>
+                      )}
                     </View>
-                    <Text variant="bodySmall" style={{ color: theme.colors.primary, fontWeight: 'bold' }}>{article.readTime}</Text>
+                    <View style={styles.metadataRow}>
+                      <MaterialCommunityIcons name="clock-outline" size={14} color={theme.colors.onSurfaceVariant} />
+                      <Text variant="bodySmall" style={{ marginLeft: 4, color: theme.colors.onSurfaceVariant }}>
+                        {article.time}
+                      </Text>
+                      <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginHorizontal: 6 }}>•</Text>
+                      <Text variant="bodySmall" style={{ color: theme.colors.primary, fontWeight: '600' }}>
+                        {article.readTime}
+                      </Text>
+                    </View>
+                  </View>
                 </View>
 
                 <Divider style={{ marginVertical: 24, backgroundColor: theme.colors.outlineVariant }} />
 
-                {/* Simulated WP Content */}
+                {/* Content Body: Support both Legacy Blocks and HTML (WP) */}
                 <View style={styles.articleBody}>
-                    {article.content.map((block: any, idx: number) => renderBlock(block, idx))}
+                    {typeof article.content === 'string' ? (
+                        renderHtmlContent()
+                    ) : (
+                        article.content.map((block: any, idx: number) => renderBlock(block, idx))
+                    )}
                 </View>
 
                 <Divider style={{ marginVertical: 32, backgroundColor: theme.colors.outlineVariant }} />
 
                 {/* SEO/Tags */}
-                <Text variant="titleSmall" style={{ marginBottom: 12, fontWeight: 'bold' }}>Tópicos Relacionados</Text>
-                <View style={styles.tagsContainer}>
-                    {article.tags.map((tag: string, idx: number) => (
-                        <Chip key={idx} style={styles.tagChip} textStyle={{ fontSize: 12 }} mode="outlined">{tag}</Chip>
-                    ))}
-                </View>
+                {article.tags && article.tags.length > 0 && (
+                    <>
+                        <Text variant="titleSmall" style={{ marginBottom: 12, fontWeight: 'bold', color: theme.colors.onSurface }}>Tópicos Relacionados</Text>
+                        <View style={styles.tagsContainer}>
+                            {article.tags.map((tag: WordPressTag, idx: number) => (
+                                <Chip key={idx} style={styles.tagChip} textStyle={{ fontSize: 12 }} mode="outlined">{tag.name}</Chip>
+                            ))}
+                        </View>
+                    </>
+                )}
 
                 {/* SEO Description Box */}
-                <Surface style={[styles.seoBox, { backgroundColor: theme.colors.elevation.level1 }]} elevation={0}>
-                    <Text variant="labelSmall" style={{ color: theme.colors.primary, marginBottom: 4, fontWeight: 'bold' }}>RESUMEN SEO</Text>
-                    <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{article.seoDescription}</Text>
-                </Surface>
+                {article.seoDescription && (
+                    <Surface style={[styles.seoBox, { backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outlineVariant }]} elevation={0}>
+                        <Text variant="labelSmall" style={{ color: theme.colors.primary, marginBottom: 4, fontWeight: 'bold' }}>RESUMEN SEO</Text>
+                        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{article.seoDescription}</Text>
+                        {article.yoastSEO?.canonical && (
+                            <Text variant="bodySmall" style={{ color: theme.colors.outline, marginTop: 8, fontSize: 11 }}>Fuente: {article.yoastSEO.canonical}</Text>
+                        )}
+                    </Surface>
+                )}
 
                 <Divider style={{ marginVertical: 32, backgroundColor: theme.colors.outlineVariant }} />
 
-                {/* Comments Section */}
-                <View style={styles.commentsSection}>
-                    <Text variant="titleMedium" style={{ fontWeight: 'bold', marginBottom: 16, color: theme.colors.onSurface }}>Comentarios (3)</Text>
+                {/* Comments Section - WordPress Integration */}
+                {commentsEnabled && (
+                  <>
+                    <Divider style={{ marginVertical: 32, backgroundColor: theme.colors.outlineVariant }} />
                     
-                    {/* Comment Input */}
-                    <View style={styles.commentInputRow}>
-                        <Avatar.Text 
-                            size={32} 
-                            label="YO" 
-                            style={{ backgroundColor: theme.colors.secondaryContainer }} 
-                            accessibilityLabel="Tu avatar"
-                        />
-                        <Surface 
-                            style={[styles.commentInput, { backgroundColor: theme.colors.surfaceVariant }]} 
-                            elevation={0}
-                            accessibilityRole="button"
-                            accessibilityLabel="Escribir un comentario"
-                            accessibilityHint="Abre el teclado para escribir un comentario"
-                        >
-                            <Text style={{ color: theme.colors.outline }}>Escribe un comentario...</Text>
-                        </Surface>
+                    <View style={styles.commentsSection}>
+                      <Text variant="titleMedium" style={{ fontWeight: 'bold', marginBottom: 16, color: theme.colors.onSurface }}>
+                        Comentarios ({comments.length})
+                      </Text>
+                      
+                      <CommentsList comments={comments} loading={commentsLoading} />
                     </View>
-
-                    {/* Mock Comments */}
-                    <View style={styles.commentItem}>
-                        <Avatar.Image size={32} source={{ uri: 'https://randomuser.me/api/portraits/men/32.jpg' }} />
-                        <View style={styles.commentContent}>
-                            <View style={styles.commentHeader}>
-                                <Text style={{ fontWeight: 'bold', color: theme.colors.onSurface }}>Carlos M.</Text>
-                                <Text style={{ fontSize: 12, color: theme.colors.outline, marginLeft: 8 }}>Hace 10 min</Text>
-                            </View>
-                            <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 14 }}>Excelente análisis sobre DeFi. La regulación será clave.</Text>
-                        </View>
-                    </View>
-
-                    <View style={styles.commentItem}>
-                        <Avatar.Image size={32} source={{ uri: 'https://randomuser.me/api/portraits/women/44.jpg' }} />
-                        <View style={styles.commentContent}>
-                            <View style={styles.commentHeader}>
-                                <Text style={{ fontWeight: 'bold', color: theme.colors.onSurface }}>Ana Trading</Text>
-                                <Text style={{ fontSize: 12, color: theme.colors.outline, marginLeft: 8 }}>Hace 1h</Text>
-                            </View>
-                            <Text style={{ color: theme.colors.onSurfaceVariant, fontSize: 14 }}>¿Qué opinan sobre el impacto en las DAOs?</Text>
-                        </View>
-                    </View>
-                </View>
+                  </>
+                )}
 
             </View>
         </Animated.ScrollView>
@@ -409,14 +582,32 @@ const styles = StyleSheet.create({
       backgroundColor: 'transparent',
   },
   title: {
-      fontWeight: 'bold',
-      lineHeight: 32,
-      marginBottom: 20,
+      fontWeight: '700',
+      lineHeight: 40,
+      marginTop: 8,
+      marginBottom: 16,
+      letterSpacing: -0.5,
   },
-  metaContainer: {
+  categoryBadge: {
+      alignSelf: 'flex-start',
+      marginBottom: 5,
+  },
+  compactMetadata: {
       flexDirection: 'row',
       alignItems: 'center',
+      marginTop: 4,
+      marginBottom: 8,
   },
+  metadataText: {
+      marginLeft: 12,
+      flex: 1,
+  },
+  metadataRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 2,
+  },
+
   articleBody: {
       gap: 16,
   },

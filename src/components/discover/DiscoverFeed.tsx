@@ -5,17 +5,15 @@ import { Text, Surface, Chip, Button, IconButton, useTheme, TouchableRipple, Div
 import LinearGradient from 'react-native-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '../../theme/theme';
+import { WordPressCategory, FormattedPost } from '../../services/WordPressService';
 
 const { width } = Dimensions.get('window');
 
 // --- Mock Data ---
 
-const CATEGORIES = [
-  { id: 'all', label: 'Todo', icon: 'view-grid' },
-  { id: 'crypto', label: 'Cripto', icon: 'bitcoin' },
-  { id: 'forex', label: 'Forex', icon: 'currency-usd' },
-  { id: 'tech', label: 'Tecnología', icon: 'chip' },
-  { id: 'analysis', label: 'Análisis', icon: 'chart-line' },
+// Default categories if WordPress categories are not available
+const DEFAULT_CATEGORIES = [
+  { id: 0, name: 'Todo', slug: 'all', count: 0, description: '', link: '', taxonomy: 'category', parent: 0 },
 ];
 
 const ADS = [
@@ -166,33 +164,48 @@ const AdCard = ({ item }: { item: typeof ADS[0] }) => {
     );
 };
 
-const FeaturedHero = ({ item }: { item: typeof FEATURED_NEWS }) => {
+const FeaturedHero = ({ item }: { item: FormattedPost }) => {
     const theme = useAppTheme();
+    const navigation = useNavigation<any>();
+    
+    const handlePress = () => {
+        if (item) {
+            navigation.navigate('ArticleDetail', { article: item });
+        }
+    };
+    
+    // Get tag for display - use first tag or category
+    const displayTag = item.tags && item.tags.length > 0 
+        ? item.tags[0].name 
+        : (item.categories && item.categories.length > 0 ? item.categories[0].name : 'Destacado');
+    
     return (
-        <View style={styles.heroContainer}>
-            <Surface style={[styles.heroCard, { borderRadius: theme.roundness * 5, borderWidth: 1, borderColor: theme.colors.outlineVariant }]} elevation={0}>
-                <ImageBackground source={{ uri: item.image }} style={styles.heroBackground} imageStyle={{ borderRadius: theme.roundness * 5 }}>
-                    <LinearGradient 
-                        colors={['transparent', 'rgba(0,0,0,0.3)', 'rgba(0,0,0,0.95)']} 
-                        style={styles.heroGradient}
-                    >
-                        <View style={styles.heroContent}>
-                            <Surface style={[styles.heroTag, { backgroundColor: item.tagColor }]} elevation={0}>
-                                <Text style={styles.heroTagText}>{item.tag}</Text>
-                            </Surface>
-                            
-                            <Text variant="headlineSmall" style={styles.heroTitle}>{item.title}</Text>
-                            
-                            <View style={styles.heroFooter}>
-                                <Text style={styles.heroMeta}>{item.author}</Text>
-                                <View style={styles.dotSeparator} />
-                                <Text style={styles.heroMeta}>{item.time}</Text>
+        <TouchableOpacity onPress={handlePress} activeOpacity={0.9}>
+            <View style={styles.heroContainer}>
+                <Surface style={[styles.heroCard, { borderRadius: theme.roundness * 5, borderWidth: 1, borderColor: theme.colors.outlineVariant }]} elevation={0}>
+                    <ImageBackground source={{ uri: item.image }} style={styles.heroBackground} imageStyle={{ borderRadius: theme.roundness * 5 }}>
+                        <LinearGradient 
+                            colors={['transparent', 'rgba(0,0,0,0.3)', 'rgba(0,0,0,0.95)']} 
+                            style={styles.heroGradient}
+                        >
+                            <View style={styles.heroContent}>
+                                <Surface style={[styles.heroTag, { backgroundColor: theme.colors.primary }]} elevation={0}>
+                                    <Text style={styles.heroTagText}>{displayTag}</Text>
+                                </Surface>
+                                
+                                <Text variant="headlineSmall" style={styles.heroTitle}>{item.title}</Text>
+                                
+                                <View style={styles.heroFooter}>
+                                    <Text style={styles.heroMeta}>{item.source}</Text>
+                                    <View style={styles.dotSeparator} />
+                                    <Text style={styles.heroMeta}>{item.time}</Text>
+                                </View>
                             </View>
-                        </View>
-                    </LinearGradient>
-                </ImageBackground>
-            </Surface>
-        </View>
+                        </LinearGradient>
+                    </ImageBackground>
+                </Surface>
+            </View>
+        </TouchableOpacity>
     );
 };
 
@@ -312,10 +325,47 @@ const PartnersSection = () => {
     );
 };
 
-const DiscoverFeed = () => {
+interface DiscoverFeedProps {
+  items?: any[];
+  categories?: WordPressCategory[];
+  selectedCategory?: number;
+  onCategorySelect?: (id: number | undefined) => void;
+  onEndReached?: () => void;
+  isLoadingMore?: boolean;
+  featuredPost?: any;
+  refreshControl?: React.ReactElement<any>;
+}
+
+const DiscoverFeed = ({ 
+    items = NEWS_LIST, 
+    categories,
+    selectedCategory,
+    onCategorySelect,
+    onEndReached,
+    isLoadingMore = false,
+    featuredPost,
+    refreshControl
+}: DiscoverFeedProps) => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  
+  // Use WordPress categories or fallback to defaults
+  const displayCategories = React.useMemo(() => {
+    if (!categories || categories.length === 0) {
+      return DEFAULT_CATEGORIES;
+    }
+    // Add "All" category at the beginning
+    return [
+      { id: 0, name: 'Todo', slug: 'all', count: 0, description: '', link: '', taxonomy: 'category', parent: 0 },
+      ...categories
+    ];
+  }, [categories]);
+  
+  // Lifted state to parent
+  const handleCategorySelect = (id: number) => {
+      // If "All" (id: 0) is selected, pass undefined to fetch all posts
+      onCategorySelect?.(id === 0 ? undefined : id);
+  };
 
   // Auto-scroll for ads
   const adsRef = useRef<FlatList>(null);
@@ -333,23 +383,24 @@ const DiscoverFeed = () => {
 
   // Mix news with promoted articles
   const feedData = useMemo(() => {
-      const items = [];
+      const sourceList = items && items.length > 0 ? items : NEWS_LIST;
+      const combinedItems = [];
       let promoIdx = 0;
-      for (let i = 0; i < NEWS_LIST.length; i++) {
-          items.push(NEWS_LIST[i]);
+      for (let i = 0; i < sourceList.length; i++) {
+          combinedItems.push(sourceList[i]);
           // Insert promo every 2 items
           if ((i + 1) % 2 === 0 && promoIdx < PROMOTED_ARTICLES.length) {
-              items.push(PROMOTED_ARTICLES[promoIdx]);
+              combinedItems.push(PROMOTED_ARTICLES[promoIdx]);
               promoIdx++;
           }
       }
-      return items;
-  }, []);
+      return combinedItems;
+  }, [items]);
 
   const renderHeader = () => (
     <View style={styles.headerContent}>
-        {/* 1. Featured Hero */}
-        <FeaturedHero item={FEATURED_NEWS} />
+        {/* 1. Featured Hero - Use featuredPost prop from DiscoverScreen */}
+        {featuredPost && <FeaturedHero item={featuredPost} />}
 
         {/* 2. Categories */}
         <ScrollView 
@@ -357,12 +408,12 @@ const DiscoverFeed = () => {
             showsHorizontalScrollIndicator={false} 
             contentContainerStyle={styles.categoriesContainer}
         >
-            {CATEGORIES.map((cat) => (
+            {displayCategories.map((cat) => (
                 <Chip 
                     key={cat.id} 
-                    icon={selectedCategory === cat.id ? 'check' : cat.icon}
+                    icon={selectedCategory === cat.id ? 'check' : 'tag'}
                     selected={selectedCategory === cat.id} 
-                    onPress={() => setSelectedCategory(cat.id)}
+                    onPress={() => handleCategorySelect(cat.id)}
                     style={[
                         styles.categoryChip, 
                         selectedCategory === cat.id && { backgroundColor: theme.colors.secondaryContainer },
@@ -374,13 +425,14 @@ const DiscoverFeed = () => {
                     mode="outlined"
                     showSelectedOverlay
                 >
-                    {cat.label}
+                    {cat.name}
                 </Chip>
             ))}
         </ScrollView>
 
         {/* 3. Ads Carousel */}
         <View style={styles.adsContainer}>
+            {/* ... Ads Content ... */}
             <View style={styles.adsHeader}>
                 <Text variant="titleMedium" style={[styles.sectionTitle, { color: theme.colors.onSurface, paddingHorizontal: 0, marginBottom: 0 }]}>Promociones</Text>
                 <Chip icon="star" style={{ height: 24, backgroundColor: 'rgba(245, 158, 11, 0.1)' }} textStyle={{ fontSize: 10, color: '#F59E0B', marginVertical: 0, marginHorizontal: 2 }}>Exclusive</Chip>
@@ -432,9 +484,21 @@ const DiscoverFeed = () => {
         renderItem={({ item }) => <NewsListItem item={item} />}
         keyExtractor={item => item.id}
         ListHeaderComponent={renderHeader}
-        ListFooterComponent={PartnersSection}
+        ListFooterComponent={() => (
+            <View>
+                <PartnersSection />
+                {isLoadingMore && (
+                    <View style={{ padding: 20, alignItems: 'center' }}>
+                         <Text variant="bodySmall">Cargando más artículos...</Text>
+                    </View>
+                )}
+            </View>
+        )}
         contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 80 }]}
         showsVerticalScrollIndicator={false}
+        onEndReached={onEndReached}
+        onEndReachedThreshold={0.5}
+        refreshControl={refreshControl}
       />
     </View>
   );

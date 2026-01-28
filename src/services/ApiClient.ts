@@ -13,15 +13,23 @@ interface RequestOptions {
   headers?: Record<string, string>;
   params?: Record<string, string | number | boolean>;
   useCache?: boolean;
+  bypassCache?: boolean; // Force bypass cache and fetch fresh data
   updateCache?: boolean; // Force update cache even if useCache is false
   cacheTTL?: number; // in milliseconds
 }
 
-class ApiClient {
-  private baseUrl: string;
+interface ApiClientConfig {
+  apiKey?: string;
+  useAppCheck?: boolean; // Default: true (for internal backend)
+}
 
-  constructor(baseUrl: string) {
+export class ApiClient {
+  private baseUrl: string;
+  private config: ApiClientConfig;
+
+  constructor(baseUrl: string, config: ApiClientConfig = { apiKey: AppConfig.API_KEY, useAppCheck: true }) {
     this.baseUrl = baseUrl;
+    this.config = config;
   }
 
   async get<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
@@ -40,7 +48,8 @@ class ApiClient {
     const cacheKey = `api_cache_${url}`;
 
     // 1. Check Cache (using MMKV for 30x better performance)
-    if (options.useCache) {
+    // Skip cache if bypassCache is true (e.g., on pull-to-refresh)
+    if (options.useCache && !options.bypassCache) {
       try {
         const cached = mmkvStorage.getString(cacheKey);
         if (cached) {
@@ -95,13 +104,23 @@ class ApiClient {
     }
 
     // 3. Setup Headers
-    const token = await appCheckService.getToken();
+    let token: string | undefined;
+
+    // Only fetch AppCheck token if enabled in config (dflt: true)
+    if (this.config.useAppCheck !== false) {
+      token = await appCheckService.getToken();
+    }
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       'Accept': 'application/json',
-      'X-API-Key': AppConfig.API_KEY,
       ...options.headers,
     };
+
+    // Add API Key if configured
+    if (this.config.apiKey) {
+      headers['X-API-Key'] = this.config.apiKey;
+    }
 
     if (token) {
       headers['X-Firebase-AppCheck'] = token;
