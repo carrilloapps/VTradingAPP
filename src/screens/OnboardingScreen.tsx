@@ -8,7 +8,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { storageService } from '../services/StorageService';
 import { fcmService } from '../services/firebase/FCMService';
 import { useAppTheme } from '../theme/theme';
-import { useToast } from '../context/ToastContext';
+import { useToastStore } from '../stores/toastStore';
 import { observabilityService } from '../services/ObservabilityService';
 import CustomButton from '../components/ui/CustomButton';
 
@@ -30,7 +30,7 @@ interface OnboardingScreenProps {
 const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
   const theme = useAppTheme();
   const navigation = useNavigation();
-  const { showToast } = useToast();
+  const showToast = useToastStore((state) => state.showToast);
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const pagerRef = useRef<PagerView>(null);

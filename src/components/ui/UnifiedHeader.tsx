@@ -5,9 +5,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import NotificationButton from './NotificationButton';
 import { md5 } from '../../utils/md5';
-import { useAuth } from '../../context/AuthContext';
 import { AppConfig } from '../../constants/AppConfig';
 import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
+import { useAuthStore } from '../../stores/authStore';
 
 export type HeaderVariant = 'profile' | 'section' | 'simple';
 
@@ -61,7 +61,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   const theme = useTheme();
   const colors = theme.colors as any;
   const insets = useSafeAreaInsets();
-  const { user } = useAuth();
+  const user = useAuthStore((state) => state.user);
   const resolvedIsPremium = typeof isPremium === 'boolean' ? isPremium : !!(user && !user.isAnonymous);
   const adUnitId = Platform.OS === 'ios' ? AppConfig.ADMOB_BANNER_ID_IOS : AppConfig.ADMOB_BANNER_ID_ANDROID;
   const bannerId = __DEV__ ? TestIds.BANNER : adUnitId;

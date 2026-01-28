@@ -1,31 +1,37 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import Share from 'react-native-share';
 import { Surface, Text, Icon } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { RouteProp } from '@react-navigation/native';
 import { captureRef } from 'react-native-view-shot';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import { useAppTheme } from '../theme/theme';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { BolivarIcon } from '../components/ui/BolivarIcon';
-import { useAuth } from '../context/AuthContext';
+import { useAuthStore } from '../stores/authStore';
+import { useToastStore } from '../stores/toastStore';
 import CustomDialog from '../components/ui/CustomDialog';
 import CustomButton from '../components/ui/CustomButton';
 import CurrencyShareGraphic from '../components/dashboard/CurrencyShareGraphic';
 import { observabilityService } from '../services/ObservabilityService';
 import { analyticsService } from '../services/firebase/AnalyticsService';
-import { useToast } from '../context/ToastContext';
 
 type CurrencyDetailRouteProp = RouteProp<RootStackParamList, 'CurrencyDetail'>;
 
-const CurrencyDetailScreen = () => {
+const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed component signature
   const theme = useAppTheme();
-  const navigation = useNavigation();
-  const route = useRoute<CurrencyDetailRouteProp>();
-  const { rate } = route.params;
-  const { user } = useAuth();
-  const { showToast } = useToast();
+  // const navigation = useNavigation(); // Removed
+  // const route = useRoute<CurrencyDetailRouteProp>(); // Removed
+  const { currencyId, rate } = route.params; // Added currencyId, kept rate for now as it's used extensively
+
+  useEffect(() => {
+    analyticsService.logScreenView('CurrencyDetail', currencyId);
+  }, [currencyId]);
+
+  // Zustand store selector
+  const user = useAuthStore((state) => state.user); // Changed from useAuth
+  const showToast = useToastStore((state) => state.showToast);
 
   const [isShareDialogVisible, setShareDialogVisible] = useState(false);
   const [shareFormat, setShareFormat] = useState<'1:1' | '16:9'>('1:1');

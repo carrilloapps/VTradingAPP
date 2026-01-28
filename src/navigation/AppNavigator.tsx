@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Text, Platform, View, StatusBar } from 'react-native';
 import { NavigationContainer, DefaultTheme as NavDefaultTheme, DarkTheme as NavDarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
@@ -16,8 +16,8 @@ import NotificationsScreen from '../screens/NotificationsScreen';
 import BankRatesScreen from '../screens/BankRatesScreen';
 import CurrencyDetailScreen from '../screens/CurrencyDetailScreen';
 import { useThemeContext } from '../theme/ThemeContext';
-import { useAuth } from '../context/AuthContext';
 import { analyticsService } from '../services/firebase/AnalyticsService';
+import { useAuthStore } from '../stores/authStore';
 
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
@@ -186,12 +186,16 @@ function MainTabNavigator() {
 }
 
 const AppNavigator = () => {
-  const theme = useTheme();
+  const theme = useTheme(); // Assuming useAppTheme is meant to be useTheme from react-native-paper
   const { isDark } = useThemeContext();
-  const { user, isLoading: authLoading } = useAuth();
-  const [isReady, setIsReady] = React.useState(false);
-  const [showOnboarding, setShowOnboarding] = React.useState(false);
-  const [showForceUpdate, setShowForceUpdate] = React.useState(false);
+  const [isOnboardingComplete, setIsOnboardingComplete] = useState<boolean | null>(null);
+
+  // Zustand store selectors
+  const user = useAuthStore((state) => state.user);
+  const authLoading = useAuthStore((state) => state.isLoading);
+  const [isReady, setIsReady] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showForceUpdate, setShowForceUpdate] = useState(false);
   const routeNameRef = React.useRef<string | undefined>(undefined);
   
   React.useEffect(() => {

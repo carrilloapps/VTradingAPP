@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { Text } from 'react-native';
 import { fcmService } from '../../services/firebase/FCMService';
-import { useToast } from '../../context/ToastContext';
+import { useToastStore } from '../../stores/toastStore';
 import { storageService } from '../../services/StorageService';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -10,7 +10,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
  * Must be placed inside ToastProvider
  */
 const NotificationController: React.FC = () => {
-  const { showToast } = useToast();
+  const showToast = useToastStore((state) => state.showToast);
 
   useEffect(() => {
     // Foreground listener

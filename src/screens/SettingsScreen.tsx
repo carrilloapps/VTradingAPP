@@ -9,8 +9,8 @@ import UnifiedHeader from '../components/ui/UnifiedHeader';
 import CustomDialog from '../components/ui/CustomDialog';
 import AboutDialog from '../components/ui/AboutDialog';
 import { useThemeContext } from '../theme/ThemeContext';
-import { useAuth } from '../context/AuthContext';
-import { useToast } from '../context/ToastContext';
+import { useAuthStore } from '../stores/authStore';
+import { useToastStore } from '../stores/toastStore';
 import { storageService, UserAlert } from '../services/StorageService';
 import { observabilityService } from '../services/ObservabilityService';
 import { AppConfig } from '../constants/AppConfig';
@@ -28,8 +28,8 @@ const SettingsScreen = () => {
   const theme = useTheme();
   const navigation = useNavigation();
   const { themeMode, setThemeMode } = useThemeContext();
-  const { user, signOut, updateProfileName, deleteAccount } = useAuth();
-  const { showToast } = useToast();
+  const { user, signOut, updateProfileName, deleteAccount } = useAuthStore();
+  const showToast = useToastStore((state) => state.showToast);
   
   // App Info State
   const [appName, setAppName] = useState('');
@@ -102,8 +102,8 @@ const SettingsScreen = () => {
   const confirmLogout = async () => {
     setShowLogoutDialog(false);
     try {
-        await signOut();
-        // Navigation will handle the switch to AuthStack automatically via Context
+        await signOut(showToast);
+        // Navigation will handle the switch to AuthStack automatically via Zustand store
     } catch (e) {
         observabilityService.captureError(e);
         handleAction("Error al cerrar sesión");
@@ -117,7 +117,7 @@ const SettingsScreen = () => {
   const confirmDeleteAccount = async () => {
     setDeleteAccountLoading(true);
     try {
-      await deleteAccount();
+      await deleteAccount(showToast);
       setShowDeleteAccountDialog(false);
     } catch (e) {
       observabilityService.captureError(e);
@@ -133,7 +133,7 @@ const SettingsScreen = () => {
 
   const saveProfileName = async (newName: string) => {
     try {
-      await updateProfileName(newName);
+      await updateProfileName(newName, showToast);
       await analyticsService.logEvent('update_profile_name');
     } catch (error) {
       handleAction("Error al actualizar el perfil");

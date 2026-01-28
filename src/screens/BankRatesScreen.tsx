@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, StyleSheet, FlatList, StatusBar, ActivityIndicator, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { View, StyleSheet, StatusBar, ActivityIndicator, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { Text, useTheme } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -9,7 +10,7 @@ import BankRatesSkeleton from '../components/dashboard/BankRatesSkeleton';
 import SearchBar from '../components/ui/SearchBar';
 import FilterSection from '../components/ui/FilterSection';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
-import { useToast } from '../context/ToastContext';
+import { useToastStore } from '../stores/toastStore';
 import { AppTheme } from '../theme/theme';
 import { useNavigation } from '@react-navigation/native';
 import { observabilityService } from '../services/ObservabilityService';
@@ -26,7 +27,7 @@ if (Platform.OS === 'android' && !isFabricEnabled) {
 const BankRatesScreen = () => {
   const theme = useTheme<AppTheme>();
   const navigation = useNavigation();
-  const { showToast } = useToast();
+  const showToast = useToastStore((state) => state.showToast);
   
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -298,7 +299,7 @@ const BankRatesScreen = () => {
       {loading && !refreshing ? (
           <BankRatesSkeleton />
       ) : (
-          <FlatList
+          <FlashList
             style={styles.list}
             data={filteredRates}
             renderItem={renderItem}

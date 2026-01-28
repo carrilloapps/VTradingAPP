@@ -1,9 +1,8 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, RefreshControl, TouchableOpacity, KeyboardAvoidingView, Platform, Keyboard, Alert, ActionSheetIOS } from 'react-native';
+import { View, StyleSheet, ScrollView, StatusBar, RefreshControl, TouchableOpacity, KeyboardAvoidingView, Platform, Keyboard } from 'react-native';
 import Share from 'react-native-share';
 import { captureRef } from 'react-native-view-shot';
 import { useTheme, Text } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MarketStatus from '../components/ui/MarketStatus';
 import ExchangeCard, { ExchangeCardProps } from '../components/dashboard/ExchangeCard';
@@ -12,31 +11,21 @@ import Calculator from '../components/dashboard/Calculator';
 import DashboardSkeleton from '../components/dashboard/DashboardSkeleton';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
 import { StocksService, StockData } from '../services/StocksService';
-import { useAuth } from '../context/AuthContext';
-import { useToast } from '../context/ToastContext';
+import { useToastStore } from '../stores/toastStore';
 import { AppConfig } from '../constants/AppConfig';
 import { TetherIcon } from '../components/ui/TetherIcon';
-import { RootStackParamList, MainTabParamList } from '../navigation/AppNavigator';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { CompositeNavigationProp } from '@react-navigation/native';
-import { MaterialTopTabNavigationProp } from '@react-navigation/material-top-tabs';
 import AdvancedCalculatorCTA from '../components/dashboard/AdvancedCalculatorCTA';
 import { observabilityService } from '../services/ObservabilityService';
 import { analyticsService } from '../services/firebase/AnalyticsService';
 import ShareGraphic from '../components/dashboard/ShareGraphic';
 import CustomDialog from '../components/ui/CustomDialog';
 import CustomButton from '../components/ui/CustomButton';
+import { useAuthStore } from '../stores/authStore';
 
-const HomeScreen = () => {
+const HomeScreen = ({ navigation }: any) => {
   const theme = useTheme();
-  const navigation = useNavigation<
-    CompositeNavigationProp<
-      NativeStackNavigationProp<RootStackParamList>,
-      MaterialTopTabNavigationProp<MainTabParamList>
-    >
-  >();
-  const { user } = useAuth();
-  const { showToast } = useToast();
+  const user = useAuthStore((state) => state.user);
+  const showToast = useToastStore((state) => state.showToast);
   
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);

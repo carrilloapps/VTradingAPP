@@ -17,7 +17,7 @@ import { CurrencyService } from '../../services/CurrencyService';
 import { StocksService } from '../../services/StocksService';
 import { storageService, UserAlert } from '../../services/StorageService';
 import { fcmService } from '../../services/firebase/FCMService';
-import { useToast } from '../../context/ToastContext';
+import { useToastStore } from '../../stores/toastStore';
 import { observabilityService } from '../../services/ObservabilityService';
 
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -41,7 +41,7 @@ const AddAlertScreen = ({ route }: Props) => {
   const theme = useAppTheme();
   const navigation = useNavigation();
   const insets = useSafeAreaInsets();
-  const { showToast } = useToast();
+  const showToast = useToastStore((state) => state.showToast);
   
   // Params for Edit Mode
   const editAlert = route.params?.editAlert;

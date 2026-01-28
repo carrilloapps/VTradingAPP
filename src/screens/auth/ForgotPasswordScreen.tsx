@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
 import { Text, TextInput, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAuth } from '../../context/AuthContext';
+import { useAuthStore } from '../../stores/authStore';
+import { useToastStore } from '../../stores/toastStore';
 import { analyticsService } from '../../services/firebase/AnalyticsService';
 import AuthLoading from '../../components/auth/AuthLoading';
 import CustomButton from '../../components/ui/CustomButton';
@@ -14,7 +15,8 @@ import { observabilityService } from '../../services/ObservabilityService';
 const ForgotPasswordScreen = ({ navigation }: any) => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
-  const { resetPassword, isLoading } = useAuth();
+  const { resetPassword, isLoading } = useAuthStore();
+  const showToast = useToastStore((state) => state.showToast);
 
   const themeStyles = React.useMemo(() => ({
     container: {
@@ -71,12 +73,12 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
       setSuccessMessage('');
       try {
         await analyticsService.logEvent('password_reset_attempt');
-        await resetPassword(email);
+        await resetPassword(email, showToast);
         setSuccessMessage('Se ha enviado un correo para restablecer tu contraseña.');
         await analyticsService.logEvent('password_reset_success');
       } catch (e) {
         observabilityService.captureError(e);
-        // Error is handled in context, but we can clear success message
+        // Error is handled in authStore, but we can clear success message
         await analyticsService.logEvent('password_reset_error');
       } finally {
         setIsSubmitting(false);

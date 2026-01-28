@@ -7,7 +7,7 @@ import DiscoverSkeleton from '../components/discover/DiscoverSkeleton';
 
 import { storageService } from '../services/StorageService';
 import { fcmService } from '../services/firebase/FCMService';
-import { useToast } from '../context/ToastContext';
+import { useToastStore } from '../stores/toastStore';
 import { observabilityService } from '../services/ObservabilityService';
 
 import { remoteConfigService } from '../services/firebase/RemoteConfigService';
@@ -42,7 +42,7 @@ const FeatureItem = ({ icon, title, description, theme }: any) => {
 
 const DiscoverScreen = () => {
   const theme = useTheme();
-  const { showToast } = useToast();
+  const showToast = useToastStore((state) => state.showToast);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
   const [progress, setProgress] = useState(0);

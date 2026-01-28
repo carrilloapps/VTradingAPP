@@ -12,7 +12,7 @@ import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
 import { StocksService } from '../services/StocksService';
 import { observabilityService } from '../services/ObservabilityService';
 import { useFilters } from '../context/FilterContext';
-import { useToast } from '../context/ToastContext';
+import { useToastStore } from '../stores/toastStore';
 import { useAppTheme } from '../theme/theme';
 
 const isFabricEnabled = !!(globalThis as any).nativeFabricUIManager;
@@ -28,7 +28,7 @@ const ExchangeRatesScreen = () => {
   const navigation = useNavigation<any>();
   const { exchangeRateFilters, setExchangeRateFilters } = useFilters();
   const { query: searchQuery, type: filterType } = exchangeRateFilters;
-  const { showToast } = useToast();
+  const showToast = useToastStore((state) => state.showToast);
   
   // Custom colors
   const colors = theme.colors;

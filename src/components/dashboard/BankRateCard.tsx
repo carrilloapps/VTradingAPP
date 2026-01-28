@@ -3,7 +3,7 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, Surface, Tooltip } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../theme/theme';
-import { useToast } from '../../context/ToastContext';
+import { useToastStore } from '../../stores/toastStore';
 
 interface BankRateCardProps {
   bankName: string;
@@ -24,7 +24,7 @@ const BankRateCard: React.FC<BankRateCardProps> = ({
   sellPercentage
 }) => {
   const theme = useAppTheme();
-  const { showToast } = useToast();
+  const showToast = useToastStore((state) => state.showToast);
 
   // Helper to format date nicely
   const formatDate = (dateString?: string) => {

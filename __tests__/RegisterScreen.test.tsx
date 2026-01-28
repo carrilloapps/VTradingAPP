@@ -2,7 +2,8 @@ import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { Provider as PaperProvider, MD3LightTheme } from 'react-native-paper';
 import RegisterScreen from '../src/screens/auth/RegisterScreen';
-import * as AuthContext from '../src/context/AuthContext';
+import * as AuthStore from '../src/stores/authStore';
+import * as ToastStore from '../src/stores/toastStore';
 
 // Mock theme with spacing
 const mockTheme = {
@@ -80,6 +81,7 @@ describe('RegisterScreen', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(ToastStore, 'useToastStore').mockReturnValue(jest.fn());
   });
 
   it('muestra loading durante el registro', async () => {
@@ -88,7 +90,7 @@ describe('RegisterScreen', () => {
       resolveSignUp = resolve;
     });
 
-    const useAuthSpy = jest.spyOn(AuthContext, 'useAuth');
+    const useAuthSpy = jest.spyOn(AuthStore, 'useAuthStore');
     useAuthSpy.mockReturnValue({
       signUp: jest.fn(() => signUpPromise),
       googleSignIn: jest.fn(),

@@ -2,7 +2,8 @@ import React from 'react';
 import { render, fireEvent, waitFor } from '@testing-library/react-native';
 import { Provider as PaperProvider, MD3LightTheme } from 'react-native-paper';
 import ForgotPasswordScreen from '../src/screens/auth/ForgotPasswordScreen';
-import * as AuthContext from '../src/context/AuthContext';
+import * as AuthStore from '../src/stores/authStore';
+import * as ToastStore from '../src/stores/toastStore';
 
 const mockTheme = {
   ...MD3LightTheme,
@@ -40,6 +41,7 @@ describe('ForgotPasswordScreen', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(ToastStore, 'useToastStore').mockReturnValue(jest.fn());
   });
 
   it('muestra loading durante la recuperación', async () => {
@@ -48,7 +50,7 @@ describe('ForgotPasswordScreen', () => {
       resolveReset = resolve;
     });
 
-    const useAuthSpy = jest.spyOn(AuthContext, 'useAuth');
+    const useAuthSpy = jest.spyOn(AuthStore, 'useAuthStore');
     useAuthSpy.mockReturnValue({
       resetPassword: jest.fn(() => resetPromise),
       isLoading: false,

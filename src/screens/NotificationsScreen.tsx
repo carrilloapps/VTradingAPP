@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef, useCallback } from 'react';
-import { View, StyleSheet, FlatList, StatusBar, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { View, StyleSheet, StatusBar, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { Text, Icon } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -126,7 +127,7 @@ const NotificationsScreen: React.FC = () => {
   );
 
   const renderList = (data: NotificationData[], emptyTitle: string, emptySubtitle: string) => (
-    <FlatList
+    <FlashList
       data={data}
       keyExtractor={(item) => item.id}
       renderItem={({ item, index }) => (
@@ -138,7 +139,7 @@ const NotificationsScreen: React.FC = () => {
           showSwipeHint={index === 0}
         />
       )}
-      contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 20, flexGrow: 1 }}
+      contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 20 }}
       ListEmptyComponent={renderEmptyState(emptyTitle, emptySubtitle)}
       showsVerticalScrollIndicator={false}
     />

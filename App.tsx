@@ -13,10 +13,7 @@ if (Platform.OS === 'android' && !(globalThis as any).nativeFabricUIManager) {
 }
 
 import { FilterProvider } from './src/context/FilterContext';
-import { AuthProvider } from './src/context/AuthContext';
-import { ToastProvider } from './src/context/ToastContext';
 import { NotificationProvider } from './src/context/NotificationContext';
-import { NetworkProvider } from './src/context/NetworkContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { inAppMessagingService } from './src/services/firebase/InAppMessagingService';
 import { appCheckService } from './src/services/firebase/AppCheckService';
@@ -24,23 +21,26 @@ import { remoteConfigService } from './src/services/firebase/RemoteConfigService
 import { appDistributionService } from './src/services/firebase/AppDistributionService';
 import NotificationController from './src/components/ui/NotificationController';
 import NoInternetModal from './src/components/ui/NoInternetModal';
+import { QueryClientProvider } from '@tanstack/react-query';
+import { queryClient } from './src/config/queryClient';
 import mobileAds from 'react-native-google-mobile-ads';
 import { getCrashlytics, setCrashlyticsCollectionEnabled, log } from '@react-native-firebase/crashlytics';
 import { getPerformance, trace, initializePerformance } from '@react-native-firebase/perf';
 import * as Sentry from '@sentry/react-native';
+import { AppConfig } from './src/constants/AppConfig';
 
 // Silence Firebase modular deprecation warnings
 // @ts-ignore
 globalThis.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
 
-const isProd = !__DEV__;
+const isProd = AppConfig.IS_PROD;
 
-Clarity.initialize('v6dxvnsq12', {
+Clarity.initialize(AppConfig.CLARITY_PROJECT_ID, {
   logLevel: isProd ? Clarity.LogLevel.None : Clarity.LogLevel.Verbose, 
 });
 
 Sentry.init({
-  dsn: 'https://8978e60b895f59f65a44a1aee2a3e1f3@o456904.ingest.us.sentry.io/4510745960120320',
+  dsn: AppConfig.SENTRY_DSN,
 
   // Adds more context data to events (IP address, cookies, user, etc.)
   // For more information, visit: https://docs.sentry.io/platforms/react-native/data-management/data-collected/
@@ -61,6 +61,8 @@ Sentry.init({
   // uncomment the line below to enable Spotlight (https://spotlightjs.com)
   // spotlight: __DEV__,
 });
+
+import ErrorBoundary from './src/components/ErrorBoundary';
 
 function App(): React.JSX.Element {
   useEffect(() => {
@@ -100,25 +102,23 @@ function App(): React.JSX.Element {
   }, []);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <ErrorBoundary>
       <SafeAreaProvider>
-        <NetworkProvider>
-          <ThemeProvider>
-            <ToastProvider>
-              <AuthProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <QueryClientProvider client={queryClient}>
+            <ThemeProvider>
+              <FilterProvider>
                 <NotificationProvider>
-                  <FilterProvider>
-                    <AppNavigator />
-                    <NotificationController />
-                    <NoInternetModal />
-                  </FilterProvider>
+                  <NotificationController />
+                  <NoInternetModal />
+                  <AppNavigator />
                 </NotificationProvider>
-              </AuthProvider>
-            </ToastProvider>
-          </ThemeProvider>
-        </NetworkProvider>
+              </FilterProvider>
+            </ThemeProvider>
+          </QueryClientProvider>
+        </GestureHandlerRootView>
       </SafeAreaProvider>
-    </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 }
 

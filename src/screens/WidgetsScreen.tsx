@@ -15,7 +15,7 @@ import WidgetPreview from '../components/widgets/WidgetPreview';
 import { WidgetItem } from '../widget/types';
 import CurrencyPickerModal from '../components/dashboard/CurrencyPickerModal';
 import { storageService, WidgetConfig } from '../services/StorageService';
-import { useToast } from '../context/ToastContext';
+import { useToastStore } from '../stores/toastStore';
 import { requestWidgetUpdate } from 'react-native-android-widget';
 import { buildWidgetElement } from '../widget/widgetTaskHandler';
 import { observabilityService } from '../services/ObservabilityService';
@@ -45,7 +45,7 @@ const WidgetsScreen = () => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const { showToast } = useToast();
+  const showToast = useToastStore((state) => state.showToast);
 
   // Data State
   const [availableRates, setAvailableRates] = useState<CurrencyRate[]>([]);

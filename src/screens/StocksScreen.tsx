@@ -1,11 +1,10 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { View, StyleSheet, StatusBar, RefreshControl, FlatList, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, StatusBar, RefreshControl, ActivityIndicator } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { Text, useTheme } from 'react-native-paper';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useIsFocused } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
-import { RootStackParamList } from '../navigation/AppNavigator';
 import MarketStatus from '../components/ui/MarketStatus';
 import IndexHero from '../components/stocks/IndexHero';
 import StockItem from '../components/stocks/StockItem';
@@ -13,22 +12,32 @@ import SearchBar from '../components/ui/SearchBar';
 import FilterSection from '../components/ui/FilterSection';
 import { useFilters } from '../context/FilterContext';
 import { StocksService, StockData } from '../services/StocksService';
-import { useToast } from '../context/ToastContext';
+import { useToastStore } from '../stores/toastStore';
 import StocksSkeleton from '../components/stocks/StocksSkeleton';
 import { observabilityService } from '../services/ObservabilityService';
-import { useAuth } from '../context/AuthContext';
+import { useAuthStore } from '../stores/authStore';
 import CustomDialog from '../components/ui/CustomDialog';
 import CustomButton from '../components/ui/CustomButton';
 import { captureRef } from 'react-native-view-shot';
 import Share from 'react-native-share';
 import MarketShareGraphic from '../components/stocks/MarketShareGraphic';
+import { analyticsService } from '../services/firebase/AnalyticsService';
 
-const StocksScreen = () => {
+const StocksScreen = ({ navigation, route }: any) => {
   const theme = useTheme();
   const { stockFilters, setStockFilters } = useFilters();
   const { query: searchQuery, category: activeFilter } = stockFilters;
-  const { showToast } = useToast();
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const showToast = useToastStore((state) => state.showToast);
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+    if (isFocused) {
+      analyticsService.logScreenView('Stocks');
+    }
+  }, [isFocused]);
+
+  // Zustand store selector
+  const user = useAuthStore((state) => state.user);
 
   const [stocks, setStocks] = useState<StockData[]>([]);
   const [categories, setCategories] = useState<string[]>(['Todos']);
@@ -37,7 +46,6 @@ const StocksScreen = () => {
   const [indexData, setIndexData] = useState<any>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [isMarketOpen, setIsMarketOpen] = useState(false);
-  const { user } = useAuth();
   
   const [isShareDialogVisible, setShareDialogVisible] = useState(false);
   const [shareFormat, setShareFormat] = useState<'1:1' | '16:9'>('1:1');
@@ -278,7 +286,7 @@ const StocksScreen = () => {
         </View>
       </View>
 
-      <FlatList
+      <FlashList
         data={filteredStocks}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <StockItem {...item} onPress={() => handleStockPress(item)} />}
@@ -291,9 +299,6 @@ const StocksScreen = () => {
         }
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.5}
-        initialNumToRender={10}
-        windowSize={5}
-        style={styles.content}
         ListEmptyComponent={
             <View style={{ padding: 40, alignItems: 'center', justifyContent: 'center' }}>
                 <MaterialCommunityIcons name="emoticon-sad-outline" size={48} color={theme.colors.onSurfaceVariant} style={{ opacity: 0.5, marginBottom: 16 }} />

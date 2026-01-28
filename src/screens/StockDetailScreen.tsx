@@ -1,31 +1,31 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Image } from 'react-native';
 import Share from 'react-native-share';
 import { Surface, Text, Chip } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { captureRef } from 'react-native-view-shot';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import { useAppTheme } from '../theme/theme';
-import { RootStackParamList } from '../navigation/AppNavigator';
 import { BolivarIcon } from '../components/ui/BolivarIcon';
-import { useAuth } from '../context/AuthContext';
+import { useAuthStore } from '../stores/authStore';
+import { useToastStore } from '../stores/toastStore';
 import CustomDialog from '../components/ui/CustomDialog';
 import CustomButton from '../components/ui/CustomButton';
 import StockShareGraphic from '../components/stocks/StockShareGraphic';
 import { observabilityService } from '../services/ObservabilityService';
 import { analyticsService } from '../services/firebase/AnalyticsService';
-import { useToast } from '../context/ToastContext';
 
-type StockDetailRouteProp = RouteProp<RootStackParamList, 'StockDetail'>;
-
-const StockDetailScreen = () => {
+const StockDetailScreen = ({ route, navigation }: any) => {
   const theme = useAppTheme();
-  const navigation = useNavigation();
-  const route = useRoute<StockDetailRouteProp>();
-  const { stock } = route.params;
-  const { user } = useAuth();
-  const { showToast } = useToast();
+  const { stock } = route.params;  // Get stock object from navigation params
+
+  useEffect(() => {
+    analyticsService.logScreenView('StockDetail', stock.id);
+  }, [stock.id]);
+
+  // Zustand store selector
+  const user = useAuthStore((state) => state.user);
+  const showToast = useToastStore((state) => state.showToast);
 
   const [isShareDialogVisible, setShareDialogVisible] = React.useState(false);
   const [shareFormat, setShareFormat] = React.useState<'1:1' | '16:9'>('1:1');

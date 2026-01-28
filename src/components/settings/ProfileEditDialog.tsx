@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { TextInput, useTheme } from 'react-native-paper';
 import CustomDialog from '../ui/CustomDialog';
-import { useToast } from '../../context/ToastContext';
+import { useToastStore } from '../../stores/toastStore';
 import { observabilityService } from '../../services/ObservabilityService';
 
 interface ProfileEditDialogProps {
@@ -18,7 +18,7 @@ const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({
   onSave,
 }) => {
   const theme = useTheme();
-  const { showToast } = useToast();
+  const showToast = useToastStore((state) => state.showToast);
   const [name, setName] = useState(currentName);
   const [loading, setLoading] = useState(false);
 

@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
 import { Text, TextInput, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAuth } from '../../context/AuthContext';
+import { useAuthStore } from '../../stores/authStore';
+import { useToastStore } from '../../stores/toastStore';
 import { analyticsService } from '../../services/firebase/AnalyticsService';
 import { AppConfig } from '../../constants/AppConfig';
 import AuthLoading from '../../components/auth/AuthLoading';
@@ -15,7 +16,8 @@ import { observabilityService } from '../../services/ObservabilityService';
 const RegisterScreen = ({ navigation }: any) => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
-  const { signUp, googleSignIn, isLoading } = useAuth();
+  const { signUp, googleSignIn, isLoading } = useAuthStore();
+  const showToast = useToastStore((state) => state.showToast);
 
   const themeStyles = React.useMemo(() => ({
     container: {
@@ -109,11 +111,11 @@ const RegisterScreen = ({ navigation }: any) => {
       setIsSubmitting(true);
       try {
         await analyticsService.logEvent('sign_up_attempt', { method: 'password' });
-        await signUp(email, password);
+        await signUp(email, password, showToast);
         await analyticsService.logEvent('sign_up_success', { method: 'password' });
       } catch {
         await analyticsService.logEvent('sign_up_error', { method: 'password' });
-        // Error handled in context
+        // Error handled in authStore
       } finally {
         setIsSubmitting(false);
       }
@@ -124,7 +126,7 @@ const RegisterScreen = ({ navigation }: any) => {
     setIsSubmitting(true);
     try {
       await analyticsService.logEvent('sign_up_attempt', { method: 'google' });
-      await googleSignIn();
+      await googleSignIn(showToast);
       await analyticsService.logEvent('sign_up_success', { method: 'google' });
     } catch (e) {
       observabilityService.captureError(e);

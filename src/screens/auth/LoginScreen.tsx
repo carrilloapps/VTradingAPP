@@ -3,7 +3,8 @@ import { View, StyleSheet, ScrollView, StatusBar, KeyboardAvoidingView, Platform
 import { Text, TextInput, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DeviceInfo from 'react-native-device-info';
-import { useAuth } from '../../context/AuthContext';
+import { useAuthStore } from '../../stores/authStore';
+import { useToastStore } from '../../stores/toastStore';
 import { analyticsService } from '../../services/firebase/AnalyticsService';
 import { observabilityService } from '../../services/ObservabilityService';
 import { useAppTheme } from '../../theme/theme';
@@ -17,7 +18,8 @@ import AuthLogo from '../../components/ui/AuthLogo';
 const LoginScreen = ({ navigation }: any) => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
-  const { signIn, googleSignIn, signInAnonymously, isLoading: isAuthLoading } = useAuth();
+  const { signIn, googleSignIn, signInAnonymously,isLoading } = useAuthStore();
+  const showToast = useToastStore((state) => state.showToast);
 
   useEffect(() => {
     analyticsService.logScreenView('Login');
@@ -74,7 +76,7 @@ const LoginScreen = ({ navigation }: any) => {
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const isBusy = isAuthLoading || isSubmitting;
+  const isBusy = isLoading || isSubmitting;
 
   const openExternalUrl = (url: string, title?: string) => {
     // @ts-ignore
@@ -104,12 +106,12 @@ const LoginScreen = ({ navigation }: any) => {
       setIsSubmitting(true);
       try {
         await analyticsService.logEvent('login_attempt', { method: 'password' });
-        await signIn(email, password);
+        await signIn(email, password, showToast);
         await analyticsService.logEvent('login_success', { method: 'password' });
       } catch (e) {
         observabilityService.captureError(e);
         await analyticsService.logEvent('login_error', { method: 'password' });
-        // Error handled in context
+        // Error handled in authStore
       } finally {
         setIsSubmitting(false);
       }
@@ -120,7 +122,7 @@ const LoginScreen = ({ navigation }: any) => {
     setIsSubmitting(true);
     try {
       await analyticsService.logEvent('login_attempt', { method: 'google' });
-      await googleSignIn();
+      await googleSignIn(showToast);
       await analyticsService.logEvent('login_success', { method: 'google' });
     } catch (e) {
       observabilityService.captureError(e);
@@ -134,7 +136,7 @@ const LoginScreen = ({ navigation }: any) => {
     setIsSubmitting(true);
     try {
       await analyticsService.logEvent('login_attempt', { method: 'anonymous' });
-      await signInAnonymously();
+      await signInAnonymously(showToast);
       await analyticsService.logEvent('login_success', { method: 'anonymous' });
     } catch (e) {
       observabilityService.captureError(e);

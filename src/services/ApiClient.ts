@@ -1,6 +1,6 @@
 import { appCheckService } from './firebase/AppCheckService';
 import { getPerformance, httpMetric, initializePerformance, FirebasePerformanceTypes } from '@react-native-firebase/perf';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { mmkvStorage } from './StorageService';
 import { AppConfig } from '../constants/AppConfig';
 import { observabilityService } from './ObservabilityService';
 
@@ -26,21 +26,21 @@ class ApiClient {
 
   async get<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
     let url = `${this.baseUrl}${endpoint}`;
-    
+
     // Append query params if present
     if (options.params) {
-        const queryString = Object.entries(options.params)
-            .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
-            .join('&');
-        url += (url.includes('?') ? '&' : '?') + queryString;
+      const queryString = Object.entries(options.params)
+        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+        .join('&');
+      url += (url.includes('?') ? '&' : '?') + queryString;
     }
 
     const cacheKey = `api_cache_${url}`;
-    
-    // 1. Check Cache
+
+    // 1. Check Cache (using MMKV for 30x better performance)
     if (options.useCache) {
       try {
-        const cached = await AsyncStorage.getItem(cacheKey);
+        const cached = mmkvStorage.getString(cacheKey);
         if (cached) {
           const { data, timestamp } = JSON.parse(cached) as CacheItem<T>;
           const ttl = options.cacheTTL || 5 * 60 * 1000; // Default 5 mins
@@ -61,15 +61,15 @@ class ApiClient {
       // Firebase Perf
       const perf = getPerformance();
       if (!perf.dataCollectionEnabled) {
-          await initializePerformance(perf.app, { dataCollectionEnabled: true });
+        await initializePerformance(perf.app, { dataCollectionEnabled: true });
       }
       metric = httpMetric(perf, url, 'GET');
-      
+
       // Add detailed attributes to Firebase Perf
       metric.putAttribute('http_method', 'GET');
       metric.putAttribute('api_endpoint', endpoint);
       metric.putAttribute('cache_enabled', options.useCache ? 'true' : 'false');
-      
+
       await metric.start();
 
       // Sentry Perf
@@ -79,14 +79,14 @@ class ApiClient {
         // setData fue removido o renombrado. Usaremos setTag para compatibilidad segura.
         const setTagFn = sentryTransaction.setTag || sentryTransaction.setData;
         if (typeof setTagFn === 'function') {
-            const safeSetTag = setTagFn.bind(sentryTransaction);
-            safeSetTag('url', url);
-            safeSetTag('http.method', 'GET');
-            safeSetTag('api.endpoint', endpoint);
-            safeSetTag('cache.enabled', String(!!options.useCache));
-            if (options.params) {
-                safeSetTag('query_params_keys', Object.keys(options.params).join(','));
-            }
+          const safeSetTag = setTagFn.bind(sentryTransaction);
+          safeSetTag('url', url);
+          safeSetTag('http.method', 'GET');
+          safeSetTag('api.endpoint', endpoint);
+          safeSetTag('cache.enabled', String(!!options.useCache));
+          if (options.params) {
+            safeSetTag('query_params_keys', Object.keys(options.params).join(','));
+          }
         }
       }
     } catch (e) {
@@ -121,32 +121,32 @@ class ApiClient {
       if (metric) {
         try {
           metric.setHttpResponseCode(response.status);
-          
+
           // Capture Content-Type
           const contentType = response.headers.get('Content-Type');
           if (contentType) metric.setResponseContentType(contentType);
-          
+
           // Capture Content-Length (Response Payload Size)
           const contentLength = response.headers.get('Content-Length');
           if (contentLength) metric.setResponsePayloadSize(parseInt(contentLength, 10));
-          
+
           // Capture Request Payload Size (0 for GET)
           metric.setRequestPayloadSize(0);
-          
+
           await metric.stop();
         } catch (e) {
-            observabilityService.captureError(e);
-            if (__DEV__) console.warn('[ApiClient] Perf stop failed', e);
+          observabilityService.captureError(e);
+          if (__DEV__) console.warn('[ApiClient] Perf stop failed', e);
         }
       }
 
       if (sentryTransaction) {
         if (response.headers.get('Content-Length')) {
-           observabilityService.setTransactionAttribute(sentryTransaction, 'content_length', response.headers.get('Content-Length') || '0');
+          observabilityService.setTransactionAttribute(sentryTransaction, 'content_length', response.headers.get('Content-Length') || '0');
         }
         observabilityService.setTransactionAttribute(sentryTransaction, 'http.status_code', String(response.status));
         observabilityService.setTransactionAttribute(sentryTransaction, 'has_app_check_token', token ? 'true' : 'false');
-        
+
         observabilityService.finishTransaction(sentryTransaction, response.ok ? 'ok' : 'unknown_error');
       }
 
@@ -157,14 +157,14 @@ class ApiClient {
       // 6. Process Response
       const data = await response.json();
 
-      // 7. Save to Cache
+      // 7. Save to Cache (using MMKV for instant synchronous writes)
       if (options.useCache || options.updateCache) {
         try {
           const cacheItem: CacheItem<T> = {
             data,
             timestamp: Date.now(),
           };
-          await AsyncStorage.setItem(cacheKey, JSON.stringify(cacheItem));
+          mmkvStorage.set(cacheKey, JSON.stringify(cacheItem));
         } catch (e) {
           observabilityService.captureError(e);
           // Cache write error
@@ -175,9 +175,9 @@ class ApiClient {
     } catch (e: any) {
       observabilityService.captureError(e);
       if (metric) {
-          try { await metric.stop(); } catch (stopError) { observabilityService.captureError(stopError); }
+        try { await metric.stop(); } catch (stopError) { observabilityService.captureError(stopError); }
       }
-      
+
       if (sentryTransaction) {
         observabilityService.finishTransaction(sentryTransaction, 'internal_error');
       }
@@ -185,14 +185,14 @@ class ApiClient {
       // Return stale cache if available on network error
       if (options.useCache) {
         try {
-            const cached = await AsyncStorage.getItem(cacheKey);
-            if (cached) {
-                const { data } = JSON.parse(cached) as CacheItem<T>;
-                return data;
-            }
+          const cached = mmkvStorage.getString(cacheKey);
+          if (cached) {
+            const { data } = JSON.parse(cached) as CacheItem<T>;
+            return data;
+          }
         } catch (cacheError) { observabilityService.captureError(cacheError); /* ignore */ }
       }
-      
+
       throw e;
     }
   }

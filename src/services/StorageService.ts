@@ -1,5 +1,12 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { createMMKV } from 'react-native-mmkv';
 import { observabilityService } from './ObservabilityService';
+
+// Create singleton MMKV instance with encryption
+export const storage = createMMKV({
+  id: 'vtrading-storage',
+  // TODO: In production, use a secure key from Keychain/SecureStore
+  // encryptionKey: await SecureStore.getItemAsync('mmkv-encryption-key')
+});
 
 const KEYS = {
   SETTINGS: 'app_settings',
@@ -46,79 +53,65 @@ export interface UserAlert {
   id: string;
   symbol: string;
   target: string;
-  condition: 'above' | 'below'; // 'Sube' | 'Baja' mapped
+  condition: 'above' | 'below';
   isActive: boolean;
   iconName?: string;
 }
 
 class StorageService {
-  
-  async getSettings(): Promise<AppSettings> {
+
+  // Helper methods for MMKV JSON operations
+  private getJSON<T>(key: string, defaultValue: T): T {
     try {
-      const data = await AsyncStorage.getItem(KEYS.SETTINGS);
-      return data ? JSON.parse(data) : { pushEnabled: true };
+      const data = storage.getString(key);
+      return data ? JSON.parse(data) : defaultValue;
     } catch (e) {
       observabilityService.captureError(e);
-      return { pushEnabled: true };
+      return defaultValue;
     }
   }
 
-  async saveSettings(settings: Partial<AppSettings>) {
+  private setJSON<T>(key: string, value: T): void {
     try {
-      const current = await this.getSettings();
-      const newSettings = { ...current, ...settings };
-      await AsyncStorage.setItem(KEYS.SETTINGS, JSON.stringify(newSettings));
+      storage.set(key, JSON.stringify(value));
     } catch (e) {
       observabilityService.captureError(e);
-      // Failed to save settings
     }
   }
 
-  async getAlerts(): Promise<UserAlert[]> {
-    try {
-      const data = await AsyncStorage.getItem(KEYS.ALERTS);
-      // Return default mocks if empty for demo purposes, or empty array
-      if (!data) {
-        return [];
-      }
-      return JSON.parse(data);
-    } catch (e) {
-      observabilityService.captureError(e);
-      return [];
-    }
+  // Settings
+  getSettings(): AppSettings {
+    return this.getJSON(KEYS.SETTINGS, { pushEnabled: true });
   }
 
-  async saveAlerts(alerts: UserAlert[]) {
-    try {
-      await AsyncStorage.setItem(KEYS.ALERTS, JSON.stringify(alerts));
-    } catch (e) {
-      observabilityService.captureError(e);
-      // Failed to save alerts
-    }
+  saveSettings(settings: Partial<AppSettings>): void {
+    const current = this.getSettings();
+    const newSettings = { ...current, ...settings };
+    this.setJSON(KEYS.SETTINGS, newSettings);
   }
 
-  async getNotifications(): Promise<StoredNotification[]> {
-    try {
-      const data = await AsyncStorage.getItem(KEYS.NOTIFICATIONS);
-      return data ? JSON.parse(data) : [];
-    } catch (e) {
-      observabilityService.captureError(e);
-      return [];
-    }
+  // Alerts
+  getAlerts(): UserAlert[] {
+    return this.getJSON(KEYS.ALERTS, []);
   }
 
-  async saveNotifications(notifications: StoredNotification[]) {
-    try {
-      await AsyncStorage.setItem(KEYS.NOTIFICATIONS, JSON.stringify(notifications));
-    } catch (e) {
-      observabilityService.captureError(e);
-      // Failed to save notifications
-    }
+  saveAlerts(alerts: UserAlert[]): void {
+    this.setJSON(KEYS.ALERTS, alerts);
   }
 
-  async getWidgetConfig(): Promise<WidgetConfig | null> {
+  // Notifications
+  getNotifications(): StoredNotification[] {
+    return this.getJSON(KEYS.NOTIFICATIONS, []);
+  }
+
+  saveNotifications(notifications: StoredNotification[]): void {
+    this.setJSON(KEYS.NOTIFICATIONS, notifications);
+  }
+
+  // Widget Config
+  getWidgetConfig(): WidgetConfig | null {
     try {
-      const data = await AsyncStorage.getItem(KEYS.WIDGET_CONFIG);
+      const data = storage.getString(KEYS.WIDGET_CONFIG);
       if (!data) return null;
       const parsed = JSON.parse(data) as WidgetConfig;
       return {
@@ -131,52 +124,45 @@ class StorageService {
     }
   }
 
-  async saveWidgetConfig(config: WidgetConfig) {
+  saveWidgetConfig(config: WidgetConfig): void {
+    this.setJSON(KEYS.WIDGET_CONFIG, config);
+  }
+
+  // Widget Refresh Meta
+  getWidgetRefreshMeta(): WidgetRefreshMeta | null {
+    return this.getJSON(KEYS.WIDGET_REFRESH_META, null);
+  }
+
+  saveWidgetRefreshMeta(meta: WidgetRefreshMeta): void {
+    this.setJSON(KEYS.WIDGET_REFRESH_META, meta);
+  }
+
+  // Onboarding
+  getHasSeenOnboarding(): boolean {
+    return storage.getBoolean(KEYS.HAS_SEEN_ONBOARDING) || false;
+  }
+
+  setHasSeenOnboarding(value: boolean): void {
+    storage.set(KEYS.HAS_SEEN_ONBOARDING, value);
+  }
+
+  // Utility methods
+  clearAll(): void {
     try {
-      await AsyncStorage.setItem(KEYS.WIDGET_CONFIG, JSON.stringify(config));
+      storage.clearAll();
     } catch (e) {
       observabilityService.captureError(e);
-      // Failed to save widget config
     }
   }
 
-  async getWidgetRefreshMeta(): Promise<WidgetRefreshMeta | null> {
-    try {
-      const data = await AsyncStorage.getItem(KEYS.WIDGET_REFRESH_META);
-      return data ? JSON.parse(data) : null;
-    } catch (e) {
-      observabilityService.captureError(e);
-      return null;
-    }
+  getAllKeys(): string[] {
+    return storage.getAllKeys();
   }
 
-  async saveWidgetRefreshMeta(meta: WidgetRefreshMeta) {
-    try {
-      await AsyncStorage.setItem(KEYS.WIDGET_REFRESH_META, JSON.stringify(meta));
-    } catch (e) {
-      observabilityService.captureError(e);
-      // Failed to save widget refresh meta
-    }
-  }
-
-  async getHasSeenOnboarding(): Promise<boolean> {
-    try {
-      const data = await AsyncStorage.getItem(KEYS.HAS_SEEN_ONBOARDING);
-      return data === 'true';
-    } catch (e) {
-      observabilityService.captureError(e);
-      return false;
-    }
-  }
-
-  async setHasSeenOnboarding(value: boolean) {
-    try {
-      await AsyncStorage.setItem(KEYS.HAS_SEEN_ONBOARDING, String(value));
-    } catch (e) {
-      observabilityService.captureError(e);
-      // Failed to save onboarding status
-    }
+  delete(key: string): void {
+    storage.remove(key);
   }
 }
 
 export const storageService = new StorageService();
+export { storage as mmkvStorage };

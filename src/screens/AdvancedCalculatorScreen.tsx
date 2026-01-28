@@ -5,7 +5,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { useNavigation } from '@react-navigation/native';
 import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
 import { observabilityService } from '../services/ObservabilityService';
-import { useToast } from '../context/ToastContext';
+import { useToastStore } from '../stores/toastStore';
 import CurrencyPickerModal from '../components/dashboard/CurrencyPickerModal';
 import CurrencySelectorButton from '../components/dashboard/CurrencySelectorButton';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
@@ -96,7 +96,7 @@ interface CurrencyRow {
 const AdvancedCalculatorScreen = () => {
   const theme = useTheme();
   const navigation = useNavigation<any>();
-  const { showToast } = useToast();
+  const showToast = useToastStore((state) => state.showToast);
 
   // --- State ---
   const [rates, setRates] = useState<CurrencyRate[]>([]);

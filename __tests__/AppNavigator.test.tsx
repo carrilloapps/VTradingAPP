@@ -2,7 +2,7 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
 import AppNavigator from '../src/navigation/AppNavigator';
-import * as AuthContext from '../src/context/AuthContext';
+import * as AuthStore from '../src/stores/authStore';
 import * as ThemeContext from '../src/theme/ThemeContext';
 
 describe('AppNavigator', () => {
@@ -11,7 +11,7 @@ describe('AppNavigator', () => {
   });
 
   it('muestra loading cuando auth está cargando', async () => {
-    jest.spyOn(AuthContext, 'useAuth').mockReturnValue({
+    jest.spyOn(AuthStore, 'useAuthStore').mockReturnValue({
       user: null,
       isLoading: true,
     } as any);
