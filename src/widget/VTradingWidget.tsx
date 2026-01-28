@@ -127,7 +127,7 @@ export default function VTradingWidget({
               </FlexWidget>
               <FlexWidget style={{ backgroundColor: item.trendBg, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8, flexDirection: 'row', alignItems: 'center', flexGap: 2 }}>
                 <TextWidget
-                  text={item.trend === 'up' ? '\uF05E3' : item.trend === 'down' ? '\uF05E5' : '\uF05E4'}
+                  text={item.trend === 'up' ? '\uF0535' : item.trend === 'down' ? '\uF0533' : '\uF0534'}
                   style={{ 
                     fontSize: 14, 
                     color: item.trendColor,
