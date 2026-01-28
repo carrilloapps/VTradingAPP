@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Alert, Platform } from 'react-native';
-import { Text, useTheme, Switch, Snackbar, Button } from 'react-native-paper';
+import { Text, useTheme, Switch, Snackbar, Button, ActivityIndicator } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DeviceInfo from 'react-native-device-info';
 import { fcmService } from '../services/firebase/FCMService';
@@ -50,6 +50,7 @@ const SettingsScreen = () => {
   const [pushEnabled, setPushEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
   const [togglingIds, setTogglingIds] = useState<Set<string>>(new Set());
+  const [switchingTheme, setSwitchingTheme] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -154,8 +155,14 @@ const SettingsScreen = () => {
   };
 
   const handleThemeChange = async (mode: 'light' | 'dark' | 'system') => {
-      setThemeMode(mode);
-      await analyticsService.logEvent('change_theme', { mode });
+      if (switchingTheme) return;
+      setSwitchingTheme(true);
+      // Artificial delay to show blocking state and ensure smooth transition check
+      setTimeout(async () => {
+          setThemeMode(mode);
+          await analyticsService.logEvent('change_theme', { mode });
+          setSwitchingTheme(false);
+      }, 500); 
   };
 
   const getTopicName = (symbol: string) => {
@@ -418,8 +425,15 @@ const SettingsScreen = () => {
                   <MaterialCommunityIcons name="palette" size={20} color={theme.colors.onSurfaceVariant} />
                 </View>
                 <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Apariencia</Text>
+                {switchingTheme && (
+                    <ActivityIndicator size={16} style={{ marginLeft: 8 }} color={theme.colors.primary} />
+                )}
               </View>
-              <ThemeSelector currentTheme={themeMode} onSelect={handleThemeChange} />
+              <ThemeSelector 
+                currentTheme={themeMode} 
+                onSelect={handleThemeChange} 
+                disabled={switchingTheme}
+              />
             </View>
           </View>
         </View>

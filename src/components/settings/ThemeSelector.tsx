@@ -6,6 +6,7 @@ import { useAppTheme, LightTheme, DarkTheme } from '../../theme/theme';
 interface ThemeSelectorProps {
   currentTheme: 'light' | 'dark' | 'system';
   onSelect: (theme: 'light' | 'dark' | 'system') => void;
+  disabled?: boolean;
 }
 
 interface ThemeOptionProps {
@@ -14,6 +15,7 @@ interface ThemeOptionProps {
   renderPreview: () => React.ReactNode;
   currentTheme: 'light' | 'dark' | 'system';
   onSelect: (theme: 'light' | 'dark' | 'system') => void;
+  disabled?: boolean;
 }
 
 const ThemeOption: React.FC<ThemeOptionProps> = ({ 
@@ -21,7 +23,8 @@ const ThemeOption: React.FC<ThemeOptionProps> = ({
   label, 
   renderPreview,
   currentTheme,
-  onSelect
+  onSelect,
+  disabled
 }) => {
   const theme = useAppTheme();
   const isSelected = currentTheme === mode;
@@ -32,7 +35,8 @@ const ThemeOption: React.FC<ThemeOptionProps> = ({
   return (
     <TouchableOpacity 
       onPress={() => onSelect(mode)}
-      style={[styles.optionBtn, { borderColor, backgroundColor: bg, borderWidth }]}
+      disabled={disabled}
+      style={[styles.optionBtn, { borderColor, backgroundColor: bg, borderWidth, opacity: disabled ? 0.6 : 1 }]}
     >
       {renderPreview()}
       <Text style={[
@@ -49,7 +53,7 @@ const ThemeOption: React.FC<ThemeOptionProps> = ({
   );
 };
 
-const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onSelect }) => {
+const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onSelect, disabled }) => {
   const theme = useAppTheme();
 
   return (
@@ -60,6 +64,7 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onSelect })
         label="Claro" 
         currentTheme={currentTheme}
         onSelect={onSelect}
+        disabled={disabled}
         renderPreview={() => (
           <View style={[styles.previewBox, styles.lightPreview]}>
              <View style={styles.lightPreviewInner} />
@@ -73,6 +78,7 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onSelect })
         label="Oscuro" 
         currentTheme={currentTheme}
         onSelect={onSelect}
+        disabled={disabled}
         renderPreview={() => (
           <View style={[styles.previewBox, styles.darkPreview]}>
             <View style={styles.darkPreviewInner} />
@@ -86,6 +92,7 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onSelect })
         label="Sistema" 
         currentTheme={currentTheme}
         onSelect={onSelect}
+        disabled={disabled}
         renderPreview={() => (
           <View style={[styles.previewBox, styles.systemPreview, { borderColor: theme.colors.outline }]}>
             <View style={styles.systemLeft} />
