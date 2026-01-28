@@ -1,18 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, ScrollView, Animated, Easing, StatusBar, RefreshControl } from 'react-native';
 import { Text, useTheme, Button, ProgressBar, Surface } from 'react-native-paper';
-import UnifiedHeader from '../components/ui/UnifiedHeader';
+import UnifiedHeader from '../../components/ui/UnifiedHeader';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import DiscoverSkeleton from '../components/discover/DiscoverSkeleton';
+import DiscoverSkeleton from '../../components/discover/DiscoverSkeleton';
 
-import { storageService } from '../services/StorageService';
-import { fcmService } from '../services/firebase/FCMService';
-import { useToastStore } from '../stores/toastStore';
-import { observabilityService } from '../services/ObservabilityService';
+import { storageService } from '../../services/StorageService';
+import { fcmService } from '../../services/firebase/FCMService';
+import { useToastStore } from '../../stores/toastStore';
+import { observabilityService } from '../../services/ObservabilityService';
+import { useRoute } from '@react-navigation/native';
 
-import { remoteConfigService } from '../services/firebase/RemoteConfigService';
-import { wordPressService, FormattedPost, WordPressCategory } from '../services/WordPressService';
-import DiscoverFeed from '../components/discover/DiscoverFeed';
+import { remoteConfigService } from '../../services/firebase/RemoteConfigService';
+import { wordPressService, FormattedPost, WordPressCategory } from '../../services/WordPressService';
+import DiscoverFeed from '../../components/discover/DiscoverFeed';
+import { useNavigation } from '@react-navigation/native';
+import DiscoverErrorView from '../../components/discover/DiscoverErrorView';
 
 const FeatureItem = ({ icon, title, description, theme }: any) => {
   const iconBgColor = theme.dark ? 'rgba(16, 185, 129, 0.1)' : '#E6FFFA';
@@ -43,6 +46,8 @@ const FeatureItem = ({ icon, title, description, theme }: any) => {
 
 const DiscoverScreen = () => {
   const theme = useTheme();
+  const route = useRoute();
+  const navigation = useNavigation<any>();
   const showToast = useToastStore((state) => state.showToast);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [isLoadingSubscription, setIsLoadingSubscription] = useState(true);
@@ -55,6 +60,7 @@ const DiscoverScreen = () => {
   const [featuredPost, setFeaturedPost] = useState<FormattedPost | undefined>(undefined);
 
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -78,13 +84,34 @@ const DiscoverScreen = () => {
 
         if (active) {
           try {
+             // 3. Handle Deep Link Slugs
+             const { categorySlug, tagSlug } = (route.params as any) || {};
+             let catId = selectedCategory;
+             let filterTagId: number | undefined;
+
              // Fetch WP categories and posts
-             const [fetchedCategories, fetchedPosts] = await Promise.all([
+             const [fetchedCategories] = await Promise.all([
                wordPressService.getCategories(),
-               wordPressService.getPosts()
              ]);
              
              setCategories(fetchedCategories);
+
+             if (categorySlug) {
+               const category = fetchedCategories.find(c => c.slug === categorySlug);
+               if (category) {
+                 catId = category.id;
+                 setSelectedCategory(catId);
+               }
+             }
+
+             if (tagSlug) {
+               const tag = await wordPressService.getTagBySlug(tagSlug);
+               if (tag) {
+                 filterTagId = tag.id;
+               }
+             }
+
+             const fetchedPosts = await wordPressService.getPosts(1, 10, catId, filterTagId);
              setPosts(fetchedPosts);
              
              // Set featured post: latest with 'trending' tag or most recent post
@@ -95,7 +122,7 @@ const DiscoverScreen = () => {
           } catch (err) {
              console.error('Failed to load discovery data', err);
              observabilityService.captureError(err, { context: 'DiscoverScreen.loadData' });
-             showToast('Error al cargar contenido de Discovery', 'error');
+             setError('No se pudo cargar el contenido. Por favor intenta de nuevo.');
           }
         }
 
@@ -229,6 +256,22 @@ const DiscoverScreen = () => {
     return <DiscoverSkeleton />;
   }
 
+  if (isDiscoveryActive && error) {
+      return (
+          <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+              <UnifiedHeader variant="section" title="Descubre" />
+              <DiscoverErrorView 
+                  message={error} 
+                  onRetry={() => {
+                      setError(null);
+                      setIsLoading(true);
+                      navigation.replace('Discover'); // Reload screen
+                  }} 
+              />
+          </View>
+      );
+  }
+
   if (isDiscoveryActive) {
       return (
         <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -240,6 +283,9 @@ const DiscoverScreen = () => {
             <UnifiedHeader 
                 variant="section" 
                 title="Descubre" 
+                showSecondaryAction={isDiscoveryActive}
+                secondaryActionIcon="magnify"
+                onSecondaryActionPress={() => navigation.navigate('SearchResults', {})}
             />
             <DiscoverFeed 
                 items={posts} 
@@ -247,6 +293,7 @@ const DiscoverScreen = () => {
                 selectedCategory={selectedCategory}
                 onCategorySelect={handleCategorySelect}
                 featuredPost={featuredPost}
+                onViewAllPress={() => navigation.navigate('AllArticles')}
                 refreshControl={
                   <RefreshControl
                     refreshing={refreshing}

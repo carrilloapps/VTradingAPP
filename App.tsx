@@ -28,6 +28,7 @@ import { getCrashlytics, setCrashlyticsCollectionEnabled, log } from '@react-nat
 import { getPerformance, trace, initializePerformance } from '@react-native-firebase/perf';
 import * as Sentry from '@sentry/react-native';
 import { AppConfig } from './src/constants/AppConfig';
+import { deepLinkService } from './src/services/DeepLinkService';
 
 // Silence Firebase modular deprecation warnings
 // @ts-ignore
@@ -99,6 +100,13 @@ function App(): React.JSX.Element {
     };
 
     initializeFirebase();
+
+    // Initialize Deep Link Handling
+    const cleanupDeepLinks = deepLinkService.init();
+    
+    return () => {
+      cleanupDeepLinks();
+    };
   }, []);
 
   return (

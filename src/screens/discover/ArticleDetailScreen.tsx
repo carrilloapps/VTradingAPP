@@ -1,48 +1,21 @@
-import React, { useRef } from 'react';
-import { View, StyleSheet, Image, Animated, Share, StatusBar, useWindowDimensions, RefreshControl, ActivityIndicator } from 'react-native';
-import { Text, Surface, IconButton, Chip, Divider, Avatar } from 'react-native-paper';
+import React from 'react';
+import { View, StyleSheet, Image, Animated, Share, StatusBar, useWindowDimensions, RefreshControl, ActivityIndicator, Linking, TouchableOpacity, ScrollView as RNScrollView, Dimensions, Platform } from 'react-native';
+import { Text, IconButton, Chip, Divider, Avatar, Button } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { WebView } from 'react-native-webview';
 import LinearGradient from 'react-native-linear-gradient';
-import { useAppTheme } from '../theme/theme';
-import { analyticsService } from '../services/firebase/AnalyticsService';
-import { wordPressService, FormattedComment, WordPressTag } from '../services/WordPressService';
-import { remoteConfigService } from '../services/firebase/RemoteConfigService';
-import { observabilityService } from '../services/ObservabilityService';
-import { CommentsList } from '../components/discover/CommentsList';
+import { useAppTheme } from '../../theme/theme';
+import { analyticsService } from '../../services/firebase/AnalyticsService';
+import { wordPressService, FormattedComment, FormattedPost } from '../../services/WordPressService';
+import { remoteConfigService } from '../../services/firebase/RemoteConfigService';
+import { observabilityService } from '../../services/ObservabilityService';
+import { CommentsList } from '../../components/discover/CommentsList';
+import ArticleCard from '../../components/discover/ArticleCard';
+import AuthorCard from '../../components/discover/AuthorCard';
+import DiscoverErrorView from '../../components/discover/DiscoverErrorView';
 
-// --- Mock Content (Simulating Headless WP JSON) ---
-const MOCK_ARTICLE = {
-  id: '1',
-  title: 'El Futuro de las Finanzas Descentralizadas: Tendencias para 2026',
-  excerpt: 'Exploramos cómo la IA y la regulación están moldeando la próxima generación de DeFi.',
-  featuredImage: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?q=80&w=1000&auto=format&fit=crop',
-  author: {
-    name: 'Elena Rostova',
-    role: 'Analista Senior',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=200&auto=format&fit=crop'
-  },
-  date: '26 Ene, 2026',
-  readTime: '8 min lectura',
-  category: 'Cripto',
-  tags: ['DeFi', 'Ethereum', 'Regulación', 'Web3'],
-  seoDescription: 'Análisis profundo sobre el impacto de la inteligencia artificial en los protocolos DeFi y qué esperar para el mercado cripto en 2026.',
-  content: [
-    { type: 'paragraph', text: 'El ecosistema de las finanzas descentralizadas (DeFi) ha recorrido un largo camino desde el "DeFi Summer" de 2020. Hoy, nos encontramos ante una nueva era caracterizada por la madurez institucional y la integración de tecnologías avanzadas.' },
-    { type: 'heading', text: 'La Convergencia con la IA' },
-    { type: 'paragraph', text: 'Una de las tendencias más disruptivas es el uso de agentes autónomos impulsados por IA para optimizar el rendimiento del farming y la gestión de liquidez. Estos "Bots Inteligentes" son capaces de rebalancear portafolios en milisegundos ante cambios de volatilidad.' },
-    { type: 'quote', text: 'La verdadera revolución no es solo financiera, es algorítmica. La IA será el principal usuario de los protocolos DeFi en la próxima década.', author: 'Satoshi Nakamoto (Simulado)' },
-    { type: 'paragraph', text: 'Sin embargo, esto plantea nuevos desafíos de seguridad. Los contratos inteligentes ahora deben ser auditados no solo por lógica de código, sino por comportamiento ante agentes adversarios de IA.' },
-    { type: 'image', url: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?q=80&w=1000&auto=format&fit=crop', caption: 'Visualización de redes neuronales aplicadas a trading.' },
-    { type: 'heading', text: 'Regulación: El Elefante en la Habitación' },
-    { type: 'paragraph', text: 'A medida que los grandes fondos de inversión entran en juego, la claridad regulatoria se vuelve indispensable. Se espera que 2026 sea el año donde veamos los primeros marcos globales unificados para activos digitales, permitiendo la tokenización de activos del mundo real (RWA) a escala masiva.' },
-    { type: 'list', items: ['Tokenización de Bienes Raíces', 'Bonos del Tesoro on-chain', 'Identidad Soberana (DID)'] },
-    { type: 'paragraph', text: 'En conclusión, aunque el camino es volátil, la dirección es clara: hacia una infraestructura financiera más abierta, eficiente y transparente.' }
-  ]
-};
-
-// --- Renderers ---
 
 const BlockParagraph = ({ text, theme }: any) => (
     <Text variant="bodyLarge" style={[styles.paragraph, { color: theme.colors.onSurface }]}>{text}</Text>
@@ -83,15 +56,9 @@ const BlockList = ({ items, theme }: any) => (
     </View>
 );
 
-import { WebView } from 'react-native-webview';
-
-// ... (Existing Imports)
-
-// ... (Existing Block Components)
-
 const ArticleDetailScreen = () => {
   const theme = useAppTheme();
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const route = useRoute();
   const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
@@ -100,26 +67,91 @@ const ArticleDetailScreen = () => {
   const [commentsLoading, setCommentsLoading] = React.useState(false);
   const [commentsEnabled, setCommentsEnabled] = React.useState(false);
   const [refreshing, setRefreshing] = React.useState(false);
-
-  // Safe width calculation for centered title
-  const maxTitleWidth = width - 220;
   
-  // Use passed params merged with mock fallback
-  const incomingArticle = (route.params as any)?.article;
-  const article = {
-      ...MOCK_ARTICLE, 
+  // New states for deep linking
+  const [articleData, setArticleData] = React.useState<any>(null);
+  const [isLoading, setIsLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+  const [relatedPosts, setRelatedPosts] = React.useState<FormattedPost[]>([]);
+  const [loadingRelated, setLoadingRelated] = React.useState(false);
+  const [contentHeight, setContentHeight] = React.useState(0);
+  const scrollY = React.useRef(new Animated.Value(0)).current;
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+
+  // Safe width calculation for header content
+  const headerContentWidth = windowWidth - 120; // Space between back and share buttons
+  
+  // Logic to merge incoming params or fetched data
+  // Logic to prioritize fetched data (full article) over incoming params (partial article)
+  const params = route.params as any;
+  const incomingArticle = articleData || params?.article;
+  const slug = params?.slug;
+
+  const article = incomingArticle ? {
       ...incomingArticle, 
       author: {
-          ...MOCK_ARTICLE.author,
           ...(incomingArticle?.author || {})
       },
-      // Use WordPress tags if available, otherwise use mock tags
-      tags: incomingArticle?.tags?.map((tag: any) => tag.name) || MOCK_ARTICLE.tags,
+      // Use WordPress tags if available
+      tags: incomingArticle?.tags?.map((tag: any) => typeof tag === 'string' ? { name: tag } : tag) || [],
       // Use WordPress categories if available
       categories: incomingArticle?.categories || [],
       // Use Yoast SEO description if available
-      seoDescription: incomingArticle?.yoastSEO?.description || incomingArticle?.seoDescription || MOCK_ARTICLE.seoDescription,
-  };
+      seoDescription: incomingArticle?.yoastSEO?.description || incomingArticle?.seoDescription || '',
+  } : null;
+
+  // Effect to load article by slug if not provided
+  React.useEffect(() => {
+    const loadArticleAndRelated = async () => {
+      let currentArticle = params?.article;
+      
+      // Clear previous article data to avoid flickering or stale content when navigating between posts
+      setArticleData(null);
+      setWebViewHeight(100);
+      
+      // Always fetch full article data to ensure we have the complete content, 
+      // as list views might only contain excerpts or truncated content.
+      if (slug || currentArticle?.id) {
+        setIsLoading(!currentArticle); // Only show full loader if we don't even have partial data
+        setError(null);
+        try {
+          const fetchedArticle = slug 
+            ? await wordPressService.getPostBySlug(slug)
+            : await wordPressService.getPostById(Number(currentArticle.id), true); // Force bypass cache for detail
+
+          if (fetchedArticle) {
+            setArticleData(fetchedArticle);
+            currentArticle = fetchedArticle;
+          } else if (!currentArticle) {
+            setError('Artículo no encontrado');
+          }
+        } catch (err) {
+            observabilityService.captureError(err, { context: 'ArticleDetailScreen.loadArticle', slug, id: currentArticle?.id });
+            if (!currentArticle) setError('Error al cargar el artículo');
+        } finally {
+            setIsLoading(true); // Temporally keep it so transitions are smooth
+            setTimeout(() => setIsLoading(false), 300);
+        }
+      }
+
+      // Fetch related posts if we have an article
+      if (currentArticle?.id && currentArticle?.categories?.[0]?.id) {
+        setLoadingRelated(true);
+        try {
+          const fetchedRelated = await wordPressService.getRelatedPosts(
+            Number(currentArticle.id),
+            currentArticle.categories[0].id
+          );
+          setRelatedPosts(fetchedRelated);
+        } catch (err) {
+          console.error('Error fetching related posts:', err);
+        } finally {
+          setLoadingRelated(false);
+        }
+      }
+    };
+    loadArticleAndRelated();
+  }, [slug, params?.article?.id]); // Depend on id to refetch if switching articles via related section
 
   React.useEffect(() => {
     if (article?.id) {
@@ -194,7 +226,7 @@ const ArticleDetailScreen = () => {
     }
   };
 
-  const scrollY = useRef(new Animated.Value(0)).current;
+
 
   const renderBlock = (block: any, index: number) => {
       switch (block.type) {
@@ -248,12 +280,27 @@ const ArticleDetailScreen = () => {
             </style>
           </head>
           <body>
-            ${article.content}
+            <div id="content-wrapper" style="padding: 1px 0;">
+              ${article.content}
+            </div>
             <script>
-              const resizeObserver = new ResizeObserver(entries => {
-                window.ReactNativeWebView.postMessage(document.body.scrollHeight);
-              });
-              resizeObserver.observe(document.body);
+              function sendHeight() {
+                const wrapper = document.getElementById('content-wrapper');
+                if (wrapper) {
+                  const height = Math.ceil(wrapper.getBoundingClientRect().height);
+                  window.ReactNativeWebView.postMessage(height.toString());
+                }
+              }
+              const resizeObserver = new ResizeObserver(sendHeight);
+              if (document.getElementById('content-wrapper')) {
+                resizeObserver.observe(document.getElementById('content-wrapper'));
+              }
+              // Multiple triggers to ensure height is correct after images/styles load
+              window.onload = sendHeight;
+              document.addEventListener('DOMContentLoaded', sendHeight);
+              setTimeout(sendHeight, 500);
+              setTimeout(sendHeight, 1500);
+              setTimeout(sendHeight, 3000);
             </script>
           </body>
         </html>
@@ -261,18 +308,48 @@ const ArticleDetailScreen = () => {
 
       return (
         <WebView
+          key={`${article.id}-${article.content?.length || 0}`}
           originWhitelist={['*']}
           source={{ html: htmlContent }}
           style={{ height: webViewHeight, backgroundColor: 'transparent' }}
           scrollEnabled={false}
           onMessage={(event) => {
-            setWebViewHeight(Number(event.nativeEvent.data));
+            const h = Number(event.nativeEvent.data);
+            if (h > 0) setWebViewHeight(h);
           }}
           javaScriptEnabled={true}
           showsVerticalScrollIndicator={false}
+          domStorageEnabled={true}
+          mixedContentMode="always"
         />
       );
   };
+
+  if (isLoading) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.colors.background, justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={theme.colors.primary} />
+        <Text style={{ marginTop: 16 }}>Cargando artículo...</Text>
+      </View>
+    );
+  }
+
+  if (error || !article) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+          <StatusBar barStyle={theme.dark ? 'light-content' : 'dark-content'} translucent backgroundColor="transparent" />
+          <View style={{ flex: 1, paddingTop: insets.top }}>
+              <View style={{ height: 56, justifyContent: 'center', paddingHorizontal: 4 }}>
+                  <IconButton icon="chevron-left" onPress={() => navigation.goBack()} />
+              </View>
+              <DiscoverErrorView 
+                  message={error || 'Artículo no encontrado'} 
+                  onRetry={() => navigation.goBack()} 
+              />
+          </View>
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -287,70 +364,98 @@ const ArticleDetailScreen = () => {
             borderBottomColor: theme.colors.outlineVariant
         }]} />
 
+        {/* Reading Progress Bar (Attached to header) */}
+        <Animated.View 
+            style={[
+                styles.progressContainer, 
+                { 
+                    top: 56 + insets.top,
+                    opacity: headerOpacity.interpolate({
+                        inputRange: [0, 0.5, 1],
+                        outputRange: [0, 0, 1]
+                    })
+                }
+            ]}
+        >
+            <Animated.View 
+                style={[
+                    styles.progressBar, 
+                    { 
+                        backgroundColor: theme.colors.primary,
+                        transform: [{
+                            scaleX: scrollY.interpolate({
+                                inputRange: [0, contentHeight > 0 ? contentHeight - windowHeight : 1],
+                                outputRange: [0.0001, 1],
+                                extrapolate: 'clamp',
+                            })
+                        }, {
+                            translateX: scrollY.interpolate({
+                                inputRange: [0, contentHeight > 0 ? contentHeight - windowHeight : 1],
+                                outputRange: [-windowWidth / 2, 0],
+                                extrapolate: 'clamp',
+                            })
+                        }]
+                    }
+                ]} 
+            />
+        </Animated.View>
+
         {/* Header Content (Title fades in, Buttons always visible) */}
-        <View style={[styles.headerOverlay, { top: insets.top, height: 56 }]}>
+        <View style={[styles.headerOverlay, { top: insets.top, height: 64 }]}>
             
-            {/* Left Button */}
+            {/* Left Button - High Clarity */}
             <View style={styles.leftButtonContainer}>
-                <Surface style={[styles.roundButton, { backgroundColor: theme.colors.background }]} elevation={2}>
-                    <IconButton 
-                        icon="arrow-left" 
-                        iconColor={theme.colors.onSurface}
-                        size={24}
-                        onPress={() => navigation.goBack()}
-                        style={{ margin: 0 }}
-                        accessibilityLabel="Regresar"
-                        accessibilityHint="Volver a la pantalla anterior"
-                        accessibilityRole="button"
-                    />
-                </Surface>
+                <TouchableOpacity 
+                    onPress={() => navigation.goBack()}
+                    activeOpacity={0.7}
+                    style={[styles.headerIconButton, { backgroundColor: theme.colors.surface + 'CC' }]}
+                >
+                    <MaterialCommunityIcons name="chevron-left" size={28} color={theme.colors.onSurface} />
+                </TouchableOpacity>
             </View>
 
-            {/* Centered Title (Fades In) */}
-            <Animated.View style={[styles.titleContainer, { opacity: headerOpacity, maxWidth: maxTitleWidth }]}>
+            {/* Centered Title & Reading Indicator (Fades In) */}
+            <Animated.View style={[
+                styles.titleContainer, 
+                { 
+                    opacity: headerOpacity, 
+                    width: headerContentWidth,
+                    transform: [{
+                        translateY: headerOpacity.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [10, 0]
+                        })
+                    }]
+                }
+            ]}>
                 <Text 
-                    variant="titleMedium" 
+                    variant="titleSmall" 
                     numberOfLines={1} 
-                    style={{ 
-                        textAlign: 'center', 
-                        fontWeight: 'bold',
-                        color: theme.colors.onBackground
+                    style={{
+                        fontWeight: '700',
+                        color: theme.colors.onSurface,
+                        textAlign: 'center',
                     }}
                 >
                     {article.title}
                 </Text>
             </Animated.View>
 
-            {/* Right Buttons */}
+            {/* Right Buttons - Minimalist Editorial */}
             <View style={styles.rightButtonsContainer}>
-                <Surface style={[styles.roundButton, { backgroundColor: theme.colors.background, marginRight: 8 }]} elevation={2}>
-                    <IconButton 
-                        icon="bookmark-outline" 
-                        iconColor={theme.colors.onSurface}
-                        size={24}
-                        onPress={() => {}}
-                        style={{ margin: 0 }}
-                        accessibilityLabel="Guardar artículo"
-                        accessibilityHint="Guarda este artículo en tus marcadores"
-                        accessibilityRole="button"
-                    />
-                </Surface>
-                <Surface style={[styles.roundButton, { backgroundColor: theme.colors.background }]} elevation={2}>
-                    <IconButton 
-                        icon="share-variant" 
-                        iconColor={theme.colors.onSurface}
-                        size={24}
-                        onPress={handleShare}
-                        style={{ margin: 0 }}
-                        accessibilityLabel="Compartir artículo"
-                        accessibilityHint="Comparte este artículo con otras aplicaciones"
-                        accessibilityRole="button"
-                    />
-                </Surface>
+                <TouchableOpacity 
+                    onPress={handleShare}
+                    activeOpacity={0.7}
+                    style={[styles.headerIconButton, { backgroundColor: theme.colors.surface + 'CC' }]}
+                >
+                    <MaterialCommunityIcons name="share-variant-outline" size={22} color={theme.colors.onSurface} />
+                </TouchableOpacity>
             </View>
         </View>
 
         <Animated.ScrollView 
+            showsVerticalScrollIndicator={false}
+            onContentSizeChange={(_, height) => setContentHeight(height)}
             onScroll={Animated.event(
                 [{ nativeEvent: { contentOffset: { y: scrollY } } }],
                 { useNativeDriver: true }
@@ -393,15 +498,21 @@ const ArticleDetailScreen = () => {
             )}
 
             <View style={styles.contentContainer}>
-                {/* Category Badge */}
+                {/* Category Badges - Multi-support */}
                 {article.categories && article.categories.length > 0 && (
-                  <Chip 
-                    style={[styles.categoryBadge, { backgroundColor: theme.colors.primaryContainer }]} 
-                    textStyle={{ color: theme.colors.onPrimaryContainer, fontWeight: '600', fontSize: 11, letterSpacing: 0.5 }}
-                    compact
-                  >
-                    {article.categories[0].name.toUpperCase()}
-                  </Chip>
+                  <View style={styles.categoriesRow}>
+                    {article.categories.map((cat: any, idx: number) => (
+                      <Chip 
+                        key={idx}
+                        style={[styles.categoryBadge, { backgroundColor: theme.colors.primaryContainer, marginRight: 8 }]} 
+                        textStyle={{ color: theme.colors.onPrimaryContainer, fontWeight: '700', fontSize: 10, letterSpacing: 0.5 }}
+                        compact
+                        onPress={() => navigation.navigate('CategoryDetail', { category: cat, slug: cat.slug })}
+                      >
+                        {cat.name.toUpperCase()}
+                      </Chip>
+                    ))}
+                  </View>
                 )}
                 
                 {/* Title */}
@@ -422,10 +533,10 @@ const ArticleDetailScreen = () => {
                       <Text variant="labelLarge" style={{ fontWeight: '600', color: theme.colors.onSurface }}>
                         {article.author?.name || article.source}
                       </Text>
-                      {article.author?.role && (
+                      {article.author?.role && article.author.role.length < 50 && (
                         <>
                           <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginHorizontal: 6 }}>•</Text>
-                          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }} numberOfLines={1}>
                             {article.author.role}
                           </Text>
                         </>
@@ -436,15 +547,37 @@ const ArticleDetailScreen = () => {
                       <Text variant="bodySmall" style={{ marginLeft: 4, color: theme.colors.onSurfaceVariant }}>
                         {article.time}
                       </Text>
+                      {article.modifiedTime && article.modifiedTime !== article.time && (
+                        <>
+                          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginHorizontal: 6 }}>•</Text>
+                          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, opacity: 0.8 }}>
+                            Actualizado {article.modifiedTime}
+                          </Text>
+                        </>
+                      )}
                       <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginHorizontal: 6 }}>•</Text>
-                      <Text variant="bodySmall" style={{ color: theme.colors.primary, fontWeight: '600' }}>
+                      <Text variant="bodySmall" style={{ color: theme.colors.primary, fontWeight: '700' }}>
                         {article.readTime}
                       </Text>
+                      {article.wordCount && (
+                        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginLeft: 6, fontSize: 10 }}>
+                          ({article.wordCount} palabras)
+                        </Text>
+                      )}
                     </View>
                   </View>
                 </View>
-
-                <Divider style={{ marginVertical: 24, backgroundColor: theme.colors.outlineVariant }} />
+                {/* Summary / Lead Paragraph Section */}
+                {article.seoDescription && (
+                    <View style={[styles.summaryBox, { marginTop: 16, backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outlineVariant }]}>
+                        <View style={[styles.summaryLabel, { backgroundColor: theme.colors.primary }]}>
+                            <Text variant="labelSmall" style={{ color: theme.colors.onPrimary, fontWeight: 'bold' }}>EN RESUMEN</Text>
+                        </View>
+                        <Text variant="bodyMedium" style={[styles.summaryText, { color: theme.colors.onSurfaceVariant }]}>
+                            {article.seoDescription}
+                        </Text>
+                    </View>
+                )}
 
                 {/* Content Body: Support both Legacy Blocks and HTML (WP) */}
                 <View style={styles.articleBody}>
@@ -455,30 +588,56 @@ const ArticleDetailScreen = () => {
                     )}
                 </View>
 
-                <Divider style={{ marginVertical: 32, backgroundColor: theme.colors.outlineVariant }} />
-
                 {/* SEO/Tags */}
                 {article.tags && article.tags.length > 0 && (
                     <>
-                        <Text variant="titleSmall" style={{ marginBottom: 12, fontWeight: 'bold', color: theme.colors.onSurface }}>Tópicos Relacionados</Text>
+                        <Text variant="titleSmall" style={{ marginBottom: 12, fontWeight: 'bold', color: theme.colors.onSurface }}>Etiquetas</Text>
                         <View style={styles.tagsContainer}>
-                            {article.tags.map((tag: WordPressTag, idx: number) => (
-                                <Chip key={idx} style={styles.tagChip} textStyle={{ fontSize: 12 }} mode="outlined">{tag.name}</Chip>
+                            {article.tags.map((tag: any, idx: number) => (
+                                <Chip 
+                                    key={idx} 
+                                    style={styles.tagChip} 
+                                    textStyle={{ fontSize: 12 }} 
+                                    mode="outlined"
+                                    onPress={() => navigation.navigate('TagDetail', { tag, slug: tag.slug })}
+                                >
+                                    {tag.name}
+                                </Chip>
                             ))}
                         </View>
                     </>
                 )}
 
-                {/* SEO Description Box */}
-                {article.seoDescription && (
-                    <Surface style={[styles.seoBox, { backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outlineVariant }]} elevation={0}>
-                        <Text variant="labelSmall" style={{ color: theme.colors.primary, marginBottom: 4, fontWeight: 'bold' }}>RESUMEN SEO</Text>
-                        <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{article.seoDescription}</Text>
-                        {article.yoastSEO?.canonical && (
-                            <Text variant="bodySmall" style={{ color: theme.colors.outline, marginTop: 8, fontSize: 11 }}>Fuente: {article.yoastSEO.canonical}</Text>
-                        )}
-                    </Surface>
-                )}
+                {/* Author Section */}
+                {article.author && <AuthorCard author={article.author} />}
+
+                <Divider style={{ marginVertical: 32, backgroundColor: theme.colors.outlineVariant }} />
+
+                {/* Recommended Articles Section */}
+                <View style={styles.recommendedSection}>
+                    <View style={styles.sectionHeader}>
+                        <Text variant="titleLarge" style={{ fontWeight: 'bold', color: theme.colors.onSurface }}>Relacionados</Text>
+                        <Button mode="text" onPress={() => navigation.navigate('CategoryDetail', { category: article.categories[0], slug: article.categories[0].slug })}>
+                            Ver más
+                        </Button>
+                    </View>
+                    
+                    {loadingRelated ? (
+                        <ActivityIndicator style={{ marginVertical: 40 }} color={theme.colors.primary} />
+                    ) : relatedPosts.length > 0 ? (
+                        <View style={styles.relatedGrid}>
+                            {relatedPosts.map((related) => (
+                                <ArticleCard 
+                                    key={related.id} 
+                                    article={related} 
+                                    onPress={() => navigation.push('ArticleDetail', { article: related })}
+                                />
+                            ))}
+                        </View>
+                    ) : (
+                        <Text style={{ textAlign: 'center', marginVertical: 40, opacity: 0.5 }}>No hay recomendaciones en este momento</Text>
+                    )}
+                </View>
 
                 <Divider style={{ marginVertical: 32, backgroundColor: theme.colors.outlineVariant }} />
 
@@ -524,13 +683,12 @@ const styles = StyleSheet.create({
       paddingHorizontal: 16,
       pointerEvents: 'box-none',
   },
-  roundButton: {
-      borderRadius: 20,
+  headerIconButton: {
       width: 40,
       height: 40,
+      borderRadius: 20,
       alignItems: 'center',
       justifyContent: 'center',
-      overflow: 'hidden',
   },
   leftButtonContainer: {
       zIndex: 25,
@@ -542,13 +700,34 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
       position: 'absolute',
-      left: 0,
-      right: 0,
+      left: 60,
+      right: 60,
       alignItems: 'center',
       justifyContent: 'center',
       zIndex: 15,
       height: '100%',
       pointerEvents: 'none',
+  },
+  summaryBox: {
+      padding: 20,
+      paddingTop: 24,
+      borderRadius: 16,
+      borderWidth: 1,
+      marginBottom: 24,
+      position: 'relative',
+  },
+  summaryLabel: {
+      position: 'absolute',
+      top: -10,
+      left: 16,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      borderRadius: 4,
+  },
+  summaryText: {
+      lineHeight: 22,
+      fontStyle: 'italic',
+      fontWeight: '500',
   },
   heroContainer: {
       height: 350,
@@ -592,6 +771,11 @@ const styles = StyleSheet.create({
       alignSelf: 'flex-start',
       marginBottom: 5,
   },
+  categoriesRow: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      marginBottom: 8,
+  },
   compactMetadata: {
       flexDirection: 'row',
       alignItems: 'center',
@@ -612,9 +796,10 @@ const styles = StyleSheet.create({
       gap: 16,
   },
   paragraph: {
-      lineHeight: 26,
-      fontSize: 16,
-      marginBottom: 8,
+      lineHeight: 28,
+      fontSize: 17,
+      marginBottom: 12,
+      opacity: 0.9,
   },
   heading: {
       fontWeight: 'bold',
@@ -622,26 +807,31 @@ const styles = StyleSheet.create({
       marginBottom: 8,
   },
   quoteContainer: {
-      padding: 20,
-      borderLeftWidth: 4,
-      borderRadius: 8,
-      marginVertical: 16,
+      paddingHorizontal: 24,
+      paddingVertical: 32,
+      marginVertical: 24,
+      backgroundColor: 'rgba(0,0,0,0.03)',
+      borderLeftWidth: 6,
+      borderTopRightRadius: 16,
+      borderBottomRightRadius: 16,
   },
   quoteIcon: {
-      marginBottom: 8,
-      opacity: 0.8, // Increased opacity for visibility
+      marginBottom: 12,
+      opacity: 0.8,
   },
   quoteText: {
       fontStyle: 'italic',
-      fontSize: 18,
-      lineHeight: 28,
-      fontWeight: '500',
+      fontSize: 22,
+      lineHeight: 32,
+      fontWeight: '700',
+      letterSpacing: -0.5,
   },
   quoteAuthor: {
-      marginTop: 12,
-      fontSize: 14,
+      marginTop: 16,
+      fontSize: 15,
       fontWeight: 'bold',
       textAlign: 'right',
+      opacity: 0.8,
   },
   imageBlock: {
       marginVertical: 16,
@@ -684,10 +874,30 @@ const styles = StyleSheet.create({
   tagChip: {
       height: 32,
   },
-  seoBox: {
-      padding: 16,
-      borderRadius: 12,
-      borderWidth: 1,
+  authorCard: {
+    padding: 20,
+    borderRadius: 24,
+    borderWidth: 1,
+    marginTop: 24,
+  },
+  authorHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 16,
+    marginBottom: 12,
+  },
+  authorInfo: {
+    flex: 1,
+  },
+  authorBio: {
+    lineHeight: 22,
+    opacity: 0.8,
+    marginBottom: 16,
+  },
+  socialRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   commentsSection: {
       marginTop: 8,
@@ -717,6 +927,30 @@ const styles = StyleSheet.create({
       flexDirection: 'row',
       alignItems: 'baseline',
       marginBottom: 4,
+  },
+  recommendedSection: {
+      marginTop: 8,
+  },
+  sectionHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 20,
+      paddingHorizontal: 0,
+  },
+  relatedGrid: {
+      marginHorizontal: -20, // To compensate for ArticleCard margin
+  },
+  progressContainer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: 3,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    zIndex: 1001,
+  },
+  progressBar: {
+    height: '100%',
   },
 });
 

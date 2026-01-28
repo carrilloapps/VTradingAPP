@@ -45,6 +45,8 @@
             <category android:name="android.intent.category.DEFAULT" />
             <category android:name="android.intent.category.BROWSABLE" />
             <data android:scheme="vtrading" android:host="article" />
+            <data android:scheme="vtrading" android:host="categoria" />
+            <data android:scheme="vtrading" android:host="tag" />
         </intent-filter>
         
         <!-- Universal Links Support -->
@@ -52,7 +54,10 @@
             <action android:name="android.intent.action.VIEW" />
             <category android:name="android.intent.category.DEFAULT" />
             <category android:name="android.intent.category.BROWSABLE" />
+            <data android:scheme="https" android:host="discover.vtrading.app" android:pathPrefix="/" />
             <data android:scheme="https" android:host="discover.vtrading.app" android:pathPrefix="/article" />
+            <data android:scheme="https" android:host="discover.vtrading.app" android:pathPrefix="/categoria" />
+            <data android:scheme="https" android:host="discover.vtrading.app" android:pathPrefix="/tag" />
         </intent-filter>
       </activity>
 

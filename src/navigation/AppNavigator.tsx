@@ -27,7 +27,7 @@ import OnboardingScreen from '../screens/OnboardingScreen';
 import ModernTabBar from '../components/navigation/ModernTabBar';
 import { navigationRef } from './NavigationRef';
 import { storageService } from '../services/StorageService';
-import DiscoverScreen from '../screens/DiscoverScreen';
+import DiscoverScreen from '../screens/discover/DiscoverScreen';
 import AddAlertScreen from '../screens/settings/AddAlertScreen';
 import { UserAlert } from '../services/StorageService';
 import AuthLoading from '../components/auth/AuthLoading';
@@ -37,7 +37,12 @@ import { CurrencyRate } from '../services/CurrencyService';
 import DeviceInfo from 'react-native-device-info';
 import { remoteConfigService } from '../services/firebase/RemoteConfigService';
 import ForceUpdateModal from '../components/ui/ForceUpdateModal';
-import ArticleDetailScreen from '../screens/ArticleDetailScreen';
+import ArticleDetailScreen from '../screens/discover/ArticleDetailScreen';
+import CategoryDetailScreen from '../screens/discover/CategoryDetailScreen';
+import TagDetailScreen from '../screens/discover/TagDetailScreen';
+import AllArticlesScreen from '../screens/discover/AllArticlesScreen';
+import SearchResultsScreen from '../screens/discover/SearchResultsScreen';
+import { WordPressCategory, WordPressTag } from '../services/WordPressService';
 
 export type RootStackParamList = {
   Onboarding: undefined;
@@ -51,14 +56,18 @@ export type RootStackParamList = {
   AddAlert: { editAlert?: UserAlert };
   StockDetail: { stock: StockData };
   CurrencyDetail: { rate: CurrencyRate };
-  ArticleDetail: { article?: any }; // Added ArticleDetail type
+  ArticleDetail: { article?: any; slug?: string }; // Updated with slug
+  CategoryDetail: { category?: WordPressCategory; slug?: string };
+  TagDetail: { tag?: WordPressTag; slug?: string };
+  AllArticles: undefined;
+  SearchResults: { initialQuery?: string };
 };
 
 export type MainTabParamList = {
   Markets: undefined;
   Rates: undefined;
   Home: undefined;
-  Discover: undefined;
+  Discover: { categorySlug?: string; tagSlug?: string }; // Updated with slugs
   Settings: undefined;
 };
 
@@ -185,6 +194,40 @@ function MainTabNavigator() {
   );
 }
 
+const linking = {
+  prefixes: ['vtrading://', 'https://discover.vtrading.app'],
+  config: {
+    screens: {
+      Main: {
+        screens: {
+          Discover: {
+            path: 'discover',
+          },
+        },
+      },
+      ArticleDetail: {
+        path: 'article/:slug',
+      },
+      CategoryDetail: {
+        path: 'categoria/:slug',
+      },
+      TagDetail: {
+        path: 'tag/:slug',
+      },
+      AllArticles: {
+        path: 'articulos',
+      },
+      SearchResults: {
+        path: 'buscar/:initialQuery?',
+      },
+      // Alternative for direct slugs from WordPress
+      ArticleDetailDirect: {
+        path: ':slug',
+      },
+    },
+  },
+};
+
 const AppNavigator = () => {
   const theme = useTheme(); // Assuming useAppTheme is meant to be useTheme from react-native-paper
   const { isDark } = useThemeContext();
@@ -258,6 +301,7 @@ const AppNavigator = () => {
       <NavigationContainer
         ref={navigationRef}
         theme={themeWithPaper}
+        linking={linking}
         onReady={() => {
           routeNameRef.current = navigationRef.current?.getCurrentRoute()?.name;
         }}
@@ -350,6 +394,38 @@ const AppNavigator = () => {
                 options={{ 
                   headerShown: false, 
                   animation: 'slide_from_right' 
+                }} 
+              />
+              <RootStack.Screen 
+                name="CategoryDetail" 
+                component={CategoryDetailScreen} 
+                options={{ 
+                  headerShown: false, 
+                  animation: 'slide_from_right' 
+                }} 
+              />
+              <RootStack.Screen 
+                name="TagDetail" 
+                component={TagDetailScreen} 
+                options={{ 
+                  headerShown: false, 
+                  animation: 'slide_from_right' 
+                }} 
+              />
+              <RootStack.Screen 
+                name="AllArticles" 
+                component={AllArticlesScreen} 
+                options={{ 
+                  headerShown: false, 
+                  animation: 'slide_from_right' 
+                }} 
+              />
+              <RootStack.Screen 
+                name="SearchResults" 
+                component={SearchResultsScreen} 
+                options={{ 
+                  headerShown: false, 
+                  animation: 'slide_from_bottom' 
                 }} 
               />
             </>

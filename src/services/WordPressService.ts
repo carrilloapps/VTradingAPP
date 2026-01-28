@@ -12,6 +12,9 @@ export interface WordPressCategory {
     slug: string;
     taxonomy: string;
     parent: number;
+    yoast_head_json?: YoastSEO;
+    acf?: any;
+    meta?: any;
 }
 
 export interface WordPressTag {
@@ -79,6 +82,9 @@ export interface WordPressAuthor {
         48?: string;
         96?: string;
     };
+    yoast_head_json?: YoastSEO;
+    meta?: any;
+    count?: number;
 }
 
 export interface WordPressFeaturedMedia {
@@ -94,7 +100,9 @@ export interface WordPressFeaturedMedia {
 export interface WordPressPost {
     id: number;
     date: string;
+    date_gmt: string;
     modified: string;
+    modified_gmt: string;
     slug: string;
     status: string;
     type: string;
@@ -136,13 +144,36 @@ export interface FormattedPost {
     tags?: WordPressTag[];
     readTime: string;
     link: string;
+    excerpt?: string;
     content?: string;
+    modifiedTime?: string;
+    wordCount?: number;
     isPromo: false;
     author?: {
+        id: number;
         name: string;
         avatar: string;
         role?: string;
+        description?: string;
+        slug: string;
+        link: string;
+        social?: {
+            facebook?: string;
+            instagram?: string;
+            youtube?: string;
+            twitter?: string;
+            linkedin?: string;
+            tiktok?: string;
+            website?: string;
+            pinterest?: string;
+            soundcloud?: string;
+            tumblr?: string;
+            wikipedia?: string;
+        };
+        yoastSEO?: YoastSEO;
+        count?: number;
     };
+    seoDescription?: string;
     yoastSEO?: YoastSEO;
 }
 
@@ -202,22 +233,78 @@ class WordPressService {
     }
 
     /**
+     * Fetch related posts (by category)
+     * @param postId Current post ID to exclude
+     * @param categoryId Category ID to filter by
+     * @param limit Number of posts to fetch
+     */
+    async getRelatedPosts(
+        postId: number,
+        categoryId: number,
+        limit = 4
+    ): Promise<FormattedPost[]> {
+        try {
+            const posts = await this.client.get<WordPressPost[]>('posts', {
+                params: {
+                    categories: categoryId,
+                    exclude: postId,
+                    per_page: limit,
+                    _embed: true,
+                },
+                useCache: true,
+                cacheTTL: 30 * 60 * 1000,
+            });
+
+            return posts.map((post) => this.formatPost(post));
+        } catch (error) {
+            observabilityService.captureError(error, { context: 'WordPressService.getRelatedPosts', details: { postId, categoryId } });
+            return [];
+        }
+    }
+
+    /**
      * Fetch a single post by ID
      * @param id Post ID
+     * @param bypassCache Force bypass cache
      */
-    async getPostById(id: number): Promise<FormattedPost | null> {
+    async getPostById(id: number, bypassCache = false): Promise<FormattedPost | null> {
         try {
             const post = await this.client.get<WordPressPost>(`posts/${id}`, {
                 params: {
                     _embed: true,
                 },
-                useCache: true,
-                cacheTTL: 10 * 60 * 1000, // Cache for 10 minutes
+                useCache: !bypassCache,
+                cacheTTL: bypassCache ? 0 : 30 * 60 * 1000,
             });
 
             return this.formatPost(post);
         } catch (error) {
             observabilityService.captureError(error, { context: 'WordPressService.getPostById' });
+            return null;
+        }
+    }
+
+    /**
+     * Fetch a single post by slug
+     * @param slug Post slug
+     */
+    async getPostBySlug(slug: string): Promise<FormattedPost | null> {
+        try {
+            const posts = await this.client.get<WordPressPost[]>('posts', {
+                params: {
+                    slug,
+                    _embed: true,
+                },
+                useCache: true,
+                cacheTTL: 10 * 60 * 1000,
+            });
+
+            if (posts && posts.length > 0) {
+                return this.formatPost(posts[0]);
+            }
+            return null;
+        } catch (error) {
+            observabilityService.captureError(error, { context: 'WordPressService.getPostBySlug', details: { slug } });
             return null;
         }
     }
@@ -229,6 +316,7 @@ class WordPressService {
      * @param perPage Posts per page
      */
     async searchPosts(query: string, page = 1, perPage = 10): Promise<FormattedPost[]> {
+        if (!query || !query.trim()) return [];
         try {
             const posts = await this.client.get<WordPressPost[]>('posts', {
                 params: {
@@ -259,10 +347,11 @@ class WordPressService {
                     per_page: 100, // Fetch all categories
                     orderby: 'count',
                     order: 'desc',
+                    _embed: true, // Try to embed additional info
                 },
                 useCache: true,
-                bypassCache, // Pass through bypassCache parameter
-                cacheTTL: 30 * 60 * 1000, // Cache for 30 minutes (categories change less frequently)
+                bypassCache,
+                cacheTTL: 30 * 60 * 1000,
             });
 
             return categories;
@@ -286,6 +375,30 @@ class WordPressService {
             return category;
         } catch (error) {
             observabilityService.captureError(error, { context: 'WordPressService.getCategoryById' });
+            return null;
+        }
+    }
+
+    /**
+     * Fetch a single category by slug
+     * @param slug Category slug
+     */
+    async getCategoryBySlug(slug: string): Promise<WordPressCategory | null> {
+        try {
+            const categories = await this.client.get<WordPressCategory[]>('categories', {
+                params: {
+                    slug,
+                },
+                useCache: true,
+                cacheTTL: 30 * 60 * 1000,
+            });
+
+            if (categories && categories.length > 0) {
+                return categories[0];
+            }
+            return null;
+        } catch (error) {
+            observabilityService.captureError(error, { context: 'WordPressService.getCategoryBySlug', details: { slug } });
             return null;
         }
     }
@@ -331,24 +444,121 @@ class WordPressService {
     }
 
     /**
+     * Fetch a single tag by slug
+     * @param slug Tag slug
+     */
+    async getTagBySlug(slug: string): Promise<WordPressTag | null> {
+        try {
+            const tags = await this.client.get<WordPressTag[]>('tags', {
+                params: {
+                    slug,
+                },
+                useCache: true,
+                cacheTTL: 30 * 60 * 1000,
+            });
+
+            if (tags && tags.length > 0) {
+                return tags[0];
+            }
+            return null;
+        } catch (error) {
+            observabilityService.captureError(error, { context: 'WordPressService.getTagBySlug', details: { slug } });
+            return null;
+        }
+    }
+
+    /**
      * Helper to format WP post to app-friendly structure
      */
     private formatPost(post: WordPressPost): FormattedPost {
         // Utility to strip HTML tags
         const stripHtml = (html: string) => html.replace(/<[^>]*>?/gm, '');
 
+        // Helper to extract social links from various possible WP structures
+        const discoverSocialLinks = (obj: any) => {
+            if (!obj) return {};
+            const social: any = {};
+            const platforms = [
+                'facebook', 'instagram', 'youtube', 'twitter', 'linkedin',
+                'tiktok', 'website', 'github', 'x', 'pinterest',
+                'soundcloud', 'tumblr', 'wikipedia'
+            ];
+
+            // Check top level, meta, acf, and common variations
+            const sources = [obj, obj.meta, obj.social_links, obj.acf].filter(Boolean);
+
+            platforms.forEach(p => {
+                for (const source of sources) {
+                    const value = source[p] ||
+                        source[`${p}_url`] ||
+                        source[`user_${p}`] ||
+                        source[`user_${p}_url`] ||
+                        source[`author_${p}`] ||
+                        source[`wp_${p}`];
+
+                    if (value && typeof value === 'string' && value.trim() !== '' && value.trim() !== '#') {
+                        let finalValue = value.trim();
+
+                        // Handle-to-URL conversion for X/Twitter
+                        if ((p === 'x' || p === 'twitter') && !finalValue.startsWith('http')) {
+                            finalValue = `https://x.com/${finalValue.replace('@', '')}`;
+                        } else if (!finalValue.startsWith('http') && finalValue.startsWith('www.')) {
+                            finalValue = `https://${finalValue}`;
+                        }
+
+                        if (finalValue.startsWith('http')) {
+                            const key = (p === 'x' || p === 'twitter') ? 'twitter' : p;
+                            social[key] = finalValue;
+                            break;
+                        }
+                    }
+                }
+            });
+
+            // Special fallback for website/url
+            if (!social.website && (obj.url || obj.user_url || obj.link)) {
+                const site = obj.url || obj.user_url || obj.link;
+                if (site && site.includes('http') && !site.includes('discover.vtrading.app')) {
+                    social.website = site;
+                }
+            }
+
+            return social;
+        };
+
         // Estimate read time (avg 200 words per minute)
         const wordCount = post.content.rendered.split(/\s+/).length;
         const readTimeMinutes = Math.ceil(wordCount / 200);
 
-        // Calculate relative time (simple format)
-        const date = new Date(post.date);
+        // Calculate relative time (Spanish format) using GMT to avoid timezone issues
+        // WP GMT dates often don't include the 'Z' suffix, so we append it
+        const date = new Date(post.date_gmt.endsWith('Z') ? post.date_gmt : `${post.date_gmt}Z`);
         const now = new Date();
-        const diffHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-        let timeString = `${diffHours}h`;
-        if (diffHours > 24) {
-            timeString = `${Math.floor(diffHours / 24)}d`;
-        }
+        const diffMs = now.getTime() - date.getTime();
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMins / 60);
+        const diffDays = Math.floor(diffHours / 24);
+
+        let timeString = 'Hace poco';
+        if (diffMins < 1) timeString = 'Ahora';
+        else if (diffMins < 60) timeString = `Hace ${Math.max(1, diffMins)}m`;
+        else if (diffHours < 24) timeString = `Hace ${Math.max(1, diffHours)}h`;
+        else if (diffDays < 7) timeString = `Hace ${Math.max(1, diffDays)}d`;
+        else timeString = date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+
+        // Calculate relative modified time
+        const mDate = new Date(post.modified_gmt.endsWith('Z') ? post.modified_gmt : `${post.modified_gmt}Z`);
+        const mDiffMs = now.getTime() - mDate.getTime();
+        const mDiffMins = Math.floor(mDiffMs / 60000);
+        const mDiffHours = Math.floor(mDiffMins / 60);
+        const mDiffDays = Math.floor(mDiffHours / 24);
+
+        let modifiedString = 'Recién';
+        if (mDiffMins < 1) modifiedString = 'Recién';
+        else if (mDiffMins < 60) modifiedString = `hace ${Math.max(1, mDiffMins)}m`;
+        else if (mDiffHours < 24) modifiedString = `hace ${Math.max(1, mDiffHours)}h`;
+        else if (mDiffDays < 7) modifiedString = `hace ${Math.max(1, mDiffDays)}d`;
+        else modifiedString = mDate.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
 
         // Extract featured image from embedded data or fallback
         let featuredImage = post.jetpack_featured_media_url || 'https://via.placeholder.com/150';
@@ -360,12 +570,29 @@ class WordPressService {
         let author: FormattedPost['author'] | undefined;
         if (post._embedded?.author?.[0]) {
             const wpAuthor = post._embedded.author[0];
+            // Extract a short role or use a default if description is too long
+            const truncatedDescription = wpAuthor.description
+                ? (wpAuthor.description.length > 60 ? wpAuthor.description.split('.')[0] : wpAuthor.description)
+                : undefined;
+
             author = {
+                id: wpAuthor.id,
                 name: wpAuthor.name,
                 avatar: wpAuthor.avatar_urls?.['96'] || wpAuthor.avatar_urls?.['48'] || '',
-                role: wpAuthor.description || undefined,
+                role: truncatedDescription || 'Colaborador',
+                description: wpAuthor.description,
+                slug: wpAuthor.slug,
+                link: wpAuthor.link,
+                social: discoverSocialLinks(wpAuthor),
+                yoastSEO: wpAuthor.yoast_head_json,
+                count: wpAuthor.count,
             };
         }
+
+        // SEO Description prioritization
+        const seoDescription = post.yoast_head_json?.og_description ||
+            post.yoast_head_json?.description ||
+            stripHtml(post.excerpt?.rendered || '').slice(0, 160).trim() + '...';
 
         // Extract categories from embedded data
         let categories: WordPressCategory[] | undefined;
@@ -399,7 +626,11 @@ class WordPressService {
             tags,
             readTime: `${readTimeMinutes} min`,
             link: post.link,
+            excerpt: stripHtml(post.excerpt?.rendered || ''),
             content: post.content.rendered,
+            modifiedTime: modifiedString,
+            wordCount: wordCount,
+            seoDescription,
             isPromo: false,
             author,
             yoastSEO: post.yoast_head_json,

@@ -22,7 +22,9 @@ describe('WordPressService', () => {
                 {
                     id: 1,
                     date: '2026-01-28T10:00:00',
+                    date_gmt: '2026-01-28T10:00:00',
                     modified: '2026-01-28T10:00:00',
+                    modified_gmt: '2026-01-28T10:00:00',
                     slug: 'test-post',
                     status: 'publish',
                     type: 'post',
@@ -148,7 +150,9 @@ describe('WordPressService', () => {
             const mockPost: WordPressPost = {
                 id: 1,
                 date: '2026-01-28T10:00:00',
+                date_gmt: '2026-01-28T10:00:00',
                 modified: '2026-01-28T10:00:00',
+                modified_gmt: '2026-01-28T10:00:00',
                 slug: 'test-post',
                 status: 'publish',
                 type: 'post',
@@ -311,7 +315,9 @@ describe('WordPressService', () => {
             const mockPost: WordPressPost = {
                 id: 1,
                 date: '2026-01-28T10:00:00',
+                date_gmt: '2026-01-28T10:00:00',
                 modified: '2026-01-28T10:00:00',
+                modified_gmt: '2026-01-28T10:00:00',
                 slug: 'test-post',
                 status: 'publish',
                 type: 'post',
@@ -339,7 +345,9 @@ describe('WordPressService', () => {
             const mockPost: WordPressPost = {
                 id: 1,
                 date: '2026-01-28T10:00:00',
+                date_gmt: '2026-01-28T10:00:00',
                 modified: '2026-01-28T10:00:00',
+                modified_gmt: '2026-01-28T10:00:00',
                 slug: 'test-post',
                 status: 'publish',
                 type: 'post',
