@@ -4,6 +4,7 @@ import { Text, Surface, Tooltip } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../theme/theme';
 import { useToastStore } from '../../stores/toastStore';
+import { BolivarIcon } from '../ui/BolivarIcon';
 
 interface BankRateCardProps {
   bankName: string;
@@ -116,6 +117,7 @@ const BankRateCard: React.FC<BankRateCardProps> = ({
         {/* Compra */}
         <View style={styles.rateColumn}>
              <View style={styles.labelRow}>
+                <MaterialCommunityIcons name="arrow-down-circle-outline" size={16} color={theme.colors.secondary} />
                 <Text variant="labelSmall" style={[styles.rateLabel, { color: theme.colors.secondary }]}>COMPRA</Text>
                 {renderPercentage(buyPercentage)}
              </View>
@@ -132,6 +134,7 @@ const BankRateCard: React.FC<BankRateCardProps> = ({
         {/* Venta */}
         <View style={styles.rateColumn}>
              <View style={styles.labelRow}>
+                <MaterialCommunityIcons name="arrow-up-circle-outline" size={16} color={theme.colors.primary} />
                 <Text variant="labelSmall" style={[styles.rateLabel, { color: theme.colors.primary }]}>VENTA</Text>
                 {renderPercentage(sellPercentage)}
              </View>

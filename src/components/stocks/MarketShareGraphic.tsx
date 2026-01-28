@@ -67,7 +67,7 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
             <View style={styles.logoAndBadgeRow}>
               <Image 
                 source={require('../../assets/images/logotipo.png')} 
-                style={styles.templateMainLogo}
+                style={[styles.templateMainLogo, { tintColor: theme.dark ? undefined : theme.colors.primary }]}
                 resizeMode="contain"
               />
               {!isPremium && (
