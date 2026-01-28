@@ -112,7 +112,9 @@ const WidgetsScreen = () => {
     const defaults: CurrencyRate[] = [];
     // Prioritize USD Fiat (BCV) and USDT
     const usd = rates.find(r => r.code === 'USD' && r.type === 'fiat');
-    const usdt = rates.find(r => r.code === 'USDT');
+    const usdtArray = rates.filter(r => r.code === 'USDT');
+    // Prefer binance usdt if available
+    const usdt = usdtArray.find(r => r.id?.includes('binance')) || usdtArray[0];
     
     if (usd) defaults.push(usd);
     if (usdt) defaults.push(usdt);

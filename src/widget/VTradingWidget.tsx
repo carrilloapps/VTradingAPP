@@ -86,7 +86,7 @@ export default function VTradingWidget({
           style={{ 
             fontSize: 24, 
             color: refreshColor,
-            fontFamily: 'materialcommunityicons'
+            fontFamily: 'mdi_font'
           }} 
           clickAction="REFRESH_WIDGET" 
         />

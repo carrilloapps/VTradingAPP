@@ -88,7 +88,8 @@ export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false
 
       for (const id of selectedIds) {
           const rate = rates.find(r => r.id === id || r.code === id);
-          if (rate) {
+          // Only add rates that are not the base currency (value !== 1)
+          if (rate && rate.value !== 1) {
               const change = Number((rate.changePercent || 0).toFixed(2));
               const isUp = change > 0;
               const isDown = change < 0;
@@ -108,8 +109,8 @@ export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false
 
       // Fill if empty
       if (widgetItems.length === 0) {
-          const defaultRates = rates.slice(0, 4);
-          defaultRates.forEach(rate => {
+          const defaultFilter = rates.filter(r => r.value !== 1).slice(0, 4);
+          defaultFilter.forEach(rate => {
               const change = Number((rate.changePercent || 0).toFixed(2));
               const isUp = change > 0;
               const isDown = change < 0;
