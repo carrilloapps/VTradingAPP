@@ -7,6 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import { storageService } from '../services/StorageService';
 import { fcmService } from '../services/firebase/FCMService';
+import { analyticsService } from '../services/firebase/AnalyticsService';
 import { useAppTheme } from '../theme/theme';
 import { useToastStore } from '../stores/toastStore';
 import { observabilityService } from '../services/ObservabilityService';
@@ -94,9 +95,17 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
     };
   };
 
-  // Auto-advance logic
+  // Track Start
   useEffect(() => {
-    if (isPaused) return;
+    analyticsService.logEvent('onboarding_start');
+  }, []);
+
+  // Modified Auto-advance logic
+  useEffect(() => {
+    // PAUSE on Notifications page (key='notifications') to force interaction
+    const isNotificationPage = ONBOARDING_DATA[currentPage]?.key === 'notifications';
+    
+    if (isPaused || isNotificationPage) return;
 
     const interval = setInterval(() => {
       if (currentPage < ONBOARDING_DATA.length - 1) {
@@ -106,9 +115,8 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
         clearInterval(interval);
       }
     }, STORY_DURATION);
-
     return () => clearInterval(interval);
-  }, [currentPage, isPaused, ONBOARDING_DATA.length]);
+  }, [currentPage, isPaused, ONBOARDING_DATA.length, ONBOARDING_DATA]);
 
   // Check initial notification permission
   useEffect(() => {
@@ -124,7 +132,12 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
   }, []);
 
   const handlePageSelected = (e: any) => {
-    setCurrentPage(e.nativeEvent.position);
+    const position = e.nativeEvent.position;
+    setCurrentPage(position);
+    analyticsService.logEvent('onboarding_step_view', { 
+        step_index: position, 
+        step_name: ONBOARDING_DATA[position]?.key 
+    });
   };
 
   const handleNext = () => {
@@ -144,15 +157,31 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
   const handlePausePressIn = () => setIsPaused(true);
   const handlePausePressOut = () => setIsPaused(false);
 
+  const handleSkipNotifications = () => {
+      analyticsService.logEvent('notification_permission_skipped');
+      // Manually advance
+      pagerRef.current?.setPage(currentPage + 1);
+  };
+
   const requestNotificationPermission = async () => {
     console.log('[Onboarding] Requesting notification permission...');
     setIsPaused(true); // Pause while system dialog is open
     try {
       const hasPermission = await fcmService.requestUserPermission();
       setNotificationPermissionStatus(hasPermission);
+      
+      analyticsService.logEvent('notification_permission_result', { 
+          granted: hasPermission 
+      });
+
       if (hasPermission) {
         await fcmService.getFCMToken();
         await fcmService.subscribeToDemographics(['all_users']);
+         // Auto-advance on success for better UX? Or let user click continue. 
+         // User said "until activate or omit". If activated, we can auto-advance or show "Continue".
+         setTimeout(() => {
+             pagerRef.current?.setPage(currentPage + 1);
+         }, 1500);
       }
     } catch (e) {
       observabilityService.captureError(e);
@@ -166,6 +195,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
 
   const finishOnboarding = async () => {
     console.log('[Onboarding] Finishing onboarding...');
+    analyticsService.logEvent('onboarding_complete');
     await storageService.setHasSeenOnboarding(true);
     if (onFinish) {
       onFinish();
@@ -227,6 +257,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
       >
         {ONBOARDING_DATA.map((item, index) => {
           const pageColors = getPageColors(item.colorType);
+          const isNotificationPage = item.key === 'notifications';
           
           return (
             <View key={item.key} style={styles.page}>
@@ -237,22 +268,25 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
                 end={{ x: 0, y: 1 }}
               >
                 {/* Touch Overlays for Navigation - Internal to page to allow button interaction */}
-                <View style={styles.touchOverlay} pointerEvents="box-none">
-                  <TouchableOpacity 
-                    style={styles.touchLeft} 
-                    onPress={handlePrev} 
-                    onLongPress={handlePausePressIn}
-                    onPressOut={handlePausePressOut}
-                    activeOpacity={1}
-                  />
-                  <TouchableOpacity 
-                    style={styles.touchRight} 
-                    onPress={handleNext} 
-                    onLongPress={handlePausePressIn}
-                    onPressOut={handlePausePressOut}
-                    activeOpacity={1}
-                  />
-                </View>
+                {/* Touch Overlays - Disabled on Notification Page to force explicit choice */}
+                {!isNotificationPage && (
+                    <View style={styles.touchOverlay} pointerEvents="box-none">
+                      <TouchableOpacity 
+                        style={styles.touchLeft} 
+                        onPress={handlePrev} 
+                        onLongPress={handlePausePressIn}
+                        onPressOut={handlePausePressOut}
+                        activeOpacity={1}
+                      />
+                      <TouchableOpacity 
+                        style={styles.touchRight} 
+                        onPress={handleNext} 
+                        onLongPress={handlePausePressIn}
+                        onPressOut={handlePausePressOut}
+                        activeOpacity={1}
+                      />
+                    </View>
+                )}
 
                 <View style={[styles.contentContainer, { width: contentWidth }]}>
                   <View style={styles.iconWrapper}>
@@ -292,27 +326,36 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
                   </Text>
 
                   {item.key === 'notifications' && (
-                    <CustomButton 
-                      label={notificationPermissionStatus === true 
-                        ? 'Notificaciones activas' 
-                        : 'Activar notificaciones'}
-                      onPress={notificationPermissionStatus === true ? () => {} : requestNotificationPermission}
-                      variant="primary"
-                      icon={notificationPermissionStatus ? "check-circle" : "bell-ring"}
-                      style={[
-                        styles.actionButton, 
-                        { 
-                          backgroundColor: notificationPermissionStatus === true 
-                            ? theme.colors.successContainer 
-                            : pageColors.icon 
-                        }
-                      ]}
-                      labelStyle={{ 
-                        color: notificationPermissionStatus === true 
-                          ? theme.colors.success 
-                          : pageColors.buttonText 
-                      }}
-                    />
+                    <View style={{ width: '100%', alignItems: 'center', gap: 12, marginTop: 16, zIndex: 20 }}>
+                        <CustomButton 
+                          label={notificationPermissionStatus === true 
+                            ? 'Notificaciones activas' 
+                            : 'Activar notificaciones'}
+                          onPress={notificationPermissionStatus === true ? () => {} : requestNotificationPermission}
+                          variant="primary"
+                          icon={notificationPermissionStatus ? "check-circle" : "bell-ring"}
+                          style={[
+                            styles.actionButton, 
+                            { 
+                              marginTop: 0,
+                              backgroundColor: notificationPermissionStatus === true 
+                                ? theme.colors.primary 
+                                : pageColors.icon 
+                            }
+                          ]}
+                          labelStyle={{ 
+                            color: theme.colors.onPrimary
+                          }}
+                        />
+                        
+                        {!notificationPermissionStatus && (
+                            <TouchableOpacity onPress={handleSkipNotifications} style={{ padding: 12 }}>
+                                <Text variant="labelLarge" style={{ color: theme.colors.onSurfaceVariant }}>
+                                    Ahora no
+                                </Text>
+                            </TouchableOpacity>
+                        )}
+                    </View>
                   )}
                 </View>
 
