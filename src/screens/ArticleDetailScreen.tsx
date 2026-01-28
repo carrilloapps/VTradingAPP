@@ -6,6 +6,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
 import { useAppTheme } from '../theme/theme';
+import { analyticsService } from '../services/firebase/AnalyticsService';
 
 // --- Mock Content (Simulating Headless WP JSON) ---
 const MOCK_ARTICLE = {
@@ -91,6 +92,8 @@ const ArticleDetailScreen = () => {
   // Max width = ScreenWidth - (110px * 2) = ScreenWidth - 220px.
   const maxTitleWidth = width - 220;
   
+
+
   // Use passed params merged with mock fallback to ensure all fields exist (like author, content)
   const incomingArticle = (route.params as any)?.article;
   const article = {
@@ -101,6 +104,12 @@ const ArticleDetailScreen = () => {
           ...(incomingArticle?.author || {})
       }
   };
+
+  React.useEffect(() => {
+    if (article?.id) {
+        analyticsService.logScreenView('ArticleDetail', article.title);
+    }
+  }, [article?.id, article?.title]);
 
   const scrollY = useRef(new Animated.Value(0)).current;
 

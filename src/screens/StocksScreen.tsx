@@ -138,6 +138,17 @@ const StocksScreen = ({ navigation, route }: any) => {
     setShareDialogVisible(true);
   };
 
+  // Debounced Search Analytics
+  useEffect(() => {
+    const timer = setTimeout(() => {
+        if (searchQuery && searchQuery.length > 2) {
+            analyticsService.logEvent('search_stock', { query: searchQuery });
+        }
+    }, 1500); // 1.5s debounce to capture "finished" typing
+
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
   const generateShareImage = async (format: '1:1' | '16:9') => {
     setShareDialogVisible(false);
     setShareFormat(format);
@@ -164,6 +175,8 @@ const StocksScreen = ({ navigation, route }: any) => {
           type: 'image/jpeg',
           message: `Resumen del Mercado Bursátil - VTradingAPP`,
         });
+
+        await analyticsService.logShare('market_summary', 'all', format === '1:1' ? 'image_square' : 'image_story');
       } catch (e) {
         if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
             observabilityService.captureError(e, { context: 'StocksScreen_generateShareImage' });
@@ -184,6 +197,7 @@ const StocksScreen = ({ navigation, route }: any) => {
         `🌐 vtrading.app`;
 
       await Share.open({ message });
+      await analyticsService.logShare('market_summary', 'all', 'text');
     } catch (e) {
        if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
         showToast('Error al compartir texto', 'error');

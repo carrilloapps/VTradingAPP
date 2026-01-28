@@ -3,6 +3,7 @@ import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../theme/theme';
+import { analyticsService } from '../../services/firebase/AnalyticsService';
 import { NotificationData } from './NotificationCard';
 import NotificationIcon, { getNotificationIconConfig } from './NotificationIcon';
 import { formatTimeAgo } from '../../utils/dateUtils';
@@ -24,6 +25,15 @@ const NotificationDetailModal: React.FC<NotificationDetailModalProps> = ({
   onArchive,
 }) => {
   const theme = useAppTheme();
+
+  React.useEffect(() => {
+    if (visible && notification) {
+        analyticsService.logEvent('view_notification_detail', { 
+            notification_id: notification.id,
+            notification_title: notification.title 
+        });
+    }
+  }, [visible, notification]);
 
   if (!notification) return null;
 

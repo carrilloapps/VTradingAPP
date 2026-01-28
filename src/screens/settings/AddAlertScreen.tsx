@@ -4,7 +4,6 @@ import { Text, ActivityIndicator, TextInput } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
 import UnifiedHeader from '../../components/ui/UnifiedHeader';
 import { BolivarIcon } from '../../components/ui/BolivarIcon';
 import SearchBar from '../../components/ui/SearchBar';
@@ -19,7 +18,7 @@ import { storageService, UserAlert } from '../../services/StorageService';
 import { fcmService } from '../../services/firebase/FCMService';
 import { useToastStore } from '../../stores/toastStore';
 import { observabilityService } from '../../services/ObservabilityService';
-
+import { analyticsService } from '../../services/firebase/AnalyticsService';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 
@@ -239,12 +238,24 @@ const AddAlertScreen = ({ route }: Props) => {
                  }
                  // New topic subscription will happen below
             }
+
+            await analyticsService.logEvent('update_alert', { 
+                symbol: selectedItem.symbol, 
+                target: parseFloat(targetPrice),
+                condition: condition 
+            });
         } else {
             // Add new
             updatedAlerts = [...alerts, newAlert];
+            await analyticsService.logEvent('create_alert', { 
+                symbol: selectedItem.symbol, 
+                target: parseFloat(targetPrice),
+                condition: condition 
+            });
         }
 
         await storageService.saveAlerts(updatedAlerts);
+        await analyticsService.setUserProperty('alert_count', updatedAlerts.length.toString());
 
         // Subscribe to FCM (Always subscribe to ensure we are listening, even if already subscribed)
         const safeSymbol = selectedItem.symbol.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
@@ -253,9 +264,11 @@ const AddAlertScreen = ({ route }: Props) => {
 
         showToast(editAlert ? 'Alerta actualizada' : `Alerta creada para ${selectedItem.symbol}`, 'success');
         navigation.goBack();
-    } catch (e) {
-        observabilityService.captureError(e);
+
+    } catch (error) {
+        observabilityService.captureError(error);
         showToast('Error al guardar alerta', 'error');
+    } finally {
         setSaving(false);
     }
   };
@@ -268,6 +281,7 @@ const AddAlertScreen = ({ route }: Props) => {
           const alerts = await storageService.getAlerts();
           const updated = alerts.filter(a => a.id !== editAlert.id);
           await storageService.saveAlerts(updated);
+          await analyticsService.setUserProperty('alert_count', updated.length.toString());
 
           // Unsubscribe from FCM topic if no remaining alerts for symbol
           const safeSymbol = editAlert.symbol.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
@@ -278,6 +292,7 @@ const AddAlertScreen = ({ route }: Props) => {
               await fcmService.unsubscribeFromTopic(topic);
           }
 
+          await analyticsService.logEvent('delete_alert', { symbol: editAlert.symbol });
           showToast('Alerta eliminada', 'success');
           navigation.goBack();
       } catch (e) {
