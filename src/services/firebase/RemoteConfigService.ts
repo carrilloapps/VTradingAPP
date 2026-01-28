@@ -128,7 +128,7 @@ class RemoteConfigService {
    */
   async getFeature(featureName: string): Promise<boolean> {
     try {
-      const configJson = this.getJson<RemoteConfigSchema>('settings');
+      const configJson = this.getJson<RemoteConfigSchema>('feature_flags');
       return await featureFlagService.evaluate(featureName, configJson);
     } catch (e) {
       observabilityService.captureError(e);
