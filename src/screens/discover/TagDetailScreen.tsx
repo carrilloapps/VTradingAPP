@@ -16,6 +16,7 @@ import CustomButton from '../../components/ui/CustomButton';
 import ShareableDetail from '../../components/discover/ShareableDetail';
 import { analyticsService } from '../../services/firebase/AnalyticsService';
 import { useToastStore } from '../../stores/toastStore';
+import { shareTextContent } from '../../utils/ShareUtils';
 
 const TagDetailScreen = () => {
   const theme = useAppTheme();
@@ -157,19 +158,14 @@ const TagDetailScreen = () => {
 
   const handleShareText = async () => {
     setShareDialogVisible(false);
-    try {
-      const topNews = posts.slice(0, 3).map(p => `• ${p.title}`).join('\n');
-      const message = `🏷️ *Etiqueta: #${tag?.name}*\n\n` +
-        `${topNews || tag?.description || 'Explora artículos relacionados.'}\n\n` +
-        `🔗 _VTrading App_`;
-
-      await Share.open({ message });
-      analyticsService.logShare('tag_detail', tag?.id.toString() || 'unknown', 'text');
-    } catch (e: any) {
-      if (e.message !== 'User did not share' && e.message !== 'CANCELLED') {
-        showToast('Error al compartir', 'error');
-      }
-    }
+    await shareTextContent({
+      title: `#${tag?.name}`,
+      excerpt: tag?.description,
+      url: `https://discover.vtrading.app/tag/${tag?.slug || tag?.id}`,
+      type: 'TAG',
+      count: tag?.count
+    });
+    analyticsService.logShare('tag_detail', tag?.id.toString() || 'unknown', 'text');
   };
 
   const renderHeader = () => {
@@ -256,40 +252,49 @@ const TagDetailScreen = () => {
         />
       )}
       <CustomDialog
-        visible={isShareDialogVisible}
-        onDismiss={() => setShareDialogVisible(false)}
-        title="Compartir Etiqueta"
-        showCancel={false}
-        confirmLabel="Cerrar"
-        onConfirm={() => setShareDialogVisible(false)}
+        visible={isShareDialogVisible || sharing}
+        onDismiss={() => !sharing && setShareDialogVisible(false)}
+        title={sharing ? "Generando imagen..." : "Compartir Etiqueta"}
+        showCancel={!sharing}
+        confirmLabel={sharing ? "" : "Cerrar"}
+        onConfirm={() => !sharing && setShareDialogVisible(false)}
       >
-        <Text variant="bodyMedium" style={{ textAlign: 'center', marginBottom: 20, color: theme.colors.onSurfaceVariant }}>
-          Comparte esta etiqueta con tus amigos
-        </Text>
+        {sharing ? (
+          <View style={{ padding: 20, alignItems: 'center' }}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+            <Text style={{ marginTop: 16, color: theme.colors.onSurfaceVariant }}>Preparando visualización...</Text>
+          </View>
+        ) : (
+          <>
+            <Text variant="bodyMedium" style={{ textAlign: 'center', marginBottom: 20, color: theme.colors.onSurfaceVariant }}>
+              Comparte esta etiqueta con tus amigos
+            </Text>
 
-        <View style={{ gap: 12 }}>
-          <CustomButton
-            variant="primary"
-            label="Imagen cuadrada"
-            icon="view-grid-outline"
-            onPress={() => generateShareImage('1:1')}
-            fullWidth
-          />
-          <CustomButton
-            variant="secondary"
-            label="Imagen vertical"
-            icon="cellphone"
-            onPress={() => generateShareImage('16:9')}
-            fullWidth
-          />
-          <CustomButton
-            variant="outlined"
-            label="Solo texto"
-            icon="text-short"
-            onPress={handleShareText}
-            fullWidth
-          />
-        </View>
+            <View style={{ gap: 12 }}>
+              <CustomButton
+                variant="primary"
+                label="Imagen cuadrada"
+                icon="view-grid-outline"
+                onPress={() => generateShareImage('1:1')}
+                fullWidth
+              />
+              <CustomButton
+                variant="secondary"
+                label="Imagen vertical"
+                icon="cellphone"
+                onPress={() => generateShareImage('16:9')}
+                fullWidth
+              />
+              <CustomButton
+                variant="outlined"
+                label="Solo texto"
+                icon="text-short"
+                onPress={handleShareText}
+                fullWidth
+              />
+            </View>
+          </>
+        )}
       </CustomDialog>
     </View>
   );

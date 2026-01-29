@@ -31,6 +31,7 @@ import AuthorCard from '../../components/discover/AuthorCard';
 import DiscoverErrorView from '../../components/discover/DiscoverErrorView';
 import XIcon from '../../components/common/XIcon';
 import FacebookIcon from '../../components/common/FacebookIcon';
+import { shareTextContent } from '../../utils/ShareUtils';
 
 
 // Helper to convert hex to rgba
@@ -300,29 +301,19 @@ const ArticleDetailScreen = () => {
 
   const handleShareText = async () => {
     setShareDialogVisible(false);
-    try {
-      // Generate deep link for the article
-      const articleId = article.id || article.slug || 'unknown';
-      const deepLink = `vtrading://article/${articleId}`;
-      const webLink = `https://discover.vtrading.app/article/${articleId}`;
+    const success = await shareTextContent({
+      title: article.title,
+      excerpt: article.excerpt,
+      url: `https://discover.vtrading.app/article/${article.id || article.slug}`,
+      type: 'ARTICLE',
+      author: article.author?.name
+    });
 
-      const shareMessage = `📰 ${article.title}\n\n${article.excerpt || ''}\n\n🔗 Leer más: ${webLink}\n\nAbrir en la app: ${deepLink}`;
-
-      const result = await Share.open({
-        message: shareMessage,
-        title: article.title,
-        url: webLink, // iOS uses this
+    if (success) {
+      analyticsService.logEvent('article_shared', {
+        article_id: article.id || 'unknown',
+        method: 'text',
       });
-
-      if (result.success !== false) { // react-native-share returns {success: boolean, message: string}
-        analyticsService.logEvent('article_shared', {
-          article_id: articleId,
-          article_title: article.title,
-          share_method: result.message || 'unknown',
-        });
-      }
-    } catch (error) {
-      observabilityService.captureError(error, { context: 'ArticleDetailScreen.handleShare' });
     }
   };
 
@@ -869,40 +860,49 @@ const ArticleDetailScreen = () => {
       />
 
       <CustomDialog
-        visible={isShareDialogVisible}
-        onDismiss={() => setShareDialogVisible(false)}
-        title="Compartir Artículo"
-        showCancel={false}
-        confirmLabel="Cerrar"
-        onConfirm={() => setShareDialogVisible(false)}
+        visible={isShareDialogVisible || sharing}
+        onDismiss={() => !sharing && setShareDialogVisible(false)}
+        title={sharing ? "Generando imagen..." : "Compartir Artículo"}
+        showCancel={!sharing}
+        confirmLabel={sharing ? "" : "Cerrar"}
+        onConfirm={() => !sharing && setShareDialogVisible(false)}
       >
-        <Text variant="bodyMedium" style={{ textAlign: 'center', marginBottom: 20, color: theme.colors.onSurfaceVariant }}>
-          Comparte este artículo con tus amigos
-        </Text>
+        {sharing ? (
+          <View style={{ padding: 20, alignItems: 'center' }}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+            <Text style={{ marginTop: 16, color: theme.colors.onSurfaceVariant }}>Preparando tu imagen exclusiva...</Text>
+          </View>
+        ) : (
+          <>
+            <Text variant="bodyMedium" style={{ textAlign: 'center', marginBottom: 20, color: theme.colors.onSurfaceVariant }}>
+              Comparte este artículo con tus amigos
+            </Text>
 
-        <View style={{ gap: 12 }}>
-          <CustomButton
-            variant="primary"
-            label="Imagen cuadrada"
-            icon="view-grid-outline"
-            onPress={() => generateShareImage('1:1')}
-            fullWidth
-          />
-          <CustomButton
-            variant="secondary"
-            label="Imagen vertical"
-            icon="cellphone"
-            onPress={() => generateShareImage('16:9')}
-            fullWidth
-          />
-          <CustomButton
-            variant="outlined"
-            label="Solo texto/Enlace"
-            icon="link"
-            onPress={handleShareText}
-            fullWidth
-          />
-        </View>
+            <View style={{ gap: 12 }}>
+              <CustomButton
+                variant="primary"
+                label="Imagen cuadrada"
+                icon="view-grid-outline"
+                onPress={() => generateShareImage('1:1')}
+                fullWidth
+              />
+              <CustomButton
+                variant="secondary"
+                label="Imagen vertical"
+                icon="cellphone"
+                onPress={() => generateShareImage('16:9')}
+                fullWidth
+              />
+              <CustomButton
+                variant="outlined"
+                label="Solo texto/Enlace"
+                icon="link"
+                onPress={handleShareText}
+                fullWidth
+              />
+            </View>
+          </>
+        )}
       </CustomDialog>
     </View>
   );

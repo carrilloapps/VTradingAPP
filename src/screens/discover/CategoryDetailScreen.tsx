@@ -16,6 +16,7 @@ import CustomButton from '../../components/ui/CustomButton';
 import ShareableDetail from '../../components/discover/ShareableDetail';
 import { analyticsService } from '../../services/firebase/AnalyticsService';
 import { useToastStore } from '../../stores/toastStore';
+import { shareTextContent } from '../../utils/ShareUtils';
 
 const CategoryDetailScreen = () => {
   const theme = useAppTheme();
@@ -175,19 +176,14 @@ const CategoryDetailScreen = () => {
 
   const handleShareText = async () => {
     setShareDialogVisible(false);
-    try {
-      const topNews = posts.slice(0, 3).map(p => `• ${p.title}`).join('\n');
-      const message = `📂 *Categoría: ${category?.name}*\n\n` +
-        `${topNews || category?.description || 'Descubre los mejores artículos.'}\n\n` +
-        `🔗 _Leelo en VTrading_`;
-
-      await Share.open({ message });
-      analyticsService.logShare('category_detail', category?.id.toString() || 'unknown', 'text');
-    } catch (e: any) {
-      if (e.message !== 'User did not share' && e.message !== 'CANCELLED') {
-        showToast('Error al compartir', 'error');
-      }
-    }
+    await shareTextContent({
+      title: category?.name || 'Categoría',
+      excerpt: category?.description,
+      url: `https://discover.vtrading.app/category/${category?.slug || category?.id}`,
+      type: 'CATEGORY',
+      count: category?.count
+    });
+    analyticsService.logShare('category_detail', category?.id.toString() || 'unknown', 'text');
   };
 
   return (
@@ -256,40 +252,49 @@ const CategoryDetailScreen = () => {
         />
       )}
       <CustomDialog
-        visible={isShareDialogVisible}
-        onDismiss={() => setShareDialogVisible(false)}
-        title="Compartir Categoría"
-        showCancel={false}
-        confirmLabel="Cerrar"
-        onConfirm={() => setShareDialogVisible(false)}
+        visible={isShareDialogVisible || sharing}
+        onDismiss={() => !sharing && setShareDialogVisible(false)}
+        title={sharing ? "Generando imagen..." : "Compartir Categoría"}
+        showCancel={!sharing}
+        confirmLabel={sharing ? "" : "Cerrar"}
+        onConfirm={() => !sharing && setShareDialogVisible(false)}
       >
-        <Text variant="bodyMedium" style={{ textAlign: 'center', marginBottom: 20, color: theme.colors.onSurfaceVariant }}>
-          Comparte esta categoría con tus amigos
-        </Text>
+        {sharing ? (
+          <View style={{ padding: 20, alignItems: 'center' }}>
+            <ActivityIndicator size="large" color={theme.colors.primary} />
+            <Text style={{ marginTop: 16, color: theme.colors.onSurfaceVariant }}>Preparando visualización...</Text>
+          </View>
+        ) : (
+          <>
+            <Text variant="bodyMedium" style={{ textAlign: 'center', marginBottom: 20, color: theme.colors.onSurfaceVariant }}>
+              Comparte esta categoría con tus amigos
+            </Text>
 
-        <View style={{ gap: 12 }}>
-          <CustomButton
-            variant="primary"
-            label="Imagen cuadrada"
-            icon="view-grid-outline"
-            onPress={() => generateShareImage('1:1')}
-            fullWidth
-          />
-          <CustomButton
-            variant="secondary"
-            label="Imagen vertical"
-            icon="cellphone"
-            onPress={() => generateShareImage('16:9')}
-            fullWidth
-          />
-          <CustomButton
-            variant="outlined"
-            label="Solo texto"
-            icon="text-short"
-            onPress={handleShareText}
-            fullWidth
-          />
-        </View>
+            <View style={{ gap: 12 }}>
+              <CustomButton
+                variant="primary"
+                label="Imagen cuadrada"
+                icon="view-grid-outline"
+                onPress={() => generateShareImage('1:1')}
+                fullWidth
+              />
+              <CustomButton
+                variant="secondary"
+                label="Imagen vertical"
+                icon="cellphone"
+                onPress={() => generateShareImage('16:9')}
+                fullWidth
+              />
+              <CustomButton
+                variant="outlined"
+                label="Solo texto"
+                icon="text-short"
+                onPress={handleShareText}
+                fullWidth
+              />
+            </View>
+          </>
+        )}
       </CustomDialog>
     </View>
   );
