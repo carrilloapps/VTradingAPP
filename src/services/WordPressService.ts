@@ -25,6 +25,7 @@ export interface WordPressTag {
     name: string;
     slug: string;
     taxonomy: string;
+    yoast_head_json?: YoastSEO;
 }
 
 export interface WordPressComment {
@@ -163,6 +164,8 @@ export interface FormattedPost {
     isPromo: boolean;
     isTrending: boolean;
     isEdited?: boolean;
+    date: string;
+    modified: string;
     author?: {
         id: number;
         name: string;
@@ -922,6 +925,8 @@ class WordPressService {
             isPromo,
             isTrending,
             isEdited: (mDate.getTime() - date.getTime()) > 300000, // Significant change > 5 mins
+            date: post.date_gmt,
+            modified: post.modified_gmt,
             author,
             yoastSEO: post.yoast_head_json,
         };
