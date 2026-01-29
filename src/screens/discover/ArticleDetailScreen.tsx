@@ -259,6 +259,7 @@ const ArticleDetailScreen = () => {
     setShareDialogVisible(false);
     setShareFormat(format);
     setSharing(true);
+    showToast('Generando imagen, por favor espera...', 'info');
 
     // Wait for render
     await new Promise(resolve => setTimeout(() => resolve(null), 300));
@@ -562,6 +563,7 @@ const ArticleDetailScreen = () => {
         <View style={styles.rightButtonsContainer}>
           <TouchableOpacity
             onPress={handleShareButton}
+            disabled={sharing}
             activeOpacity={0.7}
             style={[styles.headerIconButton, { backgroundColor: theme.colors.surface + 'CC' }]}
           >
@@ -881,50 +883,39 @@ const ArticleDetailScreen = () => {
         ]}
       />
 
+      {/* Standard Dialog for Sharing Options */}
       <CustomDialog
-        visible={isShareDialogVisible || sharing}
-        onDismiss={() => !sharing && setShareDialogVisible(false)}
-        title={sharing ? "Generando imagen..." : "Compartir Artículo"}
-        showCancel={!sharing}
-        confirmLabel={sharing ? "" : "Cerrar"}
-        onConfirm={() => !sharing && setShareDialogVisible(false)}
+        visible={isShareDialogVisible}
+        onDismiss={() => setShareDialogVisible(false)}
+        title="Compartir artículo"
+        content="Elige el formato de la imagen para compartir"
+        showCancel={true}
+        confirmLabel="Cerrar"
+        onConfirm={() => setShareDialogVisible(false)}
       >
-        {sharing ? (
-          <View style={{ padding: 20, alignItems: 'center' }}>
-            <ActivityIndicator size="large" color={theme.colors.primary} />
-            <Text style={{ marginTop: 16, color: theme.colors.onSurfaceVariant }}>Preparando tu imagen exclusiva...</Text>
-          </View>
-        ) : (
-          <>
-            <Text variant="bodyMedium" style={{ textAlign: 'center', marginBottom: 20, color: theme.colors.onSurfaceVariant }}>
-              Comparte este artículo con tus amigos
-            </Text>
-
-            <View style={{ gap: 12 }}>
-              <CustomButton
-                variant="primary"
-                label="Imagen cuadrada"
-                icon="view-grid-outline"
-                onPress={() => generateShareImage('1:1')}
-                fullWidth
-              />
-              <CustomButton
-                variant="secondary"
-                label="Imagen vertical"
-                icon="cellphone"
-                onPress={() => generateShareImage('16:9')}
-                fullWidth
-              />
-              <CustomButton
-                variant="outlined"
-                label="Solo texto/Enlace"
-                icon="link"
-                onPress={handleShareText}
-                fullWidth
-              />
-            </View>
-          </>
-        )}
+        <View style={{ gap: 12 }}>
+          <CustomButton
+            variant="primary"
+            label="Imagen cuadrada (1:1)"
+            icon="crop-square"
+            onPress={() => generateShareImage('1:1')}
+            fullWidth
+          />
+          <CustomButton
+            variant="secondary"
+            label="Historia vertical (16:9)"
+            icon="crop-portrait"
+            onPress={() => generateShareImage('16:9')}
+            fullWidth
+          />
+          <CustomButton
+            variant="outlined"
+            label="Solo texto/Enlace"
+            icon="link"
+            onPress={handleShareText}
+            fullWidth
+          />
+        </View>
       </CustomDialog>
     </View>
   );
@@ -1242,6 +1233,19 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: '100%',
+  },
+  shareOptions: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    gap: 16,
+  },
+  shareOption: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderWidth: 1,
+    borderRadius: 16,
+    flex: 1,
   },
 });
 
