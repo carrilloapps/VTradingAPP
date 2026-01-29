@@ -283,10 +283,17 @@ const ArticleDetailScreen = () => {
         const slug = article.slug || article.id || 'unknown';
         const webLink = deepLinkService.getArticleLink(slug);
 
+        // Feature Flag: Toggle sharing exact deep link vs generic promo
+        const SHARE_EXACT_DEEP_LINK = true; 
+
+        const shareMessage = SHARE_EXACT_DEEP_LINK
+            ? `📰 ${article.title}\n\n🔗 ${webLink}`
+            : `📰 ${article.title}\n\nDescarga ya VTrading en https://vtrading.app y recibe más información`;
+
         await Share.open({
           url: sharePath,
           title: article.title,
-          message: `📰 ${article.title}\n\n🔗 ${webLink}`, // Adding text for some platforms
+          message: `📰 ${article.title}${shareMessage}`, // Adding text for some platforms
           type: 'image/jpeg',
         });
 

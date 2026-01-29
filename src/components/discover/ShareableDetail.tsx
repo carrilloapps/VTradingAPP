@@ -51,7 +51,6 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
     viewShotRef,
     title,
     type,
-    count,
     image,
     description,
     items,
@@ -59,7 +58,6 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
     author,
     categoryName,
     metaLabel,
-    metaValue,
 }) => {
     const theme = useAppTheme();
     const isDark = theme.dark;

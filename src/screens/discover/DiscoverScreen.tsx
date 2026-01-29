@@ -73,7 +73,7 @@ const DiscoverScreen = () => {
       try {
         await remoteConfigService.fetchAndActivate();
 
-        const isEnabled = true;
+        const isEnabled = await remoteConfigService.getFeature('discover');
         setFeatureEnabled(isEnabled);
 
         if (!isEnabled) {
