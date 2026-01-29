@@ -262,7 +262,7 @@ const ArticleDetailScreen = () => {
     showToast('Generando imagen, por favor espera...', 'info');
 
     // Wait for render
-    await new Promise(resolve => setTimeout(() => resolve(null), 300));
+    await new Promise(resolve => setTimeout(() => resolve(null), 500));
 
     if (viewShotRef.current) {
       try {
@@ -888,30 +888,32 @@ const ArticleDetailScreen = () => {
         visible={isShareDialogVisible}
         onDismiss={() => setShareDialogVisible(false)}
         title="Compartir artículo"
-        content="Elige el formato de la imagen para compartir"
-        showCancel={true}
+        showCancel={false}
         confirmLabel="Cerrar"
         onConfirm={() => setShareDialogVisible(false)}
       >
+        <Text variant="bodyMedium" style={{ textAlign: 'center', marginBottom: 20, color: theme.colors.onSurfaceVariant }}>
+          Selecciona el formato ideal para compartir en tus redes sociales
+        </Text>
         <View style={{ gap: 12 }}>
           <CustomButton
             variant="primary"
-            label="Imagen cuadrada (1:1)"
-            icon="crop-square"
+            label="Imagen cuadrada"
+            icon="view-grid-outline"
             onPress={() => generateShareImage('1:1')}
             fullWidth
           />
           <CustomButton
             variant="secondary"
-            label="Historia vertical (16:9)"
-            icon="crop-portrait"
+            label="Imagen vertical"
+            icon="cellphone"
             onPress={() => generateShareImage('16:9')}
             fullWidth
           />
           <CustomButton
             variant="outlined"
-            label="Solo texto/Enlace"
-            icon="link"
+            label="Solo texto"
+            icon="text-short"
             onPress={handleShareText}
             fullWidth
           />
