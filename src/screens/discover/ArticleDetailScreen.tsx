@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Image, Animated, Share, StatusBar, useWindowDimensions, RefreshControl, ActivityIndicator, TouchableOpacity, Linking } from 'react-native';
+import { View, StyleSheet, Image, Animated, StatusBar, useWindowDimensions, RefreshControl, ActivityIndicator, TouchableOpacity, Linking } from 'react-native';
 import {
   Text,
   IconButton,
@@ -14,6 +14,7 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { WebView } from 'react-native-webview';
 import LinearGradient from 'react-native-linear-gradient';
+import Share from 'react-native-share';
 import ViewShot, { captureRef } from 'react-native-view-shot';
 import CustomDialog from '../../components/ui/CustomDialog';
 import CustomButton from '../../components/ui/CustomButton';
@@ -278,10 +279,11 @@ const ArticleDetailScreen = () => {
         const articleId = article.id || article.slug || 'unknown';
         const webLink = `https://discover.vtrading.app/article/${articleId}`;
 
-        await Share.share({
+        await Share.open({
           url: sharePath,
           title: article.title,
           message: `📰 ${article.title}\n\n🔗 ${webLink}`, // Adding text for some platforms
+          type: 'image/jpeg',
         });
 
         analyticsService.logShare('article_detail', article.id.toString() || 'unknown', format === '1:1' ? 'image_square' : 'image_story');
@@ -306,17 +308,17 @@ const ArticleDetailScreen = () => {
 
       const shareMessage = `📰 ${article.title}\n\n${article.excerpt || ''}\n\n🔗 Leer más: ${webLink}\n\nAbrir en la app: ${deepLink}`;
 
-      const result = await Share.share({
+      const result = await Share.open({
         message: shareMessage,
         title: article.title,
         url: webLink, // iOS uses this
       });
 
-      if (result.action === Share.sharedAction) {
+      if (result.success !== false) { // react-native-share returns {success: boolean, message: string}
         analyticsService.logEvent('article_shared', {
           article_id: articleId,
           article_title: article.title,
-          share_method: result.activityType || 'unknown',
+          share_method: result.message || 'unknown',
         });
       }
     } catch (error) {
@@ -501,7 +503,7 @@ const ArticleDetailScreen = () => {
       </Animated.View>
 
       {/* Header Content (Title fades in, Buttons always visible) */}
-      <View style={[styles.headerOverlay, { top: insets.top, height: 64 }]}>
+      <View style={[styles.headerOverlay, { top: insets.top, height: 56 }]}>
         <LinearGradient
           colors={[hexToRGBA(theme.colors.background, 0.8), 'transparent']}
           style={[StyleSheet.absoluteFill, { top: -insets.top, height: 160 }]} // Extended height and covered status bar
