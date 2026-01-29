@@ -507,7 +507,7 @@ const styles = StyleSheet.create({
         textShadowRadius: 10,
     },
     description: {
-        fontSize: 32, // Smaller than before
+        fontSize: 36, // Smaller than before
         lineHeight: 46, // Increased line height for better readability
         fontWeight: '400',
         marginTop: 20, // Add separation from author block
