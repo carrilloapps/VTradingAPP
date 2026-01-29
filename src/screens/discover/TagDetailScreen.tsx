@@ -207,8 +207,9 @@ const TagDetailScreen = () => {
         items={posts.slice(0, 6).map(p => ({
           title: p.title.replace(/&#8211;/g, '-').replace(/&#8217;/g, "'"),
           image: p.image,
-          date: new Date(p.date).toLocaleDateString(),
-          author: p.author?.name || 'VTrading'
+          date: new Date(p.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }),
+          author: p.author?.name || 'VTrading',
+          authorAvatar: p.author?.avatar
         }))}
       />
 

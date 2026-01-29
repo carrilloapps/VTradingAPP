@@ -102,20 +102,6 @@ const CategoryDetailScreen = () => {
     }
   };
 
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return '---';
-    try {
-      const date = new Date(dateString);
-      return new Intl.DateTimeFormat('es-ES', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      }).format(date);
-    } catch (e) {
-      return '---';
-    }
-  };
-
   const renderHeader = () => {
     const firstArticleImage = posts.length > 0 ? posts[0].image : null;
     const lastUpdateDate = posts.length > 0 ? posts[0].date : undefined;
@@ -180,7 +166,7 @@ const CategoryDetailScreen = () => {
     await shareTextContent({
       title: category?.name || 'Categoría',
       excerpt: category?.description,
-      url: `https://discover.vtrading.app/category/${category?.slug || category?.id}`,
+      url: `https://discover.vtrading.app/categoria/${category?.slug || category?.id}`,
       type: 'CATEGORY',
       count: category?.count
     });
@@ -207,8 +193,9 @@ const CategoryDetailScreen = () => {
         items={posts.slice(0, 6).map(p => ({
           title: p.title.replace(/&#8211;/g, '-').replace(/&#8217;/g, "'"),
           image: p.image,
-          date: new Date(p.date).toLocaleDateString(),
-          author: p.author?.name || 'VTrading'
+          date: new Date(p.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }),
+          author: p.author?.name || 'VTrading',
+          authorAvatar: p.author?.avatar
         }))}
       />
 

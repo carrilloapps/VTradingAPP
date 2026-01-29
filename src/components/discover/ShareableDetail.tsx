@@ -21,6 +21,7 @@ export interface ShareableItem {
     image?: string;
     date?: string;
     author?: string;
+    authorAvatar?: string;
 }
 
 // Expanded Author Interface based on FormattedPost
@@ -83,7 +84,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
     const getLabel = () => {
         if (metaLabel) return metaLabel.toUpperCase();
         switch (type) {
-            case 'CATEGORY': return 'COLECCIÓN';
+            case 'CATEGORY': return 'CATEGORÍA';
             case 'TAG': return 'TENDENCIA';
             case 'ARTICLE': return 'ARTÍCULO';
             default: return 'DESTACADO';
@@ -243,7 +244,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
 
                                 {/* Description */}
                                 {description && aspectRatio === '16:9' && (
-                                    <Text style={[styles.modernDescription, { color: hexToRgba(theme.colors.onBackground, 0.85), fontSize: isVertical ? 42 : 30, lineHeight: isVertical ? 60 : 42 }]} numberOfLines={5}>
+                                    <Text style={[styles.modernDescription, { color: hexToRgba(theme.colors.onBackground, 0.85), fontSize: isVertical ? 42 : 30, lineHeight: isVertical ? 60 : 42 }]} numberOfLines={4}>
                                         {cleanText(description)}
                                     </Text>
                                 )}
@@ -283,7 +284,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
 
         const isVertical = aspectRatio === '16:9';
         const heroItem = items[0];
-        const listItems = items.slice(1, aspectRatio === '16:9' ? 3 : 1);
+        const listItems = items.slice(1, aspectRatio === '16:9' ? 4 : 0);
 
         return (
             <View style={styles.listContainer}>
@@ -331,7 +332,29 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                                 )}
                                 <View style={styles.cardContent}>
                                     <Text style={[styles.cardTitle, { color: theme.colors.onBackground, fontSize: isVertical ? 38 : 32, lineHeight: isVertical ? 46 : 40 }]} numberOfLines={2}>{item.title}</Text>
-                                    <Text style={[styles.cardDate, { color: getAccentColor(), fontSize: isVertical ? 24 : 20 }]}>{item.date || 'Reciente'}</Text>
+                                    <View style={{ marginTop: 12, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                                        {/* Author Avatar */}
+                                        {item.authorAvatar ? (
+                                            <Image source={{ uri: item.authorAvatar }} style={{ width: isVertical ? 48 : 40, height: isVertical ? 48 : 40, borderRadius: isVertical ? 24 : 20 }} />
+                                        ) : (
+                                            <View style={{ width: isVertical ? 48 : 40, height: isVertical ? 48 : 40, borderRadius: isVertical ? 24 : 20, backgroundColor: theme.colors.primaryContainer, alignItems: 'center', justifyContent: 'center' }}>
+                                                <Text style={{ fontSize: isVertical ? 24 : 20, color: theme.colors.onPrimaryContainer, fontWeight: 'bold' }}>{(item.author || 'V')[0]}</Text>
+                                            </View>
+                                        )}
+                                        
+                                        {/* Author Name */}
+                                        <Text style={{ color: hexToRgba(theme.colors.onBackground, 0.9), fontSize: isVertical ? 24 : 20, fontWeight: '600' }}>
+                                            {item.author}
+                                        </Text>
+
+                                        {/* Separator */}
+                                        <MaterialCommunityIcons name="circle-small" size={isVertical ? 32 : 24} color={hexToRgba(theme.colors.onBackground, 0.5)} />
+                                        
+                                        {/* Date */}
+                                        <Text style={[styles.cardDate, { color: hexToRgba(theme.colors.onBackground, 0.7), fontSize: isVertical ? 22 : 18, flex: 1 }]}>
+                                            {item.date || 'Reciente'}
+                                        </Text>
+                                    </View>
                                 </View>
                             </View>
                         ))}
@@ -430,7 +453,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                                         <MaterialCommunityIcons name="google-play" size={isVertical ? 40 : 28} color={theme.colors.background} />
                                     </View>
                                 </View>
-                                <Text style={[styles.downloadText, { color: theme.colors.onBackground, fontSize: isVertical ? 40 : 28 }]}>Descarga Gratis</Text>
+                                <Text style={[styles.downloadText, { color: theme.colors.onBackground, fontSize: isVertical ? 40 : 28 }]}>Descarga gratis</Text>
                             </View>
                             
                             <View style={[styles.urlBadge, { backgroundColor: hexToRgba(theme.colors.onBackground, 0.15), paddingHorizontal: isVertical ? 40 : 32, paddingVertical: isVertical ? 20 : 16 }]}>
@@ -530,17 +553,17 @@ const styles = StyleSheet.create({
     mainWrapper: {
         flex: 1,
         justifyContent: 'center',
-        gap: 60,
+        gap: 40,
     },
     headerSection: {
-        marginBottom: 20,
+        marginBottom: 0,
     },
     mainTitle: {
-        fontSize: 80,
-        lineHeight: 88,
+        fontSize: 64,
+        lineHeight: 72,
         fontWeight: '900',
-        marginBottom: 32,
-        letterSpacing: -1.5,
+        marginBottom: 24,
+        letterSpacing: -1,
         textShadowColor: 'rgba(0,0,0,0.5)',
         textShadowOffset: { width: 0, height: 4 },
         textShadowRadius: 10,
@@ -690,6 +713,9 @@ const styles = StyleSheet.create({
         fontSize: 20,
         fontWeight: '600',
         textTransform: 'uppercase',
+    },
+    cardAuthor: {
+        fontWeight: '500',
     },
 
     // Footer
