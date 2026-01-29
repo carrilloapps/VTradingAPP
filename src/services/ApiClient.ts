@@ -235,6 +235,56 @@ export class ApiClient {
       throw e;
     }
   }
+
+  /**
+   * Performs a GET request and returns both the data and the response headers.
+   * Useful for pagination where information is stored in headers (X-WP-Total, X-WP-TotalPages).
+   */
+  async getWithFullResponse<T>(endpoint: string, options: RequestOptions = {}): Promise<{ data: T; headers: Headers }> {
+    const cleanBaseUrl = this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl;
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    let url = `${cleanBaseUrl}${cleanEndpoint}`;
+
+    if (options.params) {
+      const queryString = Object.entries(options.params)
+        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+        .join('&');
+      url += (url.includes('?') ? '&' : '?') + queryString;
+    }
+
+    // Note: This implementation is a simplified version of get() that returns headers.
+    // It doesn't include all the performance metrics for brevity as it's primarily for internal data fetching.
+
+    let token: string | undefined;
+    if (this.config.useAppCheck !== false) {
+      token = await appCheckService.getToken();
+    }
+
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      ...options.headers,
+    };
+
+    if (this.config.apiKey) {
+      headers['X-API-Key'] = this.config.apiKey;
+    }
+    if (token) {
+      headers['X-Firebase-AppCheck'] = token;
+    }
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers,
+    });
+
+    if (!response.ok) {
+      throw new Error(`API Error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return { data, headers: response.headers };
+  }
 }
 
 export const apiClient = new ApiClient(AppConfig.API_BASE_URL);

@@ -155,7 +155,8 @@ export interface FormattedPost {
     content?: string;
     modifiedTime?: string;
     wordCount?: number;
-    isPromo: false;
+    isPromo: boolean;
+    isTrending: boolean;
     author?: {
         id: number;
         name: string;
@@ -183,6 +184,14 @@ export interface FormattedPost {
     seoDescription?: string;
     yoastSEO?: YoastSEO;
 }
+
+export interface PaginatedResponse<T> {
+    data: T[];
+    totalPages: number;
+    totalItems: number;
+    currentPage: number;
+}
+
 
 class WordPressService {
     private client: ApiClient;
@@ -238,6 +247,54 @@ class WordPressService {
             return [];
         }
     }
+
+    /**
+     * Fetch latest posts with pagination metadata
+     */
+    async getPostsPaginated(
+        page = 1,
+        perPage = 10,
+        categoryId?: number,
+        tagId?: number,
+        bypassCache = false
+    ): Promise<PaginatedResponse<FormattedPost>> {
+        try {
+            const params: any = {
+                page,
+                per_page: perPage,
+                _embed: true,
+            };
+
+            if (categoryId) params.categories = categoryId;
+            if (tagId) params.tags = tagId;
+
+            const { data, headers } = await this.client.getWithFullResponse<WordPressPost[]>('posts', {
+                params,
+                useCache: !bypassCache,
+                bypassCache,
+                cacheTTL: 5 * 60 * 1000,
+            });
+
+            const totalPages = parseInt(headers.get('X-WP-TotalPages') || '1', 10);
+            const totalItems = parseInt(headers.get('X-WP-Total') || '0', 10);
+
+            return {
+                data: data.map((post) => this.formatPost(post)),
+                totalPages,
+                totalItems,
+                currentPage: page,
+            };
+        } catch (error) {
+            observabilityService.captureError(error, { context: 'WordPressService.getPostsPaginated' });
+            return {
+                data: [],
+                totalPages: 0,
+                totalItems: 0,
+                currentPage: page,
+            };
+        }
+    }
+
 
     /**
      * Fetch related posts (by category)
@@ -736,6 +793,20 @@ class WordPressService {
             tags = post._embedded['wp:term'][1] as WordPressTag[];
         }
 
+        // Detect Promo/Sponsored content from tags
+        const PROMO_SLUGS = ['promoted', 'promocionado', 'sponsored', 'patrocinado', 'anuncio', 'ad'];
+        const isPromo = tags?.some(tag =>
+            PROMO_SLUGS.includes(tag.slug.toLowerCase()) ||
+            PROMO_SLUGS.includes(tag.name.toLowerCase())
+        ) || false;
+
+        // Detect Trending content from tags
+        const TRENDING_SLUGS = ['trending', 'trendingnow', 'trendingtoday', 'trendingthisweek', 'trendingthismonth', 'tendencia', 'destacado'];
+        const isTrending = tags?.some(tag =>
+            TRENDING_SLUGS.includes(tag.slug.toLowerCase()) ||
+            TRENDING_SLUGS.includes(tag.name.toLowerCase())
+        ) || false;
+
         return {
             id: String(post.id),
             title: stripHtml(post.title.rendered),
@@ -754,7 +825,8 @@ class WordPressService {
             modifiedTime: modifiedString,
             wordCount: wordCount,
             seoDescription,
-            isPromo: false,
+            isPromo,
+            isTrending,
             author,
             yoastSEO: post.yoast_head_json,
         };

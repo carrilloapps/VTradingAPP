@@ -13,6 +13,7 @@ import CategoryTabList from '../../components/discover/CategoryTabList';
 import AdCard from '../../components/discover/AdCard';
 import PartnersSection from '../../components/discover/PartnersSection';
 import FeaturedCarousel from '../../components/discover/FeaturedCarousel';
+import PaginationControls from '../../components/discover/PaginationControls';
 
 import { useToastStore } from '../../stores/toastStore';
 import { observabilityService } from '../../services/ObservabilityService';
@@ -36,6 +37,11 @@ const DiscoverScreen = () => {
   const [categories, setCategories] = useState<WordPressCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>(undefined);
   
+  // Pagination State
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [loadingPagination, setLoadingPagination] = useState(false);
+  
   // UI State
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -45,6 +51,7 @@ const DiscoverScreen = () => {
   // Ads/Promoted
   const [adsIndex, setAdsIndex] = useState(0);
   const adsRef = useRef<FlatList>(null);
+  const listRef = useRef<FlatList>(null);
   
   // Map fetched Promoted Posts to Ad Cards
   const ads = useMemo(() => {
@@ -108,8 +115,8 @@ const DiscoverScreen = () => {
 
         setSelectedCategory(catId);
 
-        // Fetch Content
-        const postsPromise = wordPressService.getPosts(1, 10, catId, filterTagId);
+        // Fetch Content with Pagination
+        const postsPromise = wordPressService.getPostsPaginated(1, 10, catId, filterTagId);
         
         let trendingPostsPromise: Promise<FormattedPost[]> = Promise.resolve([]);
         if (trendingTag) {
@@ -122,13 +129,16 @@ const DiscoverScreen = () => {
             promotedPostsPromise = wordPressService.getPosts(1, 5, undefined, promotedTag.id);
         }
 
-        const [fetchedPosts, fetchedTrendingPosts, fetchedPromotedPosts] = await Promise.all([
+        const [fetchedPaginatedPosts, fetchedTrendingPosts, fetchedPromotedPosts] = await Promise.all([
             postsPromise,
             trendingPostsPromise,
             promotedPostsPromise
         ]);
         
-        setPosts(fetchedPosts);
+        setPosts(fetchedPaginatedPosts.data);
+        setTotalPages(fetchedPaginatedPosts.totalPages);
+        setCurrentPage(1);
+        
         setTrendingPosts(fetchedTrendingPosts);
         setPromotedPosts(fetchedPromotedPosts);
         
@@ -159,7 +169,7 @@ const DiscoverScreen = () => {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      // Re-fetch tags to be safe or just use IDs if we stored them? Rethetching is safer for slugs
+      // Re-fetch tags
       const [
           trendingTagEn, trendingTagEs,
           promotedTagEn, promotedTagEs
@@ -174,14 +184,14 @@ const DiscoverScreen = () => {
 
       const promises: Promise<any>[] = [
         wordPressService.getCategories(true), 
-        wordPressService.getPosts(1, 10, selectedCategory, undefined, true) 
+        wordPressService.getPostsPaginated(1, 10, selectedCategory, undefined, true) 
       ];
       
       // Add optional fetches
       if (trendingTag) {
           promises.push(wordPressService.getPosts(1, 3, undefined, trendingTag.id, true));
       } else {
-          promises.push(Promise.resolve([])); // Placeholder to keep index alignment
+          promises.push(Promise.resolve([])); 
       }
 
       if (promotedTag) {
@@ -192,7 +202,12 @@ const DiscoverScreen = () => {
 
       const results = await Promise.all(promises);
       setCategories(results[0]);
-      setPosts(results[1]);
+      
+      const postsResult = results[1];
+      setPosts(postsResult.data);
+      setTotalPages(postsResult.totalPages);
+      setCurrentPage(1);
+
       setTrendingPosts(results[2]);
       setPromotedPosts(results[3]);
       
@@ -206,14 +221,37 @@ const DiscoverScreen = () => {
 
   const handleCategorySelect = async (categoryId: number | undefined) => {
     try {
-      // Toggle behavior: if clicking the same category, deselect it
       const newCategoryId = categoryId === selectedCategory ? undefined : categoryId;
-      
       setSelectedCategory(newCategoryId);
-      const fetchedPosts = await wordPressService.getPosts(1, 10, newCategoryId);
-      setPosts(fetchedPosts);
+      
+      // Load first page of new category
+      setLoadingPagination(true);
+      const fetchedPaginatedPosts = await wordPressService.getPostsPaginated(1, 10, newCategoryId);
+      setPosts(fetchedPaginatedPosts.data);
+      setTotalPages(fetchedPaginatedPosts.totalPages);
+      setCurrentPage(1);
     } catch (err) {
       showToast('Error al filtrar', 'error');
+    } finally {
+      setLoadingPagination(false);
+    }
+  };
+
+  const handlePageChange = async (newPage: number) => {
+    if (newPage < 1 || newPage > totalPages || loadingPagination) return;
+    
+    try {
+      setLoadingPagination(true);
+      const fetchedPaginatedPosts = await wordPressService.getPostsPaginated(newPage, 10, selectedCategory);
+      setPosts(fetchedPaginatedPosts.data);
+      setCurrentPage(newPage);
+      
+      // Scroll to top of list
+      listRef.current?.scrollToOffset({ offset: 0, animated: true });
+    } catch (err) {
+      showToast('Error al cargar página', 'error');
+    } finally {
+      setLoadingPagination(false);
     }
   };
 
@@ -365,16 +403,24 @@ const DiscoverScreen = () => {
             onSearchPress={() => navigation.navigate('SearchResults', {})}
         />
         <FlatList
+            ref={listRef}
             data={mixedFeedData}
             renderItem={renderItem}
             keyExtractor={(item, index) => `${item.type}-${item.type === 'article' ? item.data.id : index}`}
             ListHeaderComponent={renderHeader}
-            ListFooterComponent={() => (
+            ListFooterComponent={Boolean(mixedFeedData.length) ? () => (
                 <View>
+                    <PaginationControls 
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        onPrevious={() => handlePageChange(currentPage - 1)}
+                        onNext={() => handlePageChange(currentPage + 1)}
+                        loading={loadingPagination}
+                    />
                     <PartnersSection />
                     <View style={{ height: insets.bottom + 80 }} />
                 </View>
-            )}
+            ) : null}
             showsVerticalScrollIndicator={false}
             refreshControl={
                 <RefreshControl
