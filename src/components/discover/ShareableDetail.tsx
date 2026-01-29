@@ -1,15 +1,25 @@
 import React from 'react';
 import { View, StyleSheet, Image, ImageBackground } from 'react-native';
-import { Text, Surface, useTheme, Icon } from 'react-native-paper';
+import { Text, Surface } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import ViewShot from 'react-native-view-shot';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useAppTheme } from '../../theme/theme';
+import XIcon from '../common/XIcon';
 
 export interface ShareableItem {
     title: string;
     image?: string;
     date?: string;
     author?: string;
+}
+
+// Expanded Author Interface based on FormattedPost
+interface ShareableAuthor {
+    name: string;
+    avatar?: string;
+    role?: string; // e.g. "Editorial", "Colaborador"
+    socials?: boolean; // Indicator to show social icons
 }
 
 interface ShareableDetailProps {
@@ -22,7 +32,8 @@ interface ShareableDetailProps {
     items?: ShareableItem[]; // List of detailed items
     aspectRatio?: '1:1' | '16:9';
 
-    author?: string; // For Article
+    author?: ShareableAuthor; // Full Author Object
+    categoryName?: string; // New prop for Category Name
     metaLabel?: string; // Custom label override
     metaValue?: string; // Custom value override
 }
@@ -37,14 +48,17 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
     items,
     aspectRatio = '1:1',
     author,
+    categoryName,
     metaLabel,
     metaValue,
 }) => {
+    const theme = useAppTheme();
+    const isDark = theme.dark;
 
     const getIcon = () => {
         switch (type) {
             case 'CATEGORY': return 'view-grid-outline';
-            case 'TAG': return 'tag-outline';
+            case 'TAG': return 'pound';
             case 'ARTICLE': return 'text-box-outline';
             default: return 'star-outline';
         }
@@ -52,14 +66,15 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
 
     const getAccentColor = () => {
         switch (type) {
-            case 'CATEGORY': return '#6DDBAC';
-            case 'TAG': return '#B3CCBE';
-            case 'ARTICLE': return '#5FA3FF';
-            default: return '#FFF';
+            case 'CATEGORY': return theme.colors.primary;
+            case 'TAG': return theme.colors.tertiary;
+            case 'ARTICLE': return theme.colors.secondary;
+            default: return theme.colors.primary;
         }
     };
 
     const getLabel = () => {
+        if (metaLabel) return metaLabel.toUpperCase();
         switch (type) {
             case 'CATEGORY': return 'COLECCIÓN';
             case 'TAG': return 'TENDENCIA';
@@ -68,57 +83,158 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
         }
     };
 
-    // Render logic helper
-    const renderHeroWithList = () => {
-        if (!items || items.length === 0) return null;
+    const cleanText = (text: string) => {
+        if (!text) return '';
+        return text
+            // Remove HTML tags
+            .replace(/<[^>]+>/g, '')
+            // Remove multiple spaces/newlines
+            .replace(/\s+/g, ' ')
+            // Decode common entities (basic set)
+            .replace(/&nbsp;/g, ' ')
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"')
+            .replace(/&#039;/g, "'")
+            .replace(/&#8217;/g, "'")
+            .replace(/&#8211;/g, "-")
+            .replace(/&#8212;/g, "--")
+            .replace(/&#8230;/g, "...")
+            .trim();
+    };
 
-        const heroItem = items[0];
-        const listItems = items.slice(1, aspectRatio === '16:9' ? 4 : 2);
+    // Determine dimensions based on aspect ratio
+    const width = 1080;
+    const height = aspectRatio === '16:9' ? 1920 : 1080;
 
+    // Styles that depend on theme and dimensions
+    const containerStyle = {
+        width,
+        height,
+        backgroundColor: '#0A0A0A', // Always dark background for "Professional" look as requested in feedback
+    };
+
+    // Helper to render author block
+    const renderAuthorBlock = (isHero = false) => {
+        if (!author) return null;
+        
         return (
-            <View style={styles.listContainer}>
-                {/* Hero Card */}
-                <View style={[styles.heroCard, { borderColor: 'rgba(255,255,255,0.1)' }]}>
-                    {heroItem.image ? (
-                        <Image source={{ uri: heroItem.image }} style={styles.heroImage} resizeMode="cover" />
+            <View style={styles.authorRow}>
+                {author.avatar ? (
+                     <Image source={{ uri: author.avatar }} style={styles.avatarImage} />
+                ) : (
+                    <View style={[styles.avatarPlaceholder, { 
+                        backgroundColor: theme.colors.primaryContainer,
+                        borderColor: theme.colors.primary 
+                    }]}>
+                        <Text style={[styles.avatarLetter, { color: theme.colors.onPrimaryContainer }]}>{author.name[0]}</Text>
+                    </View>
+                )}
+                <View>
+                    <Text style={[styles.authorName, { color: '#FFF' }]}>{author.name}</Text>
+                    <View style={styles.authorMetaRow}>
+                        {author.role && <Text style={[styles.authorLabel, { color: 'rgba(255,255,255,0.7)' }]}>{author.role}</Text>}
+                        {author.socials && (
+                            <View style={styles.socialIcons}>
+                                <XIcon size={18} color="rgba(255,255,255,0.7)" />
+                                <MaterialCommunityIcons name="instagram" size={20} color="rgba(255,255,255,0.7)" />
+                                <MaterialCommunityIcons name="linkedin" size={20} color="rgba(255,255,255,0.7)" />
+                            </View>
+                        )}
+                    </View>
+                </View>
+            </View>
+        );
+    };
+
+    const renderHeroWithList = () => {
+        // If items are provided, use them. Otherwise, if it's an article, treat the article itself as the "Hero"
+        // But usually 'items' is used for Category/Tag lists.
+        // For ARTICLE type, we might not have 'items', so we create a visual representation of the article itself as a card.
+        
+        if (type === 'ARTICLE') {
+             return (
+                <Surface style={[styles.heroCard, { 
+                    backgroundColor: '#1A1A1A',
+                    borderColor: 'rgba(255,255,255,0.1)',
+                    borderRadius: 40,
+                }]} elevation={5}>
+                    {image ? (
+                        <Image source={{ uri: image }} style={styles.heroImage} resizeMode="cover" />
                     ) : (
-                        <View style={[styles.heroImage, { backgroundColor: 'rgba(255,255,255,0.05)', alignItems: 'center', justifyContent: 'center' }]}>
-                            <MaterialCommunityIcons name="image-off-outline" size={40} color="rgba(255,255,255,0.2)" />
+                        <View style={[styles.heroImage, { backgroundColor: '#333', alignItems: 'center', justifyContent: 'center' }]}>
+                            <MaterialCommunityIcons name="image-off-outline" size={80} color="#666" />
                         </View>
                     )}
 
                     <LinearGradient
-                        colors={['transparent', 'rgba(0,0,0,0.8)']}
+                        colors={['transparent', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.9)']}
                         style={StyleSheet.absoluteFill}
                     />
 
                     <View style={styles.heroContent}>
-                        <View style={styles.heroBadge}>
-                            <Text style={styles.heroBadgeText}><Text style={{ color: getAccentColor() }}>★</Text> DESTACADO</Text>
+                         <View style={[styles.heroBadge, { backgroundColor: getAccentColor() }]}>
+                            <Text style={[styles.heroBadgeText, { color: '#000' }]}>{categoryName ? categoryName.toUpperCase() : getLabel()}</Text>
                         </View>
-                        <Text style={styles.heroTitle} numberOfLines={3}>{heroItem.title}</Text>
+                        {/* Title and Author removed to avoid redundancy as they are already displayed above */}
+                    </View>
+                </Surface>
+             );
+        }
+
+        // For Lists (Category/Tag)
+        if (!items || items.length === 0) return null;
+
+        const heroItem = items[0];
+        const listItems = items.slice(1, aspectRatio === '16:9' ? 3 : 1);
+
+        return (
+            <View style={styles.listContainer}>
+                {/* Hero Card */}
+                <Surface style={[styles.heroCard, { 
+                    backgroundColor: '#1A1A1A',
+                    borderColor: 'rgba(255,255,255,0.1)',
+                    borderRadius: 40,
+                }]} elevation={5}>
+                    {heroItem.image ? (
+                        <Image source={{ uri: heroItem.image }} style={styles.heroImage} resizeMode="cover" />
+                    ) : (
+                        <View style={[styles.heroImage, { backgroundColor: '#333', alignItems: 'center', justifyContent: 'center' }]}>
+                            <MaterialCommunityIcons name="image-off-outline" size={60} color="#666" />
+                        </View>
+                    )}
+
+                    <LinearGradient
+                        colors={['transparent', 'rgba(0,0,0,0.9)']}
+                        style={StyleSheet.absoluteFill}
+                    />
+
+                    <View style={styles.heroContent}>
+                        <View style={[styles.heroBadge, { backgroundColor: getAccentColor() }]}>
+                            <Text style={[styles.heroBadgeText, { color: '#000' }]}>DESTACADO</Text>
+                        </View>
+                        <Text style={styles.heroTitle} numberOfLines={2}>{heroItem.title}</Text>
                         <View style={styles.cardMeta}>
-                            {heroItem.author && <Text style={styles.cardMetaAuthor}>Por {heroItem.author}</Text>}
-                            {heroItem.date && (
-                                <Text style={styles.cardMetaDate}>
-                                    {heroItem.author ? ' • ' : ''}{heroItem.date}
-                                </Text>
-                            )}
+                            {heroItem.author && <Text style={styles.cardMetaText}>Por {heroItem.author}</Text>}
                         </View>
                     </View>
-                </View>
+                </Surface>
 
                 {/* List Items */}
                 {listItems.length > 0 && (
                     <View style={styles.compactList}>
                         {listItems.map((item, index) => (
-                            <View key={index} style={[styles.card, { borderColor: 'rgba(255,255,255,0.05)' }]}>
+                            <View key={index} style={[styles.card, { 
+                                backgroundColor: 'rgba(255,255,255,0.05)',
+                                borderColor: 'rgba(255,255,255,0.1)' 
+                            }]}>
                                 {item.image && (
                                     <Image source={{ uri: item.image }} style={styles.cardImage} resizeMode="cover" />
                                 )}
                                 <View style={styles.cardContent}>
-                                    <Text style={styles.cardTitle} numberOfLines={2}>{item.title}</Text>
-                                    <Text style={[styles.cardDate, { color: getAccentColor() }]}>{item.date}</Text>
+                                    <Text style={[styles.cardTitle, { color: '#FFF' }]} numberOfLines={2}>{item.title}</Text>
+                                    <Text style={[styles.cardDate, { color: getAccentColor() }]}>{item.date || 'Reciente'}</Text>
                                 </View>
                             </View>
                         ))}
@@ -131,88 +247,94 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
     return (
         <View style={styles.hiddenTemplate} pointerEvents="none">
             <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 1.0 }}>
-                <View style={[
-                    styles.shareTemplate,
-                    aspectRatio === '16:9' ? styles.shareTemplateVertical : styles.shareTemplateSquare,
-                ]}>
-                    {/* Background Image with heavy blur/overlay */}
+                <View style={containerStyle}>
+                    {/* Background Layer - Abstract Dark */}
+                     <LinearGradient
+                        colors={['#1a1a1a', '#050505']}
+                        style={StyleSheet.absoluteFill}
+                    />
+                    
+                    {/* Background Image Blended */}
                     <ImageBackground
                         source={image ? { uri: image } : require('../../assets/images/logotipo.png')}
-                        style={styles.backgroundImage}
-                        blurRadius={40} // Heavy blur for abstract abstract background
-                    >
-                        {/* Multiple Gradients for depth */}
-                        <LinearGradient
-                            colors={['rgba(10,10,10,0.7)', '#0A0A0A']}
-                            style={StyleSheet.absoluteFill}
-                        />
-                        <LinearGradient
-                            colors={[getAccentColor() + '20', 'transparent']} // Subtle color tint from top
-                            style={[StyleSheet.absoluteFill, { height: '40%' }]}
-                        />
-                    </ImageBackground>
+                        style={[styles.backgroundImage, { opacity: 0.4 }]}
+                        blurRadius={60}
+                    />
+                    
+                    {/* Gradient Overlay for Consistency */}
+                    <LinearGradient
+                        colors={['rgba(0,0,0,0.3)', '#000000']}
+                        style={StyleSheet.absoluteFill}
+                    />
 
                     <View style={styles.contentContainer}>
-                        {/* Top Bar: Type + Brand */}
+                        {/* Top Bar */}
                         <View style={styles.topBar}>
-                            <View style={[styles.pillBadge, { borderColor: getAccentColor() }]}>
-                                <MaterialCommunityIcons name={getIcon()} size={14} color={getAccentColor()} />
-                                <Text style={[styles.pillText, { color: getAccentColor() }]}>{getLabel()}</Text>
+                            <View style={[styles.pillBadge, { 
+                                borderColor: 'rgba(255,255,255,0.3)',
+                                backgroundColor: 'rgba(0,0,0,0.5)'
+                            }]}>
+                                <MaterialCommunityIcons name={getIcon()} size={24} color="#FFF" />
+                                <Text style={[styles.pillText, { color: '#FFF' }]}>{getLabel()}</Text>
                             </View>
-                            <Image source={require('../../assets/images/logotipo.png')} style={styles.topLogo} resizeMode="contain" />
+                            
+                            {/* Brand Logo - Using Asset */}
+                             <View style={styles.brandContainer}>
+                                <Image 
+                                    source={require('../../assets/images/logotipo.png')} 
+                                    style={styles.brandLogo} 
+                                    resizeMode="contain"
+                                />
+                            </View>
                         </View>
 
-                        {/* Main Title Section */}
-                        <View style={styles.headerSection}>
-                            <Text style={[
-                                styles.mainTitle,
-                                (type === 'ARTICLE' && title.length > 50) && { fontSize: 36, lineHeight: 42 }
-                            ]} numberOfLines={3}>
-                                {title}
-                            </Text>
+                        {/* Main Content Area */}
+                        <View style={styles.mainWrapper}>
+                            {/* Header Section */}
+                            <View style={styles.headerSection}>
+                                <Text style={[
+                                    styles.mainTitle,
+                                    { color: '#FFF' },
+                                    (title.length > 40) && { fontSize: 64, lineHeight: 72 },
+                                    (title.length > 80) && { fontSize: 56, lineHeight: 64 }
+                                ]}>
+                                    {title}
+                                </Text>
 
-                            {description && !items && (
-                                <Text style={styles.description} numberOfLines={3}>{description}</Text>
-                            )}
+                                {/* Author Block (Outside Card) */}
+                                {type === 'ARTICLE' && author && renderAuthorBlock()}
 
-                            {/* Author Row for Article Type */}
-                            {type === 'ARTICLE' && author && (
-                                <View style={styles.authorRow}>
-                                    <View style={styles.avatarPlaceholder}>
-                                        <Text style={styles.avatarLetter}>{author[0]}</Text>
-                                    </View>
-                                    <View>
-                                        <Text style={styles.authorName}>{author}</Text>
-                                        <Text style={styles.authorLabel}>Autor en VTrading</Text>
-                                    </View>
-                                </View>
-                            )}
+                                {description && (
+                                    <Text style={[styles.description, { color: 'rgba(255,255,255,0.8)' }]} numberOfLines={12}>
+                                        {cleanText(description)}
+                                    </Text>
+                                )}
+                            </View>
 
-                            {/* Stats Row for Category/Tag */}
-                            {count !== undefined && (type === 'CATEGORY' || type === 'TAG') && (
-                                <View style={styles.statsRow}>
-                                    <Text style={[styles.statValue, { color: getAccentColor() }]}>{count}</Text>
-                                    <Text style={styles.statLabel}>Artículos{"\n"}Disponibles</Text>
-                                </View>
-                            )}
+                            {/* Middle Content (Card) */}
+                            <View style={styles.middleSection}>
+                                {renderHeroWithList()}
+                            </View>
                         </View>
 
-                        {/* Middle Content: Hero + List */}
-                        <View style={styles.middleSection}>
-                            {renderHeroWithList()}
-                        </View>
-
-                        {/* Footer Section */}
+                        {/* Footer */}
                         <View style={styles.footer}>
                             <View style={styles.footerLeft}>
-                                <View style={styles.storeRow}>
-                                    <View style={styles.storeIcon}><Icon source="apple" size={14} color="#FFF" /></View>
-                                    <View style={styles.storeIcon}><Icon source="google-play" size={14} color="#FFF" /></View>
-                                    <Text style={styles.downloadText}>Descarga gratis en stores</Text>
+                                <View style={styles.storeIcons}>
+                                     {/* Larger Store Icons */}
+                                    <View style={styles.storeIconCircle}>
+                                        <MaterialCommunityIcons name="apple" size={32} color="#000" />
+                                    </View>
+                                    <View style={styles.storeIconCircle}>
+                                        <MaterialCommunityIcons name="google-play" size={28} color="#000" />
+                                    </View>
                                 </View>
+                                <Text style={[styles.downloadText, { color: '#FFF' }]}>Descarga gratis</Text>
                             </View>
-                            <View style={styles.footerRight}>
-                                <Text style={styles.websiteText}>vtrading.app</Text>
+                            
+                            <View style={[styles.urlBadge, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
+                                <MaterialCommunityIcons name="web" size={24} color="#FFF" style={{ marginRight: 10 }} />
+                                <Text style={[styles.urlText, { color: '#FFF' }]}>vtrading.app</Text>
                             </View>
                         </View>
 
@@ -226,27 +348,17 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
 const styles = StyleSheet.create({
     hiddenTemplate: {
         position: 'absolute',
-        left: -3000,
+        left: -4000,
         top: 0,
         zIndex: -1,
-    },
-    shareTemplate: {
-        backgroundColor: '#050505',
-    },
-    shareTemplateSquare: {
-        width: 1080,
-        height: 1080,
-    },
-    shareTemplateVertical: {
-        width: 1080,
-        height: 1920,
+        opacity: 0, 
     },
     backgroundImage: {
         ...StyleSheet.absoluteFillObject,
     },
     contentContainer: {
         flex: 1,
-        padding: 60, // Generous padding for 1080p
+        padding: 64,
         justifyContent: 'space-between',
     },
 
@@ -255,117 +367,123 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 40,
+        marginBottom: 32,
+        height: 100,
     },
     pillBadge: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 10,
-        paddingHorizontal: 20,
-        paddingVertical: 12,
-        borderRadius: 50,
+        gap: 16,
+        paddingHorizontal: 32,
+        paddingVertical: 16,
+        borderRadius: 100,
         borderWidth: 2,
-        backgroundColor: 'rgba(0,0,0,0.4)',
     },
     pillText: {
-        color: '#FFF',
-        fontSize: 18,
+        fontSize: 24,
         fontWeight: 'bold',
-        letterSpacing: 1.5,
+        letterSpacing: 3,
+        textTransform: 'uppercase',
     },
-    topLogo: {
-        width: 180,
-        height: 50,
-        tintColor: 'white',
-        opacity: 0.9,
+    brandContainer: {
+        height: 80,
+        justifyContent: 'center',
+    },
+    brandLogo: {
+        width: 300,
+        height: 80,
+        tintColor: '#FFF', // Make logo white for dark theme consistency
     },
 
-    // Header
+    // Main Layout
+    mainWrapper: {
+        flex: 1,
+        justifyContent: 'center',
+        gap: 60,
+    },
     headerSection: {
-        marginBottom: 40,
+        marginBottom: 20,
     },
     mainTitle: {
-        fontSize: 72,
-        lineHeight: 78,
+        fontSize: 80,
+        lineHeight: 88,
         fontWeight: '900',
-        color: '#FFF',
-        marginBottom: 24,
-        letterSpacing: -1,
+        marginBottom: 32,
+        letterSpacing: -1.5,
         textShadowColor: 'rgba(0,0,0,0.5)',
         textShadowOffset: { width: 0, height: 4 },
         textShadowRadius: 10,
     },
     description: {
-        fontSize: 28,
-        lineHeight: 38,
-        color: 'rgba(255,255,255,0.85)',
+        fontSize: 32, // Smaller than before
+        lineHeight: 46, // Increased line height for better readability
         fontWeight: '400',
+        marginTop: 20, // Add separation from author block
+        textAlign: 'justify', // Justify text as requested
+        letterSpacing: 0.5, // Slight spacing for clarity
     },
+    
+    // Author Row
     authorRow: {
         flexDirection: 'row',
         alignItems: 'center',
         marginTop: 10,
-        gap: 20,
+        gap: 24,
     },
-    avatarPlaceholder: {
-        width: 60,
-        height: 60,
-        borderRadius: 30,
-        backgroundColor: 'rgba(255,255,255,0.1)',
+    authorMetaRow: {
+        flexDirection: 'row',
         alignItems: 'center',
-        justifyContent: 'center',
-        borderWidth: 1,
+        gap: 20,
+        marginTop: 8,
+    },
+    socialIcons: {
+        flexDirection: 'row',
+        gap: 12,
+        alignItems: 'center',
+        opacity: 0.8,
+    },
+    avatarImage: {
+        width: 90,
+        height: 90,
+        borderRadius: 45,
+        borderWidth: 3,
         borderColor: 'rgba(255,255,255,0.2)',
     },
+    avatarPlaceholder: {
+        width: 90,
+        height: 90,
+        borderRadius: 45,
+        alignItems: 'center',
+        justifyContent: 'center',
+        borderWidth: 3,
+    },
     avatarLetter: {
-        color: '#FFF',
-        fontSize: 28,
+        fontSize: 40,
         fontWeight: 'bold',
     },
     authorName: {
-        color: '#FFF',
-        fontSize: 24,
+        fontSize: 32,
         fontWeight: 'bold',
     },
     authorLabel: {
-        color: 'rgba(255,255,255,0.6)',
-        fontSize: 16,
-    },
-    statsRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        gap: 16,
-    },
-    statValue: {
-        fontSize: 56,
-        fontWeight: '900',
-    },
-    statLabel: {
-        color: 'rgba(255,255,255,0.6)',
-        fontSize: 16,
-        lineHeight: 20,
-        fontWeight: 'bold',
-        textTransform: 'uppercase',
+        fontSize: 24,
+        fontWeight: '500',
+        marginTop: 4,
     },
 
     // Middle Content
     middleSection: {
-        flex: 1,
-        justifyContent: 'flex-end', // Push content down in available space
-        marginBottom: 40,
+        marginBottom: 20,
     },
     listContainer: {
         width: '100%',
-        gap: 24,
+        gap: 32,
     },
     heroCard: {
         width: '100%',
         aspectRatio: 16 / 9,
-        backgroundColor: '#1A1A1A',
-        borderRadius: 24,
         overflow: 'hidden',
-        borderWidth: 1,
-        elevation: 10,
+        borderWidth: 0, // Flat design as requested
     },
     heroImage: {
         width: '100%',
@@ -376,29 +494,26 @@ const styles = StyleSheet.create({
         bottom: 0,
         left: 0,
         right: 0,
-        padding: 32,
+        padding: 48,
     },
     heroBadge: {
-        backgroundColor: 'rgba(0,0,0,0.6)',
-        paddingHorizontal: 12,
-        paddingVertical: 6,
-        borderRadius: 8,
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 16,
         alignSelf: 'flex-start',
-        marginBottom: 12,
-        borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.2)',
+        marginBottom: 20,
     },
     heroBadgeText: {
-        color: '#FFF',
-        fontSize: 14,
+        fontSize: 20,
         fontWeight: 'bold',
         letterSpacing: 1,
+        textTransform: 'uppercase',
     },
     heroTitle: {
         color: '#FFF',
-        fontSize: 32,
+        fontSize: 44,
         fontWeight: 'bold',
-        lineHeight: 40,
+        lineHeight: 52,
         marginBottom: 16,
         textShadowColor: 'rgba(0,0,0,0.8)',
         textShadowOffset: { width: 0, height: 2 },
@@ -406,49 +521,42 @@ const styles = StyleSheet.create({
     },
     cardMeta: {
         flexDirection: 'row',
-        alignItems: 'center',
     },
-    cardMetaAuthor: {
+    cardMetaText: {
         color: 'rgba(255,255,255,0.9)',
-        fontSize: 18,
-        fontWeight: '600',
-    },
-    cardMetaDate: {
-        color: 'rgba(255,255,255,0.7)',
-        fontSize: 18,
+        fontSize: 24,
+        fontWeight: '500',
     },
 
     // Compact List
     compactList: {
-        gap: 16,
+        gap: 24,
     },
     card: {
         flexDirection: 'row',
-        backgroundColor: 'rgba(255,255,255,0.08)',
-        borderRadius: 16,
+        borderRadius: 24,
         overflow: 'hidden',
-        height: 100, // Fixed height for consistency
+        height: 160,
         alignItems: 'center',
         borderWidth: 1,
     },
     cardImage: {
-        width: 100,
-        height: 100,
+        width: 160,
+        height: 160,
     },
     cardContent: {
         flex: 1,
-        paddingHorizontal: 20,
+        paddingHorizontal: 32,
         justifyContent: 'center',
     },
     cardTitle: {
-        color: '#FFF',
-        fontSize: 20,
+        fontSize: 32,
         fontWeight: 'bold',
-        lineHeight: 26,
-        marginBottom: 6,
+        lineHeight: 40,
+        marginBottom: 8,
     },
     cardDate: {
-        fontSize: 14,
+        fontSize: 20,
         fontWeight: '600',
         textTransform: 'uppercase',
     },
@@ -458,43 +566,45 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingTop: 40,
-        borderTopWidth: 2,
-        borderTopColor: 'rgba(255,255,255,0.1)',
+        paddingTop: 0, // Removed border/padding for cleaner look
     },
     footerLeft: {
         flexDirection: 'row',
         alignItems: 'center',
+        gap: 32,
     },
-    storeRow: {
+    storeIcons: {
         flexDirection: 'row',
-        alignItems: 'center',
-        gap: 12,
+        gap: 16, // Added explicit gap for separation
     },
-    storeIcon: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        backgroundColor: 'rgba(255,255,255,0.2)',
+    storeIconCircle: {
+        width: 64,
+        height: 64,
+        borderRadius: 32,
+        backgroundColor: '#FFF',
         alignItems: 'center',
         justifyContent: 'center',
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 4.65,
+        elevation: 8,
     },
     downloadText: {
-        color: 'rgba(255,255,255,0.8)',
-        fontSize: 18,
-        fontWeight: '600',
-        marginLeft: 8,
+        fontSize: 28,
+        fontWeight: 'bold',
     },
-    footerRight: {
-
+    urlBadge: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingHorizontal: 32,
+        paddingVertical: 16,
+        borderRadius: 100,
     },
-    websiteText: {
-        color: '#FFF',
-        fontSize: 24,
-        fontWeight: '900',
-        letterSpacing: 1,
+    urlText: {
+        fontSize: 26,
+        fontWeight: 'bold',
     },
-
 });
 
 export default ShareableDetail;

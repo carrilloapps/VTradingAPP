@@ -717,7 +717,6 @@ const ArticleDetailScreen = () => {
                   </Text>
                 </View>
 
-
                 <Text variant="bodySmall" style={[styles.separator, { color: theme.colors.onSurfaceVariant }]}>•</Text>
 
                 <View style={styles.metadataItem}>
@@ -838,8 +837,14 @@ const ArticleDetailScreen = () => {
         title={article?.title || 'Artículo'}
         type="ARTICLE"
         image={article?.image}
-        description={article?.excerpt?.replace(/<[^>]*>/g, '').slice(0, 100) + '...'}
-        author={article?.author?.name}
+        description={article?.content ? article.content.replace(/<[^>]*>/g, '').replace(/\n+/g, ' ').slice(0, 400) + '...' : ''}
+        author={article?.author ? {
+            name: article.author.name,
+            avatar: article.author.avatar,
+            role: article.date ? new Date(article.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : (article.time || ''),
+            socials: !!article.author.social
+        } : undefined}
+        categoryName={article?.categories && article.categories.length > 0 ? article.categories[0].name : 'Artículo'}
         aspectRatio={shareFormat}
         items={[
           // Hero Item (Current Article)
