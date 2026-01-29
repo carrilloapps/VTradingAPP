@@ -492,6 +492,13 @@ const ArticleDetailScreen = () => {
                       ]} 
                       style={styles.heroGradient}
                   />
+                  {(article.isPromo || article.tags?.some((t: any) => ['promoted', 'promocionado', 'sponsored', 'patrocinado'].includes(t.slug?.toLowerCase()))) && (
+                      <View style={{ position: 'absolute', top: 0, right: 0, overflow: 'hidden', width: 100, height: 100, zIndex: 10 }}>
+                        <View style={{ backgroundColor: theme.colors.warning, width: 150, height: 30, alignItems: 'center', justifyContent: 'center', transform: [{ rotate: '45deg' }, { translateX: 35 }, { translateY: -20 }] }}>
+                            <Text style={{ color: theme.colors.onPrimary, fontSize: 10, fontWeight: '900', letterSpacing: 1 }}>PROMO</Text>
+                        </View>
+                      </View>
+                  )}
               </View>
             ) : (
               <View style={[styles.heroContainer, { backgroundColor: theme.colors.surfaceVariant, height: 280 }]}>
@@ -503,6 +510,13 @@ const ArticleDetailScreen = () => {
                       style={{ opacity: 0.3 }}
                     />
                   </View>
+                  {(article.isPromo || article.tags?.some((t: any) => ['promoted', 'promocionado', 'sponsored', 'patrocinado'].includes(t.slug?.toLowerCase()))) && (
+                      <View style={{ position: 'absolute', top: 0, right: 0, overflow: 'hidden', width: 100, height: 100, zIndex: 10 }}>
+                        <View style={{ backgroundColor: theme.colors.warning, width: 150, height: 30, alignItems: 'center', justifyContent: 'center', transform: [{ rotate: '45deg' }, { translateX: 35 }, { translateY: -20 }] }}>
+                            <Text style={{ color: theme.colors.onPrimary, fontSize: 10, fontWeight: '900', letterSpacing: 1 }}>PROMO</Text>
+                        </View>
+                      </View>
+                  )}
               </View>
             )}
 

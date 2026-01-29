@@ -289,7 +289,12 @@ const DiscoverScreen = () => {
       if (item.type === 'ad') {
           return (
               <View style={{ marginBottom: 16 }}>
-                <AdCard item={item.data} />
+                <AdCard 
+                    item={item.data} 
+                    onPress={() => navigation.navigate('ArticleDetail', { 
+                        article: item.data.originalPost || item.data 
+                    })}
+                />
               </View>
           );
       }
