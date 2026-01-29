@@ -284,16 +284,23 @@ const ArticleDetailScreen = () => {
         const webLink = deepLinkService.getArticleLink(slug);
 
         // Feature Flag: Toggle sharing exact deep link vs generic promo
-        const SHARE_EXACT_DEEP_LINK = true; 
+        // Controlled by 'discover_web' remote config
+        let shareExactDeepLink = true;
+        try {
+            shareExactDeepLink = await remoteConfigService.getFeature('discover_web');
+        } catch (_) {
+            // Fallback to true if config fails
+            shareExactDeepLink = false;
+        }
 
-        const shareMessage = SHARE_EXACT_DEEP_LINK
-            ? `📰 ${article.title}\n\n🔗 ${webLink}`
-            : `📰 ${article.title}\n\nDescarga ya VTrading en https://vtrading.app y recibe más información`;
+        const shareMessage = shareExactDeepLink
+            ? `📰 ${article.title}\n\n${article.excerpt}\n\n🔗 ${webLink}`
+            : `📰 ${article.title}\n\n${article.excerpt}\n\n🚀 ¡Domina los mercados con VTrading!\n📲 Noticias, análisis y señales en tiempo real.\n\n👇 Descárgala GRATIS aquí:\nhttps://vtrading.app`;
 
         await Share.open({
           url: sharePath,
           title: article.title,
-          message: `📰 ${article.title}${shareMessage}`, // Adding text for some platforms
+          message: shareMessage, // Adding text for some platforms
           type: 'image/jpeg',
         });
 
