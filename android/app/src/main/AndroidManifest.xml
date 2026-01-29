@@ -40,7 +40,7 @@
         </intent-filter>
         
         <!-- Deep Link Support for Article Sharing -->
-        <intent-filter android:autoVerify="true">
+        <intent-filter>
             <action android:name="android.intent.action.VIEW" />
             <category android:name="android.intent.category.DEFAULT" />
             <category android:name="android.intent.category.BROWSABLE" />
@@ -55,9 +55,6 @@
             <category android:name="android.intent.category.DEFAULT" />
             <category android:name="android.intent.category.BROWSABLE" />
             <data android:scheme="https" android:host="discover.vtrading.app" android:pathPrefix="/" />
-            <data android:scheme="https" android:host="discover.vtrading.app" android:pathPrefix="/article" />
-            <data android:scheme="https" android:host="discover.vtrading.app" android:pathPrefix="/categoria" />
-            <data android:scheme="https" android:host="discover.vtrading.app" android:pathPrefix="/tag" />
         </intent-filter>
       </activity>
 

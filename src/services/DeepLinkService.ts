@@ -15,6 +15,27 @@ class DeepLinkService {
     private readonly BASE_URL = `https://${this.HOST}`;
 
     /**
+     * Generate a deep link URL for an article
+     */
+    getArticleLink(slug: string): string {
+        return `${this.BASE_URL}/${slug}`;
+    }
+
+    /**
+     * Generate a deep link URL for a category
+     */
+    getCategoryLink(slug: string): string {
+        return `${this.BASE_URL}/categoria/${slug}`;
+    }
+
+    /**
+     * Generate a deep link URL for a tag
+     */
+    getTagLink(slug: string): string {
+        return `${this.BASE_URL}/tag/${slug}`;
+    }
+
+    /**
      * Parse a URL into a structured DeepLinkRoute
      */
     parseDeepLink(url: string): DeepLinkRoute | null {

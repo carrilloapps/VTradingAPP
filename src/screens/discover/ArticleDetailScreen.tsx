@@ -15,10 +15,11 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { WebView } from 'react-native-webview';
 import LinearGradient from 'react-native-linear-gradient';
 import Share from 'react-native-share';
-import ViewShot, { captureRef } from 'react-native-view-shot';
+import { captureRef } from 'react-native-view-shot';
 import CustomDialog from '../../components/ui/CustomDialog';
 import CustomButton from '../../components/ui/CustomButton';
 import ShareableDetail from '../../components/discover/ShareableDetail';
+import { deepLinkService } from '../../services/DeepLinkService';
 import { useToastStore } from '../../stores/toastStore';
 import { useAppTheme } from '../../theme/theme';
 import { analyticsService } from '../../services/firebase/AnalyticsService';
@@ -278,9 +279,9 @@ const ArticleDetailScreen = () => {
 
         // Generate deep link for context
         // Use slug if available, otherwise fallback to ID.
-        // Format matches DeepLinkService: discover.vtrading.app/{slug}
+        // Format centralized in DeepLinkService
         const slug = article.slug || article.id || 'unknown';
-        const webLink = `https://discover.vtrading.app/${slug}`;
+        const webLink = deepLinkService.getArticleLink(slug);
 
         await Share.open({
           url: sharePath,

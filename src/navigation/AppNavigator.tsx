@@ -220,11 +220,45 @@ const linking = {
       SearchResults: {
         path: 'buscar/:initialQuery?',
       },
-      // Alternative for direct slugs from WordPress
-      ArticleDetailDirect: {
-        path: ':slug',
-      },
+      // Alternative for direct slugs from WordPress (discover.vtrading.app/{slug})
+      // NOTE: This must be handled carefully to avoid conflicts with other paths
+      // In this config, specific paths above take precedence.
+      // If no other path matches, it falls through to this one?
+      // React Navigation matches hierarchically.
+      // We can map the root path to ArticleDetail with a slug param.
     },
+  },
+  // Custom getStateFromPath to handle root slugs for articles
+  getStateFromPath: (path: string, options: any) => {
+    // Clean path
+    const cleanPath = path.replace(/^\/+/, '');
+    
+    // Check for known prefixes to avoid hijacking
+    if (
+        cleanPath.startsWith('discover') || 
+        cleanPath.startsWith('article/') || 
+        cleanPath.startsWith('categoria/') || 
+        cleanPath.startsWith('tag/') || 
+        cleanPath.startsWith('articulos') || 
+        cleanPath.startsWith('buscar/')
+    ) {
+        // Let default logic handle it
+        return undefined; 
+    }
+
+    // If it's a root slug (e.g. "my-article-slug"), map to ArticleDetail
+    if (cleanPath.length > 0) {
+        return {
+            routes: [
+                {
+                    name: 'ArticleDetail',
+                    params: { slug: cleanPath },
+                },
+            ],
+        };
+    }
+
+    return undefined;
   },
 };
 
