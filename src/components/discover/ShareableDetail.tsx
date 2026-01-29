@@ -112,11 +112,11 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
     const containerStyle = {
         width,
         height,
-        backgroundColor: '#0A0A0A', // Always dark background for "Professional" look as requested in feedback
+        backgroundColor: '#121212', // Deep dark background
     };
 
     // Helper to render author block
-    const renderAuthorBlock = (isHero = false) => {
+    const renderAuthorBlock = () => {
         if (!author) return null;
         
         return (
@@ -134,12 +134,12 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                 <View>
                     <Text style={[styles.authorName, { color: '#FFF' }]}>{author.name}</Text>
                     <View style={styles.authorMetaRow}>
-                        {author.role && <Text style={[styles.authorLabel, { color: 'rgba(255,255,255,0.7)' }]}>{author.role}</Text>}
+                        {author.role && <Text style={[styles.authorLabel, { color: 'rgba(255,255,255,0.6)' }]}>{author.role}</Text>}
                         {author.socials && (
                             <View style={styles.socialIcons}>
-                                <XIcon size={18} color="rgba(255,255,255,0.7)" />
-                                <MaterialCommunityIcons name="instagram" size={20} color="rgba(255,255,255,0.7)" />
-                                <MaterialCommunityIcons name="linkedin" size={20} color="rgba(255,255,255,0.7)" />
+                                <XIcon size={20} color="rgba(255,255,255,0.6)" />
+                                <MaterialCommunityIcons name="instagram" size={22} color="rgba(255,255,255,0.6)" />
+                                <MaterialCommunityIcons name="linkedin" size={22} color="rgba(255,255,255,0.6)" />
                             </View>
                         )}
                     </View>
@@ -148,41 +148,102 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
         );
     };
 
+    // Modern Article Layout
+    if (type === 'ARTICLE') {
+        return (
+            <View style={styles.hiddenTemplate} pointerEvents="none">
+                <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 1.0 }}>
+                    <View style={containerStyle}>
+                        {/* Top Image Section (45%) */}
+                        <View style={{ height: '45%', width: '100%', overflow: 'hidden' }}>
+                            {image ? (
+                                <Image source={{ uri: image }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                            ) : (
+                                <View style={{ flex: 1, backgroundColor: '#1A1A1A', alignItems: 'center', justifyContent: 'center' }}>
+                                    <MaterialCommunityIcons name="image-off-outline" size={100} color="#333" />
+                                </View>
+                            )}
+                            {/* Gradient Fade to Bottom */}
+                            <LinearGradient
+                                colors={['transparent', 'rgba(18,18,18,0.2)', '#121212']}
+                                style={[StyleSheet.absoluteFill, { top: '50%' }]} 
+                            />
+                            
+                            {/* Top Bar Overlay */}
+                            <View style={[styles.topBar, { position: 'absolute', top: 0, left: 0, right: 0, paddingHorizontal: 64, marginTop: 40 }]}>
+                                <View style={[styles.pillBadge, { 
+                                    borderColor: 'rgba(255,255,255,0.2)',
+                                    backgroundColor: 'rgba(0,0,0,0.6)'
+                                }]}>
+                                    <MaterialCommunityIcons name={getIcon()} size={24} color="#FFF" />
+                                    <Text style={[styles.pillText, { color: '#FFF' }]}>{getLabel()}</Text>
+                                </View>
+                                
+                                <View style={styles.brandContainer}>
+                                    <Image 
+                                        source={require('../../assets/images/logotipo.png')} 
+                                        style={styles.brandLogo} 
+                                        resizeMode="contain"
+                                    />
+                                </View>
+                            </View>
+                        </View>
+
+                        {/* Content Section (55%) */}
+                        <View style={{ flex: 1, paddingHorizontal: 64, paddingBottom: 64, justifyContent: 'space-between' }}>
+                            <View>
+                                {/* Category Badge */}
+                                <View style={[styles.categoryBadge, { backgroundColor: getAccentColor() }]}>
+                                    <Text style={[styles.categoryBadgeText, { color: '#000' }]}>
+                                        {categoryName ? categoryName.toUpperCase() : 'ARTÍCULO'}
+                                    </Text>
+                                </View>
+
+                                {/* Title */}
+                                <Text style={styles.modernTitle} numberOfLines={4}>
+                                    {title}
+                                </Text>
+
+                                {/* Author */}
+                                {renderAuthorBlock()}
+
+                                {/* Description */}
+                                {description && aspectRatio === '16:9' && (
+                                    <Text style={styles.modernDescription} numberOfLines={10}>
+                                        {cleanText(description)}
+                                    </Text>
+                                )}
+                            </View>
+
+                            {/* Footer */}
+                            <View style={styles.footer}>
+                                <View style={styles.footerLeft}>
+                                    <View style={styles.storeIcons}>
+                                        <View style={styles.storeIconCircle}>
+                                            <MaterialCommunityIcons name="apple" size={32} color="#000" />
+                                        </View>
+                                        <View style={styles.storeIconCircle}>
+                                            <MaterialCommunityIcons name="google-play" size={28} color="#000" />
+                                        </View>
+                                    </View>
+                                    <Text style={[styles.downloadText, { color: '#FFF' }]}>Descarga Gratis</Text>
+                                </View>
+                                
+                                <View style={[styles.urlBadge, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
+                                    <MaterialCommunityIcons name="web" size={24} color="#FFF" style={{ marginRight: 10 }} />
+                                    <Text style={[styles.urlText, { color: '#FFF' }]}>vtrading.app</Text>
+                                </View>
+                            </View>
+                        </View>
+                    </View>
+                </ViewShot>
+            </View>
+        );
+    }
+
     const renderHeroWithList = () => {
         // If items are provided, use them. Otherwise, if it's an article, treat the article itself as the "Hero"
-        // But usually 'items' is used for Category/Tag lists.
-        // For ARTICLE type, we might not have 'items', so we create a visual representation of the article itself as a card.
         
-        if (type === 'ARTICLE') {
-             return (
-                <Surface style={[styles.heroCard, { 
-                    backgroundColor: '#1A1A1A',
-                    borderColor: 'rgba(255,255,255,0.1)',
-                    borderRadius: 40,
-                }]} elevation={5}>
-                    {image ? (
-                        <Image source={{ uri: image }} style={styles.heroImage} resizeMode="cover" />
-                    ) : (
-                        <View style={[styles.heroImage, { backgroundColor: '#333', alignItems: 'center', justifyContent: 'center' }]}>
-                            <MaterialCommunityIcons name="image-off-outline" size={80} color="#666" />
-                        </View>
-                    )}
-
-                    <LinearGradient
-                        colors={['transparent', 'rgba(0,0,0,0.4)', 'rgba(0,0,0,0.9)']}
-                        style={StyleSheet.absoluteFill}
-                    />
-
-                    <View style={styles.heroContent}>
-                         <View style={[styles.heroBadge, { backgroundColor: getAccentColor() }]}>
-                            <Text style={[styles.heroBadgeText, { color: '#000' }]}>{categoryName ? categoryName.toUpperCase() : getLabel()}</Text>
-                        </View>
-                        {/* Title and Author removed to avoid redundancy as they are already displayed above */}
-                    </View>
-                </Surface>
-             );
-        }
-
         // For Lists (Category/Tag)
         if (!items || items.length === 0) return null;
 
@@ -244,6 +305,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
         );
     };
 
+    // Old Layout for Category/Tag
     return (
         <View style={styles.hiddenTemplate} pointerEvents="none">
             <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 1.0 }}>
@@ -301,11 +363,11 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                                     {title}
                                 </Text>
 
-                                {/* Author Block (Outside Card) */}
-                                {type === 'ARTICLE' && author && renderAuthorBlock()}
+                                {/* Author Block (Outside Card) - Should not be needed for Category/Tag usually but kept for safety */}
+                                {(type as string) === 'ARTICLE' && author && renderAuthorBlock()}
 
-                                {description && (
-                                    <Text style={[styles.description, { color: 'rgba(255,255,255,0.8)' }]} numberOfLines={12}>
+                                {description && !items && aspectRatio === '16:9' && (
+                                    <Text style={[styles.description, { color: 'rgba(255,255,255,0.8)' }]} numberOfLines={4}>
                                         {cleanText(description)}
                                     </Text>
                                 )}
@@ -329,7 +391,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                                         <MaterialCommunityIcons name="google-play" size={28} color="#000" />
                                     </View>
                                 </View>
-                                <Text style={[styles.downloadText, { color: '#FFF' }]}>Descarga gratis</Text>
+                                <Text style={[styles.downloadText, { color: '#FFF' }]}>Descarga Gratis</Text>
                             </View>
                             
                             <View style={[styles.urlBadge, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
@@ -360,6 +422,36 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 64,
         justifyContent: 'space-between',
+    },
+
+    // Modern Styles
+    categoryBadge: {
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 8,
+        alignSelf: 'flex-start',
+        marginBottom: 20,
+    },
+    categoryBadgeText: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        letterSpacing: 1,
+    },
+    modernTitle: {
+        fontSize: 56, // Adjusted for new layout
+        lineHeight: 64,
+        fontWeight: '900',
+        color: '#FFF',
+        marginBottom: 24,
+        letterSpacing: -1,
+    },
+    modernDescription: {
+        fontSize: 30,
+        lineHeight: 42,
+        fontWeight: '400',
+        color: 'rgba(255,255,255,0.85)',
+        marginTop: 32,
+        textAlign: 'justify',
     },
 
     // Top Bar
