@@ -22,7 +22,7 @@ const AdCard = ({ item, onPress }: AdCardProps) => {
     const theme = useAppTheme();
     // Use window width if possible, but keep stylesheet reference for layout
     const cardWidth = Dimensions.get('window').width - 40;
-    
+
     // Pulse Animation
     const pulseAnim = useRef(new Animated.Value(1)).current;
 
@@ -51,8 +51,8 @@ const AdCard = ({ item, onPress }: AdCardProps) => {
         <Surface style={[styles.adCard, { width: cardWidth, borderRadius: theme.roundness * 4, backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.outlineVariant }]} elevation={0}>
             <TouchableRipple onPress={onPress} style={{ flex: 1 }} borderless>
                 <ImageBackground source={{ uri: item.image }} style={styles.adBackground} imageStyle={{ borderRadius: theme.roundness * 4 }}>
-                    <LinearGradient 
-                        colors={['rgba(0,0,0,0.2)', 'rgba(0,0,0,0.85)']} 
+                    <LinearGradient
+                        colors={['rgba(0,0,0,0.2)', 'rgba(0,0,0,0.85)']}
                         style={styles.adGradient}
                     >
                         {/* Diagonal Ribbon */}
@@ -68,9 +68,9 @@ const AdCard = ({ item, onPress }: AdCardProps) => {
                             </Text>
 
                             <Animated.View style={[
-                                styles.iconContainer, 
-                                { 
-                                    backgroundColor: theme.colors.onPrimaryContainer, 
+                                styles.iconContainer,
+                                {
+                                    backgroundColor: theme.colors.onPrimaryContainer,
                                     transform: [{ scale: pulseAnim }],
                                     borderRadius: theme.roundness * 3
                                 }
@@ -87,7 +87,7 @@ const AdCard = ({ item, onPress }: AdCardProps) => {
 
 const styles = StyleSheet.create({
     adCard: {
-        height: 200, 
+        height: 200,
         marginHorizontal: 20,
         overflow: 'hidden',
         marginTop: 8,
@@ -128,20 +128,28 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         width: 100,
         height: 100,
-        justifyContent: 'flex-start',
-        alignItems: 'flex-end',
     },
     ribbon: {
-        width: 150,
-        height: 30,
+        backgroundColor: '#FBC02D',
+        position: 'absolute',
+        top: 25,
+        right: -30,
+        width: 140,
+        transform: [{ rotate: '45deg' }],
+        paddingVertical: 4,
         alignItems: 'center',
         justifyContent: 'center',
-        transform: [{ rotate: '45deg' }, { translateX: 30 }, { translateY: -20 }],
+        elevation: 4,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
     },
     ribbonText: {
         fontSize: 10,
-        fontWeight: 'bold',
-        letterSpacing: 1,
+        fontWeight: '900',
+        letterSpacing: 1.2,
+        textAlign: 'center',
     },
 });
 

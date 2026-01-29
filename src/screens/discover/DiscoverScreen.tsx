@@ -36,12 +36,12 @@ const DiscoverScreen = () => {
   const [promotedPosts, setPromotedPosts] = useState<FormattedPost[]>([]);
   const [categories, setCategories] = useState<WordPressCategory[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<number | undefined>(undefined);
-  
+
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loadingPagination, setLoadingPagination] = useState(false);
-  
+
   // UI State
   const [refreshing, setRefreshing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -52,33 +52,33 @@ const DiscoverScreen = () => {
   const [adsIndex, setAdsIndex] = useState(0);
   const adsRef = useRef<FlatList>(null);
   const listRef = useRef<FlatList>(null);
-  
+
   // Map fetched Promoted Posts to Ad Cards
   const ads = useMemo(() => {
-      if (promotedPosts.length === 0) return [];
-      
-      return promotedPosts.map((post, index) => ({
-          id: post.id,
-          title: post.title,
-          subtitle: post.description || post.excerpt || '',
-          cta: 'Leer más',
-          color: index % 2 === 0 ? theme.colors.primary : theme.colors.secondary, // Cycle colors
-          image: post.image,
-          originalPost: post // Keep reference just in case we want to navigate to ArticleDetail instead
-      }));
+    if (promotedPosts.length === 0) return [];
+
+    return promotedPosts.map((post, index) => ({
+      id: post.id,
+      title: post.title,
+      subtitle: post.description || post.excerpt || '',
+      cta: 'Leer más',
+      color: index % 2 === 0 ? theme.colors.primary : theme.colors.secondary, // Cycle colors
+      image: post.image,
+      originalPost: post // Keep reference just in case we want to navigate to ArticleDetail instead
+    }));
   }, [promotedPosts, theme.colors]);
 
   useEffect(() => {
     const loadData = async () => {
       try {
-        await remoteConfigService.fetchAndActivate(); 
-        
-        const isEnabled = true; 
+        await remoteConfigService.fetchAndActivate();
+
+        const isEnabled = true;
         setFeatureEnabled(isEnabled);
 
         if (!isEnabled) {
-            setIsLoading(false);
-            return;
+          setIsLoading(false);
+          return;
         }
 
         const { categorySlug, tagSlug } = (route.params as any) || {};
@@ -87,61 +87,61 @@ const DiscoverScreen = () => {
 
         // Fetch Tags (Trending & Promoted) & Categories
         const [
-            fetchedCategories, 
-            trendingTagEn, trendingTagEs,
-            promotedTagEn, promotedTagEs
+          fetchedCategories,
+          trendingTagEn, trendingTagEs,
+          promotedTagEn, promotedTagEs
         ] = await Promise.all([
-            wordPressService.getCategories(),
-            wordPressService.getTagBySlug('trending'),
-            wordPressService.getTagBySlug('tendencias'),
-            wordPressService.getTagBySlug('promoted'),
-            wordPressService.getTagBySlug('promocionado')
+          wordPressService.getCategories(),
+          wordPressService.getTagBySlug('trending'),
+          wordPressService.getTagBySlug('tendencias'),
+          wordPressService.getTagBySlug('promoted'),
+          wordPressService.getTagBySlug('promocionado')
         ]);
-        
+
         const trendingTag = trendingTagEn || trendingTagEs;
         const promotedTag = promotedTagEn || promotedTagEs;
-        
+
         setCategories(fetchedCategories);
 
         if (categorySlug) {
-            const category = fetchedCategories.find(c => c.slug === categorySlug);
-            if (category) catId = category.id;
+          const category = fetchedCategories.find(c => c.slug === categorySlug);
+          if (category) catId = category.id;
         }
 
         if (tagSlug) {
-            const tag = await wordPressService.getTagBySlug(tagSlug);
-            if (tag) filterTagId = tag.id;
+          const tag = await wordPressService.getTagBySlug(tagSlug);
+          if (tag) filterTagId = tag.id;
         }
 
         setSelectedCategory(catId);
 
         // Fetch Content with Pagination
         const postsPromise = wordPressService.getPostsPaginated(1, 10, catId, filterTagId);
-        
+
         let trendingPostsPromise: Promise<FormattedPost[]> = Promise.resolve([]);
         if (trendingTag) {
-            trendingPostsPromise = wordPressService.getPosts(1, 3, undefined, trendingTag.id);
+          trendingPostsPromise = wordPressService.getPosts(1, 3, undefined, trendingTag.id);
         }
 
         let promotedPostsPromise: Promise<FormattedPost[]> = Promise.resolve([]);
         if (promotedTag) {
-            // Fetch latest 5 promoted posts
-            promotedPostsPromise = wordPressService.getPosts(1, 5, undefined, promotedTag.id);
+          // Fetch latest 5 promoted posts
+          promotedPostsPromise = wordPressService.getPosts(1, 5, undefined, promotedTag.id);
         }
 
         const [fetchedPaginatedPosts, fetchedTrendingPosts, fetchedPromotedPosts] = await Promise.all([
-            postsPromise,
-            trendingPostsPromise,
-            promotedPostsPromise
+          postsPromise,
+          trendingPostsPromise,
+          promotedPostsPromise
         ]);
-        
+
         setPosts(fetchedPaginatedPosts.data);
         setTotalPages(fetchedPaginatedPosts.totalPages);
         setCurrentPage(1);
-        
+
         setTrendingPosts(fetchedTrendingPosts);
         setPromotedPosts(fetchedPromotedPosts);
-        
+
       } catch (err) {
         console.error('Failed to load data', err);
         observabilityService.captureError(err, { context: 'DiscoverScreen.loadData' });
@@ -157,11 +157,11 @@ const DiscoverScreen = () => {
   useEffect(() => {
     if (!featureEnabled || ads.length === 0) return;
     const interval = setInterval(() => {
-        setAdsIndex(prev => {
-            const next = (prev + 1) % ads.length;
-            adsRef.current?.scrollToIndex({ index: next, animated: true });
-            return next;
-        });
+      setAdsIndex(prev => {
+        const next = (prev + 1) % ads.length;
+        adsRef.current?.scrollToIndex({ index: next, animated: true });
+        return next;
+      });
     }, 6000);
     return () => clearInterval(interval);
   }, [featureEnabled, ads]);
@@ -171,38 +171,38 @@ const DiscoverScreen = () => {
     try {
       // Re-fetch tags
       const [
-          trendingTagEn, trendingTagEs,
-          promotedTagEn, promotedTagEs
+        trendingTagEn, trendingTagEs,
+        promotedTagEn, promotedTagEs
       ] = await Promise.all([
-          wordPressService.getTagBySlug('trending'),
-          wordPressService.getTagBySlug('tendencias'),
-          wordPressService.getTagBySlug('promoted'),
-          wordPressService.getTagBySlug('promocionado')
+        wordPressService.getTagBySlug('trending'),
+        wordPressService.getTagBySlug('tendencias'),
+        wordPressService.getTagBySlug('promoted'),
+        wordPressService.getTagBySlug('promocionado')
       ]);
       const trendingTag = trendingTagEn || trendingTagEs;
       const promotedTag = promotedTagEn || promotedTagEs;
 
       const promises: Promise<any>[] = [
-        wordPressService.getCategories(true), 
-        wordPressService.getPostsPaginated(1, 10, selectedCategory, undefined, true) 
+        wordPressService.getCategories(true),
+        wordPressService.getPostsPaginated(1, 10, selectedCategory, undefined, true)
       ];
-      
+
       // Add optional fetches
       if (trendingTag) {
-          promises.push(wordPressService.getPosts(1, 3, undefined, trendingTag.id, true));
+        promises.push(wordPressService.getPosts(1, 3, undefined, trendingTag.id, true));
       } else {
-          promises.push(Promise.resolve([])); 
+        promises.push(Promise.resolve([]));
       }
 
       if (promotedTag) {
-          promises.push(wordPressService.getPosts(1, 5, undefined, promotedTag.id, true));
+        promises.push(wordPressService.getPosts(1, 5, undefined, promotedTag.id, true));
       } else {
-          promises.push(Promise.resolve([]));
+        promises.push(Promise.resolve([]));
       }
 
       const results = await Promise.all(promises);
       setCategories(results[0]);
-      
+
       const postsResult = results[1];
       setPosts(postsResult.data);
       setTotalPages(postsResult.totalPages);
@@ -210,7 +210,7 @@ const DiscoverScreen = () => {
 
       setTrendingPosts(results[2]);
       setPromotedPosts(results[3]);
-      
+
       showToast('Actualizado', 'success');
     } catch (err) {
       showToast('Error al actualizar', 'error');
@@ -223,7 +223,7 @@ const DiscoverScreen = () => {
     try {
       const newCategoryId = categoryId === selectedCategory ? undefined : categoryId;
       setSelectedCategory(newCategoryId);
-      
+
       // Load first page of new category
       setLoadingPagination(true);
       const fetchedPaginatedPosts = await wordPressService.getPostsPaginated(1, 10, newCategoryId);
@@ -239,13 +239,13 @@ const DiscoverScreen = () => {
 
   const handlePageChange = async (newPage: number) => {
     if (newPage < 1 || newPage > totalPages || loadingPagination) return;
-    
+
     try {
       setLoadingPagination(true);
       const fetchedPaginatedPosts = await wordPressService.getPostsPaginated(newPage, 10, selectedCategory);
       setPosts(fetchedPaginatedPosts.data);
       setCurrentPage(newPage);
-      
+
       // Scroll to top of list
       listRef.current?.scrollToOffset({ offset: 0, animated: true });
     } catch (err) {
@@ -256,39 +256,41 @@ const DiscoverScreen = () => {
   };
 
   // --- DATA PREPARATION ---
-  
+
   // 1. Trending Data (Header)
   const trendingHeroItems = useMemo(() => trendingPosts.slice(0, 3), [trendingPosts]);
   const trendingIds = useMemo(() => new Set(trendingHeroItems.map(h => h.id)), [trendingHeroItems]);
 
   // 2. Filter posts
+  const promotedIds = useMemo(() => new Set(promotedPosts.map(p => p.id)), [promotedPosts]);
+
   const filteredPosts = useMemo(() => {
-    return posts.filter(p => !trendingIds.has(p.id));
-  }, [posts, trendingIds]);
+    return posts.filter(p => !trendingIds.has(p.id) && !promotedIds.has(p.id));
+  }, [posts, trendingIds, promotedIds]);
 
   const displayCategories = useMemo(() => {
     return categories.map((cat: WordPressCategory) => ({
-          ...cat,
-          image: getCategoryImage(cat)
-      }));
+      ...cat,
+      image: getCategoryImage(cat)
+    }));
   }, [categories]);
 
   // 3. Mixed Feed (Posts + Ads interleaved)
   const mixedFeedData = useMemo(() => {
-      const data: Array<{ type: 'article' | 'ad', data: any }> = [];
-      let adIndex = 0;
+    const data: Array<{ type: 'article' | 'ad', data: any }> = [];
+    let adIndex = 0;
 
-      filteredPosts.forEach((post, index) => {
-          data.push({ type: 'article', data: post });
-          
-          if ((index + 1) % 2 === 0 && ads.length > 0) {
-              const ad = ads[adIndex % ads.length];
-              data.push({ type: 'ad', data: ad });
-              adIndex++;
-          }
-      });
+    filteredPosts.forEach((post, index) => {
+      data.push({ type: 'article', data: post });
 
-      return data;
+      if ((index + 1) % 2 === 0 && ads.length > 0) {
+        const ad = ads[adIndex % ads.length];
+        data.push({ type: 'ad', data: ad });
+        adIndex++;
+      }
+    });
+
+    return data;
   }, [filteredPosts, ads]);
 
   // --- RENDERERS ---
@@ -297,12 +299,12 @@ const DiscoverScreen = () => {
     <View>
       {/* Trending Section (Tendencias) */}
       {trendingHeroItems.length > 0 && (
-         <FeaturedCarousel items={trendingHeroItems} />
+        <FeaturedCarousel items={trendingHeroItems} />
       )}
 
       {/* Categories */}
       <Surface style={[styles.stickyCategoryBar, { backgroundColor: theme.colors.background, borderBottomColor: theme.colors.outlineVariant }]} elevation={0}>
-        <CategoryTabList 
+        <CategoryTabList
           categories={displayCategories}
           selectedCategory={selectedCategory}
           onCategorySelect={handleCategorySelect}
@@ -311,33 +313,33 @@ const DiscoverScreen = () => {
 
       {/* Section Header */}
       {mixedFeedData.length > 0 && (
-          <View style={{ marginTop: 16 }}>
-            <SectionHeader title="Lo último" showViewAll onViewAll={() => navigation.navigate('AllArticles')} />
-          </View>
+        <View style={{ marginTop: 16 }}>
+          <SectionHeader title="Lo último" showViewAll onViewAll={() => navigation.navigate('AllArticles')} />
+        </View>
       )}
     </View>
   );
 
   const renderItem = useCallback(({ item }: { item: { type: 'article' | 'ad', data: any } }) => {
-      if (item.type === 'ad') {
-          return (
-              <View style={{ marginBottom: 16 }}>
-                <AdCard 
-                    item={item.data} 
-                    onPress={() => navigation.navigate('ArticleDetail', { 
-                        article: item.data.originalPost || item.data 
-                    })}
-                />
-              </View>
-          );
-      }
+    if (item.type === 'ad') {
       return (
-          <ArticleCard 
-              article={item.data} 
-              variant={'compact'}
-              onPress={() => navigation.navigate('ArticleDetail', { article: item.data })}
+        <View style={{ marginBottom: 16 }}>
+          <AdCard
+            item={item.data}
+            onPress={() => navigation.navigate('ArticleDetail', {
+              article: item.data.originalPost || item.data
+            })}
           />
+        </View>
       );
+    }
+    return (
+      <ArticleCard
+        article={item.data}
+        variant={'compact'}
+        onPress={() => navigation.navigate('ArticleDetail', { article: item.data })}
+      />
+    );
   }, [navigation]);
 
   if (isLoading) {
@@ -345,92 +347,92 @@ const DiscoverScreen = () => {
   }
 
   if (!featureEnabled) {
-      return (
-        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-             <DiscoverHeader onSearchPress={() => {}} />
-             <ScrollView contentContainerStyle={styles.constructionContent}>
-                 <View style={[styles.constructionHero, { marginTop: windowWidth * 0.4 }]}>
-                     <View style={styles.iconContainer}>
-                        <Icon source="flask" size={60} color={theme.colors.primary} />
-                        <View style={styles.gearIcon}>
-                           <Icon source="cog" size={30} color={theme.colors.secondary} />
-                        </View>
-                     </View>
-                     <View style={[styles.statusBadge, { borderColor: theme.colors.outline }]}>
-                        <View style={[styles.blinkingDot, { backgroundColor: theme.colors.primary }]} />
-                        <Text style={[styles.statusText, { color: theme.colors.primary }]}>En Desarrollo</Text>
-                     </View>
-                     <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.onBackground }]}>
-                       V2 Próximamente
-                     </Text>
-                     <Text variant="bodyMedium" style={[styles.description, { color: theme.colors.onSurfaceVariant }]}>
-                       Estamos trabajando en una nueva experiencia de noticias.
-                     </Text>
-                 </View>
-                 
-                 <View style={styles.progressSection}>
-                    <View style={styles.progressHeader}>
-                       <Text variant="labelMedium">Progreso</Text>
-                       <Text variant="labelMedium" style={{ fontWeight: 'bold', color: theme.colors.primary }}>90%</Text>
-                    </View>
-                    <ProgressBar progress={0.9} color={theme.colors.primary} style={styles.progressBar} />
-                 </View>
-             </ScrollView>
-        </View>
-      );
+    return (
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <DiscoverHeader onSearchPress={() => { }} />
+        <ScrollView contentContainerStyle={styles.constructionContent}>
+          <View style={[styles.constructionHero, { marginTop: windowWidth * 0.4 }]}>
+            <View style={styles.iconContainer}>
+              <Icon source="flask" size={60} color={theme.colors.primary} />
+              <View style={styles.gearIcon}>
+                <Icon source="cog" size={30} color={theme.colors.secondary} />
+              </View>
+            </View>
+            <View style={[styles.statusBadge, { borderColor: theme.colors.outline }]}>
+              <View style={[styles.blinkingDot, { backgroundColor: theme.colors.primary }]} />
+              <Text style={[styles.statusText, { color: theme.colors.primary }]}>En Desarrollo</Text>
+            </View>
+            <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.onBackground }]}>
+              V2 Próximamente
+            </Text>
+            <Text variant="bodyMedium" style={[styles.description, { color: theme.colors.onSurfaceVariant }]}>
+              Estamos trabajando en una nueva experiencia de noticias.
+            </Text>
+          </View>
+
+          <View style={styles.progressSection}>
+            <View style={styles.progressHeader}>
+              <Text variant="labelMedium">Progreso</Text>
+              <Text variant="labelMedium" style={{ fontWeight: 'bold', color: theme.colors.primary }}>90%</Text>
+            </View>
+            <ProgressBar progress={0.9} color={theme.colors.primary} style={styles.progressBar} />
+          </View>
+        </ScrollView>
+      </View>
+    );
   }
 
   if (error) {
-      return (
-          <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-              <View style={{ height: 60, width: '100%', backgroundColor: theme.colors.surface }} />
-              <DiscoverErrorView 
-                  message={error} 
-                  onRetry={() => { setError(null); setIsLoading(true); handleRefresh(); }} 
-              />
-          </View>
-      );
+    return (
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <View style={{ height: 60, width: '100%', backgroundColor: theme.colors.surface }} />
+        <DiscoverErrorView
+          message={error}
+          onRetry={() => { setError(null); setIsLoading(true); handleRefresh(); }}
+        />
+      </View>
+    );
   }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <StatusBar 
-            backgroundColor="transparent"
-            translucent 
-            barStyle={theme.dark ? 'light-content' : 'dark-content'}
-        />
-        <DiscoverHeader 
-            onSearchPress={() => navigation.navigate('SearchResults', {})}
-        />
-        <FlatList
-            ref={listRef}
-            data={mixedFeedData}
-            renderItem={renderItem}
-            keyExtractor={(item, index) => `${item.type}-${item.type === 'article' ? item.data.id : index}`}
-            ListHeaderComponent={renderHeader}
-            ListFooterComponent={Boolean(mixedFeedData.length) ? () => (
-                <View>
-                    <PaginationControls 
-                        currentPage={currentPage}
-                        totalPages={totalPages}
-                        onPrevious={() => handlePageChange(currentPage - 1)}
-                        onNext={() => handlePageChange(currentPage + 1)}
-                        loading={loadingPagination}
-                    />
-                    <PartnersSection />
-                    <View style={{ height: insets.bottom + 80 }} />
-                </View>
-            ) : null}
-            showsVerticalScrollIndicator={false}
-            refreshControl={
-                <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={handleRefresh}
-                    colors={[theme.colors.primary]}
-                    tintColor={theme.colors.primary}
-                />
-            }
-        />
+      <StatusBar
+        backgroundColor="transparent"
+        translucent
+        barStyle={theme.dark ? 'light-content' : 'dark-content'}
+      />
+      <DiscoverHeader
+        onSearchPress={() => navigation.navigate('SearchResults', {})}
+      />
+      <FlatList
+        ref={listRef}
+        data={mixedFeedData}
+        renderItem={renderItem}
+        keyExtractor={(item, index) => `${item.type}-${item.type === 'article' ? item.data.id : index}`}
+        ListHeaderComponent={renderHeader}
+        ListFooterComponent={Boolean(mixedFeedData.length) ? () => (
+          <View>
+            <PaginationControls
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPrevious={() => handlePageChange(currentPage - 1)}
+              onNext={() => handlePageChange(currentPage + 1)}
+              loading={loadingPagination}
+            />
+            <PartnersSection />
+            <View style={{ height: insets.bottom + 80 }} />
+          </View>
+        ) : null}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            colors={[theme.colors.primary]}
+            tintColor={theme.colors.primary}
+          />
+        }
+      />
     </View>
   );
 };
@@ -465,7 +467,7 @@ const styles = StyleSheet.create({
   paginationContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: -16, 
+    marginTop: -16,
     gap: 4,
   },
   paginationDot: {
@@ -474,13 +476,13 @@ const styles = StyleSheet.create({
   },
   // Construction Styles
   constructionContent: {
-      flexGrow: 1,
-      alignItems: 'center',
-      padding: 24,
+    flexGrow: 1,
+    alignItems: 'center',
+    padding: 24,
   },
   constructionHero: {
-      alignItems: 'center',
-      marginBottom: 40,
+    alignItems: 'center',
+    marginBottom: 40,
   },
   iconContainer: {
     marginBottom: 24,
@@ -523,17 +525,17 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   progressSection: {
-      width: '100%',
-      maxWidth: 300,
+    width: '100%',
+    maxWidth: 300,
   },
   progressHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginBottom: 8,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 8,
   },
   progressBar: {
-      height: 6,
-      borderRadius: 3,
+    height: 6,
+    borderRadius: 3,
   }
 });
 

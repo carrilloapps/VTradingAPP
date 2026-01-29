@@ -68,6 +68,10 @@ export interface YoastSEO {
     twitter_title?: string;
     twitter_description?: string;
     twitter_image?: string;
+    schema?: {
+        '@context': string;
+        '@graph': any[];
+    };
 }
 
 export interface WordPressAuthor {
@@ -85,6 +89,7 @@ export interface WordPressAuthor {
     yoast_head_json?: YoastSEO;
     meta?: any;
     count?: number;
+    roles?: string[];
 }
 
 export interface WordPressFeaturedMedia {
@@ -157,6 +162,7 @@ export interface FormattedPost {
     wordCount?: number;
     isPromo: boolean;
     isTrending: boolean;
+    isEdited?: boolean;
     author?: {
         id: number;
         name: string;
@@ -275,8 +281,19 @@ class WordPressService {
                 cacheTTL: 5 * 60 * 1000,
             });
 
-            const totalPages = parseInt(headers.get('X-WP-TotalPages') || '1', 10);
-            const totalItems = parseInt(headers.get('X-WP-Total') || '0', 10);
+            const totalPages = parseInt(
+                headers.get('X-WP-TotalPages') ||
+                headers.get('x-wp-totalpages') ||
+                headers.get('X-WP-Total-Pages') ||
+                '1',
+                10
+            );
+            const totalItems = parseInt(
+                headers.get('X-WP-Total') ||
+                headers.get('x-wp-total') ||
+                '0',
+                10
+            );
 
             return {
                 data: data.map((post) => this.formatPost(post)),
@@ -588,9 +605,155 @@ class WordPressService {
     }
 
     /**
-     * Fetch a single tag by ID
-     * @param id Tag ID
+     * Fetch a single user by ID
+     * @param id User ID
      */
+    async getUserById(id: number): Promise<FormattedPost['author'] | null> {
+        try {
+            const user = await this.client.get<WordPressAuthor>(`users/${id}`, {
+                params: {
+                    _embed: true,
+                },
+                useCache: true,
+                cacheTTL: 60 * 60 * 1000, // Cache for 1 hour
+            });
+
+            if (!user) return null;
+            return this.formatAuthor(user);
+        } catch (error) {
+            observabilityService.captureError(error, { context: 'WordPressService.getUserById', details: { id } });
+            return null;
+        }
+    }
+
+    /**
+     * Format a WP user/author to app format
+     */
+    private formatAuthor(wpAuthor: WordPressAuthor): NonNullable<FormattedPost['author']> {
+        // Extract a short role or use a default if description is too long
+        // If the description starts with the same text, it's probably not a "role" but a bio
+        const rawDescription = wpAuthor.description || wpAuthor.yoast_head_json?.description || '';
+        const firstSentence = rawDescription.split(/[.!?]/)[0].trim();
+
+        let role = undefined;
+        if (wpAuthor.roles && wpAuthor.roles.length > 0) {
+            const primaryRole = wpAuthor.roles[0].toLowerCase();
+            if (primaryRole === 'administrator') role = 'Administrador';
+            else if (primaryRole === 'editor') role = 'Editor';
+            else if (primaryRole === 'author') role = 'Autor';
+            else if (primaryRole !== 'subscriber' && primaryRole !== 'contributor') {
+                role = primaryRole.charAt(0).toUpperCase() + primaryRole.slice(1);
+            }
+        }
+
+        // Only use description if it's very short and likely a title
+        if (!role && wpAuthor.description && wpAuthor.description.length > 0 && wpAuthor.description.length < 40) {
+            role = wpAuthor.description;
+        }
+
+        return {
+            id: wpAuthor.id,
+            name: wpAuthor.name,
+            avatar: wpAuthor.avatar_urls?.['96'] || wpAuthor.avatar_urls?.['48'] || '',
+            role,
+            description: rawDescription,
+            slug: wpAuthor.slug,
+            link: wpAuthor.link,
+            social: this.discoverSocialLinks(wpAuthor),
+            yoastSEO: wpAuthor.yoast_head_json,
+            count: wpAuthor.count,
+        };
+    }
+
+    /**
+     * Helper to extract social links from various possible WP structures
+     */
+    private discoverSocialLinks(obj: any): Record<string, string> {
+        if (!obj) return {};
+        const social: any = {};
+        const platforms = [
+            'facebook', 'instagram', 'youtube', 'twitter', 'linkedin',
+            'tiktok', 'website', 'github', 'x', 'pinterest',
+            'soundcloud', 'tumblr', 'wikipedia'
+        ];
+
+        // 1. Check Yoast SEO Schema Graph for "sameAs"
+        if (obj.yoast_head_json?.schema?.['@graph']) {
+            const graph = obj.yoast_head_json.schema['@graph'];
+
+            graph.forEach((item: any) => {
+                if (Array.isArray(item.sameAs)) {
+                    item.sameAs.forEach((url: string) => {
+                        if (!url || typeof url !== 'string') return;
+
+                        const lowercaseUrl = url.toLowerCase();
+                        platforms.forEach(p => {
+                            const key = (p === 'x' || p === 'twitter') ? 'twitter' : p;
+                            // Priority to schema but don't overwrite if already found
+                            if (!social[key]) {
+                                if (lowercaseUrl.includes(p === 'x' ? 'x.com' : p)) {
+                                    let finalUrl = url.trim();
+
+                                    // Sanitize accidental double URLs (common WP plugin glitch)
+                                    if (finalUrl.includes('https://x.com/https://x.com/')) {
+                                        finalUrl = finalUrl.replace('https://x.com/https://x.com/', 'https://x.com/');
+                                    } else if (finalUrl.includes('https://twitter.com/https://twitter.com/')) {
+                                        finalUrl = finalUrl.replace('https://twitter.com/https://twitter.com/', 'https://twitter.com/');
+                                    }
+
+                                    social[key] = finalUrl;
+                                }
+                            }
+                        });
+                    });
+                }
+            });
+        }
+
+        // 2. Check top level, meta, acf, and common variations
+        const sources = [obj, obj.meta, obj.social_links, obj.acf].filter(Boolean);
+
+        platforms.forEach(p => {
+            for (const source of sources) {
+                const value = source[p] ||
+                    source[`${p}_url`] ||
+                    source[`user_${p}`] ||
+                    source[`user_${p}_url`] ||
+                    source[`author_${p}`] ||
+                    source[`wp_${p}`];
+
+                if (value && typeof value === 'string' && value.trim() !== '' && value.trim() !== '#') {
+                    let finalValue = value.trim();
+
+                    // Handle-to-URL conversion for X/Twitter
+                    if ((p === 'x' || p === 'twitter') && !finalValue.startsWith('http')) {
+                        finalValue = `https://x.com/${finalValue.replace('@', '')}`;
+                    } else if (!finalValue.startsWith('http') && finalValue.startsWith('www.')) {
+                        finalValue = `https://${finalValue}`;
+                    }
+
+                    if (finalValue.startsWith('http')) {
+                        const key = (p === 'x' || p === 'twitter') ? 'twitter' : p;
+                        // Only set if not already set by schema logic
+                        if (!social[key]) {
+                            social[key] = finalValue;
+                        }
+                        break;
+                    }
+                }
+            }
+        });
+
+        // Special fallback for website/url
+        if (!social.website && (obj.url || obj.user_url || obj.link)) {
+            const site = obj.url || obj.user_url || obj.link;
+            if (site && site.includes('http') && !site.includes('discover.vtrading.app')) {
+                social.website = site;
+            }
+        }
+
+        return social;
+    }
     async getTagById(id: number): Promise<WordPressTag | null> {
         try {
             const tag = await this.client.get<WordPressTag>(`tags/${id}`, {
@@ -654,58 +817,6 @@ class WordPressService {
         // Utility to strip HTML tags
         const stripHtml = (html: string) => decodeHtml(html.replace(/<[^>]*>?/gm, ''));
 
-        // Helper to extract social links from various possible WP structures
-        const discoverSocialLinks = (obj: any) => {
-            if (!obj) return {};
-            const social: any = {};
-            const platforms = [
-                'facebook', 'instagram', 'youtube', 'twitter', 'linkedin',
-                'tiktok', 'website', 'github', 'x', 'pinterest',
-                'soundcloud', 'tumblr', 'wikipedia'
-            ];
-
-            // Check top level, meta, acf, and common variations
-            const sources = [obj, obj.meta, obj.social_links, obj.acf].filter(Boolean);
-
-            platforms.forEach(p => {
-                for (const source of sources) {
-                    const value = source[p] ||
-                        source[`${p}_url`] ||
-                        source[`user_${p}`] ||
-                        source[`user_${p}_url`] ||
-                        source[`author_${p}`] ||
-                        source[`wp_${p}`];
-
-                    if (value && typeof value === 'string' && value.trim() !== '' && value.trim() !== '#') {
-                        let finalValue = value.trim();
-
-                        // Handle-to-URL conversion for X/Twitter
-                        if ((p === 'x' || p === 'twitter') && !finalValue.startsWith('http')) {
-                            finalValue = `https://x.com/${finalValue.replace('@', '')}`;
-                        } else if (!finalValue.startsWith('http') && finalValue.startsWith('www.')) {
-                            finalValue = `https://${finalValue}`;
-                        }
-
-                        if (finalValue.startsWith('http')) {
-                            const key = (p === 'x' || p === 'twitter') ? 'twitter' : p;
-                            social[key] = finalValue;
-                            break;
-                        }
-                    }
-                }
-            });
-
-            // Special fallback for website/url
-            if (!social.website && (obj.url || obj.user_url || obj.link)) {
-                const site = obj.url || obj.user_url || obj.link;
-                if (site && site.includes('http') && !site.includes('discover.vtrading.app')) {
-                    social.website = site;
-                }
-            }
-
-            return social;
-        };
-
         // Estimate read time (avg 200 words per minute)
         const wordCount = post.content.rendered.split(/\s+/).length;
         const readTimeMinutes = Math.ceil(wordCount / 200);
@@ -749,24 +860,7 @@ class WordPressService {
         // Extract author from embedded data
         let author: FormattedPost['author'] | undefined;
         if (post._embedded?.author?.[0]) {
-            const wpAuthor = post._embedded.author[0];
-            // Extract a short role or use a default if description is too long
-            const truncatedDescription = wpAuthor.description
-                ? (wpAuthor.description.length > 60 ? wpAuthor.description.split('.')[0] : wpAuthor.description)
-                : undefined;
-
-            author = {
-                id: wpAuthor.id,
-                name: wpAuthor.name,
-                avatar: wpAuthor.avatar_urls?.['96'] || wpAuthor.avatar_urls?.['48'] || '',
-                role: truncatedDescription || 'Colaborador',
-                description: wpAuthor.description,
-                slug: wpAuthor.slug,
-                link: wpAuthor.link,
-                social: discoverSocialLinks(wpAuthor),
-                yoastSEO: wpAuthor.yoast_head_json,
-                count: wpAuthor.count,
-            };
+            author = this.formatAuthor(post._embedded.author[0]);
         }
 
         // SEO Description prioritization
@@ -827,6 +921,7 @@ class WordPressService {
             seoDescription,
             isPromo,
             isTrending,
+            isEdited: (mDate.getTime() - date.getTime()) > 300000, // Significant change > 5 mins
             author,
             yoastSEO: post.yoast_head_json,
         };

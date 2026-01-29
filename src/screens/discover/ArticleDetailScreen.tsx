@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Image, Animated, Share, StatusBar, useWindowDimensions, RefreshControl, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, Image, Animated, Share, StatusBar, useWindowDimensions, RefreshControl, ActivityIndicator, TouchableOpacity, Linking } from 'react-native';
 import {
   Text,
   IconButton,
@@ -23,6 +23,8 @@ import { CommentsList } from '../../components/discover/CommentsList';
 import ArticleCard from '../../components/discover/ArticleCard';
 import AuthorCard from '../../components/discover/AuthorCard';
 import DiscoverErrorView from '../../components/discover/DiscoverErrorView';
+import XIcon from '../../components/common/XIcon';
+import FacebookIcon from '../../components/common/FacebookIcon';
 
 
 const BlockParagraph = ({ text, theme }: any) => (
@@ -152,6 +154,19 @@ const ArticleDetailScreen = () => {
       if (currentArticle?.id && currentArticle?.categories?.[0]?.id) {
         setLoadingRelated(true);
         try {
+          // Enrich author data if it was slim (social might be missing in embed)
+          if (currentArticle.author?.id) {
+            wordPressService.getUserById(currentArticle.author.id).then(fullAuthor => {
+              if (fullAuthor) {
+                setArticleData((prev: any) => {
+                  const base = prev || params?.article;
+                  if (!base) return null;
+                  return { ...base, author: fullAuthor };
+                });
+              }
+            });
+          }
+
           const fetchedRelated = await wordPressService.getRelatedPosts(
             Number(currentArticle.id),
             currentArticle.categories[0].id
@@ -579,32 +594,86 @@ const ArticleDetailScreen = () => {
                     </Text>
                   </>
                 )}
-              </View>
-              <View style={styles.metadataRow}>
-                <MaterialCommunityIcons name="clock-outline" size={14} color={theme.colors.onSurfaceVariant} />
-                <Text variant="bodySmall" style={{ marginLeft: 4, color: theme.colors.onSurfaceVariant }}>
-                  {article.time}
-                </Text>
-                {article.modifiedTime && article.modifiedTime !== article.time && (
+                {article.author?.social && (
+                  <View style={[styles.metadataItem, { gap: 8, marginHorizontal: 4 }]}>
+                    {article.author.social.twitter && (
+                      <TouchableOpacity onPress={() => Linking.openURL(article.author.social.twitter)}>
+                        <XIcon size={16} color={theme.colors.onSurfaceVariant} />
+                      </TouchableOpacity>
+                    )}
+                    {article.author.social.facebook && (
+                      <TouchableOpacity onPress={() => Linking.openURL(article.author.social.facebook)}>
+                        <FacebookIcon size={16} color={theme.colors.onSurfaceVariant} />
+                      </TouchableOpacity>
+                    )}
+                    {article.author.social.instagram && (
+                      <TouchableOpacity onPress={() => Linking.openURL(article.author.social.instagram)}>
+                        <MaterialCommunityIcons name="instagram" size={16} color={theme.colors.onSurfaceVariant} />
+                      </TouchableOpacity>
+                    )}
+                    {article.author.social.youtube && (
+                      <TouchableOpacity onPress={() => Linking.openURL(article.author.social.youtube)}>
+                        <MaterialCommunityIcons name="youtube" size={16} color={theme.colors.onSurfaceVariant} />
+                      </TouchableOpacity>
+                    )}
+                    {article.author.social.linkedin && (
+                      <TouchableOpacity onPress={() => Linking.openURL(article.author.social.linkedin)}>
+                        <MaterialCommunityIcons name="linkedin" size={16} color={theme.colors.onSurfaceVariant} />
+                      </TouchableOpacity>
+                    )}
+                    {article.author.social.tiktok && (
+                      <TouchableOpacity onPress={() => Linking.openURL(article.author.social.tiktok)}>
+                        <MaterialCommunityIcons name="music-note" size={16} color={theme.colors.onSurfaceVariant} />
+                      </TouchableOpacity>
+                    )}
+                  </View>
+                )}
+                {article.isEdited && article.modifiedTime && (
                   <>
-                    <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginHorizontal: 6 }}>•</Text>
-                    <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, opacity: 0.8 }}>
-                      Actualizado {article.modifiedTime}
-                    </Text>
+                    <Text variant="bodySmall" style={[styles.separator, { color: theme.colors.onSurfaceVariant }]}>•</Text>
+                    <View style={styles.metadataItem}>
+                      <MaterialCommunityIcons name="pencil-outline" size={14} color={theme.colors.onSurfaceVariant} style={{ opacity: 0.7 }} />
+                      <Text variant="bodySmall" style={{ marginLeft: 4, color: theme.colors.onSurfaceVariant, opacity: 0.8 }}>
+                        {article.modifiedTime}
+                      </Text>
+                    </View>
                   </>
                 )}
-                <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginHorizontal: 6 }}>•</Text>
-                <Text variant="bodySmall" style={{ color: theme.colors.primary, fontWeight: '700' }}>
-                  {article.readTime}
-                </Text>
-                {article.wordCount && (
-                  <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginLeft: 6, fontSize: 10 }}>
-                    ({article.wordCount} palabras)
+              </View>
+              <View style={styles.metadataRow}>
+                <View style={styles.metadataItem}>
+                  <MaterialCommunityIcons name="clock-outline" size={14} color={theme.colors.onSurfaceVariant} />
+                  <Text variant="bodySmall" style={{ marginLeft: 4, color: theme.colors.onSurfaceVariant }}>
+                    {article.time}
                   </Text>
-                )}
+                </View>
+
+
+                <Text variant="bodySmall" style={[styles.separator, { color: theme.colors.onSurfaceVariant }]}>•</Text>
+
+                <View style={styles.metadataItem}>
+                  <Text variant="bodySmall" style={{ color: theme.colors.primary, fontWeight: '700' }}>
+                    {article.readTime}
+                  </Text>
+                  {article.wordCount && (
+                    <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginLeft: 6, fontSize: 10 }}>
+                      ({article.wordCount} palabras)
+                    </Text>
+                  )}
+                </View>
               </View>
             </View>
           </View>
+
+          {/* Content Body: Support both Legacy Blocks and HTML (WP) */}
+          <View style={styles.articleBody}>
+            {typeof article.content === 'string' ? (
+              renderHtmlContent()
+            ) : (
+              article.content.map((block: any, idx: number) => renderBlock(block, idx))
+            )}
+          </View>
+
           {/* Summary / Lead Paragraph Section */}
           {article.seoDescription && (
             <View style={[
@@ -617,22 +686,13 @@ const ArticleDetailScreen = () => {
               }
             ]}>
               <View style={[styles.summaryLabel, { backgroundColor: theme.colors.primary, borderRadius: theme.roundness }]}>
-                <Text variant="labelSmall" style={{ color: theme.colors.onPrimary, fontWeight: 'bold' }}>EN RESUMEN</Text>
+                <Text variant="labelSmall" style={{ color: theme.colors.onPrimary, fontWeight: 'bold' }}>IMPORTANTE</Text>
               </View>
               <Text variant="bodyMedium" style={[styles.summaryText, { color: theme.colors.onSurfaceVariant }]}>
                 {article.seoDescription}
               </Text>
             </View>
           )}
-
-          {/* Content Body: Support both Legacy Blocks and HTML (WP) */}
-          <View style={styles.articleBody}>
-            {typeof article.content === 'string' ? (
-              renderHtmlContent()
-            ) : (
-              article.content.map((block: any, idx: number) => renderBlock(block, idx))
-            )}
-          </View>
 
           {/* SEO/Tags */}
           {article.tags && article.tags.length > 0 && (
@@ -848,7 +908,17 @@ const styles = StyleSheet.create({
   metadataRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 4,
     marginTop: 2,
+  },
+  metadataItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  separator: {
+    marginHorizontal: 4,
+    opacity: 0.5,
   },
 
   articleBody: {

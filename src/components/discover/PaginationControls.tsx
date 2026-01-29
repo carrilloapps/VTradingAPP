@@ -23,8 +23,8 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
     if (totalPages <= 1) return null;
 
     return (
-        <Surface 
-            style={[styles.container, { backgroundColor: theme.colors.elevation.level1 }]} 
+        <Surface
+            style={[styles.container, { backgroundColor: theme.colors.elevation.level1 }]}
             elevation={1}
         >
             <View style={styles.content}>
@@ -35,7 +35,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
                     onPress={onPrevious}
                     iconColor={theme.colors.primary}
                 />
-                
+
                 <View style={styles.pageIndicator}>
                     {loading ? (
                         <ActivityIndicator size="small" color={theme.colors.primary} />

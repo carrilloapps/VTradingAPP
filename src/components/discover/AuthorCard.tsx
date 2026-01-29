@@ -2,6 +2,8 @@ import React from 'react';
 import { View, StyleSheet, Linking } from 'react-native';
 import { Text, Surface, IconButton, Avatar, Button } from 'react-native-paper';
 import { useAppTheme } from '../../theme/theme';
+import XIcon from '../common/XIcon';
+import FacebookIcon from '../common/FacebookIcon';
 
 interface AuthorCardProps {
     author: any;
@@ -22,16 +24,16 @@ const AuthorCard = ({ author }: AuthorCardProps) => {
                 <Avatar.Image size={64} source={{ uri: author.avatar }} />
                 <View style={styles.authorInfo}>
                     <Text variant="titleLarge" style={{ fontWeight: 'bold' }}>{author.name}</Text>
-                    {author.role && author.role !== author.description && (
+                    {author.role && (
                         <Text variant="bodySmall" style={{ opacity: 0.7 }}>{author.role}</Text>
                     )}
                 </View>
             </View>
-            
+
             <Text variant="bodyMedium" style={styles.authorBio}>
-                {author.yoastSEO?.description || author.description}
+                {author.description || author.yoastSEO?.description}
             </Text>
-            
+
             {author.count !== undefined && (
                 <View style={styles.statsRow}>
                     <Text variant="labelSmall" style={{ color: theme.colors.primary, fontWeight: 'bold' }}>
@@ -39,13 +41,25 @@ const AuthorCard = ({ author }: AuthorCardProps) => {
                     </Text>
                 </View>
             )}
-            
+
             <View style={styles.socialRow}>
                 {author.social?.twitter && (
-                    <IconButton icon="twitter" mode="contained-tonal" size={20} onPress={() => handleSocialPress(author.social.twitter)} style={styles.socialIcon} />
+                    <IconButton
+                        icon={({ size, color }) => <XIcon size={size} color={color} />}
+                        mode="contained-tonal"
+                        size={20}
+                        onPress={() => handleSocialPress(author.social.twitter)}
+                        style={styles.socialIcon}
+                    />
                 )}
                 {author.social?.facebook && (
-                    <IconButton icon="facebook" mode="contained-tonal" size={20} onPress={() => handleSocialPress(author.social.facebook)} style={styles.socialIcon} />
+                    <IconButton
+                        icon={({ size, color }) => <FacebookIcon size={size} color={color} />}
+                        mode="contained-tonal"
+                        size={20}
+                        onPress={() => handleSocialPress(author.social.facebook)}
+                        style={styles.socialIcon}
+                    />
                 )}
                 {author.social?.instagram && (
                     <IconButton icon="instagram" mode="contained-tonal" size={20} onPress={() => handleSocialPress(author.social.instagram)} style={styles.socialIcon} />
