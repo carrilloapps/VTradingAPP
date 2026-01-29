@@ -8,6 +8,14 @@ import { useAppTheme } from '../../theme/theme';
 import XIcon from '../common/XIcon';
 import FacebookIcon from '../common/FacebookIcon';
 
+// Helper to convert hex to rgba
+const hexToRgba = (hex: string, alpha: number) => {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
 export interface ShareableItem {
     title: string;
     image?: string;
@@ -113,40 +121,49 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
     const containerStyle = {
         width,
         height,
-        backgroundColor: '#121212', // Deep dark background
+        backgroundColor: theme.colors.background, // Deep dark background
     };
 
     // Helper to render author block
     const renderAuthorBlock = () => {
         if (!author) return null;
         
+        const isVertical = aspectRatio === '16:9';
         const socials = (typeof author.socials === 'object' && author.socials !== null) ? author.socials : {} as any;
         const showSocials = !!author.socials;
+
+        // Dynamic Sizes for Vertical Mode
+        const avatarSize = isVertical ? 140 : 90;
+        const nameSize = isVertical ? 48 : 32;
+        const roleSize = isVertical ? 34 : 24;
+        const socialIconSize = isVertical ? 54 : 22;
+        const socialGap = isVertical ? 24 : 12;
 
         return (
             <View style={styles.authorRow}>
                 {author.avatar ? (
-                     <Image source={{ uri: author.avatar }} style={styles.avatarImage} />
+                     <Image source={{ uri: author.avatar }} style={[styles.avatarImage, { width: avatarSize, height: avatarSize, borderRadius: avatarSize / 2 }]} />
                 ) : (
                     <View style={[styles.avatarPlaceholder, { 
+                        width: avatarSize, height: avatarSize, borderRadius: avatarSize / 2,
                         backgroundColor: theme.colors.primaryContainer,
                         borderColor: theme.colors.primary 
                     }]}>
-                        <Text style={[styles.avatarLetter, { color: theme.colors.onPrimaryContainer }]}>{author.name[0]}</Text>
+                        <Text style={[styles.avatarLetter, { fontSize: isVertical ? 60 : 40, color: theme.colors.onPrimaryContainer }]}>{author.name[0]}</Text>
                     </View>
                 )}
-                <View>
-                    <Text style={[styles.authorName, { color: '#FFF' }]}>{author.name}</Text>
-                    <View style={styles.authorMetaRow}>
-                        {author.role && <Text style={[styles.authorLabel, { color: 'rgba(255,255,255,0.6)' }]}>{author.role}</Text>}
+                <View style={{ gap: isVertical ? 0 : 0 }}>
+                    <Text style={[styles.authorName, { fontSize: nameSize, color: theme.colors.onBackground }]}>{author.name}</Text>
+                    <View style={[styles.authorMetaRow, { marginTop: isVertical ? 0 : 8 }]}>
+                        {author.role && <Text style={[styles.authorLabel, { fontSize: roleSize, color: hexToRgba(theme.colors.onBackground, 0.6) }]}>{author.role}</Text>}
                         {showSocials && (
-                            <View style={styles.socialIcons}>
-                                {socials.twitter && <XIcon size={20} color="rgba(255,255,255,0.6)" />}
-                                {socials.facebook && <FacebookIcon size={20} color="rgba(255,255,255,0.6)" />}
-                                {socials.instagram && <MaterialCommunityIcons name="instagram" size={22} color="rgba(255,255,255,0.6)" />}
-                                {socials.linkedin && <MaterialCommunityIcons name="linkedin" size={22} color="rgba(255,255,255,0.6)" />}
-                                {socials.youtube && <MaterialCommunityIcons name="youtube" size={22} color="rgba(255,255,255,0.6)" />}
-                                {socials.tiktok && <MaterialCommunityIcons name="music-note-eighth" size={22} color="rgba(255,255,255,0.6)" />}
+                            <View style={[styles.socialIcons, { gap: socialGap }]}>
+                                {socials.twitter && <XIcon size={socialIconSize} color={hexToRgba(theme.colors.onBackground, 0.6)} />}
+                                {socials.facebook && <FacebookIcon size={socialIconSize} color={hexToRgba(theme.colors.onBackground, 0.6)} />}
+                                {socials.instagram && <MaterialCommunityIcons name="instagram" size={socialIconSize} color={hexToRgba(theme.colors.onBackground, 0.6)} />}
+                                {socials.linkedin && <MaterialCommunityIcons name="linkedin" size={socialIconSize} color={hexToRgba(theme.colors.onBackground, 0.6)} />}
+                                {socials.youtube && <MaterialCommunityIcons name="youtube" size={socialIconSize} color={hexToRgba(theme.colors.onBackground, 0.6)} />}
+                                {socials.tiktok && <MaterialCommunityIcons name="music-note-eighth" size={socialIconSize} color={hexToRgba(theme.colors.onBackground, 0.6)} />}
                             </View>
                         )}
                     </View>
@@ -157,6 +174,8 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
 
     // Modern Article Layout
     if (type === 'ARTICLE') {
+        const isVertical = aspectRatio === '16:9';
+
         return (
             <View style={styles.hiddenTemplate} pointerEvents="none">
                 <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 1.0 }}>
@@ -166,37 +185,39 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                             {image ? (
                                 <Image source={{ uri: image }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                             ) : (
-                                <View style={{ flex: 1, backgroundColor: '#1A1A1A', alignItems: 'center', justifyContent: 'center' }}>
-                                    <MaterialCommunityIcons name="image-off-outline" size={100} color="#333" />
+                                <View style={{ flex: 1, backgroundColor: theme.colors.elevation.level1, alignItems: 'center', justifyContent: 'center' }}>
+                                    <MaterialCommunityIcons name="image-off-outline" size={isVertical ? 150 : 100} color={theme.colors.onSurfaceVariant} />
                                 </View>
                             )}
                             
                             {/* Top Gradient Overlay for Logo Visibility */}
                             <LinearGradient
-                                colors={['rgba(0,0,0,0.8)', 'transparent']}
-                                style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 160 }} 
+                                colors={[hexToRgba(theme.colors.background, 0.8), 'transparent']}
+                                style={{ position: 'absolute', top: 0, left: 0, right: 0, height: isVertical ? 240 : 160 }} 
                             />
 
                             {/* Gradient Fade to Bottom */}
                             <LinearGradient
-                                colors={['transparent', 'rgba(18,18,18,0.2)', '#121212']}
+                                colors={['transparent', hexToRgba(theme.colors.background, 0.2), theme.colors.background]}
                                 style={[StyleSheet.absoluteFill, { top: '50%' }]} 
                             />
                             
                             {/* Top Bar Overlay */}
-                            <View style={[styles.topBar, { position: 'absolute', top: 0, left: 0, right: 0, paddingHorizontal: 64, marginTop: 40 }]}>
+                            <View style={[styles.topBar, { position: 'absolute', top: 0, left: 0, right: 0, paddingHorizontal: 64, marginTop: isVertical ? 60 : 40 }]}>
                                 <View style={[styles.pillBadge, { 
-                                    borderColor: 'rgba(255,255,255,0.2)',
-                                    backgroundColor: 'rgba(0,0,0,0.6)'
+                                    borderColor: hexToRgba(theme.colors.onBackground, 0.2),
+                                    backgroundColor: hexToRgba(theme.colors.background, 0.6),
+                                    paddingHorizontal: isVertical ? 40 : 32,
+                                    paddingVertical: isVertical ? 20 : 16,
                                 }]}>
-                                    <MaterialCommunityIcons name={getIcon()} size={24} color="#FFF" />
-                                    <Text style={[styles.pillText, { color: '#FFF' }]}>{getLabel()}</Text>
+                                    <MaterialCommunityIcons name={getIcon()} size={isVertical ? 32 : 24} color={theme.colors.onBackground} />
+                                    <Text style={[styles.pillText, { color: theme.colors.onBackground, fontSize: isVertical ? 32 : 24 }]}>{getLabel()}</Text>
                                 </View>
                                 
                                 <View style={styles.brandContainer}>
                                     <Image 
                                         source={require('../../assets/images/logotipo.png')} 
-                                        style={styles.brandLogo} 
+                                        style={[styles.brandLogo, { tintColor: theme.colors.onBackground, width: isVertical ? 450 : 300, height: isVertical ? 120 : 80 }]} 
                                         resizeMode="contain"
                                     />
                                 </View>
@@ -207,15 +228,15 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                         <View style={{ flex: 1, paddingHorizontal: 64, paddingBottom: 64, justifyContent: 'space-between' }}>
                             <View>
                                 {/* Category Badge */}
-                                <View style={[styles.categoryBadge, { backgroundColor: getAccentColor() }]}>
-                                    <Text style={[styles.categoryBadgeText, { color: theme.colors.onPrimary }]}>
+                                <View style={[styles.categoryBadge, { backgroundColor: theme.colors.primaryContainer, borderRadius: 100, paddingHorizontal: isVertical ? 24 : 16, paddingVertical: isVertical ? 12 : 8 }]}>
+                                    <Text style={[styles.categoryBadgeText, { color: theme.colors.onPrimaryContainer, fontSize: isVertical ? 26 : 18 }]}>
                                         {categoryName ? categoryName.toUpperCase() : 'ARTÍCULO'}
                                     </Text>
                                 </View>
 
 
                                 {/* Title */}
-                                <Text style={styles.modernTitle} numberOfLines={4}>
+                                <Text style={[styles.modernTitle, { color: theme.colors.onBackground, fontSize: isVertical ? 80 : 56, lineHeight: isVertical ? 88 : 64 }]} numberOfLines={4}>
                                     {title}
                                 </Text>
 
@@ -224,7 +245,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
 
                                 {/* Description */}
                                 {description && aspectRatio === '16:9' && (
-                                    <Text style={styles.modernDescription} numberOfLines={10}>
+                                    <Text style={[styles.modernDescription, { color: hexToRgba(theme.colors.onBackground, 0.85), fontSize: isVertical ? 42 : 30, lineHeight: isVertical ? 60 : 42 }]} numberOfLines={5}>
                                         {cleanText(description)}
                                     </Text>
                                 )}
@@ -233,20 +254,20 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                             {/* Footer */}
                             <View style={styles.footer}>
                                 <View style={styles.footerLeft}>
-                                    <View style={styles.storeIcons}>
-                                        <View style={styles.storeIconCircle}>
-                                            <MaterialCommunityIcons name="apple" size={32} color="#000" />
+                                    <View style={[styles.storeIcons, { gap: isVertical ? 24 : 16 }]}>
+                                        <View style={[styles.storeIconCircle, { backgroundColor: theme.colors.onBackground, width: isVertical ? 90 : 64, height: isVertical ? 90 : 64, borderRadius: isVertical ? 45 : 32 }]}>
+                                            <MaterialCommunityIcons name="apple" size={isVertical ? 48 : 32} color={theme.colors.background} />
                                         </View>
-                                        <View style={styles.storeIconCircle}>
-                                            <MaterialCommunityIcons name="google-play" size={28} color="#000" />
+                                        <View style={[styles.storeIconCircle, { backgroundColor: theme.colors.onBackground, width: isVertical ? 90 : 64, height: isVertical ? 90 : 64, borderRadius: isVertical ? 45 : 32 }]}>
+                                            <MaterialCommunityIcons name="google-play" size={isVertical ? 40 : 28} color={theme.colors.background} />
                                         </View>
                                     </View>
-                                    <Text style={[styles.downloadText, { color: '#FFF' }]}>Descarga Gratis</Text>
+                                    <Text style={[styles.downloadText, { color: theme.colors.onBackground, fontSize: isVertical ? 40 : 28 }]}>Descarga gratis</Text>
                                 </View>
                                 
-                                <View style={[styles.urlBadge, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
-                                    <MaterialCommunityIcons name="web" size={24} color="#FFF" style={{ marginRight: 10 }} />
-                                    <Text style={[styles.urlText, { color: '#FFF' }]}>vtrading.app</Text>
+                                <View style={[styles.urlBadge, { backgroundColor: hexToRgba(theme.colors.onBackground, 0.1), paddingHorizontal: isVertical ? 40 : 32, paddingVertical: isVertical ? 20 : 16 }]}>
+                                    <MaterialCommunityIcons name="web" size={isVertical ? 36 : 24} color={theme.colors.onBackground} style={{ marginRight: 10 }} />
+                                    <Text style={[styles.urlText, { color: theme.colors.onBackground, fontSize: isVertical ? 36 : 26 }]}>vtrading.app</Text>
                                 </View>
                             </View>
                         </View>
@@ -262,6 +283,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
         // For Lists (Category/Tag)
         if (!items || items.length === 0) return null;
 
+        const isVertical = aspectRatio === '16:9';
         const heroItem = items[0];
         const listItems = items.slice(1, aspectRatio === '16:9' ? 3 : 1);
 
@@ -269,30 +291,30 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
             <View style={styles.listContainer}>
                 {/* Hero Card */}
                 <Surface style={[styles.heroCard, { 
-                    backgroundColor: '#1A1A1A',
-                    borderColor: 'rgba(255,255,255,0.1)',
+                    backgroundColor: theme.colors.elevation.level1,
+                    borderColor: theme.colors.outline,
                     borderRadius: 40,
                 }]} elevation={5}>
                     {heroItem.image ? (
                         <Image source={{ uri: heroItem.image }} style={styles.heroImage} resizeMode="cover" />
                     ) : (
-                        <View style={[styles.heroImage, { backgroundColor: '#333', alignItems: 'center', justifyContent: 'center' }]}>
-                            <MaterialCommunityIcons name="image-off-outline" size={60} color="#666" />
+                        <View style={[styles.heroImage, { backgroundColor: theme.colors.surfaceVariant, alignItems: 'center', justifyContent: 'center' }]}>
+                            <MaterialCommunityIcons name="image-off-outline" size={isVertical ? 80 : 60} color={theme.colors.onSurfaceVariant} />
                         </View>
                     )}
 
                     <LinearGradient
-                        colors={['transparent', 'rgba(0,0,0,0.9)']}
+                        colors={['transparent', hexToRgba(theme.colors.scrim, 0.9)]}
                         style={StyleSheet.absoluteFill}
                     />
 
                     <View style={styles.heroContent}>
                         <View style={[styles.heroBadge, { backgroundColor: getAccentColor() }]}>
-                            <Text style={[styles.heroBadgeText, { color: '#000' }]}>DESTACADO</Text>
+                            <Text style={[styles.heroBadgeText, { color: theme.colors.onPrimary, fontSize: isVertical ? 24 : 20 }]}>DESTACADO</Text>
                         </View>
-                        <Text style={styles.heroTitle} numberOfLines={2}>{heroItem.title}</Text>
+                        <Text style={[styles.heroTitle, { color: '#FFF', fontSize: isVertical ? 56 : 44, lineHeight: isVertical ? 64 : 52 }]} numberOfLines={2}>{heroItem.title}</Text>
                         <View style={styles.cardMeta}>
-                            {heroItem.author && <Text style={styles.cardMetaText}>Por {heroItem.author}</Text>}
+                            {heroItem.author && <Text style={[styles.cardMetaText, { color: 'rgba(255,255,255,0.9)', fontSize: isVertical ? 30 : 24 }]}>Por {heroItem.author}</Text>}
                         </View>
                     </View>
                 </Surface>
@@ -302,15 +324,16 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                     <View style={styles.compactList}>
                         {listItems.map((item, index) => (
                             <View key={index} style={[styles.card, { 
-                                backgroundColor: 'rgba(255,255,255,0.05)',
-                                borderColor: 'rgba(255,255,255,0.1)' 
+                                backgroundColor: hexToRgba(theme.colors.onBackground, 0.05),
+                                borderColor: hexToRgba(theme.colors.onBackground, 0.1),
+                                height: isVertical ? 180 : 160,
                             }]}>
                                 {item.image && (
-                                    <Image source={{ uri: item.image }} style={styles.cardImage} resizeMode="cover" />
+                                    <Image source={{ uri: item.image }} style={[styles.cardImage, { width: isVertical ? 180 : 160, height: isVertical ? 180 : 160 }]} resizeMode="cover" />
                                 )}
                                 <View style={styles.cardContent}>
-                                    <Text style={[styles.cardTitle, { color: '#FFF' }]} numberOfLines={2}>{item.title}</Text>
-                                    <Text style={[styles.cardDate, { color: getAccentColor() }]}>{item.date || 'Reciente'}</Text>
+                                    <Text style={[styles.cardTitle, { color: theme.colors.onBackground, fontSize: isVertical ? 38 : 32, lineHeight: isVertical ? 46 : 40 }]} numberOfLines={2}>{item.title}</Text>
+                                    <Text style={[styles.cardDate, { color: getAccentColor(), fontSize: isVertical ? 24 : 20 }]}>{item.date || 'Reciente'}</Text>
                                 </View>
                             </View>
                         ))}
@@ -321,13 +344,14 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
     };
 
     // Old Layout for Category/Tag
+    const isVertical = aspectRatio === '16:9';
     return (
         <View style={styles.hiddenTemplate} pointerEvents="none">
             <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 1.0 }}>
                 <View style={containerStyle}>
                     {/* Background Layer - Abstract Dark */}
                      <LinearGradient
-                        colors={['#1a1a1a', '#050505']}
+                        colors={[theme.colors.background, theme.colors.background]}
                         style={StyleSheet.absoluteFill}
                     />
                     
@@ -340,7 +364,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                     
                     {/* Gradient Overlay for Consistency */}
                     <LinearGradient
-                        colors={['rgba(0,0,0,0.3)', '#000000']}
+                        colors={[hexToRgba(theme.colors.background, 0.3), theme.colors.background]}
                         style={StyleSheet.absoluteFill}
                     />
 
@@ -348,18 +372,20 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                         {/* Top Bar */}
                         <View style={styles.topBar}>
                             <View style={[styles.pillBadge, { 
-                                borderColor: 'rgba(255,255,255,0.3)',
-                                backgroundColor: 'rgba(0,0,0,0.5)'
+                                borderColor: hexToRgba(theme.colors.onBackground, 0.3),
+                                backgroundColor: hexToRgba(theme.colors.background, 0.5),
+                                paddingHorizontal: isVertical ? 40 : 32,
+                                paddingVertical: isVertical ? 20 : 16,
                             }]}>
-                                <MaterialCommunityIcons name={getIcon()} size={24} color="#FFF" />
-                                <Text style={[styles.pillText, { color: '#FFF' }]}>{getLabel()}</Text>
+                                <MaterialCommunityIcons name={getIcon()} size={isVertical ? 32 : 24} color={theme.colors.onBackground} />
+                                <Text style={[styles.pillText, { color: theme.colors.onBackground, fontSize: isVertical ? 32 : 24 }]}>{getLabel()}</Text>
                             </View>
                             
                             {/* Brand Logo - Using Asset */}
                              <View style={styles.brandContainer}>
                                 <Image 
                                     source={require('../../assets/images/logotipo.png')} 
-                                    style={styles.brandLogo} 
+                                    style={[styles.brandLogo, { tintColor: theme.colors.onBackground, width: isVertical ? 450 : 300, height: isVertical ? 120 : 80 }]} 
                                     resizeMode="contain"
                                 />
                             </View>
@@ -371,9 +397,9 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                             <View style={styles.headerSection}>
                                 <Text style={[
                                     styles.mainTitle,
-                                    { color: '#FFF' },
-                                    (title.length > 40) && { fontSize: 64, lineHeight: 72 },
-                                    (title.length > 80) && { fontSize: 56, lineHeight: 64 }
+                                    { color: theme.colors.onBackground },
+                                    (title.length > 40) && { fontSize: isVertical ? 80 : 64, lineHeight: isVertical ? 88 : 72 },
+                                    (title.length > 80) && { fontSize: isVertical ? 72 : 56, lineHeight: isVertical ? 80 : 64 }
                                 ]}>
                                     {title}
                                 </Text>
@@ -382,7 +408,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                                 {(type as string) === 'ARTICLE' && author && renderAuthorBlock()}
 
                                 {description && !items && aspectRatio === '16:9' && (
-                                    <Text style={[styles.description, { color: 'rgba(255,255,255,0.8)' }]} numberOfLines={4}>
+                                    <Text style={[styles.description, { color: hexToRgba(theme.colors.onBackground, 0.8), fontSize: 42, lineHeight: 60 }]} numberOfLines={4}>
                                         {cleanText(description)}
                                     </Text>
                                 )}
@@ -397,21 +423,21 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                         {/* Footer */}
                         <View style={styles.footer}>
                             <View style={styles.footerLeft}>
-                                <View style={styles.storeIcons}>
+                                <View style={[styles.storeIcons, { gap: isVertical ? 24 : 16 }]}>
                                      {/* Larger Store Icons */}
-                                    <View style={styles.storeIconCircle}>
-                                        <MaterialCommunityIcons name="apple" size={32} color="#000" />
+                                    <View style={[styles.storeIconCircle, { backgroundColor: theme.colors.onBackground, width: isVertical ? 90 : 64, height: isVertical ? 90 : 64, borderRadius: isVertical ? 45 : 32 }]}>
+                                        <MaterialCommunityIcons name="apple" size={isVertical ? 48 : 32} color={theme.colors.background} />
                                     </View>
-                                    <View style={styles.storeIconCircle}>
-                                        <MaterialCommunityIcons name="google-play" size={28} color="#000" />
+                                    <View style={[styles.storeIconCircle, { backgroundColor: theme.colors.onBackground, width: isVertical ? 90 : 64, height: isVertical ? 90 : 64, borderRadius: isVertical ? 45 : 32 }]}>
+                                        <MaterialCommunityIcons name="google-play" size={isVertical ? 40 : 28} color={theme.colors.background} />
                                     </View>
                                 </View>
-                                <Text style={[styles.downloadText, { color: '#FFF' }]}>Descarga Gratis</Text>
+                                <Text style={[styles.downloadText, { color: theme.colors.onBackground, fontSize: isVertical ? 40 : 28 }]}>Descarga Gratis</Text>
                             </View>
                             
-                            <View style={[styles.urlBadge, { backgroundColor: 'rgba(255,255,255,0.15)' }]}>
-                                <MaterialCommunityIcons name="web" size={24} color="#FFF" style={{ marginRight: 10 }} />
-                                <Text style={[styles.urlText, { color: '#FFF' }]}>vtrading.app</Text>
+                            <View style={[styles.urlBadge, { backgroundColor: hexToRgba(theme.colors.onBackground, 0.15), paddingHorizontal: isVertical ? 40 : 32, paddingVertical: isVertical ? 20 : 16 }]}>
+                                <MaterialCommunityIcons name="web" size={isVertical ? 36 : 24} color={theme.colors.onBackground} style={{ marginRight: 10 }} />
+                                <Text style={[styles.urlText, { color: theme.colors.onBackground, fontSize: isVertical ? 36 : 26 }]}>vtrading.app</Text>
                             </View>
                         </View>
 
