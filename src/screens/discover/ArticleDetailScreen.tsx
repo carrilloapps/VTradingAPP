@@ -14,6 +14,11 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { WebView } from 'react-native-webview';
 import LinearGradient from 'react-native-linear-gradient';
+import ViewShot, { captureRef } from 'react-native-view-shot';
+import CustomDialog from '../../components/ui/CustomDialog';
+import CustomButton from '../../components/ui/CustomButton';
+import ShareableDetail from '../../components/discover/ShareableDetail';
+import { useToastStore } from '../../stores/toastStore';
 import { useAppTheme } from '../../theme/theme';
 import { analyticsService } from '../../services/firebase/AnalyticsService';
 import { wordPressService, FormattedComment, FormattedPost } from '../../services/WordPressService';
@@ -26,6 +31,14 @@ import DiscoverErrorView from '../../components/discover/DiscoverErrorView';
 import XIcon from '../../components/common/XIcon';
 import FacebookIcon from '../../components/common/FacebookIcon';
 
+
+// Helper to convert hex to rgba
+const hexToRGBA = (hex: string, alpha: number) => {
+  const r = parseInt(hex.slice(1, 3), 16);
+  const g = parseInt(hex.slice(3, 5), 16);
+  const b = parseInt(hex.slice(5, 7), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
 
 const BlockParagraph = ({ text, theme }: any) => (
   <Text variant="bodyLarge" style={[styles.paragraph, { color: theme.colors.onSurface }]}>{text}</Text>
@@ -93,6 +106,13 @@ const ArticleDetailScreen = () => {
   const [contentHeight, setContentHeight] = React.useState(0);
   const scrollY = React.useRef(new Animated.Value(0)).current;
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+
+  // Share Logic
+  const viewShotRef = React.useRef<any>(null);
+  const [isShareDialogVisible, setShareDialogVisible] = React.useState(false);
+  const [shareFormat, setShareFormat] = React.useState<'1:1' | '16:9'>('1:1');
+  const [sharing, setSharing] = React.useState(false);
+  const showToast = useToastStore((state) => state.showToast);
 
   // Safe width calculation for header content
   const headerContentWidth = windowWidth - 120; // Space between back and share buttons
@@ -228,7 +248,56 @@ const ArticleDetailScreen = () => {
   };
 
   // Enhanced Share with Deep Links
-  const handleShare = async () => {
+  const handleShareButton = () => {
+    setShareDialogVisible(true);
+  };
+
+  const generateShareImage = async (format: '1:1' | '16:9') => {
+    setShareDialogVisible(false);
+    setShareFormat(format);
+    setSharing(true);
+
+    // Wait for render
+    await new Promise(resolve => setTimeout(() => resolve(null), 300));
+
+    if (viewShotRef.current) {
+      try {
+        const uri = await captureRef(viewShotRef.current, {
+          format: 'jpg',
+          quality: 1.0,
+          result: 'tmpfile',
+          width: 1080,
+          height: format === '1:1' ? 1080 : 1920,
+        });
+
+        if (!uri) throw new Error("URI generation failed");
+
+        const sharePath = uri.startsWith('file://') ? uri : `file://${uri}`;
+
+        // Generate deep link for context
+        const articleId = article.id || article.slug || 'unknown';
+        const webLink = `https://discover.vtrading.app/article/${articleId}`;
+
+        await Share.share({
+          url: sharePath,
+          title: article.title,
+          message: `📰 ${article.title}\n\n🔗 ${webLink}`, // Adding text for some platforms
+        });
+
+        analyticsService.logShare('article_detail', article.id.toString() || 'unknown', format === '1:1' ? 'image_square' : 'image_story');
+      } catch (e: any) {
+        if (e.message !== 'User did not share' && e.message !== 'CANCELLED') {
+          observabilityService.captureError(e, { context: 'ArticleDetailScreen.shareImage' });
+          showToast('Error al compartir imagen', 'error');
+        }
+      } finally {
+        setSharing(false);
+      }
+    }
+  };
+
+  const handleShareText = async () => {
+    setShareDialogVisible(false);
     try {
       // Generate deep link for the article
       const articleId = article.id || article.slug || 'unknown';
@@ -433,6 +502,13 @@ const ArticleDetailScreen = () => {
 
       {/* Header Content (Title fades in, Buttons always visible) */}
       <View style={[styles.headerOverlay, { top: insets.top, height: 64 }]}>
+        <LinearGradient
+          colors={[hexToRGBA(theme.colors.background, 0.8), 'transparent']}
+          style={[StyleSheet.absoluteFill, { top: -insets.top, height: 160 }]} // Extended height and covered status bar
+          start={{ x: 0, y: 0 }}
+          end={{ x: 0, y: 1 }}
+          pointerEvents="none"
+        />
 
         {/* Left Button - High Clarity */}
         <View style={styles.leftButtonContainer}>
@@ -475,7 +551,7 @@ const ArticleDetailScreen = () => {
         {/* Right Buttons - Minimalist Editorial */}
         <View style={styles.rightButtonsContainer}>
           <TouchableOpacity
-            onPress={handleShare}
+            onPress={handleShareButton}
             activeOpacity={0.7}
             style={[styles.headerIconButton, { backgroundColor: theme.colors.surface + 'CC' }]}
           >
@@ -764,6 +840,68 @@ const ArticleDetailScreen = () => {
 
         </View>
       </Animated.ScrollView>
+      <ShareableDetail
+        viewShotRef={viewShotRef}
+        title={article?.title || 'Artículo'}
+        type="ARTICLE"
+        image={article?.image}
+        description={article?.excerpt?.replace(/<[^>]*>/g, '').slice(0, 100) + '...'}
+        author={article?.author?.name}
+        aspectRatio={shareFormat}
+        items={[
+          // Hero Item (Current Article)
+          {
+            title: article?.title || 'Artículo',
+            image: article?.image,
+            date: article?.date ? new Date(article.date).toLocaleDateString() : (article?.time || ''),
+            author: article?.author?.name || 'VTrading'
+          },
+          // Related Items (List)
+          ...relatedPosts.slice(0, shareFormat === '16:9' ? 4 : 2).map(p => ({
+            title: p.title.replace(/&#8211;/g, '-').replace(/&#8217;/g, "'"),
+            image: p.image,
+            date: new Date(p.date).toLocaleDateString(),
+            author: p.author?.name || 'VTrading'
+          }))
+        ]}
+      />
+
+      <CustomDialog
+        visible={isShareDialogVisible}
+        onDismiss={() => setShareDialogVisible(false)}
+        title="Compartir Artículo"
+        showCancel={false}
+        confirmLabel="Cerrar"
+        onConfirm={() => setShareDialogVisible(false)}
+      >
+        <Text variant="bodyMedium" style={{ textAlign: 'center', marginBottom: 20, color: theme.colors.onSurfaceVariant }}>
+          Comparte este artículo con tus amigos
+        </Text>
+
+        <View style={{ gap: 12 }}>
+          <CustomButton
+            variant="primary"
+            label="Imagen cuadrada"
+            icon="view-grid-outline"
+            onPress={() => generateShareImage('1:1')}
+            fullWidth
+          />
+          <CustomButton
+            variant="secondary"
+            label="Imagen vertical"
+            icon="cellphone"
+            onPress={() => generateShareImage('16:9')}
+            fullWidth
+          />
+          <CustomButton
+            variant="outlined"
+            label="Solo texto/Enlace"
+            icon="link"
+            onPress={handleShareText}
+            fullWidth
+          />
+        </View>
+      </CustomDialog>
     </View>
   );
 };

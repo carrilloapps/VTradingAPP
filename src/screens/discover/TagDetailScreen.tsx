@@ -206,8 +206,13 @@ const TagDetailScreen = () => {
         type="TAG"
         count={tag?.count || 0}
         image={posts.length > 0 ? posts[0].image : undefined}
-        description={posts.slice(0, 3).map(p => p.title).join('\n')}
         aspectRatio={shareFormat}
+        items={posts.slice(0, 6).map(p => ({
+          title: p.title.replace(/&#8211;/g, '-').replace(/&#8217;/g, "'"),
+          image: p.image,
+          date: new Date(p.date).toLocaleDateString(),
+          author: p.author?.name || 'VTrading'
+        }))}
       />
 
       {loading && posts.length === 0 ? (
