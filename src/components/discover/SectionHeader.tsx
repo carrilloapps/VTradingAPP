@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Text, Button } from 'react-native-paper';
+import { Text, TouchableRipple, Icon } from 'react-native-paper';
 import { useAppTheme } from '../../theme/theme';
 
 interface SectionHeaderProps {
@@ -13,34 +13,38 @@ const SectionHeader = ({ title, showViewAll, onViewAll }: SectionHeaderProps) =>
     const theme = useAppTheme();
     return (
         <View style={styles.listHeader}>
-            <View style={styles.headerTitleGroup}>
-                <View style={[styles.sectionAccent, { backgroundColor: theme.colors.primary }]} />
-                <Text 
-                    variant="displaySmall" 
-                    style={[
-                        styles.sectionTitle, 
-                        { 
-                            color: theme.colors.onSurface,
-                            fontSize: 28, 
-                            fontWeight: '900',
-                            letterSpacing: -1.2,
-                            textTransform: 'uppercase'
-                        }
-                    ]}
-                >
-                    {title}
-                </Text>
-            </View>
+            <Text 
+                variant="headlineSmall" 
+                style={[
+                    styles.sectionTitle, 
+                    { 
+                        color: theme.colors.onSurface,
+                        fontWeight: '800',
+                    }
+                ]}
+            >
+                {title}
+            </Text>
+            
             {showViewAll && (
-                <Button 
-                    mode="elevated" 
-                    onPress={onViewAll}
-                    style={styles.viewAllButton}
-                    labelStyle={{ fontWeight: '900', letterSpacing: 0.5, fontSize: 11 }}
-                    contentStyle={{ height: 32 }}
+                <TouchableRipple 
+                    onPress={onViewAll} 
+                    borderless 
+                    style={{ borderRadius: 12 }}
                 >
-                    VER TODO
-                </Button>
+                    <View style={styles.actionRow}>
+                        <Text 
+                            variant="labelLarge" 
+                            style={{ 
+                                color: theme.colors.primary, 
+                                fontWeight: '700' 
+                            }}
+                        >
+                            Ver todo
+                        </Text>
+                        <Icon source="chevron-right" size={20} color={theme.colors.primary} />
+                    </View>
+                </TouchableRipple>
             )}
         </View>
     );
@@ -50,25 +54,20 @@ const styles = StyleSheet.create({
     listHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        alignItems: 'flex-end',
+        alignItems: 'center',
         paddingHorizontal: 20,
-        marginTop: 40, // Increased for a more "breathable" layout
-        marginBottom: 16,
-    },
-    headerTitleGroup: {
-        gap: 8,
-    },
-    sectionAccent: {
-        width: 32,
-        height: 4,
-        borderRadius: 2,
+        marginTop: 24,
+        marginBottom: 12,
     },
     sectionTitle: {
-        marginBottom: 0,
-        lineHeight: 32,
+        letterSpacing: -0.5,
     },
-    viewAllButton: {
-        borderRadius: 8,
+    actionRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 2,
+        paddingVertical: 4,
+        paddingLeft: 8,
     },
 });
 

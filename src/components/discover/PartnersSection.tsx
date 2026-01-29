@@ -30,7 +30,8 @@ const PartnersSection = () => {
                             { 
                                 backgroundColor: theme.colors.elevation.level2,
                                 borderWidth: 1,
-                                borderColor: theme.colors.outlineVariant
+                                borderColor: theme.colors.outlineVariant,
+                                borderRadius: theme.roundness * 4
                             }
                         ]} 
                         elevation={0}
@@ -79,7 +80,6 @@ const styles = StyleSheet.create({
         height: 90,
         alignItems: 'center',
         justifyContent: 'center',
-        borderRadius: 16,
     },
     dividerContainer: {
         paddingHorizontal: 20,

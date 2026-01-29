@@ -1,6 +1,6 @@
 import React, { useRef } from 'react';
 import { StyleSheet, Animated, Image, View } from 'react-native';
-import { Text, Surface, TouchableRipple, useTheme } from 'react-native-paper';
+import { Text, Surface, TouchableRipple } from 'react-native-paper';
 import { useAppTheme } from '../../theme/theme';
 
 interface CategoryTabProps {
@@ -11,8 +11,9 @@ interface CategoryTabProps {
     onPress: () => void;
 }
 
-const CategoryTab = ({ name, image, count, selected, onPress }: CategoryTabProps) => {
+const CategoryTab = ({ name, image, selected, onPress }: CategoryTabProps) => {
     const theme = useAppTheme();
+    const initials = name.substring(0, 2).toUpperCase();
     const scale = useRef(new Animated.Value(1)).current;
 
     const handlePressIn = () => {
@@ -31,15 +32,16 @@ const CategoryTab = ({ name, image, count, selected, onPress }: CategoryTabProps
 
     return (
         <Animated.View style={{ transform: [{ scale }] }}>
-            <Surface 
+            <Surface
                 style={[
-                    styles.container, 
-                    { 
-                        backgroundColor: selected ? theme.colors.primary : theme.colors.elevation.level1,
+                    styles.container,
+                    {
+                        borderRadius: theme.roundness * 4, // Consistent rounding
+                        backgroundColor: selected ? theme.colors.secondaryContainer : theme.colors.surface,
                         borderColor: selected ? theme.colors.primary : theme.colors.outlineVariant,
                     }
                 ]}
-                elevation={selected ? 2 : 0}
+                elevation={selected ? 2 : 0} // Slight elevation only when selected
             >
                 <TouchableRipple
                     onPress={onPress}
@@ -47,39 +49,41 @@ const CategoryTab = ({ name, image, count, selected, onPress }: CategoryTabProps
                     onPressOut={handlePressOut}
                     style={styles.touchable}
                     borderless
-                    rippleColor="rgba(255, 255, 255, 0.2)"
+                    rippleColor={theme.colors.primary}
                 >
                     <View style={styles.content}>
                         {image ? (
-                            <Image source={{ uri: image }} style={styles.avatar} />
+                            <Image 
+                                source={{ uri: image }} 
+                                style={styles.mediaItem}
+                                resizeMode="cover"
+                            />
                         ) : (
-                            <View style={[styles.avatarPlaceholder, { backgroundColor: selected ? 'rgba(255,255,255,0.2)' : theme.colors.surfaceVariant }]}>
-                                <Text style={[styles.avatarText, { color: selected ? 'white' : theme.colors.primary }]}>
-                                    {name.charAt(0).toUpperCase()}
+                            <View style={[
+                                styles.mediaItem, 
+                                styles.initialsContainer,
+                                { backgroundColor: selected ? theme.colors.primary : theme.colors.surfaceVariant }
+                            ]}>
+                                <Text style={[
+                                    styles.initialsText, 
+                                    { color: selected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant }
+                                ]}>
+                                    {initials}
                                 </Text>
                             </View>
                         )}
-                        
-                        <View style={styles.textContainer}>
-                            <Text 
-                                style={[
-                                    styles.label, 
-                                    { color: selected ? 'white' : theme.colors.onSurfaceVariant }
-                                ]}
-                            >
-                                {name}
-                            </Text>
-                            {count !== undefined && count > 0 && (
-                                <Text 
-                                    style={[
-                                        styles.count, 
-                                        { color: selected ? 'rgba(255,255,255,0.7)' : theme.colors.outline }
-                                    ]}
-                                >
-                                    {count}
-                                </Text>
-                            )}
-                        </View>
+                        <Text 
+                            variant="labelLarge"
+                            style={[
+                                styles.label, 
+                                { 
+                                    color: selected ? theme.colors.onSecondaryContainer : theme.colors.onSurface,
+                                    fontWeight: selected ? '700' : '500'
+                                }
+                            ]}
+                        >
+                            {name}
+                        </Text>
                     </View>
                 </TouchableRipple>
             </Surface>
@@ -89,11 +93,11 @@ const CategoryTab = ({ name, image, count, selected, onPress }: CategoryTabProps
 
 const styles = StyleSheet.create({
     container: {
-        borderRadius: 12,
-        marginRight: 10,
+        marginRight: 8,
         borderWidth: 1,
         overflow: 'hidden',
-        minWidth: 80,
+        minWidth: 90,
+        marginBottom: 4, // Space for shadow
     },
     touchable: {
         paddingHorizontal: 12,
@@ -102,37 +106,26 @@ const styles = StyleSheet.create({
     content: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
         gap: 8,
     },
-    avatar: {
+    mediaItem: {
         width: 24,
         height: 24,
         borderRadius: 12,
-        backgroundColor: 'rgba(0,0,0,0.05)',
     },
-    avatarPlaceholder: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
+    initialsContainer: {
         alignItems: 'center',
         justifyContent: 'center',
     },
-    avatarText: {
+    initialsText: {
         fontSize: 10,
-        fontWeight: '900',
-    },
-    textContainer: {
-        flexDirection: 'column',
+        fontWeight: 'bold',
+        letterSpacing: 0.5,
     },
     label: {
+        textTransform: 'capitalize',
         fontSize: 13,
-        fontWeight: '800',
-        letterSpacing: 0.2,
-    },
-    count: {
-        fontSize: 9,
-        fontWeight: '700',
-        marginTop: -1,
     },
 });
 

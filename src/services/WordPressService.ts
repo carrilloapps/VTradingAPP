@@ -13,8 +13,8 @@ export interface WordPressCategory {
     taxonomy: string;
     parent: number;
     yoast_head_json?: YoastSEO;
-    acf?: any;
-    meta?: any;
+    acf?: WordPressACF;
+    meta?: Record<string, any>;
 }
 
 export interface WordPressTag {
@@ -97,6 +97,12 @@ export interface WordPressFeaturedMedia {
     };
 }
 
+export interface WordPressACF {
+    image?: string | { url: string; alt?: string };
+    icon?: string | { url: string; alt?: string };
+    [key: string]: any;
+}
+
 export interface WordPressPost {
     id: number;
     date: string;
@@ -124,6 +130,7 @@ export interface WordPressPost {
     tags: number[];
     yoast_head_json?: YoastSEO;
     jetpack_featured_media_url?: string;
+    acf?: WordPressACF;
     _embedded?: {
         author?: WordPressAuthor[];
         'wp:featuredmedia'?: WordPressFeaturedMedia[];

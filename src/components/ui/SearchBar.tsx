@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TextInput, StyleSheet, TouchableOpacity, FlatList, Text } from 'react-native';
+import { View, TextInput, StyleSheet, TouchableOpacity, FlatList, Text, StyleProp, ViewStyle } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -10,6 +10,10 @@ interface SearchBarProps {
   onFilterPress?: () => void;
   suggestions?: string[];
   onSuggestionPress?: (suggestion: string) => void;
+  style?: StyleProp<ViewStyle>;
+  inputStyle?: StyleProp<ViewStyle>;
+  onSubmitEditing?: () => void;
+  autoFocus?: boolean;
 }
 
 const SearchBar: React.FC<SearchBarProps> = ({ 
@@ -18,7 +22,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
   onChangeText,
   onFilterPress,
   suggestions = [],
-  onSuggestionPress
+  onSuggestionPress,
+  style,
+  inputStyle,
+  onSubmitEditing,
+  autoFocus
 }) => {
   const theme = useTheme();
   const [isFocused, setIsFocused] = useState(false);
@@ -31,17 +39,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
       backgroundColor: theme.dark ? theme.colors.elevation.level2 : theme.colors.surface,
       borderColor: isFocused ? theme.colors.primary : theme.colors.outline,
       borderWidth: 1,
-      // Flat style
-      shadowColor: 'transparent',
-      shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: 0,
-      shadowRadius: 0,
-      elevation: 0,
     }
   ];
 
   return (
-    <View style={styles.wrapper}>
+    <View style={[styles.wrapper, style]}>
       <View style={containerStyle}>
         <MaterialCommunityIcons 
           name="magnify" 
@@ -49,7 +51,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           color={isFocused ? theme.colors.primary : theme.colors.onSurfaceVariant} 
         />
         <TextInput
-          style={[styles.input, { color: theme.colors.onSurface }]}
+          style={[styles.input, { color: theme.colors.onSurface }, inputStyle]}
           placeholder={placeholder}
           placeholderTextColor={theme.colors.onSurfaceDisabled}
           value={value}
@@ -57,15 +59,15 @@ const SearchBar: React.FC<SearchBarProps> = ({
           onFocus={() => setIsFocused(true)}
           onBlur={() => setTimeout(() => setIsFocused(false), 200)} // Delay to allow press
           accessibilityLabel="Campo de búsqueda"
-          accessibilityHint="Introduce texto para buscar"
           accessibilityRole="search"
+          onSubmitEditing={onSubmitEditing}
+          autoFocus={autoFocus}
         />
         {onFilterPress && (
           <TouchableOpacity 
             onPress={onFilterPress} 
             style={styles.filterButton}
             accessibilityLabel="Filtros"
-            accessibilityHint="Abrir opciones de filtrado"
             accessibilityRole="button"
           >
             <MaterialCommunityIcons name="tune" size={20} color={theme.colors.primary} />
@@ -78,7 +80,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
           styles.suggestionsContainer, 
           { 
             backgroundColor: theme.colors.elevation.level3,
-            borderColor: theme.colors.outline 
+            borderColor: theme.colors.outlineVariant 
           }
         ]}>
           <FlatList
@@ -87,7 +89,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             keyboardShouldPersistTaps="handled"
             renderItem={({ item }) => (
               <TouchableOpacity 
-                style={[styles.suggestionItem, { borderBottomColor: theme.colors.outline }]}
+                style={[styles.suggestionItem, { borderBottomColor: theme.colors.outlineVariant }]}
                 onPress={() => {
                   onSuggestionPress?.(item);
                   setIsFocused(false);
@@ -97,6 +99,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 <Text style={{ color: theme.colors.onSurface }}>{item}</Text>
               </TouchableOpacity>
             )}
+            style={{ borderRadius: 12 }}
           />
         </View>
       )}
@@ -111,15 +114,14 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 16,
-    paddingHorizontal: 16,
-    height: 44,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 48,
   },
   input: {
     flex: 1,
-    paddingHorizontal: 12,
+    paddingHorizontal: 10,
     fontSize: 15,
-    fontWeight: '500',
     paddingVertical: 0,
   },
   filterButton: {
@@ -127,26 +129,18 @@ const styles = StyleSheet.create({
   },
   suggestionsContainer: {
     position: 'absolute',
-    top: 50,
+    top: 52, // Just below search input
     left: 0,
     right: 0,
     borderRadius: 12,
-    elevation: 0,
-    shadowColor: 'transparent',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0,
-    shadowRadius: 0,
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
     maxHeight: 200,
     zIndex: 1001,
     borderWidth: 1,
-    borderColor: '#E0E0E0', // Or theme color if available, but StyleSheet doesn't have theme. Will use default outline color or similar.
-    // Since we can't access theme here easily without inline styles, I will rely on inline override if possible, 
-    // or just assume a safe default. But wait, I can't put theme in StyleSheet.
-    // I should check if I can move this to inline style or if it's already using theme somewhere.
-    // The component uses `theme` hook. I should move this styling to inline or `themeStyles` if I want to use theme colors.
-    // However, looking at the code, `suggestionsContainer` is used in:
-    // <View style={[styles.suggestionsContainer, { backgroundColor: theme.colors.elevation.level3 }]}>
-    // I can add borderColor there.
   },
   suggestionItem: {
     flexDirection: 'row',

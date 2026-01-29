@@ -26,24 +26,31 @@ const AdCard = ({ item }: AdCardProps) => {
         <Surface style={[styles.adCard, { width: cardWidth, borderRadius: theme.roundness * 4, backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.outlineVariant }]} elevation={0}>
             <ImageBackground source={{ uri: item.image }} style={styles.adBackground} imageStyle={{ borderRadius: theme.roundness * 4 }}>
                 <LinearGradient 
-                    colors={['rgba(0,0,0,0.1)', 'rgba(0,0,0,0.85)']} 
+                    colors={['rgba(0,0,0,0.2)', 'rgba(0,0,0,0.85)']} 
                     style={styles.adGradient}
                 >
-                    <View style={styles.adContent}>
-                        <View>
-                            <Text variant="titleLarge" style={styles.adTitle}>{item.title}</Text>
-                            <Text variant="bodyMedium" style={styles.adSubtitle}>{item.subtitle}</Text>
+                    {/* Diagonal Ribbon */}
+                    <View style={[styles.ribbonContainer]}>
+                        <View style={[styles.ribbon, { backgroundColor: theme.colors.warning }]}>
+                            <Text style={[styles.ribbonText, { color: theme.colors.onPrimary }]}>PROMO</Text>
                         </View>
+                    </View>
+
+                    <View style={styles.adContent}>
+                        <Text variant="headlineSmall" style={styles.adTitle} numberOfLines={2}>
+                            {item.title}
+                        </Text>
 
                         <Button 
                             mode="contained" 
-                            buttonColor={item.color}
-                            textColor="#fff"
+                            buttonColor={item.color || theme.colors.primary}
+                            textColor={theme.colors.onPrimary}
                             style={styles.adButton}
                             labelStyle={{ fontSize: 13, fontWeight: 'bold' }}
+                            compact
                             onPress={() => {}}
                         >
-                            {item.cta}
+                            {item.cta || 'Ver Más'}
                         </Button>
                     </View>
                 </LinearGradient>
@@ -54,7 +61,7 @@ const AdCard = ({ item }: AdCardProps) => {
 
 const styles = StyleSheet.create({
     adCard: {
-        height: 180,
+        height: 200, // Slightly taller for impact
         marginHorizontal: 20,
         overflow: 'hidden',
         marginTop: 8,
@@ -69,23 +76,40 @@ const styles = StyleSheet.create({
         padding: 20,
     },
     adContent: {
-        gap: 8,
+        gap: 12,
         alignItems: 'flex-start',
     },
     adTitle: {
         color: 'white',
-        fontWeight: '900',
-        textShadowColor: 'rgba(0,0,0,0.5)',
+        fontWeight: '800',
+        textShadowColor: 'rgba(0,0,0,0.75)',
         textShadowOffset: { width: 0, height: 1 },
-        textShadowRadius: 3,
-    },
-    adSubtitle: {
-        color: 'rgba(255,255,255,0.9)',
-        fontWeight: '500',
+        textShadowRadius: 4,
     },
     adButton: {
-        borderRadius: 20,
-        marginTop: 8,
+        paddingHorizontal: 8,
+    },
+    ribbonContainer: {
+        position: 'absolute',
+        top: 0,
+        right: 0,
+        overflow: 'hidden',
+        width: 100,
+        height: 100,
+        justifyContent: 'flex-start',
+        alignItems: 'flex-end',
+    },
+    ribbon: {
+        width: 150,
+        height: 30,
+        alignItems: 'center',
+        justifyContent: 'center',
+        transform: [{ rotate: '45deg' }, { translateX: 30 }, { translateY: -20 }],
+    },
+    ribbonText: {
+        fontSize: 10,
+        fontWeight: 'bold',
+        letterSpacing: 1,
     },
 });
 

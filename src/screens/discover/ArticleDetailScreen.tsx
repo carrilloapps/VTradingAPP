@@ -22,14 +22,21 @@ const BlockParagraph = ({ text, theme }: any) => (
 );
 
 const BlockHeading = ({ text, theme }: any) => (
-    <Text variant="titleLarge" style={[styles.heading, { color: theme.colors.primary }]}>{text}</Text>
+    <Text variant="titleLarge" style={[styles.heading, { color: theme.colors.primary, fontWeight: 'bold' }]}>{text}</Text>
 );
 
 const BlockQuote = ({ text, author, theme }: any) => (
-    <View style={[styles.quoteContainer, { borderLeftColor: theme.colors.primary, backgroundColor: theme.colors.elevation.level2 }]}>
+    <View style={[
+        styles.quoteContainer, 
+        { 
+            borderLeftColor: theme.colors.primary, 
+            backgroundColor: theme.colors.elevation.level2,
+            borderRadius: theme.roundness * 2
+        }
+    ]}>
         <MaterialCommunityIcons name="format-quote-open" size={32} color={theme.colors.primary} style={styles.quoteIcon} />
         <Text style={[styles.quoteText, { color: theme.colors.onSurface }]}>{text}</Text>
-        {author && <Text style={[styles.quoteAuthor, { color: theme.colors.outline }]}>— {author}</Text>}
+        {author && <Text variant="labelMedium" style={[styles.quoteAuthor, { color: theme.colors.outline }]}>— {author}</Text>}
     </View>
 );
 
@@ -37,11 +44,11 @@ const BlockImage = ({ url, caption, theme }: any) => (
     <View style={styles.imageBlock}>
         <Image 
           source={{ uri: url }} 
-          style={styles.contentImage} 
+          style={[styles.contentImage, { borderRadius: theme.roundness * 3, backgroundColor: theme.colors.surfaceVariant }]} 
           accessibilityRole="image"
           accessibilityLabel={caption || 'Imagen del artículo'}
         />
-        {caption && <Text style={[styles.imageCaption, { color: theme.colors.outline }]}>{caption}</Text>}
+        {caption && <Text variant="labelSmall" style={[styles.imageCaption, { color: theme.colors.outline, textAlign: 'center', marginTop: 8 }]}>{caption}</Text>}
     </View>
 );
 
@@ -49,8 +56,8 @@ const BlockList = ({ items, theme }: any) => (
     <View style={styles.listBlock}>
         {items.map((item: string, index: number) => (
             <View key={index} style={styles.listItem}>
-                <View style={[styles.bullet, { backgroundColor: theme.colors.primary }]} />
-                <Text style={[styles.listItemText, { color: theme.colors.onSurface }]}>{item}</Text>
+                <View style={[styles.bullet, { backgroundColor: theme.colors.primary, borderRadius: 2 }]} />
+                <Text variant="bodyMedium" style={[styles.listItemText, { color: theme.colors.onSurface }]}>{item}</Text>
             </View>
         ))}
     </View>
@@ -257,7 +264,7 @@ const ArticleDetailScreen = () => {
             <style>
               body { 
                 font-family: -apple-system, Roboto, sans-serif; 
-                font-size: 16px; 
+                font-size: 17px; 
                 line-height: 1.6; 
                 color: ${textColor}; 
                 background-color: transparent;
@@ -265,15 +272,17 @@ const ArticleDetailScreen = () => {
                 padding: 0;
               }
               h1, h2, h3 { color: ${textColor}; font-weight: bold; margin-top: 24px; margin-bottom: 12px; }
-              p { margin-bottom: 16px; }
-              a { color: ${linkColor}; text-decoration: none; }
-              img { max-width: 100%; height: auto; border-radius: 8px; margin: 16px 0; }
+              p { margin-bottom: 16px; font-size: 17px; }
+              a { color: ${linkColor}; text-decoration: none; font-weight: 600; }
+              img { max-width: 100%; height: auto; border-radius: ${theme.roundness * 3}px; margin: 16px 0; background-color: ${theme.colors.surfaceVariant}; }
               blockquote { 
                 border-left: 4px solid ${theme.colors.primary};
-                padding-left: 16px;
-                margin-left: 0;
+                padding: 4px 0 4px 16px;
+                margin: 20px 0;
                 font-style: italic;
                 color: ${theme.colors.onSurfaceVariant};
+                background-color: ${theme.colors.elevation.level1};
+                border-radius: ${theme.roundness}px;
               }
               ul, ol { padding-left: 20px; }
               li { margin-bottom: 8px; }
@@ -504,7 +513,7 @@ const ArticleDetailScreen = () => {
                     {article.categories.map((cat: any, idx: number) => (
                       <Chip 
                         key={idx}
-                        style={[styles.categoryBadge, { backgroundColor: theme.colors.primaryContainer, marginRight: 8 }]} 
+                        style={[styles.categoryBadge, { backgroundColor: theme.colors.primaryContainer, marginRight: 8, borderRadius: theme.roundness * 2 }]} 
                         textStyle={{ color: theme.colors.onPrimaryContainer, fontWeight: '700', fontSize: 10, letterSpacing: 0.5 }}
                         compact
                         onPress={() => navigation.navigate('CategoryDetail', { category: cat, slug: cat.slug })}
@@ -569,8 +578,16 @@ const ArticleDetailScreen = () => {
                 </View>
                 {/* Summary / Lead Paragraph Section */}
                 {article.seoDescription && (
-                    <View style={[styles.summaryBox, { marginTop: 16, backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outlineVariant }]}>
-                        <View style={[styles.summaryLabel, { backgroundColor: theme.colors.primary }]}>
+                    <View style={[
+                        styles.summaryBox, 
+                        { 
+                            marginTop: 16, 
+                            backgroundColor: theme.colors.elevation.level1, 
+                            borderColor: theme.colors.outlineVariant,
+                            borderRadius: theme.roundness * 4
+                        }
+                    ]}>
+                        <View style={[styles.summaryLabel, { backgroundColor: theme.colors.primary, borderRadius: theme.roundness }]}>
                             <Text variant="labelSmall" style={{ color: theme.colors.onPrimary, fontWeight: 'bold' }}>EN RESUMEN</Text>
                         </View>
                         <Text variant="bodyMedium" style={[styles.summaryText, { color: theme.colors.onSurfaceVariant }]}>
@@ -596,7 +613,7 @@ const ArticleDetailScreen = () => {
                             {article.tags.map((tag: any, idx: number) => (
                                 <Chip 
                                     key={idx} 
-                                    style={styles.tagChip} 
+                                    style={[styles.tagChip, { borderRadius: theme.roundness * 2 }]} 
                                     textStyle={{ fontSize: 12 }} 
                                     mode="outlined"
                                     onPress={() => navigation.navigate('TagDetail', { tag, slug: tag.slug })}
@@ -711,7 +728,6 @@ const styles = StyleSheet.create({
   summaryBox: {
       padding: 20,
       paddingTop: 24,
-      borderRadius: 16,
       borderWidth: 1,
       marginBottom: 24,
       position: 'relative',
@@ -722,7 +738,6 @@ const styles = StyleSheet.create({
       left: 16,
       paddingHorizontal: 8,
       paddingVertical: 2,
-      borderRadius: 4,
   },
   summaryText: {
       lineHeight: 22,
@@ -756,8 +771,6 @@ const styles = StyleSheet.create({
   contentContainer: {
       padding: 24,
       marginTop: -20,
-      borderTopLeftRadius: 24,
-      borderTopRightRadius: 24,
       backgroundColor: 'transparent',
   },
   title: {

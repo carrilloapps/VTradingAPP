@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, FlatList, ActivityIndicator, StatusBar } from 'react-native';
-import { Text, useTheme, Appbar, Surface, Searchbar } from 'react-native-paper';
+import { Text, useTheme, Appbar, Surface } from 'react-native-paper';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { wordPressService, FormattedPost, WordPressCategory } from '../../services/WordPressService';
 import { observabilityService } from '../../services/ObservabilityService';
 import ArticleCard from '../../components/discover/ArticleCard';
-import DiscoverErrorView from '../../components/discover/DiscoverErrorView';
 import DiscoverEmptyView from '../../components/discover/DiscoverEmptyView';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -56,7 +55,7 @@ const CategoryDetailScreen = () => {
       setPage(1);
       setHasMore(fetchedPosts.length === 10);
     } catch (error) {
-      console.error(error);
+       observabilityService.captureError(error, { context: 'CategoryDetailScreen.refresh' });
     } finally {
       setRefreshing(false);
     }
@@ -75,7 +74,7 @@ const CategoryDetailScreen = () => {
         setHasMore(false);
       }
     } catch (error) {
-      console.error(error);
+      observabilityService.captureError(error, { context: 'CategoryDetailScreen.loadMore' });
     }
   };
 
@@ -103,7 +102,7 @@ const CategoryDetailScreen = () => {
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar barStyle={theme.dark ? 'light-content' : 'dark-content'} />
-      <Appbar.Header style={{ backgroundColor: 'transparent' }}>
+      <Appbar.Header style={{ backgroundColor: theme.colors.background }}>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <Appbar.Content title={category?.name || 'Cargando...'} />
       </Appbar.Header>
@@ -111,16 +110,17 @@ const CategoryDetailScreen = () => {
       {loading && page === 1 ? (
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text style={{ marginTop: 16 }}>Buscando artículos...</Text>
+          <Text style={{ marginTop: 16, color: theme.colors.onBackground }}>Cargando artículos...</Text>
         </View>
       ) : (
         <FlatList
           data={posts}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
             <ArticleCard 
                 article={item} 
                 onPress={() => navigation.navigate('ArticleDetail', { article: item })}
+                variant="compact"
             />
           )}
           showsVerticalScrollIndicator={false}
@@ -134,7 +134,9 @@ const CategoryDetailScreen = () => {
             hasMore ? (
               <ActivityIndicator style={{ marginVertical: 20 }} color={theme.colors.primary} />
             ) : posts.length > 0 ? (
-              <Text style={{ textAlign: 'center', marginVertical: 32, opacity: 0.5 }}>Fin de los artículos</Text>
+              <Text style={{ textAlign: 'center', marginVertical: 32, opacity: 0.5, color: theme.colors.onSurface }}>
+                  Fin de los artículos
+              </Text>
             ) : null
           )}
           ListEmptyComponent={
@@ -166,16 +168,16 @@ const styles = StyleSheet.create({
   },
   title: {
     fontWeight: 'bold',
-    marginBottom: 12,
+    marginBottom: 8,
   },
   description: {
-    lineHeight: 22,
+    lineHeight: 20,
     marginBottom: 16,
   },
   statsContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingTop: 16,
+    paddingTop: 12,
     borderTopWidth: 1,
   },
   statItem: {

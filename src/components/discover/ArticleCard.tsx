@@ -69,24 +69,28 @@ const ArticleCard = React.memo(({ article, onPress, variant = 'compact' }: Artic
                 <Surface style={[
                     styles.container, 
                     isFeatured ? styles.featuredContainer : styles.compactContainer,
-                    { 
-                        backgroundColor: theme.colors.elevation.level1,
-                        borderColor: theme.colors.outlineVariant,
-                        borderWidth: 0.5,
+                    {
                         elevation: isFeatured ? 2 : 0,
+                        borderRadius: theme.roundness * 4,
                     }
                 ]} elevation={0}>
                     
                     {isFeatured && (
                         <View style={styles.imageWrapper}>
-                            <Image 
+                            <Image
                                 source={{ uri: article.image }} 
-                                style={styles.featuredImage} 
+                                style={[styles.featuredImage, { backgroundColor: theme.colors.surfaceVariant }]} 
                                 resizeMode="cover"
                             />
                             {article.categories && article.categories.length > 0 && (
-                                <Surface style={[styles.floatingCategory, { backgroundColor: theme.colors.primary }]}>
-                                    <Text style={styles.floatingCategoryText}>
+                                <Surface style={[
+                                    styles.floatingCategory, 
+                                    { 
+                                        backgroundColor: theme.colors.primary,
+                                        borderRadius: theme.roundness * 1.5 
+                                    }
+                                ]} elevation={2}>
+                                    <Text style={[styles.floatingCategoryText, { color: theme.colors.onPrimary }]}>
                                         {article.categories[0].name.toUpperCase()}
                                     </Text>
                                 </Surface>
@@ -98,18 +102,24 @@ const ArticleCard = React.memo(({ article, onPress, variant = 'compact' }: Artic
                         {!isFeatured && (
                             <View style={styles.compactHeader}>
                                 {article.categories && article.categories.length > 0 && (
-                                    <Text style={[styles.category, { color: theme.colors.primary }]}>
+                                    <Text variant="labelSmall" style={[styles.category, { color: theme.colors.primary }]}>
                                         {article.categories[0].name.toUpperCase()}
                                     </Text>
                                 )}
-                                <Text style={[styles.time, { color: theme.colors.outline }]}>{article.time}</Text>
+                                <Text variant="bodySmall" style={[styles.time, { color: theme.colors.onSurfaceVariant }]}>{article.time}</Text>
                             </View>
                         )}
                         
                         <View style={styles.titleContainer}>
-                            {isFeatured && (article.tags?.some(t => t.slug === 'trending') || article.tags?.some(t => t.slug === 'breaking')) && (
-                                <View style={[styles.badge, { backgroundColor: theme.colors.error }]}>
-                                    <Text style={styles.badgeText}>
+                             {isFeatured && (article.tags?.some(t => t.slug === 'trending') || article.tags?.some(t => t.slug === 'breaking')) && (
+                                <View style={[
+                                    styles.badge, 
+                                    { 
+                                        backgroundColor: theme.colors.error,
+                                        borderRadius: theme.roundness 
+                                    }
+                                ]}>
+                                    <Text style={[styles.badgeText, { color: theme.colors.onError }]}>
                                         {article.tags?.some(t => t.slug === 'breaking') ? 'BREAKING' : 'TRENDING'}
                                     </Text>
                                 </View>
@@ -145,22 +155,22 @@ const ArticleCard = React.memo(({ article, onPress, variant = 'compact' }: Artic
                                 <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '700' }}>
                                     {article.author?.name || article.source}
                                 </Text>
-                                <Text variant="labelSmall" style={{ color: theme.colors.outline, marginHorizontal: 4 }}>•</Text>
-                                <Text variant="labelSmall" style={{ color: theme.colors.outline }}>
+                                <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, marginHorizontal: 4 }}>•</Text>
+                                <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
                                     {article.readTime}
                                 </Text>
                             </View>
                             
                             {isFeatured && (
                                 <View style={styles.featuredTime}>
-                                    <Text variant="labelSmall" style={{ color: theme.colors.outline }}>{article.time}</Text>
+                                    <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>{article.time}</Text>
                                 </View>
                             )}
                         </View>
                     </View>
 
                     {!isFeatured && (
-                        <Image source={{ uri: article.image }} style={styles.compactImage} />
+                        <Image source={{ uri: article.image }} style={[styles.compactImage, { borderRadius: theme.roundness * 2 }]} />
                     )}
                 </Surface>
             </TouchableRipple>
@@ -180,7 +190,6 @@ const styles = StyleSheet.create({
         marginBottom: 32,
     },
     container: {
-        borderRadius: 16,
         overflow: 'hidden',
     },
     compactContainer: {
@@ -194,13 +203,10 @@ const styles = StyleSheet.create({
     featuredImage: {
         width: '100%',
         height: 200,
-        backgroundColor: '#eee',
     },
     compactImage: {
         width: 85,
         height: 85,
-        borderRadius: 12,
-        backgroundColor: '#eee',
         marginLeft: 12,
     },
     content: {
@@ -235,8 +241,6 @@ const styles = StyleSheet.create({
         lineHeight: 22,
     },
     featuredTitle: {
-        fontSize: 22,
-        lineHeight: 30,
         marginBottom: 10,
     },
     excerpt: {
@@ -278,7 +282,6 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-start',
         paddingHorizontal: 8,
         paddingVertical: 2,
-        borderRadius: 4,
         marginBottom: 8,
     },
     imageWrapper: {
@@ -292,16 +295,13 @@ const styles = StyleSheet.create({
         left: 12,
         paddingHorizontal: 10,
         paddingVertical: 4,
-        borderRadius: 6,
     },
     floatingCategoryText: {
-        color: 'white',
         fontSize: 10,
         fontWeight: '900',
         letterSpacing: 1,
     },
     badgeText: {
-        color: 'white',
         fontSize: 10,
         fontWeight: '900',
         letterSpacing: 1,
