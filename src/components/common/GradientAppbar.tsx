@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Appbar } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -12,19 +12,20 @@ interface GradientAppbarProps {
 
 const GradientAppbar: React.FC<GradientAppbarProps> = ({ title, onBack, onShare }) => {
     const insets = useSafeAreaInsets();
+    const HEADER_HEIGHT = 56;
 
     return (
         <LinearGradient
             colors={['rgba(0,0,0,0.7)', 'transparent']}
-            style={styles.appbarGradient}
+            style={[styles.appbarGradient, { height: insets.top + HEADER_HEIGHT }]}
         >
-            <Appbar.Header style={[styles.appbar, { paddingTop: insets.top }]} elevated={false} statusBarHeight={0}>
+            <View style={[styles.contentContainer, { marginTop: insets.top, height: HEADER_HEIGHT }]}>
                 <Appbar.BackAction onPress={onBack} color="#FFF" />
                 <Appbar.Content title={title || ''} titleStyle={styles.appbarTitle} />
                 {onShare && (
                     <Appbar.Action icon="share-variant" onPress={onShare} color="#FFF" />
                 )}
-            </Appbar.Header>
+            </View>
         </LinearGradient>
     );
 };
@@ -37,9 +38,10 @@ const styles = StyleSheet.create({
         right: 0,
         zIndex: 10,
     },
-    appbar: {
-        backgroundColor: 'transparent',
-        elevation: 0,
+    contentContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        width: '100%',
     },
     appbarTitle: {
         color: '#FFF',
