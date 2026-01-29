@@ -6,6 +6,7 @@ import ViewShot from 'react-native-view-shot';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../theme/theme';
 import XIcon from '../common/XIcon';
+import FacebookIcon from '../common/FacebookIcon';
 
 export interface ShareableItem {
     title: string;
@@ -119,6 +120,9 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
     const renderAuthorBlock = () => {
         if (!author) return null;
         
+        const socials = (typeof author.socials === 'object' && author.socials !== null) ? author.socials : {} as any;
+        const showSocials = !!author.socials;
+
         return (
             <View style={styles.authorRow}>
                 {author.avatar ? (
@@ -135,11 +139,14 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                     <Text style={[styles.authorName, { color: '#FFF' }]}>{author.name}</Text>
                     <View style={styles.authorMetaRow}>
                         {author.role && <Text style={[styles.authorLabel, { color: 'rgba(255,255,255,0.6)' }]}>{author.role}</Text>}
-                        {author.socials && (
+                        {showSocials && (
                             <View style={styles.socialIcons}>
-                                <XIcon size={20} color="rgba(255,255,255,0.6)" />
-                                <MaterialCommunityIcons name="instagram" size={22} color="rgba(255,255,255,0.6)" />
-                                <MaterialCommunityIcons name="linkedin" size={22} color="rgba(255,255,255,0.6)" />
+                                {socials.twitter && <XIcon size={20} color="rgba(255,255,255,0.6)" />}
+                                {socials.facebook && <FacebookIcon size={20} color="rgba(255,255,255,0.6)" />}
+                                {socials.instagram && <MaterialCommunityIcons name="instagram" size={22} color="rgba(255,255,255,0.6)" />}
+                                {socials.linkedin && <MaterialCommunityIcons name="linkedin" size={22} color="rgba(255,255,255,0.6)" />}
+                                {socials.youtube && <MaterialCommunityIcons name="youtube" size={22} color="rgba(255,255,255,0.6)" />}
+                                {socials.tiktok && <MaterialCommunityIcons name="music-note-eighth" size={22} color="rgba(255,255,255,0.6)" />}
                             </View>
                         )}
                     </View>
@@ -163,6 +170,13 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                                     <MaterialCommunityIcons name="image-off-outline" size={100} color="#333" />
                                 </View>
                             )}
+                            
+                            {/* Top Gradient Overlay for Logo Visibility */}
+                            <LinearGradient
+                                colors={['rgba(0,0,0,0.8)', 'transparent']}
+                                style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 160 }} 
+                            />
+
                             {/* Gradient Fade to Bottom */}
                             <LinearGradient
                                 colors={['transparent', 'rgba(18,18,18,0.2)', '#121212']}
@@ -194,10 +208,11 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                             <View>
                                 {/* Category Badge */}
                                 <View style={[styles.categoryBadge, { backgroundColor: getAccentColor() }]}>
-                                    <Text style={[styles.categoryBadgeText, { color: '#000' }]}>
+                                    <Text style={[styles.categoryBadgeText, { color: theme.colors.onPrimary }]}>
                                         {categoryName ? categoryName.toUpperCase() : 'ARTÍCULO'}
                                     </Text>
                                 </View>
+
 
                                 {/* Title */}
                                 <Text style={styles.modernTitle} numberOfLines={4}>

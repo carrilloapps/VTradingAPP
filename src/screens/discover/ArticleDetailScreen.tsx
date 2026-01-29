@@ -842,7 +842,7 @@ const ArticleDetailScreen = () => {
             name: article.author.name,
             avatar: article.author.avatar,
             role: article.date ? new Date(article.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : (article.time || ''),
-            socials: !!article.author.social
+            socials: article.author.social
         } : undefined}
         categoryName={article?.categories && article.categories.length > 0 ? article.categories[0].name : 'Artículo'}
         aspectRatio={shareFormat}
