@@ -133,11 +133,11 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
         const showSocials = !!author.socials;
 
         // Dynamic Sizes for Vertical Mode
-        const avatarSize = isVertical ? 140 : 90;
-        const nameSize = isVertical ? 48 : 32;
-        const roleSize = isVertical ? 34 : 24;
-        const socialIconSize = isVertical ? 54 : 22;
-        const socialGap = isVertical ? 24 : 12;
+        const avatarSize = isVertical ? 140 : 110;
+        const nameSize = isVertical ? 48 : 40;
+        const roleSize = isVertical ? 34 : 30;
+        const socialIconSize = isVertical ? 54 : 30;
+        const socialGap = isVertical ? 24 : 16;
 
         return (
             <View style={styles.authorRow}>
@@ -180,8 +180,8 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
             <View style={styles.hiddenTemplate} pointerEvents="none">
                 <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 1.0 }}>
                     <View style={containerStyle}>
-                        {/* Top Image Section (45%) */}
-                        <View style={{ height: '45%', width: '100%', overflow: 'hidden' }}>
+                        {/* Top Image Section (45% for Vertical, 55% for Square) */}
+                        <View style={{ height: isVertical ? '45%' : '50%', width: '100%', overflow: 'hidden' }}>
                             {image ? (
                                 <Image source={{ uri: image }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
                             ) : (
@@ -228,8 +228,8 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                         <View style={{ flex: 1, paddingHorizontal: 64, paddingBottom: 64, justifyContent: 'space-between' }}>
                             <View>
                                 {/* Category Badge */}
-                                <View style={[styles.categoryBadge, { backgroundColor: theme.colors.primaryContainer, borderRadius: 100, paddingHorizontal: isVertical ? 24 : 16, paddingVertical: isVertical ? 12 : 8 }]}>
-                                    <Text style={[styles.categoryBadgeText, { color: theme.colors.onPrimaryContainer, fontSize: isVertical ? 26 : 18 }]}>
+                                <View style={[styles.categoryBadge, { backgroundColor: theme.colors.primaryContainer, borderRadius: 100, paddingHorizontal: isVertical ? 24 : 20, paddingVertical: isVertical ? 12 : 10 }]}>
+                                    <Text style={[styles.categoryBadgeText, { color: theme.colors.onPrimaryContainer, fontSize: isVertical ? 26 : 22 }]}>
                                         {categoryName ? categoryName.toUpperCase() : 'ARTÍCULO'}
                                     </Text>
                                 </View>

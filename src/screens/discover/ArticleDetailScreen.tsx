@@ -277,8 +277,10 @@ const ArticleDetailScreen = () => {
         const sharePath = uri.startsWith('file://') ? uri : `file://${uri}`;
 
         // Generate deep link for context
-        const articleId = article.id || article.slug || 'unknown';
-        const webLink = `https://discover.vtrading.app/article/${articleId}`;
+        // Use slug if available, otherwise fallback to ID.
+        // Format matches DeepLinkService: discover.vtrading.app/{slug}
+        const slug = article.slug || article.id || 'unknown';
+        const webLink = `https://discover.vtrading.app/${slug}`;
 
         await Share.open({
           url: sharePath,

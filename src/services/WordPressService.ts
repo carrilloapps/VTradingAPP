@@ -146,6 +146,7 @@ export interface WordPressPost {
 
 export interface FormattedPost {
     id: string;
+    slug: string;
     title: string;
     description: string;
     source: string;
@@ -906,6 +907,7 @@ class WordPressService {
 
         return {
             id: String(post.id),
+            slug: post.slug,
             title: stripHtml(post.title.rendered),
             description: stripHtml(post.excerpt.rendered).slice(0, 150) + '...',
             source: 'VTrading',
