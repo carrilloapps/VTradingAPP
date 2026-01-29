@@ -36,9 +36,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const containerStyle = [
     styles.container,
     { 
-      backgroundColor: theme.dark ? theme.colors.elevation.level2 : theme.colors.surface,
-      borderColor: isFocused ? theme.colors.primary : theme.colors.outline,
-      borderWidth: 1,
+      backgroundColor: theme.dark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.95)',
+      borderColor: isFocused ? theme.colors.primary : 'transparent',
+      borderWidth: isFocused ? 2 : 0,
     }
   ];
 
@@ -60,9 +60,20 @@ const SearchBar: React.FC<SearchBarProps> = ({
           onBlur={() => setTimeout(() => setIsFocused(false), 200)} // Delay to allow press
           accessibilityLabel="Campo de búsqueda"
           accessibilityRole="search"
+          accessibilityHint="Introduce texto para buscar"
           onSubmitEditing={onSubmitEditing}
           autoFocus={autoFocus}
         />
+        {value && value.length > 0 && (
+          <TouchableOpacity 
+            onPress={() => onChangeText?.('')} 
+            style={styles.clearButton}
+            accessibilityLabel="Limpiar búsqueda"
+            accessibilityRole="button"
+          >
+            <MaterialCommunityIcons name="close-circle" size={18} color={theme.colors.onSurfaceVariant} />
+          </TouchableOpacity>
+        )}
         {onFilterPress && (
           <TouchableOpacity 
             onPress={onFilterPress} 
@@ -114,15 +125,24 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    height: 48,
+    borderRadius: 16,
+    paddingHorizontal: 12, // Reduced from 14
+    height: 40, // Reduced from 50 to match UnifiedHeader icons (40px)
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
   },
   input: {
     flex: 1,
     paddingHorizontal: 10,
-    fontSize: 15,
+    fontSize: 14, // Reduced from 15
     paddingVertical: 0,
+  },
+  clearButton: {
+    padding: 4,
+    marginRight: 4,
   },
   filterButton: {
     padding: 4,

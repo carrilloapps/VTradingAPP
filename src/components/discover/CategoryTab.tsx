@@ -1,7 +1,9 @@
 import React, { useRef } from 'react';
 import { StyleSheet, Animated, Image, View } from 'react-native';
 import { Text, Surface, TouchableRipple } from 'react-native-paper';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../theme/theme';
+import { getCategoryIcon } from '../../utils/categoryIcons';
 
 interface CategoryTabProps {
     name: string;
@@ -13,12 +15,11 @@ interface CategoryTabProps {
 
 const CategoryTab = ({ name, image, selected, onPress }: CategoryTabProps) => {
     const theme = useAppTheme();
-    const initials = name.substring(0, 2).toUpperCase();
     const scale = useRef(new Animated.Value(1)).current;
 
     const handlePressIn = () => {
         Animated.spring(scale, {
-            toValue: 0.95,
+            toValue: 0.96,
             useNativeDriver: true,
         }).start();
     };
@@ -26,82 +27,102 @@ const CategoryTab = ({ name, image, selected, onPress }: CategoryTabProps) => {
     const handlePressOut = () => {
         Animated.spring(scale, {
             toValue: 1,
+            friction: 3,
             useNativeDriver: true,
         }).start();
     };
 
     return (
         <Animated.View style={{ transform: [{ scale }] }}>
-            <Surface
-                style={[
-                    styles.container,
-                    {
-                        borderRadius: theme.roundness * 4, // Consistent rounding
-                        backgroundColor: selected ? theme.colors.secondaryContainer : theme.colors.surface,
-                        borderColor: selected ? theme.colors.primary : theme.colors.outlineVariant,
-                    }
-                ]}
-                elevation={selected ? 2 : 0} // Slight elevation only when selected
+            <TouchableRipple 
+                onPress={onPress}
+                onPressIn={handlePressIn}
+                onPressOut={handlePressOut}
+                style={{ borderRadius: theme.roundness * 6 }}
+                borderless
+                rippleColor={theme.colors.primary}
+                accessibilityRole="button"
+                accessibilityLabel={`Categoría ${name}`}
+                accessibilityState={{ selected }}
             >
-                <TouchableRipple
-                    onPress={onPress}
-                    onPressIn={handlePressIn}
-                    onPressOut={handlePressOut}
-                    style={styles.touchable}
-                    borderless
-                    rippleColor={theme.colors.primary}
+                <Surface
+                    style={[
+                        styles.container,
+                        {
+                            borderRadius: theme.roundness * 6,
+                            backgroundColor: selected 
+                                ? theme.colors.primaryContainer 
+                                : theme.colors.elevation.level1,
+                            borderColor: selected 
+                                ? theme.colors.primary 
+                                : theme.colors.outline,
+                        }
+                    ]}
+                    elevation={0}
                 >
                     <View style={styles.content}>
+                        {/* Icon Container */}
                         {image ? (
                             <Image 
                                 source={{ uri: image }} 
-                                style={styles.mediaItem}
+                                style={styles.iconImage}
                                 resizeMode="cover"
                             />
                         ) : (
                             <View style={[
-                                styles.mediaItem, 
-                                styles.initialsContainer,
-                                { backgroundColor: selected ? theme.colors.primary : theme.colors.surfaceVariant }
+                                styles.iconContainer,
+                                { 
+                                    backgroundColor: selected 
+                                        ? theme.colors.primary 
+                                        : theme.colors.surfaceVariant,
+                                    borderRadius: theme.roundness * 3,
+                                }
                             ]}>
-                                <Text style={[
-                                    styles.initialsText, 
-                                    { color: selected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant }
-                                ]}>
-                                    {initials}
-                                </Text>
+                                <MaterialCommunityIcons 
+                                    name={getCategoryIcon(name)}
+                                    size={18}
+                                    color={selected 
+                                        ? theme.colors.onPrimary 
+                                        : theme.colors.onSurfaceVariant}
+                                />
                             </View>
                         )}
+                        
+                        {/* Label */}
                         <Text 
-                            variant="labelLarge"
+                            variant="labelMedium"
                             style={[
                                 styles.label, 
                                 { 
-                                    color: selected ? theme.colors.onSecondaryContainer : theme.colors.onSurface,
-                                    fontWeight: selected ? '700' : '500'
+                                    color: selected 
+                                        ? theme.colors.onPrimaryContainer 
+                                        : theme.colors.onSurface,
                                 }
                             ]}
+                            numberOfLines={1}
                         >
                             {name}
                         </Text>
                     </View>
-                </TouchableRipple>
-            </Surface>
+                </Surface>
+            </TouchableRipple>
         </Animated.View>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
-        marginRight: 8,
         borderWidth: 1,
-        overflow: 'hidden',
-        minWidth: 90,
-        marginBottom: 4, // Space for shadow
-    },
-    touchable: {
         paddingHorizontal: 12,
         paddingVertical: 8,
+        minHeight: 44,
+        minWidth: 100,
+        // Professional shadow
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 2,
     },
     content: {
         flexDirection: 'row',
@@ -109,24 +130,24 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         gap: 8,
     },
-    mediaItem: {
-        width: 24,
-        height: 24,
-        borderRadius: 12,
-    },
-    initialsContainer: {
+    iconContainer: {
+        width: 28,
+        height: 28,
         alignItems: 'center',
         justifyContent: 'center',
     },
-    initialsText: {
-        fontSize: 10,
-        fontWeight: 'bold',
-        letterSpacing: 0.5,
+    iconImage: {
+        width: 28,
+        height: 28,
+        borderRadius: 14,
     },
     label: {
         textTransform: 'capitalize',
         fontSize: 13,
+        fontWeight: '600',
+        letterSpacing: 0.1,
     },
 });
 
 export default React.memo(CategoryTab);
+

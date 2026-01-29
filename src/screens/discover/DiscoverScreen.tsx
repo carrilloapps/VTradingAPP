@@ -9,7 +9,7 @@ import DiscoverSkeleton from '../../components/discover/DiscoverSkeleton';
 import DiscoverErrorView from '../../components/discover/DiscoverErrorView';
 import ArticleCard from '../../components/discover/ArticleCard';
 import SectionHeader from '../../components/discover/SectionHeader';
-import CategoryTab from '../../components/discover/CategoryTab';
+import CategoryTabList from '../../components/discover/CategoryTabList';
 import AdCard from '../../components/discover/AdCard';
 import PartnersSection from '../../components/discover/PartnersSection';
 import FeaturedCarousel from '../../components/discover/FeaturedCarousel';
@@ -205,9 +205,12 @@ const DiscoverScreen = () => {
   };
 
   const handleCategorySelect = async (categoryId: number | undefined) => {
-    setSelectedCategory(categoryId);
     try {
-      const fetchedPosts = await wordPressService.getPosts(1, 10, categoryId);
+      // Toggle behavior: if clicking the same category, deselect it
+      const newCategoryId = categoryId === selectedCategory ? undefined : categoryId;
+      
+      setSelectedCategory(newCategoryId);
+      const fetchedPosts = await wordPressService.getPosts(1, 10, newCategoryId);
       setPosts(fetchedPosts);
     } catch (err) {
       showToast('Error al filtrar', 'error');
@@ -261,19 +264,11 @@ const DiscoverScreen = () => {
 
       {/* Categories */}
       <Surface style={[styles.stickyCategoryBar, { backgroundColor: theme.colors.background, borderBottomColor: theme.colors.outlineVariant }]} elevation={0}>
-        <View style={styles.categoriesGrid}>
-            {displayCategories.map(cat => (
-                <View key={cat.id} style={styles.categoryWrapper}>
-                    <CategoryTab 
-                        name={cat.name}
-                        image={cat.image}
-                        count={cat.count}
-                        selected={selectedCategory === cat.id}
-                        onPress={() => handleCategorySelect(cat.id)}
-                    />
-                </View>
-            ))}
-        </View>
+        <CategoryTabList 
+          categories={displayCategories}
+          selectedCategory={selectedCategory}
+          onCategorySelect={handleCategorySelect}
+        />
       </Surface>
 
       {/* Section Header */}

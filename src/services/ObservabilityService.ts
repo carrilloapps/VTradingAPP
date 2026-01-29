@@ -11,6 +11,14 @@ class ObservabilityService {
     // Log en consola siempre para desarrollo y depuración local
     console.error('[Observability] Error caught:', error);
 
+    if (__DEV__) {
+      console.error('[Observability] Error caught:', error);
+      if (context) {
+        console.error('[Observability] Context:', context);
+      }
+      return;
+    }
+
     // Filtro para ignorar errores de conectividad o plataforma (ya manejados o irrelevantes)
     const errorMsg = String(error?.message || error || '').toLowerCase();
     const isIgnoredError = errorMsg.includes('network request failed') ||

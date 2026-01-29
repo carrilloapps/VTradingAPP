@@ -317,17 +317,47 @@ class WordPressService {
     }
 
     /**
+     * Sanitize search query to prevent WordPress API errors
+     * Removes special characters that cause 400 errors and normalizes whitespace
+     * Preserves accented characters (á, é, í, ó, ú, ñ, etc.)
+     * @param query Raw search query
+     * @returns Sanitized query string
+     */
+    private sanitizeSearchQuery(query: string): string {
+        if (!query) return '';
+
+        const sanitized = query
+            .trim()
+            // Remove problematic characters that cause WordPress REST API 400 errors
+            // Note: We keep accented characters (á, é, í, ó, ú, ñ) as they're valid in Spanish
+            .replace(/[<>{}[\]\\]/g, '')
+            // Normalize multiple spaces to single space
+            .replace(/\s+/g, ' ')
+            // Remove leading/trailing whitespace again after replacements
+            .trim();
+
+        return sanitized;
+    }
+
+    /**
      * Search posts by keyword
      * @param query Search query
      * @param page Page number
      * @param perPage Posts per page
      */
     async searchPosts(query: string, page = 1, perPage = 10): Promise<FormattedPost[]> {
-        if (!query || !query.trim()) return [];
+        // Sanitize the search query
+        const sanitizedQuery = this.sanitizeSearchQuery(query);
+
+        // Validate minimum length (2 characters minimum for WordPress search)
+        if (!sanitizedQuery || sanitizedQuery.length < 2) {
+            return [];
+        }
+
         try {
             const posts = await this.client.get<WordPressPost[]>('posts', {
                 params: {
-                    search: query,
+                    search: sanitizedQuery,
                     page,
                     per_page: perPage,
                     _embed: true,
@@ -338,8 +368,76 @@ class WordPressService {
 
             return posts.map((post) => this.formatPost(post));
         } catch (error) {
-            observabilityService.captureError(error, { context: 'WordPressService.searchPosts' });
-            return [];
+            observabilityService.captureError(error, {
+                context: 'WordPressService.searchPosts',
+                details: {
+                    originalQuery: query,
+                    sanitizedQuery,
+                    page,
+                    perPage
+                }
+            });
+            throw error; // Re-throw to allow proper error handling in UI
+        }
+    }
+
+    /**
+     * Get posts by tag ID
+     * @param tagId Tag ID to filter by
+     * @param page Page number
+     * @param perPage Posts per page
+     */
+    async getPostsByTag(tagId: number, page = 1, perPage = 10): Promise<FormattedPost[]> {
+        try {
+            const posts = await this.client.get<WordPressPost[]>('posts', {
+                params: {
+                    tags: tagId, // Filter by tag ID
+                    page,
+                    per_page: perPage,
+                    _embed: true,
+                },
+                useCache: false, // Disable cache for debugging
+                cacheTTL: 5 * 60 * 1000,
+            });
+
+            return posts.map((post) => this.formatPost(post));
+        } catch (error) {
+            console.error('[WordPressService] getPostsByTag ERROR:', error);
+            observabilityService.captureError(error, {
+                context: 'WordPressService.getPostsByTag',
+                details: { tagId, page, perPage }
+            });
+            throw error;
+        }
+    }
+
+    /**
+     * Get posts by category ID
+     * @param categoryId Category ID to filter by
+     * @param page Page number
+     * @param perPage Posts per page
+     */
+    async getPostsByCategory(categoryId: number, page = 1, perPage = 10): Promise<FormattedPost[]> {
+        try {
+            const posts = await this.client.get<WordPressPost[]>('posts', {
+                params: {
+                    categories: categoryId, // Filter by category ID
+                    page,
+                    per_page: perPage,
+                    _embed: true,
+                },
+                useCache: false, // Disable cache for debugging
+                cacheTTL: 5 * 60 * 1000,
+            });
+
+            return posts.map((post) => this.formatPost(post));
+        } catch (error) {
+            console.error('[WordPressService] getPostsByCategory ERROR:', error);
+            observabilityService.captureError(error, {
+                context: 'WordPressService.getPostsByCategory',
+                details: { categoryId, page, perPage }
+            });
+            throw error;
         }
     }
 

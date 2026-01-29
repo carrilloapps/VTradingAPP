@@ -393,7 +393,7 @@ const AppNavigator = () => {
                 component={ArticleDetailScreen} 
                 options={{ 
                   headerShown: false, 
-                  animation: 'slide_from_right' 
+                  animation: 'default' 
                 }} 
               />
               <RootStack.Screen 
@@ -401,7 +401,7 @@ const AppNavigator = () => {
                 component={CategoryDetailScreen} 
                 options={{ 
                   headerShown: false, 
-                  animation: 'slide_from_right' 
+                  animation: 'default' 
                 }} 
               />
               <RootStack.Screen 
@@ -409,7 +409,7 @@ const AppNavigator = () => {
                 component={TagDetailScreen} 
                 options={{ 
                   headerShown: false, 
-                  animation: 'slide_from_right' 
+                  animation: 'default' 
                 }} 
               />
               <RootStack.Screen 
@@ -417,7 +417,7 @@ const AppNavigator = () => {
                 component={AllArticlesScreen} 
                 options={{ 
                   headerShown: false, 
-                  animation: 'slide_from_right' 
+                  animation: 'default' 
                 }} 
               />
               <RootStack.Screen 
@@ -425,7 +425,7 @@ const AppNavigator = () => {
                 component={SearchResultsScreen} 
                 options={{ 
                   headerShown: false, 
-                  animation: 'slide_from_bottom' 
+                  animation: 'default' 
                 }} 
               />
             </>

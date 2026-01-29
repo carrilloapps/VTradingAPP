@@ -206,6 +206,49 @@ describe('WordPressService', () => {
                 cacheTTL: 5 * 60 * 1000
             });
         });
+
+        it('should return empty array for queries shorter than 2 characters', async () => {
+            const result = await wordPressService.searchPosts('a');
+            expect(result).toEqual([]);
+            expect(mockApiClient.get).not.toHaveBeenCalled();
+        });
+
+        it('should return empty array for empty query', async () => {
+            const result = await wordPressService.searchPosts('');
+            expect(result).toEqual([]);
+            expect(mockApiClient.get).not.toHaveBeenCalled();
+        });
+
+        it('should sanitize special characters from query', async () => {
+            mockApiClient.get.mockResolvedValue([]);
+
+            await wordPressService.searchPosts('hello<world>');
+
+            expect(mockApiClient.get).toHaveBeenCalledWith('posts', expect.objectContaining({
+                params: expect.objectContaining({
+                    search: 'helloworld' // Special chars removed
+                })
+            }));
+        });
+
+        it('should normalize whitespace in query', async () => {
+            mockApiClient.get.mockResolvedValue([]);
+
+            await wordPressService.searchPosts('  multiple   spaces  ');
+
+            expect(mockApiClient.get).toHaveBeenCalledWith('posts', expect.objectContaining({
+                params: expect.objectContaining({
+                    search: 'multiple spaces' // Single spaces, trimmed
+                })
+            }));
+        });
+
+        it('should throw error on API failure instead of returning empty array', async () => {
+            const error = new Error('API Error');
+            mockApiClient.get.mockRejectedValue(error);
+
+            await expect(wordPressService.searchPosts('test')).rejects.toThrow('API Error');
+        });
     });
 
     describe('getCategories', () => {

@@ -66,6 +66,34 @@ describe('SearchBar', () => {
     expect(mockOnSuggestionPress).toHaveBeenCalledWith('Suggestion 1');
   });
 
+  it('shows clear button when value is present', () => {
+    const mockOnChange = jest.fn();
+    const { getByLabelText } = render(
+      <SearchBar value="test" onChangeText={mockOnChange} />
+    );
+
+    const clearButton = getByLabelText('Limpiar búsqueda');
+    expect(clearButton).toBeTruthy();
+  });
+
+  it('calls onChangeText with empty string when clear button is pressed', () => {
+    const mockOnChange = jest.fn();
+    const { getByLabelText } = render(
+      <SearchBar value="test" onChangeText={mockOnChange} />
+    );
+
+    fireEvent.press(getByLabelText('Limpiar búsqueda'));
+    expect(mockOnChange).toHaveBeenCalledWith('');
+  });
+
+  it('does not show clear button when value is empty', () => {
+    const { queryByLabelText } = render(
+      <SearchBar value="" />
+    );
+
+    expect(queryByLabelText('Limpiar búsqueda')).toBeNull();
+  });
+
   it('has correct accessibility attributes', () => {
     const { getByLabelText } = render(<SearchBar />);
     const input = getByLabelText('Campo de búsqueda');
