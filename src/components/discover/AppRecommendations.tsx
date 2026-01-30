@@ -1,49 +1,182 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import AppCard from './AppCard';
-
-export interface RecommendedApp {
-  id: number;
-  name: string;
-  description: string;
-  icon: string;
-  url: string;
-  color: string;
-}
+import React, { useEffect, useMemo, useState } from 'react';
+import { DimensionValue, Platform, StyleSheet, View, ViewStyle } from 'react-native';
+import AppCard, { RecommendedApp } from './AppCard';
+import AppRecommendationsSkeleton from './AppRecommendationsSkeleton';
+import { remoteConfigService } from '../../services/firebase/RemoteConfigService';
+import { observabilityService } from '../../services/ObservabilityService';
 
 interface AppRecommendationsProps {
   apps?: RecommendedApp[];
   columns?: number;
 }
 
-const DEFAULT_APPS: RecommendedApp[] = [
-  {
-      id: 1, name: 'TradingView', icon: 'chart-line', color: '#fff',
-      description: '',
-      url: ''
-  },
-  {
-      id: 2, name: 'MetaMask', icon: 'wallet', color: '#F6851B',
-      description: '',
-      url: ''
-  },
-  {
-      id: 3, name: 'Binance', icon: 'bitcoin', color: '#F0B90B',
-      description: '',
-      url: ''
-  },
-  {
-      id: 4, name: 'CoinGecko', icon: 'trending-up', color: '#8DC647',
-      description: '',
-      url: ''
-  },
-];
+type SupportedPlatform = 'android' | 'ios' | 'web' | 'all';
 
-const AppRecommendations = ({ apps = DEFAULT_APPS, columns = 2 }: AppRecommendationsProps) => {
+interface RemoteConfigRecommendation {
+  id?: string;
+  title?: string;
+  description?: string;
+  logo?: string;
+  icon?: string;
+  color?: string;
+  url?: string;
+  androidUrl?: string;
+  iosUrl?: string;
+  webUrl?: string;
+  os?: SupportedPlatform[];
+  useTint?: boolean;
+}
+
+interface AppRecommendationsRemoteConfig {
+  apps?: RemoteConfigRecommendation[];
+}
+
+const DEFAULT_COLUMNS = 4;
+
+const slugify = (value: string, fallback: string): string => {
+  const normalized = value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  return normalized || fallback;
+};
+
+const isPlatformSupported = (platforms?: SupportedPlatform[]): boolean => {
+  if (!platforms || platforms.length === 0) {
+    return true;
+  }
+
+  const current = Platform.OS as SupportedPlatform;
+  const normalized = platforms.map((platform) => platform.toLowerCase() as SupportedPlatform);
+  return normalized.includes('all') || normalized.includes(current);
+};
+
+const resolveUrl = (recommendation: RemoteConfigRecommendation): string | undefined => {
+  const urls = [
+    recommendation.androidUrl,
+    recommendation.iosUrl,
+    recommendation.webUrl,
+    recommendation.url,
+  ];
+
+  const platformUrl = Platform.select<string | undefined>({
+    android: recommendation.androidUrl || recommendation.url,
+    ios: recommendation.iosUrl || recommendation.url,
+    default: recommendation.webUrl || recommendation.url,
+  });
+
+  const resolved = platformUrl || urls.find((candidate) => !!candidate);
+  return resolved?.trim() || undefined;
+};
+
+const mapRemoteRecommendation = (recommendation: RemoteConfigRecommendation, index: number): RecommendedApp | null => {
+  if (!recommendation?.title) {
+    return null;
+  }
+
+  if (!isPlatformSupported(recommendation.os)) {
+    return null;
+  }
+
+  const idBase = recommendation.id || recommendation.title;
+  const generatedId = slugify(idBase, `recommended-app-${index}`);
+
+  return {
+    id: generatedId,
+    name: recommendation.title.trim(),
+    description: recommendation.description?.trim(),
+    icon: recommendation.icon?.trim() || undefined,
+    color: recommendation.color?.trim() || undefined,
+    url: resolveUrl(recommendation),
+    logoUri: recommendation.logo?.trim() || undefined,
+    useTint: recommendation.useTint ?? false,
+  };
+};
+
+const normalizeRemoteConfig = (config: AppRecommendationsRemoteConfig | null | undefined): RecommendedApp[] => {
+  if (!config || !Array.isArray(config.apps)) {
+    return [];
+  }
+
+  return config.apps
+    .map((recommendation, index) => mapRemoteRecommendation(recommendation, index))
+    .filter((recommendation): recommendation is RecommendedApp => recommendation !== null);
+};
+
+const AppRecommendations: React.FC<AppRecommendationsProps> = ({ apps: providedApps, columns = DEFAULT_COLUMNS }) => {
+  const [recommendations, setRecommendations] = useState<RecommendedApp[]>(providedApps ?? []);
+  const [isLoading, setIsLoading] = useState<boolean>(!providedApps);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (providedApps) {
+      setRecommendations(providedApps);
+      setIsLoading(false);
+    } else {
+      setIsLoading(true);
+      setRecommendations([]);
+
+      const loadRecommendations = async () => {
+        try {
+          const initialConfig = remoteConfigService.getJson<AppRecommendationsRemoteConfig>('app_recommendations');
+          let normalized = normalizeRemoteConfig(initialConfig);
+
+          if (normalized.length === 0) {
+            const fetched = await remoteConfigService.fetchAndActivate();
+            if (fetched) {
+              const refreshedConfig = remoteConfigService.getJson<AppRecommendationsRemoteConfig>('app_recommendations');
+              normalized = normalizeRemoteConfig(refreshedConfig);
+            }
+          }
+
+          await Promise.resolve();
+
+          if (isMounted) {
+            setRecommendations(normalized);
+            setIsLoading(false);
+          }
+        } catch (error) {
+          observabilityService.captureError(error, {
+            context: 'AppRecommendations.loadRecommendations',
+          });
+
+          await Promise.resolve();
+
+          if (isMounted) {
+            setRecommendations([]);
+            setIsLoading(false);
+          }
+        }
+      };
+
+      loadRecommendations();
+    }
+
+    return () => {
+      isMounted = false;
+    };
+  }, [providedApps]);
+
+  const effectiveColumns = useMemo(() => Math.max(1, Math.floor(columns)), [columns]);
+  const columnStyle = useMemo<ViewStyle>(() => {
+    const columnWidth = `${100 / effectiveColumns}%` as DimensionValue;
+    return { width: columnWidth };
+  }, [effectiveColumns]);
+
+  if (isLoading) {
+    return <AppRecommendationsSkeleton columns={columns} />;
+  }
+
+  if (recommendations.length === 0) {
+    return null;
+  }
+
   return (
-    <View style={styles.container}>
-      {apps.map((app) => (
-        <View key={app.id} style={styles.cardWrapper}>
+    <View style={styles.container} testID="app-recommendations-container">
+      {recommendations.map((app) => (
+        <View key={app.id} style={[styles.cardWrapper, columnStyle]}>
           <AppCard app={app} />
         </View>
       ))}
@@ -55,13 +188,12 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8, // Reduced from 12 to fit 4 cards
+    gap: 8,
     paddingHorizontal: 12,
   },
   cardWrapper: {
-    flexBasis: '23%', // 4 columns: 4 * 23% = 92% + gaps = ~100%
-    flexGrow: 0,
-    flexShrink: 0,
+    paddingHorizontal: 4,
+    marginBottom: 12,
   },
 });
 
