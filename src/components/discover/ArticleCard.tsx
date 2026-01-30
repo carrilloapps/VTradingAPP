@@ -61,7 +61,7 @@ const ArticleCard = React.memo(({ article, onPress, variant = 'compact' }: Artic
                 onPressOut={handlePressOut}
                 style={[
                     styles.touchable,
-                    { borderRadius: theme.roundness * 4 },
+                    { borderRadius: theme.roundness * 5 },
                     isFeatured ? styles.featuredTouchable : styles.compactTouchable
                 ]}
                 borderless
@@ -70,8 +70,9 @@ const ArticleCard = React.memo(({ article, onPress, variant = 'compact' }: Artic
                     styles.container,
                     isFeatured ? styles.featuredContainer : styles.compactContainer,
                     {
-                        elevation: isFeatured ? 2 : 0,
-                        borderRadius: theme.roundness * 4,
+                        elevation: isFeatured ? 3 : 1,
+                        borderRadius: theme.roundness * 5,
+                        backgroundColor: theme.colors.surface,
                     }
                 ]} elevation={0}>
 
@@ -175,7 +176,7 @@ const ArticleCard = React.memo(({ article, onPress, variant = 'compact' }: Artic
                     </View>
 
                     {!isFeatured && (
-                        <Image source={{ uri: article.image }} style={[styles.compactImage, { borderRadius: theme.roundness * 2 }]} />
+                        <Image source={{ uri: article.image }} style={[styles.compactImage, { borderRadius: theme.roundness * 3 }]} />
                     )}
                 </Surface>
             </TouchableRipple>

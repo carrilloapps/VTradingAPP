@@ -85,8 +85,6 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
 
     const isDark = theme.dark;
 
-    // Status Bar Style
-    const barStyle = isDark ? 'light-content' : (variant === 'main' || isFadingVariant ? (isFadingVariant ? 'light-content' : 'dark-content') : 'dark-content');
 
     // Button dynamic styles
     const buttonBgColor = isDark ? 'rgba(30, 35, 32, 0.7)' : 'rgba(255, 255, 255, 0.85)';
@@ -139,7 +137,10 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
                     { opacity: variant === 'main' || isFadingVariant ? gradientOpacity : 0 }
                 ]}>
                     <LinearGradient
-                        colors={['rgba(0,0,0,0.6)', 'transparent']}
+                        colors={[
+                            theme.dark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)',
+                            'transparent'
+                        ]}
                         style={{ height: insets.top + 140 }}
                         pointerEvents="none"
                     />
@@ -151,7 +152,7 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
                         StyleSheet.absoluteFill,
                         {
                             opacity: solidBgOpacity,
-                            backgroundColor: isDark ? 'rgba(25, 28, 26, 0.95)' : 'rgba(251, 253, 249, 0.95)',
+                            backgroundColor: theme.colors.background,
                         }
                     ]}
                 >
@@ -207,7 +208,7 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
                         <Animated.View style={{ opacity: logoOpacity }}>
                             <Image
                                 source={require('../../assets/images/logotipo.png')}
-                                style={styles.logoImage}
+                                style={[styles.logoImage, { tintColor: isDark ? theme.colors.onSurface : theme.colors.onPrimaryContainer }]}
                                 resizeMode="contain"
                             />
                         </Animated.View>
@@ -235,7 +236,7 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
                             <Animated.View style={{ opacity: logoOpacity, position: 'absolute' }}>
                                 <Image
                                     source={require('../../assets/images/logotipo.png')}
-                                    style={styles.logoImage}
+                                    style={[styles.logoImage, { tintColor: isDark ? theme.colors.onSurface : theme.colors.onPrimaryContainer }]}
                                     resizeMode="contain"
                                 />
                             </Animated.View>

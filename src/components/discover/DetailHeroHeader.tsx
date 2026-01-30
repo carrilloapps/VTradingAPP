@@ -51,53 +51,65 @@ const DetailHeroHeader: React.FC<DetailHeroHeaderProps> = ({
     };
 
     const getSectionColor = () => {
-        // Mimicking original styles: Category uses Primary Green, Tag uses Secondary/Light Green
-        return type === 'CATEGORY' ? '#6DDBAC' : '#B3CCBE';
+        if (type === 'CATEGORY') {
+            return theme.dark ? '#6DDBAC' : theme.colors.primary;
+        } else {
+            return theme.dark ? '#B3CCBE' : theme.colors.secondary;
+        }
     };
 
     return (
         <View style={styles.headerWrapper}>
-            <ImageBackground
-                source={image ? { uri: image } : undefined}
-                style={styles.heroBackground}
-                blurRadius={15}
-            >
-                <LinearGradient
-                    colors={['rgba(0,0,0,0.3)', 'rgba(0,0,0,0.6)', theme.colors.background]}
-                    style={styles.gradientOverlay}
+            <View style={[styles.heroBackground, { backgroundColor: theme.colors.surface }]}>
+                <ImageBackground
+                    source={image ? { uri: image } : undefined}
+                    style={styles.heroBackground}
+                    blurRadius={15}
+                    imageStyle={{ opacity: theme.dark ? 0.5 : 0.35 }}
                 >
-                    <View style={styles.heroContent}>
-                        <View style={styles.categoryBadge}>
-                            <MaterialCommunityIcons name={getBadgeIcon()} size={16} color={getBadgeColor()} />
-                            <Text variant="labelLarge" style={styles.badgeText}>{categoryName}</Text>
-                        </View>
+                    <LinearGradient
+                        colors={[
+                            theme.dark ? 'rgba(0,0,0,0.5)' : 'rgba(255,255,255,0.7)',
+                            theme.dark ? 'rgba(0,0,0,0.2)' : 'rgba(255,255,255,0.3)',
+                            'transparent',
+                            theme.colors.background
+                        ]}
+                        locations={[0, 0.2, 0.5, 1]}
+                        style={styles.gradientOverlay}
+                    >
+                        <View style={styles.heroContent}>
+                            <View style={[styles.categoryBadge, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outlineVariant }]}>
+                                <MaterialCommunityIcons name={getBadgeIcon()} size={16} color={getBadgeColor()} />
+                                <Text variant="labelLarge" style={[styles.badgeText, { color: theme.colors.onSurface }]}>{categoryName}</Text>
+                            </View>
 
-                        <Text variant="headlineLarge" style={styles.title}>
-                            {title}
-                        </Text>
-
-                        {description ? (
-                            <Text variant="bodyMedium" style={styles.description} numberOfLines={3}>
-                                {description}
+                            <Text variant="headlineLarge" style={[styles.title, { color: theme.colors.primary }]}>
+                                {title}
                             </Text>
-                        ) : null}
 
-                        <View style={styles.metaStrip}>
-                            <View style={styles.metaItem}>
-                                <Text variant="labelSmall" style={styles.metaLabel}>ÚLTIMA ACTUALIZACIÓN</Text>
-                                <Text variant="bodyMedium" style={styles.metaValue} numberOfLines={1}>
-                                    {formatDate(lastUpdateDate)}
+                            {description ? (
+                                <Text variant="bodyMedium" style={[styles.description, { color: theme.colors.onSurfaceVariant }]} numberOfLines={3}>
+                                    {description}
                                 </Text>
-                            </View>
-                            <View style={styles.metaGap} />
-                            <View style={styles.metaItem}>
-                                <Text variant="labelSmall" style={styles.metaLabel}>{type === 'CATEGORY' ? 'ARTÍCULOS' : 'TOTAL'}</Text>
-                                <Text variant="bodyMedium" style={styles.metaValue}>{articleCount}</Text>
+                            ) : null}
+
+                            <View style={styles.metaStrip}>
+                                <View style={styles.metaItem}>
+                                    <Text variant="labelSmall" style={[styles.metaLabel, { color: theme.colors.onSurfaceVariant, opacity: 0.7 }]}>ÚLTIMA ACTUALIZACIÓN</Text>
+                                    <Text variant="bodyMedium" style={[styles.metaValue, { color: theme.colors.onSurface }]} numberOfLines={1}>
+                                        {formatDate(lastUpdateDate)}
+                                    </Text>
+                                </View>
+                                <View style={styles.metaGap} />
+                                <View style={styles.metaItem}>
+                                    <Text variant="labelSmall" style={[styles.metaLabel, { color: theme.colors.onSurfaceVariant, opacity: 0.7 }]}>{type === 'CATEGORY' ? 'ARTÍCULOS' : 'TOTAL'}</Text>
+                                    <Text variant="bodyMedium" style={[styles.metaValue, { color: theme.colors.onSurface }]}>{articleCount}</Text>
+                                </View>
                             </View>
                         </View>
-                    </View>
-                </LinearGradient>
-            </ImageBackground>
+                    </LinearGradient>
+                </ImageBackground>
+            </View>
 
             <View style={styles.sectionHeader}>
                 <Text variant="labelLarge" style={[styles.sectionTitle, { color: getSectionColor() }]}>
@@ -139,14 +151,12 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     badgeText: {
-        color: '#FFF',
         fontWeight: '900',
         marginLeft: 8,
         letterSpacing: 1,
     },
     title: {
         fontWeight: '900',
-        color: '#FFF',
         fontSize: 48,
         lineHeight: 52,
         textTransform: 'uppercase',
@@ -154,7 +164,6 @@ const styles = StyleSheet.create({
         marginBottom: 12,
     },
     description: {
-        color: 'rgba(255, 255, 255, 0.8)',
         lineHeight: 22,
         marginBottom: 32,
         fontSize: 15,
@@ -168,13 +177,11 @@ const styles = StyleSheet.create({
         // metadata column
     },
     metaLabel: {
-        color: 'rgba(255,255,255,0.5)',
         fontWeight: '800',
         marginBottom: 2,
         fontSize: 10,
     },
     metaValue: {
-        color: '#FFF',
         fontWeight: '700',
         fontSize: 13,
     },
