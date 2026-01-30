@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, FlatList } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { useAppTheme } from '../../theme/theme';
 import Skeleton from '../ui/Skeleton';
 import ArticleSkeleton from './ArticleSkeleton';
@@ -11,11 +12,11 @@ const CategoryTagSkeleton = () => {
         <View style={styles.header}>
             <Skeleton width="100%" height={300} borderRadius={0} />
             <View style={styles.headerOverlay}>
-                <Skeleton width={80} height={16} style={{ marginBottom: 12 }} />
-                <Skeleton width="60%" height={32} style={{ marginBottom: 8 }} />
-                <Skeleton width="80%" height={16} style={{ marginBottom: 24 }} />
+                <Skeleton width={80} height={16} style={styles.categoryLabel} />
+                <Skeleton width="60%" height={32} style={styles.titleLabel} />
+                <Skeleton width="80%" height={16} style={styles.descriptionLabel} />
                 <View style={styles.statsRow}>
-                    <Skeleton width={100} height={14} style={{ marginRight: 16 }} />
+                    <Skeleton width={100} height={14} style={styles.statsItem} />
                     <Skeleton width={80} height={14} />
                 </View>
             </View>
@@ -25,9 +26,14 @@ const CategoryTagSkeleton = () => {
         </View>
     );
 
+    const containerStyle = [
+        styles.container,
+        { backgroundColor: theme.colors.background }
+    ];
+
     return (
-        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-            <FlatList
+        <View style={containerStyle}>
+            <FlashList
                 data={[1, 2, 3, 4]}
                 keyExtractor={(item) => item.toString()}
                 renderItem={({ index }) => (
@@ -67,6 +73,18 @@ const styles = StyleSheet.create({
     },
     listContent: {
         paddingBottom: 40,
+    },
+    categoryLabel: {
+        marginBottom: 12,
+    },
+    titleLabel: {
+        marginBottom: 8,
+    },
+    descriptionLabel: {
+        marginBottom: 24,
+    },
+    statsItem: {
+        marginRight: 16,
     },
 });
 

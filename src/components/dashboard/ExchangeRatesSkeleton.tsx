@@ -9,76 +9,84 @@ const ExchangeRatesSkeleton = () => {
   const insets = useSafeAreaInsets();
   const r = theme.roundness;
 
-  const renderRateCardSkeleton = (key: number) => (
-    <View 
-      key={key} 
-      style={[
-        styles.card, 
-        { 
-          backgroundColor: theme.colors.elevation.level1,
-          borderColor: theme.colors.outline,
-          borderRadius: r * 6,
-        }
-      ]}
-    >
-      <View style={styles.leftContent}>
-        <Skeleton width={48} height={48} borderRadius={r * 4} />
-        <View style={styles.textContainer}>
-          <Skeleton width={80} height={20} style={{ marginBottom: 4 }} />
-          <Skeleton width={120} height={14} />
+  const renderRateCardSkeleton = (key: number) => {
+    const cardStyle = [
+      styles.card,
+      {
+        backgroundColor: theme.colors.elevation.level1,
+        borderColor: theme.colors.outline,
+      }
+    ];
+
+    return (
+      <View
+        key={key}
+        style={cardStyle}
+      >
+        <View style={styles.leftContent}>
+          <Skeleton width={48} height={48} style={styles.iconSkeleton} />
+          <View style={styles.textContainer}>
+            <Skeleton width={80} height={20} style={styles.titleSkeleton} />
+            <Skeleton width={120} height={14} />
+          </View>
+        </View>
+        <View style={styles.rightContent}>
+          <Skeleton width={100} height={24} style={styles.valueSkeleton} />
+          <Skeleton width={60} height={16} />
         </View>
       </View>
-      <View style={styles.rightContent}>
-        <Skeleton width={100} height={24} style={{ marginBottom: 4 }} />
-        <Skeleton width={60} height={16} />
-      </View>
-    </View>
-  );
+    );
+  };
+
+  const containerStyle = [
+    styles.container,
+    { paddingTop: insets.top, backgroundColor: theme.colors.background }
+  ];
 
   return (
-    <View style={[styles.container, { paddingTop: insets.top, backgroundColor: theme.colors.background }]}>
+    <View style={containerStyle}>
       {/* Header Skeleton matches UnifiedHeader section variant */}
       <View style={styles.headerContainer}>
         <View style={styles.header}>
-            <View style={styles.headerTop}>
-                <View style={styles.headerLeft}>
-                    <Skeleton width={150} height={28} />
-                    <Skeleton width={200} height={14} style={{ marginTop: 8 }} />
-                </View>
-                <Skeleton width={40} height={40} borderRadius={20} />
+          <View style={styles.headerTop}>
+            <View style={styles.headerLeft}>
+              <Skeleton width={150} height={28} />
+              <Skeleton width={200} height={14} style={styles.headerSubtitle} />
             </View>
+            <Skeleton width={40} height={40} borderRadius={20} />
+          </View>
         </View>
-        
+
         {/* Search Bar Skeleton */}
         <View style={styles.searchBar}>
-            <Skeleton width="100%" height={56} borderRadius={r * 3} />
+          <Skeleton width="100%" height={56} borderRadius={r * 3} />
         </View>
       </View>
 
       <View style={styles.scrollContent}>
         {/* Filter Chips Skeleton */}
         <View style={styles.chipsContainer}>
-            {[1, 2, 3, 4].map((i) => (
-                <Skeleton key={i} width={i === 1 ? 60 : 80} height={32} borderRadius={16} style={{ marginRight: 8 }} />
-            ))}
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} width={i === 1 ? 60 : 80} height={32} borderRadius={16} style={styles.chipSkeleton} />
+          ))}
         </View>
 
         {/* Sections Skeleton */}
         <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-                <Skeleton width={150} height={12} />
-                <Skeleton width={120} height={20} borderRadius={4} />
-            </View>
-            {renderRateCardSkeleton(1)}
-            {renderRateCardSkeleton(2)}
+          <View style={styles.sectionHeader}>
+            <Skeleton width={150} height={12} />
+            <Skeleton width={120} height={20} borderRadius={4} />
+          </View>
+          {renderRateCardSkeleton(1)}
+          {renderRateCardSkeleton(2)}
         </View>
 
         <View style={styles.section}>
-             <View style={styles.sectionHeader}>
-                <Skeleton width={180} height={12} />
-            </View>
-            {renderRateCardSkeleton(3)}
-            {renderRateCardSkeleton(4)}
+          <View style={styles.sectionHeader}>
+            <Skeleton width={180} height={12} />
+          </View>
+          {renderRateCardSkeleton(3)}
+          {renderRateCardSkeleton(4)}
         </View>
       </View>
     </View>
@@ -138,6 +146,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    borderRadius: 24, // Assuming theme.roundness * 6 ≈ 24 (4 * 6)
   },
   leftContent: {
     flexDirection: 'row',
@@ -150,6 +159,21 @@ const styles = StyleSheet.create({
   rightContent: {
     alignItems: 'flex-end',
   },
+  iconSkeleton: {
+    borderRadius: 16, // r * 4
+  },
+  titleSkeleton: {
+    marginBottom: 4,
+  },
+  valueSkeleton: {
+    marginBottom: 4,
+  },
+  headerSubtitle: {
+    marginTop: 8,
+  },
+  chipSkeleton: {
+    marginRight: 8,
+  }
 });
 
 export default ExchangeRatesSkeleton;

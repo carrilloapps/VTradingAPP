@@ -44,33 +44,33 @@ const StockItem: React.FC<StockData> = ({
 }) => {
   const theme = useAppTheme();
   const colors = colorMap[color || 'emerald'] || colorMap.emerald;
-  
+
   const isPositive = propIsPositive !== undefined ? propIsPositive : (changePercent > 0);
   const isNegative = propIsPositive !== undefined ? !propIsPositive : (changePercent < 0);
   const isNeutral = !isPositive && !isNegative;
-  
+
   // Format price - Use prop 'value' if available (dashboard), otherwise format 'price'
   const formattedPrice = value || `${price.toLocaleString('es-VE', { minimumFractionDigits: 4 })} Bs`;
-  
+
   let formattedChange = change;
   if (!formattedChange) {
-      if (isNeutral) {
-          formattedChange = '= ' + Math.abs(changePercent).toFixed(2) + '%';
-      } else {
-          formattedChange = (isPositive ? '+' : '') + changePercent.toFixed(2) + '%';
-      }
+    if (isNeutral) {
+      formattedChange = '= ' + Math.abs(changePercent).toFixed(2) + '%';
+    } else {
+      formattedChange = (isPositive ? '+' : '') + changePercent.toFixed(2) + '%';
+    }
   } else if (isNeutral && !change?.startsWith('=')) {
-      // Ensure dashboard formatted string has = if neutral
-      // This is tricky if 'change' is pre-formatted as "0.00%". 
-      // We'll trust the logic below for rendering style, but text might need adjustment if passed from dashboard.
-      if (change === '0.00%' || change === '0,00%') {
-          formattedChange = '= ' + change;
-      }
+    // Ensure dashboard formatted string has = if neutral
+    // This is tricky if 'change' is pre-formatted as "0.00%". 
+    // We'll trust the logic below for rendering style, but text might need adjustment if passed from dashboard.
+    if (change === '0.00%' || change === '0,00%') {
+      formattedChange = '= ' + change;
+    }
   }
-  
+
   const containerStyle = [
     styles.container,
-    { 
+    {
       backgroundColor: theme.colors.elevation.level1,
       borderColor: theme.colors.outline,
       // Flat style with border, no elevation
@@ -79,20 +79,10 @@ const StockItem: React.FC<StockData> = ({
   ];
 
   const changeColor = isPositive ? theme.colors.trendUp : isNegative ? theme.colors.trendDown : theme.colors.onSurfaceVariant;
-  const changeTextStyle = [
-    styles.changeText,
-    { color: changeColor }
-  ];
 
-  const badgeBackgroundColor = (!isPositive && !isNegative) 
-    ? (theme.dark ? 'rgba(255,255,255,0.05)' : '#F3F4F6') 
+  const badgeBackgroundColor = (!isPositive && !isNegative)
+    ? (theme.dark ? 'rgba(255,255,255,0.05)' : '#F3F4F6')
     : undefined;
-
-  const badgeStyle = [
-    styles.changeBadge,
-    !isPositive && !isNegative && styles.neutralBadge,
-    { backgroundColor: badgeBackgroundColor }
-  ];
 
   const handlePress = () => {
     if (onPress) {
@@ -113,27 +103,21 @@ const StockItem: React.FC<StockData> = ({
   };
 
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={containerStyle}
       activeOpacity={0.7}
       onPress={handlePress}
     >
       <View style={styles.leftContent}>
-        <View style={[
-          styles.iconBox, 
-          { backgroundColor: '#FFFFFF' }
-        ]}>
+        <View style={styles.iconBox}>
           {iconUrl ? (
-            <Image 
-              source={{ uri: iconUrl }} 
-              style={styles.iconImage} 
+            <Image
+              source={{ uri: iconUrl }}
+              style={styles.iconImage}
               resizeMode="cover"
             />
           ) : (
-            <Text style={[
-              styles.initials, 
-              { color: theme.dark ? colors.darkText : colors.text }
-            ]}>
+            <Text style={[styles.initials, { color: theme.dark ? colors.darkText : colors.text }]}>
               {initials || symbol.substring(0, 3)}
             </Text>
           )}
@@ -152,13 +136,13 @@ const StockItem: React.FC<StockData> = ({
         <Text style={[styles.price, { color: theme.colors.onSurface }]}>
           {formattedPrice}
         </Text>
-        <View style={badgeStyle}>
+        <View style={[styles.changeBadge, !isPositive && !isNegative && styles.neutralBadge, { backgroundColor: badgeBackgroundColor }]}>
           {isPositive ? (
             <MaterialCommunityIcons name="trending-up" size={12} color={theme.colors.trendUp} />
           ) : isNegative ? (
             <MaterialCommunityIcons name="trending-down" size={12} color={theme.colors.trendDown} />
           ) : null}
-          <Text style={changeTextStyle}>
+          <Text style={[styles.changeText, { color: changeColor }]}>
             {formattedChange}
           </Text>
         </View>

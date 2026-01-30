@@ -3,7 +3,7 @@ import { StyleSheet, ViewStyle, TextStyle, StyleProp } from 'react-native';
 import { Button, useTheme } from 'react-native-paper';
 import { AppTheme } from '../../theme/theme';
 
-export type ButtonVariant = 
+export type ButtonVariant =
   | 'primary'      // Contained, Primary Color (Default)
   | 'secondary'    // Contained, Secondary Color
   | 'outlined'     // Outlined, Primary Color
@@ -107,10 +107,10 @@ const CustomButton: React.FC<CustomButtonProps> = ({
 
   const getBorderColor = () => {
     if (variant === 'outlined') {
-        return disabled ? theme.colors.onSurfaceDisabled : theme.colors.primary;
+      return disabled ? theme.colors.onSurfaceDisabled : theme.colors.primary;
     }
     if (variant === 'outlined-destructive') {
-        return disabled ? theme.colors.onSurfaceDisabled : theme.colors.error;
+      return disabled ? theme.colors.onSurfaceDisabled : theme.colors.error;
     }
     return 'transparent';
   };
@@ -129,7 +129,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
       style={[
         styles.button,
         fullWidth && styles.fullWidth,
-        (variant === 'outlined' || variant === 'outlined-destructive') && { borderColor: getBorderColor() },
+        (variant === 'outlined' || variant === 'outlined-destructive') && [styles.outlined, { borderColor: getBorderColor() }],
         variant === 'link' && styles.linkButton,
         style
       ]}
@@ -150,6 +150,8 @@ const styles = StyleSheet.create({
   button: {
     borderRadius: 12, // Standard Pill/Rounded Shape for VTradingAPP
     marginVertical: 4,
+  },
+  outlined: {
   },
   fullWidth: {
     width: '100%',

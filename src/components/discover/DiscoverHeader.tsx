@@ -117,12 +117,84 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
 
     const displayTitle = variant === 'tag' && !title.startsWith('#') ? `#${title}` : title;
 
+    const containerStyle = [
+        styles.container,
+        { height: insets.top + 62 },
+        variant === 'search' && styles.containerSearch
+    ];
+
+    const gradientWrapperStyle = [
+        StyleSheet.absoluteFill,
+        { opacity: variant === 'main' || isFadingVariant ? gradientOpacity : 0 }
+    ];
+
+    const gradientStyle = [
+        styles.gradient,
+        { height: insets.top + 140 }
+    ];
+
+    const solidBgStyle = [
+        StyleSheet.absoluteFill,
+        {
+            opacity: solidBgOpacity,
+            backgroundColor: theme.colors.background,
+        }
+    ];
+
+    const separatorStyle = [
+        styles.separator,
+        {
+            backgroundColor: theme.colors.outlineVariant,
+        }
+    ];
+
+    const progressBarStyle = [
+        styles.progressBar,
+        {
+            backgroundColor: theme.colors.primary,
+            width: windowWidth,
+            transform: [
+                { translateX: progressTranslateX },
+                { scaleX: progressScaleX }
+            ]
+        }
+    ];
+
+    const contentStyle = [
+        styles.content,
+        { paddingTop: insets.top }
+    ];
+
+    const leftContainerStyle = [
+        styles.leftContainer,
+        variant === 'main' && styles.flex1
+    ];
+
+    const logoWrapperStyle = { opacity: logoOpacity };
+
+    const logoImageStyle = [
+        styles.logoImage,
+        { tintColor: isDark ? theme.colors.onSurface : theme.colors.onPrimaryContainer }
+    ];
+
+    const detailLogoWrapperStyle = [
+        { opacity: logoOpacity, position: 'absolute' as const }
+    ];
+
+    const centerContainerStyle = [
+        styles.centerContainer,
+        { top: insets.top }
+    ];
+
+    const titleWrapperStyle = { opacity: titleOpacity };
+
+    const headerTitleStyle = [
+        styles.headerTitle,
+        { color: theme.colors.onSurface }
+    ];
+
     return (
-        <View style={[
-            styles.container,
-            { height: insets.top + 62 },
-            variant === 'search' && styles.containerSearch
-        ]}>
+        <View style={containerStyle}>
             <StatusBar
                 barStyle={isDark ? 'light-content' : 'dark-content'}
                 translucent
@@ -132,66 +204,32 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
             {/* Background Layer */}
             <View style={StyleSheet.absoluteFill}>
                 {/* Gradient Layer (fades out on scroll for fading variants) */}
-                <Animated.View style={[
-                    StyleSheet.absoluteFill,
-                    { opacity: variant === 'main' || isFadingVariant ? gradientOpacity : 0 }
-                ]}>
+                <Animated.View style={gradientWrapperStyle}>
                     <LinearGradient
                         colors={[
                             theme.dark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)',
                             'transparent'
                         ]}
-                        style={{ height: insets.top + 140 }}
+                        style={gradientStyle}
                         pointerEvents="none"
                     />
                 </Animated.View>
 
                 {/* Solid Glassy Layer (fades in on scroll for detail/tag/category) */}
-                <Animated.View
-                    style={[
-                        StyleSheet.absoluteFill,
-                        {
-                            opacity: solidBgOpacity,
-                            backgroundColor: theme.colors.background,
-                        }
-                    ]}
-                >
-                    <View style={[
-                        styles.separator,
-                        {
-                            backgroundColor: theme.colors.outlineVariant,
-                            bottom: 0,
-                            position: 'absolute',
-                            left: 0,
-                            right: 0,
-                            height: 1,
-                            opacity: 0.5
-                        }
-                    ]} />
+                <Animated.View style={solidBgStyle}>
+                    <View style={separatorStyle} />
                 </Animated.View>
 
                 {/* Progress Bar (detail only) */}
                 {isDetail && contentHeight > 0 && (
-                    <Animated.View
-                        style={[
-                            styles.progressBar,
-                            {
-                                backgroundColor: theme.colors.primary,
-                                width: windowWidth,
-                                transform: [
-                                    { translateX: progressTranslateX },
-                                    { scaleX: progressScaleX }
-                                ]
-                            }
-                        ]}
-                    />
+                    <Animated.View style={progressBarStyle} />
                 )}
             </View>
 
             {/* Content Layer */}
-            <View style={[styles.content, { paddingTop: insets.top }]}>
+            <View style={contentStyle}>
                 {/* Left Section */}
-                <View style={[styles.leftContainer, variant === 'main' && { flex: 1 }]}>
+                <View style={leftContainerStyle}>
                     {variant !== 'main' ? (
                         <TouchableRipple
                             onPress={onBackPress}
@@ -205,10 +243,10 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
                             <MaterialCommunityIcons name="arrow-left" size={24} color={theme.colors.onSurface} />
                         </TouchableRipple>
                     ) : (
-                        <Animated.View style={{ opacity: logoOpacity }}>
+                        <Animated.View style={logoWrapperStyle}>
                             <Image
                                 source={require('../../assets/images/logotipo.png')}
-                                style={[styles.logoImage, { tintColor: isDark ? theme.colors.onSurface : theme.colors.onPrimaryContainer }]}
+                                style={logoImageStyle}
                                 resizeMode="contain"
                             />
                         </Animated.View>
@@ -227,24 +265,24 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
                                 Keyboard.dismiss();
                             }}
                             autoFocus={autoFocus}
-                            style={{ elevation: 0, shadowOpacity: 0 }}
+                            style={styles.searchBar}
                         />
                     </View>
                 ) : (
-                    <View style={[styles.centerContainer, { top: insets.top }]}>
+                    <View style={centerContainerStyle}>
                         {isFadingVariant && (
-                            <Animated.View style={{ opacity: logoOpacity, position: 'absolute' }}>
+                            <Animated.View style={detailLogoWrapperStyle}>
                                 <Image
                                     source={require('../../assets/images/logotipo.png')}
-                                    style={[styles.logoImage, { tintColor: isDark ? theme.colors.onSurface : theme.colors.onPrimaryContainer }]}
+                                    style={logoImageStyle}
                                     resizeMode="contain"
                                 />
                             </Animated.View>
                         )}
-                        <Animated.View style={{ opacity: titleOpacity }}>
+                        <Animated.View style={titleWrapperStyle}>
                             <Text
                                 numberOfLines={1}
-                                style={[styles.headerTitle, { color: theme.colors.onSurface }]}
+                                style={headerTitleStyle}
                             >
                                 {displayTitle}
                             </Text>
@@ -389,7 +427,22 @@ const styles = StyleSheet.create({
     },
     separator: {
         bottom: 0,
-    }
+        position: 'absolute',
+        left: 0,
+        right: 0,
+        height: 1,
+        opacity: 0.5,
+    },
+    gradient: {
+        width: '100%',
+    },
+    flex1: {
+        flex: 1,
+    },
+    searchBar: {
+        elevation: 0,
+        shadowOpacity: 0,
+    },
 });
 
 export default DiscoverHeader;

@@ -34,41 +34,48 @@ const RateCard: React.FC<RateCardProps> = ({
   // Determine if neutral (0.00% or explicitly marked as such via prop if we added one, 
   // but checking the string value is also a safe fallback for display logic)
   const isNeutral = changePercent.includes('0.00') || changePercent === '0%' || changePercent === '+0.00%' || changePercent === '0.00%';
-  
-  const trendColor = isNeutral 
-    ? theme.colors.onSurfaceVariant 
+
+  const trendColor = isNeutral
+    ? theme.colors.onSurfaceVariant
     : (isPositive ? colors.success : colors.error);
 
-  const trendIcon = isNeutral 
-    ? "minus" 
+  const trendIcon = isNeutral
+    ? "minus"
     : (isPositive ? "trending-up" : "trending-down");
-  
+
   // Default icon colors if not provided
   const finalIconBgColor = iconBgColor || colors.infoContainer;
   const finalIconColor = iconColor || colors.info;
 
+  const rippleStyle = [styles.ripple, { borderRadius: theme.roundness * 6 }];
+  const cardStyle = [
+    styles.card,
+    {
+      backgroundColor: theme.colors.elevation.level1,
+      borderColor: theme.colors.outline,
+    }
+  ];
+  const iconContainerStyle = [
+    styles.iconContainer,
+    { backgroundColor: finalIconBgColor }
+  ];
+  const textPrimaryStyle = { color: theme.colors.onSurface };
+
   return (
-    <TouchableRipple 
+    <TouchableRipple
       onPress={onPress}
-      style={{ marginBottom: 12, borderRadius: theme.roundness * 6 }}
+      style={rippleStyle}
       borderless
       accessibilityRole="button"
       accessibilityLabel={`${title}, valor: ${value}. ${isNeutral ? 'Sin cambios' : `Cambio: ${changePercent} ${isPositive ? 'positivo' : 'negativo'}`}`}
       accessibilityHint="Toca para ver detalles de esta tasa"
     >
-      <Surface 
+      <Surface
         elevation={0}
-        style={[styles.card, { 
-          backgroundColor: theme.colors.elevation.level1, 
-          borderColor: theme.colors.outline,
-          borderRadius: theme.roundness * 6
-        }]}
+        style={cardStyle}
       >
         <View style={styles.leftContent}>
-          <View style={[styles.iconContainer, { 
-            backgroundColor: finalIconBgColor,
-            borderRadius: theme.roundness * 4
-          }]}>
+          <View style={iconContainerStyle}>
             {iconName === 'Bs' ? (
               <BolivarIcon color={finalIconColor} size={24} />
             ) : (
@@ -76,20 +83,20 @@ const RateCard: React.FC<RateCardProps> = ({
             )}
           </View>
           <View>
-            <Text variant="titleMedium" style={[styles.titleText, { color: theme.colors.onSurface }]}>{title}</Text>
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{subtitle}</Text>
+            <Text variant="titleMedium" style={[styles.titleText, textPrimaryStyle]}>{title}</Text>
+            <Text variant="bodySmall" style={styles.subtitleText}>{subtitle}</Text>
           </View>
         </View>
 
         <View style={styles.rightContent}>
-          <Text variant="headlineSmall" style={[styles.valueText, { color: theme.colors.onSurface }]}>
+          <Text variant="headlineSmall" style={[styles.valueText, textPrimaryStyle]}>
             {value}
           </Text>
           <View style={styles.trendContainer}>
-            <MaterialCommunityIcons 
-              name={trendIcon} 
-              size={16} 
-              color={trendColor} 
+            <MaterialCommunityIcons
+              name={trendIcon}
+              size={16}
+              color={trendColor}
               importantForAccessibility="no-hide-descendants"
             />
             <Text variant="labelMedium" style={[styles.trendText, { color: trendColor }]}>
@@ -103,6 +110,9 @@ const RateCard: React.FC<RateCardProps> = ({
 };
 
 const styles = StyleSheet.create({
+  ripple: {
+    marginBottom: 12,
+  },
   card: {
     padding: 16,
     borderWidth: 1,
@@ -110,6 +120,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    borderRadius: 24,
   },
   leftContent: {
     flexDirection: 'row',
@@ -121,6 +132,7 @@ const styles = StyleSheet.create({
     height: 48,
     alignItems: 'center',
     justifyContent: 'center',
+    borderRadius: 16,
   },
   rightContent: {
     alignItems: 'flex-end',
@@ -140,6 +152,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     marginTop: 2,
+  },
+  subtitleText: {
+    color: '#666666', // Fallback for onSurfaceVariant
   },
 });
 

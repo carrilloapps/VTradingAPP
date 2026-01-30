@@ -15,13 +15,12 @@ export const BolivarIcon: React.FC<BolivarIconProps> = ({
   return (
     <View style={[
       styles.container, 
+      styles.iconBorder,
       { 
         width: size, 
         height: size, 
         borderRadius: size / 2,
-        backgroundColor: 'transparent', // Or pass a prop if background needed
         borderColor: color,
-        borderWidth: 1.5,
       },
       style
     ]}>
@@ -42,6 +41,10 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  iconBorder: {
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
   },
   text: {
     fontWeight: 'bold',

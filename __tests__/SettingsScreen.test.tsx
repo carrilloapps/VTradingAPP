@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react-native';
+import { render } from '@testing-library/react-native';
 import SettingsScreen from '../src/screens/SettingsScreen';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { LightTheme } from '../src/theme/theme';
@@ -151,11 +151,13 @@ const mockNavigation = {
 };
 
 jest.mock('@react-navigation/native', () => {
-  const React = require('react');
+  const MockReact = require('react');
   return {
     useNavigation: () => mockNavigation,
-    useFocusEffect: (effect: any) => React.useEffect(effect, []),
-     createNavigationContainerRef: jest.fn(() => ({
+    useFocusEffect: (effect: any) => MockReact.useEffect(() => {
+      effect();
+    }, [effect]),
+    createNavigationContainerRef: jest.fn(() => ({
       isReady: jest.fn().mockReturnValue(true),
       navigate: jest.fn(),
       dispatch: jest.fn(),
@@ -205,36 +207,36 @@ describe('SettingsScreen', () => {
 
   it('renders correctly', async () => {
     const { findByText } = renderWithProvider(<SettingsScreen />);
-    
+
     // Check Header
     expect(await findByText('Configuración')).toBeTruthy();
   });
 
-/*
-  it('renders app info values correctly', async () => {
-    const { findByText } = renderWithProvider(<SettingsScreen />);
-    expect(await findByText(/Finanzas VE v1.0.0 \(BUILD 100\)/)).toBeTruthy();
-  });
-
-  it('toggles alerts', async () => {
-    const { storageService } = require('../src/services/StorageService');
-    storageService.getAlerts.mockResolvedValue([
-       { id: '1', symbol: 'ves_usd', target: 50, condition: 'above', isActive: true, iconName: 'currency-usd' }
-    ]);
-
-    const { getAllByTestId, findByText } = renderWithProvider(<SettingsScreen />);
-    await findByText('Configuración');
-    const switches = getAllByTestId('switch');
-    expect(switches.length).toBeGreaterThanOrEqual(1);
-    expect(switches[0]).toBeTruthy();
-  });
-
-  it('renders theme selector', async () => {
-    const { findByText, getByText } = renderWithProvider(<SettingsScreen />);
-    await findByText('Configuración');
-    expect(getByText('Claro')).toBeTruthy();
-    expect(getByText('Oscuro')).toBeTruthy();
-    expect(getByText('Sistema')).toBeTruthy();
-  });
-*/
+  /*
+    it('renders app info values correctly', async () => {
+      const { findByText } = renderWithProvider(<SettingsScreen />);
+      expect(await findByText(/Finanzas VE v1.0.0 \(BUILD 100\)/)).toBeTruthy();
+    });
+  
+    it('toggles alerts', async () => {
+      const { storageService } = require('../src/services/StorageService');
+      storageService.getAlerts.mockResolvedValue([
+         { id: '1', symbol: 'ves_usd', target: 50, condition: 'above', isActive: true, iconName: 'currency-usd' }
+      ]);
+  
+      const { getAllByTestId, findByText } = renderWithProvider(<SettingsScreen />);
+      await findByText('Configuración');
+      const switches = getAllByTestId('switch');
+      expect(switches.length).toBeGreaterThanOrEqual(1);
+      expect(switches[0]).toBeTruthy();
+    });
+  
+    it('renders theme selector', async () => {
+      const { findByText, getByText } = renderWithProvider(<SettingsScreen />);
+      await findByText('Configuración');
+      expect(getByText('Claro')).toBeTruthy();
+      expect(getByText('Oscuro')).toBeTruthy();
+      expect(getByText('Sistema')).toBeTruthy();
+    });
+  */
 });

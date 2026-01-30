@@ -28,6 +28,12 @@ const WidgetPreview: React.FC<WidgetPreviewProps> = ({
 }) => {
   const theme = useAppTheme();
 
+  // Pre-calculate dynamic styles
+  const statusBarColor = isWallpaperDark ? '#FFF' : '#1A1A1A';
+  const vtradingAppBg = theme.colors.primary;
+  const vtradingLogoTint = theme.colors.onPrimary;
+  const activeIndicatorBg = isWallpaperDark ? '#FFF' : '#1A1A1A';
+
   // Colors for wallpaper are now defined inline with more complex gradients
 
   return (
@@ -43,8 +49,8 @@ const WidgetPreview: React.FC<WidgetPreviewProps> = ({
                 end={{ x: 1, y: 1 }}
                 style={StyleSheet.absoluteFill}
               />
-              <View style={{ position: 'absolute', top: -100, right: -50, width: 300, height: 300, borderRadius: 150, backgroundColor: 'rgba(109, 219, 172, 0.05)', transform: [{ scaleX: 1.2 }] }} />
-              <View style={{ position: 'absolute', bottom: -50, left: -100, width: 400, height: 400, borderRadius: 200, backgroundColor: 'rgba(0, 0, 0, 0.3)' }} />
+              <View style={styles.decorativeCircleDark1} />
+              <View style={styles.decorativeCircleDark2} />
             </>
           ) : (
             <>
@@ -54,8 +60,8 @@ const WidgetPreview: React.FC<WidgetPreviewProps> = ({
                 end={{ x: 1, y: 1 }}
                 style={StyleSheet.absoluteFill}
               />
-              <View style={{ position: 'absolute', top: -120, left: -60, width: 400, height: 400, borderRadius: 200, backgroundColor: 'rgba(255, 255, 255, 0.8)' }} />
-              <View style={{ position: 'absolute', bottom: -80, right: -80, width: 300, height: 300, borderRadius: 150, backgroundColor: 'rgba(16, 185, 129, 0.05)' }} />
+              <View style={styles.decorativeCircleLight1} />
+              <View style={styles.decorativeCircleLight2} />
             </>
           )}
         </View>
@@ -64,10 +70,10 @@ const WidgetPreview: React.FC<WidgetPreviewProps> = ({
         <View style={styles.statusBarMockup}>
           <Text
             variant="labelSmall"
-            style={{
-              color: isWallpaperDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)',
-              fontWeight: 'bold',
-            }}
+            style={[
+              styles.statusBarTime,
+              { color: statusBarColor }
+            ]}
           >
             10:42
           </Text>
@@ -75,17 +81,17 @@ const WidgetPreview: React.FC<WidgetPreviewProps> = ({
             <MaterialCommunityIcons
               name="signal-cellular-3"
               size={14}
-              color={isWallpaperDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)'}
+              color={statusBarColor}
             />
             <MaterialCommunityIcons
               name="wifi"
               size={14}
-              color={isWallpaperDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)'}
+              color={statusBarColor}
             />
             <MaterialCommunityIcons
               name="battery-50"
               size={14}
-              color={isWallpaperDark ? 'rgba(255,255,255,0.8)' : 'rgba(0,0,0,0.8)'}
+              color={statusBarColor}
             />
           </View>
         </View>
@@ -104,7 +110,7 @@ const WidgetPreview: React.FC<WidgetPreviewProps> = ({
         <View style={styles.dock}>
           {/* Phone App */}
           <View style={styles.appIconWrapper}>
-            <View style={[styles.appIcon, { backgroundColor: '#4ADE80', alignItems: 'center', justifyContent: 'center' }]}>
+            <View style={[styles.appIcon, styles.phoneAppIcon]}>
               <MaterialCommunityIcons name="phone" size={24} color="#FFF" />
             </View>
           </View>
@@ -112,44 +118,36 @@ const WidgetPreview: React.FC<WidgetPreviewProps> = ({
           {/* VTrading App (Active) - Position 2 */}
           <View style={styles.appIconWrapper}>
             <View style={[
-              styles.appIcon, 
-              { 
-                backgroundColor: isWallpaperDark ? '#212121' : '#FFFFFF',
-                alignItems: 'center',
-                justifyContent: 'center',
-                overflow: 'hidden'
-              }
+              styles.appIcon,
+              styles.vtradingAppIcon,
+              { backgroundColor: vtradingAppBg }
             ]}>
               <Image
                 source={require('../../assets/images/logo.png')}
-                style={{
-                  width: 32,
-                  height: 32,
-                  tintColor: isWallpaperDark ? theme.colors.primary : '#212121'
-                }}
+                style={[
+                  styles.vtradingLogo,
+                  { tintColor: vtradingLogoTint }
+                ]}
                 resizeMode="contain"
               />
             </View>
             {/* Active Indicator dot */}
-            <View style={{
-              width: 4, 
-              height: 4, 
-              borderRadius: 2, 
-              backgroundColor: isWallpaperDark ? 'white' : '#1A2C3E',
-              marginTop: 4
-            }} />
+            <View style={[
+              styles.activeIndicator,
+              { backgroundColor: activeIndicatorBg }
+            ]} />
           </View>
 
           {/* Messages App */}
           <View style={styles.appIconWrapper}>
-            <View style={[styles.appIcon, { backgroundColor: '#60A5FA', alignItems: 'center', justifyContent: 'center' }]}>
+            <View style={[styles.appIcon, styles.messagesAppIcon]}>
               <MaterialCommunityIcons name="message-text" size={24} color="#FFF" />
             </View>
           </View>
 
           {/* Maps App */}
           <View style={styles.appIconWrapper}>
-            <View style={[styles.appIcon, { backgroundColor: '#FBBF24', alignItems: 'center', justifyContent: 'center' }]}>
+            <View style={[styles.appIcon, styles.mapsAppIcon]}>
               <MaterialCommunityIcons name="google-maps" size={24} color="#FFF" />
             </View>
           </View>
@@ -176,6 +174,43 @@ const styles = StyleSheet.create({
     padding: 20,
     justifyContent: 'center',
   },
+  decorativeCircleDark1: {
+    position: 'absolute',
+    top: -100,
+    right: -50,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: 'rgba(109, 219, 172, 0.05)',
+    transform: [{ scaleX: 1.2 }],
+  },
+  decorativeCircleDark2: {
+    position: 'absolute',
+    bottom: -50,
+    left: -100,
+    width: 400,
+    height: 400,
+    borderRadius: 200,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+  },
+  decorativeCircleLight1: {
+    position: 'absolute',
+    top: -120,
+    left: -60,
+    width: 400,
+    height: 400,
+    borderRadius: 200,
+    backgroundColor: 'rgba(255, 255, 255, 0.8)',
+  },
+  decorativeCircleLight2: {
+    position: 'absolute',
+    bottom: -80,
+    right: -80,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: 'rgba(16, 185, 129, 0.05)',
+  },
   statusBarMockup: {
     position: 'absolute',
     top: 12,
@@ -184,6 +219,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  statusBarTime: {
+    fontWeight: 'bold',
   },
   statusIcons: {
     flexDirection: 'row',
@@ -207,6 +245,36 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 12,
+  },
+  phoneAppIcon: {
+    backgroundColor: '#4ADE80',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  vtradingAppIcon: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+  },
+  vtradingLogo: {
+    width: 32,
+    height: 32,
+  },
+  activeIndicator: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    marginTop: 4,
+  },
+  messagesAppIcon: {
+    backgroundColor: '#60A5FA',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mapsAppIcon: {
+    backgroundColor: '#FBBF24',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

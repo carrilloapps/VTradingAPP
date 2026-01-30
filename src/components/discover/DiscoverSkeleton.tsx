@@ -11,10 +11,29 @@ const DiscoverConstructionSkeleton = () => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
 
+  const containerStyle = [
+    styles.container,
+    { backgroundColor: theme.colors.background }
+  ];
+
+  const headerStyle = [
+    styles.header,
+    { paddingTop: insets.top + 12 }
+  ];
+
+  const featureItemStyle = [
+    styles.featureItem,
+    {
+      backgroundColor: theme.colors.elevation.level1,
+      borderColor: theme.colors.outlineVariant,
+      borderRadius: 20,
+    }
+  ];
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={containerStyle}>
       {/* Header Skeleton */}
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+      <View style={headerStyle}>
         <Skeleton width={150} height={32} />
       </View>
 
@@ -49,14 +68,7 @@ const DiscoverConstructionSkeleton = () => {
           {[1, 2, 3].map((item) => (
             <View
               key={item}
-              style={[
-                styles.featureItem,
-                {
-                  backgroundColor: theme.colors.elevation.level1,
-                  borderColor: theme.colors.outlineVariant,
-                  borderRadius: 20,
-                }
-              ]}
+              style={featureItemStyle}
             >
               <Skeleton width={44} height={44} borderRadius={12} />
               <View style={styles.featureText}>

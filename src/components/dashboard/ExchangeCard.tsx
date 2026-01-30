@@ -56,142 +56,153 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
   const theme = useAppTheme();
   const { width } = useWindowDimensions();
   const isSmallScreen = width < 380;
-  const isTinyScreen = width < 350;
 
   const isNeutral = changePercent === '0.00%';
-  
-  const trendColor = isNeutral 
-    ? 'rgba(255, 255, 255, 0.7)' 
+
+  const trendColor = isNeutral
+    ? 'rgba(255, 255, 255, 0.7)'
     : (isPositive ? '#6EE7B7' : '#F87171');
 
   const getTrendColor = (percentStr?: string) => {
-      if (!percentStr) return 'rgba(255, 255, 255, 0.7)';
-      if (percentStr.includes('0.00') || percentStr === '0%' || percentStr === '+0.00%') return 'rgba(255, 255, 255, 0.7)';
-      return percentStr.includes('-') ? '#F87171' : '#6EE7B7';
+    if (!percentStr) return 'rgba(255, 255, 255, 0.7)';
+    if (percentStr.includes('0.00') || percentStr === '0%' || percentStr === '+0.00%') return 'rgba(255, 255, 255, 0.7)';
+    return percentStr.includes('-') ? '#F87171' : '#6EE7B7';
   };
 
   const buyColor = getTrendColor(buyChangePercent);
   const sellColor = getTrendColor(sellChangePercent);
 
-  const trendIcon = isNeutral 
-    ? "minus" 
+  const trendIcon = isNeutral
+    ? "minus"
     : (isPositive ? "trending-up" : "trending-down");
 
+  const rippleStyle = [styles.ripple, { borderRadius: theme.roundness * 6 }];
+  const cardGradientStyle = [
+    styles.card,
+    {
+      borderRadius: theme.roundness * 6,
+      borderColor: theme.colors.exchangeCardBorder,
+    }
+  ];
+  const iconContainerStyle = [
+    styles.iconContainer,
+    { backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: theme.roundness * 5 }
+  ];
+  const symbolIconStyle = [styles.symbolIcon, { backgroundColor: iconColor }];
+  const trendBadgeStyle = [
+    styles.trendBadge,
+    { backgroundColor: isNeutral ? 'rgba(255,255,255,0.1)' : (isPositive ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)') }
+  ];
+
   return (
-    <TouchableRipple 
-      onPress={onPress} 
-      style={{ marginBottom: 12, borderRadius: theme.roundness * 6 }}
+    <TouchableRipple
+      onPress={onPress}
+      style={rippleStyle}
       borderless
     >
       <LinearGradient
         colors={['#0e4981', '#0b3a67', '#082f54']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[styles.card, { 
-          borderRadius: theme.roundness * 6,
-          borderColor: theme.colors.exchangeCardBorder,
-          borderWidth: 1,
-          overflow: 'hidden',
-          position: 'relative'
-        }]}
+        style={cardGradientStyle}
       >
         {/* Background Blur Effect Circle */}
         <View style={styles.blurCircle} />
-        
-        <View style={[styles.header, { position: 'relative', zIndex: 1 }]}>
+
+        <View style={[styles.header, styles.headerZIndex1]}>
           <View style={styles.leftContent}>
-            <View style={[styles.iconContainer, { borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.1)', borderRadius: theme.roundness * 5 }]}>
+            <View style={iconContainerStyle}>
               {customIcon ? (
                 customIcon
               ) : iconUrl ? (
                 <Image source={{ uri: iconUrl }} style={styles.iconImage} />
               ) : iconName ? (
-                <View style={[styles.symbolIcon, { backgroundColor: iconColor }]}>
+                <View style={symbolIconStyle}>
                   {iconName === 'Bs' ? (
-                       <BolivarIcon color={iconTintColor || theme.colors.onPrimaryContainer} size={24} />
+                    <BolivarIcon color={iconTintColor || theme.colors.onPrimaryContainer} size={24} />
                   ) : (
-                    <MaterialCommunityIcons 
+                    <MaterialCommunityIcons
                       name={iconName} size={32} color={iconTintColor || theme.colors.onPrimaryContainer} />
                   )}
                 </View>
               ) : (
-                <View style={[styles.symbolIcon, { backgroundColor: iconColor }]}>
+                <View style={symbolIconStyle}>
                   <Text style={styles.symbolText}>{iconSymbol}</Text>
                 </View>
               )}
             </View>
             <View>
-              <Text variant="labelMedium" style={[{ color: 'rgba(255, 255, 255, 0.7)', textTransform: 'uppercase', letterSpacing: 0.5 }, styles.titleText]}>{title}</Text>
-              {subtitle ? <Text variant="bodySmall" style={{ color: 'rgba(255, 255, 255, 0.5)' }}>{subtitle}</Text> : null}
+              <Text variant="labelMedium" style={[styles.titleLabel, styles.titleText]}>{title}</Text>
+              {subtitle ? <Text variant="bodySmall" style={styles.subtitleText}>{subtitle}</Text> : null}
               <View style={styles.valueContainer}>
                 {buyValue && sellValue ? (
-                    <View style={[styles.dualContainer, isSmallScreen && { gap: 4 }]}>
-                        {/* GENERAL (Average/Main) */}
-                        <View style={{ flexShrink: 1 }}>
-                            <Text variant="labelSmall" style={{color: 'rgba(255, 255, 255, 0.7)', fontSize: isSmallScreen ? 8 : 10, marginBottom: 2}}>GENERAL</Text>
-                            <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
-                              <Text variant={isSmallScreen ? "titleMedium" : "titleLarge"} style={[{ color: '#FFFFFF', fontWeight: 'bold' }]}>{value}</Text>
-                              <Text variant="bodySmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginLeft: 2, fontSize: isSmallScreen ? 10 : 12}}>{currency}</Text>
-                            </View>
-                            <Text variant="labelSmall" style={{color: trendColor, fontSize: isSmallScreen ? 8 : 10}}>
-                                {changePercent}
-                            </Text>
-                        </View>
-  
-                        <View style={[styles.divider, { marginHorizontal: isSmallScreen ? 4 : 8 }]} />
-  
-                        {/* COMPRA */}
-                        <View style={{ flexShrink: 1 }}>
-                            <Text variant="labelSmall" style={{color: 'rgba(255, 255, 255, 0.7)', fontSize: isSmallScreen ? 8 : 10, marginBottom: 2}}>COMPRA</Text>
-                            <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
-                              <Text variant={isSmallScreen ? "titleMedium" : "titleLarge"} style={[{ color: '#FFFFFF', fontWeight: 'bold' }]}>{buyValue}</Text>
-                              <Text variant="bodySmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginLeft: 2, fontSize: isSmallScreen ? 10 : 12}}>{currency}</Text>
-                            </View>
-                            {buyChangePercent && (
-                                <Text variant="labelSmall" style={{color: buyChangePercent.includes('-') ? '#F87171' : buyChangePercent.includes('0.00') ? 'rgba(255, 255, 255, 0.7)' : '#6EE7B7', fontSize: isSmallScreen ? 8 : 10}}>
-                                    {buyChangePercent}
-                                </Text>
-                            )}
-                        </View>
-  
-                        <View style={[styles.divider, { marginHorizontal: isSmallScreen ? 4 : 8 }]} />
-  
-                        {/* VENTA */}
-                        <View style={{ flexShrink: 1 }}>
-                            <Text variant="labelSmall" style={{color: 'rgba(255, 255, 255, 0.7)', fontSize: isSmallScreen ? 8 : 10, marginBottom: 2}}>VENTA</Text>
-                            <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
-                              <Text variant={isSmallScreen ? "titleMedium" : "titleLarge"} style={[{ color: '#FFFFFF', fontWeight: 'bold' }]}>{sellValue}</Text>
-                              <Text variant="bodySmall" style={{color: 'rgba(255, 255, 255, 0.7)', marginLeft: 2, fontSize: isSmallScreen ? 10 : 12}}>{currency}</Text>
-                            </View>
-                            {sellChangePercent && (
-                                <Text variant="labelSmall" style={{color: sellChangePercent.includes('-') ? '#F87171' : sellChangePercent.includes('0.00') ? 'rgba(255, 255, 255, 0.7)' : '#6EE7B7', fontSize: isSmallScreen ? 8 : 10}}>
-                                    {sellChangePercent}
-                                </Text>
-                            )}
-                        </View>
+                  <View style={[styles.dualContainer, isSmallScreen && styles.gap4]}>
+                    {/* GENERAL (Average/Main) */}
+                    <View style={styles.generalContainer}>
+                      <Text variant="labelSmall" style={[styles.labelSmall, isSmallScreen && styles.fontSize8]}>GENERAL</Text>
+                      <View style={styles.rowBaseline}>
+                        <Text variant={isSmallScreen ? "titleMedium" : "titleLarge"} style={styles.whiteBold}>{value}</Text>
+                        <Text variant="bodySmall" style={[styles.currencyLabel, isSmallScreen && styles.fontSize10]}>{currency}</Text>
+                      </View>
+                      <Text variant="labelSmall" style={[styles.trendLabel, { color: trendColor }, isSmallScreen && styles.fontSize8]}>
+                        {changePercent}
+                      </Text>
                     </View>
+
+                    <View style={[styles.divider, isSmallScreen ? styles.marginH4 : styles.marginH8]} />
+
+                    {/* COMPRA */}
+                    <View style={styles.generalContainer}>
+                      <Text variant="labelSmall" style={[styles.labelSmall, isSmallScreen && styles.fontSize8]}>COMPRA</Text>
+                      <View style={styles.rowBaseline}>
+                        <Text variant={isSmallScreen ? "titleMedium" : "titleLarge"} style={styles.whiteBold}>{buyValue}</Text>
+                        <Text variant="bodySmall" style={[styles.currencyLabel, isSmallScreen && styles.fontSize10]}>{currency}</Text>
+                      </View>
+                      {buyChangePercent && (
+                        <Text variant="labelSmall" style={[styles.trendLabel, { color: getTrendColor(buyChangePercent) }, isSmallScreen && styles.fontSize8]}>
+                          {buyChangePercent}
+                        </Text>
+                      )}
+                    </View>
+
+                    <View style={[styles.divider, isSmallScreen ? styles.marginH4 : styles.marginH8]} />
+
+                    {/* VENTA */}
+                    <View style={styles.generalContainer}>
+                      <Text variant="labelSmall" style={[styles.labelSmall, isSmallScreen && styles.fontSize8]}>VENTA</Text>
+                      <View style={styles.rowBaseline}>
+                        <Text variant={isSmallScreen ? "titleMedium" : "titleLarge"} style={styles.whiteBold}>{sellValue}</Text>
+                        <Text variant="bodySmall" style={[styles.currencyLabel, isSmallScreen && styles.fontSize10]}>{currency}</Text>
+                      </View>
+                      {sellChangePercent && (
+                        <Text variant="labelSmall" style={[styles.trendLabel, { color: getTrendColor(sellChangePercent) }, isSmallScreen && styles.fontSize8]}>
+                          {sellChangePercent}
+                        </Text>
+                      )}
+                    </View>
+                  </View>
                 ) : (
-                  <View style={{flexDirection: 'row', alignItems: 'baseline'}}>
-                    <Text variant="headlineMedium" style={[styles.valueText, { color: '#FFFFFF' }]}>{value}</Text>
-                    <Text variant="titleMedium" style={[styles.currencyText, { color: 'rgba(255, 255, 255, 0.7)' }]}>{currency}</Text>
+                  <View style={styles.rowBaseline}>
+                    <Text variant="headlineMedium" style={[styles.whiteBold, styles.valueText]}>{value}</Text>
+                    <Text variant="titleMedium" style={[styles.currencyLabel, styles.currencyText]}>{currency}</Text>
                   </View>
                 )}
               </View>
             </View>
           </View>
-          
-          <View style={{alignItems: 'flex-end', position: 'relative', zIndex: 1}}>
-              {/* Trend Indicator */}
-              {!buyValue && (
-                  <View style={{flexDirection: 'row', alignItems: 'center', backgroundColor: isNeutral ? 'rgba(255,255,255,0.1)' : (isPositive ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'), paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12}}>
-                      <MaterialCommunityIcons name={trendIcon} size={16} color={trendColor} />
-                      <Text variant="labelMedium" style={[styles.trendText, { color: trendColor }]}>{changePercent}</Text>
-                  </View>
-              )}
-          </View>
         </View>
-  
-        <View style={{ height: 60, marginTop: 8, position: 'relative', zIndex: 1 }}>
+
+        <View style={styles.trendIndicatorContainer}>
+          {/* Trend Indicator */}
+          {!buyValue && (
+            <View style={trendBadgeStyle}>
+              <MaterialCommunityIcons name={trendIcon} size={16} color={trendColor} />
+              <Text variant="labelMedium" style={[styles.trendText, { color: trendColor }]}>{changePercent}</Text>
+            </View>
+          )}
+        </View>
+
+        <View style={styles.chartWrapper}>
           <Svg height="100%" width="100%" viewBox="0 0 100 40" preserveAspectRatio="none">
             {buyChartPath && sellChartPath ? (
               <>
@@ -249,11 +260,13 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     elevation: 0,
+    overflow: 'hidden',
+    position: 'relative'
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center', // Align items to center vertically
+    alignItems: 'center',
     marginBottom: 4,
   },
   titleText: {
@@ -280,13 +293,14 @@ const styles = StyleSheet.create({
     height: 40,
     overflow: 'hidden',
     borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   iconImage: {
     width: 40,
     height: 40,
-    transform: [{ scale: 1.1 }], // scale-110 from tailwind
+    transform: [{ scale: 1.1 }],
   },
   symbolIcon: {
     width: 40,
@@ -297,6 +311,18 @@ const styles = StyleSheet.create({
   symbolText: {
     fontWeight: '900',
     color: 'black',
+  },
+  trendBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  trendIndicatorContainer: {
+    alignItems: 'flex-end',
+    position: 'relative',
+    zIndex: 1,
   },
   subtitle: {
     fontSize: 10,
@@ -351,6 +377,64 @@ const styles = StyleSheet.create({
     borderRadius: 75,
     backgroundColor: 'rgba(255,255,255,0.05)',
     zIndex: 0,
+  },
+  ripple: {
+    marginBottom: 12,
+  },
+  headerZIndex1: {
+    position: 'relative',
+    zIndex: 1,
+  },
+  generalContainer: {
+    flexShrink: 1,
+  },
+  labelSmall: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    marginBottom: 2,
+  },
+  fontSize8: {
+    fontSize: 8,
+  },
+  fontSize10: {
+    fontSize: 10,
+  },
+  rowBaseline: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  whiteBold: {
+    color: '#FFFFFF',
+    fontWeight: 'bold',
+  },
+  currencyLabel: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    marginLeft: 2,
+  },
+  trendLabel: {
+    // color provided dynamically
+  },
+  chartWrapper: {
+    height: 60,
+    marginTop: 8,
+    position: 'relative',
+    zIndex: 1,
+  },
+  titleLabel: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  subtitleText: {
+    color: 'rgba(255, 255, 255, 0.5)',
+  },
+  marginH4: {
+    marginHorizontal: 4,
+  },
+  marginH8: {
+    marginHorizontal: 8,
+  },
+  gap4: {
+    gap: 4,
   },
 });
 

@@ -17,17 +17,17 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, onPress }) => {
   const icon = getCategoryIcon(category.name);
 
   return (
-    <TouchableRipple 
+    <TouchableRipple
       onPress={() => onPress(category)}
-      style={{ marginBottom: 12, borderRadius: theme.roundness * 6 }}
+      style={[styles.ripple, { borderRadius: theme.roundness * 6 }]}
       borderless
       accessibilityRole="button"
       accessibilityLabel={`Categoría ${category.name}`}
     >
-      <Surface 
+      <Surface
         elevation={0}
-        style={[styles.card, { 
-          backgroundColor: theme.colors.elevation.level1, 
+        style={[styles.card, {
+          backgroundColor: theme.colors.elevation.level1,
           borderColor: theme.colors.outline,
           borderRadius: theme.roundness * 6
         }]}
@@ -36,7 +36,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, onPress }) => {
           <View
             style={[
               styles.iconContainer,
-              { 
+              {
                 backgroundColor: theme.colors.primaryContainer,
                 borderRadius: theme.roundness * 4
               },
@@ -63,6 +63,9 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, onPress }) => {
 };
 
 const styles = StyleSheet.create({
+  ripple: {
+    marginBottom: 12,
+  },
   card: {
     padding: 16,
     borderWidth: 1,

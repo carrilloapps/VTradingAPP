@@ -66,14 +66,14 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   const adUnitId = Platform.OS === 'ios' ? AppConfig.ADMOB_BANNER_ID_IOS : AppConfig.ADMOB_BANNER_ID_ANDROID;
   const bannerId = __DEV__ ? TestIds.BANNER : adUnitId;
   const shouldShowAd = showAd && !resolvedIsPremium && !!bannerId;
-  
+
   const [imageError, setImageError] = useState(false);
 
   // Reset error state when identity changes
   useEffect(() => {
     setImageError(false);
   }, [avatarUrl, email]);
-  
+
   // Custom theme colors fallback
   const accentGreen = colors.success;
   const accentRed = colors.error;
@@ -143,9 +143,9 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
     // 1. If user has a photoURL (e.g. Google Sign In), use it.
     if (avatarUrl) {
       return (
-        <Avatar.Image 
-          size={44} 
-          source={{ uri: avatarUrl }} 
+        <Avatar.Image
+          size={44}
+          source={{ uri: avatarUrl }}
           accessibilityLabel={`Foto de perfil de ${userName || 'Usuario'}`}
           style={[styles.avatar as ViewStyle, themeStyles.avatar]}
         />
@@ -157,9 +157,9 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
       const hash = md5(email.trim().toLowerCase());
       const gravatarUrl = `https://www.gravatar.com/avatar/${hash}?d=404`;
       return (
-        <Avatar.Image 
-          size={44} 
-          source={{ uri: gravatarUrl }} 
+        <Avatar.Image
+          size={44}
+          source={{ uri: gravatarUrl }}
           onError={() => setImageError(true)}
           accessibilityLabel={`Foto de perfil de ${userName || 'Usuario'}`}
           style={[styles.avatar as ViewStyle, themeStyles.avatar]}
@@ -169,10 +169,10 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
 
     // 3. Fallback: Initials
     return (
-      <Avatar.Text 
-        size={44} 
-        label={getInitials(userName || 'User')} 
-        style={[styles.avatar as ViewStyle, { backgroundColor: theme.colors.primaryContainer, borderColor: theme.colors.outline }]}
+      <Avatar.Text
+        size={44}
+        label={getInitials(userName || 'User')}
+        style={[styles.avatarText, { backgroundColor: theme.colors.primaryContainer, borderColor: theme.colors.outline }]}
         color={theme.colors.onPrimaryContainer}
         accessibilityLabel={`Iniciales de perfil de ${userName || 'Usuario'}`}
       />
@@ -180,9 +180,9 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   };
 
   const renderProfileContent = () => (
-    <TouchableOpacity 
-      onPress={onProfilePress} 
-      style={styles.userInfo} 
+    <TouchableOpacity
+      onPress={onProfilePress}
+      style={styles.userInfo}
       activeOpacity={0.7}
       accessibilityRole="button"
       accessibilityLabel={`Perfil de ${userName || 'Usuario'}. ${resolvedIsPremium ? 'Plan Premium' : 'Plan Gratuito'}`}
@@ -192,7 +192,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
         {renderAvatar()}
         <View style={[styles.statusDot, themeStyles.statusDot]} />
       </View>
-      
+
       <View style={styles.textContainer}>
         <Text style={[styles.subtitle, resolvedIsPremium ? themeStyles.subtitlePremium : themeStyles.subtitleDefault]}>
           {resolvedIsPremium ? 'PLAN PREMIUM' : 'PLAN GRATUITO'}
@@ -219,22 +219,22 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
 
   const renderSimpleContent = () => (
     <View style={[styles.textContainer, styles.simpleHeaderContainer]} accessibilityRole="header">
-       <Text variant="titleLarge" style={[styles.simpleTitle, themeStyles.simpleTitle]}>
-          {title}
-        </Text>
+      <Text variant="titleLarge" style={[styles.simpleTitle, themeStyles.simpleTitle]}>
+        {title}
+      </Text>
     </View>
   );
 
   return (
     <View style={[styles.wrapper, style]}>
-      <View style={[styles.container, themeStyles.container, { 
-        paddingTop: insets.top + 10,
+      <View style={[styles.container, themeStyles.container, {
+        paddingTop: insets.top + (styles.headerPadding.paddingTop as number),
       }]}>
         <View style={styles.leftContent}>
           {onBackPress && (
             <TouchableRipple
               onPress={onBackPress}
-              style={[styles.iconButton, themeStyles.iconButton, { marginRight: 8 }]}
+              style={[styles.iconButton, themeStyles.iconButton, styles.backButton]}
               borderless
               rippleColor="rgba(0, 0, 0, .1)"
               accessibilityRole="button"
@@ -253,8 +253,8 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
         {(variant !== 'simple' || onActionPress || showNotification) && (
           <View style={styles.rightContent}>
             {onActionPress && (
-              <TouchableRipple 
-                onPress={onActionPress} 
+              <TouchableRipple
+                onPress={onActionPress}
                 style={[styles.iconButton, themeStyles.iconButton]}
                 borderless
                 rippleColor="rgba(0, 0, 0, .1)"
@@ -264,24 +264,24 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
                 {rightActionIcon ? (
-                  <MaterialCommunityIcons 
-                    name={rightActionIcon} 
-                    size={24} 
-                    color={theme.colors.onSurface} 
+                  <MaterialCommunityIcons
+                    name={rightActionIcon}
+                    size={24}
+                    color={theme.colors.onSurface}
                   />
                 ) : (
-                  <MaterialCommunityIcons 
-                    name="dots-vertical" 
-                    size={24} 
-                    color={theme.colors.onSurfaceVariant} 
+                  <MaterialCommunityIcons
+                    name="dots-vertical"
+                    size={24}
+                    color={theme.colors.onSurfaceVariant}
                   />
                 )}
               </TouchableRipple>
             )}
 
             {showSecondaryAction && onSecondaryActionPress && (
-              <TouchableRipple 
-                onPress={onSecondaryActionPress} 
+              <TouchableRipple
+                onPress={onSecondaryActionPress}
                 style={[styles.iconButton, themeStyles.iconButton]}
                 borderless
                 rippleColor="rgba(0, 0, 0, .1)"
@@ -290,16 +290,16 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
                 accessibilityHint={secondaryActionIcon === 'share-variant' ? "Compartir este contenido" : ""}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <MaterialCommunityIcons 
-                  name={secondaryActionIcon} 
-                  size={24} 
+                <MaterialCommunityIcons
+                  name={secondaryActionIcon}
+                  size={24}
                   color={theme.colors.onSurface}
                 />
               </TouchableRipple>
             )}
 
             {showNotification && (
-              <NotificationButton 
+              <NotificationButton
                 icon={notificationIcon}
               />
             )}
@@ -328,10 +328,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 20,
     paddingBottom: 16,
-    // Border is handled by borderBottomColor + borderWidth usually 0 or 1 depending on context, 
-    // but here we can default to 0 and let parent or style prop override, 
-    // OR default to 1 for consistency.
-    borderBottomWidth: 1, 
+    borderBottomWidth: 1,
+  },
+  headerPadding: {
+    paddingTop: 10,
   },
   leftContent: {
     flex: 1,
@@ -352,6 +352,12 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   avatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    borderWidth: 2,
+  },
+  avatarText: {
     width: 44,
     height: 44,
     borderRadius: 22,
@@ -383,6 +389,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
+  },
+  backButton: {
+    marginRight: 8,
   },
   badge: {
     position: 'absolute',

@@ -107,7 +107,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
       />
       <KeyboardAvoidingView 
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
+        style={styles.flex1}
       >
         <ScrollView 
           contentContainerStyle={[
@@ -196,6 +196,9 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
 
 const styles = StyleSheet.create({
   screen: {
+    flex: 1,
+  },
+  flex1: {
     flex: 1,
   },
   container: {

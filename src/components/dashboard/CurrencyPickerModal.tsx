@@ -8,201 +8,212 @@ import { AppConfig } from '../../constants/AppConfig';
 import { BolivarIcon } from '../ui/BolivarIcon';
 
 export interface CurrencyPickerModalProps {
-  visible: boolean;
-  onDismiss: () => void;
-  onSelect?: (currency: CurrencyRate) => void;
-  selectedCurrencyCode?: string | null;
-  rates: CurrencyRate[];
-  title?: string;
-  favorites?: string[];
-  excludedCodes?: string[];
-  multiSelect?: boolean;
-  selectedIds?: string[];
-  onToggle?: (currency: CurrencyRate) => void;
-  maxSelected?: number;
+    visible: boolean;
+    onDismiss: () => void;
+    onSelect?: (currency: CurrencyRate) => void;
+    selectedCurrencyCode?: string | null;
+    rates: CurrencyRate[];
+    title?: string;
+    favorites?: string[];
+    excludedCodes?: string[];
+    multiSelect?: boolean;
+    selectedIds?: string[];
+    onToggle?: (currency: CurrencyRate) => void;
+    maxSelected?: number;
 }
 
 const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
-  visible,
-  onDismiss,
-  onSelect,
-  selectedCurrencyCode,
-  rates,
-  title = "Seleccionar divisa",
-  favorites = ['USD', 'USDT', 'VES'],
-  excludedCodes = [],
-  multiSelect = false,
-  selectedIds = [],
-  onToggle,
-  maxSelected
+    visible,
+    onDismiss,
+    onSelect,
+    selectedCurrencyCode,
+    rates,
+    title = "Seleccionar divisa",
+    favorites = ['USD', 'USDT', 'VES'],
+    excludedCodes = [],
+    multiSelect = false,
+    selectedIds = [],
+    onToggle,
+    maxSelected
 }) => {
-  const theme = useTheme();
-  const [searchQuery, setSearchQuery] = useState('');
+    const theme = useTheme();
+    const [searchQuery, setSearchQuery] = useState('');
 
-  const isMaxReached = !!(multiSelect && maxSelected && selectedIds.length >= maxSelected);
+    const isMaxReached = !!(multiSelect && maxSelected && selectedIds.length >= maxSelected);
 
-  const handleItemPress = (item: CurrencyRate) => {
-    if (multiSelect && onToggle) {
-        if (!selectedIds.includes(item.id) && isMaxReached) {
-            return; // Block selection if max reached
+    const handleItemPress = (item: CurrencyRate) => {
+        if (multiSelect && onToggle) {
+            if (!selectedIds.includes(item.id) && isMaxReached) {
+                return; // Block selection if max reached
+            }
+            onToggle(item);
+        } else if (onSelect) {
+            onSelect(item);
+            onDismiss();
         }
-        onToggle(item);
-    } else if (onSelect) {
-        onSelect(item);
-        onDismiss();
-    }
-  };
+    };
 
-  const themeStyles = React.useMemo(() => ({
-    searchBarInput: {
-      color: theme.colors.onSurface,
-    },
-    sectionHeader: {
-      color: theme.colors.onSurfaceVariant,
-    },
-    pickerItem: {
-      borderRadius: theme.roundness * 3, // 12px
-    },
-    pickerItemSelected: {
-      backgroundColor: theme.colors.secondaryContainer,
-    },
-    iconPlaceholderNormal: {
-      backgroundColor: theme.colors.elevation.level4,
-      borderRadius: theme.roundness * 5, // 20px
-    },
-    iconPlaceholderSelected: {
-      backgroundColor: theme.colors.primary,
-      borderRadius: theme.roundness * 5, // 20px
-    },
-    checkBadge: {
-      backgroundColor: theme.colors.elevation.level2,
-      borderRadius: theme.roundness * 3, // 12px
-    },
-    textPrimary: {
-      color: theme.colors.onSurface,
-    },
-    textSecondary: {
-      color: theme.colors.onSurfaceVariant,
-    },
-  }), [theme]);
+    const themeStyles = React.useMemo(() => ({
+        searchBarInput: {
+            color: theme.colors.onSurface,
+        },
+        sectionHeader: {
+            color: theme.colors.onSurfaceVariant,
+        },
+        pickerItem: {
+            borderRadius: theme.roundness * 3, // 12px
+        },
+        pickerItemSelected: {
+            backgroundColor: theme.colors.secondaryContainer,
+        },
+        iconPlaceholderNormal: {
+            backgroundColor: theme.colors.elevation.level4,
+            borderRadius: theme.roundness * 5, // 20px
+        },
+        iconPlaceholderSelected: {
+            backgroundColor: theme.colors.primary,
+            borderRadius: theme.roundness * 5, // 20px
+        },
+        checkBadge: {
+            backgroundColor: theme.colors.elevation.level2,
+            borderRadius: theme.roundness * 3, // 12px
+        },
+        textPrimary: {
+            color: theme.colors.onSurface,
+        },
+        textSecondary: {
+            color: theme.colors.onSurfaceVariant,
+        },
+        footerContainer: {
+            padding: 16,
+            borderTopWidth: 1,
+            borderTopColor: theme.colors.outline,
+        },
+        listContent: {
+            paddingBottom: 24,
+        },
+        searchBarContainer: {
+            borderRadius: theme.roundness * 3,
+            borderColor: theme.colors.outline,
+            borderWidth: 1,
+            backgroundColor: theme.dark ? theme.colors.elevation.level2 : theme.colors.surface,
+        },
+        priceText: {
+            color: theme.colors.onSurface,
+        }
+    }), [theme]);
 
-  const sections = useMemo(() => {
-      const lowerQuery = searchQuery.toLowerCase();
-      
-      // First filter by search query and excluded codes
-      const filtered = rates.filter(r => 
-          (r.code.toLowerCase().includes(lowerQuery) || 
-          r.name.toLowerCase().includes(lowerQuery)) &&
-          !excludedCodes.includes(r.code)
-      );
+    const sections = useMemo(() => {
+        const lowerQuery = searchQuery.toLowerCase();
 
-      const main = filtered.filter(r => favorites.includes(r.code));
-      const others = filtered.filter(r => !favorites.includes(r.code));
+        // First filter by search query and excluded codes
+        const filtered = rates.filter(r =>
+            (r.code.toLowerCase().includes(lowerQuery) ||
+                r.name.toLowerCase().includes(lowerQuery)) &&
+            !excludedCodes.includes(r.code)
+        );
 
-      const result = [];
-      if (main.length > 0) result.push({ title: 'PRINCIPALES', data: main });
-      if (others.length > 0) result.push({ title: 'OTRAS MONEDAS', data: others });
+        const main = filtered.filter(r => favorites.includes(r.code));
+        const others = filtered.filter(r => !favorites.includes(r.code));
 
-      return result;
-  }, [rates, searchQuery, favorites, excludedCodes]);
+        const result = [];
+        if (main.length > 0) result.push({ title: 'PRINCIPALES', data: main });
+        if (others.length > 0) result.push({ title: 'OTRAS MONEDAS', data: others });
 
-  return (
-    <BottomSheetModal
-        visible={visible}
-        onClose={onDismiss}
-        title={title}
-    >
-        <Searchbar 
-            placeholder="Buscar moneda o país..." 
-            onChangeText={setSearchQuery} 
-            value={searchQuery} 
-            style={[
-                styles.searchBar, 
-                { 
-                    borderRadius: theme.roundness * 3, 
-                    borderColor: theme.colors.outline,
-                    borderWidth: 1, // Ensure border is visible in light mode
-                    backgroundColor: theme.dark ? theme.colors.elevation.level2 : theme.colors.surface,
-                }
-            ]}
-            inputStyle={themeStyles.searchBarInput}
-            iconColor={theme.colors.onSurfaceVariant}
-            placeholderTextColor={theme.colors.onSurfaceVariant}
-            mode="bar"
-            elevation={0} // Flat style
-        />
+        return result;
+    }, [rates, searchQuery, favorites, excludedCodes]);
 
-        <SectionList
-            sections={sections}
-            keyExtractor={(item) => item.id || item.code}
-            renderItem={({ item }) => {
-                const isSelected = multiSelect 
-                    ? selectedIds.includes(item.id) 
-                    : selectedCurrencyCode === item.code;
-                
-                return (
-                    <TouchableOpacity 
-                        onPress={() => handleItemPress(item)}
-                        style={[
-                            styles.pickerItem, 
-                            themeStyles.pickerItem,
-                            isSelected && themeStyles.pickerItemSelected,
-                            // Opacity for disabled items
-                            (!isSelected && isMaxReached) ? { opacity: 0.5 } : undefined
-                        ]}
-                        disabled={!isSelected && isMaxReached}
-                    >
-                        <View style={[
-                            styles.iconPlaceholder, 
-                            isSelected ? themeStyles.iconPlaceholderSelected : themeStyles.iconPlaceholderNormal
-                        ]}>
-                             {(item.code === 'VES' || item.iconName === 'Bs') ? (
-                                <BolivarIcon color={isSelected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant} size={24} />
-                             ) : (
-                                <Icon 
-                                    source={item.iconName && item.iconName !== 'attach-money' ? item.iconName : 'currency-usd'} 
-                                    size={24} 
-                                    color={isSelected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant} 
-                                />
-                             )}
-                        </View>
-                        <View style={styles.textContainer}>
-                            <Text variant="titleMedium" style={[{ fontWeight: isSelected ? '700' : '400'}, themeStyles.textPrimary]}>
-                                {item.code}
-                            </Text>
-                            <Text variant="bodySmall" style={themeStyles.textSecondary} numberOfLines={1}>
-                                {item.name}
-                            </Text>
-                        </View>
-                        <View style={styles.rightContainer}>
-                            <Text variant="titleMedium" style={[styles.priceText, { color: theme.colors.onSurface }]}>
-                                {item.value.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs
-                            </Text>
-                            {isSelected && (
-                                <View style={styles.checkContainer}>
-                                    <MaterialCommunityIcons name="check-circle" size={16} color={theme.colors.primary} />
-                                </View>
-                            )}
-                        </View>
-                    </TouchableOpacity>
-                );
-            }}
-            renderSectionHeader={({ section: { title } }) => (
-                <Text style={[styles.sectionHeader, themeStyles.sectionHeader]}>{title}</Text>
+    return (
+        <BottomSheetModal
+            visible={visible}
+            onClose={onDismiss}
+            title={title}
+        >
+            <Searchbar
+                placeholder="Buscar moneda o país..."
+                onChangeText={setSearchQuery}
+                value={searchQuery}
+                style={[
+                    styles.searchBar,
+                    themeStyles.searchBarContainer
+                ]}
+                inputStyle={themeStyles.searchBarInput}
+                iconColor={theme.colors.onSurfaceVariant}
+                placeholderTextColor={theme.colors.onSurfaceVariant}
+                mode="bar"
+                elevation={0} // Flat style
+            />
+
+            <SectionList
+                sections={sections}
+                keyExtractor={(item) => item.id || item.code}
+                renderItem={({ item }) => {
+                    const isSelected = multiSelect
+                        ? selectedIds.includes(item.id)
+                        : selectedCurrencyCode === item.code;
+
+                    return (
+                        <TouchableOpacity
+                            onPress={() => handleItemPress(item)}
+                            style={[
+                                styles.pickerItem,
+                                themeStyles.pickerItem,
+                                isSelected && themeStyles.pickerItemSelected,
+                                (!isSelected && isMaxReached) && styles.disabledOpacity
+                            ]}
+                            disabled={!isSelected && isMaxReached}
+                        >
+                            <View style={[
+                                styles.iconPlaceholder,
+                                isSelected ? themeStyles.iconPlaceholderSelected : themeStyles.iconPlaceholderNormal
+                            ]}>
+                                {(item.code === 'VES' || item.iconName === 'Bs') ? (
+                                    <BolivarIcon color={isSelected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant} size={24} />
+                                ) : (
+                                    <Icon
+                                        source={item.iconName && item.iconName !== 'attach-money' ? item.iconName : 'currency-usd'}
+                                        size={24}
+                                        color={isSelected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant}
+                                    />
+                                )}
+                            </View>
+                            <View style={styles.textContainer}>
+                                <Text variant="titleMedium" style={[isSelected ? styles.fontBold : styles.fontNormal, themeStyles.textPrimary]}>
+                                    {item.code}
+                                </Text>
+                                <Text variant="bodySmall" style={themeStyles.textSecondary} numberOfLines={1}>
+                                    {item.name}
+                                </Text>
+                            </View>
+                            <View style={styles.rightContainer}>
+                                <Text variant="titleMedium" style={[styles.priceText, themeStyles.priceText]}>
+                                    {item.value.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs
+                                </Text>
+                                {isSelected && (
+                                    <View style={styles.checkContainer}>
+                                        <MaterialCommunityIcons name="check-circle" size={16} color={theme.colors.primary} />
+                                    </View>
+                                )}
+                            </View>
+                        </TouchableOpacity>
+                    );
+                }}
+                renderSectionHeader={({ section: { title: sectionTitle } }) => (
+                    <Text style={[styles.sectionHeader, themeStyles.sectionHeader]}>{sectionTitle}</Text>
+                )}
+                stickySectionHeadersEnabled={false}
+                contentContainerStyle={themeStyles.listContent}
+            />
+
+            {multiSelect && (
+                <View style={themeStyles.footerContainer}>
+                    <Button mode="contained" onPress={onDismiss}>
+                        Listo
+                    </Button>
+                </View>
             )}
-            stickySectionHeadersEnabled={false}
-            contentContainerStyle={{ paddingBottom: 24 }}
-        />
-        
-        {multiSelect && (
-            <View style={{ padding: 16, borderTopWidth: 1, borderTopColor: theme.colors.outline }}>
-                <Button mode="contained" onPress={onDismiss}>
-                    Listo
-                </Button>
-            </View>
-        )}
-    </BottomSheetModal>
-  );
+        </BottomSheetModal>
+    );
 };
 
 const styles = StyleSheet.create({
@@ -262,6 +273,15 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'center',
     },
+    disabledOpacity: {
+        opacity: 0.5,
+    },
+    fontBold: {
+        fontWeight: '700',
+    },
+    fontNormal: {
+        fontWeight: '400',
+    }
 });
 
 export default CurrencyPickerModal;

@@ -11,14 +11,13 @@ const NotificationsSkeleton = () => {
       {/* Notification Cards Skeleton */}
       <View style={styles.list}>
         {[1, 2, 3, 4, 5, 6].map((key) => (
-          <View 
-            key={key} 
+          <View
+            key={key}
             style={[
-              styles.card, 
-              { 
+              styles.card,
+              {
                 borderColor: theme.colors.outline,
                 backgroundColor: theme.colors.elevation.level1,
-                borderRadius: 24 // Matches NotificationCard standard
               }
             ]}
           >
@@ -29,8 +28,8 @@ const NotificationsSkeleton = () => {
                   <Skeleton width={100} height={16} />
                   <Skeleton width={60} height={12} />
                 </View>
-                <Skeleton width="90%" height={14} style={{ marginTop: 8 }} />
-                <Skeleton width="60%" height={14} style={{ marginTop: 6 }} />
+                <Skeleton width="90%" height={14} style={styles.skeletonSpacer} />
+                <Skeleton width="60%" height={14} style={styles.skeletonSpacerSmall} />
               </View>
             </View>
           </View>
@@ -53,6 +52,7 @@ const styles = StyleSheet.create({
   card: {
     borderWidth: 1,
     padding: 16,
+    borderRadius: 24,
   },
   cardContent: {
     flexDirection: 'row',
@@ -67,6 +67,12 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 4,
   },
+  skeletonSpacer: {
+    marginTop: 8,
+  },
+  skeletonSpacerSmall: {
+    marginTop: 6,
+  }
 });
 
 export default NotificationsSkeleton;

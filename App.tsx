@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import * as Clarity from '@microsoft/react-native-clarity';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { Platform, UIManager } from 'react-native';
+import { Platform, UIManager, StyleSheet } from 'react-native';
 import { ThemeProvider } from './src/theme/ThemeContext';
 
 // Enable LayoutAnimation for Android (Old Architecture only)
@@ -29,6 +29,7 @@ import { getPerformance, trace, initializePerformance } from '@react-native-fire
 import * as Sentry from '@sentry/react-native';
 import { AppConfig } from './src/constants/AppConfig';
 import { deepLinkService } from './src/services/DeepLinkService';
+import { notificationInitService } from './src/services/NotificationInitService';
 
 // Silence Firebase modular deprecation warnings
 // @ts-ignore
@@ -37,7 +38,7 @@ globalThis.RNFB_SILENCE_MODULAR_DEPRECATION_WARNINGS = true;
 const isProd = AppConfig.IS_PROD;
 
 Clarity.initialize(AppConfig.CLARITY_PROJECT_ID, {
-  logLevel: isProd ? Clarity.LogLevel.None : Clarity.LogLevel.Verbose, 
+  logLevel: isProd ? Clarity.LogLevel.None : Clarity.LogLevel.Verbose,
 });
 
 Sentry.init({
@@ -64,6 +65,7 @@ Sentry.init({
 });
 
 import ErrorBoundary from './src/components/ErrorBoundary';
+import ToastContainer from './src/components/ui/ToastContainer';
 
 function App(): React.JSX.Element {
   useEffect(() => {
@@ -91,6 +93,9 @@ function App(): React.JSX.Element {
         await inAppMessagingService.initialize();
 
         await appDistributionService.checkForUpdate();
+
+        // Initialize notification system (checks permissions, gets token, subscribes to topics)
+        await notificationInitService.initialize();
       } catch (e) {
         // Safe catch to ensure app continues even if initialization fails
         console.error('Firebase initialization error:', e);
@@ -103,7 +108,7 @@ function App(): React.JSX.Element {
 
     // Initialize Deep Link Handling
     const cleanupDeepLinks = deepLinkService.init();
-    
+
     return () => {
       cleanupDeepLinks();
     };
@@ -112,13 +117,14 @@ function App(): React.JSX.Element {
   return (
     <ErrorBoundary>
       <SafeAreaProvider>
-        <GestureHandlerRootView style={{ flex: 1 }}>
+        <GestureHandlerRootView style={styles.container}>
           <QueryClientProvider client={queryClient}>
             <ThemeProvider>
               <FilterProvider>
                 <NotificationProvider>
                   <NotificationController />
                   <NoInternetModal />
+                  <ToastContainer />
                   <AppNavigator />
                 </NotificationProvider>
               </FilterProvider>
@@ -129,5 +135,11 @@ function App(): React.JSX.Element {
     </ErrorBoundary>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
 
 export default Sentry.wrap(App);

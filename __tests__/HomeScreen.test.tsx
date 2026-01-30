@@ -2,7 +2,7 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react-native';
 import HomeScreen from '../src/screens/HomeScreen';
 import { Provider as PaperProvider, MD3LightTheme } from 'react-native-paper';
-import { NavigationContainer } from '@react-navigation/native';
+// NavigationContainer removed as it was unused
 
 jest.mock('react-native-paper', () => {
   const Actual = jest.requireActual('react-native-paper');
@@ -17,7 +17,7 @@ jest.mock('react-native-paper', () => {
       inversePrimary: '#b39ddb',
       outline: '#cccccc',
       elevation: {
-          level1: '#f5f5f5',
+        level1: '#f5f5f5',
       }
     },
     spacing: { xs: 4, s: 8, m: 12, l: 16, xl: 20, xxl: 24 },
@@ -41,7 +41,7 @@ const mockTheme = {
     inversePrimary: '#b39ddb',
     outline: '#cccccc',
     elevation: {
-        level1: '#f5f5f5',
+      level1: '#f5f5f5',
     }
   },
   spacing: { xs: 4, s: 8, m: 12, l: 16, xl: 20, xxl: 24 },
@@ -72,7 +72,7 @@ jest.mock('../src/services/StocksService', () => ({
     getStocks: jest.fn(() => Promise.resolve([])),
     subscribe: jest.fn((callback) => {
       callback([]);
-      return () => {};
+      return () => { };
     }),
     isMarketOpen: jest.fn(() => true),
   },
@@ -117,31 +117,31 @@ jest.mock('../src/services/ObservabilityService', () => ({
 }));
 
 jest.mock('../src/services/CurrencyService', () => ({
-    CurrencyService: {
-      getRates: jest.fn(() => Promise.resolve([
-        {
-          id: '1',
-          code: 'USD',
-          name: 'Dólar Estadounidense (BCV)',
-          value: 36.58,
-          changePercent: 0.14,
-          type: 'fiat',
-          iconName: 'account-balance',
-          lastUpdated: new Date().toISOString(),
-        },
-        {
-          id: '4',
-          code: 'BTC',
-          name: 'Bitcoin',
-          value: 2345901.00,
-          changePercent: 2.45,
-          type: 'crypto',
-          iconName: 'currency-bitcoin',
-          lastUpdated: new Date().toISOString(),
-        }
-      ])),
-      getAvailableTargetRates: jest.fn(() => []), // Add this for AdvancedCalculatorScreen
-      subscribe: jest.fn((callback) => {
+  CurrencyService: {
+    getRates: jest.fn(() => Promise.resolve([
+      {
+        id: '1',
+        code: 'USD',
+        name: 'Dólar Estadounidense (BCV)',
+        value: 36.58,
+        changePercent: 0.14,
+        type: 'fiat',
+        iconName: 'account-balance',
+        lastUpdated: new Date().toISOString(),
+      },
+      {
+        id: '4',
+        code: 'BTC',
+        name: 'Bitcoin',
+        value: 2345901.00,
+        changePercent: 2.45,
+        type: 'crypto',
+        iconName: 'currency-bitcoin',
+        lastUpdated: new Date().toISOString(),
+      }
+    ])),
+    getAvailableTargetRates: jest.fn(() => []), // Add this for AdvancedCalculatorScreen
+    subscribe: jest.fn((callback) => {
       // Use setTimeout to break the synchronous loop and avoid maximum update depth exceeded
       setTimeout(() => {
         callback([
@@ -167,7 +167,7 @@ jest.mock('../src/services/CurrencyService', () => ({
           }
         ]);
       }, 0);
-      return () => {};
+      return () => { };
     }),
   },
 }));
@@ -184,7 +184,7 @@ const renderWithProviders = (component: React.ReactNode) => {
 describe('HomeScreen', () => {
   it('renders correctly with user greeting', async () => {
     const { getByText } = renderWithProviders(<HomeScreen />);
-    
+
     await waitFor(() => {
       expect(getByText(/Hola, Carlos/i)).toBeTruthy();
     });
@@ -192,7 +192,7 @@ describe('HomeScreen', () => {
 
   it('renders market status', async () => {
     const { getByText } = renderWithProviders(<HomeScreen />);
-    
+
     await waitFor(() => {
       expect(getByText('MERCADO ABIERTO')).toBeTruthy();
     });
@@ -200,7 +200,7 @@ describe('HomeScreen', () => {
 
   it('renders exchange cards', async () => {
     const { getByText } = renderWithProviders(<HomeScreen />);
-    
+
     await waitFor(() => {
       expect(getByText('Dólar BCV')).toBeTruthy();
       expect(getByText('Tether')).toBeTruthy();
@@ -213,7 +213,7 @@ describe('HomeScreen', () => {
 
   it('renders calculator section', async () => {
     const { getByText } = renderWithProviders(<HomeScreen />);
-    
+
     await waitFor(() => {
       expect(getByText('Calculadora Rápida')).toBeTruthy();
     });

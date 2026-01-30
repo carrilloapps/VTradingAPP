@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Animated, LayoutAnimation, Platform, UIManager, useWindowDimensions } from 'react-native';
 import { IconButton, useTheme, Surface } from 'react-native-paper';
 import { WordPressCategory } from '../../services/WordPressService';
@@ -31,22 +31,22 @@ const CategoryTabList: React.FC<CategoryTabListProps> = ({
     const HORIZONTAL_PADDING = 16 * 2; // Container padding
     const AVERAGE_TAB_WIDTH = 120; // Adjusted to fit ~3 categories
     const GAP = 8;
-    
+
     const availableWidth = windowWidth - HORIZONTAL_PADDING;
     const BUTTON_WIDTH = 48; // + button width
-    
+
     // Calculate how many tabs fit including the + button space
     let maxTabs = Math.floor((availableWidth - BUTTON_WIDTH - GAP) / (AVERAGE_TAB_WIDTH + GAP));
-    
+
     // Default to 3 categories, ensure at least 2
     maxTabs = Math.max(2, Math.min(maxTabs, categories.length));
-    
+
     setFirstRowCount(maxTabs);
   }, [windowWidth, categories.length]);
 
   // Determine visible categories
-  const visibleCategories = showAll 
-    ? categories 
+  const visibleCategories = showAll
+    ? categories
     : categories.slice(0, firstRowCount);
 
   const hiddenCount = Math.max(0, categories.length - firstRowCount);
@@ -84,14 +84,14 @@ const CategoryTabList: React.FC<CategoryTabListProps> = ({
             />
           </View>
         ))}
-        
+
         {/* Professional + Button */}
         {shouldShowButton && !showAll && (
-          <Surface 
+          <Surface
             elevation={2}
             style={[
-              styles.expandButton, 
-              { 
+              styles.expandButton,
+              {
                 backgroundColor: theme.colors.elevation.level1,
                 borderColor: theme.colors.outline,
               }
@@ -105,23 +105,23 @@ const CategoryTabList: React.FC<CategoryTabListProps> = ({
               style={styles.iconButton}
             />
             {hiddenCount > 0 && (
-              <View style={[styles.badge, { backgroundColor: '#10B981' }]}>
-                <Animated.Text style={[styles.badgeText, { color: '#FFFFFF' }]}>
+              <View style={styles.badge}>
+                <Animated.Text style={styles.badgeText}>
                   {hiddenCount}
                 </Animated.Text>
               </View>
             )}
           </Surface>
         )}
-        
+
         {/* Collapse Button (shown when expanded) */}
         {showAll && shouldShowButton && (
-          <Surface 
+          <Surface
             elevation={1}
             style={[
               styles.expandButton,
               styles.collapseButton,
-              { 
+              {
                 backgroundColor: theme.colors.surfaceVariant,
                 borderColor: theme.colors.outline,
               }
@@ -187,6 +187,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     borderWidth: 2,
     borderColor: '#FFFFFF',
+    backgroundColor: '#10B981',
     // Badge shadow
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 1 },
@@ -198,6 +199,7 @@ const styles = StyleSheet.create({
     fontSize: 9,
     fontWeight: 'bold',
     lineHeight: 12,
+    color: '#FFFFFF',
   },
 });
 

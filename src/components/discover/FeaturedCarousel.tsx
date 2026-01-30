@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, StyleSheet, FlatList, useWindowDimensions, Image, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import { View, StyleSheet, useWindowDimensions, Image, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import { FlashList, FlashListRef } from '@shopify/flash-list';
 import { Text, Surface, TouchableRipple, useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
@@ -14,8 +15,8 @@ const FeaturedCarousel = ({ items }: FeaturedCarouselProps) => {
     const navigation = useNavigation<any>();
     const { width, height } = useWindowDimensions();
     const [currentIndex, setCurrentIndex] = useState(0);
-    const flatListRef = useRef<FlatList>(null);
-    
+    const flatListRef = useRef<FlashListRef<FormattedPost>>(null);
+
     // Immersive height (approx 45% of screen or min 400)
     const CAROUSEL_HEIGHT = Math.max(height * 0.45, 400);
 
@@ -26,46 +27,73 @@ const FeaturedCarousel = ({ items }: FeaturedCarouselProps) => {
             const nextIndex = (currentIndex + 1) % items.length;
             flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
             setCurrentIndex(nextIndex);
-        }, 8000); 
+        }, 8000);
         return () => clearInterval(interval);
     }, [currentIndex, items.length]);
 
-    const renderItem = ({ item }: { item: FormattedPost }) => (
-        <TouchableRipple 
-            onPress={() => navigation.navigate('ArticleDetail', { article: item })}
-            style={{ width, height: CAROUSEL_HEIGHT }} 
-            borderless
-        >
-            <View style={styles.slide}>
-                <Image 
-                    source={{ uri: item.image }} 
-                    style={styles.image} 
-                    resizeMode="cover" 
-                />
-                <LinearGradient 
-                    colors={['transparent', theme.dark ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)', theme.colors.background]} 
-                    locations={[0, 0.6, 1]}
-                    style={styles.gradient}
-                >
-                    <View style={styles.content}>
-                        {item.categories && item.categories.length > 0 && (
-                            <Surface style={[styles.badge, { backgroundColor: theme.colors.primary }]} elevation={2}>
-                                <Text style={[styles.badgeText, { color: theme.colors.onPrimary }]}>{item.categories[0].name.toUpperCase()}</Text>
-                            </Surface>
-                        )}
-                        <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.onBackground }]} numberOfLines={3}>
-                            {item.title}
-                        </Text>
-                        <View style={styles.metaRow}>
-                            <Text style={[styles.metaText, { color: theme.colors.onSurfaceVariant }]}>{item.author?.name || 'VTrading'}</Text>
-                            <Text style={[styles.metaText, { color: theme.colors.onSurfaceVariant }]}>•</Text>
-                            <Text style={[styles.metaText, { color: theme.colors.onSurfaceVariant }]}>{item.time}</Text>
+    const renderItem = ({ item }: { item: FormattedPost }) => {
+        const rippleStyle = [
+            styles.ripple,
+            { width, height: CAROUSEL_HEIGHT }
+        ];
+
+        const badgeStyle = [
+            styles.badge,
+            { backgroundColor: theme.colors.primary }
+        ];
+
+        const badgeTextStyle = [
+            styles.badgeText,
+            { color: theme.colors.onPrimary }
+        ];
+
+        const titleStyle = [
+            styles.title,
+            { color: theme.colors.onBackground }
+        ];
+
+        const metaTextStyle = [
+            styles.metaText,
+            { color: theme.colors.onSurfaceVariant }
+        ];
+
+        return (
+            <TouchableRipple
+                onPress={() => navigation.navigate('ArticleDetail', { article: item })}
+                style={rippleStyle}
+                borderless
+            >
+                <View style={styles.slide}>
+                    <Image
+                        source={{ uri: item.image }}
+                        style={styles.image}
+                        resizeMode="cover"
+                    />
+                    <LinearGradient
+                        colors={['transparent', theme.dark ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)', theme.colors.background]}
+                        locations={[0, 0.6, 1]}
+                        style={styles.gradient}
+                    >
+                        <View style={styles.content}>
+                            {item.categories && item.categories.length > 0 && (
+                                <Surface style={badgeStyle} elevation={2}>
+                                    <Text style={badgeTextStyle}>{item.categories[0].name.toUpperCase()}</Text>
+                                </Surface>
+                            )}
+                            <Text variant="headlineMedium" style={titleStyle} numberOfLines={3}>
+                                {item.title}
+                            </Text>
+                            <View style={styles.metaRow}>
+                                <Text style={metaTextStyle}>{item.author?.name || 'VTrading'}</Text>
+                                <Text style={metaTextStyle}>•</Text>
+                                <Text style={metaTextStyle}>{item.time}</Text>
+                            </View>
                         </View>
-                    </View>
-                </LinearGradient>
-            </View>
-        </TouchableRipple>
-    );
+                    </LinearGradient>
+                </View>
+            </TouchableRipple>
+        );
+    };
 
     const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const index = Math.round(event.nativeEvent.contentOffset.x / width);
@@ -76,7 +104,7 @@ const FeaturedCarousel = ({ items }: FeaturedCarouselProps) => {
 
     return (
         <View style={styles.container}>
-            <FlatList
+            <FlashList
                 ref={flatListRef}
                 data={items}
                 renderItem={renderItem}
@@ -86,30 +114,32 @@ const FeaturedCarousel = ({ items }: FeaturedCarouselProps) => {
                 showsHorizontalScrollIndicator={false}
                 onMomentumScrollEnd={onScroll}
                 scrollEventThrottle={16}
-                snapToInterval={width}
-                decelerationRate="fast"
-                bounces={false}
             />
             {/* Pagination Lines */}
             <View style={styles.pagination}>
-                {items.map((_, index) => (
-                    <View 
-                        key={index}
-                        style={[
-                            styles.dot,
-                            { 
-                                backgroundColor: index === currentIndex ? theme.colors.primary : 'rgba(255,255,255,0.3)',
-                                width: index === currentIndex ? 24 : 12
-                            }
-                        ]}
-                    />
-                ))}
+                {items.map((_, index) => {
+                    const dotStyle = [
+                        styles.dot,
+                        {
+                            backgroundColor: index === currentIndex ? theme.colors.primary : 'rgba(255,255,255,0.3)',
+                            width: index === currentIndex ? 24 : 12
+                        }
+                    ];
+                    return (
+                        <View
+                            key={index}
+                            style={dotStyle}
+                        />
+                    );
+                })}
             </View>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
+    ripple: {
+    },
     container: {
         marginBottom: 0,
     },

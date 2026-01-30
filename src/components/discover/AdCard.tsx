@@ -48,15 +48,27 @@ const AdCard = ({ item, onPress }: AdCardProps) => {
     }, [pulseAnim]);
 
     return (
-        <Surface style={[styles.adCard, { width: cardWidth, borderRadius: theme.roundness * 4, backgroundColor: theme.colors.surface, borderWidth: 1, borderColor: theme.colors.outlineVariant }]} elevation={0}>
-            <TouchableRipple onPress={onPress} style={{ flex: 1 }} borderless>
-                <ImageBackground source={{ uri: item.image }} style={styles.adBackground} imageStyle={{ borderRadius: theme.roundness * 4 }}>
+        <Surface style={[
+            styles.adCard,
+            {
+                width: cardWidth,
+                backgroundColor: theme.colors.surface,
+                borderColor: theme.colors.outlineVariant,
+                borderRadius: theme.roundness * 4,
+            }
+        ]} elevation={0}>
+            <TouchableRipple onPress={onPress} style={styles.flex1} borderless>
+                <ImageBackground
+                    source={{ uri: item.image }}
+                    style={styles.adBackground}
+                    imageStyle={[styles.adImage, { borderRadius: theme.roundness * 4 }]}
+                >
                     <LinearGradient
                         colors={['rgba(0,0,0,0.2)', 'rgba(0,0,0,0.85)']}
                         style={styles.adGradient}
                     >
                         {/* Diagonal Ribbon */}
-                        <View style={[styles.ribbonContainer]}>
+                        <View style={styles.ribbonContainer}>
                             <View style={[styles.ribbon, { backgroundColor: theme.colors.warning }]}>
                                 <Text style={[styles.ribbonText, { color: theme.colors.onPrimary }]}>PROMO</Text>
                             </View>
@@ -91,6 +103,12 @@ const styles = StyleSheet.create({
         marginHorizontal: 20,
         overflow: 'hidden',
         marginTop: 8,
+        borderWidth: 1,
+    },
+    flex1: {
+        flex: 1,
+    },
+    adImage: {
     },
     adBackground: {
         width: '100%',

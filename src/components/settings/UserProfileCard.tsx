@@ -39,10 +39,10 @@ const UserProfileCard = ({ user, onEdit, onRegister }: UserProfileCardProps) => 
     // 1. If user has a photoURL (e.g. Google Sign In), use it.
     if (user?.photoURL) {
       return (
-        <Avatar.Image 
-          size={64} 
-          source={{ uri: user.photoURL }} 
-          style={{ backgroundColor: 'transparent' }}
+        <Avatar.Image
+          size={64}
+          source={{ uri: user.photoURL }}
+          style={styles.transparentBg}
         />
       );
     }
@@ -52,21 +52,21 @@ const UserProfileCard = ({ user, onEdit, onRegister }: UserProfileCardProps) => 
       const hash = md5(user.email.trim().toLowerCase());
       const gravatarUrl = `https://www.gravatar.com/avatar/${hash}?d=404`;
       return (
-        <Avatar.Image 
-          size={64} 
-          source={{ uri: gravatarUrl }} 
+        <Avatar.Image
+          size={64}
+          source={{ uri: gravatarUrl }}
           onError={() => setImageError(true)}
-          style={{ backgroundColor: 'transparent' }}
+          style={styles.transparentBg}
         />
       );
     }
 
     // 3. Fallback: Initials
     return (
-      <Avatar.Text 
-        size={64} 
-        label={getInitials(displayName)} 
-        style={{ backgroundColor: theme.colors.primaryContainer }}
+      <Avatar.Text
+        size={64}
+        label={getInitials(displayName)}
+        style={[styles.avatarText, { backgroundColor: theme.colors.primaryContainer }]}
         color={theme.colors.onPrimaryContainer}
       />
     );
@@ -74,7 +74,7 @@ const UserProfileCard = ({ user, onEdit, onRegister }: UserProfileCardProps) => 
 
   return (
     <View style={styles.wrapper}>
-      <View style={[styles.container, { 
+      <View style={[styles.container, {
         backgroundColor: theme.colors.elevation.level1,
         borderColor: theme.colors.outline,
       }]}>
@@ -82,14 +82,14 @@ const UserProfileCard = ({ user, onEdit, onRegister }: UserProfileCardProps) => 
           <View style={[styles.avatarWrapper, { borderColor: theme.colors.primary + '33' }]}>
             {renderAvatar()}
           </View>
-          <View style={[styles.badge, { 
+          <View style={[styles.badge, {
             backgroundColor: isPro ? theme.colors.warning : theme.colors.surfaceVariant,
-            borderColor: theme.colors.elevation.level1 
+            borderColor: theme.colors.elevation.level1
           }]}>
-            <Text style={[styles.badgeText, { 
-              color: isPro 
-                ? (theme.dark ? theme.colors.onPrimary : theme.colors.onPrimaryContainer) 
-                : theme.colors.onSurfaceVariant 
+            <Text style={[styles.badgeText, {
+              color: isPro
+                ? (theme.dark ? theme.colors.onPrimary : theme.colors.onPrimaryContainer)
+                : theme.colors.onSurfaceVariant
             }]}>
               {isPro ? 'PRO' : 'FREE'}
             </Text>
@@ -100,13 +100,13 @@ const UserProfileCard = ({ user, onEdit, onRegister }: UserProfileCardProps) => 
           <Text variant="titleMedium" style={[styles.userName, { color: theme.colors.onSurface }]}>
             {displayName}
           </Text>
-          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+          <Text variant="bodySmall" style={[styles.userEmail, { color: theme.colors.onSurfaceVariant }]}>
             {email}
           </Text>
         </View>
 
         {isPro && (
-          <TouchableOpacity 
+          <TouchableOpacity
             style={styles.editButton}
             onPress={onEdit}
           >
@@ -116,25 +116,24 @@ const UserProfileCard = ({ user, onEdit, onRegister }: UserProfileCardProps) => 
       </View>
 
       {!isPro && (
-        <View style={[styles.premiumCard, { 
+        <View style={[styles.premiumCard, {
           backgroundColor: theme.colors.primaryContainer,
-          // borderColor: theme.colors.primary, // Optional border
         }]}>
           <View style={styles.premiumContent}>
-             <MaterialCommunityIcons name="diamond" size={24} color={theme.colors.onPrimaryContainer} />
-             <View style={styles.premiumTextContainer}>
-                <Text variant="titleSmall" style={{ color: theme.colors.onPrimaryContainer, fontWeight: 'bold' }}>
-                  PÁSATE AL PLAN PREMIUM
-                </Text>
-                <Text variant="bodySmall" style={{ color: theme.colors.onPrimaryContainer, opacity: 0.8 }}>
-                  Gratis durante el periodo de pruebas. Solo necesitas registrarte presionando el boton "Registrarse gratis".
-                </Text>
-             </View>
+            <MaterialCommunityIcons name="diamond" size={24} color={theme.colors.onPrimaryContainer} />
+            <View style={styles.premiumTextContainer}>
+              <Text variant="titleSmall" style={[styles.premiumTitle, { color: theme.colors.onPrimaryContainer }]}>
+                PÁSATE AL PLAN PREMIUM
+              </Text>
+              <Text variant="bodySmall" style={[styles.premiumSubtitle, { color: theme.colors.onPrimaryContainer }]}>
+                Gratis durante el periodo de pruebas. Solo necesitas registrarte presionando el boton "Registrarse gratis".
+              </Text>
+            </View>
           </View>
-          <Button 
-            mode="contained" 
+          <Button
+            mode="contained"
             onPress={onRegister}
-            style={{ marginTop: 12, backgroundColor: theme.colors.primary }}
+            style={[styles.registerButton, { backgroundColor: theme.colors.primary }]}
             textColor={theme.colors.onPrimary}
           >
             Registrarse gratis
@@ -153,7 +152,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 16,
-    borderRadius: 24, 
+    borderRadius: 24,
     borderWidth: 1,
     gap: 16,
   },
@@ -164,7 +163,7 @@ const styles = StyleSheet.create({
     borderRadius: 100, // Fixed: "100%" string not recommended for borderRadius in some RN versions/linters, use number usually, but if it works it works. 64/2 = 32. 
     // Actually the previous code had "100%". I'll keep it as number 100 (large enough) or 34.
     borderWidth: 2,
-    padding: 2, 
+    padding: 2,
   },
   badge: {
     position: 'absolute',
@@ -183,6 +182,11 @@ const styles = StyleSheet.create({
   infoContainer: {
     flex: 1,
     justifyContent: 'center',
+  },
+  transparentBg: {
+    backgroundColor: 'transparent',
+  },
+  userEmail: {
   },
   editButton: {
     width: 32,
@@ -206,6 +210,18 @@ const styles = StyleSheet.create({
   premiumTextContainer: {
     flex: 1,
   },
+  premiumTitle: {
+    fontWeight: 'bold',
+  },
+  premiumSubtitle: {
+    opacity: 0.8,
+  },
+  registerButton: {
+    marginTop: 12,
+  },
+  avatarText: {
+    // bgColor handled inline with theme
+  }
 });
 
 export default UserProfileCard;

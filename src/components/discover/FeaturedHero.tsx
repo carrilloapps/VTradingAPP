@@ -13,34 +13,44 @@ interface FeaturedHeroProps {
 const FeaturedHero = ({ item }: FeaturedHeroProps) => {
     const theme = useAppTheme();
     const navigation = useNavigation<any>();
-    
+
     const handlePress = () => {
         if (item) {
             navigation.navigate('ArticleDetail', { article: item });
         }
     };
-    
+
     // Get tag for display - use first tag or category
-    const displayTag = item.tags && item.tags.length > 0 
-        ? item.tags[0].name 
+    const displayTag = item.tags && item.tags.length > 0
+        ? item.tags[0].name
         : (item.categories && item.categories.length > 0 ? item.categories[0].name : 'Destacado');
-    
+
     return (
         <TouchableOpacity onPress={handlePress} activeOpacity={0.9}>
             <View style={styles.heroContainer}>
-                <Surface style={[styles.heroCard, { borderRadius: theme.roundness * 5, borderWidth: 1, borderColor: theme.colors.outlineVariant }]} elevation={0}>
-                    <ImageBackground source={{ uri: item.image }} style={styles.heroBackground} imageStyle={{ borderRadius: theme.roundness * 5 }}>
-                        <LinearGradient 
-                            colors={['transparent', 'rgba(0,0,0,0.3)', 'rgba(0,0,0,0.95)']} 
+                <Surface style={[
+                    styles.heroCard,
+                    {
+                        borderRadius: theme.roundness * 5,
+                        borderColor: theme.colors.outlineVariant,
+                    }
+                ]} elevation={0}>
+                    <ImageBackground
+                        source={{ uri: item.image }}
+                        style={styles.heroBackground}
+                        imageStyle={[styles.heroImage, { borderRadius: theme.roundness * 5 }]}
+                    >
+                        <LinearGradient
+                            colors={['transparent', 'rgba(0,0,0,0.3)', 'rgba(0,0,0,0.95)']}
                             style={styles.heroGradient}
                         >
                             <View style={styles.heroContent}>
                                 <Surface style={[styles.heroTag, { backgroundColor: theme.colors.primary }]} elevation={0}>
                                     <Text style={styles.heroTagText}>{displayTag}</Text>
                                 </Surface>
-                                
+
                                 <Text variant="headlineSmall" style={styles.heroTitle}>{item.title}</Text>
-                                
+
                                 <View style={styles.heroFooter}>
                                     {item.author?.avatar && (
                                         <Image source={{ uri: item.author.avatar }} style={styles.authorAvatar} />
@@ -49,7 +59,7 @@ const FeaturedHero = ({ item }: FeaturedHeroProps) => {
                                     <View style={styles.dotSeparator} />
                                     <Text style={styles.heroMeta}>{item.time}</Text>
                                     <View style={styles.dotSeparator} />
-                                    <Text style={[styles.heroMeta, { color: theme.colors.primaryContainer, fontWeight: 'bold' }]}>
+                                    <Text style={[styles.readTime, { color: theme.colors.primaryContainer }]}>
                                         {item.readTime}
                                     </Text>
                                 </View>
@@ -70,6 +80,9 @@ const styles = StyleSheet.create({
     heroCard: {
         height: 260,
         overflow: 'hidden',
+        borderWidth: 1,
+    },
+    heroImage: {
     },
     heroBackground: {
         width: '100%',
@@ -122,6 +135,10 @@ const styles = StyleSheet.create({
         height: 18,
         borderRadius: 9,
         marginRight: 6,
+    },
+    readTime: {
+        fontWeight: 'bold',
+        fontSize: 12,
     },
 });
 

@@ -14,10 +14,10 @@ interface ShareGraphicProps {
   aspectRatio?: '1:1' | '16:9';
 }
 
-const ShareGraphic: React.FC<ShareGraphicProps> = ({ 
-  viewShotRef, 
-  featuredRates, 
-  spread, 
+const ShareGraphic: React.FC<ShareGraphicProps> = ({
+  viewShotRef,
+  featuredRates,
+  spread,
   lastUpdated,
   isPremium = false,
   aspectRatio = '1:1'
@@ -49,96 +49,155 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
   const footerIconSize = isVertical ? 20 : 16;
   const footerTextSize = isVertical ? 11 : 9;
 
+  // Computed Styles
+  const templateStyle = [
+    styles.shareTemplate,
+    aspectRatio === '16:9' ? styles.shareTemplateVertical : styles.shareTemplateSquare,
+    { backgroundColor: theme.dark ? '#051911' : '#F0FDF4' }
+  ];
+
+  const glowStyle = [styles.templateGlow, styles.templateGlowOpacity, { backgroundColor: theme.colors.primary }];
+  const badgeStyle = [styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }];
+  const badgeTextStyle = (size: number) => [styles.platformText, { color: theme.colors.onSurfaceVariant, fontSize: size }];
+
+  const logoStyle = [
+    styles.templateMainLogo,
+    {
+      tintColor: theme.dark ? undefined : theme.colors.primary,
+      width: logoWidth,
+      height: logoHeight
+    }
+  ];
+
+  const freeBadgeStyle = [styles.freeBadge, { backgroundColor: theme.colors.error }];
+  const freeBadgeTextStyle = [styles.freeBadgeText, { fontSize: freeBadgeTextSize }];
+
+  const urlBadgeStyle = [styles.templateUrlBadge, { backgroundColor: theme.colors.primary + '15', marginBottom: 8 }];
+  const urlTextStyle = [styles.templateUrlText, { color: theme.colors.primary, fontSize: urlTextSize }];
+
+  const dateTextStyle = [styles.templateDate, { color: theme.colors.onSurfaceVariant, fontSize: dateTextSize }];
+
+  const contentStyle = [
+    styles.templateContent,
+    aspectRatio === '16:9' && ({ flex: 1, justifyContent: 'center', gap: 24 } as const)
+  ];
+
+  const footerTextStyle = [styles.templateFooterText, { color: theme.colors.primary, fontSize: footerTextSize }];
+
   return (
     <View style={styles.hiddenTemplate} pointerEvents="none">
       <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 0.9 }}>
-        <LinearGradient 
-          colors={theme.dark ? ['#051911', '#0A0A0A'] : ['#F0FDF4', '#FFFFFF']} 
-          style={[
-            styles.shareTemplate, 
-            aspectRatio === '16:9' ? styles.shareTemplateVertical : styles.shareTemplateSquare
-          ]}
+        <LinearGradient
+          colors={theme.dark ? ['#051911', '#0A0A0A'] : ['#F0FDF4', '#FFFFFF']}
+          style={templateStyle}
         >
           {/* Decorative Elements */}
-          <View style={[styles.templateGlow, { backgroundColor: theme.colors.primary, opacity: 0.05 }]} />
+          <View style={glowStyle} />
 
           {/* Platform Badges */}
           <View style={styles.platformBadgesContainer}>
-            <Surface style={[styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }]} elevation={1}>
+            <Surface style={badgeStyle} elevation={1}>
               <Icon source="google-play" size={platformIconSize} color={theme.colors.onSurfaceVariant} />
-              <Text style={[styles.platformText, { color: theme.colors.onSurfaceVariant, fontSize: platformTextSize }]}>Android</Text>
+              <Text style={badgeTextStyle(platformTextSize)}>Android</Text>
             </Surface>
-            <View style={{ flex: 1 }} />
-            <Surface style={[styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }]} elevation={1}>
+            <View style={styles.flex1} />
+            <Surface style={badgeStyle} elevation={1}>
               <Icon source="apple" size={platformIconSize} color={theme.colors.onSurfaceVariant} />
-              <Text style={[styles.platformText, { color: theme.colors.onSurfaceVariant, fontSize: platformTextSize }]}>iOS</Text>
+              <Text style={badgeTextStyle(platformTextSize)}>iOS</Text>
             </Surface>
           </View>
 
           <View style={styles.templateHeader}>
             <View style={styles.logoAndBadgeRow}>
-              <Image 
-                source={require('../../assets/images/logotipo.png')} 
-                style={[styles.templateMainLogo, { tintColor: theme.dark ? undefined : theme.colors.primary, width: logoWidth, height: logoHeight }]}
+              <Image
+                source={require('../../assets/images/logotipo.png')}
+                style={logoStyle}
                 resizeMode="contain"
               />
               {!isPremium && (
-                <Surface style={[styles.freeBadge, { backgroundColor: (theme.colors as any).error || '#FF5252' }]} elevation={2}>
-                  <Text style={[styles.freeBadgeText, { fontSize: freeBadgeTextSize }]}>FREE</Text>
+                <Surface style={freeBadgeStyle} elevation={2}>
+                  <Text style={freeBadgeTextStyle}>FREE</Text>
                 </Surface>
               )}
             </View>
-            <View style={[styles.templateUrlBadge, { backgroundColor: theme.colors.primary + '15', marginBottom: 8 }]}>
-              <Text style={[styles.templateUrlText, { color: theme.colors.primary, fontSize: urlTextSize }]}>vtrading.app</Text>
+            <View style={urlBadgeStyle}>
+              <Text style={urlTextStyle}>vtrading.app</Text>
             </View>
             <View style={styles.templateDateBox}>
               <Icon source="calendar-clock" size={dateIconSize} color={theme.colors.onSurfaceVariant} />
-              <Text style={[styles.templateDate, { color: theme.colors.onSurfaceVariant, fontSize: dateTextSize }]}>
+              <Text style={dateTextStyle}>
                 {new Date().toLocaleDateString('es-VE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} • {lastUpdated}
               </Text>
             </View>
           </View>
-          
-          <View style={[styles.templateContent, aspectRatio === '16:9' && { flex: 1, justifyContent: 'center', gap: 24 }]}>
+
+          <View style={contentStyle}>
             {featuredRates.map((rate, idx) => {
               const isNeutral = rate.changePercent.includes('0.00');
-              const trendColor = isNeutral 
-                ? theme.colors.onSurfaceVariant 
+              const trendColor = isNeutral
+                ? theme.colors.onSurfaceVariant
                 : (rate.isPositive ? (theme.colors as any).success || '#6EE7B7' : (theme.colors as any).error || '#F87171');
-              const trendIcon = isNeutral 
-                ? 'minus' 
+              const trendIcon = isNeutral
+                ? 'minus'
                 : (rate.isPositive ? 'trending-up' : 'trending-down');
 
+              const cardStyle = [
+                styles.templateCard,
+                isVertical && styles.templateCardVertical,
+                {
+                  backgroundColor: theme.dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
+                  borderColor: theme.colors.outlineVariant
+                }
+              ];
+              const cardIconContainerStyle = [
+                styles.templateIconSmall,
+                {
+                  width: cardIconContainerSize,
+                  height: cardIconContainerSize,
+                  backgroundColor: theme.colors.primary + '20'
+                }
+              ];
+              const cardTitleStyle = [styles.templateCardTitle, { fontSize: cardTitleSize, color: theme.colors.onSurfaceVariant }];
+              const valueTextStyle = [styles.templateValue, { fontSize: valueSize, color: theme.colors.onSurface }];
+              const valueLabelColumnStyle = [styles.templateValueLabelColumn, { height: valueSize }];
+              const currencyTextStyle = [styles.templateCurrency, { fontSize: currencySize, color: theme.colors.onSurfaceVariant }];
+              const trendBoxStyle = [styles.templateTrendBox, { backgroundColor: trendColor + '15' }];
+              const trendTextStyle = [styles.templateTrendText, { color: trendColor, fontSize: trendTextSize }];
+
+              const detailLabelStyle = [styles.templateDetailLabel, { fontSize: detailLabelSize }];
+              const detailValueTextStyle = [styles.templateDetailValue, { fontSize: detailValueSize }];
+              const detailCurrencyTextStyle = [styles.templateDetailCurrency, { fontSize: detailCurrencySize }];
+
               return (
-                <Surface key={idx} style={[styles.templateCard, isVertical && styles.templateCardVertical, { backgroundColor: theme.dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', borderColor: theme.colors.outlineVariant }]} elevation={0}>
-                  <View style={[styles.templateCardHeader, isVertical && { marginBottom: 12 }]}>
-                    <View style={[styles.templateIconSmall, { width: cardIconContainerSize, height: cardIconContainerSize, backgroundColor: theme.colors.primary + '20' }]}>
+                <Surface key={idx} style={cardStyle} elevation={0}>
+                  <View style={[styles.templateCardHeader, isVertical && styles.marginBottom12]}>
+                    <View style={cardIconContainerStyle}>
                       <Icon source={rate.code === 'USDT' || rate.title.includes('USDT') ? 'alpha-t-circle-outline' : 'currency-usd'} size={cardIconSize} color={theme.colors.primary} />
                     </View>
-                    <Text style={[styles.templateCardTitle, { fontSize: cardTitleSize, color: theme.colors.onSurfaceVariant }]}>{rate.title}</Text>
+                    <Text style={cardTitleStyle}>{rate.title}</Text>
                   </View>
-                  
+
                   <View style={styles.templateValueRow}>
-                    <Text style={[styles.templateValue, { fontSize: valueSize, color: theme.colors.onSurface }]}>{rate.value}</Text>
-                    <View style={[styles.templateValueLabelColumn, { height: valueSize }]}>
-                        <Text style={[styles.templateCurrency, { fontSize: currencySize, color: theme.colors.onSurfaceVariant }]}>Bs.</Text>
-                        <View style={[styles.templateTrendBox, { backgroundColor: trendColor + '15' }]}>
-                            <Icon source={trendIcon} size={trendIconSize} color={trendColor} />
-                            <Text style={[styles.templateTrendText, { color: trendColor, fontSize: trendTextSize }]}>{rate.changePercent}</Text>
-                        </View>
+                    <Text style={valueTextStyle}>{rate.value}</Text>
+                    <View style={valueLabelColumnStyle}>
+                      <Text style={currencyTextStyle}>Bs.</Text>
+                      <View style={trendBoxStyle}>
+                        <Icon source={trendIcon} size={trendIconSize} color={trendColor} />
+                        <Text style={trendTextStyle}>{rate.changePercent}</Text>
+                      </View>
                     </View>
                   </View>
 
                   {isVertical && (rate.buyValue || rate.sellValue) && (
                     <View style={styles.templateVerticalDetails}>
                       <View style={styles.templateDetailItem}>
-                        <Text style={[styles.templateDetailLabel, { fontSize: detailLabelSize }]}>COMPRA</Text>
-                        <Text style={[styles.templateDetailValue, { fontSize: detailValueSize }]}>{rate.buyValue || '--'} <Text style={[styles.templateDetailCurrency, { fontSize: detailCurrencySize }]}>Bs.</Text></Text>
+                        <Text style={detailLabelStyle}>COMPRA</Text>
+                        <Text style={detailValueTextStyle}>{rate.buyValue || '--'} <Text style={detailCurrencyTextStyle}>Bs.</Text></Text>
                       </View>
                       <View style={styles.templateVerticalDivider} />
                       <View style={styles.templateDetailItem}>
-                        <Text style={[styles.templateDetailLabel, { fontSize: detailLabelSize }]}>VENTA</Text>
-                        <Text style={[styles.templateDetailValue, { fontSize: detailValueSize }]}>{rate.sellValue || '--'} <Text style={[styles.templateDetailCurrency, { fontSize: detailCurrencySize }]}>Bs.</Text></Text>
+                        <Text style={detailLabelStyle}>VENTA</Text>
+                        <Text style={detailValueTextStyle}>{rate.sellValue || '--'} <Text style={detailCurrencyTextStyle}>Bs.</Text></Text>
                       </View>
                     </View>
                   )}
@@ -146,25 +205,37 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
               );
             })}
 
-            {spread !== null && (
-              <View style={[styles.templateSpreadBox, { backgroundColor: ((theme.colors as any).warning || '#F59E0B') + '15', borderColor: ((theme.colors as any).warning || '#F59E0B') + '30' }]}>
-                <Icon source="swap-horizontal" size={spreadIconSize} color={(theme.colors as any).warning || '#F59E0B'} />
-                <Text style={[styles.templateSpreadText, { color: (theme.colors as any).warning || '#F59E0B', fontSize: spreadTextSize }]}>
-                  SPREAD (Diferencia USD vs USDT): <Text style={{ fontWeight: '900' }}>{spread.toFixed(2)}%</Text>
-                </Text>
-              </View>
-            )}
+            {spread !== null && (() => {
+              const warningColor = (theme.colors as any).warning || '#F59E0B';
+              const spreadBoxStyle = [
+                styles.templateSpreadBox,
+                {
+                  backgroundColor: warningColor + '15',
+                  borderColor: warningColor + '30'
+                }
+              ];
+              const spreadTextStyle = [styles.templateSpreadText, { color: warningColor, fontSize: spreadTextSize }];
+
+              return (
+                <View style={spreadBoxStyle}>
+                  <Icon source="swap-horizontal" size={spreadIconSize} color={warningColor} />
+                  <Text style={spreadTextStyle}>
+                    SPREAD (Diferencia USD vs USDT): <Text style={styles.bold900}>{spread.toFixed(2)}%</Text>
+                  </Text>
+                </View>
+              );
+            })()}
           </View>
-          
+
           <View style={styles.templateFooter}>
-            <LinearGradient 
-              colors={[theme.colors.primary + '00', theme.colors.primary + '10', theme.colors.primary + '00']} 
-              start={{x: 0, y: 0}} end={{x: 1, y: 0}}
+            <LinearGradient
+              colors={[theme.colors.primary + '00', theme.colors.primary + '10', theme.colors.primary + '00']}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
               style={styles.templateDivider}
             />
             <View style={styles.templateFooterRow}>
               <Icon source={isPremium ? "shield-check-outline" : "shield-outline"} size={footerIconSize} color={theme.colors.primary} />
-              <Text style={[styles.templateFooterText, { color: theme.colors.primary, fontSize: footerTextSize }]}>
+              <Text style={footerTextStyle}>
                 MONITOREO FINANCIERO{isPremium ? ' PREMIUM' : ''}
               </Text>
             </View>
@@ -178,9 +249,12 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
 const styles = StyleSheet.create({
   hiddenTemplate: {
     position: 'absolute',
-    left: -2000, 
+    left: -2000,
     width: 600,
     zIndex: -1,
+  },
+  flex1: {
+    flex: 1,
   },
   shareTemplate: {
     padding: 40,
@@ -195,7 +269,7 @@ const styles = StyleSheet.create({
   },
   shareTemplateVertical: {
     width: 600,
-    height: 1066, 
+    height: 1066,
     paddingVertical: 100,
     paddingHorizontal: 40,
   },
@@ -206,7 +280,9 @@ const styles = StyleSheet.create({
     width: 300,
     height: 300,
     borderRadius: 150,
-    backgroundColor: 'white', 
+  },
+  templateGlowOpacity: {
+    opacity: 0.05,
   },
   templateHeader: {
     alignItems: 'center',
@@ -247,7 +323,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     paddingVertical: 1,
     borderRadius: 4,
-    marginLeft: -8, 
+    marginLeft: -8,
     marginTop: -2,
   },
   freeBadgeText: {
@@ -400,7 +476,13 @@ const styles = StyleSheet.create({
     width: 1,
     height: 30,
     backgroundColor: 'rgba(128,128,128,0.2)',
-  }
+  },
+  marginBottom12: {
+    marginBottom: 12,
+  },
+  bold900: {
+    fontWeight: '900',
+  },
 });
 
 export default ShareGraphic;

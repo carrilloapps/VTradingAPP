@@ -20,6 +20,17 @@ interface FilterSectionProps {
   style?: StyleProp<ViewStyle>;
 }
 
+// Icon component extracted to avoid creating during render
+interface ChipIconProps {
+  iconName: string;
+  color: string;
+  size: number;
+}
+
+const ChipIcon: React.FC<ChipIconProps> = ({ iconName, color, size }) => (
+  <MaterialCommunityIcons name={iconName} size={size} color={color} />
+);
+
 const FilterSection: React.FC<FilterSectionProps> = ({
   options,
   selectedValue,
@@ -34,32 +45,35 @@ const FilterSection: React.FC<FilterSectionProps> = ({
 
   const renderChip = (option: FilterOption) => {
     const isSelected = selectedValue === option.value;
-    
+
     // Determine content color based on selection state and theme
     // If selected, use onPrimary. If unselected, use option.color or onSurfaceVariant.
-    const contentColor = isSelected 
-      ? theme.colors.onPrimary 
+    const contentColor = isSelected
+      ? theme.colors.onPrimary
       : (option.color || theme.colors.onSurfaceVariant);
+
+    // Create icon renderer outside of JSX to avoid creating new component each render
+    const iconRenderer = option.icon 
+      ? () => <ChipIcon iconName={option.icon!} color={contentColor} size={18} />
+      : undefined;
 
     return (
       <Chip
         key={option.value}
         selected={isSelected}
-        icon={option.icon ? ({ size }) => (
-          <MaterialCommunityIcons name={option.icon!} size={size} color={contentColor} />
-        ) : undefined}
+        icon={iconRenderer}
         onPress={() => {
           // Optional: Add animation on selection if desired
           onSelect(option.value);
         }}
         style={[
           styles.chip,
-          isSelected 
-            ? [styles.chipSelected, { backgroundColor: option.color || theme.colors.primary }] 
+          isSelected
+            ? [styles.chipSelected, { backgroundColor: option.color || theme.colors.primary }]
             : [styles.chipUnselected, { borderColor: theme.colors.outline }]
         ]}
         textStyle={
-          isSelected 
+          isSelected
             ? [styles.chipTextSelected, { color: contentColor }]
             : [styles.chipTextUnselected, { color: contentColor }]
         }
@@ -76,17 +90,17 @@ const FilterSection: React.FC<FilterSectionProps> = ({
 
   if (mode === 'scroll') {
     return (
-      <ScrollView 
-        horizontal 
-        showsHorizontalScrollIndicator={false} 
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
-        style={[{ marginTop: theme.spacing.m, marginLeft: -20, marginRight: -20 }, style]}
+        style={[styles.scrollContainer, { marginTop: theme.spacing.m }, style]}
       >
         {/* Add left spacer for initial padding that scrolls */}
-        <View style={{ width: 20 }} /> 
+        <View style={styles.spacer} />
         {content}
         {/* Add right spacer for final padding that scrolls */}
-        <View style={{ width: 20 }} />
+        <View style={styles.spacer} />
       </ScrollView>
     );
   }
@@ -102,6 +116,13 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 0,
     gap: 8,
+  },
+  scrollContainer: {
+    marginLeft: -20,
+    marginRight: -20,
+  },
+  spacer: {
+    width: 20,
   },
   wrapContainer: {
     flexDirection: 'row',

@@ -26,7 +26,7 @@ const HomeScreen = ({ navigation }: any) => {
   const theme = useTheme();
   const user = useAuthStore((state) => state.user);
   const showToast = useToastStore((state) => state.showToast);
-  
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [rates, setRates] = useState<CurrencyRate[]>([]);
@@ -35,9 +35,9 @@ const HomeScreen = ({ navigation }: any) => {
   const [featuredRates, setFeaturedRates] = useState<ExchangeCardProps[]>([]);
   const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
   const [isMarketOpen, setIsMarketOpen] = useState(false);
-  const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [_keyboardVisible, setKeyboardVisible] = useState(false);
   const viewShotRef = React.useRef<any>(null);
-  const [sharing, setSharing] = useState(false);
+  const [_sharing, setSharing] = useState(false);
   const [shareFormat, setShareFormat] = useState<'1:1' | '16:9'>('1:1');
   const [isShareDialogVisible, setShareDialogVisible] = useState(false);
 
@@ -58,186 +58,174 @@ const HomeScreen = ({ navigation }: any) => {
   }, []);
 
   const processRates = useCallback((data: CurrencyRate[]) => {
-      // Prioritize USD and USDT for the Home Screen
-      const homeRates: CurrencyRate[] = [];
-      const usdRate = data.find(r => r.code === 'USD');
-      const usdtRate = data.find(r => r.code === 'USDT');
+    // Prioritize USD and USDT for the Home Screen
+    const homeRates: CurrencyRate[] = [];
+    const usdRate = data.find(r => r.code === 'USD');
+    const usdtRate = data.find(r => r.code === 'USDT');
 
-      if (usdRate) homeRates.push(usdRate);
-      if (usdtRate) homeRates.push(usdtRate);
+    if (usdRate) homeRates.push(usdRate);
+    if (usdtRate) homeRates.push(usdtRate);
 
-      // Calculate Spread (Brecha)
-      const usdRates = data.filter(r => (r.code === 'USD' || r.code === 'USDT') && r.value > 0);
-      let spreadVal: number | null = null;
+    // Calculate Spread (Brecha)
+    const usdRates = data.filter(r => (r.code === 'USD' || r.code === 'USDT') && r.value > 0);
+    let spreadVal: number | null = null;
 
-      if (usdRates.length >= 2) {
-           const values = usdRates.map(r => r.value);
-           const min = Math.min(...values);
-           const max = Math.max(...values);
-           if (min > 0) {
-               spreadVal = ((max - min) / min) * 100;
-           }
+    if (usdRates.length >= 2) {
+      const values = usdRates.map(r => r.value);
+      const min = Math.min(...values);
+      const max = Math.max(...values);
+      if (min > 0) {
+        spreadVal = ((max - min) / min) * 100;
       }
-      setSpread(spreadVal);
-      
-      const getPath = (percent: number | null | undefined) => {
-        if (percent === null || percent === undefined || Math.abs(percent) < 0.001) return 'M0 20 L 100 20';
-        
-        // Dynamic curve intensity based on percentage
-        // We amplify small percentages to make them visible
-        // 0.5% is treated as "high intensity" (1.0) for visual purposes
-        const scaleFactor = 200; // Multiplier: 0.005 * 200 = 1.0
-        const intensity = Math.min(Math.abs(percent) * scaleFactor, 1.0);
-        
-        // Base amplitude (how far from center Y=20)
-        // Min deviation 3 (flat-ish), Max 18 (steep)
-        const minAmp = 3;
-        const maxAmp = 18;
-        const amplitude = minAmp + ((maxAmp - minAmp) * intensity);
-        const center = 20;
-        
-        if (percent > 0) {
-            // Up Trend: Start Low (Y > 20), End High (Y < 20)
-            const startY = center + amplitude;
-            const endY = center - amplitude;
-            // Bezier control points for smooth S-curve
-            return `M0 ${startY} C 40 ${startY}, 60 ${endY}, 100 ${endY}`; 
-        } else {
-            // Down Trend: Start High (Y < 20), End Low (Y > 20)
-            const startY = center - amplitude;
-            const endY = center + amplitude;
-            return `M0 ${startY} C 40 ${startY}, 60 ${endY}, 100 ${endY}`;
+    }
+    setSpread(spreadVal);
+
+    const getPath = (percent: number | null | undefined) => {
+      if (percent === null || percent === undefined || Math.abs(percent) < 0.001) return 'M0 20 L 100 20';
+
+      // Dynamic curve intensity based on percentage
+      // We amplify small percentages to make them visible
+      // 0.5% is treated as "high intensity" (1.0) for visual purposes
+      const scaleFactor = 200; // Multiplier: 0.005 * 200 = 1.0
+      const intensity = Math.min(Math.abs(percent) * scaleFactor, 1.0);
+
+      // Base amplitude (how far from center Y=20)
+      // Min deviation 3 (flat-ish), Max 18 (steep)
+      const minAmp = 3;
+      const maxAmp = 18;
+      const amplitude = minAmp + ((maxAmp - minAmp) * intensity);
+      const center = 20;
+
+      if (percent > 0) {
+        // Up Trend: Start Low (Y > 20), End High (Y < 20)
+        const startY = center + amplitude;
+        const endY = center - amplitude;
+        // Bezier control points for smooth S-curve
+        return `M0 ${startY} C 40 ${startY}, 60 ${endY}, 100 ${endY}`;
+      } else {
+        // Down Trend: Start High (Y < 20), End Low (Y > 20)
+        const startY = center - amplitude;
+        const endY = center + amplitude;
+        return `M0 ${startY} C 40 ${startY}, 60 ${endY}, 100 ${endY}`;
+      }
+    };
+
+    // Transform rates to ExchangeCard format
+    const featured = homeRates.map(rate => {
+      // Handle potential NaN or invalid values for value
+      let displayValue = '0,00';
+      try {
+        if (rate.value && !isNaN(Number(rate.value))) {
+          displayValue = Number(rate.value).toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES });
         }
+      } catch (e) {
+        observabilityService.captureError(e);
+        // Error formatting value
+      }
+
+      // Handle potential undefined/null for buy/sell
+      let displayBuyValue;
+      let displaySellValue;
+
+      if (rate.buyValue !== undefined && !isNaN(Number(rate.buyValue))) {
+        displayBuyValue = Number(rate.buyValue).toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES });
+      }
+
+      if (rate.sellValue !== undefined && !isNaN(Number(rate.sellValue))) {
+        displaySellValue = Number(rate.sellValue).toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES });
+      }
+
+      // Determine icon and color based on currency type/code
+      let iconName = rate.iconName;
+      let iconSymbol = '$';
+      let iconColor;
+      let iconTintColor;
+      let customIcon;
+
+      // Use consistent background color for both modes that supports dark content (#212121)
+      // In Dark Mode: primary is #6DDBAC (Light Green)
+      // In Light Mode: inversePrimary is #6DDBAC (Light Green)
+      const iconBackground = theme.dark ? theme.colors.primary : theme.colors.inversePrimary;
+
+      if (rate.code === 'USD') {
+        iconName = 'currency-usd';
+        iconColor = iconBackground;
+        iconTintColor = '#212121';
+      } else if (rate.code === 'USDT') {
+        customIcon = <TetherIcon backgroundColor={iconBackground} contentColor="#212121" />;
+      } else if (rate.type === 'crypto') {
+        iconSymbol = '₿';
+        iconColor = '#F7931A';
+      }
+
+      return {
+        title: rate.name,
+        subtitle: '',
+        value: displayValue,
+        currency: 'Bs',
+        changePercent: rate.changePercent !== null ? `${rate.changePercent.toFixed(2)}%` : '0.00%',
+        isPositive: rate.changePercent !== null ? rate.changePercent >= 0 : true,
+        chartPath: getPath(rate.changePercent),
+        iconName: iconName,
+        iconSymbol: iconSymbol,
+        iconColor: iconColor,
+        iconTintColor: iconTintColor,
+        customIcon: customIcon,
+        buyValue: displayBuyValue,
+        sellValue: displaySellValue,
+        buyChangePercent: rate.buyChangePercent !== undefined ? `${rate.buyChangePercent > 0 ? '+' : ''}${rate.buyChangePercent.toFixed(2)}%` : undefined,
+        sellChangePercent: rate.sellChangePercent !== undefined ? `${rate.sellChangePercent > 0 ? '+' : ''}${rate.sellChangePercent.toFixed(2)}%` : undefined,
+        buyChartPath: getPath(rate.buyChangePercent),
+        sellChartPath: getPath(rate.sellChangePercent),
+        onPress: handleShareImage,
       };
-
-      // Transform rates to ExchangeCard format
-      const featured = homeRates.map(rate => {
-        // Handle potential NaN or invalid values for value
-        let displayValue = '0,00';
-        try {
-            if (rate.value && !isNaN(Number(rate.value))) {
-                displayValue = Number(rate.value).toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES });
-            }
-        } catch (e) {
-            observabilityService.captureError(e);
-            // Error formatting value
-        }
-
-        // Handle potential undefined/null for buy/sell
-        let displayBuyValue;
-        let displaySellValue;
-        
-        if (rate.buyValue !== undefined && !isNaN(Number(rate.buyValue))) {
-             displayBuyValue = Number(rate.buyValue).toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES });
-        }
-        
-        if (rate.sellValue !== undefined && !isNaN(Number(rate.sellValue))) {
-             displaySellValue = Number(rate.sellValue).toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES });
-        }
-
-        // Determine icon and color based on currency type/code
-        let iconName = rate.iconName;
-        let iconSymbol = '$';
-        let iconColor;
-        let iconTintColor;
-        let customIcon;
-        
-        // Use consistent background color for both modes that supports dark content (#212121)
-        // In Dark Mode: primary is #6DDBAC (Light Green)
-        // In Light Mode: inversePrimary is #6DDBAC (Light Green)
-        const iconBackground = theme.dark ? theme.colors.primary : theme.colors.inversePrimary;
-
-        if (rate.code === 'USD') {
-            iconName = 'currency-usd';
-            iconColor = iconBackground;
-            iconTintColor = '#212121';
-        } else if (rate.code === 'USDT') {
-            customIcon = <TetherIcon backgroundColor={iconBackground} contentColor="#212121" />;
-        } else if (rate.type === 'crypto') {
-            iconSymbol = '₿';
-            iconColor = '#F7931A';
-        }
-
-        return {
-            title: rate.name,
-            subtitle: '',
-            value: displayValue,
-            currency: 'Bs',
-            changePercent: rate.changePercent !== null ? `${rate.changePercent.toFixed(2)}%` : '0.00%', 
-            isPositive: rate.changePercent !== null ? rate.changePercent >= 0 : true,
-            chartPath: getPath(rate.changePercent),
-            iconName: iconName,
-            iconSymbol: iconSymbol,
-            iconColor: iconColor,
-            iconTintColor: iconTintColor,
-            customIcon: customIcon,
-            buyValue: displayBuyValue,
-            sellValue: displaySellValue,
-            buyChangePercent: rate.buyChangePercent !== undefined ? `${rate.buyChangePercent > 0 ? '+' : ''}${rate.buyChangePercent.toFixed(2)}%` : undefined,
-            sellChangePercent: rate.sellChangePercent !== undefined ? `${rate.sellChangePercent > 0 ? '+' : ''}${rate.sellChangePercent.toFixed(2)}%` : undefined,
-            buyChartPath: getPath(rate.buyChangePercent),
-            sellChartPath: getPath(rate.sellChangePercent),
-            onPress: handleShareImage,
-        };
-      });
-      setFeaturedRates(featured);
+    });
+    setFeaturedRates(featured);
   }, [theme]);
 
   useEffect(() => {
     const unsubscribeRates = CurrencyService.subscribe((data) => {
-        setRates(data);
-        processRates(data);
-        setLoading(false);
-        setLastRefreshTime(new Date());
+      setRates(data);
+      processRates(data);
+      setLoading(false);
+      setLastRefreshTime(new Date());
     });
-    
+
     const unsubscribeStocks = StocksService.subscribe((data) => {
-        setStocks(data.slice(0, 3)); // Only take top 3 for Home
-        setIsMarketOpen(StocksService.isMarketOpen());
+      setStocks(data.slice(0, 3)); // Only take top 3 for Home
+      setIsMarketOpen(StocksService.isMarketOpen());
     });
 
     // Initial fetch
     const loadInitialData = async () => {
-        try {
-            await Promise.all([
-                CurrencyService.getRates(),
-                StocksService.getStocks()
-            ]);
-            setIsMarketOpen(StocksService.isMarketOpen());
-        } catch (e) {
-            observabilityService.captureError(e);
-            showToast('Error al actualizar datos', 'error');
-        } finally {
-            setLoading(false);
-        }
+      try {
+        await Promise.all([
+          CurrencyService.getRates(),
+          StocksService.getStocks()
+        ]);
+        setIsMarketOpen(StocksService.isMarketOpen());
+      } catch (e) {
+        observabilityService.captureError(e);
+        showToast('Error al actualizar datos', 'error');
+      } finally {
+        setLoading(false);
+      }
     };
     loadInitialData();
 
     return () => {
-        unsubscribeRates();
-        unsubscribeStocks();
+      unsubscribeRates();
+      unsubscribeStocks();
     };
   }, [processRates, showToast]);
-
-  const handleRatePress = (rate: any) => {
-    // Basic rate extraction from the featured object if needed, 
-    // but the original 'rate' object from CurrencyService is better if we had it.
-    // Since featuredRates is mapping to CurrencyDetail params, we might need to find the raw rate
-    const rawRate = rates.find(r => r.name === rate.title);
-    if (rawRate) {
-        navigation.navigate('CurrencyDetail', { rate: rawRate });
-    } else {
-        // Fallback for custom cards (like Spread) - currently redirecting to calculator or ignoring
-        // Spread detail screen doesn't exist yet, keeping as share only or ignoring for now
-    }
-  };
 
   const generateShareImage = async (format: '1:1' | '16:9') => {
     setShareDialogVisible(false);
     setShareFormat(format);
     setSharing(true);
-    
+
     // Wait a brief moment for the hidden template to re-render with the new ratio
+    showToast('Generando imagen para compartir...', 'info');
     await new Promise(resolve => setTimeout(() => resolve(null), 300));
 
     if (viewShotRef.current) {
@@ -245,14 +233,14 @@ const HomeScreen = ({ navigation }: any) => {
         const uri = await captureRef(viewShotRef.current, {
           format: 'jpg',
           quality: 1.0,
-          result: 'tmpfile', 
+          result: 'tmpfile',
           // 1080p base resolution for high quality
           width: 1080,
           height: format === '1:1' ? 1080 : 1920,
         });
-        
+
         if (!uri) {
-           throw new Error("Failed to capture image: URI is empty");
+          throw new Error("Failed to capture image: URI is empty");
         }
 
         const sharePath = uri.startsWith('file://') ? uri : `file://${uri}`;
@@ -266,9 +254,9 @@ const HomeScreen = ({ navigation }: any) => {
         analyticsService.logShare('dashboard_report', 'all', format === '1:1' ? 'image_square' : 'image_story');
       } catch (e) {
         if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
-            const errorMsg = e instanceof Error ? e.message : 'Unknown sharing error';
-            observabilityService.captureError(e, { context: 'HomeScreen_handleShareImage' });
-            showToast(`No se pudo compartir: ${errorMsg}`, 'error');
+          const errorMsg = e instanceof Error ? e.message : 'Unknown sharing error';
+          observabilityService.captureError(e, { context: 'HomeScreen_handleShareImage' });
+          showToast(`No se pudo compartir: ${errorMsg}`, 'error');
         }
       } finally {
         setSharing(false);
@@ -281,7 +269,7 @@ const HomeScreen = ({ navigation }: any) => {
     try {
       const bcv = rates.find(r => r.code === 'USD');
       const p2p = rates.find(r => r.code === 'USDT');
-      
+
       const message = `📊 *VTrading - Reporte Diario*\n\n` +
         (bcv ? `💵 *USD BCV:* ${Number(bcv.value).toFixed(2)} Bs\n` : '') +
         (p2p ? `🔶 *USDT P2P:* ${Number(p2p.value).toFixed(2)} Bs\n` : '') +
@@ -307,27 +295,27 @@ const HomeScreen = ({ navigation }: any) => {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-        await Promise.all([
-            CurrencyService.getRates(true),
-            StocksService.getStocks(true)
-        ]);
-        setIsMarketOpen(StocksService.isMarketOpen());
-        showToast('Datos actualizados', 'success');
-        setLastRefreshTime(new Date()); // Force update time immediately on success
-        analyticsService.logEvent('dashboard_refresh');
+      await Promise.all([
+        CurrencyService.getRates(true),
+        StocksService.getStocks(true)
+      ]);
+      setIsMarketOpen(StocksService.isMarketOpen());
+      showToast('Datos actualizados', 'success');
+      setLastRefreshTime(new Date()); // Force update time immediately on success
+      analyticsService.logEvent('dashboard_refresh');
     } catch (e) {
-        observabilityService.captureError(e);
-        showToast('Error al actualizar', 'error');
+      observabilityService.captureError(e);
+      showToast('Error al actualizar', 'error');
     } finally {
-        setRefreshing(false);
+      setRefreshing(false);
     }
   }, [showToast]);
 
-  const lastUpdated = lastRefreshTime 
+  const lastUpdated = lastRefreshTime
     ? lastRefreshTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    : (rates.length > 0 
-        ? new Date(rates[0].lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
-        : '--:--');
+    : (rates.length > 0
+      ? new Date(rates[0].lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      : '--:--');
 
   // User Data from Auth
   const userData = {
@@ -348,10 +336,10 @@ const HomeScreen = ({ navigation }: any) => {
   if (loading) {
     return (
       <View style={[styles.container, themeStyles.container]}>
-        <StatusBar 
-          backgroundColor="transparent" 
+        <StatusBar
+          backgroundColor="transparent"
           translucent
-          barStyle={theme.dark ? 'light-content' : 'dark-content'} 
+          barStyle={theme.dark ? 'light-content' : 'dark-content'}
         />
         <DashboardSkeleton />
       </View>
@@ -360,19 +348,19 @@ const HomeScreen = ({ navigation }: any) => {
 
   return (
     <View style={[styles.container, themeStyles.container]}>
-      <StatusBar 
+      <StatusBar
         backgroundColor="transparent"
-        translucent 
-        barStyle={theme.dark ? 'light-content' : 'dark-content'} 
+        translucent
+        barStyle={theme.dark ? 'light-content' : 'dark-content'}
       />
-      
-      <UnifiedHeader 
+
+      <UnifiedHeader
         variant="profile"
-        userName={userData.name} 
-        avatarUrl={userData.avatarUrl} 
+        userName={userData.name}
+        avatarUrl={userData.avatarUrl}
         email={userData.email}
         notificationCount={userData.notificationCount}
-        isPremium={userData.isPremium} 
+        isPremium={userData.isPremium}
         onProfilePress={() => navigation.navigate('Settings')}
         onNotificationPress={() => navigation.navigate('Notifications')}
         showSecondaryAction
@@ -380,7 +368,7 @@ const HomeScreen = ({ navigation }: any) => {
         secondaryActionIcon="share-variant"
       />
 
-      <ShareGraphic 
+      <ShareGraphic
         viewShotRef={viewShotRef}
         featuredRates={featuredRates}
         spread={spread}
@@ -389,47 +377,52 @@ const HomeScreen = ({ navigation }: any) => {
         aspectRatio={shareFormat}
       />
 
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
+        style={styles.flex1}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
       >
-        <ScrollView 
+        <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.colors.primary]} />
+            <RefreshControl 
+              refreshing={refreshing} 
+              onRefresh={onRefresh} 
+              colors={[theme.colors.primary]}
+              progressBackgroundColor={theme.colors.elevation.level3}
+            />
           }
         >
           <MarketStatus
-              style={{ paddingHorizontal: 22, paddingTop: 15, paddingBottom: 20 }} 
-              isOpen={isMarketOpen} 
-              updatedAt={lastUpdated} 
-              onRefresh={() => {
-                  onRefresh();
-              }}
+            style={styles.marketStatus}
+            isOpen={isMarketOpen}
+            updatedAt={lastUpdated}
+            onRefresh={() => {
+              onRefresh();
+            }}
           />
 
           <View style={styles.section}>
             {featuredRates.map((item, index) => (
-              <ExchangeCard 
-                key={index} 
-                {...item} 
+              <ExchangeCard
+                key={index}
+                {...item}
                 onPress={() => {
-                    const rawRate = rates.find(r => r.name === item.title);
-                    if (rawRate) {
-                        analyticsService.logEvent('click_currency_detail', { currency: rawRate.code });
-                        navigation.navigate('CurrencyDetail', { rate: rawRate });
-                    }
-                }} 
+                  const rawRate = rates.find(r => r.name === item.title);
+                  if (rawRate) {
+                    analyticsService.logEvent('click_currency_detail', { currency: rawRate.code });
+                    navigation.navigate('CurrencyDetail', { rate: rawRate });
+                  }
+                }}
               />
             ))}
             {featuredRates.length === 0 && (
-               <Text style={[styles.emptyText, themeStyles.emptyText]}>
-                 No hay tasas disponibles
-               </Text>
+              <Text style={[styles.emptyText, themeStyles.emptyText]}>
+                No hay tasas disponibles
+              </Text>
             )}
           </View>
 
@@ -441,19 +434,19 @@ const HomeScreen = ({ navigation }: any) => {
                 Mercado Bursátil
               </Text>
               <TouchableOpacity onPress={() => navigation.navigate('Markets')}>
-                  <Text variant="labelLarge" style={[styles.linkText, themeStyles.linkText]}>VER TODO</Text>
+                <Text variant="labelLarge" style={[styles.linkText, themeStyles.linkText]}>VER TODO</Text>
               </TouchableOpacity>
             </View>
-            
+
             {stocks.map((stock) => (
-              <StockItem 
+              <StockItem
                 key={stock.id}
                 {...stock}
                 value={`${stock.price.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`}
                 change={`${stock.changePercent > 0 ? '+' : ''}${stock.changePercent.toFixed(2)}%`}
                 onPress={() => {
-                   analyticsService.logEvent('click_stock_detail', { symbol: stock.symbol });
-                   navigation.navigate('StockDetail', { stock });
+                  analyticsService.logEvent('click_stock_detail', { symbol: stock.symbol });
+                  navigation.navigate('StockDetail', { stock });
                 }}
               />
             ))}
@@ -472,26 +465,26 @@ const HomeScreen = ({ navigation }: any) => {
         confirmLabel="Cerrar"
         onConfirm={() => setShareDialogVisible(false)}
       >
-        <Text variant="bodyMedium" style={{ textAlign: 'center', marginBottom: 20, color: theme.colors.onSurfaceVariant }}>
+        <Text variant="bodyMedium" style={styles.dialogDescription}>
           Selecciona el formato ideal para compartir en tus redes sociales
         </Text>
-        
-        <View style={{ gap: 12 }}>
-          <CustomButton 
+
+        <View style={styles.dialogButtonsContainer}>
+          <CustomButton
             variant="primary"
             label="Imagen cuadrada"
             icon="view-grid-outline"
             onPress={() => generateShareImage('1:1')}
             fullWidth
           />
-          <CustomButton 
+          <CustomButton
             variant="secondary"
             label="Imagen vertical"
             icon="cellphone"
             onPress={() => generateShareImage('16:9')}
             fullWidth
           />
-          <CustomButton 
+          <CustomButton
             variant="outlined"
             label="Solo texto"
             icon="text-short"
@@ -512,7 +505,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingBottom: 40, 
+    paddingBottom: 40,
   },
   section: {
     paddingHorizontal: 20,
@@ -538,11 +531,26 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   emptyText: {
-    textAlign: 'center', 
+    textAlign: 'center',
     marginVertical: 20,
   },
   linkText: {
     fontWeight: 'bold',
+  },
+  flex1: {
+    flex: 1,
+  },
+  marketStatus: {
+    paddingHorizontal: 22,
+    paddingTop: 15,
+    paddingBottom: 20,
+  },
+  dialogDescription: {
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  dialogButtonsContainer: {
+    gap: 12,
   }
 });
 

@@ -167,13 +167,25 @@ const ExchangeRatesScreen = () => {
     />
   );
 
+  // Pre-calculate dynamic styles
+  const containerBgColor = theme.colors.background;
+  const statusBarStyle = theme.dark ? 'light-content' : 'dark-content';
+  const headerContainerBg = theme.colors.background;
+  const messageTextColor = theme.colors.onSurface;
+  const retryTextColor = theme.colors.primary;
+  const emptyIconColor = theme.colors.onSurfaceVariant;
+  const emptyMessageColor = theme.colors.onSurfaceVariant;
+  const sectionTitleColor = theme.colors.onSurfaceVariant;
+  const bcvBadgeBg = theme.colors.primaryContainer;
+  const bcvBadgeTextColor = theme.colors.onPrimaryContainer;
+
   if (loading && !refreshing && allRates.length === 0) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={[styles.container, { backgroundColor: containerBgColor }]}>
         <StatusBar 
           backgroundColor="transparent"
           translucent
-          barStyle={theme.dark ? 'light-content' : 'dark-content'} 
+          barStyle={statusBarStyle} 
         />
         <ExchangeRatesSkeleton />
       </View>
@@ -181,15 +193,15 @@ const ExchangeRatesScreen = () => {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={[styles.container, { backgroundColor: containerBgColor }]}>
       <StatusBar 
         backgroundColor="transparent"
         translucent
-        barStyle={theme.dark ? 'light-content' : 'dark-content'} 
+        barStyle={statusBarStyle} 
       />
 
       {/* Header */}
-      <View style={[styles.headerContainer, { backgroundColor: theme.colors.background }]}>
+      <View style={[styles.headerContainer, { backgroundColor: headerContainerBg }]}>
         <UnifiedHeader
           variant="section"
           title="Tasas de Cambio"
@@ -219,7 +231,12 @@ const ExchangeRatesScreen = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} colors={[theme.colors.primary]} />
+            <RefreshControl 
+              refreshing={refreshing} 
+              onRefresh={onRefresh} 
+              colors={[theme.colors.primary]}
+              progressBackgroundColor={theme.colors.elevation.level3}
+            />
         }
       >
         {/* Filter Chips */}
@@ -237,25 +254,21 @@ const ExchangeRatesScreen = () => {
           }}
           visible={showFilters}
           mode="wrap"
-          style={{ 
-            marginTop: 8,
-            paddingHorizontal: 20,
-            marginBottom: 16
-          }}
+          style={styles.filterStyle}
         />
 
         {error && filteredRates.length === 0 ? (
            <View style={styles.centerContainer}>
             <MaterialCommunityIcons name="alert-circle-outline" size={40} color={accentRed} />
-            <Text style={[styles.messageText, { color: theme.colors.onSurface }]}>{error}</Text>
+            <Text style={[styles.messageText, { color: messageTextColor }]}>{error}</Text>
             <TouchableOpacity onPress={() => loadRates()} style={styles.retryButton}>
-              <Text style={[styles.retryText, { color: theme.colors.primary }]}>Reintentar</Text>
+              <Text style={[styles.retryText, { color: retryTextColor }]}>Reintentar</Text>
             </TouchableOpacity>
           </View>
         ) : filteredRates.length === 0 ? (
           <View style={styles.centerContainer}>
-             <MaterialCommunityIcons name="magnify-remove-outline" size={40} color={theme.colors.onSurfaceVariant} />
-             <Text style={[styles.messageText, { color: theme.colors.onSurfaceVariant }]}>
+             <MaterialCommunityIcons name="magnify-remove-outline" size={40} color={emptyIconColor} />
+             <Text style={[styles.messageText, { color: emptyMessageColor }]}>
                {filterType !== 'all' 
                  ? `No hay resultados para "${filterType}"` 
                  : "No se encontraron resultados"}
@@ -267,24 +280,19 @@ const ExchangeRatesScreen = () => {
             {officialRates.length > 0 && (
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
-                  <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>Tasa oficial del BCV</Text>
+                  <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>Tasa oficial del BCV</Text>
                   <TouchableOpacity 
                     onPress={() => navigation.navigate('BankRates')}
                     activeOpacity={0.7}
                     accessibilityRole="button"
                     accessibilityLabel="Ver mesas de cambio"
-                    style={[styles.tag, { 
-                      backgroundColor: theme.colors.primaryContainer,
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: 4
-                    }]}>
+                    style={[styles.tag, styles.tagContainer, { backgroundColor: bcvBadgeBg }]}>
                     <Text style={[styles.tagText, { 
-                        color: theme.colors.onPrimaryContainer 
+                        color: bcvBadgeTextColor 
                     }]}>
                         VER MESAS DE CAMBIO
                     </Text>
-                    <MaterialCommunityIcons name="arrow-right" size={12} color={theme.colors.onPrimaryContainer} />
+                    <MaterialCommunityIcons name="arrow-right" size={12} color={bcvBadgeTextColor} />
                   </TouchableOpacity>
                 </View>
                 {officialRates.map(renderRateCard)}
@@ -295,7 +303,7 @@ const ExchangeRatesScreen = () => {
             {borderRates.length > 0 && (
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
-                  <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>Mercado Fronterizo (P2P)</Text>
+                  <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>Mercado Fronterizo (P2P)</Text>
                 </View>
                 {borderRates.map(renderRateCard)}
               </View>
@@ -305,7 +313,7 @@ const ExchangeRatesScreen = () => {
             {cryptoRates.length > 0 && (
               <View style={styles.section}>
                 <View style={styles.sectionHeader}>
-                  <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>Mercado Cripto (P2P)</Text>
+                  <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>Mercado Cripto (P2P)</Text>
                 </View>
                 {cryptoRates.map(renderRateCard)}
               </View>
@@ -315,7 +323,7 @@ const ExchangeRatesScreen = () => {
             {otherRates.length > 0 && (
                  <View style={styles.section}>
                     <View style={styles.sectionHeader}>
-                      <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>Otras Tasas</Text>
+                      <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>Otras Tasas</Text>
                     </View>
                     {otherRates.map(renderRateCard)}
                  </View>
@@ -341,6 +349,11 @@ const styles = StyleSheet.create({
   searchContainer: {
     paddingHorizontal: 20,
     marginTop: 8,
+  },
+  filterStyle: {
+    marginTop: 8,
+    paddingHorizontal: 20,
+    marginBottom: 16,
   },
   content: {
     flex: 1,
@@ -385,8 +398,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 4,
-  },
-  tagText: {
+  },  tagContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },  tagText: {
     fontSize: 10,
     fontWeight: 'bold',
   },

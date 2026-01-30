@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { View, StyleSheet, FlatList, TouchableOpacity, Keyboard, ScrollView } from 'react-native';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { View, StyleSheet, TouchableOpacity, Keyboard, ScrollView } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { Text, ActivityIndicator, TextInput } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -34,7 +35,7 @@ interface SymbolItem {
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AddAlert'>;
 
-const ItemSeparator = () => <View style={{ height: 8 }} />;
+const ItemSeparator = () => <View style={styles.separatorHeight} />;
 
 const AddAlertScreen = ({ route }: Props) => {
   const theme = useAppTheme();
@@ -75,6 +76,20 @@ const AddAlertScreen = ({ route }: Props) => {
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [hasPermissions, setHasPermissions] = useState<boolean | null>(null);
+  const [pushEnabled, setPushEnabled] = useState(true);
+
+  // Check permissions on mount
+  useEffect(() => {
+    const checkPermissions = async () => {
+      const hasSystemPermission = await fcmService.checkPermission();
+      const settings = await storageService.getSettings();
+      setHasPermissions(hasSystemPermission);
+      setPushEnabled(settings.pushEnabled);
+    };
+    
+    checkPermissions();
+  }, []);
 
   // Effects moved below
 
@@ -179,11 +194,57 @@ const AddAlertScreen = ({ route }: Props) => {
     }
   }, [editAlert, items]);
 
-  if (loading) {
+  const renderEmptyList = useCallback(() => (
+      <View style={styles.centerContainer}>
+          <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
+              No se encontraron resultados
+          </Text>
+      </View>
+  ), [theme.colors.onSurfaceVariant]);
+
+  if (loading || hasPermissions === null) {
     return <AddAlertSkeleton variant={editAlert ? 'form' : 'list'} />;
   }
 
+  // Si no tiene permisos O notificaciones deshabilitadas, mostrar estado vacío
+  if (!hasPermissions || !pushEnabled) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <UnifiedHeader
+          variant="simple"
+          title={editAlert ? 'Editar alerta' : 'Nueva alerta'}
+          onBackPress={() => navigation.goBack()}
+        />
 
+        <View style={styles.noPermissionsContainer}>
+          <View style={[styles.noPermissionsIconContainer, { backgroundColor: theme.colors.elevation.level2 }]}>
+            <MaterialCommunityIcons 
+              name="bell-alert-outline" 
+              size={64} 
+              color={theme.colors.onSurfaceVariant} 
+            />
+          </View>
+          
+          <Text variant="headlineSmall" style={[styles.noPermissionsTitle, { color: theme.colors.onSurface }]}>
+            {!hasPermissions ? 'Activa las notificaciones' : 'Notificaciones pausadas'}
+          </Text>
+          
+          <Text variant="bodyLarge" style={[styles.noPermissionsDescription, { color: theme.colors.onSurfaceVariant }]}>
+            {!hasPermissions 
+              ? 'Para crear alertas de precios, primero debes activar las notificaciones en tu dispositivo.'
+              : 'Has desactivado las notificaciones. Actívalas en Ajustes para poder crear y gestionar alertas.'}
+          </Text>
+
+          <CustomButton
+            variant="primary"
+            onPress={() => navigation.navigate('Settings' as never)}
+            icon="cog"
+            label="Ir a Ajustes"
+          />
+        </View>
+      </View>
+    );
+  }
 
 
 
@@ -317,14 +378,8 @@ const AddAlertScreen = ({ route }: Props) => {
           }
         ]}
       >
-        <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-          <View style={{ 
-              width: 40, height: 40, 
-              borderRadius: 20, 
-              backgroundColor: theme.colors.secondaryContainer,
-              alignItems: 'center', justifyContent: 'center',
-              marginRight: 12
-          }}>
+        <View style={styles.rowAlignCenterFlex1}>
+          <View style={[styles.iconContainerCircular, { backgroundColor: theme.colors.secondaryContainer }]}>
               {item.iconName === 'Bs' ? (
                   <BolivarIcon color={theme.colors.onSecondaryContainer} size={24} />
               ) : (
@@ -336,35 +391,34 @@ const AddAlertScreen = ({ route }: Props) => {
               )}
           </View>
           <View>
-              <Text variant="titleMedium" style={{ fontWeight: 'bold' }}>{item.symbol}</Text>
+              <Text variant="titleMedium" style={styles.fontWeightBold}>{item.symbol}</Text>
               <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>{item.name}</Text>
           </View>
         </View>
         
-        <View style={{ alignItems: 'flex-end', gap: 4, minWidth: 80 }}>
-          <Text variant="bodyMedium" style={{ fontWeight: 'bold', fontSize: 13 }}>
+        <View style={styles.alignEndGap4MinWidth80}>
+          <Text variant="bodyMedium" style={styles.boldTextFontSize13}>
               {item.price < 1 ? item.price.toFixed(4) : item.price.toFixed(2)}
           </Text>
-          <View style={{ 
-              flexDirection: 'row', 
-              alignItems: 'center',
+          <View style={[
+              styles.trendBadge,
+              {
               backgroundColor: isNeutral 
                   ? (theme.dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)')
                   : (item.changePercent > 0 ? theme.colors.successContainer : theme.colors.errorContainer),
-              paddingHorizontal: 6,
-              paddingVertical: 2,
-              borderRadius: 4
-          }}>
+              }
+          ]}>
               <MaterialCommunityIcons 
                   name={isNeutral ? 'minus' : (item.changePercent > 0 ? 'arrow-up' : 'arrow-down')} 
                   size={12} 
                   color={isNeutral ? theme.colors.onSurfaceVariant : (item.changePercent > 0 ? theme.colors.trendUp : theme.colors.trendDown)} 
               />
-              <Text style={{ 
-                  fontSize: 10, 
-                  fontWeight: 'bold',
+              <Text style={[
+                  styles.trendBadgeText,
+                  { 
                   color: isNeutral ? theme.colors.onSurfaceVariant : (item.changePercent > 0 ? theme.colors.trendUp : theme.colors.trendDown) 
-              }}>
+                  }
+              ]}>
                   {Math.abs(item.changePercent).toFixed(2)}%
               </Text>
           </View>
@@ -403,28 +457,30 @@ const AddAlertScreen = ({ route }: Props) => {
                         />
                     )}
                 </View>
-                <View style={{ alignItems: 'center' }}>
-                    <Text variant="headlineMedium" style={{ fontWeight: 'bold' }}>{selectedItem.symbol}</Text>
+                <View style={styles.centerText}>
+                    <Text variant="headlineMedium" style={styles.symbolHeadline}>{selectedItem.symbol}</Text>
                     <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>{selectedItem.name}</Text>
                 </View>
             </View>
 
             {/* Current Price Section */}
             <View style={[styles.priceCard, { backgroundColor: theme.colors.elevation.level1 }]}>
-                <Text variant="labelMedium" style={{ color: theme.colors.onSurfaceVariant, textTransform: 'uppercase' }}>Precio Actual</Text>
-                <Text variant="displaySmall" style={{ fontWeight: 'bold', color: theme.colors.onSurface, marginVertical: 4 }}>
+                <Text variant="labelMedium" style={[styles.currentPriceLabel, { color: theme.colors.onSurfaceVariant }]}>Precio Actual</Text>
+                <Text variant="displaySmall" style={[styles.currentPriceValue, { color: theme.colors.onSurface }]}>
                     {selectedItem.price < 1 ? selectedItem.price.toFixed(4) : selectedItem.price.toFixed(2)}
                 </Text>
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                <View style={styles.priceChangeRow}>
                     <MaterialCommunityIcons 
                         name={Math.abs(selectedItem.changePercent) < 0.01 ? 'minus' : (selectedItem.changePercent > 0 ? 'arrow-up' : 'arrow-down')} 
                         size={16} 
                         color={Math.abs(selectedItem.changePercent) < 0.01 ? theme.colors.onSurfaceVariant : (selectedItem.changePercent > 0 ? theme.colors.trendUp : theme.colors.trendDown)} 
                     />
-                    <Text variant="bodyMedium" style={{ 
-                        color: Math.abs(selectedItem.changePercent) < 0.01 ? theme.colors.onSurfaceVariant : (selectedItem.changePercent > 0 ? theme.colors.trendUp : theme.colors.trendDown),
-                        fontWeight: 'bold'
-                    }}>
+                    <Text variant="bodyMedium" style={[
+                        styles.priceChangeText,
+                        { 
+                            color: Math.abs(selectedItem.changePercent) < 0.01 ? theme.colors.onSurfaceVariant : (selectedItem.changePercent > 0 ? theme.colors.trendUp : theme.colors.trendDown)
+                        }
+                    ]}>
                         {Math.abs(selectedItem.changePercent).toFixed(2)}%
                     </Text>
                 </View>
@@ -432,7 +488,7 @@ const AddAlertScreen = ({ route }: Props) => {
 
             {/* Target Price Input */}
             <View style={styles.sectionContainer}>
-                <Text variant="titleMedium" style={{ marginBottom: 12, fontWeight: 'bold' }}>Configurar Objetivo</Text>
+                <Text variant="titleMedium" style={styles.configHeaderBold}>Configurar Objetivo</Text>
                 <TextInput
                     mode="outlined"
                     label="Precio Objetivo"
@@ -472,9 +528,9 @@ const AddAlertScreen = ({ route }: Props) => {
                         }
 
                         return (
-                            <View style={[styles.diffIndicator, { backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outline, marginTop: 12 }]}>
+                            <View style={[styles.diffIndicator, styles.diffIndicatorMargin, { backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outline }]}>
                                 <MaterialCommunityIcons name={icon} size={20} color={color} />
-                                <Text variant="bodyMedium" style={{ color: color, fontWeight: 'bold', marginLeft: 8 }}>
+                                <Text variant="bodyMedium" style={[styles.diffIndicatorText, { color: color }]}>
                                     {text}
                                 </Text>
                             </View>
@@ -486,7 +542,7 @@ const AddAlertScreen = ({ route }: Props) => {
 
             {/* Condition Selector */}
             <View style={styles.sectionContainer}>
-                <Text variant="titleMedium" style={{ marginBottom: 12, fontWeight: 'bold' }}>Condición de Alerta</Text>
+                <Text variant="titleMedium" style={styles.configHeaderBold}>Condición de Alerta</Text>
                 <View style={[styles.conditionSelector, { backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outline }]}>
                     <TouchableOpacity 
                         style={[
@@ -500,14 +556,13 @@ const AddAlertScreen = ({ route }: Props) => {
                             size={20} 
                             color={condition === 'above' ? theme.colors.onPrimary : theme.colors.onSurfaceVariant} 
                         />
-                        <Text style={{ 
-                            marginLeft: 8,
-                            color: condition === 'above' ? theme.colors.onPrimary : theme.colors.onSurfaceVariant,
-                            fontWeight: condition === 'above' ? 'bold' : 'normal'
-                        }}>Mayor que</Text>
+                        <Text style={[
+                            styles.conditionTextNormal,
+                            { color: condition === 'above' ? theme.colors.onPrimary : theme.colors.onSurfaceVariant }
+                        ]}>Mayor que</Text>
                     </TouchableOpacity>
 
-                    <View style={{ width: 1, backgroundColor: theme.colors.outline, marginVertical: 8 }} />
+                    <View style={[styles.conditionDivider, { backgroundColor: theme.colors.outline }]} />
 
                     <TouchableOpacity 
                         style={[
@@ -521,14 +576,13 @@ const AddAlertScreen = ({ route }: Props) => {
                             size={20} 
                             color={condition === 'below' ? theme.colors.onError : theme.colors.onSurfaceVariant} 
                         />
-                        <Text style={{ 
-                            marginLeft: 8,
-                            color: condition === 'below' ? theme.colors.onError : theme.colors.onSurfaceVariant,
-                            fontWeight: condition === 'below' ? 'bold' : 'normal'
-                        }}>Menor que</Text>
+                        <Text style={[
+                            styles.conditionTextNormal,
+                            { color: condition === 'below' ? theme.colors.onError : theme.colors.onSurfaceVariant }
+                        ]}>Menor que</Text>
                     </TouchableOpacity>
                 </View>
-                <Text variant="bodySmall" style={{ marginTop: 8, color: theme.colors.onSurfaceVariant, textAlign: 'center' }}>
+                <Text variant="bodySmall" style={[styles.conditionDescription, { color: theme.colors.onSurfaceVariant }]}>
                     {condition === 'above' 
                         ? `La alerta se activará cuando el precio suba a ${targetPrice || '...'}` 
                         : `La alerta se activará cuando el precio baje a ${targetPrice || '...'}`}
@@ -544,7 +598,7 @@ const AddAlertScreen = ({ route }: Props) => {
                     disabled={!targetPrice || saving || deleting}
                     icon={editAlert ? "content-save-outline" : "bell-plus-outline"}
                     label={editAlert ? "Guardar cambios" : "Crear alerta"}
-                    style={{ marginBottom: 12 }}
+                    style={styles.saveButton}
                 />
                 
                 {editAlert && (
@@ -561,8 +615,8 @@ const AddAlertScreen = ({ route }: Props) => {
 
             {/* Disclaimer Section */}
             <View style={[styles.disclaimerContainer, { backgroundColor: theme.colors.elevation.level1 }]}>
-                <MaterialCommunityIcons name="information-outline" size={20} color={theme.colors.onSurfaceVariant} style={{ marginRight: 8 }} />
-                <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, flex: 1 }}>
+                <MaterialCommunityIcons name="information-outline" size={20} color={theme.colors.onSurfaceVariant} style={styles.disclaimerIconMargin} />
+                <Text variant="bodySmall" style={[styles.disclaimerText, { color: theme.colors.onSurfaceVariant }]}>
                     Nota: Las alertas pueden tener un ligero retraso dependiendo de la conectividad y las actualizaciones del mercado. Asegúrate de tener las notificaciones activadas para VTradingAPP.
                 </Text>
             </View>
@@ -585,7 +639,7 @@ const AddAlertScreen = ({ route }: Props) => {
                     ]}
                     selectedValue={selectedCategory}
                     onSelect={(val) => setSelectedCategory(val as any)}
-                    style={{ marginTop: 12, marginLeft: -16, marginRight: -16 }}
+                    style={styles.filterSectionNegativeMargin}
                 />
             </View>
 
@@ -594,20 +648,14 @@ const AddAlertScreen = ({ route }: Props) => {
                     <ActivityIndicator size="large" />
                 </View>
             ) : (
-                <FlatList
+                <FlashList
                     data={filteredItems}
                     keyExtractor={(item) => item.id}
                     renderItem={renderItem}
                     contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 16 }]}
                     showsVerticalScrollIndicator={false}
                     ItemSeparatorComponent={ItemSeparator}
-                    ListEmptyComponent={
-                        <View style={styles.centerContainer}>
-                            <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
-                                No se encontraron resultados
-                            </Text>
-                        </View>
-                    }
+                    ListEmptyComponent={renderEmptyList}
                 />
             )}
         </>
@@ -709,6 +757,150 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginTop: 8,
     alignItems: 'flex-start',
+  },
+  separatorHeight: {
+    height: 8,
+  },
+  centerText: {
+    alignItems: 'center',
+  },
+  symbolHeadline: {
+    fontWeight: 'bold',
+  },
+  currentPriceLabel: {
+    textTransform: 'uppercase',
+  },
+  currentPriceValue: {
+    fontWeight: 'bold',
+    marginVertical: 4,
+  },
+  priceChangeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  priceChangeText: {
+    fontWeight: 'bold',
+  },
+  configHeaderBold: {
+    marginBottom: 12,
+    fontWeight: 'bold',
+  },
+  diffIndicatorMargin: {
+    marginTop: 12,
+  },
+  diffIndicatorText: {
+    fontWeight: 'bold',
+    marginLeft: 8,
+  },
+  conditionDivider: {
+    width: 1,
+    marginVertical: 8,
+  },
+  conditionText: {
+    marginLeft: 8,
+  },
+  conditionTextBold: {
+    marginLeft: 8,
+    fontWeight: 'bold',
+  },
+  conditionDescription: {
+    marginTop: 8,
+    textAlign: 'center',
+  },
+  saveButton: {
+    marginBottom: 12,
+  },
+  disclaimerIconMargin: {
+    marginRight: 8,
+  },
+  disclaimerText: {
+    flex: 1,
+  },
+  conditionTextNormal: {
+    marginLeft: 8,
+    fontWeight: 'normal',
+  },
+  rowAlignCenter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  marginLeft8: {
+    marginLeft: 8,
+  },
+  paddingVertical8: {
+    paddingVertical: 8,
+  },
+  borderRadius8: {
+    borderRadius: 8,
+  },
+  flex1Style: {
+    flex: 1,
+  },
+  rowAlignCenterFlex1: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+  },
+  iconContainerCircular: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  fontWeightBold: {
+    fontWeight: 'bold',
+  },
+  alignEndGap4MinWidth80: {
+    alignItems: 'flex-end',
+    gap: 4,
+    minWidth: 80,
+  },
+  boldTextFontSize13: {
+    fontWeight: 'bold',
+    fontSize: 13,
+  },
+  trendBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  trendBadgeText: {
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  filterSectionNegativeMargin: {
+    marginTop: 12,
+    marginLeft: -16,
+    marginRight: -16,
+  },
+  noPermissionsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  noPermissionsIconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  noPermissionsTitle: {
+    textAlign: 'center',
+    marginBottom: 12,
+    fontWeight: '600',
+  },
+  noPermissionsDescription: {
+    textAlign: 'center',
+    marginBottom: 32,
+    lineHeight: 24,
   },
 });
 

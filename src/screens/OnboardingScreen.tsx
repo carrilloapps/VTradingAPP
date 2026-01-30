@@ -84,7 +84,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
     },
   ], []);
 
-  const getPageColors = (type: string) => {
+  const getPageColors = (_type: string) => {
     // Unify all under the primary financial green theme
     return { 
       gradientStart: theme.colors.primaryContainer, 
@@ -208,9 +208,16 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
     }
   };
 
+  // Pre-calculate dynamic styles before rendering
+  const containerBgColor = theme.colors.background;
+  const statusBarStyle = theme.dark ? "light-content" : "dark-content";
+
   const renderProgressBar = () => {
+    // Pre-calculate container top position
+    const progressTopPosition = insets.top + 10;
+    
     return (
-      <View style={[styles.progressContainer, { top: insets.top + 10 }]}>
+      <View style={[styles.progressContainer, { top: progressTopPosition }]}>
         {ONBOARDING_DATA.map((item, index) => {
           const isActive = index === currentPage;
           const isPassed = index < currentPage;
@@ -219,7 +226,8 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
           const activeColor = theme.colors.primary;
           const inactiveColor = theme.dark 
             ? 'rgba(255, 255, 255, 0.12)' 
-            : 'rgba(0, 0, 0, 0.08)'; 
+            : 'rgba(0, 0, 0, 0.08)';
+          const barWidth = isPassed ? '100%' : isActive ? '100%' : '0%';
           
           return (
             <View key={index} style={[styles.progressBarBackground, { backgroundColor: inactiveColor }]}>
@@ -227,7 +235,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
                 style={[
                   styles.progressBarFill, 
                   { 
-                    width: isPassed ? '100%' : isActive ? '100%' : '0%', // Full for passed and active (story style)
+                    width: barWidth,
                     backgroundColor: activeColor,
                   }
                 ]} 
@@ -240,11 +248,11 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={[styles.container, { backgroundColor: containerBgColor }]}>
       <StatusBar 
         translucent 
         backgroundColor="transparent" 
-        barStyle={theme.dark ? "light-content" : "dark-content"} 
+        barStyle={statusBarStyle} 
       />
       
       {renderProgressBar()}
@@ -258,6 +266,20 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
         {ONBOARDING_DATA.map((item, index) => {
           const pageColors = getPageColors(item.colorType);
           const isNotificationPage = item.key === 'notifications';
+          
+          // Pre-calculate dynamic styles
+          const contentWidthStyle = contentWidth;
+          const haloOpacityValue = theme.dark ? 0.15 : 0.1;
+          const iconMarginBottom = verticalSpacing;
+          const titleColor = theme.colors.onSurface;
+          const descriptionColor = theme.colors.onSurfaceVariant;
+          const notificationBgColor = notificationPermissionStatus === true ? theme.colors.primary : pageColors.icon;
+          const notificationLabelColor = theme.colors.onPrimary;
+          const skipTextColor = theme.colors.onSurfaceVariant;
+          const footerPaddingBottom = insets.bottom + 20;
+          const startBtnBgColor = pageColors.icon;
+          const startBtnLabelColor = pageColors.buttonText;
+          const tapHintColor = theme.colors.onSurfaceVariant;
           
           return (
             <View key={item.key} style={styles.page}>
@@ -288,26 +310,21 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
                     </View>
                 )}
 
-                <View style={[styles.contentContainer, { width: contentWidth }]}>
+                <View style={[styles.contentContainer, { width: contentWidthStyle }]}>
                   <View style={styles.iconWrapper}>
                     {/* Halo Glow effect behind the icon */}
                     <View style={[
                       styles.haloEffect, 
-                      { backgroundColor: theme.colors.primary, opacity: theme.dark ? 0.15 : 0.1 }
+                      { 
+                        backgroundColor: theme.colors.primary, 
+                        opacity: haloOpacityValue 
+                      }
                     ]} />
                     
                     <View style={[
                       styles.iconContainer, 
-                      { 
-                        // All pages now have the 'Floating' look (no rigid box)
-                        backgroundColor: 'transparent',
-                        borderColor: 'transparent',
-                        borderWidth: 0,
-                        marginBottom: verticalSpacing,
-                        padding: 0, 
-                        elevation: 0, // No shadow for container itself, Halo handles the 'glow'
-                        shadowOpacity: 0
-                      }
+                      styles.iconContainerTransparent,
+                      { marginBottom: iconMarginBottom }
                     ]}>
                       <Icon 
                         source={item.icon} 
@@ -317,16 +334,16 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
                     </View>
                   </View>
                   
-                  <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.onSurface }]}>
+                  <Text variant="headlineMedium" style={[styles.title, { color: titleColor }]}>
                     {item.title}
                   </Text>
                   
-                  <Text variant="bodyLarge" style={[styles.description, { color: theme.colors.onSurfaceVariant }]}>
+                  <Text variant="bodyLarge" style={[styles.description, { color: descriptionColor }]}>
                     {item.description}
                   </Text>
 
                   {item.key === 'notifications' && (
-                    <View style={{ width: '100%', alignItems: 'center', gap: 12, marginTop: 16, zIndex: 20 }}>
+                    <View style={styles.notificationButtonRow}>
                         <CustomButton 
                           label={notificationPermissionStatus === true 
                             ? 'Notificaciones activas' 
@@ -336,21 +353,15 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
                           icon={notificationPermissionStatus ? "check-circle" : "bell-ring"}
                           style={[
                             styles.actionButton, 
-                            { 
-                              marginTop: 0,
-                              backgroundColor: notificationPermissionStatus === true 
-                                ? theme.colors.primary 
-                                : pageColors.icon 
-                            }
+                            styles.actionButtonMarginTop,
+                            { backgroundColor: notificationBgColor }
                           ]}
-                          labelStyle={{ 
-                            color: theme.colors.onPrimary
-                          }}
+                          labelStyle={{ color: notificationLabelColor }}
                         />
                         
                         {!notificationPermissionStatus && (
-                            <TouchableOpacity onPress={handleSkipNotifications} style={{ padding: 12 }}>
-                                <Text variant="labelLarge" style={{ color: theme.colors.onSurfaceVariant }}>
+                            <TouchableOpacity onPress={handleSkipNotifications} style={styles.skipButton}>
+                                <Text variant="labelLarge" style={{ color: skipTextColor }}>
                                     Ahora no
                                 </Text>
                             </TouchableOpacity>
@@ -359,18 +370,18 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
                   )}
                 </View>
 
-                <View style={[styles.footer, { paddingBottom: insets.bottom + 20 }]}>
+                <View style={[styles.footer, { paddingBottom: footerPaddingBottom }]}>
                   {index === ONBOARDING_DATA.length - 1 ? (
                     <CustomButton 
                       label="Comenzar"
                       onPress={finishOnboarding}
                       variant="primary"
-                      style={[styles.startBtn, { backgroundColor: pageColors.icon }]}
-                      labelStyle={{ color: pageColors.buttonText }}
+                      style={[styles.startBtn, { backgroundColor: startBtnBgColor }]}
+                      labelStyle={{ color: startBtnLabelColor }}
                       fullWidth
                     />
                   ) : (
-                    <Text style={[styles.tapHint, { color: theme.colors.onSurfaceVariant }]}>Toca para continuar</Text>
+                    <Text style={[styles.tapHint, { color: tapHintColor }]}>Toca para continuar</Text>
                   )}
                 </View>
               </LinearGradient>
@@ -496,6 +507,66 @@ const styles = StyleSheet.create({
   },
   touchRight: {
     flex: 0.7,
+  },
+  haloOpacity: {
+    // Placeholder for dynamic opacity - applied inline
+  },
+  iconContainerTransparent: {
+    backgroundColor: 'transparent',
+    borderColor: 'transparent',
+    borderWidth: 0,
+    padding: 0,
+    elevation: 0,
+    shadowOpacity: 0,
+  },
+  titleBold: {
+    fontWeight: '900',
+    letterSpacing: -1,
+  },
+  titleFontSize: {
+    fontSize: 42,
+  },
+  descriptionLetterSpacing: {
+    letterSpacing: 1.5,
+  },
+  notificationButtonRow: {
+    width: '100%',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 16,
+    zIndex: 20,
+  },
+  actionButtonMarginTop: {
+    marginTop: 0,
+  },
+  skipButton: {
+    padding: 12,
+  },
+  tapHintLetterSpacing: {
+    letterSpacing: 1.5,
+  },
+  tapHintMarginTop: {
+    marginTop: 12,
+    fontWeight: '600',
+  },
+  centerMarginBottom: {
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  footerGap: {
+    gap: 12,
+  },
+  iconCenter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  marginTopBottom: {
+    marginTop: 0,
+    marginBottom: 12,
+  },
+  flex1Style: {
+    flex: 1,
   },
 });
 

@@ -42,6 +42,16 @@ const WidgetCard: React.FC<WidgetCardProps> = ({
 
   const gradientColors = getGradientColors();
 
+  // Pre-calculate dynamic colors
+  const refreshIconColor = isWidgetDarkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.4)';
+  const widgetIconTint = isWidgetDarkMode ? theme.colors.primary : '#1A2C3E';
+  const widgetTitleColor = isWidgetDarkMode ? '#FFF' : '#1A2C3E';
+  const currencyLabelColor = isWidgetDarkMode ? 'rgba(255, 255, 255, 0.7)' : '#64748B';
+  const rateValueColor = isWidgetDarkMode ? '#FFF' : '#0F172A';
+  const rateCurrencyColor = isWidgetDarkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.5)';
+  const borderBottomColorValue = isWidgetDarkMode ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
+  const footerTextColor = isWidgetDarkMode ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)';
+
   return (
     <LinearGradient
       colors={gradientColors}
@@ -64,13 +74,13 @@ const WidgetCard: React.FC<WidgetCardProps> = ({
             source={require('../../assets/images/logo.png')}
             style={[
               styles.widgetIcon,
-              { tintColor: isWidgetDarkMode ? theme.colors.primary : '#1A2C3E' },
+              { tintColor: widgetIconTint },
             ]}
           />
           <Text
             style={[
               styles.widgetTitleText,
-              { color: isWidgetDarkMode ? '#FFF' : '#1A2C3E' },
+              { color: widgetTitleColor },
             ]}
           >
             {widgetTitle}
@@ -79,30 +89,27 @@ const WidgetCard: React.FC<WidgetCardProps> = ({
         <MaterialCommunityIcons
           name="refresh"
           size={18}
-          color={isWidgetDarkMode ? 'rgba(255,255,255,0.6)' : 'rgba(0,0,0,0.4)'}
+          color={refreshIconColor}
         />
       </View>
 
       {/* Dynamic Rows */}
       {items.slice(0, 4).map((item, index) => {
         const isLast = index === items.length - 1;
+        const rowBorderStyle = !isLast ? { borderBottomColor: borderBottomColorValue } : undefined;
         return (
           <View
             key={item.id}
             style={[
               isLast ? styles.rateRowNoBorder : styles.rateRow,
-              !isLast && {
-                borderBottomColor: isWidgetDarkMode
-                  ? 'rgba(255,255,255,0.1)'
-                  : 'rgba(0,0,0,0.05)',
-              },
+              rowBorderStyle,
             ]}
           >
             <View>
               <Text
                 style={[
                   styles.currencyLabel,
-                  { color: isWidgetDarkMode ? 'rgba(255, 255, 255, 0.7)' : '#64748B' },
+                  { color: currencyLabelColor },
                 ]}
               >
                 {item.label}
@@ -110,18 +117,15 @@ const WidgetCard: React.FC<WidgetCardProps> = ({
               <Text
                 style={[
                   styles.rateValue,
-                  { color: isWidgetDarkMode ? '#FFF' : '#0F172A' },
+                  { color: rateValueColor },
                 ]}
               >
                 {item.value}{' '}
                 <Text
-                  style={{
-                    fontSize: 12,
-                    fontWeight: 'normal',
-                    color: isWidgetDarkMode
-                      ? 'rgba(255,255,255,0.6)'
-                      : 'rgba(0,0,0,0.5)',
-                  }}
+                  style={[
+                    styles.rateCurrency,
+                    { color: rateCurrencyColor }
+                  ]}
                 >
                   {item.currency}
                 </Text>
@@ -152,10 +156,10 @@ const WidgetCard: React.FC<WidgetCardProps> = ({
       {/* Widget Footer (if graph is hidden, maybe show updated time or provider) */}
       {!showGraph && (
         <View style={styles.widgetFooter}>
-          <Text style={{ fontSize: 10, color: isWidgetDarkMode ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}>
+          <Text style={[styles.footerText, { color: footerTextColor }]}>
             Actualizado hace 5 min
           </Text>
-          <Text style={{ fontSize: 10, fontWeight: 'bold', color: isWidgetDarkMode ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)' }}>
+          <Text style={[styles.footerTextBold, { color: footerTextColor }]}>
             BCV • Binance
           </Text>
         </View>
@@ -226,6 +230,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
   },
+  rateCurrency: {
+    fontSize: 12,
+    fontWeight: 'normal',
+  },
   trendBadge: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -243,6 +251,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+  },
+  footerText: {
+    fontSize: 10,
+  },
+  footerTextBold: {
+    fontSize: 10,
+    fontWeight: 'bold',
   },
 });
 

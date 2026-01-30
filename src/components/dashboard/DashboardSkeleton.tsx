@@ -9,15 +9,25 @@ const DashboardSkeleton = () => {
   const insets = useSafeAreaInsets();
   const r = theme.roundness;
 
+  const containerStyle = [styles.container, { paddingTop: insets.top }];
+  const stockItemStyle = [
+    styles.stockItem,
+    {
+      backgroundColor: theme.colors.elevation.level1,
+      borderColor: theme.colors.outline,
+      borderRadius: r * 6,
+    }
+  ];
+
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={containerStyle}>
       {/* Header Skeleton (matches UnifiedHeader profile) */}
       <View style={styles.header}>
         <View style={styles.headerTop}>
           <View style={styles.headerLeft}>
             <Skeleton width={44} height={44} borderRadius={22} />
             <View style={styles.headerText}>
-              <Skeleton width={80} height={12} style={{ marginBottom: 4 }} />
+              <Skeleton width={80} height={12} style={styles.headerTextSkeleton} />
               <Skeleton width={120} height={20} />
             </View>
           </View>
@@ -47,22 +57,14 @@ const DashboardSkeleton = () => {
       {/* Stocks List Skeleton */}
       <View style={styles.section}>
         <View style={styles.sectionHeader}>
-           <Skeleton width={180} height={24} borderRadius={r * 2} />
-           <Skeleton width={80} height={20} borderRadius={r * 2} />
+          <Skeleton width={180} height={24} borderRadius={r * 2} />
+          <Skeleton width={80} height={20} borderRadius={r * 2} />
         </View>
-        
+
         {[1, 2, 3].map((_, index) => (
-          <View 
-            key={index} 
-            style={[
-              styles.stockItem, 
-              { 
-                backgroundColor: theme.colors.elevation.level1,
-                borderColor: theme.colors.outline,
-                borderRadius: r * 6,
-                elevation: 0,
-              }
-            ]}
+          <View
+            key={index}
+            style={stockItemStyle}
           >
             <View style={styles.stockLeft}>
               <Skeleton width={48} height={48} borderRadius={r * 3} />
@@ -81,7 +83,7 @@ const DashboardSkeleton = () => {
 
       {/* Quick Calculator Skeleton */}
       <View style={styles.section}>
-         <Skeleton width="100%" height={240} borderRadius={r * 6} />
+        <Skeleton width="100%" height={240} borderRadius={r * 6} />
       </View>
     </View>
   );
@@ -108,6 +110,9 @@ const styles = StyleSheet.create({
   },
   headerText: {
     justifyContent: 'center',
+  },
+  headerTextSkeleton: {
+    marginBottom: 4,
   },
   headerIcons: {
     flexDirection: 'row',
@@ -138,7 +143,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     padding: 16,
     marginBottom: 12,
-    borderWidth: 1, 
+    borderWidth: 1,
   },
   stockLeft: {
     flexDirection: 'row',

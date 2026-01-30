@@ -1,6 +1,6 @@
 import React from 'react';
-import { View, StyleSheet, Image, useWindowDimensions, Animated } from 'react-native';
-import { Text, Surface, TouchableRipple, useTheme, IconButton } from 'react-native-paper';
+import { View, StyleSheet, Image, Animated } from 'react-native';
+import { Text, Surface, TouchableRipple, useTheme } from 'react-native-paper';
 import { FormattedPost } from '../../services/WordPressService';
 
 interface ArticleCardProps {
@@ -11,7 +11,6 @@ interface ArticleCardProps {
 
 const ArticleCard = React.memo(({ article, onPress, variant = 'compact' }: ArticleCardProps) => {
     const theme = useTheme();
-    const { width: windowWidth } = useWindowDimensions();
     const scale = React.useRef(new Animated.Value(1)).current;
 
     const isFeatured = variant === 'featured';
@@ -31,7 +30,7 @@ const ArticleCard = React.memo(({ article, onPress, variant = 'compact' }: Artic
                 useNativeDriver: true,
             }),
         ]).start();
-    }, []);
+    }, [fadeAnim, isFeatured, slideAnim]);
 
     const handlePressIn = () => {
         Animated.spring(scale, {
@@ -47,51 +46,114 @@ const ArticleCard = React.memo(({ article, onPress, variant = 'compact' }: Artic
         }).start();
     };
 
-    return (
-        <Animated.View style={{
+    const animatedContainerStyle = [
+        styles.animatedContainer,
+        {
             opacity: fadeAnim,
             transform: [
                 { scale },
                 { translateY: slideAnim }
             ]
-        }}>
+        }
+    ];
+
+    const touchableStyle = [
+        styles.touchable,
+        { borderRadius: theme.roundness * 5 },
+        isFeatured ? styles.featuredTouchable : styles.compactTouchable
+    ];
+
+    const surfaceStyle = [
+        styles.container,
+        isFeatured ? styles.featuredContainer : styles.compactContainer,
+        {
+            elevation: isFeatured ? 3 : 1,
+            backgroundColor: theme.colors.surface,
+        }
+    ];
+
+    const featuredImageStyle = [
+        styles.featuredImage,
+        { backgroundColor: theme.colors.surfaceVariant }
+    ];
+
+    const floatingCategoryStyle = [
+        styles.floatingCategory,
+        {
+            backgroundColor: theme.colors.primary,
+            borderRadius: theme.roundness * 1.5
+        }
+    ];
+
+    const floatingCategoryTextStyle = [
+        styles.floatingCategoryText,
+        { color: theme.colors.onPrimary }
+    ];
+
+    const categoryTextStyle = [
+        styles.category,
+        { color: theme.colors.primary }
+    ];
+
+    const timeTextStyle = [
+        styles.time,
+        { color: theme.colors.onSurfaceVariant }
+    ];
+
+    const badgeStyle = [
+        styles.badge,
+        {
+            backgroundColor: article.isPromo
+                ? theme.colors.primary
+                : theme.colors.error,
+            borderRadius: theme.roundness
+        }
+    ];
+
+    const badgeTextStyle = [
+        styles.badgeText,
+        { color: article.isPromo ? theme.colors.onPrimary : theme.colors.onError }
+    ];
+
+    const titleStyle = [
+        styles.title,
+        { color: theme.colors.onSurface },
+        isFeatured ? styles.featuredTitle : styles.compactTitle
+    ];
+
+    const excerptStyle = [
+        styles.excerpt,
+        { color: theme.colors.onSurfaceVariant }
+    ];
+
+    const featuredTimeTextStyle = { color: theme.colors.onSurfaceVariant };
+
+    const compactImageStyle = [
+        styles.compactImage,
+        { borderRadius: theme.roundness * 3 }
+    ];
+
+    return (
+        <Animated.View style={animatedContainerStyle}>
             <TouchableRipple
                 onPress={onPress}
                 onPressIn={handlePressIn}
                 onPressOut={handlePressOut}
-                style={[
-                    styles.touchable,
-                    { borderRadius: theme.roundness * 5 },
-                    isFeatured ? styles.featuredTouchable : styles.compactTouchable
-                ]}
+                style={touchableStyle}
                 borderless
             >
-                <Surface style={[
-                    styles.container,
-                    isFeatured ? styles.featuredContainer : styles.compactContainer,
-                    {
-                        elevation: isFeatured ? 3 : 1,
-                        borderRadius: theme.roundness * 5,
-                        backgroundColor: theme.colors.surface,
-                    }
-                ]} elevation={0}>
+                <Surface style={surfaceStyle} elevation={0}>
 
                     {isFeatured && (
                         <View style={styles.imageWrapper}>
                             <Image
                                 source={{ uri: article.image }}
-                                style={[styles.featuredImage, { backgroundColor: theme.colors.surfaceVariant }]}
+                                style={featuredImageStyle}
                                 resizeMode="cover"
                             />
                             {article.categories && article.categories.length > 0 && (
-                                <Surface style={[
-                                    styles.floatingCategory,
-                                    {
-                                        backgroundColor: theme.colors.primary,
-                                        borderRadius: theme.roundness * 1.5
-                                    }
-                                ]} elevation={2}>
-                                    <Text style={[styles.floatingCategoryText, { color: theme.colors.onPrimary }]}>
+                                <Surface style={floatingCategoryStyle} elevation={2}>
+                                    <Text style={floatingCategoryTextStyle}>
                                         {article.categories[0].name.toUpperCase()}
                                     </Text>
                                 </Surface>
@@ -103,11 +165,11 @@ const ArticleCard = React.memo(({ article, onPress, variant = 'compact' }: Artic
                         {!isFeatured && (
                             <View style={styles.compactHeader}>
                                 {article.categories && article.categories.length > 0 && (
-                                    <Text variant="labelSmall" style={[styles.category, { color: theme.colors.primary }]}>
+                                    <Text variant="labelSmall" style={categoryTextStyle}>
                                         {article.categories[0].name.toUpperCase()}
                                     </Text>
                                 )}
-                                <Text variant="bodySmall" style={[styles.time, { color: theme.colors.onSurfaceVariant }]}>{article.time}</Text>
+                                <Text variant="bodySmall" style={timeTextStyle}>{article.time}</Text>
                             </View>
                         )}
 
@@ -115,16 +177,8 @@ const ArticleCard = React.memo(({ article, onPress, variant = 'compact' }: Artic
                             {(article.isTrending ||
                                 article.tags?.some(t => t.slug === 'breaking') ||
                                 article.isPromo) && (
-                                    <View style={[
-                                        styles.badge,
-                                        {
-                                            backgroundColor: article.isPromo
-                                                ? theme.colors.primary
-                                                : theme.colors.error,
-                                            borderRadius: theme.roundness
-                                        }
-                                    ]}>
-                                        <Text style={[styles.badgeText, { color: article.isPromo ? theme.colors.onPrimary : theme.colors.onError }]}>
+                                    <View style={badgeStyle}>
+                                        <Text style={badgeTextStyle}>
                                             {article.tags?.some(t => t.slug === 'breaking') ? 'BREAKING' :
                                                 article.isTrending ? 'TRENDING' : 'PROMO'}
                                         </Text>
@@ -132,11 +186,7 @@ const ArticleCard = React.memo(({ article, onPress, variant = 'compact' }: Artic
                                 )}
                             <Text
                                 variant={isFeatured ? "headlineSmall" : "titleMedium"}
-                                style={[
-                                    styles.title,
-                                    { color: theme.colors.onSurface },
-                                    isFeatured ? styles.featuredTitle : styles.compactTitle
-                                ]}
+                                style={titleStyle}
                                 numberOfLines={isFeatured ? 3 : 2}
                             >
                                 {article.title}
@@ -146,7 +196,7 @@ const ArticleCard = React.memo(({ article, onPress, variant = 'compact' }: Artic
                         {isFeatured && article.excerpt && (
                             <Text
                                 variant="bodyMedium"
-                                style={[styles.excerpt, { color: theme.colors.onSurfaceVariant }]}
+                                style={excerptStyle}
                                 numberOfLines={3}
                             >
                                 {article.excerpt.replace(/<[^>]*>?/gm, '').trim()}
@@ -158,25 +208,25 @@ const ArticleCard = React.memo(({ article, onPress, variant = 'compact' }: Artic
                                 {article.author?.avatar && (
                                     <Image source={{ uri: article.author.avatar }} style={styles.authorAvatar} />
                                 )}
-                                <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '700' }}>
+                                <Text variant="labelSmall" style={styles.authorText}>
                                     {article.author?.name || article.source}
                                 </Text>
-                                <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, marginHorizontal: 4 }}>•</Text>
-                                <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+                                <Text variant="labelSmall" style={styles.dotSeparator}>•</Text>
+                                <Text variant="labelSmall" style={styles.readTimeText}>
                                     {article.readTime}
                                 </Text>
                             </View>
 
                             {isFeatured && (
                                 <View style={styles.featuredTime}>
-                                    <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>{article.time}</Text>
+                                    <Text variant="labelSmall" style={featuredTimeTextStyle}>{article.time}</Text>
                                 </View>
                             )}
                         </View>
                     </View>
 
                     {!isFeatured && (
-                        <Image source={{ uri: article.image }} style={[styles.compactImage, { borderRadius: theme.roundness * 3 }]} />
+                        <Image source={{ uri: article.image }} style={compactImageStyle} />
                     )}
                 </Surface>
             </TouchableRipple>
@@ -197,6 +247,7 @@ const styles = StyleSheet.create({
     },
     container: {
         overflow: 'hidden',
+        borderRadius: 20,
     },
     compactContainer: {
         flexDirection: 'row',
@@ -320,6 +371,17 @@ const styles = StyleSheet.create({
     },
     featuredTime: {
         justifyContent: 'center',
+    },
+    animatedContainer: {
+        width: '100%',
+    },
+    authorText: {
+        fontWeight: '700',
+    },
+    dotSeparator: {
+        marginHorizontal: 4,
+    },
+    readTimeText: {
     },
 });
 

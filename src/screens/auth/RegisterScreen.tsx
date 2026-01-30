@@ -157,7 +157,7 @@ const RegisterScreen = ({ navigation }: any) => {
       />
       <KeyboardAvoidingView 
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
+        style={styles.flex1}
       >
         <ScrollView 
           contentContainerStyle={[
@@ -300,17 +300,17 @@ const RegisterScreen = ({ navigation }: any) => {
             </View>
             
             <View style={[styles.legal, { marginTop: theme.spacing.m }]}>
-              <Text variant="bodySmall" style={[themeStyles.legalText, { textAlign: 'center' }]}>
+              <Text variant="bodySmall" style={[themeStyles.legalText, styles.legalText]}>
                 Al continuar aceptas nuestras{' '}
                 <Text
-                  style={{ color: theme.colors.primary, fontWeight: 'bold' }}
+                  style={[styles.linkText, { color: theme.colors.primary }]}
                   onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL, 'Políticas de privacidad')}
                 >
                   Políticas de privacidad
                 </Text>
                 {' y '}
                 <Text
-                  style={{ color: theme.colors.primary, fontWeight: 'bold' }}
+                  style={[styles.linkText, { color: theme.colors.primary }]}
                   onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL, 'Términos y condiciones')}
                 >
                   Términos y condiciones
@@ -328,6 +328,9 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
+  flex1: {
+    flex: 1,
+  },
   container: {
     flexGrow: 1,
   },
@@ -340,6 +343,12 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: 'transparent',
+  },
+  legalText: {
+    textAlign: 'center',
+  },
+  linkText: {
+    fontWeight: 'bold',
   },
   divider: {
     flexDirection: 'row',

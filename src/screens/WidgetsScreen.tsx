@@ -152,16 +152,16 @@ const WidgetsScreen = () => {
         });
 
         // Request widget update
-        requestWidgetUpdate({
+        await requestWidgetUpdate({
             widgetName: 'VTradingWidget',
             renderWidget: buildWidgetElement,
         });
 
-        showToast('Configuración guardada', 'success');
+        showToast('Widget configurado correctamente', 'success');
         navigation.goBack();
     } catch (e) {
         observabilityService.captureError(e);
-        showToast('Error al guardar', 'error');
+        showToast('Error al guardar la configuración del widget', 'error');
     }
   };
 
@@ -197,12 +197,32 @@ const WidgetsScreen = () => {
   // Widget Preview Data
   const widgetItems = selectedRates.map(mapRateToWidgetItem);
 
+  // Pre-calculate all dynamic styles
+  const containerBgColor = theme.colors.background;
+  const statusBarStyle = theme.dark ? 'light-content' : 'dark-content';
+  const contentPaddingBottom = insets.bottom + 100;
+  const headerTextColor = theme.colors.onSurfaceVariant;
+  const headerTextBoldColor = theme.colors.primary;
+  const sectionTitleColor = theme.colors.onSurfaceVariant;
+  const cardContainerBorder = theme.colors.outline;
+  const cardContainerBg = theme.colors.elevation.level1;
+  const iconBoxPrimaryBg = theme.colors.primaryContainer;
+  const prefTextColor = theme.colors.onSurface;
+  const textInputBg = theme.colors.background;
+  const separatorBg = theme.colors.outline;
+  const iconBoxLevel2Bg = theme.colors.elevation.level2;
+  const currencyIconColor = theme.colors.onSurfaceVariant;
+  const errorTextColor = theme.colors.error;
+  const footerBg = theme.colors.background;
+  const footerBorderTop = theme.colors.outline;
+  const footerPaddingBottom = insets.bottom + 16;
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={[styles.container, { backgroundColor: containerBgColor }]}>
       <StatusBar 
         backgroundColor="transparent"
         translucent 
-        barStyle={theme.dark ? 'light-content' : 'dark-content'} 
+        barStyle={statusBarStyle} 
       />
       
       <UnifiedHeader 
@@ -212,12 +232,12 @@ const WidgetsScreen = () => {
       />
 
       <ScrollView 
-        contentContainerStyle={[styles.content, { paddingBottom: insets.bottom + 100 }]}
+        contentContainerStyle={[styles.content, { paddingBottom: contentPaddingBottom }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.headerSection}>
-          <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}>
-            Previsualiza cómo se verá el widget <Text style={{ color: theme.colors.primary, fontWeight: 'bold' }}>Widget Tracker</Text> en tu pantalla de inicio para Android e iOS.
+          <Text variant="bodyMedium" style={[styles.headerText, { color: headerTextColor }]}>
+            Previsualiza cómo se verá el widget <Text style={[styles.headerTextBold, { color: headerTextBoldColor }]}>Widget Tracker</Text> en tu pantalla de inicio para Android e iOS.
           </Text>
         </View>
 
@@ -233,36 +253,36 @@ const WidgetsScreen = () => {
 
         {/* Customization Section */}
         <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>PERSONALIZACIÓN</Text>
+            <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>PERSONALIZACIÓN</Text>
 
-            <View style={[styles.cardContainer, { borderColor: theme.colors.outline, backgroundColor: theme.colors.elevation.level1 }]}>
+            <View style={[styles.cardContainer, { borderColor: cardContainerBorder, backgroundColor: cardContainerBg }]}>
                 {/* Title Input */}
-                <View style={[styles.prefRow, { flexDirection: 'column', alignItems: 'stretch', gap: 12 }]}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <View style={[styles.iconBox, { backgroundColor: theme.colors.primaryContainer }]}>
+                <View style={[styles.prefRow, styles.columnLayoutGap12]}>
+                    <View style={styles.rowAlignCenter}>
+                        <View style={[styles.iconBox, { backgroundColor: iconBoxPrimaryBg }]}>
                             <MaterialCommunityIcons name="format-title" size={20} color={theme.colors.onPrimaryContainer} />
                         </View>
-                        <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface, marginLeft: 12 }]}>Título del Widget</Text>
+                        <Text variant="bodyLarge" style={[styles.prefText, styles.marginLeft12, { color: prefTextColor }]}>Título del Widget</Text>
                     </View>
                     <TextInput
                         mode="outlined"
                         value={widgetTitle}
                         onChangeText={setWidgetTitle}
                         placeholder="Escribe un título..."
-                        style={{ backgroundColor: theme.colors.background }}
+                        style={{ backgroundColor: textInputBg }}
                         dense
                     />
                 </View>
 
-                <View style={[styles.separator, { backgroundColor: theme.colors.outline }]} />
+                <View style={[styles.separator, { backgroundColor: separatorBg }]} />
 
                 {/* Currency Header */}
                 <View style={styles.prefRow}>
                      <View style={styles.prefLeft}>
-                        <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
-                            <MaterialCommunityIcons name="currency-usd" size={20} color={theme.colors.onSurfaceVariant} />
+                        <View style={[styles.iconBox, { backgroundColor: iconBoxLevel2Bg }]}>
+                            <MaterialCommunityIcons name="currency-usd" size={20} color={currencyIconColor} />
                         </View>
-                        <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Divisas ({selectedRates.length})</Text>
+                        <Text variant="bodyLarge" style={[styles.prefText, { color: prefTextColor }]}>Divisas ({selectedRates.length})</Text>
                      </View>
                      <Button mode="text" onPress={() => setIsSelectionModalVisible(true)} compact>
                         Editar
@@ -292,11 +312,11 @@ const WidgetsScreen = () => {
 
                     return (
                         <React.Fragment key={rate.id}>
-                             <View style={[styles.separator, { backgroundColor: theme.colors.outline }]} />
-                             <View style={[styles.prefRow, { paddingVertical: 8 }]}>
-                                <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                             <View style={[styles.separator, { backgroundColor: separatorBg }]} />
+                             <View style={[styles.prefRow, styles.paddingVertical8]}>
+                                <View style={styles.flex1Currency}>
                                      { (rate.code === 'VES' || rate.iconName === 'Bs') ? (
-                                         <View style={[styles.iconBox, { backgroundColor: iconBg, width: 32, height: 32, borderRadius: 8 }]}>
+                                         <View style={[styles.iconBoxSmall, { backgroundColor: iconBg }]}>
                                              <BolivarIcon color={iconColor} size={20} />
                                          </View>
                                      ) : (
@@ -304,12 +324,12 @@ const WidgetsScreen = () => {
                                             size={32} 
                                             icon={iconName} 
                                             color={iconColor} 
-                                            style={{ backgroundColor: iconBg, borderRadius: 8 }} 
+                                            style={[styles.borderRadius8, { backgroundColor: iconBg }]} 
                                          />
                                      )}
-                                     <Text variant="bodyMedium" numberOfLines={1} style={{ flex: 1, color: theme.colors.onSurface }}>{rate.name}</Text>
+                                     <Text variant="bodyMedium" numberOfLines={1} style={[styles.flex1Text, { color: theme.colors.onSurface }]}>{rate.name}</Text>
                                 </View>
-                                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                                <View style={styles.rowAlignCenter}>
                                     <IconButton icon="arrow-up" size={20} disabled={index === 0} onPress={() => moveRate(index, 'up')} />
                                     <IconButton icon="arrow-down" size={20} disabled={index === selectedRates.length - 1} onPress={() => moveRate(index, 'down')} />
                                 </View>
@@ -319,17 +339,17 @@ const WidgetsScreen = () => {
                 })}
                 
                 {selectedRates.length === 0 && (
-                     <Text style={{ textAlign: 'center', color: theme.colors.error, padding: 16 }}>Selecciona al menos una divisa</Text>
+                     <Text style={[styles.errorText, { color: errorTextColor }]}>Selecciona al menos una divisa</Text>
                 )}
 
-                <View style={[styles.separator, { backgroundColor: theme.colors.outline }]} />
+                <View style={[styles.separator, { backgroundColor: separatorBg }]} />
 
-                <View style={[styles.prefRow, { flexDirection: 'column', alignItems: 'stretch', gap: 12 }]}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                        <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
-                            <MaterialCommunityIcons name="refresh" size={20} color={theme.colors.onSurfaceVariant} />
+                <View style={[styles.prefRow, styles.columnLayoutGap12]}>
+                    <View style={styles.rowAlignCenter}>
+                        <View style={[styles.iconBox, { backgroundColor: iconBoxLevel2Bg }]}>
+                            <MaterialCommunityIcons name="refresh" size={20} color={currencyIconColor} />
                         </View>
-                        <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface, marginLeft: 12 }]}>Refresco automático</Text>
+                        <Text variant="bodyLarge" style={[styles.prefText, styles.marginLeft12, { color: prefTextColor }]}>Refresco automático</Text>
                     </View>
                     <SegmentedButtons
                         value={refreshInterval}
@@ -345,15 +365,15 @@ const WidgetsScreen = () => {
         </View>
 
         <View style={styles.section}>
-             <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>APARIENCIA</Text>
-             <View style={[styles.cardContainer, { borderColor: theme.colors.outline, backgroundColor: theme.colors.elevation.level1 }]}>
+             <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>APARIENCIA</Text>
+             <View style={[styles.cardContainer, { borderColor: cardContainerBorder, backgroundColor: cardContainerBg }]}>
                  {/* Wallpaper */}
                  <View style={styles.prefRow}>
                     <View style={styles.prefLeft}>
-                        <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
-                             <MaterialCommunityIcons name="wallpaper" size={20} color={theme.colors.onSurfaceVariant} />
+                        <View style={[styles.iconBox, { backgroundColor: iconBoxLevel2Bg }]}>
+                             <MaterialCommunityIcons name="wallpaper" size={20} color={currencyIconColor} />
                         </View>
-                        <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Fondo de pantalla oscuro</Text>
+                        <Text variant="bodyLarge" style={[styles.prefText, { color: prefTextColor }]}>Fondo de pantalla oscuro</Text>
                     </View>
                     <Switch 
                         value={isWallpaperDark} 
@@ -363,15 +383,15 @@ const WidgetsScreen = () => {
                     />
                  </View>
                  
-                 <View style={[styles.separator, { backgroundColor: theme.colors.outline }]} />
+                 <View style={[styles.separator, { backgroundColor: separatorBg }]} />
                  
                  {/* Transparent */}
                  <View style={styles.prefRow}>
                     <View style={styles.prefLeft}>
-                        <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
-                             <MaterialCommunityIcons name="opacity" size={20} color={theme.colors.onSurfaceVariant} />
+                        <View style={[styles.iconBox, { backgroundColor: iconBoxLevel2Bg }]}>
+                             <MaterialCommunityIcons name="opacity" size={20} color={currencyIconColor} />
                         </View>
-                        <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Widget transparente</Text>
+                        <Text variant="bodyLarge" style={[styles.prefText, { color: prefTextColor }]}>Widget transparente</Text>
                     </View>
                     <Switch 
                         value={isTransparent} 
@@ -381,15 +401,15 @@ const WidgetsScreen = () => {
                     />
                  </View>
 
-                 <View style={[styles.separator, { backgroundColor: theme.colors.outline }]} />
+                 <View style={[styles.separator, { backgroundColor: separatorBg }]} />
 
                  {/* Graph */}
                  <View style={styles.prefRow}>
                     <View style={styles.prefLeft}>
-                        <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
-                             <MaterialCommunityIcons name="chart-line-variant" size={20} color={theme.colors.onSurfaceVariant} />
+                        <View style={[styles.iconBox, { backgroundColor: iconBoxLevel2Bg }]}>
+                             <MaterialCommunityIcons name="chart-line-variant" size={20} color={currencyIconColor} />
                         </View>
-                        <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Mostrar porcentaje</Text>
+                        <Text variant="bodyLarge" style={[styles.prefText, { color: prefTextColor }]}>Mostrar porcentaje</Text>
                     </View>
                     <Switch 
                         value={showGraph} 
@@ -399,15 +419,15 @@ const WidgetsScreen = () => {
                     />
                  </View>
                  
-                 <View style={[styles.separator, { backgroundColor: theme.colors.outline }]} />
+                 <View style={[styles.separator, { backgroundColor: separatorBg }]} />
 
                  {/* Dark Mode */}
                  <View style={styles.prefRow}>
                     <View style={styles.prefLeft}>
-                        <View style={[styles.iconBox, { backgroundColor: theme.colors.elevation.level2 }]}>
-                             <MaterialCommunityIcons name="brightness-6" size={20} color={theme.colors.onSurfaceVariant} />
+                        <View style={[styles.iconBox, { backgroundColor: iconBoxLevel2Bg }]}>
+                             <MaterialCommunityIcons name="brightness-6" size={20} color={currencyIconColor} />
                         </View>
-                        <Text variant="bodyLarge" style={[styles.prefText, { color: theme.colors.onSurface }]}>Widget modo oscuro</Text>
+                        <Text variant="bodyLarge" style={[styles.prefText, { color: prefTextColor }]}>Widget modo oscuro</Text>
                     </View>
                     <Switch 
                         value={isWidgetDarkMode} 
@@ -423,9 +443,9 @@ const WidgetsScreen = () => {
 
       {/* Footer Action */}
       <View style={[styles.footer, { 
-          backgroundColor: theme.colors.background,
-          borderTopColor: theme.colors.outline,
-          paddingBottom: insets.bottom + 16
+          backgroundColor: footerBg,
+          borderTopColor: footerBorderTop,
+          paddingBottom: footerPaddingBottom
       }]}>
           <CustomButton 
             label="Guardar" 
@@ -533,6 +553,64 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 16,
     borderTopWidth: 1,
+  },
+  headerText: {
+    textAlign: 'center',
+  },
+  headerTextBold: {
+    fontWeight: 'bold',
+  },
+  columnGap: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    gap: 12,
+  },
+  rowGap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  marginLeft12: {
+    marginLeft: 12,
+  },
+  flex1Currency: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  iconBoxSmall: {
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+  },
+  errorText: {
+    textAlign: 'center',
+    padding: 16,
+  },
+  fontWeightBold: {
+    fontWeight: 'bold',
+  },
+  fontSize10Bold: {
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  rowAlignCenter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  paddingVertical8: {
+    paddingVertical: 8,
+  },
+  borderRadius8: {
+    borderRadius: 8,
+  },
+  flex1Text: {
+    flex: 1,
+  },
+  columnLayoutGap12: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    gap: 12,
   },
 });
 

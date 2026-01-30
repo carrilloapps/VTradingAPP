@@ -22,9 +22,19 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
 
     if (totalPages <= 1) return null;
 
+    const containerStyle = [
+        styles.container,
+        { backgroundColor: theme.colors.elevation.level1 }
+    ];
+
+    const currentPageTextStyle = [
+        styles.text,
+        { color: theme.colors.primary, fontWeight: 'bold' as const }
+    ];
+
     return (
         <Surface
-            style={[styles.container, { backgroundColor: theme.colors.elevation.level1 }]}
+            style={containerStyle}
             elevation={1}
         >
             <View style={styles.content}>
@@ -41,7 +51,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
                         <ActivityIndicator size="small" color={theme.colors.primary} />
                     ) : (
                         <Text variant="labelLarge" style={styles.text}>
-                            Página <Text style={[styles.text, { color: theme.colors.primary, fontWeight: 'bold' }]}>{currentPage}</Text> de {totalPages}
+                            Página <Text style={currentPageTextStyle}>{currentPage}</Text> de {totalPages}
                         </Text>
                     )}
                 </View>

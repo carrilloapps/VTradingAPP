@@ -13,7 +13,7 @@ interface NotificationIconProps {
 
 export const getNotificationIconConfig = (notification: NotificationData, theme: any) => {
   const effectiveType = notification.type || 'system';
-  
+
   switch (effectiveType) {
     case 'price_alert':
       return {
@@ -21,7 +21,7 @@ export const getNotificationIconConfig = (notification: NotificationData, theme:
         color: notification.trend === 'up' ? theme.colors.success : theme.colors.error,
         bgColor: notification.trend === 'up' ? theme.colors.successContainer : theme.colors.errorContainer,
         badge: notification.trend === 'up' ? 'trending-up' : 'trending-down',
-        fallbackTitle: 'Alerta de Precio',
+        fallbackTitle: 'Alerta de precio',
       };
     case 'market_news':
       return {
@@ -35,22 +35,22 @@ export const getNotificationIconConfig = (notification: NotificationData, theme:
     default:
       // Try to infer from title if type is generic
       if (notification.title.toLowerCase().includes('bs') || notification.title.toLowerCase().includes('bolivar')) {
-           return {
-              name: 'Bs', // Special marker
-              color: theme.colors.primary,
-              bgColor: theme.colors.primaryContainer,
-              badge: null,
-              fallbackTitle: 'Notificación de Bolívar',
-           };
+        return {
+          name: 'Bs', // Special marker
+          color: theme.colors.primary,
+          bgColor: theme.colors.primaryContainer,
+          badge: null,
+          fallbackTitle: 'Notificación de Bolívar',
+        };
       }
       if (notification.title.toLowerCase().includes('dolar')) {
-           return {
-              name: 'currency-usd',
-              color: theme.colors.secondary,
-              bgColor: theme.colors.secondaryContainer,
-              badge: null,
-              fallbackTitle: 'Notificación de Divisa',
-           };
+        return {
+          name: 'currency-usd',
+          color: theme.colors.secondary,
+          bgColor: theme.colors.secondaryContainer,
+          badge: null,
+          fallbackTitle: 'Notificación de Divisa',
+        };
       }
       return {
         name: 'bell',
@@ -67,7 +67,14 @@ const NotificationIcon: React.FC<NotificationIconProps> = ({ notification, size 
   const iconConfig = getNotificationIconConfig(notification, theme);
 
   return (
-    <View style={[styles.iconContainer, { backgroundColor: iconConfig.bgColor, width: size * 2, height: size * 2 }]}>
+    <View style={[
+      styles.iconContainer,
+      {
+        backgroundColor: iconConfig.bgColor,
+        width: size * 2,
+        height: size * 2
+      }
+    ]}>
       {iconConfig.name === 'Bs' ? (
         <BolivarIcon color={iconConfig.color} size={size} />
       ) : (

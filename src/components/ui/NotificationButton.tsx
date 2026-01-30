@@ -49,16 +49,19 @@ const NotificationButton: React.FC<NotificationButtonProps> = ({
   const buttonBgColor = theme.colors.elevation.level1;
   const iconColor = color || theme.colors.onSurfaceVariant;
   const badgeColor = theme.colors.error;
+  const borderColorValue = theme.dark ? 'transparent' : theme.colors.outline;
+  const badgeBorderColor = theme.colors.background;
 
   return (
     <TouchableRipple
       testID="notification-button"
       onPress={handlePress}
       style={[
-        styles.container, 
+        styles.container,
+        theme.dark ? styles.darkBorder : styles.lightBorder,
         { 
           backgroundColor: buttonBgColor,
-          borderColor: theme.dark ? 'transparent' : theme.colors.outline,
+          borderColor: borderColorValue,
         },
         style
       ]}
@@ -78,7 +81,7 @@ const NotificationButton: React.FC<NotificationButtonProps> = ({
               styles.badge, 
               { 
                 backgroundColor: badgeColor,
-                borderColor: theme.colors.background,
+                borderColor: badgeBorderColor,
                 transform: [{ scale: scaleAnim }]
               }
             ]}
@@ -110,6 +113,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     overflow: 'hidden', // Ensures ripple stays inside
   },
+  darkBorder: {},
+  lightBorder: {},
   content: {
     width: '100%',
     height: '100%',

@@ -68,14 +68,14 @@ export const handleBackgroundMessage = async (remoteMessage: any) => {
             if (triggered) {
                 const isUp = alert.condition === 'above';
                 const actionVerb = isUp ? 'subió' : 'bajó';
-                const directionText = isUp ? 'subida' : 'bajada';
+                const directionText = isUp ? 'Subida' : 'Bajada';
 
                 const formatPrice = (val: number) => val < 0.01 ? val : val.toFixed(2);
                 const currentPriceFormatted = formatPrice(currentPrice);
                 const targetPriceFormatted = formatPrice(targetPrice);
 
                 const notificationId = `price_${symbol}_${Date.now()}`;
-                const finalTitle = `Alerta de ${directionText}: ${symbol} a ${currentPriceFormatted}`;
+                const finalTitle = `${directionText}: ${symbol} a ${currentPriceFormatted}`;
                 const finalBody = `El precio ${actionVerb} de los ${targetPriceFormatted}`;
 
                 await notifee.displayNotification({

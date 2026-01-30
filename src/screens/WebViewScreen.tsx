@@ -78,7 +78,7 @@ const WebViewScreen = () => {
           injectedJavaScript={hideElementsScript}
           onLoadStart={() => setIsLoading(true)}
           onLoadEnd={() => setIsLoading(false)}
-          style={{ flex: 1, backgroundColor: theme.colors.background }}
+          style={[styles.webView, { backgroundColor: theme.colors.background }]}
           containerStyle={{ backgroundColor: theme.colors.background }}
         />
         
@@ -99,6 +99,9 @@ const styles = StyleSheet.create({
   webViewContainer: {
     flex: 1,
     position: 'relative',
+  },
+  webView: {
+    flex: 1,
   },
   loadingContainer: {
     ...StyleSheet.absoluteFillObject,

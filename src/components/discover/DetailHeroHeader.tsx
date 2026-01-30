@@ -58,14 +58,66 @@ const DetailHeroHeader: React.FC<DetailHeroHeaderProps> = ({
         }
     };
 
+    const heroContainerStyle = [
+        styles.heroBackground,
+        { backgroundColor: theme.colors.surface }
+    ];
+
+    const heroImageStyle = {
+        opacity: theme.dark ? 0.5 : 0.35,
+    };
+
+    const categoryBadgeStyle = [
+        styles.categoryBadge,
+        {
+            backgroundColor: theme.colors.surface,
+            borderColor: theme.colors.outlineVariant
+        }
+    ];
+
+    const badgeTextStyle = [
+        styles.badgeText,
+        { color: theme.colors.onSurface }
+    ];
+
+    const titleStyle = [
+        styles.title,
+        { color: theme.colors.primary }
+    ];
+
+    const descriptionStyle = [
+        styles.description,
+        { color: theme.colors.onSurfaceVariant }
+    ];
+
+    const metaLabelStyle = [
+        styles.metaLabel,
+        { color: theme.colors.onSurfaceVariant, opacity: 0.7 }
+    ];
+
+    const metaValueStyle = [
+        styles.metaValue,
+        { color: theme.colors.onSurface }
+    ];
+
+    const sectionTitleStyle = [
+        styles.sectionTitle,
+        { color: getSectionColor() }
+    ];
+
+    const sectionDividerStyle = [
+        styles.sectionDivider,
+        { backgroundColor: `${getSectionColor()}33` }
+    ];
+
     return (
         <View style={styles.headerWrapper}>
-            <View style={[styles.heroBackground, { backgroundColor: theme.colors.surface }]}>
+            <View style={heroContainerStyle}>
                 <ImageBackground
                     source={image ? { uri: image } : undefined}
                     style={styles.heroBackground}
                     blurRadius={15}
-                    imageStyle={{ opacity: theme.dark ? 0.5 : 0.35 }}
+                    imageStyle={heroImageStyle}
                 >
                     <LinearGradient
                         colors={[
@@ -78,32 +130,32 @@ const DetailHeroHeader: React.FC<DetailHeroHeaderProps> = ({
                         style={styles.gradientOverlay}
                     >
                         <View style={styles.heroContent}>
-                            <View style={[styles.categoryBadge, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outlineVariant }]}>
+                            <View style={categoryBadgeStyle}>
                                 <MaterialCommunityIcons name={getBadgeIcon()} size={16} color={getBadgeColor()} />
-                                <Text variant="labelLarge" style={[styles.badgeText, { color: theme.colors.onSurface }]}>{categoryName}</Text>
+                                <Text variant="labelLarge" style={badgeTextStyle}>{categoryName}</Text>
                             </View>
 
-                            <Text variant="headlineLarge" style={[styles.title, { color: theme.colors.primary }]}>
+                            <Text variant="headlineLarge" style={titleStyle}>
                                 {title}
                             </Text>
 
                             {description ? (
-                                <Text variant="bodyMedium" style={[styles.description, { color: theme.colors.onSurfaceVariant }]} numberOfLines={3}>
+                                <Text variant="bodyMedium" style={descriptionStyle} numberOfLines={3}>
                                     {description}
                                 </Text>
                             ) : null}
 
                             <View style={styles.metaStrip}>
                                 <View style={styles.metaItem}>
-                                    <Text variant="labelSmall" style={[styles.metaLabel, { color: theme.colors.onSurfaceVariant, opacity: 0.7 }]}>ÚLTIMA ACTUALIZACIÓN</Text>
-                                    <Text variant="bodyMedium" style={[styles.metaValue, { color: theme.colors.onSurface }]} numberOfLines={1}>
+                                    <Text variant="labelSmall" style={metaLabelStyle}>ÚLTIMA ACTUALIZACIÓN</Text>
+                                    <Text variant="bodyMedium" style={metaValueStyle} numberOfLines={1}>
                                         {formatDate(lastUpdateDate)}
                                     </Text>
                                 </View>
                                 <View style={styles.metaGap} />
                                 <View style={styles.metaItem}>
-                                    <Text variant="labelSmall" style={[styles.metaLabel, { color: theme.colors.onSurfaceVariant, opacity: 0.7 }]}>{type === 'CATEGORY' ? 'ARTÍCULOS' : 'TOTAL'}</Text>
-                                    <Text variant="bodyMedium" style={[styles.metaValue, { color: theme.colors.onSurface }]}>{articleCount}</Text>
+                                    <Text variant="labelSmall" style={metaLabelStyle}>{type === 'CATEGORY' ? 'ARTÍCULOS' : 'TOTAL'}</Text>
+                                    <Text variant="bodyMedium" style={metaValueStyle}>{articleCount}</Text>
                                 </View>
                             </View>
                         </View>
@@ -112,10 +164,10 @@ const DetailHeroHeader: React.FC<DetailHeroHeaderProps> = ({
             </View>
 
             <View style={styles.sectionHeader}>
-                <Text variant="labelLarge" style={[styles.sectionTitle, { color: getSectionColor() }]}>
+                <Text variant="labelLarge" style={sectionTitleStyle}>
                     {sectionTitle}
                 </Text>
-                <View style={[styles.sectionDivider, { backgroundColor: `${getSectionColor()}33` }]} />
+                <View style={sectionDividerStyle} />
             </View>
         </View>
     );
@@ -142,12 +194,10 @@ const styles = StyleSheet.create({
     categoryBadge: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'rgba(255,255,255,0.1)',
         paddingHorizontal: 12,
         paddingVertical: 6,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: 'rgba(255,255,255,0.2)',
         marginBottom: 16,
     },
     badgeText: {

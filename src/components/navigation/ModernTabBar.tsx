@@ -28,22 +28,18 @@ const ModernTabBar: React.FC<MaterialTopTabBarProps> = ({ state, descriptors, na
     <View pointerEvents="box-none" style={styles.mainContainer}>
       <View style={[
         styles.barBackground,
-        { 
+        {
           backgroundColor: theme.colors.elevation.level1,
           paddingBottom: insets.bottom,
           height: 60 + insets.bottom,
-          elevation: 4,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
-        }
+        },
+        styles.elevationShadow
       ]}>
         <View style={styles.content}>
           {state.routes.map((route, index) => {
             const { options } = descriptors[route.key];
             const isFocused = state.index === index;
-            
+
             // Get the icon function from options
             const IconComponent = options.tabBarIcon;
 
@@ -76,15 +72,15 @@ const ModernTabBar: React.FC<MaterialTopTabBarProps> = ({ state, descriptors, na
               inputRange: [0, 1],
               outputRange: [1, 1.1]
             });
-            
+
             const circleScale = animatedValues[index].interpolate({
               inputRange: [0, 1],
               outputRange: [0, 1]
             });
-            
+
             const iconTranslateY = animatedValues[index].interpolate({
-                inputRange: [0, 1],
-                outputRange: [0, 0] 
+              inputRange: [0, 1],
+              outputRange: [0, 0]
             });
 
             const iconColor = isFocused ? (theme.dark ? theme.colors.onPrimary : '#212121') : theme.colors.onSurfaceVariant;
@@ -116,11 +112,11 @@ const ModernTabBar: React.FC<MaterialTopTabBarProps> = ({ state, descriptors, na
                       opacity: circleScale
                     }
                   ]} />
-                  
+
                   {/* Icon */}
                   <Animated.View style={{ transform: [{ scale }, { translateY: iconTranslateY }] }}>
-                    {IconComponent && IconComponent({ 
-                      focused: isFocused, 
+                    {IconComponent && IconComponent({
+                      focused: isFocused,
                       color: iconColor
                     })}
                   </Animated.View>
@@ -172,6 +168,13 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     elevation: 0,
     shadowOpacity: 0,
+  },
+  elevationShadow: {
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   }
 });
 

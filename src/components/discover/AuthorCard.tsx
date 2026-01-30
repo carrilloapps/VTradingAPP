@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, Linking } from 'react-native';
-import { Text, Surface, IconButton, Avatar, Button } from 'react-native-paper';
+import { Text, Surface, IconButton, Avatar } from 'react-native-paper';
 import { useAppTheme } from '../../theme/theme';
 import XIcon from '../common/XIcon';
 import FacebookIcon from '../common/FacebookIcon';
@@ -8,6 +8,15 @@ import FacebookIcon from '../common/FacebookIcon';
 interface AuthorCardProps {
     author: any;
 }
+
+const XIconRender = ({ size, color }: { size: number; color: string }) => (
+    <XIcon size={size} color={color} />
+);
+
+const FacebookIconRender = ({ size, color }: { size: number; color: string }) => (
+    <FacebookIcon size={size} color={color} />
+);
+
 
 const AuthorCard = ({ author }: AuthorCardProps) => {
     const theme = useAppTheme();
@@ -18,14 +27,24 @@ const AuthorCard = ({ author }: AuthorCardProps) => {
 
     if (!author) return null;
 
+    const surfaceStyle = [
+        styles.authorCard,
+        { backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outlineVariant }
+    ];
+
+    const statsTextStyle = [
+        styles.statsText,
+        { color: theme.colors.primary }
+    ];
+
     return (
-        <Surface style={[styles.authorCard, { backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outlineVariant }]} elevation={0}>
+        <Surface style={surfaceStyle} elevation={0}>
             <View style={styles.authorHeader}>
                 <Avatar.Image size={64} source={{ uri: author.avatar }} />
                 <View style={styles.authorInfo}>
-                    <Text variant="titleLarge" style={{ fontWeight: 'bold' }}>{author.name}</Text>
+                    <Text variant="titleLarge" style={styles.authorName}>{author.name}</Text>
                     {author.role && (
-                        <Text variant="bodySmall" style={{ opacity: 0.7 }}>{author.role}</Text>
+                        <Text variant="bodySmall" style={styles.authorRole}>{author.role}</Text>
                     )}
                 </View>
             </View>
@@ -36,7 +55,7 @@ const AuthorCard = ({ author }: AuthorCardProps) => {
 
             {author.count !== undefined && (
                 <View style={styles.statsRow}>
-                    <Text variant="labelSmall" style={{ color: theme.colors.primary, fontWeight: 'bold' }}>
+                    <Text variant="labelSmall" style={statsTextStyle}>
                         {author.count} ARTÍCULOS PUBLICADOS
                     </Text>
                 </View>
@@ -45,7 +64,7 @@ const AuthorCard = ({ author }: AuthorCardProps) => {
             <View style={styles.socialRow}>
                 {author.social?.twitter && (
                     <IconButton
-                        icon={({ size, color }) => <XIcon size={size} color={color} />}
+                        icon={XIconRender}
                         mode="contained-tonal"
                         size={20}
                         onPress={() => handleSocialPress(author.social.twitter)}
@@ -54,7 +73,7 @@ const AuthorCard = ({ author }: AuthorCardProps) => {
                 )}
                 {author.social?.facebook && (
                     <IconButton
-                        icon={({ size, color }) => <FacebookIcon size={size} color={color} />}
+                        icon={FacebookIconRender}
                         mode="contained-tonal"
                         size={20}
                         onPress={() => handleSocialPress(author.social.facebook)}
@@ -112,6 +131,12 @@ const styles = StyleSheet.create({
         marginLeft: 16,
         flex: 1,
     },
+    authorName: {
+        fontWeight: 'bold',
+    },
+    authorRole: {
+        opacity: 0.7,
+    },
     authorBio: {
         lineHeight: 22,
         opacity: 0.8,
@@ -121,6 +146,9 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         flexDirection: 'row',
         alignItems: 'center',
+    },
+    statsText: {
+        fontWeight: 'bold',
     },
     socialRow: {
         flexDirection: 'row',

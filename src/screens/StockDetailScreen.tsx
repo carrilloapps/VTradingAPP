@@ -29,32 +29,33 @@ const StockDetailScreen = ({ route, navigation }: any) => {
 
   const [isShareDialogVisible, setShareDialogVisible] = React.useState(false);
   const [shareFormat, setShareFormat] = React.useState<'1:1' | '16:9'>('1:1');
-  const [sharing, setSharing] = React.useState(false);
+  const [_sharing, setSharing] = React.useState(false);
   const viewShotRef = React.useRef<any>(null);
 
   const isPremium = !!(user && !user.isAnonymous);
 
   const isPositive = stock.changePercent > 0;
   const isNegative = stock.changePercent < 0;
-  
-  const trendColor = isPositive 
-    ? theme.colors.trendUp 
-    : isNegative 
-      ? theme.colors.trendDown 
+
+  const trendColor = isPositive
+    ? theme.colors.trendUp
+    : isNegative
+      ? theme.colors.trendDown
       : theme.colors.neutral;
 
-  const trendIcon = isPositive 
-    ? 'trending-up' 
-    : isNegative 
-      ? 'trending-down' 
+  const trendIcon = isPositive
+    ? 'trending-up'
+    : isNegative
+      ? 'trending-down'
       : 'minus';
 
   const generateShareImage = async (format: '1:1' | '16:9') => {
     setShareDialogVisible(false);
     setShareFormat(format);
     setSharing(true);
-    
+
     // Wait for layout update
+    showToast('Generando imagen para compartir...', 'info');
     await new Promise(resolve => setTimeout(() => resolve(null), 300));
 
     if (viewShotRef.current) {
@@ -66,7 +67,7 @@ const StockDetailScreen = ({ route, navigation }: any) => {
           width: 1080,
           height: format === '1:1' ? 1080 : 1920,
         });
-        
+
         if (!uri) throw new Error("Capture failed");
 
         const sharePath = uri.startsWith('file://') ? uri : `file://${uri}`;
@@ -80,8 +81,8 @@ const StockDetailScreen = ({ route, navigation }: any) => {
         analyticsService.logShare('stock', stock.symbol, format === '1:1' ? 'image_square' : 'image_story');
       } catch (e) {
         if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
-            observabilityService.captureError(e, { context: 'StockDetail_generateShareImage' });
-            showToast('No se pudo compartir la imagen', 'error');
+          observabilityService.captureError(e, { context: 'StockDetail_generateShareImage' });
+          showToast('No se pudo compartir la imagen', 'error');
         }
       } finally {
         setSharing(false);
@@ -101,7 +102,7 @@ const StockDetailScreen = ({ route, navigation }: any) => {
       await Share.open({ message });
       analyticsService.logShare('stock', stock.symbol, 'text');
     } catch (e) {
-       if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
+      if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
         showToast('Error al compartir texto', 'error');
       }
     }
@@ -111,12 +112,12 @@ const StockDetailScreen = ({ route, navigation }: any) => {
     setShareDialogVisible(true);
   };
 
-  const averagePrice = (stock.volumeAmount && stock.volumeShares) 
-    ? (stock.volumeAmount / stock.volumeShares) 
+  const averagePrice = (stock.volumeAmount && stock.volumeShares)
+    ? (stock.volumeAmount / stock.volumeShares)
     : 0;
-  
+
   const previousClose = stock.price - (stock.changeAmount || 0);
-  
+
   const showOpening = stock.opening && stock.opening > 0;
   const primaryStatLabel = showOpening ? "Apertura" : "Precio promedio";
   const primaryStatValue = showOpening ? stock.opening : averagePrice;
@@ -124,168 +125,191 @@ const StockDetailScreen = ({ route, navigation }: any) => {
 
   const formatCompactNumber = (num: number, isCurrency: boolean = false) => {
     if (num >= 1000000) {
-       // Supera los 6 dígitos (>= 1,000,000) -> usar acortador
-       if (num >= 1000000000) {
-          return (num / 1000000000).toLocaleString('es-VE', { maximumFractionDigits: 2 }) + 'b';
-       }
-       return (num / 1000000).toLocaleString('es-VE', { maximumFractionDigits: 2 }) + 'm';
+      // Supera los 6 dígitos (>= 1,000,000) -> usar acortador
+      if (num >= 1000000000) {
+        return (num / 1000000000).toLocaleString('es-VE', { maximumFractionDigits: 2 }) + 'b';
+      }
+      return (num / 1000000).toLocaleString('es-VE', { maximumFractionDigits: 2 }) + 'm';
     }
     // Menos de 1 millón -> mostrar completo
     // Si es moneda, usar 2 decimales fijos. Si es volumen (acciones), usar 0 decimales (enteros) o 2 si es necesario.
-    return num.toLocaleString('es-VE', { 
-        minimumFractionDigits: isCurrency ? 2 : 0, 
-        maximumFractionDigits: 2 
+    return num.toLocaleString('es-VE', {
+      minimumFractionDigits: isCurrency ? 2 : 0,
+      maximumFractionDigits: 2
     });
   };
 
+  // Pre-calculate all dynamic styles
+  const containerBgColor = theme.colors.background;
+  const haloOpacityValue = theme.dark ? 0.15 : 0.1;
+  const iconContainerBg = stock.iconUrl ? '#FFFFFF' : (theme.dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)');
+  const iconContainerBorderColor = theme.dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
+  const initialsColor = trendColor;
+  const stockNameColor = theme.colors.onSurface;
+  const chipBgColor = theme.colors.elevation.level2;
+  const chipTextColor = theme.colors.onSurfaceVariant;
+  const priceTextColor = theme.colors.onSurface;
+  const trendBgColor = trendColor + (theme.dark ? '30' : '15');
+  const trendAmountOpacity = 0.8;
+  const sectionTitleColor = theme.colors.onSurfaceVariant;
+  const statCardBg = theme.colors.elevation.level1;
+  const statCardBorder = theme.colors.outline;
+  const statIconBoxBg = theme.colors.surfaceVariant;
+  const statLabelColor = theme.colors.onSurfaceVariant;
+  const statValueColor = theme.colors.onSurface;
+  const chartPlaceholderBg = theme.colors.elevation.level1;
+  const chartPlaceholderBorder = theme.colors.outline;
+  const chartIconGlowOpacity = 0.05;
+  const chartPlaceholderTextColor = theme.colors.onSurfaceVariant;
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={[styles.container, { backgroundColor: containerBgColor }]}>
       <UnifiedHeader
         title={stock.symbol}
         onBackPress={() => navigation.goBack()}
         rightActionIcon="share-variant"
         onActionPress={handleShare}
       />
-      
+
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Header Section - Immersive Design */}
         <View style={styles.immersiveHeader}>
-            <View style={styles.iconWrapper}>
-                {/* Halo Glow effect behind the stock icon */}
-                <View style={[
-                  styles.haloEffect, 
-                  { backgroundColor: trendColor, opacity: theme.dark ? 0.15 : 0.1 }
-                ]} />
-                
-                <View style={[
-                  styles.iconContainer, 
-                  { 
-                    backgroundColor: stock.iconUrl ? '#FFFFFF' : (theme.dark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)'),
-                    borderColor: theme.dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
-                    borderWidth: 1,
-                  }
-                ]}>
-                     {stock.iconUrl ? (
-                         <Image 
-                            source={{ uri: stock.iconUrl }} 
-                            style={styles.logoImage}
-                            resizeMode="contain"
-                         />
-                     ) : (
-                        <Text style={[styles.initials, { color: trendColor }]}>{stock.initials || stock.symbol.substring(0, 2)}</Text>
-                     )}
-                </View>
+          <View style={styles.iconWrapper}>
+            {/* Halo Glow effect behind the stock icon */}
+            <View style={[
+              styles.haloEffect,
+              { backgroundColor: trendColor, opacity: haloOpacityValue }
+            ]} />
+
+            <View style={[
+              styles.iconContainer,
+              styles.borderWidthOne,
+              {
+                backgroundColor: iconContainerBg,
+                borderColor: iconContainerBorderColor,
+              }
+            ]}>
+              {stock.iconUrl ? (
+                <Image
+                  source={{ uri: stock.iconUrl }}
+                  style={styles.logoImage}
+                  resizeMode="contain"
+                />
+              ) : (
+                <Text style={[styles.initials, { color: initialsColor }]}>{stock.initials || stock.symbol.substring(0, 2)}</Text>
+              )}
+            </View>
+          </View>
+
+          <View style={styles.headerInfo}>
+            <Text variant="headlineSmall" style={[styles.stockName, { color: stockNameColor }]}>{stock.name}</Text>
+            <Chip
+              style={[styles.chip, { backgroundColor: chipBgColor }]}
+              textStyle={[styles.chipTextStyle, { color: chipTextColor }]}
+            >
+              {stock.category || 'General'}
+            </Chip>
+          </View>
+
+          <View style={styles.priceContainer}>
+            <View style={styles.currencyRow}>
+              <Text variant="headlineLarge" style={[styles.priceLarge, { color: priceTextColor }]}>
+                {stock.price.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              </Text>
+              <View style={styles.bolivarIcon}>
+                <BolivarIcon size={24} color={theme.colors.onSurface} />
+              </View>
             </View>
 
-            <View style={styles.headerInfo}>
-                <Text variant="headlineSmall" style={[styles.stockName, { color: theme.colors.onSurface }]}>{stock.name}</Text>
-                <Chip 
-                  style={[styles.chip, { backgroundColor: theme.colors.elevation.level2 }]} 
-                  textStyle={{ fontSize: 11, color: theme.colors.onSurfaceVariant, fontWeight: '700' }}
-                >
-                  {stock.category || 'General'}
-                </Chip>
+            <View style={[styles.trendBadge, { backgroundColor: trendBgColor }]}>
+              <MaterialCommunityIcons name={trendIcon} size={18} color={trendColor} />
+              <Text style={[styles.trendText, { color: trendColor }]}>
+                {isPositive ? '+' : ''}{stock.changePercent.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%
+              </Text>
+              {stock.changeAmount !== undefined && stock.changeAmount !== 0 && (
+                <Text style={[styles.trendAmount, { color: trendColor, opacity: trendAmountOpacity }]}>
+                  ({isPositive ? '+' : ''}{stock.changeAmount.toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bs)
+                </Text>
+              )}
             </View>
-
-            <View style={styles.priceContainer}>
-                <View style={styles.currencyRow}>
-                    <Text variant="headlineLarge" style={{ color: theme.colors.onSurface, fontWeight: '900', letterSpacing: -1 }}>
-                        {stock.price.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </Text>
-                    <View style={styles.bolivarIcon}>
-                        <BolivarIcon size={24} color={theme.colors.onSurface}  />
-                    </View>
-                </View>
-                
-                <View style={[styles.trendBadge, { backgroundColor: trendColor + (theme.dark ? '30' : '15') }]}>
-                    <MaterialCommunityIcons name={trendIcon} size={18} color={trendColor} />
-                    <Text style={[styles.trendText, { color: trendColor }]}>
-                        {isPositive ? '+' : ''}{stock.changePercent.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}%
-                    </Text>
-                    {stock.changeAmount !== undefined && stock.changeAmount !== 0 && (
-                        <Text style={[styles.trendAmount, { color: trendColor, opacity: 0.8 }]}>
-                            ({isPositive ? '+' : ''}{stock.changeAmount.toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bs)
-                        </Text>
-                    )}
-                </View>
-            </View>
+          </View>
         </View>
 
         {/* Stats Section */}
         <View style={styles.sectionHeader}>
-            <Text variant="titleSmall" style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant, letterSpacing: 1 }]}>ESTADÍSTICAS</Text>
-        </View>
-        
-        <View style={styles.statsGrid}>
-            <Surface style={[styles.statCard, { backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outline }]} elevation={0}>
-                <View style={styles.statHeader}>
-                    <View style={[styles.statIconBox, { backgroundColor: theme.colors.surfaceVariant }]}>
-                        <MaterialCommunityIcons name={primaryStatIcon} size={18} color={theme.colors.primary} />
-                    </View>
-                    <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '700' }}>{primaryStatLabel.toUpperCase()}</Text>
-                </View>
-                <View style={styles.statValueRow}>
-                    <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: '800' }}>
-                        {primaryStatValue ? primaryStatValue.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}
-                    </Text>
-                    <BolivarIcon size={14} color={theme.colors.onSurface} />
-                </View>
-            </Surface>
-
-            <Surface style={[styles.statCard, { backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outline }]} elevation={0}>
-                <View style={styles.statHeader}>
-                    <View style={[styles.statIconBox, { backgroundColor: theme.colors.surfaceVariant }]}>
-                        <MaterialCommunityIcons name="history" size={18} color={theme.colors.primary} />
-                    </View>
-                    <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '700' }}>CIERRE ANT.</Text>
-                </View>
-                <View style={styles.statValueRow}>
-                    <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: '800' }}>
-                        {previousClose.toLocaleString('es-VE', { minimumFractionDigits: 2 })}
-                    </Text>
-                    <BolivarIcon size={14} color={theme.colors.onSurface} />
-                </View>
-            </Surface>
+          <Text variant="titleSmall" style={[styles.sectionTitle, styles.sectionTitleLetterSpacing, { color: sectionTitleColor }]}>ESTADÍSTICAS</Text>
         </View>
 
         <View style={styles.statsGrid}>
-             <Surface style={[styles.statCard, { backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outline }]} elevation={0}>
-                <View style={styles.statHeader}>
-                    <View style={[styles.statIconBox, { backgroundColor: theme.colors.surfaceVariant }]}>
-                        <MaterialCommunityIcons name="chart-bar" size={18} color={theme.colors.primary} />
-                    </View>
-                    <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '700' }}>VOL. TÍTULOS</Text>
-                </View>
-                <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: '800' }}>
-                    {stock.volumeShares ? formatCompactNumber(stock.volumeShares) : (stock.volume || '-')}
-                </Text>
-            </Surface>
+          <Surface style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]} elevation={0}>
+            <View style={styles.statHeader}>
+              <View style={[styles.statIconBox, { backgroundColor: statIconBoxBg }]}>
+                <MaterialCommunityIcons name={primaryStatIcon} size={18} color={theme.colors.primary} />
+              </View>
+              <Text variant="labelSmall" style={[styles.statLabelBold, { color: statLabelColor }]}>{primaryStatLabel.toUpperCase()}</Text>
+            </View>
+            <View style={styles.statValueRow}>
+              <Text variant="titleMedium" style={[styles.statValueBold, { color: statValueColor }]}>
+                {primaryStatValue ? primaryStatValue.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '-'}
+              </Text>
+              <BolivarIcon size={14} color={theme.colors.onSurface} />
+            </View>
+          </Surface>
 
-             <Surface style={[styles.statCard, { backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outline }]} elevation={0}>
-                <View style={styles.statHeader}>
-                    <View style={[styles.statIconBox, { backgroundColor: theme.colors.surfaceVariant }]}>
-                        <MaterialCommunityIcons name="cash-multiple" size={18} color={theme.colors.primary} />
-                    </View>
-                    <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, fontWeight: '700' }}>VOL. BS</Text>
-                </View>
-                 <View style={styles.statValueRow}>
-                    <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: '800' }}>
-                         {stock.volumeAmount ? formatCompactNumber(stock.volumeAmount, true) : '-'}
-                    </Text>
-                    <BolivarIcon size={14} color={theme.colors.onSurface}  />
-                </View>
-            </Surface>
+          <Surface style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]} elevation={0}>
+            <View style={styles.statHeader}>
+              <View style={[styles.statIconBox, { backgroundColor: statIconBoxBg }]}>
+                <MaterialCommunityIcons name="history" size={18} color={theme.colors.primary} />
+              </View>
+              <Text variant="labelSmall" style={[styles.statLabelBold, { color: statLabelColor }]}>CIERRE ANT.</Text>
+            </View>
+            <View style={styles.statValueRow}>
+              <Text variant="titleMedium" style={[styles.statValueBold, { color: statValueColor }]}>
+                {previousClose.toLocaleString('es-VE', { minimumFractionDigits: 2 })}
+              </Text>
+              <BolivarIcon size={14} color={theme.colors.onSurface} />
+            </View>
+          </Surface>
         </View>
 
-         {/* Additional Info / Placeholder for Chart */}
-         <View style={styles.sectionHeader}>
-            <Text variant="titleSmall" style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant, letterSpacing: 1 }]}>ANÁLISIS TÉCNICO</Text>
+        <View style={styles.statsGrid}>
+          <Surface style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]} elevation={0}>
+            <View style={styles.statHeader}>
+              <View style={[styles.statIconBox, { backgroundColor: statIconBoxBg }]}>
+                <MaterialCommunityIcons name="chart-bar" size={18} color={theme.colors.primary} />
+              </View>
+              <Text variant="labelSmall" style={[styles.statLabelBold, { color: statLabelColor }]}>VOL. TÍTULOS</Text>
+            </View>
+            <Text variant="titleMedium" style={[styles.statValueBold, { color: statValueColor }]}>
+              {stock.volumeShares ? formatCompactNumber(stock.volumeShares) : (stock.volume || '-')}
+            </Text>
+          </Surface>
+
+          <Surface style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]} elevation={0}>
+            <View style={styles.statHeader}>
+              <View style={[styles.statIconBox, { backgroundColor: statIconBoxBg }]}>
+                <MaterialCommunityIcons name="cash-multiple" size={18} color={theme.colors.primary} />
+              </View>
+              <Text variant="labelSmall" style={[styles.statLabelBold, { color: statLabelColor }]}>VOL. BS</Text>
+            </View>
+            <View style={styles.statValueRow}>
+              <Text variant="titleMedium" style={[styles.statValueBold, { color: statValueColor }]}>
+                {stock.volumeAmount ? formatCompactNumber(stock.volumeAmount, true) : '-'}
+              </Text>
+              <BolivarIcon size={14} color={theme.colors.onSurface} />
+            </View>
+          </Surface>
         </View>
-         <Surface style={[styles.chartPlaceholder, { backgroundColor: theme.colors.elevation.level1, borderColor: theme.colors.outline }]} elevation={0}>
-            <View style={[styles.chartIconGlow, { backgroundColor: theme.colors.primary, opacity: 0.05 }]} />
-            <MaterialCommunityIcons name="chart-timeline-variant" size={48} color={theme.colors.outline} />
-            <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, marginTop: 12, fontWeight: '600' }}>Gráfico histórico próximamente</Text>
-         </Surface>
+
+        {/* Additional Info / Placeholder for Chart */}
+        <View style={styles.sectionHeader}>
+          <Text variant="titleSmall" style={[styles.sectionTitle, styles.sectionTitleLetterSpacing, { color: sectionTitleColor }]}>ANÁLISIS TÉCNICO</Text>
+        </View>
+        <Surface style={[styles.chartPlaceholder, { backgroundColor: chartPlaceholderBg, borderColor: chartPlaceholderBorder }]} elevation={0}>
+          <View style={[styles.chartIconGlow, { backgroundColor: theme.colors.primary, opacity: chartIconGlowOpacity }]} />
+          <MaterialCommunityIcons name="chart-timeline-variant" size={48} color={theme.colors.outline} />
+          <Text variant="bodyMedium" style={[styles.chartPlaceholderText, { color: chartPlaceholderTextColor }]}>Gráfico histórico próximamente</Text>
+        </Surface>
 
       </ScrollView>
 
@@ -306,26 +330,26 @@ const StockDetailScreen = ({ route, navigation }: any) => {
         confirmLabel="Cerrar"
         onConfirm={() => setShareDialogVisible(false)}
       >
-        <Text variant="bodyMedium" style={{ textAlign: 'center', marginBottom: 20, color: theme.colors.onSurfaceVariant }}>
+        <Text variant="bodyMedium" style={[styles.shareDialogText, { color: theme.colors.onSurfaceVariant }]}>
           Selecciona el formato ideal para compartir los datos de {stock.symbol}
         </Text>
-        
-        <View style={{ gap: 12 }}>
-          <CustomButton 
+
+        <View style={styles.shareButtonsGap}>
+          <CustomButton
             variant="primary"
             label="Imagen cuadrada"
             icon="view-grid-outline"
             onPress={() => generateShareImage('1:1')}
             fullWidth
           />
-          <CustomButton 
+          <CustomButton
             variant="secondary"
             label="Imagen vertical"
             icon="cellphone"
             onPress={() => generateShareImage('16:9')}
             fullWidth
           />
-          <CustomButton 
+          <CustomButton
             variant="outlined"
             label="Solo texto"
             icon="text-short"
@@ -483,7 +507,38 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     filter: 'blur(40px)',
     top: '30%',
-  }
+  },
+  borderWidthOne: {
+    borderWidth: 1,
+  },
+  chipTextStyle: {
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  priceLarge: {
+    fontWeight: '900',
+    letterSpacing: -1,
+  },
+  sectionTitleLetterSpacing: {
+    letterSpacing: 1,
+  },
+  statLabelBold: {
+    fontWeight: '700',
+  },
+  statValueBold: {
+    fontWeight: '800',
+  },
+  chartPlaceholderText: {
+    marginTop: 12,
+    fontWeight: '600',
+  },
+  shareDialogText: {
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  shareButtonsGap: {
+    gap: 12,
+  },
 });
 
 export default StockDetailScreen;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Image, Animated, StatusBar, useWindowDimensions, RefreshControl, ActivityIndicator, TouchableOpacity, Linking } from 'react-native';
+import { View, StyleSheet, Image, Animated, StatusBar, RefreshControl, ActivityIndicator, TouchableOpacity, Linking } from 'react-native';
 import {
   Text,
   IconButton,
@@ -36,60 +36,81 @@ import FacebookIcon from '../../components/common/FacebookIcon';
 import { shareTextContent } from '../../utils/ShareUtils';
 import DiscoverHeader from '../../components/discover/DiscoverHeader';
 
-
-// Helper to convert hex to rgba
-const hexToRGBA = (hex: string, alpha: number) => {
-  const r = parseInt(hex.slice(1, 3), 16);
-  const g = parseInt(hex.slice(3, 5), 16);
-  const b = parseInt(hex.slice(5, 7), 16);
-  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+const BlockParagraph = ({ text, theme }: any) => {
+  const paragraphStyle = [styles.paragraph, { color: theme.colors.onSurface }];
+  return <Text variant="bodyLarge" style={paragraphStyle}>{text}</Text>;
 };
 
-const BlockParagraph = ({ text, theme }: any) => (
-  <Text variant="bodyLarge" style={[styles.paragraph, { color: theme.colors.onSurface }]}>{text}</Text>
-);
+const BlockHeading = ({ text, theme }: any) => {
+  const headingStyle = [styles.heading, { color: theme.colors.primary }];
+  return <Text variant="titleLarge" style={headingStyle}>{text}</Text>;
+};
 
-const BlockHeading = ({ text, theme }: any) => (
-  <Text variant="titleLarge" style={[styles.heading, { color: theme.colors.primary, fontWeight: 'bold' }]}>{text}</Text>
-);
-
-const BlockQuote = ({ text, author, theme }: any) => (
-  <View style={[
+const BlockQuote = ({ text, author, theme }: any) => {
+  const quoteContainerStyle = [
     styles.quoteContainer,
     {
       borderLeftColor: theme.colors.primary,
       backgroundColor: theme.colors.elevation.level2,
       borderRadius: theme.roundness * 2
     }
-  ]}>
-    <MaterialCommunityIcons name="format-quote-open" size={32} color={theme.colors.primary} style={styles.quoteIcon} />
-    <Text style={[styles.quoteText, { color: theme.colors.onSurface }]}>{text}</Text>
-    {author && <Text variant="labelMedium" style={[styles.quoteAuthor, { color: theme.colors.outline }]}>— {author}</Text>}
-  </View>
-);
+  ];
+  const quoteTextStyle = [styles.quoteText, { color: theme.colors.onSurface }];
+  const quoteAuthorStyle = [styles.quoteAuthor, { color: theme.colors.outline }];
 
-const BlockImage = ({ url, caption, theme }: any) => (
-  <View style={styles.imageBlock}>
-    <Image
-      source={{ uri: url }}
-      style={[styles.contentImage, { borderRadius: theme.roundness * 3, backgroundColor: theme.colors.surfaceVariant }]}
-      accessibilityRole="image"
-      accessibilityLabel={caption || 'Imagen del artículo'}
-    />
-    {caption && <Text variant="labelSmall" style={[styles.imageCaption, { color: theme.colors.outline, textAlign: 'center', marginTop: 8 }]}>{caption}</Text>}
-  </View>
-);
+  return (
+    <View style={quoteContainerStyle}>
+      <MaterialCommunityIcons name="format-quote-open" size={32} color={theme.colors.primary} style={styles.quoteIcon} />
+      <Text style={quoteTextStyle}>{text}</Text>
+      {author && <Text variant="labelMedium" style={quoteAuthorStyle}>— {author}</Text>}
+    </View>
+  );
+};
 
-const BlockList = ({ items, theme }: any) => (
-  <View style={styles.listBlock}>
-    {items.map((item: string, index: number) => (
-      <View key={index} style={styles.listItem}>
-        <View style={[styles.bullet, { backgroundColor: theme.colors.primary, borderRadius: 2 }]} />
-        <Text variant="bodyMedium" style={[styles.listItemText, { color: theme.colors.onSurface }]}>{item}</Text>
-      </View>
-    ))}
-  </View>
-);
+const BlockImage = ({ url, caption, theme }: any) => {
+  const contentImageStyle = [
+    styles.contentImage,
+    { borderRadius: theme.roundness * 3, backgroundColor: theme.colors.surfaceVariant }
+  ];
+  const imageCaptionStyle = [
+    styles.imageCaption,
+    { color: theme.colors.outline }
+  ];
+
+  return (
+    <View style={styles.imageBlock}>
+      <Image
+        source={{ uri: url }}
+        style={contentImageStyle}
+        accessibilityRole="image"
+        accessibilityLabel={caption || 'Imagen del artículo'}
+      />
+      {caption && <Text variant="labelSmall" style={imageCaptionStyle}>{caption}</Text>}
+    </View>
+  );
+};
+
+const BlockList = ({ items, theme }: any) => {
+  const bulletStyle = [
+    styles.bullet,
+    { backgroundColor: theme.colors.primary }
+  ];
+  const listItemTextStyle = [
+    styles.listItemText,
+    { color: theme.colors.onSurface }
+  ];
+
+  return (
+    <View style={styles.listBlock}>
+      {items.map((item: string, index: number) => (
+        <View key={index} style={styles.listItem}>
+          <View style={bulletStyle} />
+          <Text variant="bodyMedium" style={listItemTextStyle}>{item}</Text>
+        </View>
+      ))}
+    </View>
+  );
+};
 
 const ArticleDetailScreen = () => {
   const theme = useAppTheme();
@@ -110,18 +131,15 @@ const ArticleDetailScreen = () => {
   const [loadingRelated, setLoadingRelated] = React.useState(false);
   const [contentHeight, setContentHeight] = React.useState(0);
   const scrollY = React.useRef(new Animated.Value(0)).current;
-  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
 
   // Share Logic
   const viewShotRef = React.useRef<any>(null);
   const [isShareDialogVisible, setShareDialogVisible] = React.useState(false);
   const [shareFormat, setShareFormat] = React.useState<'1:1' | '16:9'>('1:1');
-  const [sharing, setSharing] = React.useState(false);
+  const [_sharing, setSharing] = React.useState(false);
   const showToast = useToastStore((state) => state.showToast);
 
   // Safe width calculation for header content
-  const headerContentWidth = windowWidth - 120; // Space between back and share buttons
-
   // Logic to merge incoming params or fetched data
   // Logic to prioritize fetched data (full article) over incoming params (partial article)
   const params = route.params as any;
@@ -205,7 +223,7 @@ const ArticleDetailScreen = () => {
       }
     };
     loadArticleAndRelated();
-  }, [slug, params?.article?.id]); // Depend on id to refetch if switching articles via related section
+  }, [slug, params?.article?.id, params?.article]); // Depend on id to refetch if switching articles via related section
 
   React.useEffect(() => {
     if (article?.id) {
@@ -227,8 +245,8 @@ const ArticleDetailScreen = () => {
           setComments(fetchedComments);
           setCommentsLoading(false);
         }
-      } catch (error) {
-        observabilityService.captureError(error, { context: 'ArticleDetailScreen.loadCommentsFeature' });
+      } catch (err) {
+        observabilityService.captureError(err, { context: 'ArticleDetailScreen.loadCommentsFeature' });
         setCommentsLoading(false);
       }
     };
@@ -245,8 +263,8 @@ const ArticleDetailScreen = () => {
         const fetchedComments = await wordPressService.getComments(Number(article.id), 1, 100, true);
         setComments(fetchedComments);
       }
-    } catch (error) {
-      observabilityService.captureError(error, { context: 'ArticleDetailScreen.handleRefresh' });
+    } catch (err) {
+      observabilityService.captureError(err, { context: 'ArticleDetailScreen.handleRefresh' });
     } finally {
       setRefreshing(false);
     }
@@ -261,9 +279,9 @@ const ArticleDetailScreen = () => {
     setShareDialogVisible(false);
     setShareFormat(format);
     setSharing(true);
-    showToast('Generando imagen, por favor espera...', 'info');
 
     // Wait for render
+    showToast('Generando imagen, por favor espera...', 'info');
     await new Promise(resolve => setTimeout(() => resolve(null), 500));
 
     if (viewShotRef.current) {
@@ -283,8 +301,8 @@ const ArticleDetailScreen = () => {
         // Generate deep link for context
         // Use slug if available, otherwise fallback to ID.
         // Format centralized in DeepLinkService
-        const slug = article.slug || article.id || 'unknown';
-        const webLink = deepLinkService.getArticleLink(slug);
+        const articleSlug = article.slug || article.id || 'unknown';
+        const webLink = deepLinkService.getArticleLink(articleSlug);
 
         // Feature Flag: Toggle sharing exact deep link vs generic promo
         // Controlled by 'discover_web' remote config
@@ -350,11 +368,13 @@ const ArticleDetailScreen = () => {
     }
   };
 
+  /* 
   const headerOpacity = scrollY.interpolate({
     inputRange: [0, 200],
     outputRange: [0, 1],
     extrapolate: 'clamp'
   });
+  */
 
   // HTML Content Renderer (WebView)
   const renderHtmlContent = () => {
@@ -419,12 +439,14 @@ const ArticleDetailScreen = () => {
         </html>
       `;
 
+    const webViewStyle = [styles.webView, { height: webViewHeight }];
+
     return (
       <WebView
         key={`${article.id}-${article.content?.length || 0}`}
         originWhitelist={['*']}
         source={{ html: htmlContent }}
-        style={{ height: webViewHeight, backgroundColor: 'transparent' }}
+        style={webViewStyle}
         scrollEnabled={false}
         onMessage={(event) => {
           const h = Number(event.nativeEvent.data);
@@ -443,11 +465,15 @@ const ArticleDetailScreen = () => {
   }
 
   if (error || !article) {
+    const errorContainerStyle = [styles.container, { backgroundColor: theme.colors.background }];
+    const errorSubContainerStyle = { flex: 1, paddingTop: insets.top };
+    const errorHeaderStyle = { height: 56, justifyContent: 'center' as const, paddingHorizontal: 4 };
+
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={errorContainerStyle}>
         <StatusBar barStyle={theme.dark ? 'light-content' : 'dark-content'} translucent backgroundColor="transparent" />
-        <View style={{ flex: 1, paddingTop: insets.top }}>
-          <View style={{ height: 56, justifyContent: 'center', paddingHorizontal: 4 }}>
+        <View style={errorSubContainerStyle}>
+          <View style={errorHeaderStyle}>
             <IconButton icon="chevron-left" onPress={() => navigation.goBack()} />
           </View>
           <DiscoverErrorView
@@ -459,8 +485,32 @@ const ArticleDetailScreen = () => {
     );
   }
 
+  const mainContainerStyle = [styles.container, { backgroundColor: theme.colors.background }];
+  const scrollViewContentStyle = { paddingBottom: insets.bottom + 40 };
+
+  const heroPlaceholderStyle = [
+    styles.heroContainer,
+    { backgroundColor: theme.colors.surfaceVariant, height: 280 }
+  ];
+  const heroPlaceholderIconSubStyle = { alignItems: 'center' as const, justifyContent: 'center' as const, flex: 1 };
+  const heroPlaceholderIconStyle = { opacity: 0.3 };
+
+  const promoBadgeStyle = [
+    styles.promoBadge,
+    { backgroundColor: theme.colors.warning }
+  ];
+  const trendingBadgeStyle = [
+    styles.promoBadge,
+    { backgroundColor: theme.colors.onPrimaryContainer }
+  ];
+  const badgeIconStyle = { marginRight: 4 };
+  const badgeTextStyle = [
+    styles.promoText,
+    { color: theme.colors.onPrimary }
+  ];
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={mainContainerStyle}>
 
       <DiscoverHeader
         variant="detail"
@@ -475,18 +525,19 @@ const ArticleDetailScreen = () => {
 
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
-        onContentSizeChange={(_, height) => setContentHeight(height)}
+        onContentSizeChange={(_, h) => setContentHeight(h)}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
           { useNativeDriver: true }
         )}
         scrollEventThrottle={16}
-        contentContainerStyle={{ paddingBottom: insets.bottom + 40 }}
+        contentContainerStyle={scrollViewContentStyle}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
             colors={[theme.colors.primary]}
+            progressBackgroundColor={theme.colors.elevation.level3}
             tintColor={theme.colors.primary}
           />
         }
@@ -504,36 +555,36 @@ const ArticleDetailScreen = () => {
               style={styles.heroGradient}
             />
             {article.isPromo ? (
-              <Surface style={[styles.promoBadge, { backgroundColor: theme.colors.warning }]} elevation={4}>
-                <MaterialCommunityIcons name="bullhorn-variant-outline" size={12} color={theme.colors.onPrimary} style={{ marginRight: 4 }} />
-                <Text style={[styles.promoText, { color: theme.colors.onPrimary }]}>PROMO</Text>
+              <Surface style={promoBadgeStyle} elevation={4}>
+                <MaterialCommunityIcons name="bullhorn-variant-outline" size={12} color={theme.colors.onPrimary} style={badgeIconStyle} />
+                <Text style={badgeTextStyle}>PROMO</Text>
               </Surface>
             ) : article.isTrending ? (
-              <Surface style={[styles.promoBadge, { backgroundColor: theme.colors.onPrimaryContainer }]} elevation={4}>
-                <MaterialCommunityIcons name="star" size={12} color={theme.colors.onPrimary} style={{ marginRight: 4 }} />
-                <Text style={[styles.promoText, { color: theme.colors.onPrimary }]}>TRENDING</Text>
+              <Surface style={trendingBadgeStyle} elevation={4}>
+                <MaterialCommunityIcons name="star" size={12} color={theme.colors.onPrimary} style={badgeIconStyle} />
+                <Text style={badgeTextStyle}>TRENDING</Text>
               </Surface>
             ) : null}
           </View>
         ) : (
-          <View style={[styles.heroContainer, { backgroundColor: theme.colors.surfaceVariant, height: 280 }]}>
-            <View style={{ alignItems: 'center', justifyContent: 'center', flex: 1 }}>
+          <View style={heroPlaceholderStyle}>
+            <View style={heroPlaceholderIconSubStyle}>
               <MaterialCommunityIcons
                 name="newspaper-variant-outline"
                 size={64}
                 color={theme.colors.onSurfaceVariant}
-                style={{ opacity: 0.3 }}
+                style={heroPlaceholderIconStyle}
               />
             </View>
             {article.isPromo ? (
-              <Surface style={[styles.promoBadge, { backgroundColor: theme.colors.warning }]} elevation={4}>
-                <MaterialCommunityIcons name="bullhorn-variant-outline" size={12} color={theme.colors.onPrimary} style={{ marginRight: 4 }} />
-                <Text style={[styles.promoText, { color: theme.colors.onPrimary }]}>PROMO</Text>
+              <Surface style={promoBadgeStyle} elevation={4}>
+                <MaterialCommunityIcons name="bullhorn-variant-outline" size={12} color={theme.colors.onPrimary} style={badgeIconStyle} />
+                <Text style={badgeTextStyle}>PROMO</Text>
               </Surface>
             ) : article.isTrending ? (
-              <Surface style={[styles.promoBadge, { backgroundColor: theme.colors.onPrimaryContainer }]} elevation={4}>
-                <MaterialCommunityIcons name="star" size={12} color={theme.colors.onPrimary} style={{ marginRight: 4 }} />
-                <Text style={[styles.promoText, { color: theme.colors.onPrimary }]}>TRENDING</Text>
+              <Surface style={trendingBadgeStyle} elevation={4}>
+                <MaterialCommunityIcons name="star" size={12} color={theme.colors.onPrimary} style={badgeIconStyle} />
+                <Text style={badgeTextStyle}>TRENDING</Text>
               </Surface>
             ) : null}
           </View>
@@ -543,17 +594,34 @@ const ArticleDetailScreen = () => {
           {/* Category Badges - Multi-support */}
           {article.categories && article.categories.length > 0 && (
             <View style={styles.categoriesRow}>
-              {article.categories.map((cat: any, idx: number) => (
-                <Chip
-                  key={idx}
-                  style={[styles.categoryBadge, { backgroundColor: theme.colors.primaryContainer, marginRight: 8, borderRadius: theme.roundness * 2 }]}
-                  textStyle={{ color: theme.colors.onPrimaryContainer, fontWeight: '700', fontSize: 10, letterSpacing: 0.5 }}
-                  compact
-                  onPress={() => navigation.navigate('CategoryDetail', { category: cat, slug: cat.slug })}
-                >
-                  {cat.name.toUpperCase()}
-                </Chip>
-              ))}
+              {article.categories.map((cat: any, idx: number) => {
+                const categoryChipStyle = [
+                  styles.categoryBadge,
+                  {
+                    backgroundColor: theme.colors.primaryContainer,
+                    marginRight: 8,
+                    borderRadius: theme.roundness * 2,
+                  }
+                ];
+                const categoryChipTextStyle = {
+                  color: theme.colors.onPrimaryContainer,
+                  fontWeight: '700' as const,
+                  fontSize: 10,
+                  letterSpacing: 0.5,
+                };
+
+                return (
+                  <Chip
+                    key={idx}
+                    style={categoryChipStyle}
+                    textStyle={categoryChipTextStyle}
+                    compact
+                    onPress={() => navigation.navigate('CategoryDetail', { category: cat, slug: cat.slug })}
+                  >
+                    {cat.name.toUpperCase()}
+                  </Chip>
+                );
+              })}
             </View>
           )}
 
@@ -572,19 +640,19 @@ const ArticleDetailScreen = () => {
 
             <View style={styles.metadataText}>
               <View style={styles.metadataRow}>
-                <Text variant="labelLarge" style={{ fontWeight: '600', color: theme.colors.onSurface }}>
+                <Text variant="labelLarge" style={{ fontWeight: '600' as const, color: theme.colors.onSurface }}>
                   {article.author?.name || article.source}
                 </Text>
                 {article.author?.role && article.author.role.length < 50 && (
                   <>
-                    <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginHorizontal: 6 }}>•</Text>
+                    <Text variant="bodySmall" style={[styles.metadataSeparator, { color: theme.colors.onSurfaceVariant }]}>•</Text>
                     <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }} numberOfLines={1}>
                       {article.author.role}
                     </Text>
                   </>
                 )}
                 {article.author?.social && (
-                  <View style={[styles.metadataItem, { gap: 8, marginHorizontal: 4 }]}>
+                  <View style={styles.socialRow}>
                     {article.author.social.twitter && (
                       <TouchableOpacity onPress={() => Linking.openURL(article.author.social.twitter)}>
                         <XIcon size={16} color={theme.colors.onSurfaceVariant} />
@@ -621,8 +689,8 @@ const ArticleDetailScreen = () => {
                   <>
                     <Text variant="bodySmall" style={[styles.separator, { color: theme.colors.onSurfaceVariant }]}>•</Text>
                     <View style={styles.metadataItem}>
-                      <MaterialCommunityIcons name="pencil-outline" size={14} color={theme.colors.onSurfaceVariant} style={{ opacity: 0.7 }} />
-                      <Text variant="bodySmall" style={{ marginLeft: 4, color: theme.colors.onSurfaceVariant, opacity: 0.8 }}>
+                      <MaterialCommunityIcons name="pencil-outline" size={14} color={theme.colors.onSurfaceVariant} style={styles.metadataIconOpacity} />
+                      <Text variant="bodySmall" style={[styles.metadataTextMarginOpacity, { color: theme.colors.onSurfaceVariant }]}>
                         {article.modifiedTime}
                       </Text>
                     </View>
@@ -632,7 +700,7 @@ const ArticleDetailScreen = () => {
               <View style={styles.metadataRow}>
                 <View style={styles.metadataItem}>
                   <MaterialCommunityIcons name="clock-outline" size={14} color={theme.colors.onSurfaceVariant} />
-                  <Text variant="bodySmall" style={{ marginLeft: 4, color: theme.colors.onSurfaceVariant }}>
+                  <Text variant="bodySmall" style={[styles.metadataTextMargin, { color: theme.colors.onSurfaceVariant }]}>
                     {article.time}
                   </Text>
                 </View>
@@ -640,11 +708,11 @@ const ArticleDetailScreen = () => {
                 <Text variant="bodySmall" style={[styles.separator, { color: theme.colors.onSurfaceVariant }]}>•</Text>
 
                 <View style={styles.metadataItem}>
-                  <Text variant="bodySmall" style={{ color: theme.colors.primary, fontWeight: '700' }}>
+                  <Text variant="bodySmall" style={[styles.readTimeText, { color: theme.colors.primary }]}>
                     {article.readTime}
                   </Text>
                   {article.wordCount && (
-                    <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, marginLeft: 6, fontSize: 10 }}>
+                    <Text variant="bodySmall" style={[styles.wordCountText, { color: theme.colors.onSurfaceVariant }]}>
                       ({article.wordCount} palabras)
                     </Text>
                   )}
@@ -667,14 +735,13 @@ const ArticleDetailScreen = () => {
             <View style={[
               styles.summaryBox,
               {
-                marginTop: 16,
                 backgroundColor: theme.colors.elevation.level1,
                 borderColor: theme.colors.outlineVariant,
                 borderRadius: theme.roundness * 4
               }
             ]}>
               <View style={[styles.summaryLabel, { backgroundColor: theme.colors.primary, borderRadius: theme.roundness }]}>
-                <Text variant="labelSmall" style={{ color: theme.colors.onPrimary, fontWeight: 'bold' }}>IMPORTANTE</Text>
+                <Text variant="labelSmall" style={styles.summaryLabelText}>IMPORTANTE</Text>
               </View>
               <Text variant="bodyMedium" style={[styles.summaryText, { color: theme.colors.onSurfaceVariant }]}>
                 {article.seoDescription}
@@ -685,13 +752,13 @@ const ArticleDetailScreen = () => {
           {/* SEO/Tags */}
           {article.tags && article.tags.length > 0 && (
             <>
-              <Text variant="titleSmall" style={{ marginBottom: 12, fontWeight: 'bold', color: theme.colors.onSurface }}>Etiquetas</Text>
+              <Text variant="titleSmall" style={[styles.tagTitle, { color: theme.colors.onSurface }]}>Etiquetas</Text>
               <View style={styles.tagsContainer}>
                 {article.tags.map((tag: any, idx: number) => (
                   <Chip
                     key={idx}
                     style={[styles.tagChip, { borderRadius: theme.roundness * 2 }]}
-                    textStyle={{ fontSize: 12 }}
+                    textStyle={styles.tagChipText}
                     mode="outlined"
                     onPress={() => navigation.navigate('TagDetail', { tag, slug: tag.slug })}
                   >
@@ -705,19 +772,19 @@ const ArticleDetailScreen = () => {
           {/* Author Section */}
           {article.author && <AuthorCard author={article.author} />}
 
-          <Divider style={{ marginVertical: 32, backgroundColor: theme.colors.outlineVariant }} />
+          <Divider style={[styles.divider, { backgroundColor: theme.colors.outlineVariant }]} />
 
           {/* Recommended Articles Section */}
           <View style={styles.recommendedSection}>
             <View style={styles.sectionHeader}>
-              <Text variant="titleLarge" style={{ fontWeight: 'bold', color: theme.colors.onSurface }}>Relacionados</Text>
+              <Text variant="titleLarge" style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>Relacionados</Text>
               <Button mode="text" onPress={() => navigation.navigate('CategoryDetail', { category: article.categories[0], slug: article.categories[0].slug })}>
                 Ver más
               </Button>
             </View>
 
             {loadingRelated ? (
-              <ActivityIndicator style={{ marginVertical: 40 }} color={theme.colors.primary} />
+              <ActivityIndicator style={styles.loader} color={theme.colors.primary} />
             ) : relatedPosts.length > 0 ? (
               <View style={styles.relatedGrid}>
                 {relatedPosts.map((related) => (
@@ -729,19 +796,19 @@ const ArticleDetailScreen = () => {
                 ))}
               </View>
             ) : (
-              <Text style={{ textAlign: 'center', marginVertical: 40, opacity: 0.5 }}>No hay recomendaciones en este momento</Text>
+              <Text style={styles.emptyText}>No hay recomendaciones en este momento</Text>
             )}
           </View>
 
-          <Divider style={{ marginVertical: 32, backgroundColor: theme.colors.outlineVariant }} />
+          <Divider style={[styles.divider, { backgroundColor: theme.colors.outlineVariant }]} />
 
           {/* Comments Section - WordPress Integration */}
           {commentsEnabled && (
             <>
-              <Divider style={{ marginVertical: 32, backgroundColor: theme.colors.outlineVariant }} />
+              <Divider style={[styles.divider, { backgroundColor: theme.colors.outlineVariant }]} />
 
               <View style={styles.commentsSection}>
-                <Text variant="titleMedium" style={{ fontWeight: 'bold', marginBottom: 16, color: theme.colors.onSurface }}>
+                <Text variant="titleMedium" style={[styles.commentsTitle, { color: theme.colors.onSurface }]}>
                   Comentarios ({comments.length})
                 </Text>
 
@@ -793,10 +860,10 @@ const ArticleDetailScreen = () => {
         confirmLabel="Cerrar"
         onConfirm={() => setShareDialogVisible(false)}
       >
-        <Text variant="bodyMedium" style={{ textAlign: 'center', marginBottom: 20, color: theme.colors.onSurfaceVariant }}>
+        <Text variant="bodyMedium" style={[styles.dialogDescription, { color: theme.colors.onSurfaceVariant }]}>
           Selecciona el formato ideal para compartir en tus redes sociales
         </Text>
-        <View style={{ gap: 12 }}>
+        <View style={styles.dialogActions}>
           <CustomButton
             variant="primary"
             label="Imagen cuadrada"
@@ -1102,6 +1169,71 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 16,
     flex: 1,
+  },
+  webViewWrapper: {
+    width: '100%',
+    height: 400,
+  },
+  webView: {
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'transparent',
+  },
+  loader: {
+    marginVertical: 40,
+  },
+  emptyText: {
+    textAlign: 'center',
+    marginVertical: 40,
+    opacity: 0.5,
+  },
+  divider: {
+    marginVertical: 32,
+  },
+  tagTitle: {
+    marginBottom: 12,
+    fontWeight: 'bold',
+  },
+  tagChipText: {
+    fontSize: 12,
+  },
+  sectionTitle: {
+    fontWeight: 'bold',
+  },
+  commentsTitle: {
+    fontWeight: 'bold',
+    marginBottom: 16,
+  },
+  dialogDescription: {
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  dialogActions: {
+    gap: 12,
+  },
+  metadataSeparator: {
+    marginHorizontal: 6,
+  },
+  metadataIconOpacity: {
+    opacity: 0.7,
+  },
+  metadataTextMarginOpacity: {
+    marginLeft: 4,
+    opacity: 0.8,
+  },
+  metadataTextMargin: {
+    marginLeft: 4,
+  },
+  readTimeText: {
+    fontWeight: '700' as const,
+  },
+  wordCountText: {
+    marginLeft: 6,
+    fontSize: 10,
+  },
+  summaryLabelText: {
+    fontWeight: 'bold' as const,
+    color: '#FFFFFF', // Guaranteed contrast
   },
 });
 

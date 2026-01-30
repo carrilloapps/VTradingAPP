@@ -14,76 +14,75 @@ const StocksSkeleton = () => {
       {/* Header Skeleton matches UnifiedHeader section variant */}
       <View style={styles.headerContainer}>
         <View style={styles.header}>
-            <View style={styles.headerTop}>
-                <View style={styles.headerLeft}>
-                    <Skeleton width={150} height={28} />
-                    <Skeleton width={120} height={14} style={{ marginTop: 8 }} />
-                </View>
-                <View style={styles.headerRight}>
-                    <Skeleton width={40} height={40} borderRadius={20} />
-                    <Skeleton width={40} height={40} borderRadius={20} />
-                </View>
+          <View style={styles.headerTop}>
+            <View style={styles.headerLeft}>
+              <Skeleton width={150} height={28} />
+              <Skeleton width={120} height={14} style={styles.headerSubtitleSkeleton} />
             </View>
+            <View style={styles.headerRight}>
+              <Skeleton width={40} height={40} borderRadius={20} />
+              <Skeleton width={40} height={40} borderRadius={20} />
+            </View>
+          </View>
         </View>
-        
+
         {/* Search Bar Skeleton */}
         <View style={styles.searchBarContainer}>
-            <Skeleton width="100%" height={56} borderRadius={r * 3} />
+          <Skeleton width="100%" height={56} borderRadius={r * 3} />
         </View>
       </View>
-      
+
       <View style={styles.scrollContent}>
         {/* Market Status Skeleton */}
         <View style={styles.marketStatusContainer}>
-            <Skeleton width="100%" height={40} borderRadius={r * 3} />
+          <Skeleton width="100%" height={40} borderRadius={r * 3} />
         </View>
 
         {/* Index Hero Skeleton */}
         <View style={styles.heroSection}>
-            <Skeleton width="100%" height={200} borderRadius={24} />
+          <Skeleton width="100%" height={200} borderRadius={24} />
         </View>
 
         {/* Filters Skeleton */}
         <View style={styles.filtersContainer}>
-            {[1, 2, 3, 4].map((i) => (
-                <Skeleton key={i} width={80} height={32} borderRadius={16} style={{ marginRight: 8 }} />
-            ))}
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} width={80} height={32} borderRadius={16} style={styles.filterSkeleton} />
+          ))}
         </View>
 
         {/* List Header Skeleton */}
         <View style={styles.listHeader}>
-             <Skeleton width={100} height={12} />
-             <Skeleton width={120} height={12} />
+          <Skeleton width={100} height={12} />
+          <Skeleton width={120} height={12} />
         </View>
 
         {/* Stocks List Skeleton */}
         <View style={styles.listSection}>
-            {[1, 2, 3, 4, 5].map((_, index) => (
-            <View 
-                key={index} 
-                style={[
-                styles.stockItem, 
-                { 
-                    backgroundColor: theme.colors.elevation.level1,
-                    borderColor: theme.colors.outline,
-                    borderRadius: r * 6,
-                    elevation: 0,
+          {[1, 2, 3, 4, 5].map((_, index) => (
+            <View
+              key={index}
+              style={[
+                styles.stockItem,
+                {
+                  backgroundColor: theme.colors.elevation.level1,
+                  borderColor: theme.colors.outline,
+                  borderRadius: r * 6,
                 }
-                ]}
+              ]}
             >
-                <View style={styles.stockLeft}>
+              <View style={styles.stockLeft}>
                 <Skeleton width={48} height={48} borderRadius={r * 4} />
                 <View style={styles.stockContent}>
-                    <Skeleton width={100} height={16} />
-                    <Skeleton width={40} height={12} style={styles.stockSubtitleSkeleton} />
+                  <Skeleton width={100} height={16} />
+                  <Skeleton width={40} height={12} style={styles.stockSubtitleSkeleton} />
                 </View>
-                </View>
-                <View style={styles.stockRight}>
+              </View>
+              <View style={styles.stockRight}>
                 <Skeleton width={70} height={16} />
                 <Skeleton width={50} height={16} style={styles.stockBadgeSkeleton} borderRadius={r * 2} />
-                </View>
+              </View>
             </View>
-            ))}
+          ))}
         </View>
       </View>
     </View>
@@ -110,6 +109,12 @@ const styles = StyleSheet.create({
   },
   headerLeft: {
     justifyContent: 'center',
+  },
+  headerSubtitleSkeleton: {
+    marginTop: 8,
+  },
+  filterSkeleton: {
+    marginRight: 8,
   },
   headerRight: {
     flexDirection: 'row',
@@ -149,7 +154,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     padding: 16,
-    borderWidth: 1, 
+    borderWidth: 1,
   },
   stockLeft: {
     flexDirection: 'row',

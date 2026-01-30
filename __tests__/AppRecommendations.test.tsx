@@ -8,9 +8,9 @@ import { LightTheme } from '../src/theme/theme';
 jest.mock('react-native-vector-icons/MaterialCommunityIcons', () => 'Icon');
 
 jest.mock('react-native-svg', () => {
-  const React = require('react');
+  const MockReact = require('react');
   return {
-    SvgUri: ({ uri }: { uri: string }) => React.createElement('svg-uri', { uri }),
+    SvgUri: ({ uri }: { uri: string }) => MockReact.createElement('svg-uri', { uri }),
   };
 });
 

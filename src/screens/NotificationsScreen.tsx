@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useRef, useCallback } from 'react';
+import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import { View, StyleSheet, StatusBar, TouchableOpacity, LayoutAnimation, Platform, UIManager } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
-import { Text, Icon } from 'react-native-paper';
+import { Text, Icon, Button } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import PagerView from 'react-native-pager-view';
@@ -14,6 +14,10 @@ import NotificationCard, { NotificationData } from '../components/notifications/
 import NotificationDetailModal from '../components/notifications/NotificationDetailModal';
 import NotificationsSkeleton from '../components/notifications/NotificationsSkeleton';
 import { useNotifications } from '../context/NotificationContext';
+import { fcmService } from '../services/firebase/FCMService';
+import { notificationInitService } from '../services/NotificationInitService';
+import { storageService } from '../services/StorageService';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 const isFabricEnabled = !!(globalThis as any).nativeFabricUIManager;
 
@@ -44,6 +48,8 @@ const NotificationsScreen: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState<NotificationData | null>(null);
+  const [hasPermissions, setHasPermissions] = useState<boolean | null>(null);
+  const [pushEnabled, setPushEnabled] = useState(true);
 
   // Filter Logic Helper
   const filterNotifications = useCallback((items: NotificationData[]) => {
@@ -70,6 +76,30 @@ const NotificationsScreen: React.FC = () => {
   [notifications, filterNotifications]);
 
   const unreadCount = notifications.filter(n => !n.isRead && !n.isArchived).length;
+
+  // Check permissions on mount and focus
+  useEffect(() => {
+    const checkPermissions = async () => {
+      const hasSystemPermission = await fcmService.checkPermission();
+      const settings = await storageService.getSettings();
+      setHasPermissions(hasSystemPermission);
+      setPushEnabled(settings.pushEnabled);
+    };
+    
+    checkPermissions();
+  }, []);
+
+  const handleEnableNotifications = async () => {
+    const granted = await notificationInitService.requestPermission();
+    if (granted) {
+      setHasPermissions(true);
+      setPushEnabled(true);
+    }
+  };
+
+  const handleGoToSettings = () => {
+    navigation.navigate('Settings' as never);
+  };
 
   // Actions
   const handleArchive = (id: string) => {
@@ -115,12 +145,12 @@ const NotificationsScreen: React.FC = () => {
       <Icon
         source="bell-off-outline"
         size={80}
-        color={theme.colors.onSurfaceVariant}
+        color={emptyIconColor}
       />
-      <Text variant="titleMedium" style={[styles.emptyTitle, { color: theme.colors.onSurface }]}>
+      <Text variant="titleMedium" style={[styles.emptyTitle, { color: emptyTitleColor }]}>
         {title}
       </Text>
-      <Text variant="bodyMedium" style={[styles.emptySubtitle, { color: theme.colors.onSurfaceVariant }]}>
+      <Text variant="bodyMedium" style={[styles.emptySubtitle, { color: emptySubtitleColor }]}>
         {subtitle}
       </Text>
     </View>
@@ -139,22 +169,89 @@ const NotificationsScreen: React.FC = () => {
           showSwipeHint={index === 0}
         />
       )}
-      contentContainerStyle={{ padding: 20, paddingBottom: insets.bottom + 20 }}
+      contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 20 }]}
       ListEmptyComponent={renderEmptyState(emptyTitle, emptySubtitle)}
       showsVerticalScrollIndicator={false}
     />
   );
   
+  // Pre-calculate dynamic styles
+  const containerBgColor = theme.colors.background;
+  const statusBarStyle = theme.dark ? 'light-content' : 'dark-content';
+  const headerContainerBg = theme.colors.background;
+  const emptyTitleColor = theme.colors.onSurface;
+  const emptySubtitleColor = theme.colors.onSurfaceVariant;
+  const emptyIconColor = theme.colors.onSurfaceVariant;
+  const segmentedContainerBg = theme.colors.elevation.level1;
+  const unreadTabBg = activeTab === 'unread' ? theme.colors.secondaryContainer : undefined;
+  const unreadTabColor = activeTab === 'unread' ? theme.colors.onSecondaryContainer : theme.colors.onSurfaceVariant;
+  const readTabBg = activeTab === 'read' ? theme.colors.secondaryContainer : undefined;
+  const readTabColor = activeTab === 'read' ? theme.colors.onSecondaryContainer : theme.colors.onSurfaceVariant;
+  const archivedTabBg = activeTab === 'archived' ? theme.colors.secondaryContainer : undefined;
+  const archivedTabColor = activeTab === 'archived' ? theme.colors.onSecondaryContainer : theme.colors.onSurfaceVariant;
+
+  // Si está cargando permisos, mostrar skeleton
+  if (hasPermissions === null || isLoading) {
+    return <NotificationsSkeleton />;
+  }
+
+  // Si no tiene permisos O notificaciones deshabilitadas, mostrar estado vacío
+  if (!hasPermissions || !pushEnabled) {
+    return (
+      <View style={[styles.container, { backgroundColor: containerBgColor }]}>
+        <StatusBar
+          backgroundColor="transparent"
+          translucent
+          barStyle={statusBarStyle}
+        />
+        
+        <UnifiedHeader
+          variant="section"
+          title="Notificaciones"
+        />
+
+        <View style={styles.noPermissionsContainer}>
+          <View style={[styles.noPermissionsIconContainer, { backgroundColor: theme.colors.elevation.level2 }]}>
+            <MaterialCommunityIcons 
+              name="bell-off-outline" 
+              size={64} 
+              color={theme.colors.onSurfaceVariant} 
+            />
+          </View>
+          
+          <Text variant="headlineSmall" style={[styles.noPermissionsTitle, { color: theme.colors.onSurface }]}>
+            {!hasPermissions ? 'Notificaciones desactivadas' : 'Notificaciones pausadas'}
+          </Text>
+          
+          <Text variant="bodyLarge" style={[styles.noPermissionsDescription, { color: theme.colors.onSurfaceVariant }]}>
+            {!hasPermissions 
+              ? 'Para recibir alertas de precios y actualizaciones importantes, necesitas activar las notificaciones.'
+              : 'Has desactivado las notificaciones desde Ajustes. Actívalas para recibir alertas y actualizaciones.'}
+          </Text>
+
+          <Button
+            mode="contained"
+            onPress={!hasPermissions ? handleEnableNotifications : handleGoToSettings}
+            style={styles.noPermissionsButton}
+            icon={!hasPermissions ? "bell-ring" : "cog"}
+          >
+            {!hasPermissions ? 'Activar notificaciones' : 'Ir a Ajustes'}
+          </Button>
+        </View>
+      </View>
+    );
+  }
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={[styles.container, { backgroundColor: containerBgColor }]}>
       <StatusBar
         backgroundColor="transparent"
         translucent
-        barStyle={theme.dark ? 'light-content' : 'dark-content'}
+        barStyle={statusBarStyle}
       />
 
       {/* Unified Header + Search */}
-      <View style={[styles.headerContainer, { backgroundColor: theme.colors.background }]}>
+      <View style={[styles.headerContainer, { backgroundColor: headerContainerBg }]}>
         <UnifiedHeader 
           variant="section" 
           title="Notificaciones" 
@@ -191,16 +288,16 @@ const NotificationsScreen: React.FC = () => {
                 LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
                 setActiveFilter(val);
               }}
-              style={{ marginTop: 0, marginBottom: 12 }}
+              style={styles.filterSectionMargin}
             />
           )}
 
           {/* Segmented Tabs (Read/Unread/Archived) */}
-          <View style={[styles.segmentedContainer, { backgroundColor: theme.colors.elevation.level1 }]}>
+          <View style={[styles.segmentedContainer, { backgroundColor: segmentedContainerBg }]}>
             <TouchableOpacity 
               style={[
                 styles.segment, 
-                activeTab === 'unread' && { backgroundColor: theme.colors.secondaryContainer }
+                activeTab === 'unread' && { backgroundColor: unreadTabBg }
               ]}
               onPress={() => {
                 LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -212,7 +309,7 @@ const NotificationsScreen: React.FC = () => {
               <Text 
                 style={[
                   styles.segmentText, 
-                  { color: activeTab === 'unread' ? theme.colors.onSecondaryContainer : theme.colors.onSurfaceVariant }
+                  { color: unreadTabColor }
                 ]}
               >
                 No leídas {unreadCount > 0 && `(${unreadCount})`}
@@ -222,7 +319,7 @@ const NotificationsScreen: React.FC = () => {
             <TouchableOpacity 
               style={[
                 styles.segment, 
-                activeTab === 'read' && { backgroundColor: theme.colors.secondaryContainer }
+                activeTab === 'read' && { backgroundColor: readTabBg }
               ]}
               onPress={() => {
                 LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -234,7 +331,7 @@ const NotificationsScreen: React.FC = () => {
               <Text 
                 style={[
                   styles.segmentText, 
-                  { color: activeTab === 'read' ? theme.colors.onSecondaryContainer : theme.colors.onSurfaceVariant }
+                  { color: readTabColor }
                 ]}
               >
                 Leídas
@@ -244,7 +341,7 @@ const NotificationsScreen: React.FC = () => {
             <TouchableOpacity 
               style={[
                 styles.segment, 
-                activeTab === 'archived' && { backgroundColor: theme.colors.secondaryContainer }
+                activeTab === 'archived' && { backgroundColor: archivedTabBg }
               ]}
               onPress={() => {
                 LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -256,7 +353,7 @@ const NotificationsScreen: React.FC = () => {
               <Text 
                 style={[
                   styles.segmentText, 
-                  { color: activeTab === 'archived' ? theme.colors.onSecondaryContainer : theme.colors.onSurfaceVariant }
+                  { color: archivedTabColor }
                 ]}
               >
                 Archivadas
@@ -273,7 +370,7 @@ const NotificationsScreen: React.FC = () => {
               style={styles.markReadButton}
             >
               <Icon source="check-all" size={16} color={theme.colors.primary} />
-              <Text style={{ color: theme.colors.primary, fontWeight: 'bold', fontSize: 11, textTransform: 'uppercase', marginLeft: 4 }}>
+              <Text style={[styles.markReadButtonText, { color: theme.colors.primary }]}>
                 Marcar todo como leído
               </Text>
             </TouchableOpacity>
@@ -282,7 +379,7 @@ const NotificationsScreen: React.FC = () => {
 
         {/* Pager Content */}
         {isLoading ? (
-           <View style={{ flex: 1 }}>
+           <View style={styles.loadingContainer}>
              <NotificationsSkeleton />
            </View>
         ) : (
@@ -332,6 +429,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginTop: 8,
   },
+  listContent: {
+    padding: 20,
+  },
   content: {
     flex: 1,
   },
@@ -366,6 +466,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
+  markReadButtonText: {
+    fontWeight: 'bold',
+    fontSize: 11,
+    textTransform: 'uppercase',
+    marginLeft: 4,
+  },
   pagerView: {
     flex: 1,
   },
@@ -388,6 +494,40 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     maxWidth: '80%',
     opacity: 0.7,
+  },
+  filterSectionMargin: {
+    marginTop: 0,
+    marginBottom: 12,
+  },
+  loadingContainer: {
+    flex: 1,
+  },
+  noPermissionsContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  noPermissionsIconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  noPermissionsTitle: {
+    textAlign: 'center',
+    marginBottom: 12,
+    fontWeight: '600',
+  },
+  noPermissionsDescription: {
+    textAlign: 'center',
+    marginBottom: 32,
+    lineHeight: 24,
+  },
+  noPermissionsButton: {
+    minWidth: 200,
   },
 });
 

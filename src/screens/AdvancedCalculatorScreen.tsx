@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { View, StyleSheet, TouchableOpacity, FlatList, TextInput as RNTextInput, StatusBar, Keyboard, RefreshControl, Platform } from 'react-native';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { View, StyleSheet, TouchableOpacity, TextInput as RNTextInput, StatusBar, Keyboard, RefreshControl, Platform } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { Text, useTheme, TouchableRipple } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
@@ -358,6 +359,24 @@ const AdvancedCalculatorScreen = () => {
     addIcon: { backgroundColor: theme.colors.secondaryContainer },
   }), [theme]);
 
+  const renderListFooter = useCallback(() => (
+    <TouchableOpacity 
+      style={[styles.addButton, themeStyles.addButton]} 
+      onPress={() => { 
+        setPickerMode('add'); 
+        setPickerVisible(true); 
+        analyticsService.logEvent('calculator_add_currency_pressed');
+      }}
+    >
+      <View style={[styles.addIcon, themeStyles.addIcon]}>
+        <MaterialCommunityIcons name="plus" size={20} color={theme.colors.onSecondaryContainer} />
+      </View>
+      <Text variant="bodyMedium" style={themeStyles.textSecondary}>
+        Agregar divisa
+      </Text>
+    </TouchableOpacity>
+  ), [theme, themeStyles]);
+
   return (
     <View style={[styles.container, themeStyles.container]}>
       <StatusBar 
@@ -446,10 +465,9 @@ const AdvancedCalculatorScreen = () => {
           </View>
 
           {/* Target List */}
-          <FlatList
+          <FlashList
               data={targetRows}
               keyExtractor={item => item.code}
-              style={styles.flex1}
               contentContainerStyle={styles.listContent}
               showsVerticalScrollIndicator={false}
               refreshControl={
@@ -465,7 +483,7 @@ const AdvancedCalculatorScreen = () => {
                       {/* Left Side: Icon */}
                       <View style={[styles.iconBox, themeStyles.iconBox]}>
                             {item.rateObj.iconName === 'Bs' ? (
-                                <Text style={{fontWeight: '900', fontSize: 18, color: theme.colors.primary}}>Bs</Text>
+                                <Text style={[styles.bsIconText, { color: theme.colors.primary }]}>Bs</Text>
                             ) : (
                                 <MaterialCommunityIcons name={item.rateObj.iconName || 'currency-usd'} size={24} color={theme.colors.primary} />
                             )}
@@ -516,19 +534,7 @@ const AdvancedCalculatorScreen = () => {
                       </TouchableOpacity>
                   </View>
               )}
-              ListFooterComponent={
-                  <TouchableOpacity 
-                    onPress={() => { setPickerMode('add'); setPickerVisible(true); }}
-                    style={[styles.addButton, themeStyles.addButton]}
-                  >
-                      <View style={[styles.addIcon, themeStyles.addIcon]}>
-                        <MaterialCommunityIcons name="plus" size={18} color={theme.colors.onSecondaryContainer} />
-                      </View>
-                      <Text style={[styles.addText, themeStyles.textSecondary]}>
-                          AÑADIR OTRA DIVISA
-                      </Text>
-                  </TouchableOpacity>
-              }
+              ListFooterComponent={renderListFooter}
           />
           
           <Keypad onKeyPress={handleKeyPress} onDelete={handleDelete} theme={theme} />
@@ -636,6 +642,10 @@ const styles = StyleSheet.create({
       borderRadius: 24,
       alignItems: 'center',
       justifyContent: 'center',
+  },
+  bsIconText: {
+      fontWeight: '900',
+      fontSize: 18,
   },
   middleCol: {
       marginLeft: 16, 

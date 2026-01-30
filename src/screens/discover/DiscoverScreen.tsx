@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
-import { View, StyleSheet, RefreshControl, ScrollView, FlatList, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, RefreshControl, ScrollView, useWindowDimensions } from 'react-native';
+import { FlashList, FlashListRef } from '@shopify/flash-list';
 import { Text, Surface, Icon, ProgressBar } from 'react-native-paper';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,13 +16,42 @@ import AdCard from '../../components/discover/AdCard';
 import PartnersSection from '../../components/discover/PartnersSection';
 import FeaturedCarousel from '../../components/discover/FeaturedCarousel';
 import PaginationControls from '../../components/discover/PaginationControls';
-
 import { useToastStore } from '../../stores/toastStore';
 import { observabilityService } from '../../services/ObservabilityService';
 import { remoteConfigService } from '../../services/firebase/RemoteConfigService';
 import { wordPressService, FormattedPost, WordPressCategory } from '../../services/WordPressService';
 import { getCategoryImage } from '../../utils/WordPressUtils';
 import { useAppTheme } from '../../theme/theme';
+
+const ListFooter = ({
+  currentPage,
+  totalPages,
+  onPrevious,
+  onNext,
+  loadingPagination,
+  bottomInset,
+}: {
+  currentPage: number;
+  totalPages: number;
+  onPrevious: () => void;
+  onNext: () => void;
+  loadingPagination: boolean;
+  bottomInset: number;
+}) => {
+  return (
+    <View>
+      <PaginationControls
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPrevious={onPrevious}
+        onNext={onNext}
+        loading={loadingPagination}
+      />
+      <PartnersSection />
+      <View style={{ height: bottomInset + 80 }} />
+    </View>
+  );
+};
 
 const DiscoverScreen = () => {
   const theme = useAppTheme();
@@ -50,9 +80,9 @@ const DiscoverScreen = () => {
   const [featureEnabled, setFeatureEnabled] = useState(false);
 
   // Ads/Promoted
-  const [adsIndex, setAdsIndex] = useState(0);
-  const adsRef = useRef<FlatList>(null);
-  const listRef = useRef<FlatList>(null);
+  const [, setAdsIndex] = useState(0);
+  const adsRef = useRef<FlashListRef<any>>(null);
+  const listRef = useRef<FlashListRef<any>>(null);
 
   // Map fetched Promoted Posts to Ad Cards
   const ads = useMemo(() => {
@@ -121,7 +151,7 @@ const DiscoverScreen = () => {
 
         let trendingPostsPromise: Promise<FormattedPost[]> = Promise.resolve([]);
         if (trendingTag) {
-          trendingPostsPromise = wordPressService.getPosts(1, 3, undefined, trendingTag.id);
+          trendingPostsPromise = wordPressService.getPosts(1, 4, undefined, trendingTag.id);
         }
 
         let promotedPostsPromise: Promise<FormattedPost[]> = Promise.resolve([]);
@@ -153,7 +183,7 @@ const DiscoverScreen = () => {
     };
 
     loadData();
-  }, []);
+  }, [route.params, selectedCategory]);
 
   useEffect(() => {
     if (!featureEnabled || ads.length === 0) return;
@@ -190,7 +220,7 @@ const DiscoverScreen = () => {
 
       // Add optional fetches
       if (trendingTag) {
-        promises.push(wordPressService.getPosts(1, 3, undefined, trendingTag.id, true));
+        promises.push(wordPressService.getPosts(1, 4, undefined, trendingTag.id, true));
       } else {
         promises.push(Promise.resolve([]));
       }
@@ -259,7 +289,7 @@ const DiscoverScreen = () => {
   // --- DATA PREPARATION ---
 
   // 1. Trending Data (Header)
-  const trendingHeroItems = useMemo(() => trendingPosts.slice(0, 3), [trendingPosts]);
+  const trendingHeroItems = useMemo(() => trendingPosts.slice(0, 4), [trendingPosts]);
   const trendingIds = useMemo(() => new Set(trendingHeroItems.map(h => h.id)), [trendingHeroItems]);
 
   // 2. Filter posts
@@ -296,35 +326,45 @@ const DiscoverScreen = () => {
 
   // --- RENDERERS ---
 
-  const renderHeader = () => (
-    <View>
-      {/* Trending Section (Tendencias) */}
-      {trendingHeroItems.length > 0 && (
-        <FeaturedCarousel items={trendingHeroItems} />
-      )}
+  const renderHeader = () => {
+    const stickyBarStyles = [
+      styles.stickyCategoryBar,
+      {
+        backgroundColor: theme.colors.background,
+        borderBottomColor: theme.colors.outlineVariant
+      }
+    ];
 
-      {/* Categories */}
-      <Surface style={[styles.stickyCategoryBar, { backgroundColor: theme.colors.background, borderBottomColor: theme.colors.outlineVariant }]} elevation={0}>
-        <CategoryTabList
-          categories={displayCategories}
-          selectedCategory={selectedCategory}
-          onCategorySelect={handleCategorySelect}
-        />
-      </Surface>
+    return (
+      <View>
+        {/* Trending Section (Tendencias) */}
+        {trendingHeroItems.length > 0 && (
+          <FeaturedCarousel items={trendingHeroItems} />
+        )}
 
-      {/* Section Header */}
-      {mixedFeedData.length > 0 && (
-        <View style={{ marginTop: 16 }}>
-          <SectionHeader title="Lo último" showViewAll onViewAll={() => navigation.navigate('AllArticles')} />
-        </View>
-      )}
-    </View>
-  );
+        {/* Categories */}
+        <Surface style={stickyBarStyles} elevation={0}>
+          <CategoryTabList
+            categories={displayCategories}
+            selectedCategory={selectedCategory}
+            onCategorySelect={handleCategorySelect}
+          />
+        </Surface>
+
+        {/* Section Header */}
+        {mixedFeedData.length > 0 && (
+          <View style={styles.sectionHeaderWrapper}>
+            <SectionHeader title="Lo último" showViewAll onViewAll={() => navigation.navigate('AllArticles')} />
+          </View>
+        )}
+      </View>
+    );
+  };
 
   const renderItem = useCallback(({ item }: { item: { type: 'article' | 'ad', data: any } }) => {
     if (item.type === 'ad') {
       return (
-        <View style={{ marginBottom: 16 }}>
+        <View style={styles.adWrapper}>
           <AdCard
             item={item.data}
             onPress={() => navigation.navigate('ArticleDetail', {
@@ -343,13 +383,39 @@ const DiscoverScreen = () => {
     );
   }, [navigation]);
 
+  const renderFooter = () => (
+    mixedFeedData.length > 0 ? (
+      <ListFooter
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onPrevious={() => handlePageChange(currentPage - 1)}
+        onNext={() => handlePageChange(currentPage + 1)}
+        loadingPagination={loadingPagination}
+        bottomInset={insets.bottom}
+      />
+    ) : null
+  );
+
   if (isLoading) {
     return featureEnabled ? <DiscoverFeedSkeleton /> : <DiscoverConstructionSkeleton />;
   }
 
+  const screenContainerStyle = [styles.container, { backgroundColor: theme.colors.background }];
+
   if (!featureEnabled) {
+    const heroContentStyle = [styles.constructionHero, { marginTop: windowWidth * 0.1 }];
+    const glowStyle = [styles.glowContainer, { backgroundColor: theme.colors.primaryContainer, opacity: 0.15 }];
+    const statusBadgeStyle = [styles.statusBadge, { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.colors.outlineVariant }];
+    const blinkingDotStyle = [styles.blinkingDot, { backgroundColor: theme.colors.primary }];
+    const statusTextStyle = [styles.statusText, { color: theme.colors.primary }];
+    const titleStyle = [styles.title, { color: theme.colors.onBackground }];
+    const descriptionStyle = [styles.description, { color: theme.colors.onSurfaceVariant }];
+    const progressPercentStyle = [styles.progressPercent, { color: theme.colors.primary }];
+    const mainButtonStyle = [styles.mainButton, { backgroundColor: theme.colors.primary }];
+    const mainButtonTextStyle = { color: theme.colors.onPrimary, fontWeight: 'bold' as const };
+
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View style={screenContainerStyle}>
         <DiscoverHeader
           variant="main"
           onSearchPress={() => { }}
@@ -360,19 +426,19 @@ const DiscoverScreen = () => {
           showsVerticalScrollIndicator={false}
         >
           {/* Hero Section */}
-          <View style={[styles.constructionHero, { marginTop: windowWidth * 0.1 }]}>
-            <View style={[styles.glowContainer, { backgroundColor: theme.colors.primaryContainer, opacity: 0.15 }]} />
+          <View style={heroContentStyle}>
+            <View style={glowStyle} />
             <View style={styles.iconContainer}>
               <Icon source="rocket-launch" size={80} color={theme.colors.primary} />
             </View>
-            <View style={[styles.statusBadge, { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.colors.outlineVariant }]}>
-              <View style={[styles.blinkingDot, { backgroundColor: theme.colors.primary }]} />
-              <Text variant="labelLarge" style={[styles.statusText, { color: theme.colors.primary }]}>En Laboratorio</Text>
+            <View style={statusBadgeStyle}>
+              <View style={blinkingDotStyle} />
+              <Text variant="labelLarge" style={statusTextStyle}>En Laboratorio</Text>
             </View>
-            <Text variant="displaySmall" style={[styles.title, { color: theme.colors.onBackground }]}>
+            <Text variant="displaySmall" style={titleStyle}>
               News V2.0
             </Text>
-            <Text variant="bodyLarge" style={[styles.description, { color: theme.colors.onSurfaceVariant }]}>
+            <Text variant="bodyLarge" style={descriptionStyle}>
               Estamos construyendo una experiencia de trading inteligente con noticias en tiempo real potenciadas por IA.
             </Text>
           </View>
@@ -381,7 +447,7 @@ const DiscoverScreen = () => {
           <View style={styles.roadmapSection}>
             <View style={styles.progressHeader}>
               <Text variant="titleMedium">Fase de Desarrollo</Text>
-              <Text variant="titleMedium" style={{ fontWeight: 'bold', color: theme.colors.primary }}>95%</Text>
+              <Text variant="titleMedium" style={progressPercentStyle}>95%</Text>
             </View>
             <ProgressBar progress={0.95} color={theme.colors.primary} style={styles.progressBar} />
             <Text variant="labelSmall" style={styles.progressLabel}>Casi listo para el lanzamiento beta</Text>
@@ -414,8 +480,8 @@ const DiscoverScreen = () => {
 
           {/* Action CTA */}
           <View style={styles.ctaContainer}>
-            <Surface style={[styles.mainButton, { backgroundColor: theme.colors.primary }]} elevation={4}>
-              <Text style={{ color: theme.colors.onPrimary, fontWeight: 'bold' }}>Notificarme al Lanzamiento</Text>
+            <Surface style={mainButtonStyle} elevation={4}>
+              <Text style={mainButtonTextStyle}>Notificarme al Lanzamiento</Text>
             </Surface>
             <Text variant="bodySmall" style={styles.ctaSubtitle}>Únete a los +10,000 inversores esperando.</Text>
           </View>
@@ -425,9 +491,12 @@ const DiscoverScreen = () => {
   }
 
   if (error) {
+    const errorPageContainerStyle = [styles.container, { backgroundColor: theme.colors.background }];
+    const errorSpacerStyle = [styles.errorSpacer, { backgroundColor: theme.colors.surface }];
+
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <View style={{ height: 60, width: '100%', backgroundColor: theme.colors.surface }} />
+      <View style={errorPageContainerStyle}>
+        <View style={errorSpacerStyle} />
         <DiscoverErrorView
           message={error}
           onRetry={() => { setError(null); setIsLoading(true); handleRefresh(); }}
@@ -437,37 +506,26 @@ const DiscoverScreen = () => {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={screenContainerStyle}>
       <DiscoverHeader
         variant="main"
         onSearchPress={() => navigation.navigate('SearchResults', {})}
         onNotificationsPress={() => navigation.navigate('Notifications')}
       />
-      <FlatList
+      <FlashList
         ref={listRef}
         data={mixedFeedData}
         renderItem={renderItem}
         keyExtractor={(item, index) => `${item.type}-${item.type === 'article' ? item.data.id : index}`}
         ListHeaderComponent={renderHeader}
-        ListFooterComponent={Boolean(mixedFeedData.length) ? () => (
-          <View>
-            <PaginationControls
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onPrevious={() => handlePageChange(currentPage - 1)}
-              onNext={() => handlePageChange(currentPage + 1)}
-              loading={loadingPagination}
-            />
-            <PartnersSection />
-            <View style={{ height: insets.bottom + 80 }} />
-          </View>
-        ) : null}
+        ListFooterComponent={renderFooter}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
             colors={[theme.colors.primary]}
+            progressBackgroundColor={theme.colors.elevation.level3}
             tintColor={theme.colors.primary}
           />
         }
@@ -636,7 +694,20 @@ const styles = StyleSheet.create({
   },
   ctaSubtitle: {
     opacity: 0.6,
-  }
+  },
+  sectionHeaderWrapper: {
+    marginTop: 16,
+  },
+  adWrapper: {
+    marginBottom: 16,
+  },
+  progressPercent: {
+    fontWeight: 'bold',
+  },
+  errorSpacer: {
+    height: 60,
+    width: '100%',
+  },
 });
 
 export default DiscoverScreen;

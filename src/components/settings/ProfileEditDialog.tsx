@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { TextInput, useTheme } from 'react-native-paper';
+import { StyleSheet } from 'react-native';
 import CustomDialog from '../ui/CustomDialog';
 import { useToastStore } from '../../stores/toastStore';
 import { observabilityService } from '../../services/ObservabilityService';
@@ -57,11 +58,17 @@ const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({
         value={name}
         onChangeText={setName}
         mode="outlined"
-        style={{ backgroundColor: theme.colors.surface, marginTop: 8 }}
+        style={[styles.input, { backgroundColor: theme.colors.surface }]}
         autoFocus
       />
     </CustomDialog>
   );
 };
+
+const styles = StyleSheet.create({
+  input: {
+    marginTop: 8,
+  },
+});
 
 export default ProfileEditDialog;

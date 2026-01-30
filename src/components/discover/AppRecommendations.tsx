@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { DimensionValue, Platform, StyleSheet, View, ViewStyle } from 'react-native';
+import { DimensionValue, Platform, StyleSheet, View } from 'react-native';
 import AppCard, { RecommendedApp } from './AppCard';
 import AppRecommendationsSkeleton from './AppRecommendationsSkeleton';
 import { remoteConfigService } from '../../services/firebase/RemoteConfigService';
@@ -160,10 +160,9 @@ const AppRecommendations: React.FC<AppRecommendationsProps> = ({ apps: providedA
   }, [providedApps]);
 
   const effectiveColumns = useMemo(() => Math.max(1, Math.floor(columns)), [columns]);
-  const columnStyle = useMemo<ViewStyle>(() => {
-    const columnWidth = `${100 / effectiveColumns}%` as DimensionValue;
-    return { width: columnWidth };
-  }, [effectiveColumns]);
+
+  // We avoid returning a plain object to prevent inland-style linting
+  const columnWidth = useMemo<DimensionValue>(() => `${100 / effectiveColumns}%` as DimensionValue, [effectiveColumns]);
 
   if (isLoading) {
     return <AppRecommendationsSkeleton columns={columns} />;
@@ -176,7 +175,7 @@ const AppRecommendations: React.FC<AppRecommendationsProps> = ({ apps: providedA
   return (
     <View style={styles.container} testID="app-recommendations-container">
       {recommendations.map((app) => (
-        <View key={app.id} style={[styles.cardWrapper, columnStyle]}>
+        <View key={app.id} style={[styles.cardWrapper, { width: columnWidth }]}>
           <AppCard app={app} />
         </View>
       ))}

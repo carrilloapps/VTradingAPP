@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator, StatusBar } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, StatusBar } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { Text, useTheme, Appbar } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { wordPressService, FormattedPost } from '../../services/WordPressService';
@@ -7,7 +8,20 @@ import { observabilityService } from '../../services/ObservabilityService';
 import ArticleCard from '../../components/discover/ArticleCard';
 import ArticleSkeleton from '../../components/discover/ArticleSkeleton';
 import DiscoverEmptyView from '../../components/discover/DiscoverEmptyView';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
+const ListFooter = ({ hasMore, postsLength, theme }: { hasMore: boolean; postsLength: number; theme: any }) => {
+  if (hasMore) {
+    return <ActivityIndicator style={styles.footerLoader} color={theme.colors.primary} />;
+  }
+  if (postsLength > 0) {
+    return (
+      <Text style={[styles.footerText, { color: theme.colors.onSurface }]}>
+        Has llegado al final
+      </Text>
+    );
+  }
+  return null;
+};
 
 const AllArticlesScreen = () => {
   const theme = useTheme();
@@ -52,8 +66,29 @@ const AllArticlesScreen = () => {
     fetchPosts(page + 1);
   };
 
+  const containerStyle = [
+    styles.container,
+    { backgroundColor: theme.colors.background }
+  ];
+
+  const renderSkeleton = () => <ArticleSkeleton />;
+  const renderItem = ({ item }: { item: FormattedPost }) => (
+    <ArticleCard
+      article={item}
+      onPress={() => navigation.navigate('ArticleDetail', { article: item })}
+    />
+  );
+  const renderFooter = () => (
+    <ListFooter hasMore={hasMore} postsLength={posts.length} theme={theme} />
+  );
+  const renderEmpty = () => (
+    !loading ? (
+      <DiscoverEmptyView message="No se encontraron artículos" />
+    ) : null
+  );
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={containerStyle}>
       <StatusBar barStyle={theme.dark ? 'light-content' : 'dark-content'} />
       <Appbar.Header elevated>
         <Appbar.BackAction onPress={() => navigation.goBack()} />
@@ -61,41 +96,25 @@ const AllArticlesScreen = () => {
       </Appbar.Header>
 
       {loading && page === 1 ? (
-        <FlatList
+        <FlashList
           data={[1, 2, 3, 4, 5, 6]}
           keyExtractor={(item) => item.toString()}
-          renderItem={() => <ArticleSkeleton />}
+          renderItem={renderSkeleton}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
         />
       ) : (
-        <FlatList
+        <FlashList
           data={posts}
           keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <ArticleCard
-              article={item}
-              onPress={() => navigation.navigate('ArticleDetail', { article: item })}
-            />
-          )}
-          contentContainerStyle={styles.listContent}
+          renderItem={renderItem}
           showsVerticalScrollIndicator={false}
           onRefresh={handleRefresh}
           refreshing={refreshing}
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
-          ListFooterComponent={() => (
-            hasMore ? (
-              <ActivityIndicator style={{ marginVertical: 20 }} color={theme.colors.primary} />
-            ) : posts.length > 0 ? (
-              <Text style={{ textAlign: 'center', marginVertical: 32, opacity: 0.5 }}>Has llegado al final</Text>
-            ) : null
-          )}
-          ListEmptyComponent={
-            !loading ? (
-              <DiscoverEmptyView message="No se encontraron artículos" />
-            ) : null
-          }
+          ListFooterComponent={renderFooter}
+          ListEmptyComponent={renderEmpty}
         />
       )}
     </View>
@@ -114,6 +133,14 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingBottom: 40,
+  },
+  footerLoader: {
+    marginVertical: 20,
+  },
+  footerText: {
+    textAlign: 'center',
+    marginVertical: 32,
+    opacity: 0.5,
   },
 });
 

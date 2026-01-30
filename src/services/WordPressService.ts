@@ -637,9 +637,8 @@ class WordPressService {
         // Extract a short role or use a default if description is too long
         // If the description starts with the same text, it's probably not a "role" but a bio
         const rawDescription = wpAuthor.description || wpAuthor.yoast_head_json?.description || '';
-        const firstSentence = rawDescription.split(/[.!?]/)[0].trim();
 
-        let role = undefined;
+        let role;
         if (wpAuthor.roles && wpAuthor.roles.length > 0) {
             const primaryRole = wpAuthor.roles[0].toLowerCase();
             if (primaryRole === 'administrator') role = 'Administrador';

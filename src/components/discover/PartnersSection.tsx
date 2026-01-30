@@ -19,15 +19,15 @@ const PartnersSection = () => {
             <AppRecommendations />
 
             <View style={styles.dividerContainer}>
-                <Divider style={{ backgroundColor: theme.colors.outlineVariant }} />
+                <Divider style={[styles.divider, { backgroundColor: theme.colors.outlineVariant }]} />
             </View>
 
-            <View style={{ marginTop: 8 }}>
+            <View style={styles.partnersTitleContainer}>
                 <SectionHeader title="PARTNERS OFICIALES" variant="secondary" center />
             </View>
             <View style={styles.partnersRow}>
                 {PARTNERS.map(p => (
-                    <Text key={p.id} style={{ fontSize: 16, fontWeight: '700', color: theme.colors.onSurfaceVariant, opacity: 0.9 }}>{p.name}</Text>
+                    <Text key={p.id} style={[styles.partnerName, { color: theme.colors.onSurfaceVariant }]}>{p.name}</Text>
                 ))}
             </View>
         </View>
@@ -58,6 +58,11 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         marginVertical: 20,
     },
+    divider: {
+    },
+    partnersTitleContainer: {
+        marginTop: 8,
+    },
     partnersTitle: {
         textAlign: 'center',
         fontWeight: 'bold',
@@ -70,6 +75,11 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingHorizontal: 20,
         marginBottom: 20,
+    },
+    partnerName: {
+        fontSize: 16,
+        fontWeight: '700',
+        opacity: 0.9,
     },
 });
 

@@ -1,4 +1,5 @@
 import React from 'react';
+import { StyleSheet } from 'react-native';
 import { Dialog, Portal, Text, useTheme } from 'react-native-paper';
 import CustomButton, { ButtonVariant } from './CustomButton';
 
@@ -53,34 +54,31 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
       <Dialog 
         visible={visible} 
         onDismiss={onDismiss} 
-        style={{ 
-          backgroundColor: theme.colors.elevation.level3, 
-          borderRadius: 28, // Material 3 standard
-          borderColor: theme.colors.outline,
-          borderWidth: 1,
-          elevation: 0, // Flat style requested
-          shadowColor: 'transparent',
-          shadowOffset: { width: 0, height: 0 },
-          shadowOpacity: 0,
-          shadowRadius: 0,
-        }}
+        style={[
+          styles.dialog,
+          { 
+            backgroundColor: theme.colors.elevation.level3, 
+            borderColor: theme.colors.outline,
+          }
+        ]}
       >
-        <Dialog.Title style={{ 
-          color: theme.colors.onSurface,
-          textAlign: 'center',
-          fontSize: 24,
-        }}>
+        <Dialog.Title style={[
+          styles.dialogTitle,
+          { color: theme.colors.onSurface }
+        ]}>
           {title}
         </Dialog.Title>
         <Dialog.Content>
           {content ? (
             <Text 
               variant="bodyMedium" 
-              style={{ 
-                color: theme.colors.onSurfaceVariant,
-                textAlign: 'center',
-                marginBottom: children ? 16 : 0,
-              }}
+              style={[
+                styles.dialogContent,
+                {
+                  color: theme.colors.onSurfaceVariant,
+                },
+                children ? styles.contentWithChildren : undefined
+              ]}
             >
               {content}
             </Text>
@@ -88,17 +86,17 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
           {children}
         </Dialog.Content>
         <Dialog.Actions style={[
-          { paddingBottom: 16 },
+          styles.dialogActions,
           fullWidthActions 
-            ? { flexDirection: 'row', paddingHorizontal: 16, gap: 12 } 
-            : { justifyContent: 'space-around', flexWrap: 'wrap' }
-        ]}>
+            ? styles.fullWidthActions
+            : styles.wrappedActions
+        ]}>  
           {showCancel && (
             <CustomButton 
               variant={getCancelVariant()}
               label={cancelLabel}
               onPress={onDismiss}
-              style={fullWidthActions ? { flex: 1 } : undefined}
+              style={fullWidthActions ? styles.flexButton : undefined}
             />
           )}
           {actions}
@@ -108,12 +106,52 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
             onPress={onConfirm || (() => {})}
             loading={confirmLoading}
             disabled={confirmDisabled}
-            style={fullWidthActions ? { flex: 1 } : { paddingHorizontal: 16 }}
+            style={fullWidthActions ? styles.flexButton : styles.paddedButton}
           />
         </Dialog.Actions>
       </Dialog>
     </Portal>
   );
 };
+
+const styles = StyleSheet.create({
+  dialog: {
+    borderRadius: 28,
+    borderWidth: 1,
+    elevation: 0,
+    shadowColor: 'transparent',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+  },
+  dialogTitle: {
+    textAlign: 'center',
+    fontSize: 24,
+  },
+  dialogContent: {
+    textAlign: 'center',
+  },
+  contentWithChildren: {
+    marginBottom: 16,
+  },
+  dialogActions: {
+    paddingBottom: 16,
+  },
+  fullWidthActions: {
+    flexDirection: 'row',
+    paddingHorizontal: 16,
+    gap: 12,
+  },
+  wrappedActions: {
+    justifyContent: 'space-around',
+    flexWrap: 'wrap',
+  },
+  flexButton: {
+    flex: 1,
+  },
+  paddedButton: {
+    paddingHorizontal: 16,
+  },
+});
 
 export default CustomDialog;

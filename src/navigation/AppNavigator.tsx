@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Text, Platform, View, StatusBar } from 'react-native';
+import { Text, Platform, View, StatusBar, StyleSheet } from 'react-native';
 import { NavigationContainer, DefaultTheme as NavDefaultTheme, DarkTheme as NavDarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
@@ -100,97 +100,103 @@ function AuthNavigator() {
   );
 }
 
+// Tab Icon Components (extracted to avoid re-creation on each render)
+const MarketsIcon = ({ color }: { color: string }) => (
+  <View style={tabStyles.iconContainer24}>
+    <MaterialCommunityIcons name="chart-line" size={24} color={color} />
+  </View>
+);
+
+const RatesIcon = ({ color }: { color: string }) => (
+  <View style={tabStyles.iconContainer24}>
+    <MaterialCommunityIcons name="currency-usd" size={24} color={color} />
+  </View>
+);
+
+const HomeIcon = ({ color }: { color: string }) => (
+  <View style={tabStyles.homeIconContainer}>
+    <Text style={[
+      tabStyles.homeIconText,
+      {
+        color: color,
+      },
+      Platform.OS === 'android' && tabStyles.androidMargin
+    ]}>
+      Bs
+    </Text>
+  </View>
+);
+
+const DiscoverIcon = ({ color }: { color: string }) => (
+  <View style={tabStyles.iconContainer24}>
+    <MaterialCommunityIcons name="compass-outline" size={24} color={color} />
+  </View>
+);
+
+const SettingsIcon = ({ color }: { color: string }) => (
+  <View style={tabStyles.iconContainer24}>
+    <MaterialCommunityIcons name="cog" size={24} color={color} />
+  </View>
+);
+
 // Tabs Principales
 const Tab = createMaterialTopTabNavigator<MainTabParamList>();
+
+// Tab Bar component extracted to avoid re-creation
+const TabBar = (props: any) => <ModernTabBar {...props} />;
 
 function MainTabNavigator() {
   return (
     <Tab.Navigator
-        initialRouteName="Home"
-        tabBarPosition="bottom"
-        tabBar={(props) => <ModernTabBar {...props} />}
-        screenOptions={{
-          swipeEnabled: true,
-          tabBarShowLabel: false,
-          tabBarIndicatorStyle: { height: 0 }, // Hide default indicator
+      initialRouteName="Home"
+      tabBarPosition="bottom"
+      tabBar={TabBar}
+      screenOptions={{
+        swipeEnabled: true,
+        tabBarShowLabel: false,
+        tabBarIndicatorStyle: { height: 0 }, // Hide default indicator
+      }}
+    >
+      <Tab.Screen
+        name="Markets"
+        component={StocksScreen}
+        options={{
+          title: 'Acciones',
+          tabBarIcon: MarketsIcon,
         }}
-      >
-        <Tab.Screen 
-          name="Markets" 
-          component={StocksScreen} 
-          options={{ 
-            title: 'Acciones',
-            tabBarIcon: ({ color }) => (
-              <View style={{ width: 24, height: 24, alignItems: 'center', justifyContent: 'center' }}>
-                <MaterialCommunityIcons name="chart-line" size={24} color={color} />
-              </View>
-            )
-          }} 
-        />
-        <Tab.Screen 
-          name="Rates" 
-          component={ExchangeRatesScreen} 
-          options={{ 
-            title: 'Tasas',
-            tabBarIcon: ({ color }) => (
-              <View style={{ width: 24, height: 24, alignItems: 'center', justifyContent: 'center' }}>
-                <MaterialCommunityIcons name="currency-usd" size={24} color={color} />
-              </View>
-            )
-          }} 
-        />
-        <Tab.Screen 
-          name="Home" 
-          component={HomeStackScreen} 
-          options={{ 
-            tabBarIcon: ({ color }) => (
-              <View style={{ 
-                width: 32, 
-                height: 32, 
-                alignItems: 'center', 
-                justifyContent: 'center',
-                borderRadius: 16,
-              }}>
-                <Text style={{ 
-                  color: color, 
-                  fontSize: 18,
-                  fontWeight: 'bold',
-                  includeFontPadding: false,
-                  textAlign: 'center',
-                  textAlignVertical: 'center',
-                  marginBottom: Platform.OS === 'android' ? 2 : 0,
-                }}>
-                  Bs
-                </Text>
-              </View>
-            )
-          }} 
-        />
-        <Tab.Screen 
-          name="Discover" 
-          component={DiscoverScreen} 
-          options={{ 
-            title: 'Descubre',
-            tabBarIcon: ({ color }) => (
-              <View style={{ width: 24, height: 24, alignItems: 'center', justifyContent: 'center' }}>
-                <MaterialCommunityIcons name="compass-outline" size={24} color={color} />
-              </View>
-            )
-          }} 
-        />
-        <Tab.Screen 
-          name="Settings" 
-          component={SettingsScreen} 
-          options={{ 
-            title: 'Configuración',
-            tabBarIcon: ({ color }) => (
-              <View style={{ width: 24, height: 24, alignItems: 'center', justifyContent: 'center' }}>
-                <MaterialCommunityIcons name="cog" size={24} color={color} />
-              </View>
-            )
-          }} 
-        />
-      </Tab.Navigator>
+      />
+      <Tab.Screen
+        name="Rates"
+        component={ExchangeRatesScreen}
+        options={{
+          title: 'Tasas',
+          tabBarIcon: RatesIcon,
+        }}
+      />
+      <Tab.Screen
+        name="Home"
+        component={HomeStackScreen}
+        options={{
+          tabBarIcon: HomeIcon,
+        }}
+      />
+      <Tab.Screen
+        name="Discover"
+        component={DiscoverScreen}
+        options={{
+          title: 'Descubre',
+          tabBarIcon: DiscoverIcon,
+        }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          title: 'Configuración',
+          tabBarIcon: SettingsIcon,
+        }}
+      />
+    </Tab.Navigator>
   );
 }
 
@@ -229,33 +235,33 @@ const linking = {
     },
   },
   // Custom getStateFromPath to handle root slugs for articles
-  getStateFromPath: (path: string, options: any) => {
+  getStateFromPath: (path: string, _options: any) => {
     // Clean path
     const cleanPath = path.replace(/^\/+/, '');
-    
+
     // Check for known prefixes to avoid hijacking
     if (
-        cleanPath.startsWith('discover') || 
-        cleanPath.startsWith('article/') || 
-        cleanPath.startsWith('categoria/') || 
-        cleanPath.startsWith('tag/') || 
-        cleanPath.startsWith('articulos') || 
-        cleanPath.startsWith('buscar/')
+      cleanPath.startsWith('discover') ||
+      cleanPath.startsWith('article/') ||
+      cleanPath.startsWith('categoria/') ||
+      cleanPath.startsWith('tag/') ||
+      cleanPath.startsWith('articulos') ||
+      cleanPath.startsWith('buscar/')
     ) {
-        // Let default logic handle it
-        return undefined; 
+      // Let default logic handle it
+      return undefined;
     }
 
     // If it's a root slug (e.g. "my-article-slug"), map to ArticleDetail
     if (cleanPath.length > 0) {
-        return {
-            routes: [
-                {
-                    name: 'ArticleDetail',
-                    params: { slug: cleanPath },
-                },
-            ],
-        };
+      return {
+        routes: [
+          {
+            name: 'ArticleDetail',
+            params: { slug: cleanPath },
+          },
+        ],
+      };
     }
 
     return undefined;
@@ -263,9 +269,9 @@ const linking = {
 };
 
 const AppNavigator = () => {
-  const theme = useTheme(); // Assuming useAppTheme is meant to be useTheme from react-native-paper
+  const theme = useTheme();
   const { isDark } = useThemeContext();
-  const [isOnboardingComplete, setIsOnboardingComplete] = useState<boolean | null>(null);
+  const [, _setIsOnboardingComplete] = useState<boolean | null>(null);
 
   // Zustand store selectors
   const user = useAuthStore((state) => state.user);
@@ -274,7 +280,7 @@ const AppNavigator = () => {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showForceUpdate, setShowForceUpdate] = useState(false);
   const routeNameRef = React.useRef<string | undefined>(undefined);
-  
+
   React.useEffect(() => {
     const initApp = async () => {
       // 1. Check Onboarding
@@ -285,14 +291,14 @@ const AppNavigator = () => {
       try {
         await remoteConfigService.fetchAndActivate();
         const config = remoteConfigService.getJson<any>('strings'); // Using 'strings' key as requested
-        
+
         if (config && config.forceUpdate) {
-            const currentBuild = parseInt(DeviceInfo.getBuildNumber(), 10);
-            const requiredBuild = config.forceUpdate.build;
-            
-            if (currentBuild < requiredBuild) {
-                setShowForceUpdate(true);
-            }
+          const currentBuild = parseInt(DeviceInfo.getBuildNumber(), 10);
+          const requiredBuild = config.forceUpdate.build;
+
+          if (currentBuild < requiredBuild) {
+            setShowForceUpdate(true);
+          }
         }
       } catch (e) {
         // Fail silently on config check, don't block app unless confirmed
@@ -322,12 +328,12 @@ const AppNavigator = () => {
   }
 
   if (showForceUpdate) {
-      return (
-        <React.Fragment>
-            <StatusBar backgroundColor="transparent" translucent barStyle="light-content" />
-            <ForceUpdateModal visible={true} />
-        </React.Fragment>
-      );
+    return (
+      <React.Fragment>
+        <StatusBar backgroundColor="transparent" translucent barStyle="light-content" />
+        <ForceUpdateModal visible={true} />
+      </React.Fragment>
+    );
   }
 
   return (
@@ -358,109 +364,109 @@ const AppNavigator = () => {
           ) : user ? (
             <>
               <RootStack.Screen name="Main" component={MainTabNavigator} />
-              <RootStack.Screen 
-                name="Notifications" 
+              <RootStack.Screen
+                name="Notifications"
                 component={NotificationsScreen}
-                options={{ 
+                options={{
                   headerShown: false,
                   animation: 'default',
-                }} 
+                }}
               />
-              <RootStack.Screen 
-                name="StockDetail" 
-                component={StockDetailScreen} 
-                options={{ 
+              <RootStack.Screen
+                name="StockDetail"
+                component={StockDetailScreen}
+                options={{
                   headerShown: false,
                   animation: 'default',
-                }} 
+                }}
               />
-              <RootStack.Screen 
-                name="Widgets" 
+              <RootStack.Screen
+                name="Widgets"
                 component={WidgetsScreen}
-                options={{ 
+                options={{
                   headerShown: false,
                   animation: 'default',
-                }} 
+                }}
               />
-              <RootStack.Screen 
-                name="AdvancedCalculator" 
-                component={AdvancedCalculatorScreen} 
-                options={{ 
-                  headerShown: false, 
-                  animation: 'default' 
-                }} 
+              <RootStack.Screen
+                name="AdvancedCalculator"
+                component={AdvancedCalculatorScreen}
+                options={{
+                  headerShown: false,
+                  animation: 'default'
+                }}
               />
-              <RootStack.Screen 
-                name="BankRates" 
-                component={BankRatesScreen} 
-                options={{ 
-                  headerShown: false, 
-                  animation: 'default' 
-                }} 
+              <RootStack.Screen
+                name="BankRates"
+                component={BankRatesScreen}
+                options={{
+                  headerShown: false,
+                  animation: 'default'
+                }}
               />
-              <RootStack.Screen 
-                name="WebView" 
-                component={WebViewScreen} 
-                options={{ 
-                  headerShown: false, 
-                  animation: 'slide_from_bottom' 
-                }} 
+              <RootStack.Screen
+                name="WebView"
+                component={WebViewScreen}
+                options={{
+                  headerShown: false,
+                  animation: 'slide_from_bottom'
+                }}
               />
-              <RootStack.Screen 
-                name="AddAlert" 
-                component={AddAlertScreen} 
-                options={{ 
-                  headerShown: false, 
-                  animation: 'default' 
-                }} 
+              <RootStack.Screen
+                name="AddAlert"
+                component={AddAlertScreen}
+                options={{
+                  headerShown: false,
+                  animation: 'default'
+                }}
               />
-              <RootStack.Screen 
-                name="CurrencyDetail" 
-                component={CurrencyDetailScreen} 
-                options={{ 
-                  headerShown: false, 
-                  animation: 'default' 
-                }} 
+              <RootStack.Screen
+                name="CurrencyDetail"
+                component={CurrencyDetailScreen}
+                options={{
+                  headerShown: false,
+                  animation: 'default'
+                }}
               />
-              <RootStack.Screen 
-                name="ArticleDetail" 
-                component={ArticleDetailScreen} 
-                options={{ 
-                  headerShown: false, 
-                  animation: 'default' 
-                }} 
+              <RootStack.Screen
+                name="ArticleDetail"
+                component={ArticleDetailScreen}
+                options={{
+                  headerShown: false,
+                  animation: 'default'
+                }}
               />
-              <RootStack.Screen 
-                name="CategoryDetail" 
-                component={CategoryDetailScreen} 
-                options={{ 
-                  headerShown: false, 
-                  animation: 'default' 
-                }} 
+              <RootStack.Screen
+                name="CategoryDetail"
+                component={CategoryDetailScreen}
+                options={{
+                  headerShown: false,
+                  animation: 'default'
+                }}
               />
-              <RootStack.Screen 
-                name="TagDetail" 
-                component={TagDetailScreen} 
-                options={{ 
-                  headerShown: false, 
-                  animation: 'default' 
-                }} 
+              <RootStack.Screen
+                name="TagDetail"
+                component={TagDetailScreen}
+                options={{
+                  headerShown: false,
+                  animation: 'default'
+                }}
               />
-              <RootStack.Screen 
-                name="AllArticles" 
-                component={AllArticlesScreen} 
-                options={{ 
-                  headerShown: false, 
-                  animation: 'default' 
-                }} 
+              <RootStack.Screen
+                name="AllArticles"
+                component={AllArticlesScreen}
+                options={{
+                  headerShown: false,
+                  animation: 'default'
+                }}
               />
-              <RootStack.Screen 
-                name="SearchResults" 
-                component={SearchResultsScreen} 
-                options={{ 
-                  headerShown: false, 
-                  animation: 'default' 
-                }} 
+              <RootStack.Screen
+                name="SearchResults"
+                component={SearchResultsScreen}
+                options={{
+                  headerShown: false,
+                  animation: 'default'
+                }}
               />
             </>
           ) : (
@@ -471,5 +477,31 @@ const AppNavigator = () => {
     </>
   );
 };
+
+const tabStyles = StyleSheet.create({
+  iconContainer24: {
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  homeIconContainer: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 16,
+  },
+  homeIconText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    includeFontPadding: false,
+    textAlign: 'center',
+    textAlignVertical: 'center',
+  },
+  androidMargin: {
+    marginBottom: 2,
+  },
+});
 
 export default AppNavigator;

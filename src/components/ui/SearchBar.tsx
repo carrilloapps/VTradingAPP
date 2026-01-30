@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { View, TextInput, StyleSheet, TouchableOpacity, FlatList, Text, StyleProp, ViewStyle } from 'react-native';
+import { View, TextInput, StyleSheet, TouchableOpacity, Text, StyleProp, ViewStyle } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
 import { useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -16,7 +17,7 @@ interface SearchBarProps {
   autoFocus?: boolean;
 }
 
-const SearchBar: React.FC<SearchBarProps> = ({ 
+const SearchBar: React.FC<SearchBarProps> = ({
   placeholder = "Buscar moneda o token...",
   value,
   onChangeText,
@@ -32,10 +33,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const [isFocused, setIsFocused] = useState(false);
 
   const showSuggestions = isFocused && suggestions.length > 0 && value && value.length > 0;
-  
+
   const containerStyle = [
     styles.container,
-    { 
+    {
       backgroundColor: theme.dark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.95)',
       borderColor: isFocused ? theme.colors.primary : 'transparent',
       borderWidth: isFocused ? 2 : 0,
@@ -45,10 +46,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
   return (
     <View style={[styles.wrapper, style]}>
       <View style={containerStyle}>
-        <MaterialCommunityIcons 
-          name="magnify" 
-          size={20} 
-          color={isFocused ? theme.colors.primary : theme.colors.onSurfaceVariant} 
+        <MaterialCommunityIcons
+          name="magnify"
+          size={20}
+          color={isFocused ? theme.colors.primary : theme.colors.onSurfaceVariant}
         />
         <TextInput
           style={[styles.input, { color: theme.colors.onSurface }, inputStyle]}
@@ -65,8 +66,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
           autoFocus={autoFocus}
         />
         {value && value.length > 0 && (
-          <TouchableOpacity 
-            onPress={() => onChangeText?.('')} 
+          <TouchableOpacity
+            onPress={() => onChangeText?.('')}
             style={styles.clearButton}
             accessibilityLabel="Limpiar búsqueda"
             accessibilityRole="button"
@@ -75,8 +76,8 @@ const SearchBar: React.FC<SearchBarProps> = ({
           </TouchableOpacity>
         )}
         {onFilterPress && (
-          <TouchableOpacity 
-            onPress={onFilterPress} 
+          <TouchableOpacity
+            onPress={onFilterPress}
             style={styles.filterButton}
             accessibilityLabel="Filtros"
             accessibilityRole="button"
@@ -88,18 +89,18 @@ const SearchBar: React.FC<SearchBarProps> = ({
 
       {showSuggestions && (
         <View style={[
-          styles.suggestionsContainer, 
-          { 
+          styles.suggestionsContainer,
+          {
             backgroundColor: theme.colors.elevation.level3,
-            borderColor: theme.colors.outlineVariant 
+            borderColor: theme.colors.outlineVariant
           }
         ]}>
-          <FlatList
+          <FlashList
             data={suggestions}
             keyExtractor={(item, index) => index.toString()}
             keyboardShouldPersistTaps="handled"
             renderItem={({ item }) => (
-              <TouchableOpacity 
+              <TouchableOpacity
                 style={[styles.suggestionItem, { borderBottomColor: theme.colors.outlineVariant }]}
                 onPress={() => {
                   onSuggestionPress?.(item);
@@ -107,10 +108,10 @@ const SearchBar: React.FC<SearchBarProps> = ({
                 }}
               >
                 <MaterialCommunityIcons name="history" size={16} color={theme.colors.onSurfaceVariant} style={styles.suggestionIcon} />
-                <Text style={{ color: theme.colors.onSurface }}>{item}</Text>
+                <Text style={[styles.suggestionText, { color: theme.colors.onSurface }]}>{item}</Text>
               </TouchableOpacity>
             )}
-            style={{ borderRadius: 12 }}
+            style={styles.suggestionsList}
           />
         </View>
       )}
@@ -170,6 +171,11 @@ const styles = StyleSheet.create({
   },
   suggestionIcon: {
     marginRight: 8,
+  },
+  suggestionText: {
+  },
+  suggestionsList: {
+    borderRadius: 12,
   },
 });
 

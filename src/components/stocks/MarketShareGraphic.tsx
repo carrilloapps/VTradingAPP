@@ -9,10 +9,10 @@ import { getTrend, getTrendColor, getTrendIcon } from '../../utils/trendUtils';
 interface MarketShareGraphicProps {
   viewShotRef: React.RefObject<any>;
   indexData: {
-      value: string;
-      changePercent: string;
-      isPositive: boolean;
-      volume: string;
+    value: string;
+    changePercent: string;
+    isPositive: boolean;
+    volume: string;
   };
   topStocks: StockData[];
   lastUpdated: string;
@@ -20,8 +20,8 @@ interface MarketShareGraphicProps {
   aspectRatio?: '1:1' | '16:9';
 }
 
-const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({ 
-  viewShotRef, 
+const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
+  viewShotRef,
   indexData,
   topStocks,
   lastUpdated,
@@ -60,35 +60,40 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
   return (
     <View style={styles.hiddenTemplate} pointerEvents="none">
       <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 1.0 }}>
-        <LinearGradient 
-          colors={theme.dark ? ['#051911', '#0A0A0A'] : ['#F0FDF4', '#FFFFFF']} 
+        <LinearGradient
+          colors={theme.dark ? ['#051911', '#0A0A0A'] : ['#F0FDF4', '#FFFFFF']}
           style={[
-            styles.shareTemplate, 
+            styles.shareTemplate,
             isVertical ? styles.shareTemplateVertical : styles.shareTemplateSquare
           ]}
         >
           {/* Decorative Elements */}
-          <View style={[styles.templateGlow, { backgroundColor: theme.colors.primary, opacity: 0.05 }]} />
+          <View style={[styles.templateGlow, { backgroundColor: theme.colors.primary }]} />
 
           {/* Platform Badges */}
-          <View style={styles.platformBadgesContainer}>
-            <Surface style={[styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }]} elevation={1}>
-              <Icon source="google-play" size={platformIconSize} color={theme.colors.onSurfaceVariant} />
-              <Text style={[styles.platformText, { color: theme.colors.onSurfaceVariant, fontSize: platformTextSize }]}>Android</Text>
-            </Surface>
-            <View style={{ flex: 1 }} />
-            <Surface style={[styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }]} elevation={1}>
-              <Icon source="apple" size={platformIconSize} color={theme.colors.onSurfaceVariant} />
-              <Text style={[styles.platformText, { color: theme.colors.onSurfaceVariant, fontSize: platformTextSize }]}>iOS</Text>
-            </Surface>
-          </View>
+          <Surface style={[styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }]} elevation={1}>
+            <Icon source="google-play" size={platformIconSize} color={theme.colors.onSurfaceVariant} />
+            <Text style={[styles.platformText, { color: theme.colors.onSurfaceVariant, fontSize: platformTextSize }]}>Android</Text>
+          </Surface>
+          <View style={styles.flex1} />
+          <Surface style={[styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }]} elevation={1}>
+            <Icon source="apple" size={platformIconSize} color={theme.colors.onSurfaceVariant} />
+            <Text style={[styles.platformText, { color: theme.colors.onSurfaceVariant, fontSize: platformTextSize }]}>iOS</Text>
+          </Surface>
 
           {/* Header */}
           <View style={styles.templateHeader}>
             <View style={styles.logoAndBadgeRow}>
-              <Image 
-                source={require('../../assets/images/logotipo.png')} 
-                style={[styles.templateMainLogo, { tintColor: theme.dark ? undefined : theme.colors.primary, width: logoWidth, height: logoHeight }]}
+              <Image
+                source={require('../../assets/images/logotipo.png')}
+                style={[
+                  styles.templateMainLogo,
+                  {
+                    tintColor: theme.dark ? undefined : theme.colors.primary,
+                    width: logoWidth,
+                    height: logoHeight
+                  }
+                ]}
                 resizeMode="contain"
               />
               {!isPremium && (
@@ -97,7 +102,7 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
                 </Surface>
               )}
             </View>
-            <View style={[styles.templateUrlBadge, { backgroundColor: theme.colors.primary + '15', marginBottom: 8 }]}>
+            <View style={[styles.templateUrlBadge, { backgroundColor: theme.colors.primary + '15' }]}>
               <Text style={[styles.templateUrlText, { color: theme.colors.primary, fontSize: urlTextSize }]}>vtrading.app</Text>
             </View>
             <View style={styles.templateDateBox}>
@@ -107,47 +112,48 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
               </Text>
             </View>
           </View>
-          
+
           {/* Market Index Section */}
           <View style={styles.indexContainer}>
-             <Text style={[styles.sectionLabel, { color: theme.colors.onSurfaceVariant, fontSize: sectionLabelSize }]}>RESUMEN DEL MERCADO (IBC)</Text>
-             <View style={styles.indexValueRow}>
-                <Text style={[styles.indexValue, { color: theme.colors.onSurface, fontSize: indexValueSize }]}>{indexData.value}</Text>
-                <View style={[styles.indexTrendBadge, { backgroundColor: trendColor + '15' }]}>
-                    <Icon source={trendIcon} size={indexTrendIconSize} color={trendColor} />
-                    <Text style={[styles.indexTrendText, { color: trendColor, fontSize: indexTrendTextSize }]}>{indexData.changePercent}</Text>
-                </View>
-             </View>
-             <Text style={[styles.volumeText, { color: theme.colors.onSurfaceVariant, fontSize: volumeTextSize }]}>Volumen Efectivo: {indexData.volume} Bs.</Text>
+            <Text style={[styles.sectionLabel, { color: theme.colors.onSurfaceVariant, fontSize: sectionLabelSize }]}>RESUMEN DEL MERCADO (IBC)</Text>
+            <View style={styles.indexValueRow}>
+              <Text style={[styles.indexValue, { color: theme.colors.onSurface, fontSize: indexValueSize }]}>{indexData.value}</Text>
+              <View style={[styles.indexTrendBadge, { backgroundColor: trendColor + '15' }]}>
+                <Icon source={trendIcon} size={indexTrendIconSize} color={trendColor} />
+                <Text style={[styles.indexTrendText, { color: trendColor, fontSize: indexTrendTextSize }]}>{indexData.changePercent}</Text>
+              </View>
+            </View>
+            <Text style={[styles.volumeText, { color: theme.colors.onSurfaceVariant, fontSize: volumeTextSize }]}>Volumen Efectivo: {indexData.volume} Bs.</Text>
           </View>
 
           {/* Stocks List Content */}
-          <View style={[styles.templateContent, isVertical && { flex: 1, gap: 16 }]}>
-            <Text style={[styles.sectionLabel, { color: theme.colors.onSurfaceVariant, fontSize: sectionLabelSize, marginBottom: 4 }]}>ACCIONES DESTACADAS</Text>
+          <View style={[styles.templateContent, isVertical && styles.flex1Gap16]}>
+            <Text style={[styles.sectionLabel, { color: theme.colors.onSurfaceVariant, fontSize: sectionLabelSize }, styles.mb4]}>ACCIONES DESTACADAS</Text>
             {topStocks.slice(0, isVertical ? 6 : 3).map((stock, idx) => {
-               const sTrend = getTrend(stock.changePercent);
-               const sColor = getTrendColor(sTrend, theme);
-               return (
-              <Surface key={idx} style={[styles.stockCard, { backgroundColor: theme.dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', borderColor: theme.colors.outlineVariant }]} elevation={0}>
-                <View style={styles.stockInfo}>
+              const sTrend = getTrend(stock.changePercent);
+              const sColor = getTrendColor(sTrend, theme);
+              return (
+                <Surface key={idx} style={[styles.stockCard, theme.dark ? styles.stockCardDark : styles.stockCardLight, { borderColor: theme.colors.outlineVariant }]} elevation={0}>
+                  <View style={styles.stockInfo}>
                     <Text style={[styles.stockSymbol, { color: theme.colors.onSurface, fontSize: stockSymbolSize }]}>{stock.symbol}</Text>
                     <Text style={[styles.stockName, { color: theme.colors.onSurfaceVariant, fontSize: stockNameSize }]} numberOfLines={1}>{stock.name}</Text>
-                </View>
-                <View style={styles.stockPriceInfo}>
+                  </View>
+                  <View style={styles.stockPriceInfo}>
                     <Text style={[styles.stockPrice, { color: theme.colors.onSurface, fontSize: stockPriceSize }]}>{stock.price.toLocaleString('es-VE', { minimumFractionDigits: 2 })}</Text>
                     <Text style={[styles.stockTrend, { color: sColor, fontSize: stockTrendSize }]}>
-                        {stock.changePercent > 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
+                      {stock.changePercent > 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
                     </Text>
-                </View>
-              </Surface>
-            )})}
+                  </View>
+                </Surface>
+              )
+            })}
           </View>
-          
+
           {/* Footer */}
           <View style={styles.templateFooter}>
-            <LinearGradient 
-              colors={[theme.colors.primary + '00', theme.colors.primary + '10', theme.colors.primary + '00']} 
-              start={{x: 0, y: 0}} end={{x: 1, y: 0}}
+            <LinearGradient
+              colors={[theme.colors.primary + '00', theme.colors.primary + '10', theme.colors.primary + '00']}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
               style={styles.templateDivider}
             />
             <View style={styles.templateFooterRow}>
@@ -166,7 +172,7 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
 const styles = StyleSheet.create({
   hiddenTemplate: {
     position: 'absolute',
-    left: -4000, 
+    left: -4000,
     width: 600,
     zIndex: -1,
   },
@@ -183,7 +189,7 @@ const styles = StyleSheet.create({
   },
   shareTemplateVertical: {
     width: 600,
-    height: 1066, 
+    height: 1066,
     paddingVertical: 80,
     paddingHorizontal: 40,
   },
@@ -194,7 +200,14 @@ const styles = StyleSheet.create({
     width: 300,
     height: 300,
     borderRadius: 150,
-    backgroundColor: 'white', 
+    opacity: 0.05,
+  },
+  flex1: {
+    flex: 1,
+  },
+  flex1Gap16: {
+    flex: 1,
+    gap: 16,
   },
   templateHeader: {
     alignItems: 'center',
@@ -234,7 +247,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     paddingVertical: 1,
     borderRadius: 4,
-    marginLeft: -8, 
+    marginLeft: -8,
     marginTop: -2,
   },
   freeBadgeText: {
@@ -247,6 +260,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     borderWidth: 1,
     borderColor: 'rgba(128,128,128,0.1)',
+    marginBottom: 8,
   },
   templateUrlText: {
     fontWeight: '900',
@@ -350,6 +364,15 @@ const styles = StyleSheet.create({
   templateFooterText: {
     fontWeight: '900',
     letterSpacing: 1.2,
+  },
+  mb4: {
+    marginBottom: 4,
+  },
+  stockCardDark: {
+    backgroundColor: 'rgba(255,255,255,0.03)',
+  },
+  stockCardLight: {
+    backgroundColor: 'rgba(0,0,0,0.02)',
   }
 });
 

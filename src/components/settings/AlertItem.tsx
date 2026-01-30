@@ -15,11 +15,11 @@ interface AlertItemProps {
   disabled?: boolean;
 }
 
-const AlertItem: React.FC<AlertItemProps> = ({ 
-  symbol, 
-  status, 
-  target, 
-  isActive, 
+const AlertItem: React.FC<AlertItemProps> = ({
+  symbol,
+  status,
+  target,
+  isActive,
   onToggle,
   onDelete,
   onPress,
@@ -28,11 +28,11 @@ const AlertItem: React.FC<AlertItemProps> = ({
 }) => {
   const theme = useTheme();
   const colors = theme.colors as any;
-  
-  const statusColor = status === 'Sube' 
+
+  const statusColor = status === 'Sube'
     ? colors.success
     : colors.error;
-    
+
   const statusBg = status === 'Sube'
     ? colors.successContainer
     : colors.errorContainer;
@@ -41,52 +41,52 @@ const AlertItem: React.FC<AlertItemProps> = ({
   const iconBgColor = status === 'Sube' ? colors.successContainer : colors.errorContainer;
 
   return (
-    <TouchableRipple 
+    <TouchableRipple
       onPress={onPress}
       disabled={disabled}
-      style={[styles.container, { 
+      style={[styles.container, {
         borderBottomColor: theme.colors.outline,
       }]}
     >
       <View style={styles.innerContainer}>
         <View style={styles.leftContent}>
-        <View style={[styles.iconContainer, { backgroundColor: iconBgColor }]}>
-          <MaterialCommunityIcons name={iconName} size={24} color={iconColor} />
-        </View>
-        
-        <View style={styles.textContainer}>
-          <View style={styles.headerRow}>
-            <Text variant="titleMedium" style={[styles.symbolText, { color: theme.colors.onSurface }]}>
-              {symbol}
-            </Text>
-            <View style={[styles.statusBadge, { backgroundColor: statusBg }]}>
-              <Text style={[styles.statusText, { color: statusColor }]}>
-                {status}
-              </Text>
-            </View>
+          <View style={[styles.iconContainer, { backgroundColor: iconBgColor }]}>
+            <MaterialCommunityIcons name={iconName} size={24} color={iconColor} />
           </View>
-          <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-            Objetivo: <Text style={[styles.targetText, { color: theme.colors.onSurface }]}>{target}</Text>
-          </Text>
+
+          <View style={styles.textContainer}>
+            <View style={styles.headerRow}>
+              <Text variant="titleMedium" style={[styles.symbolText, { color: theme.colors.onSurface }]}>
+                {symbol}
+              </Text>
+              <View style={[styles.statusBadge, { backgroundColor: statusBg }]}>
+                <Text style={[styles.statusText, { color: statusColor }]}>
+                  {status}
+                </Text>
+              </View>
+            </View>
+            <Text variant="bodySmall" style={[styles.targetLabel, { color: theme.colors.onSurfaceVariant }]}>
+              Objetivo: <Text style={[styles.targetText, { color: theme.colors.onSurface }]}>{target}</Text>
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.actions}>
+          <Switch
+            value={isActive}
+            onValueChange={onToggle}
+            color={theme.colors.primary}
+            disabled={disabled}
+          />
+          <IconButton
+            icon="delete-outline"
+            size={20}
+            iconColor={theme.colors.error}
+            onPress={onDelete}
+            disabled={disabled}
+          />
         </View>
       </View>
-
-      <View style={styles.actions}>
-        <Switch 
-          value={isActive} 
-          onValueChange={onToggle}
-          color={theme.colors.primary}
-          disabled={disabled}
-        />
-        <IconButton
-          icon="delete-outline"
-          size={20}
-          iconColor={theme.colors.error}
-          onPress={onDelete}
-          disabled={disabled}
-        />
-      </View>
-    </View>
     </TouchableRipple>
   );
 };
@@ -130,6 +130,8 @@ const styles = StyleSheet.create({
   },
   symbolText: {
     fontWeight: 'bold',
+  },
+  targetLabel: {
   },
   targetText: {
     fontWeight: 'bold',

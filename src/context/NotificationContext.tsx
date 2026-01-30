@@ -92,6 +92,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     fcmService.getInitialNotification().then(remoteMessage => {
       if (remoteMessage) {
         // Notification caused app to open from quit state
+        // Process and add to notifications list
+        processRemoteMessage(remoteMessage, 'quit');
+        
         // Navigate to Notifications Screen
         setTimeout(() => {
              if (navigationRef.isReady()) {
@@ -107,7 +110,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     });
 
     // 2. Background State
-    const unsubscribeOpened = fcmService.onNotificationOpenedApp(_remoteMessage => {
+    const unsubscribeOpened = fcmService.onNotificationOpenedApp((remoteMessage) => {
+       // Process and add to notifications list
+       processRemoteMessage(remoteMessage, 'background');
+       
        // Navigate to Notifications Screen
        if (navigationRef.isReady()) {
            try {
@@ -121,9 +127,15 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
     // 3. Foreground State
     const unsubscribeMessage = fcmService.onMessage(async (remoteMessage) => {
-      
-      // Add to list
-      if (remoteMessage.notification || remoteMessage.data) {
+      // Process and add to notifications list
+      await processRemoteMessage(remoteMessage, 'foreground');
+    });
+
+    // Process remote message and add to notifications list
+    const processRemoteMessage = async (remoteMessage: any, _state: 'foreground' | 'background' | 'quit') => {
+      try {
+        // Add to list
+        if (remoteMessage.notification || remoteMessage.data) {
         // Extract content with fallbacks
         const dataTitle = (remoteMessage.data?.title as string);
         const notifTitle = (remoteMessage.notification?.title as string);
@@ -166,15 +178,15 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                        const isUp = alert.condition === 'above';
                        
                        trendVal = isUp ? 'up' : 'down';
-                       const directionText = isUp ? 'subida' : 'bajada';
+                       const directionText = isUp ? 'Subida' : 'Bajada';
                        const actionVerb = isUp ? 'subió' : 'bajó';
                        const targetPrice = parseFloat(alert.target);
-                       const formatPrice = (val: number) => val < 0.01 ? val : val.toFixed(2);
-                       const currentPriceFormatted = formatPrice(price);
-                       const targetPriceFormatted = formatPrice(targetPrice);
+                       const formatTargetPrice = (val: number) => val < 0.01 ? val : val.toFixed(2);
+                       const currentPriceFormatted = formatTargetPrice(price);
+                       const targetPriceFormatted = formatTargetPrice(targetPrice);
                        
                        // Unified title and body
-                       finalTitle = `Alerta de ${directionText}: ${symbol} a ${currentPriceFormatted}`;
+                       finalTitle = `${directionText}: ${symbol} a ${currentPriceFormatted}`;
                        finalBody = `El precio ${actionVerb} de los ${targetPriceFormatted}`;
                    } else {
                        // Price update received but no alert condition met -> Ignore it
@@ -202,16 +214,31 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             highlightedValue: highlightedVal,
             data: remoteMessage.data,
             };
+            
+            // Add notification to context
             addNotification(newNotif);
+            
+            // Explicitly persist to storage immediately
+            try {
+              const currentNotifications = await storageService.getNotifications();
+              await storageService.saveNotifications([newNotif, ...currentNotifications]);
+            } catch (e) {
+              observabilityService.captureError(e);
+              // Failed to persist notification
+            }
         }
       }
-    });
+    } catch (error) {
+      observabilityService.captureError(error);
+          // Error processing remote message
+        }
+      };
 
-    return () => {
-      unsubscribeOpened();
-      unsubscribeMessage();
-    };
-  }, [addNotification]);
+      return () => {
+        unsubscribeOpened();
+        unsubscribeMessage();
+      };
+    }, [addNotification]);
 
   return (
     <NotificationContext.Provider value={{

@@ -33,14 +33,14 @@ const IndexHero: React.FC<IndexHeroProps> = ({
 }) => {
   const trend = getTrend(changePercent);
   const trendIcon = getTrendIcon(trend);
-  
+
   return (
     <View style={styles.container}>
       <LinearGradient
         colors={['#0e4981', '#0b3a67', '#082f54']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
-        style={[styles.card, { borderColor: 'rgba(255,255,255,0.15)', borderWidth: 1 }]}
+        style={styles.card}
       >
         {/* Background Blur Effect Circle */}
         <View style={styles.blurCircle} />
@@ -56,9 +56,9 @@ const IndexHero: React.FC<IndexHeroProps> = ({
 
           <View style={styles.mainValueRow}>
             <Text variant="displaySmall" style={styles.valueText}>Bs. {value}</Text>
-            <View style={[styles.changeBadge, { backgroundColor: trend === 'neutral' ? 'rgba(255,255,255,0.1)' : 'rgba(110, 231, 183, 0.15)' }]}>
+            <View style={[styles.changeBadge, trend === 'neutral' ? styles.neutralBg : styles.positiveBg]}>
               <MaterialCommunityIcons name={trendIcon} size={16} color={trend === 'neutral' ? '#D1D5DB' : '#6EE7B7'} />
-              <Text variant="labelLarge" style={[styles.changeText, { color: trend === 'neutral' ? '#D1D5DB' : '#6EE7B7' }]}>{changePercent}</Text>
+              <Text variant="labelLarge" style={[styles.changeText, trend === 'neutral' ? styles.trendNeutralText : styles.trendUpText]}>{changePercent}</Text>
             </View>
           </View>
 
@@ -70,30 +70,30 @@ const IndexHero: React.FC<IndexHeroProps> = ({
               </Text>
             </View>
             <View style={styles.rightAlign}>
-            <Text variant="labelSmall" style={styles.labelSmall}>{labelOverride || 'TÍTULOS NEGOCIADOS'}</Text>
-            {stats ? (
-                  <View style={styles.breadthRow}>
-                       <View style={styles.breadthItem}>
-                          <MaterialCommunityIcons name="arrow-up-bold" size={14} color="#6EE7B7" />
-                          <Text variant="bodyMedium" style={[styles.whiteBold, { color: '#6EE7B7' }]}>{stats.titlesUp}</Text>
-                       </View>
-                       <View style={styles.breadthItem}>
-                          <MaterialCommunityIcons name="arrow-down-bold" size={14} color="#F87171" />
-                          <Text variant="bodyMedium" style={[styles.whiteBold, { color: '#F87171' }]}>{stats.titlesDown}</Text>
-                       </View>
-                       <View style={styles.breadthItem}>
-                          <MaterialCommunityIcons name="minus" size={14} color="#D1D5DB" />
-                          <Text variant="bodyMedium" style={[styles.whiteBold, { color: '#D1D5DB' }]}>{stats.titlesUnchanged}</Text>
-                       </View>
+              <Text variant="labelSmall" style={styles.labelSmall}>{labelOverride || 'TÍTULOS NEGOCIADOS'}</Text>
+              {stats ? (
+                <View style={styles.breadthRow}>
+                  <View style={styles.breadthItem}>
+                    <MaterialCommunityIcons name="arrow-up-bold" size={14} color="#6EE7B7" />
+                    <Text variant="bodyMedium" style={[styles.whiteBold, styles.trendUpText]}>{stats.titlesUp}</Text>
                   </View>
+                  <View style={styles.breadthItem}>
+                    <MaterialCommunityIcons name="arrow-down-bold" size={14} color="#F87171" />
+                    <Text variant="bodyMedium" style={[styles.whiteBold, styles.trendDownText]}>{stats.titlesDown}</Text>
+                  </View>
+                  <View style={styles.breadthItem}>
+                    <MaterialCommunityIcons name="minus" size={14} color="#D1D5DB" />
+                    <Text variant="bodyMedium" style={[styles.whiteBold, styles.trendNeutralText]}>{stats.titlesUnchanged}</Text>
+                  </View>
+                </View>
               ) : (
-                 <Text variant="bodyMedium" style={styles.whiteBold}>{fallbackValue || '-'}</Text>
+                <Text variant="bodyMedium" style={styles.whiteBold}>{fallbackValue || '-'}</Text>
               )}
             </View>
           </View>
         </View>
-      </LinearGradient>
-    </View>
+      </LinearGradient >
+    </View >
   );
 };
 
@@ -108,6 +108,8 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     elevation: 0,
     marginHorizontal: 0, // Ensure no extra margin
+    borderColor: 'rgba(255,255,255,0.15)',
+    borderWidth: 1,
   },
   blurCircle: {
     position: 'absolute',
@@ -145,6 +147,12 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignSelf: 'flex-start',
     marginTop: 8,
+  },
+  neutralBg: {
+    backgroundColor: 'rgba(255,255,255,0.1)',
+  },
+  positiveBg: {
+    backgroundColor: 'rgba(110, 231, 183, 0.15)',
   },
   statsRow: {
     flexDirection: 'row',
@@ -188,6 +196,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+  },
+  trendUpText: {
+    color: '#6EE7B7',
+  },
+  trendDownText: {
+    color: '#F87171',
+  },
+  trendNeutralText: {
+    color: '#D1D5DB',
   },
 });
 

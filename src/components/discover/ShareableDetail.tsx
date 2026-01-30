@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Image, ImageBackground } from 'react-native';
+import { View, StyleSheet, Image, ImageBackground, DimensionValue } from 'react-native';
 import { Text, Surface } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import ViewShot from 'react-native-view-shot';
@@ -61,7 +61,6 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
     metaLabel,
 }) => {
     const theme = useAppTheme();
-    const isDark = theme.dark;
 
     const getIcon = () => {
         switch (type) {
@@ -117,16 +116,60 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
     const height = aspectRatio === '16:9' ? 1920 : 1080;
 
     // Styles that depend on theme and dimensions
-    const containerStyle = {
-        width,
-        height,
-        backgroundColor: theme.colors.background, // Deep dark background
-    };
+    const containerStyle = [
+        styles.container,
+        {
+            width,
+            height,
+            backgroundColor: theme.colors.background, // Deep dark background
+        }
+    ];
+
+    const authorBlockStyle = (avatarSize: number) => [
+        styles.avatarImage,
+        { width: avatarSize, height: avatarSize, borderRadius: avatarSize / 2 }
+    ];
+
+    const avatarPlaceholderStyle = (avatarSize: number) => [
+        styles.avatarPlaceholder,
+        {
+            width: avatarSize,
+            height: avatarSize,
+            borderRadius: avatarSize / 2,
+            backgroundColor: theme.colors.primaryContainer,
+            borderColor: theme.colors.primary
+        }
+    ];
+
+    const avatarLetterStyle = (isVertical: boolean) => [
+        styles.avatarLetter,
+        { fontSize: isVertical ? 60 : 40, color: theme.colors.onPrimaryContainer }
+    ];
+
+    const authorNameStyle = (nameSize: number) => [
+        styles.authorName,
+        { fontSize: nameSize, color: theme.colors.onBackground }
+    ];
+
+    const authorMetaRowStyle = (isVertical: boolean) => [
+        styles.authorMetaRow,
+        { marginTop: isVertical ? 0 : 8 }
+    ];
+
+    const authorLabelStyle = (roleSize: number) => [
+        styles.authorLabel,
+        { fontSize: roleSize, color: hexToRgba(theme.colors.onBackground, 0.6) }
+    ];
+
+    const socialIconsStyle = (socialGap: number) => [
+        styles.socialIcons,
+        { gap: socialGap }
+    ];
 
     // Helper to render author block
     const renderAuthorBlock = () => {
         if (!author) return null;
-        
+
         const isVertical = aspectRatio === '16:9';
         const socials = (typeof author.socials === 'object' && author.socials !== null) ? author.socials : {} as any;
         const showSocials = !!author.socials;
@@ -138,31 +181,29 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
         const socialIconSize = isVertical ? 54 : 30;
         const socialGap = isVertical ? 24 : 16;
 
+        const iconColor = hexToRgba(theme.colors.onBackground, 0.6);
+
         return (
             <View style={styles.authorRow}>
                 {author.avatar ? (
-                     <Image source={{ uri: author.avatar }} style={[styles.avatarImage, { width: avatarSize, height: avatarSize, borderRadius: avatarSize / 2 }]} />
+                    <Image source={{ uri: author.avatar }} style={authorBlockStyle(avatarSize)} />
                 ) : (
-                    <View style={[styles.avatarPlaceholder, { 
-                        width: avatarSize, height: avatarSize, borderRadius: avatarSize / 2,
-                        backgroundColor: theme.colors.primaryContainer,
-                        borderColor: theme.colors.primary 
-                    }]}>
-                        <Text style={[styles.avatarLetter, { fontSize: isVertical ? 60 : 40, color: theme.colors.onPrimaryContainer }]}>{author.name[0]}</Text>
+                    <View style={avatarPlaceholderStyle(avatarSize)}>
+                        <Text style={avatarLetterStyle(isVertical)}>{author.name[0]}</Text>
                     </View>
                 )}
-                <View style={{ gap: isVertical ? 0 : 0 }}>
-                    <Text style={[styles.authorName, { fontSize: nameSize, color: theme.colors.onBackground }]}>{author.name}</Text>
-                    <View style={[styles.authorMetaRow, { marginTop: isVertical ? 0 : 8 }]}>
-                        {author.role && <Text style={[styles.authorLabel, { fontSize: roleSize, color: hexToRgba(theme.colors.onBackground, 0.6) }]}>{author.role}</Text>}
+                <View style={styles.authorInfo}>
+                    <Text style={authorNameStyle(nameSize)}>{author.name}</Text>
+                    <View style={authorMetaRowStyle(isVertical)}>
+                        {author.role && <Text style={authorLabelStyle(roleSize)}>{author.role}</Text>}
                         {showSocials && (
-                            <View style={[styles.socialIcons, { gap: socialGap }]}>
-                                {socials.twitter && <XIcon size={socialIconSize} color={hexToRgba(theme.colors.onBackground, 0.6)} />}
-                                {socials.facebook && <FacebookIcon size={socialIconSize} color={hexToRgba(theme.colors.onBackground, 0.6)} />}
-                                {socials.instagram && <MaterialCommunityIcons name="instagram" size={socialIconSize} color={hexToRgba(theme.colors.onBackground, 0.6)} />}
-                                {socials.linkedin && <MaterialCommunityIcons name="linkedin" size={socialIconSize} color={hexToRgba(theme.colors.onBackground, 0.6)} />}
-                                {socials.youtube && <MaterialCommunityIcons name="youtube" size={socialIconSize} color={hexToRgba(theme.colors.onBackground, 0.6)} />}
-                                {socials.tiktok && <MaterialCommunityIcons name="music-note-eighth" size={socialIconSize} color={hexToRgba(theme.colors.onBackground, 0.6)} />}
+                            <View style={socialIconsStyle(socialGap)}>
+                                {socials.twitter && <XIcon size={socialIconSize} color={iconColor} />}
+                                {socials.facebook && <FacebookIcon size={socialIconSize} color={iconColor} />}
+                                {socials.instagram && <MaterialCommunityIcons name="instagram" size={socialIconSize} color={iconColor} />}
+                                {socials.linkedin && <MaterialCommunityIcons name="linkedin" size={socialIconSize} color={iconColor} />}
+                                {socials.youtube && <MaterialCommunityIcons name="youtube" size={socialIconSize} color={iconColor} />}
+                                {socials.tiktok && <MaterialCommunityIcons name="music-note-eighth" size={socialIconSize} color={iconColor} />}
                             </View>
                         )}
                     </View>
@@ -171,52 +212,73 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
         );
     };
 
+    // Removal of unused _isDark from line 64
     // Modern Article Layout
     if (type === 'ARTICLE') {
         const isVertical = aspectRatio === '16:9';
+
+        const topImageWrapperStyle = [styles.topImageWrapper, { height: (isVertical ? '45%' : '50%') as DimensionValue }];
+        const placeholderWrapperStyle = [styles.placeholderWrapper, { backgroundColor: theme.colors.elevation.level1 }];
+        const topGradientOverlayStyle = [styles.topGradientOverlay, { height: isVertical ? 240 : 160 }];
+        const topBarOverlayStyle = [styles.topBarOverlay, { marginTop: isVertical ? 60 : 40, paddingHorizontal: 64 }];
+        const pillBadgeStyle = [styles.pillBadge, {
+            borderColor: hexToRgba(theme.colors.onBackground, 0.2),
+            backgroundColor: hexToRgba(theme.colors.background, 0.6),
+            paddingHorizontal: isVertical ? 40 : 32,
+            paddingVertical: isVertical ? 20 : 16,
+        }];
+        const pillTextStyle = [styles.pillText, { color: theme.colors.onBackground, fontSize: isVertical ? 32 : 24 }];
+        const brandLogoStyle = [styles.brandLogo, { tintColor: theme.colors.onBackground, width: isVertical ? 450 : 300, height: isVertical ? 120 : 80 }];
+        const categoryBadgeStyle = [styles.categoryBadge, { backgroundColor: theme.colors.primaryContainer, paddingHorizontal: isVertical ? 24 : 20, paddingVertical: isVertical ? 12 : 10 }];
+        const categoryBadgeTextStyle = [styles.categoryBadgeText, { color: theme.colors.onPrimaryContainer, fontSize: isVertical ? 26 : 22 }];
+        const modernTitleStyle = [styles.modernTitle, { color: theme.colors.onBackground, fontSize: isVertical ? 80 : 56, lineHeight: isVertical ? 88 : 64 }];
+        const descriptionStyle = [styles.modernDescription, { color: hexToRgba(theme.colors.onBackground, 0.85), fontSize: isVertical ? 42 : 30, lineHeight: isVertical ? 60 : 42 }];
+        const storeIconsStyle = (gap: number) => [styles.storeIcons, { gap }];
+        const storeIconCircleStyle = (size: number) => [styles.storeIconCircle, { backgroundColor: theme.colors.onBackground, width: size, height: size, borderRadius: size / 2 }];
+        const downloadTextStyle = [styles.downloadText, { color: theme.colors.onBackground, fontSize: isVertical ? 40 : 28 }];
+        const urlBadgeStyle = [styles.urlBadge, { backgroundColor: hexToRgba(theme.colors.onBackground, 0.1), paddingHorizontal: isVertical ? 40 : 32, paddingVertical: isVertical ? 20 : 16 }];
+        const urlTextStyle = [styles.urlText, { color: theme.colors.onBackground, fontSize: isVertical ? 36 : 26 }];
+
+        const storeIconSize = isVertical ? 90 : 64;
+        const storeGap = isVertical ? 24 : 16;
 
         return (
             <View style={styles.hiddenTemplate} pointerEvents="none">
                 <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 1.0 }}>
                     <View style={containerStyle}>
                         {/* Top Image Section (45% for Vertical, 55% for Square) */}
-                        <View style={{ height: isVertical ? '45%' : '50%', width: '100%', overflow: 'hidden' }}>
+                        <View style={topImageWrapperStyle}>
                             {image ? (
-                                <Image source={{ uri: image }} style={{ width: '100%', height: '100%' }} resizeMode="cover" />
+                                <Image source={{ uri: image }} style={styles.fullImage} resizeMode="cover" />
                             ) : (
-                                <View style={{ flex: 1, backgroundColor: theme.colors.elevation.level1, alignItems: 'center', justifyContent: 'center' }}>
+                                <View style={placeholderWrapperStyle}>
                                     <MaterialCommunityIcons name="image-off-outline" size={isVertical ? 150 : 100} color={theme.colors.onSurfaceVariant} />
                                 </View>
                             )}
-                            
+
                             {/* Top Gradient Overlay for Logo Visibility */}
                             <LinearGradient
                                 colors={[hexToRgba(theme.colors.background, 0.8), 'transparent']}
-                                style={{ position: 'absolute', top: 0, left: 0, right: 0, height: isVertical ? 240 : 160 }} 
+                                style={topGradientOverlayStyle}
                             />
 
                             {/* Gradient Fade to Bottom */}
                             <LinearGradient
                                 colors={['transparent', hexToRgba(theme.colors.background, 0.2), theme.colors.background]}
-                                style={[StyleSheet.absoluteFill, { top: '50%' }]} 
+                                style={styles.bottomGradientFade}
                             />
-                            
+
                             {/* Top Bar Overlay */}
-                            <View style={[styles.topBar, { position: 'absolute', top: 0, left: 0, right: 0, paddingHorizontal: 64, marginTop: isVertical ? 60 : 40 }]}>
-                                <View style={[styles.pillBadge, { 
-                                    borderColor: hexToRgba(theme.colors.onBackground, 0.2),
-                                    backgroundColor: hexToRgba(theme.colors.background, 0.6),
-                                    paddingHorizontal: isVertical ? 40 : 32,
-                                    paddingVertical: isVertical ? 20 : 16,
-                                }]}>
+                            <View style={topBarOverlayStyle}>
+                                <View style={pillBadgeStyle}>
                                     <MaterialCommunityIcons name={getIcon()} size={isVertical ? 32 : 24} color={theme.colors.onBackground} />
-                                    <Text style={[styles.pillText, { color: theme.colors.onBackground, fontSize: isVertical ? 32 : 24 }]}>{getLabel()}</Text>
+                                    <Text style={pillTextStyle}>{getLabel()}</Text>
                                 </View>
-                                
+
                                 <View style={styles.brandContainer}>
-                                    <Image 
-                                        source={require('../../assets/images/logotipo.png')} 
-                                        style={[styles.brandLogo, { tintColor: theme.colors.onBackground, width: isVertical ? 450 : 300, height: isVertical ? 120 : 80 }]} 
+                                    <Image
+                                        source={require('../../assets/images/logotipo.png')}
+                                        style={brandLogoStyle}
                                         resizeMode="contain"
                                     />
                                 </View>
@@ -224,18 +286,18 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                         </View>
 
                         {/* Content Section (55%) */}
-                        <View style={{ flex: 1, paddingHorizontal: 64, paddingBottom: 64, justifyContent: 'space-between' }}>
+                        <View style={styles.articleContentWrapper}>
                             <View>
                                 {/* Category Badge */}
-                                <View style={[styles.categoryBadge, { backgroundColor: theme.colors.primaryContainer, borderRadius: 100, paddingHorizontal: isVertical ? 24 : 20, paddingVertical: isVertical ? 12 : 10 }]}>
-                                    <Text style={[styles.categoryBadgeText, { color: theme.colors.onPrimaryContainer, fontSize: isVertical ? 26 : 22 }]}>
+                                <View style={categoryBadgeStyle}>
+                                    <Text style={categoryBadgeTextStyle}>
                                         {categoryName ? categoryName.toUpperCase() : 'ARTÍCULO'}
                                     </Text>
                                 </View>
 
 
                                 {/* Title */}
-                                <Text style={[styles.modernTitle, { color: theme.colors.onBackground, fontSize: isVertical ? 80 : 56, lineHeight: isVertical ? 88 : 64 }]} numberOfLines={4}>
+                                <Text style={modernTitleStyle} numberOfLines={4}>
                                     {title}
                                 </Text>
 
@@ -244,7 +306,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
 
                                 {/* Description */}
                                 {description && aspectRatio === '16:9' && (
-                                    <Text style={[styles.modernDescription, { color: hexToRgba(theme.colors.onBackground, 0.85), fontSize: isVertical ? 42 : 30, lineHeight: isVertical ? 60 : 42 }]} numberOfLines={4}>
+                                    <Text style={descriptionStyle} numberOfLines={4}>
                                         {cleanText(description)}
                                     </Text>
                                 )}
@@ -253,20 +315,20 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                             {/* Footer */}
                             <View style={styles.footer}>
                                 <View style={styles.footerLeft}>
-                                    <View style={[styles.storeIcons, { gap: isVertical ? 24 : 16 }]}>
-                                        <View style={[styles.storeIconCircle, { backgroundColor: theme.colors.onBackground, width: isVertical ? 90 : 64, height: isVertical ? 90 : 64, borderRadius: isVertical ? 45 : 32 }]}>
+                                    <View style={storeIconsStyle(storeGap)}>
+                                        <View style={storeIconCircleStyle(storeIconSize)}>
                                             <MaterialCommunityIcons name="apple" size={isVertical ? 48 : 32} color={theme.colors.background} />
                                         </View>
-                                        <View style={[styles.storeIconCircle, { backgroundColor: theme.colors.onBackground, width: isVertical ? 90 : 64, height: isVertical ? 90 : 64, borderRadius: isVertical ? 45 : 32 }]}>
+                                        <View style={storeIconCircleStyle(storeIconSize)}>
                                             <MaterialCommunityIcons name="google-play" size={isVertical ? 40 : 28} color={theme.colors.background} />
                                         </View>
                                     </View>
-                                    <Text style={[styles.downloadText, { color: theme.colors.onBackground, fontSize: isVertical ? 40 : 28 }]}>Descarga gratis</Text>
+                                    <Text style={downloadTextStyle}>Descarga gratis</Text>
                                 </View>
-                                
-                                <View style={[styles.urlBadge, { backgroundColor: hexToRgba(theme.colors.onBackground, 0.1), paddingHorizontal: isVertical ? 40 : 32, paddingVertical: isVertical ? 20 : 16 }]}>
-                                    <MaterialCommunityIcons name="web" size={isVertical ? 36 : 24} color={theme.colors.onBackground} style={{ marginRight: 10 }} />
-                                    <Text style={[styles.urlText, { color: theme.colors.onBackground, fontSize: isVertical ? 36 : 26 }]}>vtrading.app</Text>
+
+                                <View style={urlBadgeStyle}>
+                                    <MaterialCommunityIcons name="web" size={isVertical ? 36 : 24} color={theme.colors.onBackground} style={styles.urlIcon} />
+                                    <Text style={urlTextStyle}>vtrading.app</Text>
                                 </View>
                             </View>
                         </View>
@@ -276,9 +338,10 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
         );
     }
 
+
     const renderHeroWithList = () => {
         // If items are provided, use them. Otherwise, if it's an article, treat the article itself as the "Hero"
-        
+
         // For Lists (Category/Tag)
         if (!items || items.length === 0) return null;
 
@@ -286,18 +349,42 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
         const heroItem = items[0];
         const listItems = items.slice(1, aspectRatio === '16:9' ? 4 : 0);
 
+        const heroCardStyle = [styles.heroCard, {
+            backgroundColor: theme.colors.elevation.level1,
+            borderColor: theme.colors.outline,
+        }];
+        const heroImagePlaceholderStyle = [styles.heroImage, { backgroundColor: theme.colors.surfaceVariant }];
+        const heroBadgeStyle = [styles.heroBadge, { backgroundColor: getAccentColor() }];
+        const heroBadgeTextStyle = [styles.heroBadgeText, { color: theme.colors.onPrimary, fontSize: isVertical ? 24 : 20 }];
+        const heroTitleTextStyle = [styles.heroTitle, { fontSize: isVertical ? 56 : 44, lineHeight: isVertical ? 64 : 52 }];
+        const cardMetaTextStyle = [styles.cardMetaText, { fontSize: isVertical ? 30 : 24 }];
+
+        const compactCardStyle = (cardHeight: number) => [styles.card, {
+            backgroundColor: hexToRgba(theme.colors.onBackground, 0.05),
+            borderColor: hexToRgba(theme.colors.onBackground, 0.1),
+            height: cardHeight,
+        }];
+        const compactCardImageStyle = (size: number) => [styles.cardImage, { width: size, height: size }];
+        const compactCardTitleStyle = [styles.cardTitle, { color: theme.colors.onBackground, fontSize: isVertical ? 38 : 32, lineHeight: isVertical ? 46 : 40 }];
+        const listItemAvatarStyle = (size: number) => [styles.listItemAvatar, { width: size, height: size, borderRadius: size / 2 }];
+        const listItemAvatarPlaceholderStyle = (size: number) => [styles.listItemAvatarPlaceholder, { width: size, height: size, borderRadius: size / 2, backgroundColor: theme.colors.primaryContainer }];
+        const listItemAvatarLetterStyle = (fontSize: number) => [styles.listItemAvatarLetter, { fontSize, color: theme.colors.onPrimaryContainer }];
+        const listItemAuthorStyle = [styles.listItemAuthor, { color: hexToRgba(theme.colors.onBackground, 0.9), fontSize: isVertical ? 24 : 20 }];
+        const cardDateTextStyle = [styles.cardDate, { color: hexToRgba(theme.colors.onBackground, 0.7), fontSize: isVertical ? 22 : 18 }];
+
+        const compactItemHeight = isVertical ? 180 : 160;
+        const compactItemImageSize = isVertical ? 180 : 160;
+        const avatarSize = isVertical ? 48 : 40;
+        const avatarFontSize = isVertical ? 24 : 20;
+
         return (
             <View style={styles.listContainer}>
                 {/* Hero Card */}
-                <Surface style={[styles.heroCard, { 
-                    backgroundColor: theme.colors.elevation.level1,
-                    borderColor: theme.colors.outline,
-                    borderRadius: 40,
-                }]} elevation={5}>
+                <Surface style={heroCardStyle} elevation={5}>
                     {heroItem.image ? (
                         <Image source={{ uri: heroItem.image }} style={styles.heroImage} resizeMode="cover" />
                     ) : (
-                        <View style={[styles.heroImage, { backgroundColor: theme.colors.surfaceVariant, alignItems: 'center', justifyContent: 'center' }]}>
+                        <View style={heroImagePlaceholderStyle}>
                             <MaterialCommunityIcons name="image-off-outline" size={isVertical ? 80 : 60} color={theme.colors.onSurfaceVariant} />
                         </View>
                     )}
@@ -308,12 +395,12 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                     />
 
                     <View style={styles.heroContent}>
-                        <View style={[styles.heroBadge, { backgroundColor: getAccentColor() }]}>
-                            <Text style={[styles.heroBadgeText, { color: theme.colors.onPrimary, fontSize: isVertical ? 24 : 20 }]}>DESTACADO</Text>
+                        <View style={heroBadgeStyle}>
+                            <Text style={heroBadgeTextStyle}>DESTACADO</Text>
                         </View>
-                        <Text style={[styles.heroTitle, { color: '#FFF', fontSize: isVertical ? 56 : 44, lineHeight: isVertical ? 64 : 52 }]} numberOfLines={2}>{heroItem.title}</Text>
+                        <Text style={heroTitleTextStyle} numberOfLines={2}>{heroItem.title}</Text>
                         <View style={styles.cardMeta}>
-                            {heroItem.author && <Text style={[styles.cardMetaText, { color: 'rgba(255,255,255,0.9)', fontSize: isVertical ? 30 : 24 }]}>Por {heroItem.author}</Text>}
+                            {heroItem.author && <Text style={cardMetaTextStyle}>Por {heroItem.author}</Text>}
                         </View>
                     </View>
                 </Surface>
@@ -322,36 +409,32 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                 {listItems.length > 0 && (
                     <View style={styles.compactList}>
                         {listItems.map((item, index) => (
-                            <View key={index} style={[styles.card, { 
-                                backgroundColor: hexToRgba(theme.colors.onBackground, 0.05),
-                                borderColor: hexToRgba(theme.colors.onBackground, 0.1),
-                                height: isVertical ? 180 : 160,
-                            }]}>
+                            <View key={index} style={compactCardStyle(compactItemHeight)}>
                                 {item.image && (
-                                    <Image source={{ uri: item.image }} style={[styles.cardImage, { width: isVertical ? 180 : 160, height: isVertical ? 180 : 160 }]} resizeMode="cover" />
+                                    <Image source={{ uri: item.image }} style={compactCardImageStyle(compactItemImageSize)} resizeMode="cover" />
                                 )}
                                 <View style={styles.cardContent}>
-                                    <Text style={[styles.cardTitle, { color: theme.colors.onBackground, fontSize: isVertical ? 38 : 32, lineHeight: isVertical ? 46 : 40 }]} numberOfLines={2}>{item.title}</Text>
-                                    <View style={{ marginTop: 12, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                                    <Text style={compactCardTitleStyle} numberOfLines={2}>{item.title}</Text>
+                                    <View style={styles.listItemMeta}>
                                         {/* Author Avatar */}
                                         {item.authorAvatar ? (
-                                            <Image source={{ uri: item.authorAvatar }} style={{ width: isVertical ? 48 : 40, height: isVertical ? 48 : 40, borderRadius: isVertical ? 24 : 20 }} />
+                                            <Image source={{ uri: item.authorAvatar }} style={listItemAvatarStyle(avatarSize)} />
                                         ) : (
-                                            <View style={{ width: isVertical ? 48 : 40, height: isVertical ? 48 : 40, borderRadius: isVertical ? 24 : 20, backgroundColor: theme.colors.primaryContainer, alignItems: 'center', justifyContent: 'center' }}>
-                                                <Text style={{ fontSize: isVertical ? 24 : 20, color: theme.colors.onPrimaryContainer, fontWeight: 'bold' }}>{(item.author || 'V')[0]}</Text>
+                                            <View style={listItemAvatarPlaceholderStyle(avatarSize)}>
+                                                <Text style={listItemAvatarLetterStyle(avatarFontSize)}>{(item.author || 'V')[0]}</Text>
                                             </View>
                                         )}
-                                        
+
                                         {/* Author Name */}
-                                        <Text style={{ color: hexToRgba(theme.colors.onBackground, 0.9), fontSize: isVertical ? 24 : 20, fontWeight: '600' }}>
+                                        <Text style={listItemAuthorStyle}>
                                             {item.author}
                                         </Text>
 
                                         {/* Separator */}
                                         <MaterialCommunityIcons name="circle-small" size={isVertical ? 32 : 24} color={hexToRgba(theme.colors.onBackground, 0.5)} />
-                                        
+
                                         {/* Date */}
-                                        <Text style={[styles.cardDate, { color: hexToRgba(theme.colors.onBackground, 0.7), fontSize: isVertical ? 22 : 18, flex: 1 }]}>
+                                        <Text style={cardDateTextStyle}>
                                             {item.date || 'Reciente'}
                                         </Text>
                                     </View>
@@ -366,23 +449,48 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
 
     // Old Layout for Category/Tag
     const isVertical = aspectRatio === '16:9';
+
+    const backgroundGradientColors = [theme.colors.background, theme.colors.background];
+    const topPillBadgeStyle = [styles.pillBadge, {
+        borderColor: hexToRgba(theme.colors.onBackground, 0.3),
+        backgroundColor: hexToRgba(theme.colors.background, 0.5),
+        paddingHorizontal: isVertical ? 40 : 32,
+        paddingVertical: isVertical ? 20 : 16,
+    }];
+    const topPillTextStyle = [styles.pillText, { color: theme.colors.onBackground, fontSize: isVertical ? 32 : 24 }];
+    const topBrandLogoStyle = [styles.brandLogo, { tintColor: theme.colors.onBackground, width: isVertical ? 450 : 300, height: isVertical ? 120 : 80 }];
+    const mainTitleStyle = [
+        styles.mainTitle,
+        { color: theme.colors.onBackground },
+        (title.length > 40) && { fontSize: isVertical ? 80 : 64, lineHeight: (isVertical ? 88 : 72) as number },
+        (title.length > 80) && { fontSize: isVertical ? 72 : 56, lineHeight: (isVertical ? 80 : 64) as number }
+    ];
+    const oldDescriptionStyle = [styles.description, { color: hexToRgba(theme.colors.onBackground, 0.8), fontSize: 42, lineHeight: 60 }];
+    const oldStoreIconsStyle = [styles.storeIcons, { gap: isVertical ? 24 : 16 }];
+    const oldStoreIconCircleStyle = (size: number) => [styles.storeIconCircle, { backgroundColor: theme.colors.onBackground, width: size, height: size, borderRadius: size / 2 }];
+    const oldDownloadTextStyle = [styles.downloadText, { color: theme.colors.onBackground, fontSize: isVertical ? 40 : 28 }];
+    const oldUrlBadgeStyle = [styles.urlBadge, { backgroundColor: hexToRgba(theme.colors.onBackground, 0.15), paddingHorizontal: isVertical ? 40 : 32, paddingVertical: isVertical ? 20 : 16 }];
+    const oldUrlTextStyle = [styles.urlText, { color: theme.colors.onBackground, fontSize: isVertical ? 36 : 26 }];
+
+    const storeIconSize = isVertical ? 90 : 64;
+
     return (
         <View style={styles.hiddenTemplate} pointerEvents="none">
             <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 1.0 }}>
                 <View style={containerStyle}>
                     {/* Background Layer - Abstract Dark */}
-                     <LinearGradient
-                        colors={[theme.colors.background, theme.colors.background]}
+                    <LinearGradient
+                        colors={backgroundGradientColors}
                         style={StyleSheet.absoluteFill}
                     />
-                    
+
                     {/* Background Image Blended */}
                     <ImageBackground
                         source={image ? { uri: image } : require('../../assets/images/logotipo.png')}
-                        style={[styles.backgroundImage, { opacity: 0.4 }]}
+                        style={styles.backgroundImage}
                         blurRadius={60}
                     />
-                    
+
                     {/* Gradient Overlay for Consistency */}
                     <LinearGradient
                         colors={[hexToRgba(theme.colors.background, 0.3), theme.colors.background]}
@@ -392,21 +500,16 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                     <View style={styles.contentContainer}>
                         {/* Top Bar */}
                         <View style={styles.topBar}>
-                            <View style={[styles.pillBadge, { 
-                                borderColor: hexToRgba(theme.colors.onBackground, 0.3),
-                                backgroundColor: hexToRgba(theme.colors.background, 0.5),
-                                paddingHorizontal: isVertical ? 40 : 32,
-                                paddingVertical: isVertical ? 20 : 16,
-                            }]}>
+                            <View style={topPillBadgeStyle}>
                                 <MaterialCommunityIcons name={getIcon()} size={isVertical ? 32 : 24} color={theme.colors.onBackground} />
-                                <Text style={[styles.pillText, { color: theme.colors.onBackground, fontSize: isVertical ? 32 : 24 }]}>{getLabel()}</Text>
+                                <Text style={topPillTextStyle}>{getLabel()}</Text>
                             </View>
-                            
+
                             {/* Brand Logo - Using Asset */}
-                             <View style={styles.brandContainer}>
-                                <Image 
-                                    source={require('../../assets/images/logotipo.png')} 
-                                    style={[styles.brandLogo, { tintColor: theme.colors.onBackground, width: isVertical ? 450 : 300, height: isVertical ? 120 : 80 }]} 
+                            <View style={styles.brandContainer}>
+                                <Image
+                                    source={require('../../assets/images/logotipo.png')}
+                                    style={topBrandLogoStyle}
                                     resizeMode="contain"
                                 />
                             </View>
@@ -416,12 +519,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                         <View style={styles.mainWrapper}>
                             {/* Header Section */}
                             <View style={styles.headerSection}>
-                                <Text style={[
-                                    styles.mainTitle,
-                                    { color: theme.colors.onBackground },
-                                    (title.length > 40) && { fontSize: isVertical ? 80 : 64, lineHeight: isVertical ? 88 : 72 },
-                                    (title.length > 80) && { fontSize: isVertical ? 72 : 56, lineHeight: isVertical ? 80 : 64 }
-                                ]}>
+                                <Text style={mainTitleStyle}>
                                     {title}
                                 </Text>
 
@@ -429,7 +527,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                                 {(type as string) === 'ARTICLE' && author && renderAuthorBlock()}
 
                                 {description && !items && aspectRatio === '16:9' && (
-                                    <Text style={[styles.description, { color: hexToRgba(theme.colors.onBackground, 0.8), fontSize: 42, lineHeight: 60 }]} numberOfLines={4}>
+                                    <Text style={oldDescriptionStyle} numberOfLines={4}>
                                         {cleanText(description)}
                                     </Text>
                                 )}
@@ -444,21 +542,21 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                         {/* Footer */}
                         <View style={styles.footer}>
                             <View style={styles.footerLeft}>
-                                <View style={[styles.storeIcons, { gap: isVertical ? 24 : 16 }]}>
-                                     {/* Larger Store Icons */}
-                                    <View style={[styles.storeIconCircle, { backgroundColor: theme.colors.onBackground, width: isVertical ? 90 : 64, height: isVertical ? 90 : 64, borderRadius: isVertical ? 45 : 32 }]}>
+                                <View style={oldStoreIconsStyle}>
+                                    {/* Larger Store Icons */}
+                                    <View style={oldStoreIconCircleStyle(storeIconSize)}>
                                         <MaterialCommunityIcons name="apple" size={isVertical ? 48 : 32} color={theme.colors.background} />
                                     </View>
-                                    <View style={[styles.storeIconCircle, { backgroundColor: theme.colors.onBackground, width: isVertical ? 90 : 64, height: isVertical ? 90 : 64, borderRadius: isVertical ? 45 : 32 }]}>
+                                    <View style={oldStoreIconCircleStyle(storeIconSize)}>
                                         <MaterialCommunityIcons name="google-play" size={isVertical ? 40 : 28} color={theme.colors.background} />
                                     </View>
                                 </View>
-                                <Text style={[styles.downloadText, { color: theme.colors.onBackground, fontSize: isVertical ? 40 : 28 }]}>Descarga gratis</Text>
+                                <Text style={oldDownloadTextStyle}>Descarga gratis</Text>
                             </View>
-                            
-                            <View style={[styles.urlBadge, { backgroundColor: hexToRgba(theme.colors.onBackground, 0.15), paddingHorizontal: isVertical ? 40 : 32, paddingVertical: isVertical ? 20 : 16 }]}>
-                                <MaterialCommunityIcons name="web" size={isVertical ? 36 : 24} color={theme.colors.onBackground} style={{ marginRight: 10 }} />
-                                <Text style={[styles.urlText, { color: theme.colors.onBackground, fontSize: isVertical ? 36 : 26 }]}>vtrading.app</Text>
+
+                            <View style={oldUrlBadgeStyle}>
+                                <MaterialCommunityIcons name="web" size={isVertical ? 36 : 24} color={theme.colors.onBackground} style={styles.urlIcon} />
+                                <Text style={oldUrlTextStyle}>vtrading.app</Text>
                             </View>
                         </View>
 
@@ -470,15 +568,82 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
 };
 
 const styles = StyleSheet.create({
+    container: {
+        // Dynamic width/height/bgcolor
+    },
+    authorInfo: {
+        flex: 1,
+    },
+    topImageWrapper: {
+        width: '100%',
+        overflow: 'hidden',
+    },
+    fullImage: {
+        width: '100%',
+        height: '100%',
+    },
+    placeholderWrapper: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    topGradientOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+    },
+    bottomGradientFade: {
+        ...StyleSheet.absoluteFillObject,
+        top: '50%',
+    },
+    topBarOverlay: {
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+    },
+    articleContentWrapper: {
+        flex: 1,
+        paddingHorizontal: 64,
+        paddingBottom: 64,
+        justifyContent: 'space-between',
+    },
+    listItemMeta: {
+        marginTop: 12,
+        flexDirection: 'row',
+        alignItems: 'center',
+        gap: 12,
+    },
+    listItemAvatar: {
+        // dynamic sizes
+    },
+    listItemAvatarPlaceholder: {
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    listItemAvatarLetter: {
+        fontWeight: 'bold',
+    },
+    listItemAuthor: {
+        fontWeight: '600',
+    },
+    urlIcon: {
+        marginRight: 10,
+    },
     hiddenTemplate: {
         position: 'absolute',
         left: -4000,
         top: 0,
         zIndex: -1,
-        opacity: 0, 
+        opacity: 0,
     },
     backgroundImage: {
         ...StyleSheet.absoluteFillObject,
+        opacity: 0.4,
     },
     contentContainer: {
         flex: 1,
@@ -488,30 +653,21 @@ const styles = StyleSheet.create({
 
     // Modern Styles
     categoryBadge: {
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 8,
+        borderRadius: 100,
         alignSelf: 'flex-start',
         marginBottom: 20,
     },
     categoryBadgeText: {
-        fontSize: 18,
         fontWeight: 'bold',
         letterSpacing: 1,
     },
     modernTitle: {
-        fontSize: 56, // Adjusted for new layout
-        lineHeight: 64,
         fontWeight: '900',
-        color: '#FFF',
         marginBottom: 24,
         letterSpacing: -1,
     },
     modernDescription: {
-        fontSize: 30,
-        lineHeight: 42,
         fontWeight: '400',
-        color: 'rgba(255,255,255,0.85)',
         marginTop: 32,
         textAlign: 'justify',
     },
@@ -528,13 +684,10 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 16,
-        paddingHorizontal: 32,
-        paddingVertical: 16,
         borderRadius: 100,
         borderWidth: 2,
     },
     pillText: {
-        fontSize: 24,
         fontWeight: 'bold',
         letterSpacing: 3,
         textTransform: 'uppercase',
@@ -544,9 +697,7 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     brandLogo: {
-        width: 300,
-        height: 80,
-        tintColor: '#FFF', // Make logo white for dark theme consistency
+        // dynamic sizes
     },
 
     // Main Layout
@@ -559,8 +710,6 @@ const styles = StyleSheet.create({
         marginBottom: 0,
     },
     mainTitle: {
-        fontSize: 64,
-        lineHeight: 72,
         fontWeight: '900',
         marginBottom: 24,
         letterSpacing: -1,
@@ -569,14 +718,12 @@ const styles = StyleSheet.create({
         textShadowRadius: 10,
     },
     description: {
-        fontSize: 36, // Smaller than before
-        lineHeight: 46, // Increased line height for better readability
         fontWeight: '400',
         marginTop: 20, // Add separation from author block
         textAlign: 'justify', // Justify text as requested
         letterSpacing: 0.5, // Slight spacing for clarity
     },
-    
+
     // Author Row
     authorRow: {
         flexDirection: 'row',
@@ -588,39 +735,27 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         gap: 20,
-        marginTop: 8,
     },
     socialIcons: {
         flexDirection: 'row',
-        gap: 12,
         alignItems: 'center',
-        opacity: 0.8,
     },
     avatarImage: {
-        width: 90,
-        height: 90,
-        borderRadius: 45,
         borderWidth: 3,
         borderColor: 'rgba(255,255,255,0.2)',
     },
     avatarPlaceholder: {
-        width: 90,
-        height: 90,
-        borderRadius: 45,
         alignItems: 'center',
         justifyContent: 'center',
         borderWidth: 3,
     },
     avatarLetter: {
-        fontSize: 40,
         fontWeight: 'bold',
     },
     authorName: {
-        fontSize: 32,
         fontWeight: 'bold',
     },
     authorLabel: {
-        fontSize: 24,
         fontWeight: '500',
         marginTop: 4,
     },
@@ -638,6 +773,7 @@ const styles = StyleSheet.create({
         aspectRatio: 16 / 9,
         overflow: 'hidden',
         borderWidth: 0, // Flat design as requested
+        borderRadius: 40,
     },
     heroImage: {
         width: '100%',
@@ -658,16 +794,13 @@ const styles = StyleSheet.create({
         marginBottom: 20,
     },
     heroBadgeText: {
-        fontSize: 20,
         fontWeight: 'bold',
         letterSpacing: 1,
         textTransform: 'uppercase',
     },
     heroTitle: {
         color: '#FFF',
-        fontSize: 44,
         fontWeight: 'bold',
-        lineHeight: 52,
         marginBottom: 16,
         textShadowColor: 'rgba(0,0,0,0.8)',
         textShadowOffset: { width: 0, height: 2 },
@@ -678,7 +811,6 @@ const styles = StyleSheet.create({
     },
     cardMetaText: {
         color: 'rgba(255,255,255,0.9)',
-        fontSize: 24,
         fontWeight: '500',
     },
 
@@ -690,13 +822,11 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         borderRadius: 24,
         overflow: 'hidden',
-        height: 160,
         alignItems: 'center',
         borderWidth: 1,
     },
     cardImage: {
-        width: 160,
-        height: 160,
+        // dynamic sizes
     },
     cardContent: {
         flex: 1,
@@ -704,15 +834,13 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     cardTitle: {
-        fontSize: 32,
         fontWeight: 'bold',
-        lineHeight: 40,
         marginBottom: 8,
     },
     cardDate: {
-        fontSize: 20,
         fontWeight: '600',
         textTransform: 'uppercase',
+        flex: 1,
     },
     cardAuthor: {
         fontWeight: '500',
@@ -732,13 +860,8 @@ const styles = StyleSheet.create({
     },
     storeIcons: {
         flexDirection: 'row',
-        gap: 16, // Added explicit gap for separation
     },
     storeIconCircle: {
-        width: 64,
-        height: 64,
-        borderRadius: 32,
-        backgroundColor: '#FFF',
         alignItems: 'center',
         justifyContent: 'center',
         shadowColor: "#000",
@@ -748,18 +871,14 @@ const styles = StyleSheet.create({
         elevation: 8,
     },
     downloadText: {
-        fontSize: 28,
         fontWeight: 'bold',
     },
     urlBadge: {
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 32,
-        paddingVertical: 16,
         borderRadius: 100,
     },
     urlText: {
-        fontSize: 26,
         fontWeight: 'bold',
     },
 });

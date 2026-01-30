@@ -147,7 +147,7 @@ const TopToast: React.FC<TopToastProps> = ({
           </View>
           <View style={styles.textContainer}>
             {title && (
-              <Text variant="titleSmall" style={{ color: colors.text, fontWeight: 'bold' }}>
+              <Text variant="titleSmall" style={[styles.title, { color: colors.text }]}>
                 {title}
               </Text>
             )}
@@ -155,16 +155,16 @@ const TopToast: React.FC<TopToastProps> = ({
               {message}
             </Text>
             {caption && (
-              <View style={{ marginTop: 4, flexDirection: 'row', alignItems: 'center' }}>
-                <MaterialCommunityIcons name="target" size={14} color={colors.textVariant} style={{ marginRight: 4, opacity: 0.8 }} />
-                <Text variant="labelSmall" style={{ color: colors.textVariant, opacity: 0.9 }}>
+              <View style={styles.captionContainer}>
+                <MaterialCommunityIcons name="target" size={14} color={colors.textVariant} style={styles.captionIcon} />
+                <Text variant="labelSmall" style={[styles.captionText, { color: colors.textVariant }]}>
                   {caption}
                 </Text>
               </View>
             )}
           </View>
           <TouchableOpacity onPress={hide} style={styles.closeButton}>
-            <MaterialCommunityIcons name="close" size={20} color={colors.textVariant} style={{ opacity: 0.7 }} />
+            <MaterialCommunityIcons name="close" size={20} color={colors.textVariant} style={styles.closeIcon} />
           </TouchableOpacity>
         </TouchableOpacity>
       </Surface>
@@ -200,9 +200,27 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
+  title: {
+    fontWeight: 'bold',
+  },
+  captionContainer: {
+    marginTop: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  captionIcon: {
+    marginRight: 4,
+    opacity: 0.8,
+  },
+  captionText: {
+    opacity: 0.9,
+  },
   closeButton: {
     padding: 4,
     marginLeft: 8,
+  },
+  closeIcon: {
+    opacity: 0.7,
   },
 });
 

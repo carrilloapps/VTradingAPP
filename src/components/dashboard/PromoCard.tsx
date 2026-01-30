@@ -5,24 +5,39 @@ import { Text, useTheme } from 'react-native-paper';
 const PromoCard: React.FC = () => {
   const theme = useTheme();
 
-  return (
-    <View style={[styles.container, { 
-      backgroundColor: theme.colors.primaryContainer, 
+  const containerStyle = [
+    styles.container,
+    {
+      backgroundColor: theme.colors.primaryContainer,
       borderColor: theme.colors.outline,
-      borderRadius: theme.roundness * 6,
-    }]}>
-      <Text style={[styles.titleText, { color: theme.colors.onPrimaryContainer }]}>
+    }
+  ];
+
+  const titleStyle = [styles.titleText, { color: theme.colors.onPrimaryContainer }];
+  const descriptionStyle = [
+    styles.descriptionText,
+    styles.descriptionTextWithOpacity,
+    { color: theme.colors.onPrimaryContainer }
+  ];
+  const buttonStyle = [
+    styles.button,
+    {
+      backgroundColor: theme.colors.primary,
+      borderColor: theme.colors.outline
+    }
+  ];
+  const buttonTextStyle = [styles.buttonText, { color: theme.colors.onPrimary }];
+
+  return (
+    <View style={containerStyle}>
+      <Text style={titleStyle}>
         ¿Necesitas cambiar divisas?
       </Text>
-      <Text style={[styles.descriptionText, { color: theme.colors.onPrimaryContainer, opacity: 0.8 }]}>
+      <Text style={descriptionStyle}>
         Usa nuestra calculadora integrada para conversiones exactas.
       </Text>
-      <TouchableOpacity style={[styles.button, { 
-        backgroundColor: theme.colors.primary,
-        borderRadius: theme.roundness * 3,
-        borderColor: theme.colors.outline 
-      }]}>
-        <Text style={[styles.buttonText, { color: theme.colors.onPrimary }]}>Calculadora</Text>
+      <TouchableOpacity style={buttonStyle}>
+        <Text style={buttonTextStyle}>Calculadora</Text>
       </TouchableOpacity>
     </View>
   );
@@ -36,6 +51,7 @@ const styles = StyleSheet.create({
     paddingVertical: 24,
     borderWidth: 1,
     alignItems: 'center',
+    borderRadius: 24,
   },
   titleText: {
     fontSize: 13,
@@ -48,10 +64,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 18,
   },
+  descriptionTextWithOpacity: {
+    opacity: 0.8,
+  },
   button: {
     paddingHorizontal: 24,
     paddingVertical: 10,
     borderWidth: 1,
+    borderRadius: 12,
   },
   buttonText: {
     fontSize: 13,

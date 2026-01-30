@@ -183,19 +183,29 @@ const BankRatesScreen = () => {
       return (
           <View style={styles.footerLoader}>
               <ActivityIndicator size="small" color={theme.colors.primary} />
-              <Text style={{ marginLeft: 8, color: theme.colors.onSurfaceVariant }}>Cargando más bancos...</Text>
+              <Text style={[styles.footerText, { color: footerTextColor }]}>Cargando más bancos...</Text>
           </View>
       );
   };
+
+  // Pre-calculate dynamic styles
+  const footerTextColor = theme.colors.onSurfaceVariant;
+  const sectionTitleColor = theme.colors.onSurfaceVariant;
+  const liveBadgeBg = theme.colors.tertiaryContainer;
+  const liveTextColor = theme.colors.onTertiaryContainer;
+  const bcvIconBg = 'rgba(255,255,255,0.2)';
+  const bcvIconBorder = 'rgba(255,255,255,0.1)';
+  const bcvTextColor = theme.colors.onPrimary;
+  const statusDotBg = theme.colors.onPrimary;
 
   const renderHeader = () => (
       <View style={styles.contentHeader}>
           {/* BCV Section */}
           <View style={styles.bcvSection}>
               <View style={styles.sectionHeader}>
-                  <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>VALORES SEGÚN BCV</Text>
-                  <View style={[styles.liveBadge, { backgroundColor: theme.colors.tertiaryContainer }]}>
-                      <Text style={[styles.liveText, { color: theme.colors.onTertiaryContainer }]}>TIEMPO REAL</Text>
+                  <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>VALORES SEGÚN BCV</Text>
+                  <View style={[styles.liveBadge, { backgroundColor: liveBadgeBg }]}>
+                      <Text style={[styles.liveText, { color: liveTextColor }]}>TIEMPO REAL</Text>
                   </View>
               </View>
 
@@ -207,14 +217,14 @@ const BankRatesScreen = () => {
               >
                   <View style={styles.bcvCardContent}>
                       <View style={styles.bcvHeader}>
-                          <View style={[styles.bcvIconContainer, { backgroundColor: 'rgba(255,255,255,0.2)', borderColor: 'rgba(255,255,255,0.1)' }]}>
-                              <MaterialCommunityIcons name="bank" size={24} color={theme.colors.onPrimary} />
+                          <View style={[styles.bcvIconContainer, { backgroundColor: bcvIconBg, borderColor: bcvIconBorder }]}>
+                              <MaterialCommunityIcons name="bank" size={24} color={bcvTextColor} />
                           </View>
                           <View>
-                              <Text style={[styles.bcvTitle, { color: theme.colors.onPrimary }]}>Tasa General (BCV)</Text>
+                              <Text style={[styles.bcvTitle, { color: bcvTextColor }]}>Tasa General (BCV)</Text>
                               <View style={styles.bcvSubtitleRow}>
-                                  <View style={[styles.statusDot, { backgroundColor: theme.colors.onPrimary }]} />
-                                  <Text style={[styles.bcvSubtitle, { color: theme.colors.onPrimary }]}>
+                                  <View style={[styles.statusDot, { backgroundColor: statusDotBg }]} />
+                                  <Text style={[styles.bcvSubtitle, { color: bcvTextColor }]}>
                                     {bcvRate?.lastUpdated 
                                         ? `A ${new Date(bcvRate.lastUpdated).toLocaleString('es-VE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
                                         : 'ACTUALIZADO'}
@@ -226,7 +236,7 @@ const BankRatesScreen = () => {
 
                   <View style={styles.bcvBottomRow}>
                       <View style={styles.bcvPriceContainer}>
-                          <Text style={[styles.bcvPrice, { color: theme.colors.onPrimary }]}>
+                          <Text style={[styles.bcvPrice, { color: bcvTextColor }]}>
                             {bcvRate 
                                 ? bcvRate.value.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) 
                                 : '--,--'}
@@ -237,20 +247,15 @@ const BankRatesScreen = () => {
                   
                   {/* Decorative huge icon */}
                   <View style={styles.decorativeIcon}>
-                      <BolivarIcon color={theme.colors.onPrimary} size={160} style={{ opacity: 0.1 }} />
+                      <BolivarIcon color={theme.colors.onPrimary} size={160} style={styles.decorativeIconOpacity} />
                   </View>
               </LinearGradient>
           </View>
 
           <View style={styles.listHeader}>
             <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>COTIZACIONES BANCARIAS</Text>
-            <View style={{ 
-                backgroundColor: theme.colors.primaryContainer,
-                paddingHorizontal: 12,
-                paddingVertical: 4,
-                borderRadius: 8,
-            }}>
-                <Text style={[styles.sectionSubtitle, { color: theme.colors.onPrimaryContainer, fontSize: 12 }]}>VES / USD</Text>
+            <View style={[styles.listHeaderBadge, { backgroundColor: theme.colors.primaryContainer }]}>
+                <Text style={[styles.sectionSubtitle, styles.listHeaderBadgeText, { color: theme.colors.onPrimaryContainer }]}>VES / USD</Text>
             </View>
         </View>
         
@@ -267,10 +272,7 @@ const BankRatesScreen = () => {
             }}
             visible={true}
             mode="scroll"
-            style={{ 
-              marginBottom: 16,
-              marginTop: -8,
-            }}
+            style={styles.filterSectionSpacing}
         />
       </View>
   );
@@ -361,6 +363,9 @@ const styles = StyleSheet.create({
   },
   contentHeader: {
       marginBottom: 10,
+  },
+  footerText: {
+      marginLeft: 8,
   },
   searchContainer: {
       marginBottom: 24,
@@ -508,7 +513,22 @@ const styles = StyleSheet.create({
       paddingVertical: 20,
       justifyContent: 'center',
       alignItems: 'center',
-  }
+  },
+  decorativeIconOpacity: {
+    opacity: 0.1,
+  },
+  listHeaderBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 8,
+  },
+  listHeaderBadgeText: {
+    fontSize: 12,
+  },
+  filterSectionSpacing: {
+    marginBottom: 16,
+    marginTop: -8,
+  },
 });
 
 export default BankRatesScreen;

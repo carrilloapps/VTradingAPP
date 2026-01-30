@@ -16,8 +16,8 @@ interface AboutDialogProps {
   onDeleteAccount?: () => void;
 }
 
-const AboutDialog: React.FC<AboutDialogProps> = ({ 
-  visible, 
+const AboutDialog: React.FC<AboutDialogProps> = ({
+  visible,
   onDismiss,
   showDeleteAccount = false,
   onDeleteAccount
@@ -44,19 +44,19 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
       fullWidthActions
     >
       <View style={styles.content}>
-        <AuthLogo 
-          size={64} 
-          showBadge={false} 
-          tintColor={theme.colors.primary} 
-          containerStyle={{ marginBottom: 8 }} 
+        <AuthLogo
+          size={64}
+          showBadge={false}
+          tintColor={theme.colors.primary}
+          containerStyle={styles.logoContainer}
         />
-        <Text variant="headlineSmall" style={{ fontWeight: 'bold', color: theme.colors.onSurface, textAlign: 'center', marginBottom: 0 }}>
+        <Text variant="headlineSmall" style={[styles.title, { color: theme.colors.onSurface }]}>
           {appName || 'VTradingAPP'}
         </Text>
-        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, marginBottom: 12 }}>
+        <Text variant="bodyMedium" style={[styles.version, { color: theme.colors.onSurfaceVariant }]}>
           Versión {version}
         </Text>
-        <Text variant="bodySmall" style={{ textAlign: 'center', marginBottom: 16, paddingHorizontal: 16, color: theme.colors.onSurfaceVariant }}>
+        <Text variant="bodySmall" style={[styles.description, { color: theme.colors.onSurfaceVariant }]}>
           Diseñado para el seguimiento financiero en tiempo real.
         </Text>
 
@@ -100,7 +100,7 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
           </View>
         </View>
 
-        <Text variant="labelSmall" style={{ color: theme.colors.outline }}>
+        <Text variant="labelSmall" style={styles.copyright}>
           © {new Date().getFullYear()} VTradingAPP
         </Text>
       </View>
@@ -123,6 +123,25 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     elevation: 0,
   },
+  logoContainer: {
+    marginBottom: 8,
+  },
+  title: {
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 0,
+  },
+  version: {
+    marginBottom: 12,
+  },
+  description: {
+    textAlign: 'center',
+    marginBottom: 16,
+    paddingHorizontal: 16,
+  },
+  copyright: {
+    color: '#8e8e93', // Fallback or use theme if possible, but earlier it was theme.colors.outline
+  }
 });
 
 export default AboutDialog;

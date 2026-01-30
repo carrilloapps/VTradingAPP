@@ -7,25 +7,34 @@ import Skeleton from '../ui/Skeleton';
 const WalletSkeleton = () => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const r = theme.roundness;
+
+  const containerStyle = [styles.container, { backgroundColor: theme.colors.background }];
+  const headerStyle = [styles.header, { paddingTop: insets.top + 12 }];
+  const featureItemStyle = [
+    styles.featureItem,
+    {
+      backgroundColor: theme.colors.elevation.level1,
+      borderColor: theme.colors.outline,
+    }
+  ];
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={containerStyle}>
       {/* Header Skeleton matches UnifiedHeader section variant */}
-      <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-         <Skeleton width={150} height={32} />
+      <View style={headerStyle}>
+        <Skeleton width={150} height={32} />
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        
+
         {/* Hero Section */}
         <View style={styles.heroSection}>
           <View style={styles.iconContainer}>
             <Skeleton width={120} height={120} borderRadius={60} />
           </View>
-          
+
           <Skeleton width={140} height={32} borderRadius={20} style={styles.badge} />
-          
+
           <Skeleton width={200} height={36} style={styles.title} />
           <Skeleton width="90%" height={20} style={styles.description} />
           <Skeleton width="80%" height={20} style={styles.descriptionLine} />
@@ -43,18 +52,11 @@ const WalletSkeleton = () => {
         {/* Features Preview */}
         <View style={styles.featuresContainer}>
           <Skeleton width={120} height={24} style={styles.featuresTitle} />
-          
+
           {[1, 2, 3].map((_, index) => (
-            <View 
-              key={index} 
-              style={[
-                styles.featureItem, 
-                { 
-                  backgroundColor: theme.colors.elevation.level1,
-                  borderColor: theme.colors.outline,
-                  borderRadius: 24,
-                }
-              ]}
+            <View
+              key={index}
+              style={featureItemStyle}
             >
               <Skeleton width={48} height={48} borderRadius={12} />
               <View style={styles.featureText}>
@@ -127,6 +129,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 1,
     gap: 16,
+    borderRadius: 24,
   },
   featureText: {
     flex: 1,

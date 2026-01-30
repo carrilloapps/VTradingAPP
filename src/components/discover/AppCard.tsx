@@ -43,7 +43,7 @@ const AppCard: React.FC<AppCardProps> = ({ app, onPress }) => {
       return (
         <Image
           source={{ uri: app.logoUri }}
-          style={[styles.remoteLogo, app.useTint ? { tintColor: accentColor } : null]}
+          style={[styles.remoteLogo, app.useTint && { tintColor: accentColor }]}
           resizeMode="contain"
         />
       );
@@ -69,7 +69,7 @@ const AppCard: React.FC<AppCardProps> = ({ app, onPress }) => {
   return (
     <TouchableRipple
       onPress={handlePress}
-      style={{ borderRadius: theme.roundness * 3 }}
+      style={[styles.ripple, { borderRadius: theme.roundness * 3 }]}
       borderless
       accessibilityRole="button"
       accessibilityLabel={`App ${app.name}`}
@@ -99,6 +99,8 @@ const AppCard: React.FC<AppCardProps> = ({ app, onPress }) => {
 };
 
 const styles = StyleSheet.create({
+  ripple: {
+  },
   container: {
     flex: 1,
     aspectRatio: 1,

@@ -19,6 +19,21 @@ import { analyticsService } from '../../services/firebase/AnalyticsService';
 import { useToastStore } from '../../stores/toastStore';
 import { shareTextContent } from '../../utils/ShareUtils';
 
+const ListFooter = ({ hasMore, postsLength, theme }: { hasMore: boolean; postsLength: number; theme: any }) => {
+  if (hasMore) {
+    return <ActivityIndicator style={styles.footerLoader} color={theme.colors.primary} />;
+  }
+  if (postsLength > 0) {
+    return (
+      <View style={styles.endContainer}>
+        <View style={[styles.endDash, { backgroundColor: theme.colors.outlineVariant }]} />
+        <Text variant="labelLarge" style={styles.endText}>HAS LLEGADO AL FINAL</Text>
+      </View>
+    );
+  }
+  return null;
+};
+
 const TagDetailScreen = () => {
   const theme = useAppTheme();
   const route = useRoute();
@@ -37,7 +52,7 @@ const TagDetailScreen = () => {
   const viewShotRef = React.useRef<any>(null);
   const [isShareDialogVisible, setShareDialogVisible] = useState(false);
   const [shareFormat, setShareFormat] = useState<'1:1' | '16:9'>('1:1');
-  const [sharing, setSharing] = useState(false);
+  const [, setSharing] = useState(false);
   const showToast = useToastStore((state) => state.showToast);
 
   useEffect(() => {
@@ -62,15 +77,15 @@ const TagDetailScreen = () => {
           setPosts(fetchedPosts);
           setHasMore(fetchedPosts.length === 10);
         }
-      } catch (error) {
-        observabilityService.captureError(error, { context: 'TagDetailScreen.fetchData', slug });
+      } catch (err) {
+        observabilityService.captureError(err, { context: 'TagDetailScreen.fetchData', slug });
       } finally {
         setLoading(false);
       }
     };
 
     fetchTagAndPosts();
-  }, [slug]);
+  }, [slug, tag]);
 
   const handleRefresh = async () => {
     if (!tag) return;
@@ -80,8 +95,8 @@ const TagDetailScreen = () => {
       setPosts(fetchedPosts);
       setPage(1);
       setHasMore(fetchedPosts.length === 10);
-    } catch (error) {
-      observabilityService.captureError(error, { context: 'TagDetailScreen.refresh' });
+    } catch (err) {
+      observabilityService.captureError(err, { context: 'TagDetailScreen.refresh' });
     } finally {
       setRefreshing(false);
     }
@@ -99,22 +114,8 @@ const TagDetailScreen = () => {
       } else {
         setHasMore(false);
       }
-    } catch (error) {
-      observabilityService.captureError(error, { context: 'TagDetailScreen.loadMore' });
-    }
-  };
-
-  const formatDate = (dateString?: string) => {
-    if (!dateString) return '---';
-    try {
-      const date = new Date(dateString);
-      return new Intl.DateTimeFormat('es-ES', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric'
-      }).format(date);
-    } catch (e) {
-      return '---';
+    } catch (err) {
+      observabilityService.captureError(err, { context: 'TagDetailScreen.loadMore' });
     }
   };
 
@@ -122,9 +123,9 @@ const TagDetailScreen = () => {
     setShareDialogVisible(false);
     setShareFormat(format);
     setSharing(true);
-    showToast('Generando imagen, por favor espera...', 'info');
 
     // Wait for render
+    showToast('Generando imagen, por favor espera...', 'info');
     await new Promise(resolve => setTimeout(() => resolve(null), 500));
 
     if (viewShotRef.current) {
@@ -189,8 +190,29 @@ const TagDetailScreen = () => {
     );
   };
 
+  const containerStyle = [styles.container, { backgroundColor: theme.colors.background }];
+  const dialogDescriptionStyle = [styles.dialogDescription, { color: theme.colors.onSurfaceVariant }];
+
+  const renderArticle = ({ item, index }: { item: FormattedPost; index: number }) => (
+    <ArticleCard
+      article={item}
+      onPress={() => navigation.navigate('ArticleDetail', { article: item })}
+      variant={index === 0 ? 'featured' : 'compact'}
+    />
+  );
+
+  const renderFooter = () => (
+    <ListFooter hasMore={hasMore} postsLength={posts.length} theme={theme} />
+  );
+
+  const renderEmpty = () => (
+    !loading ? (
+      <DiscoverEmptyView message="No hay artículos con esta etiqueta" icon="tag-off-outline" />
+    ) : null
+  );
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={containerStyle}>
       <StatusBar barStyle={theme.dark ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
 
       <DiscoverHeader
@@ -228,13 +250,7 @@ const TagDetailScreen = () => {
             [{ nativeEvent: { contentOffset: { y: scrollY } } }],
             { useNativeDriver: true }
           )}
-          renderItem={({ item, index }) => (
-            <ArticleCard
-              article={item}
-              onPress={() => navigation.navigate('ArticleDetail', { article: item })}
-              variant={index === 0 ? 'featured' : 'compact'}
-            />
-          )}
+          renderItem={renderArticle}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={renderHeader}
           contentContainerStyle={styles.listContent}
@@ -242,21 +258,8 @@ const TagDetailScreen = () => {
           refreshing={refreshing}
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
-          ListFooterComponent={() => (
-            hasMore ? (
-              <ActivityIndicator style={{ marginVertical: 32 }} color={theme.colors.primary} />
-            ) : posts.length > 0 ? (
-              <View style={styles.endContainer}>
-                <View style={[styles.endDash, { backgroundColor: theme.colors.outlineVariant }]} />
-                <Text variant="labelLarge" style={styles.endText}>HAS LLEGADO AL FINAL</Text>
-              </View>
-            ) : null
-          )}
-          ListEmptyComponent={
-            !loading ? (
-              <DiscoverEmptyView message="No hay artículos con esta etiqueta" icon="tag-off-outline" />
-            ) : null
-          }
+          ListFooterComponent={renderFooter}
+          ListEmptyComponent={renderEmpty}
         />
       )}
       <CustomDialog
@@ -267,10 +270,10 @@ const TagDetailScreen = () => {
         confirmLabel="Cerrar"
         onConfirm={() => setShareDialogVisible(false)}
       >
-        <Text variant="bodyMedium" style={{ textAlign: 'center', marginBottom: 20, color: theme.colors.onSurfaceVariant }}>
+        <Text variant="bodyMedium" style={dialogDescriptionStyle}>
           Selecciona el formato ideal para compartir en tus redes sociales
         </Text>
-        <View style={{ gap: 12 }}>
+        <View style={styles.dialogActions}>
           <CustomButton
             variant="primary"
             label="Imagen cuadrada"
@@ -330,6 +333,16 @@ const styles = StyleSheet.create({
     opacity: 0.3,
     letterSpacing: 2,
     fontWeight: '900',
+  },
+  footerLoader: {
+    marginVertical: 32,
+  },
+  dialogDescription: {
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  dialogActions: {
+    gap: 12,
   },
 });
 

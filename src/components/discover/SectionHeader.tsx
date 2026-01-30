@@ -23,30 +23,42 @@ const SectionHeader = ({
     hideAccent = false
 }: SectionHeaderProps) => {
     const theme = useAppTheme();
+
+    const containerStyle = [
+        styles.listHeader,
+        { paddingHorizontal },
+        center && styles.justifyCenter
+    ];
+
+    const accentStyle = [
+        styles.accent,
+        { backgroundColor: theme.colors.primary }
+    ];
+
+    const titleStyle = [
+        styles.sectionTitle,
+        variant === 'primary' ? styles.primaryText : styles.secondaryText,
+        {
+            color: variant === 'primary' ? theme.colors.onSurface : theme.colors.onSurfaceVariant,
+            textAlign: (center ? 'center' : 'left') as 'center' | 'left' | 'right' | 'justify',
+        },
+        center && styles.flex1
+    ];
+
+    const actionTextStyle = [
+        styles.actionText,
+        { color: theme.colors.primary }
+    ];
+
     return (
-        <View style={[
-            styles.listHeader,
-            { paddingHorizontal },
-            center && { justifyContent: 'center' }
-        ]}>
+        <View style={containerStyle}>
             <View style={styles.titleWrapper}>
                 {(variant === 'primary' && !center && !hideAccent) && (
-                    <View style={[styles.accent, { backgroundColor: theme.colors.primary }]} />
+                    <View style={accentStyle} />
                 )}
                 <Text
                     variant={variant === 'primary' ? 'headlineSmall' : 'labelMedium'}
-                    style={[
-                        styles.sectionTitle,
-                        {
-                            color: variant === 'primary' ? theme.colors.onSurface : theme.colors.onSurfaceVariant,
-                            fontWeight: '900',
-                            textTransform: variant === 'secondary' ? 'uppercase' : 'none',
-                            letterSpacing: variant === 'secondary' ? 2 : -0.75,
-                            opacity: variant === 'secondary' ? 0.7 : 1,
-                            flex: center ? 1 : undefined,
-                            textAlign: center ? 'center' : 'left',
-                        }
-                    ]}
+                    style={titleStyle}
                 >
                     {title}
                 </Text>
@@ -56,15 +68,12 @@ const SectionHeader = ({
                 <TouchableRipple
                     onPress={onViewAll}
                     borderless
-                    style={{ borderRadius: 12 }}
+                    style={styles.ripple}
                 >
                     <View style={styles.actionRow}>
                         <Text
                             variant="labelLarge"
-                            style={{
-                                color: theme.colors.primary,
-                                fontWeight: '700'
-                            }}
+                            style={actionTextStyle}
                         >
                             Ver todo
                         </Text>
@@ -84,8 +93,28 @@ const styles = StyleSheet.create({
         marginTop: 24,
         marginBottom: 12,
     },
+    justifyCenter: {
+        justifyContent: 'center',
+    },
     sectionTitle: {
-        // fontWeight handled in component to allow for variant switching
+        fontWeight: '900',
+    },
+    primaryText: {
+        letterSpacing: -0.75,
+    },
+    secondaryText: {
+        textTransform: 'uppercase',
+        letterSpacing: 2,
+        opacity: 0.7,
+    },
+    flex1: {
+        flex: 1,
+    },
+    ripple: {
+        borderRadius: 12,
+    },
+    actionText: {
+        fontWeight: '700',
     },
     titleWrapper: {
         flexDirection: 'row',

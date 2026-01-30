@@ -14,9 +14,9 @@ interface StockShareGraphicProps {
   aspectRatio?: '1:1' | '16:9';
 }
 
-const StockShareGraphic: React.FC<StockShareGraphicProps> = ({ 
-  viewShotRef, 
-  stock, 
+const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
+  viewShotRef,
+  stock,
   lastUpdated,
   isPremium = false,
   aspectRatio = '1:1'
@@ -29,7 +29,7 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
   const isPositive = trend === 'up';
 
   const isVertical = aspectRatio === '16:9';
-  
+
   // Dynamic sizes based on aspect ratio
   const platformIconSize = isVertical ? 18 : 14;
   const platformTextSize = isVertical ? 11 : 9;
@@ -56,35 +56,35 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
   const footerTextSize = isVertical ? 11 : 9;
 
   const previousClose = stock.price - (stock.changeAmount || 0);
-  const averagePrice = (stock.volumeAmount && stock.volumeShares) 
-    ? (stock.volumeAmount / stock.volumeShares) 
+  const averagePrice = (stock.volumeAmount && stock.volumeShares)
+    ? (stock.volumeAmount / stock.volumeShares)
     : 0;
 
   const formatCompactNumber = (num: number, isCurrency: boolean = false) => {
     if (num >= 1000000) {
-       if (num >= 1000000000) {
-          return (num / 1000000000).toLocaleString('es-VE', { maximumFractionDigits: 2 }) + 'b';
-       }
-       return (num / 1000000).toLocaleString('es-VE', { maximumFractionDigits: 2 }) + 'm';
+      if (num >= 1000000000) {
+        return (num / 1000000000).toLocaleString('es-VE', { maximumFractionDigits: 2 }) + 'b';
+      }
+      return (num / 1000000).toLocaleString('es-VE', { maximumFractionDigits: 2 }) + 'm';
     }
-    return num.toLocaleString('es-VE', { 
-        minimumFractionDigits: isCurrency ? 2 : 0, 
-        maximumFractionDigits: 2 
+    return num.toLocaleString('es-VE', {
+      minimumFractionDigits: isCurrency ? 2 : 0,
+      maximumFractionDigits: 2
     });
   };
 
   return (
     <View style={styles.hiddenTemplate} pointerEvents="none">
       <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 1.0 }}>
-        <LinearGradient 
-          colors={theme.dark ? ['#051911', '#0A0A0A'] : ['#F0FDF4', '#FFFFFF']} 
+        <LinearGradient
+          colors={theme.dark ? ['#051911', '#0A0A0A'] : ['#F0FDF4', '#FFFFFF']}
           style={[
-            styles.shareTemplate, 
+            styles.shareTemplate,
             isVertical ? styles.shareTemplateVertical : styles.shareTemplateSquare
           ]}
         >
           {/* Decorative Elements */}
-          <View style={[styles.templateGlow, { backgroundColor: theme.colors.primary, opacity: 0.05 }]} />
+          <View style={[styles.templateGlow, { backgroundColor: theme.colors.primary }]} />
 
           {/* Platform Badges */}
           <View style={styles.platformBadgesContainer}>
@@ -92,7 +92,7 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
               <Icon source="google-play" size={platformIconSize} color={theme.colors.onSurfaceVariant} />
               <Text style={[styles.platformText, { color: theme.colors.onSurfaceVariant, fontSize: platformTextSize }]}>Android</Text>
             </Surface>
-            <View style={{ flex: 1 }} />
+            <View style={styles.flex1} />
             <Surface style={[styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }]} elevation={1}>
               <Icon source="apple" size={platformIconSize} color={theme.colors.onSurfaceVariant} />
               <Text style={[styles.platformText, { color: theme.colors.onSurfaceVariant, fontSize: platformTextSize }]}>iOS</Text>
@@ -102,8 +102,8 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
           {/* Header */}
           <View style={styles.templateHeader}>
             <View style={styles.logoAndBadgeRow}>
-              <Image 
-                source={require('../../assets/images/logotipo.png')} 
+              <Image
+                source={require('../../assets/images/logotipo.png')}
                 style={[styles.templateMainLogo, { tintColor: theme.dark ? undefined : theme.colors.primary, width: logoWidth, height: logoHeight }]}
                 resizeMode="contain"
               />
@@ -113,7 +113,7 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
                 </Surface>
               )}
             </View>
-            <View style={[styles.templateUrlBadge, { backgroundColor: theme.colors.primary + '15', marginBottom: 8 }]}>
+            <View style={[styles.templateUrlBadge, { backgroundColor: theme.colors.primary + '15' }]}>
               <Text style={[styles.templateUrlText, { color: theme.colors.primary, fontSize: urlTextSize }]}>vtrading.app</Text>
             </View>
             <View style={styles.templateDateBox}>
@@ -123,82 +123,82 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
               </Text>
             </View>
           </View>
-          
+
           {/* Content */}
-          <View style={[styles.templateContent, isVertical && { flex: 1, justifyContent: 'center', gap: 32 }]}>
-            <Surface style={[styles.mainCard, isVertical && styles.mainCardVertical, { backgroundColor: theme.dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)', borderColor: theme.colors.outlineVariant }]} elevation={0}>
-                {/* Stock Identification */}
-                <View style={styles.stockIdentityRow}>
-                    <View style={[styles.stockIconContainer, { backgroundColor: stock.iconUrl ? '#FFFFFF' : trendColor + '20', width: iconContainerSize, height: iconContainerSize }]}>
-                        {stock.iconUrl ? (
-                            <Image 
-                                source={{ uri: stock.iconUrl }} 
-                                style={styles.stockIconImage}
-                                resizeMode="contain"
-                            />
-                        ) : stock.initials ? (
-                            <Text style={[styles.stockInitialsText, { color: trendColor, fontSize: initialsTextSize }]}>{stock.initials}</Text>
-                        ) : (
-                            <Icon source="chart-box-outline" size={iconSize} color={trendColor} />
-                        )}
-                    </View>
-                    <View>
-                        <Text style={[styles.stockSymbolLabel, { color: theme.colors.onSurface, fontSize: symbolTextSize }]}>{stock.symbol}</Text>
-                        <Text style={[styles.stockNameLabel, { color: theme.colors.onSurfaceVariant, fontSize: nameTextSize }]}>{stock.name}</Text>
-                    </View>
+          <View style={[styles.templateContent, isVertical && styles.flex1Gap32]}>
+            <Surface style={[styles.mainCard, isVertical && styles.mainCardVertical, theme.dark ? styles.mainCardDark : styles.mainCardLight, { borderColor: theme.colors.outlineVariant }]} elevation={0}>
+              {/* Stock Identification */}
+              <View style={styles.stockIdentityRow}>
+                <View style={[styles.stockIconContainer, { width: iconContainerSize, height: iconContainerSize }, stock.iconUrl ? styles.bgWhite : { backgroundColor: trendColor + '20' }]}>
+                  {stock.iconUrl ? (
+                    <Image
+                      source={{ uri: stock.iconUrl }}
+                      style={styles.stockIconImage}
+                      resizeMode="contain"
+                    />
+                  ) : stock.initials ? (
+                    <Text style={[styles.stockInitialsText, { color: trendColor, fontSize: initialsTextSize }]}>{stock.initials}</Text>
+                  ) : (
+                    <Icon source="chart-box-outline" size={iconSize} color={trendColor} />
+                  )}
                 </View>
-
-                <View style={styles.priceSection}>
-                    <View style={styles.valueRow}>
-                        <Text style={[styles.mainValueText, { fontSize: mainValueSize, color: theme.colors.onSurface }]}>
-                            {stock.price.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                        </Text>
-                        <View style={[styles.labelColumn, { height: mainValueSize }]}>
-                            <Text style={[styles.currencyText, { color: theme.colors.onSurfaceVariant, fontSize: currencySize }]}>Bs.</Text>
-                            <View style={[styles.trendBadge, { backgroundColor: trendColor + '15' }]}>
-                                <Icon source={trendIcon} size={trendIconSize} color={trendColor} />
-                                <Text style={[styles.trendPercentText, { color: trendColor, fontSize: trendTextSize }]}>
-                                    {isPositive ? '+' : ''}{stock.changePercent.toFixed(2)}%
-                                </Text>
-                            </View>
-                        </View>
-                    </View>
-                    {stock.changeAmount !== undefined && (
-                        <Text style={[styles.changeAmountSub, { color: trendColor, fontSize: changeAmountSize }]}>
-                            {isPositive ? '+' : ''}{stock.changeAmount.toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bs. hoy
-                        </Text>
-                    )}
+                <View>
+                  <Text style={[styles.stockSymbolLabel, { color: theme.colors.onSurface, fontSize: symbolTextSize }]}>{stock.symbol}</Text>
+                  <Text style={[styles.stockNameLabel, { color: theme.colors.onSurfaceVariant, fontSize: nameTextSize }]}>{stock.name}</Text>
                 </View>
+              </View>
 
-                {/* Extra Stats for vertical format */}
-                {isVertical && (
-                    <View style={styles.statsGrid}>
-                        <View style={styles.statItem}>
-                            <Text style={[styles.statLabel, { fontSize: statLabelSize }]}>CIERRE ANTERIOR</Text>
-                            <Text style={[styles.statValue, { fontSize: statValueSize }]}>{previousClose.toLocaleString('es-VE', { minimumFractionDigits: 2 })} <Text style={[styles.statCurrency, { fontSize: statCurrencySize }]}>Bs.</Text></Text>
-                        </View>
-                        <View style={styles.statItem}>
-                            <Text style={[styles.statLabel, { fontSize: statLabelSize }]}>PRECIO PROMEDIO</Text>
-                            <Text style={[styles.statValue, { fontSize: statValueSize }]}>{averagePrice ? averagePrice.toLocaleString('es-VE', { minimumFractionDigits: 2 }) : '--'} <Text style={[styles.statCurrency, { fontSize: statCurrencySize }]}>Bs.</Text></Text>
-                        </View>
-                        <View style={styles.statItem}>
-                            <Text style={[styles.statLabel, { fontSize: statLabelSize }]}>VOLUMEN TÍTULOS</Text>
-                            <Text style={[styles.statValue, { fontSize: statValueSize }]}>{stock.volumeShares ? formatCompactNumber(stock.volumeShares) : stock.volume || '--'}</Text>
-                        </View>
-                        <View style={styles.statItem}>
-                            <Text style={[styles.statLabel, { fontSize: statLabelSize }]}>VOLUMEN EFECTIVO</Text>
-                            <Text style={[styles.statValue, { fontSize: statValueSize }]}>{stock.volumeAmount ? formatCompactNumber(stock.volumeAmount, true) : '--'} <Text style={[styles.statCurrency, { fontSize: statCurrencySize }]}>Bs.</Text></Text>
-                        </View>
+              <View style={styles.priceSection}>
+                <View style={styles.valueRow}>
+                  <Text style={[styles.mainValueText, { fontSize: mainValueSize, color: theme.colors.onSurface }]}>
+                    {stock.price.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </Text>
+                  <View style={[styles.labelColumn, { height: mainValueSize }]}>
+                    <Text style={[styles.currencyText, { color: theme.colors.onSurfaceVariant, fontSize: currencySize }]}>Bs.</Text>
+                    <View style={[styles.trendBadge, { backgroundColor: trendColor + '15' }]}>
+                      <Icon source={trendIcon} size={trendIconSize} color={trendColor} />
+                      <Text style={[styles.trendPercentText, { color: trendColor, fontSize: trendTextSize }]}>
+                        {isPositive ? '+' : ''}{stock.changePercent.toFixed(2)}%
+                      </Text>
                     </View>
+                  </View>
+                </View>
+                {stock.changeAmount !== undefined && (
+                  <Text style={[styles.changeAmountSub, { color: trendColor, fontSize: changeAmountSize }]}>
+                    {isPositive ? '+' : ''}{stock.changeAmount.toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bs. hoy
+                  </Text>
                 )}
+              </View>
+
+              {/* Extra Stats for vertical format */}
+              {isVertical && (
+                <View style={styles.statsGrid}>
+                  <View style={styles.statItem}>
+                    <Text style={[styles.statLabel, { fontSize: statLabelSize }]}>CIERRE ANTERIOR</Text>
+                    <Text style={[styles.statValue, { fontSize: statValueSize }]}>{previousClose.toLocaleString('es-VE', { minimumFractionDigits: 2 })} <Text style={[styles.statCurrency, { fontSize: statCurrencySize }]}>Bs.</Text></Text>
+                  </View>
+                  <View style={styles.statItem}>
+                    <Text style={[styles.statLabel, { fontSize: statLabelSize }]}>PRECIO PROMEDIO</Text>
+                    <Text style={[styles.statValue, { fontSize: statValueSize }]}>{averagePrice ? averagePrice.toLocaleString('es-VE', { minimumFractionDigits: 2 }) : '--'} <Text style={[styles.statCurrency, { fontSize: statCurrencySize }]}>Bs.</Text></Text>
+                  </View>
+                  <View style={styles.statItem}>
+                    <Text style={[styles.statLabel, { fontSize: statLabelSize }]}>VOLUMEN TÍTULOS</Text>
+                    <Text style={[styles.statValue, { fontSize: statValueSize }]}>{stock.volumeShares ? formatCompactNumber(stock.volumeShares) : stock.volume || '--'}</Text>
+                  </View>
+                  <View style={styles.statItem}>
+                    <Text style={[styles.statLabel, { fontSize: statLabelSize }]}>VOLUMEN EFECTIVO</Text>
+                    <Text style={[styles.statValue, { fontSize: statValueSize }]}>{stock.volumeAmount ? formatCompactNumber(stock.volumeAmount, true) : '--'} <Text style={[styles.statCurrency, { fontSize: statCurrencySize }]}>Bs.</Text></Text>
+                  </View>
+                </View>
+              )}
             </Surface>
           </View>
-          
+
           {/* Footer */}
           <View style={styles.templateFooter}>
-            <LinearGradient 
-              colors={[theme.colors.primary + '00', theme.colors.primary + '10', theme.colors.primary + '00']} 
-              start={{x: 0, y: 0}} end={{x: 1, y: 0}}
+            <LinearGradient
+              colors={[theme.colors.primary + '00', theme.colors.primary + '10', theme.colors.primary + '00']}
+              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
               style={styles.templateDivider}
             />
             <View style={styles.templateFooterRow}>
@@ -208,9 +208,9 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
               </Text>
             </View>
           </View>
-        </LinearGradient>
-      </ViewShot>
-    </View>
+        </LinearGradient >
+      </ViewShot >
+    </View >
   );
 };
 
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
   },
   shareTemplateVertical: {
     width: 600,
-    height: 1066, 
+    height: 1066,
     paddingVertical: 100,
     paddingHorizontal: 40,
   },
@@ -245,7 +245,15 @@ const styles = StyleSheet.create({
     width: 300,
     height: 300,
     borderRadius: 150,
-    backgroundColor: 'white', 
+    opacity: 0.05,
+  },
+  flex1: {
+    flex: 1,
+  },
+  flex1Gap32: {
+    flex: 1,
+    justifyContent: 'center',
+    gap: 32,
   },
   templateHeader: {
     alignItems: 'center',
@@ -285,7 +293,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 5,
     paddingVertical: 1,
     borderRadius: 4,
-    marginLeft: -8, 
+    marginLeft: -8,
     marginTop: -2,
   },
   freeBadgeText: {
@@ -298,6 +306,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     borderWidth: 1,
     borderColor: 'rgba(128,128,128,0.1)',
+    marginBottom: 8,
   },
   templateUrlText: {
     fontWeight: '900',
@@ -438,6 +447,15 @@ const styles = StyleSheet.create({
   templateFooterText: {
     fontWeight: '900',
     letterSpacing: 1.2,
+  },
+  mainCardDark: {
+    backgroundColor: 'rgba(255,255,255,0.03)',
+  },
+  mainCardLight: {
+    backgroundColor: 'rgba(0,0,0,0.02)',
+  },
+  bgWhite: {
+    backgroundColor: '#FFFFFF',
   }
 });
 

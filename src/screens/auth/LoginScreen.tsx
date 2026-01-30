@@ -169,7 +169,7 @@ const LoginScreen = ({ navigation }: any) => {
       />
       <KeyboardAvoidingView 
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        style={{ flex: 1 }}
+        style={styles.flex1}
       >
         <ScrollView 
           contentContainerStyle={[
@@ -254,7 +254,7 @@ const LoginScreen = ({ navigation }: any) => {
                 label="¿Olvidaste tu contraseña?"
                 variant="link"
                 onPress={() => navigation.navigate('ForgotPassword')}
-                style={{ alignSelf: 'flex-end', marginBottom: theme.spacing.m }}
+                style={[styles.forgotLink, { marginBottom: theme.spacing.m }]}
                 disabled={isBusy}
               />
             </View>
@@ -305,17 +305,17 @@ const LoginScreen = ({ navigation }: any) => {
             </View>
             
             <View style={[styles.legal, { marginTop: theme.spacing.m }]}>
-              <Text variant="bodySmall" style={[themeStyles.legalText, { textAlign: 'center' }]}>
+              <Text variant="bodySmall" style={[themeStyles.legalText, styles.legalText]}>
                 Al continuar aceptas nuestras{' '}
                 <Text
-                  style={{ color: theme.colors.primary, fontWeight: 'bold' }}
+                  style={[styles.linkText, { color: theme.colors.primary }]}
                   onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL, 'Políticas de privacidad')}
                 >
                   Políticas de privacidad
                 </Text>
                 {' y '}
                 <Text
-                  style={{ color: theme.colors.primary, fontWeight: 'bold' }}
+                  style={[styles.linkText, { color: theme.colors.primary }]}
                   onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL, 'Términos y condiciones')}
                 >
                   Términos y condiciones
@@ -337,6 +337,9 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
   },
+  flex1: {
+    flex: 1,
+  },
   container: {
     flexGrow: 1,
     // justifyContent: 'center',
@@ -356,6 +359,15 @@ const styles = StyleSheet.create({
   },
   forgotPassword: {
     alignItems: 'flex-end',
+  },
+  forgotLink: {
+    alignSelf: 'flex-end',
+  },
+  legalText: {
+    textAlign: 'center',
+  },
+  linkText: {
+    fontWeight: 'bold',
   },
   divider: {
     flexDirection: 'row',

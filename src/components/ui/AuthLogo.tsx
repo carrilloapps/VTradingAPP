@@ -10,30 +10,29 @@ interface AuthLogoProps {
   containerStyle?: ViewStyle;
 }
 
-const AuthLogo: React.FC<AuthLogoProps> = ({ 
-  size = 80, 
-  showBadge = true, 
+const AuthLogo: React.FC<AuthLogoProps> = ({
+  size = 80,
+  showBadge = true,
   tintColor,
-  containerStyle 
+  containerStyle
 }) => {
   const theme = useAppTheme();
   const resolvedTintColor = tintColor || (theme.dark ? undefined : '#212121');
 
   return (
     <View style={[styles.logoRow, containerStyle]}>
-      <Image 
-        source={require('../../assets/images/logo.png')} 
+      <Image
+        source={require('../../assets/images/logo.png')}
         style={[
-          styles.logo, 
-          { width: size, height: size },
-          resolvedTintColor ? { tintColor: resolvedTintColor } : null
-        ] as ImageStyle[]} 
+          styles.logo,
+          { width: size, height: size, tintColor: resolvedTintColor || undefined }
+        ] as ImageStyle[]}
       />
       {showBadge && (
         <View
           style={[
-            styles.badge, 
-            { 
+            styles.badge,
+            {
               backgroundColor: theme.colors.elevation.level2,
               borderColor: theme.colors.warning,
               marginLeft: theme.spacing.m,
@@ -41,8 +40,8 @@ const AuthLogo: React.FC<AuthLogoProps> = ({
           ]}
           accessibilityLabel="BETA"
         >
-          <Text 
-            variant="labelSmall" 
+          <Text
+            variant="labelSmall"
             style={[styles.badgeText, { color: theme.colors.warning }]}
           >
             BETA

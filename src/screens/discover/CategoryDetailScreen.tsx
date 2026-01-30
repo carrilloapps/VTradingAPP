@@ -19,6 +19,21 @@ import { analyticsService } from '../../services/firebase/AnalyticsService';
 import { useToastStore } from '../../stores/toastStore';
 import { shareTextContent } from '../../utils/ShareUtils';
 
+const ListFooter = ({ hasMore, postsLength, theme }: { hasMore: boolean; postsLength: number; theme: any }) => {
+  if (hasMore) {
+    return <ActivityIndicator style={styles.footerLoader} color={theme.colors.primary} />;
+  }
+  if (postsLength > 0) {
+    return (
+      <View style={styles.endContainer}>
+        <View style={[styles.endLine, { backgroundColor: theme.colors.outlineVariant }]} />
+        <Text variant="labelLarge" style={styles.endText}>HAS LLEGADO AL FINAL</Text>
+      </View>
+    );
+  }
+  return null;
+};
+
 const CategoryDetailScreen = () => {
   const theme = useAppTheme();
   const route = useRoute();
@@ -37,7 +52,7 @@ const CategoryDetailScreen = () => {
   const viewShotRef = React.useRef<any>(null);
   const [isShareDialogVisible, setShareDialogVisible] = useState(false);
   const [shareFormat, setShareFormat] = useState<'1:1' | '16:9'>('1:1');
-  const [sharing, setSharing] = useState(false);
+  const [, setSharing] = useState(false);
   const showToast = useToastStore((state) => state.showToast);
 
   useEffect(() => {
@@ -62,15 +77,15 @@ const CategoryDetailScreen = () => {
           setPosts(fetchedPosts);
           setHasMore(fetchedPosts.length === 10);
         }
-      } catch (error) {
-        observabilityService.captureError(error, { context: 'CategoryDetailScreen.fetchData', slug });
+      } catch (err) {
+        observabilityService.captureError(err, { context: 'CategoryDetailScreen.fetchData', slug });
       } finally {
         setLoading(false);
       }
     };
 
     fetchCategoryAndPosts();
-  }, [slug]);
+  }, [slug, category]);
 
   const handleRefresh = async () => {
     if (!category) return;
@@ -81,8 +96,8 @@ const CategoryDetailScreen = () => {
       setPage(1);
       setRefreshing(false);
       setHasMore(fetchedPosts.length === 10);
-    } catch (error) {
-      observabilityService.captureError(error, { context: 'CategoryDetailScreen.refresh' });
+    } catch (err) {
+      observabilityService.captureError(err, { context: 'CategoryDetailScreen.refresh' });
       setRefreshing(false);
     }
   };
@@ -99,8 +114,8 @@ const CategoryDetailScreen = () => {
       } else {
         setHasMore(false);
       }
-    } catch (error) {
-      observabilityService.captureError(error, { context: 'CategoryDetailScreen.loadMore' });
+    } catch (err) {
+      observabilityService.captureError(err, { context: 'CategoryDetailScreen.loadMore' });
     }
   };
 
@@ -126,9 +141,9 @@ const CategoryDetailScreen = () => {
     setShareDialogVisible(false);
     setShareFormat(format);
     setSharing(true);
-    showToast('Generando imagen, por favor espera...', 'info');
 
     // Wait for render
+    showToast('Generando imagen, por favor espera...', 'info');
     await new Promise(resolve => setTimeout(() => resolve(null), 500));
 
     if (viewShotRef.current) {
@@ -175,8 +190,29 @@ const CategoryDetailScreen = () => {
     analyticsService.logShare('category_detail', category?.id.toString() || 'unknown', 'text');
   };
 
+  const containerStyle = [styles.container, { backgroundColor: theme.colors.background }];
+  const dialogDescriptionStyle = [styles.dialogDescription, { color: theme.colors.onSurfaceVariant }];
+
+  const renderArticle = ({ item, index }: { item: FormattedPost; index: number }) => (
+    <ArticleCard
+      article={item}
+      onPress={() => navigation.navigate('ArticleDetail', { article: item })}
+      variant={index === 0 ? 'featured' : 'compact'}
+    />
+  );
+
+  const renderFooter = () => (
+    <ListFooter hasMore={hasMore} postsLength={posts.length} theme={theme} />
+  );
+
+  const renderEmpty = () => (
+    !loading ? (
+      <DiscoverEmptyView message="No hay artículos en esta categoría" />
+    ) : null
+  );
+
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={containerStyle}>
       <StatusBar barStyle={theme.dark ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
 
       <DiscoverHeader
@@ -214,13 +250,7 @@ const CategoryDetailScreen = () => {
             [{ nativeEvent: { contentOffset: { y: scrollY } } }],
             { useNativeDriver: true }
           )}
-          renderItem={({ item, index }) => (
-            <ArticleCard
-              article={item}
-              onPress={() => navigation.navigate('ArticleDetail', { article: item })}
-              variant={index === 0 ? 'featured' : 'compact'}
-            />
-          )}
+          renderItem={renderArticle}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={renderHeader}
           contentContainerStyle={styles.listContent}
@@ -228,21 +258,8 @@ const CategoryDetailScreen = () => {
           refreshing={refreshing}
           onEndReached={loadMore}
           onEndReachedThreshold={0.5}
-          ListFooterComponent={() => (
-            hasMore ? (
-              <ActivityIndicator style={{ marginVertical: 32 }} color={theme.colors.primary} />
-            ) : posts.length > 0 ? (
-              <View style={styles.endContainer}>
-                <View style={[styles.endLine, { backgroundColor: theme.colors.outlineVariant }]} />
-                <Text variant="labelLarge" style={styles.endText}>HAS LLEGADO AL FINAL</Text>
-              </View>
-            ) : null
-          )}
-          ListEmptyComponent={
-            !loading ? (
-              <DiscoverEmptyView message="No hay artículos en esta categoría" />
-            ) : null
-          }
+          ListFooterComponent={renderFooter}
+          ListEmptyComponent={renderEmpty}
         />
       )}
       <CustomDialog
@@ -253,10 +270,10 @@ const CategoryDetailScreen = () => {
         confirmLabel="Cerrar"
         onConfirm={() => setShareDialogVisible(false)}
       >
-        <Text variant="bodyMedium" style={{ textAlign: 'center', marginBottom: 20, color: theme.colors.onSurfaceVariant }}>
+        <Text variant="bodyMedium" style={dialogDescriptionStyle}>
           Selecciona el formato ideal para compartir en tus redes sociales
         </Text>
-        <View style={{ gap: 12 }}>
+        <View style={styles.dialogActions}>
           <CustomButton
             variant="primary"
             label="Imagen cuadrada"
@@ -316,6 +333,16 @@ const styles = StyleSheet.create({
     opacity: 0.3,
     letterSpacing: 2,
     fontWeight: '900',
+  },
+  footerLoader: {
+    marginVertical: 32,
+  },
+  dialogDescription: {
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  dialogActions: {
+    gap: 12,
   },
 });
 

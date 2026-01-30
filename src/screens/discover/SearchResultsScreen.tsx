@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, StyleSheet, FlatList, ActivityIndicator, StatusBar, Keyboard, ScrollView, RefreshControl } from 'react-native';
-import { Text, useTheme, Button } from 'react-native-paper';
+import { View, StyleSheet, ActivityIndicator, StatusBar, Keyboard, ScrollView, RefreshControl } from 'react-native';
+import { FlashList } from '@shopify/flash-list';
+import { Text, Button } from 'react-native-paper';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { wordPressService, FormattedPost, WordPressCategory, WordPressTag } from '../../services/WordPressService';
 import { observabilityService } from '../../services/ObservabilityService';
@@ -14,6 +15,7 @@ import TagCloud from '../../components/discover/TagCloud';
 import AppRecommendations from '../../components/discover/AppRecommendations';
 import SectionHeader from '../../components/discover/SectionHeader';
 import DiscoverHeader from '../../components/discover/DiscoverHeader';
+import { useAppTheme } from '../../theme/theme';
 
 type SearchState = 'idle' | 'searching' | 'success' | 'error' | 'too_short';
 
@@ -24,8 +26,28 @@ const LAYOUT = {
   BOTTOM_PADDING: 40,
 };
 
+const ListHeader = ({ count, query, theme }: { count: number; query: string; theme: any }) => (
+  <Text variant="labelLarge" style={[styles.resultsCount, { color: theme.colors.onSurfaceVariant }]}>
+    {count} resultado{count !== 1 ? 's' : ''} para "{query}"
+  </Text>
+);
+
+const ListFooter = ({ loadingMore, hasMore, postsLength, theme }: { loadingMore: boolean; hasMore: boolean; postsLength: number; theme: any }) => {
+  if (loadingMore) {
+    return <ActivityIndicator style={styles.footerLoader} color={theme.colors.primary} />;
+  }
+  if (!hasMore && postsLength > 0) {
+    return (
+      <Text style={[styles.endOfResults, { color: theme.colors.onSurface }]}>
+        Fin de los resultados
+      </Text>
+    );
+  }
+  return null;
+};
+
 const SearchResultsScreen = () => {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const navigation = useNavigation<any>();
   const route = useRoute();
   const { initialQuery } = (route.params as any) || {};
@@ -71,9 +93,9 @@ const SearchResultsScreen = () => {
 
         setCategories(cats.slice(0, 5)); // Show top 5 categories
         setTrendingTags(tags.slice(0, 10)); // Top 10 tags
-      } catch (error) {
-        observabilityService.captureError(error, { context: 'SearchResultsScreen.fetchDiscoveryContent' });
-        console.error('[SearchResults] Failed to load discovery content:', error);
+      } catch (err) {
+        observabilityService.captureError(err, { context: 'SearchResultsScreen.fetchDiscoveryContent' });
+        console.error('[SearchResults] Failed to load discovery content:', err);
       } finally {
         setLoadingCategories(false);
         setLoadingTags(false);
@@ -120,9 +142,9 @@ const SearchResultsScreen = () => {
       setHasMore(results.length === 10);
       setPage(pageNum);
       setSearchState(results.length === 0 && pageNum === 1 ? 'success' : 'success');
-    } catch (error: any) {
-      const isNetworkError = error?.message?.toLowerCase().includes('network');
-      const is400Error = error?.message?.includes('400');
+    } catch (err: any) {
+      const isNetworkError = err?.message?.toLowerCase().includes('network');
+      const is400Error = err?.message?.includes('400');
 
       let userMessage = 'Error al buscar. Por favor, intenta de nuevo.';
 
@@ -137,7 +159,7 @@ const SearchResultsScreen = () => {
 
       // Only capture non-network errors to Sentry
       if (!isNetworkError) {
-        observabilityService.captureError(error, {
+        observabilityService.captureError(err, {
           context: 'SearchResultsScreen.executeSearch',
           query: trimmedQuery,
           pageNum
@@ -182,9 +204,9 @@ const SearchResultsScreen = () => {
       ]);
       setCategories(cats.slice(0, 5));
       setTrendingTags(tags.slice(0, 10));
-    } catch (error) {
-      observabilityService.captureError(error, { context: 'SearchResultsScreen.handleRefresh' });
-      console.error('[SearchResults] Refresh error:', error);
+    } catch (err) {
+      observabilityService.captureError(err, { context: 'SearchResultsScreen.handleRefresh' });
+      console.error('[SearchResults] Refresh error:', err);
     } finally {
       setRefreshing(false);
     }
@@ -207,11 +229,11 @@ const SearchResultsScreen = () => {
       setHasMore(results.length === 10);
       setPage(1);
       setSearchState('success');
-    } catch (error: any) {
-      console.error('[SearchResults] Category filter error:', error);
+    } catch (err: any) {
+      console.error('[SearchResults] Category filter error:', err);
       setSearchState('error');
       setErrorMessage('Error al buscar en esta categoría');
-      observabilityService.captureError(error, { context: 'SearchResultsScreen.handleCategoryPress' });
+      observabilityService.captureError(err, { context: 'SearchResultsScreen.handleCategoryPress' });
     }
   }, []);
 
@@ -243,13 +265,18 @@ const SearchResultsScreen = () => {
       setHasMore(results.length === 10);
       setPage(1);
       setSearchState('success');
-    } catch (error: any) {
-      console.error('[SearchResults] Tag filter error:', error);
+    } catch (err: any) {
+      console.error('[SearchResults] Tag filter error:', err);
       setSearchState('error');
       setErrorMessage('Error al buscar con este tag');
-      observabilityService.captureError(error, { context: 'SearchResultsScreen.handleTagPress' });
+      observabilityService.captureError(err, { context: 'SearchResultsScreen.handleTagPress' });
     }
   }, [trendingTags]);
+
+  const containerStyle = [styles.container, { backgroundColor: theme.colors.background }];
+  const helperTextStyle = [styles.helperText, { color: theme.colors.onSurfaceVariant }];
+  const retryButtonStyle = [styles.retryButton, { marginTop: 16 }];
+  const noTagsTextStyle = [styles.noTagsText, { color: theme.colors.onSurfaceVariant }];
 
   // Render discovery content (idle state)
   const renderDiscoveryContent = () => {
@@ -263,6 +290,7 @@ const SearchResultsScreen = () => {
             refreshing={refreshing}
             onRefresh={handleRefresh}
             colors={[theme.colors.primary]}
+            progressBackgroundColor={theme.colors.elevation.level3}
             tintColor={theme.colors.primary}
           />
         }
@@ -274,7 +302,7 @@ const SearchResultsScreen = () => {
         />
         <View style={styles.sectionContent}>
           {loadingCategories ? (
-            <View style={{ gap: 8, marginVertical: 8 }}>
+            <View style={styles.skeletonsContainer}>
               <Skeleton width="100%" height={60} borderRadius={12} />
               <Skeleton width="100%" height={60} borderRadius={12} />
               <Skeleton width="100%" height={60} borderRadius={12} />
@@ -297,7 +325,7 @@ const SearchResultsScreen = () => {
         />
         <View style={styles.sectionContent}>
           {loadingTags ? (
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginVertical: 8 }}>
+            <View style={styles.tagsSkeletonContainer}>
               <Skeleton width={80} height={32} borderRadius={16} />
               <Skeleton width={60} height={32} borderRadius={16} />
               <Skeleton width={90} height={32} borderRadius={16} />
@@ -309,7 +337,7 @@ const SearchResultsScreen = () => {
               onTagPress={handleTagPress}
             />
           ) : (
-            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, fontStyle: 'italic' }}>
+            <Text variant="bodySmall" style={noTagsTextStyle}>
               No hay tags disponibles
             </Text>
           )}
@@ -330,7 +358,7 @@ const SearchResultsScreen = () => {
     if (searchState === 'too_short') {
       return (
         <View style={styles.centered}>
-          <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}>
+          <Text variant="bodyLarge" style={helperTextStyle}>
             Escribe al menos 2 caracteres para buscar
           </Text>
         </View>
@@ -347,7 +375,7 @@ const SearchResultsScreen = () => {
           <Button
             mode="contained"
             onPress={handleRetry}
-            style={{ marginTop: 16 }}
+            style={retryButtonStyle}
           >
             Reintentar
           </Button>
@@ -358,12 +386,30 @@ const SearchResultsScreen = () => {
     return null;
   };
 
+  const renderArticle = ({ item }: { item: FormattedPost }) => (
+    <ArticleCard
+      article={item}
+      onPress={() => navigation.navigate('ArticleDetail', { article: item })}
+      variant="compact"
+    />
+  );
+
+  const renderSearchResultsHeader = () => (
+    <ListHeader count={posts.length} query={debouncedQuery} theme={theme} />
+  );
+
+  const renderSearchResultsFooter = () => (
+    <ListFooter loadingMore={loadingMore} hasMore={hasMore} postsLength={posts.length} theme={theme} />
+  );
+
   // Determine what to show
   const showDiscoveryContent = searchState === 'idle' && searchQuery.trim().length === 0;
-  const showSearchResults = posts.length > 0 && searchState === 'success';
+  const showSearchResults = posts.length > 0 && (searchState === 'success' || (searchState === 'searching' && page > 1));
+
+  const renderSkeleton = () => <ArticleSkeleton />;
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View style={containerStyle}>
       <StatusBar barStyle={theme.dark ? 'light-content' : 'dark-content'} />
       <DiscoverHeader
         variant="search"
@@ -379,44 +425,26 @@ const SearchResultsScreen = () => {
       />
 
       {searchState === 'searching' && page === 1 ? (
-        <FlatList
+        <FlashList
           data={[1, 2, 3, 4, 5]}
           keyExtractor={(item) => item.toString()}
-          renderItem={() => <ArticleSkeleton />}
+          renderItem={renderSkeleton}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
         />
       ) : showDiscoveryContent ? (
         renderDiscoveryContent()
       ) : showSearchResults ? (
-        <FlatList
+        <FlashList
           data={posts}
           keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <ArticleCard
-              article={item}
-              onPress={() => navigation.navigate('ArticleDetail', { article: item })}
-              variant="compact"
-            />
-          )}
+          renderItem={renderArticle}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.5}
-          ListHeaderComponent={(
-            <Text variant="labelLarge" style={[styles.resultsCount, { color: theme.colors.onSurfaceVariant }]}>
-              {posts.length} resultado{posts.length !== 1 ? 's' : ''} para "{debouncedQuery}"
-            </Text>
-          )}
-          ListFooterComponent={() => (
-            loadingMore ? (
-              <ActivityIndicator style={{ marginVertical: 20 }} color={theme.colors.primary} />
-            ) : !hasMore && posts.length > 0 ? (
-              <Text style={{ textAlign: 'center', marginVertical: 32, opacity: 0.5, color: theme.colors.onSurface }}>
-                Fin de los resultados
-              </Text>
-            ) : null
-          )}
+          ListHeaderComponent={renderSearchResultsHeader}
+          ListFooterComponent={renderSearchResultsFooter}
         />
       ) : (
         renderHelperContent()
@@ -453,6 +481,33 @@ const styles = StyleSheet.create({
   resultsCount: {
     paddingHorizontal: LAYOUT.HORIZONTAL_PADDING,
     paddingVertical: 12,
+  },
+  skeletonsContainer: {
+    gap: 8,
+    marginVertical: 8,
+  },
+  tagsSkeletonContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginVertical: 8,
+  },
+  noTagsText: {
+    fontStyle: 'italic',
+  },
+  helperText: {
+    textAlign: 'center',
+  },
+  retryButton: {
+    // marginTop is handled in computed style for theme consistency
+  },
+  footerLoader: {
+    marginVertical: 20,
+  },
+  endOfResults: {
+    textAlign: 'center',
+    marginVertical: 32,
+    opacity: 0.5,
   },
 });
 

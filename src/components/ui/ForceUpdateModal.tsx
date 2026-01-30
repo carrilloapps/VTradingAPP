@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, StyleSheet, Modal, StatusBar, Linking, Platform } from 'react-native';
-import { Surface, Text, useTheme } from 'react-native-paper';
+import { Surface, Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
 import { useAppTheme } from '../../theme/theme';
@@ -38,6 +38,12 @@ const ForceUpdateModal: React.FC<ForceUpdateModalProps> = ({ visible, storeUrl }
 
   if (!visible) return null;
 
+  // Pre-calculate dynamic styles
+  const surfaceBackgroundColor = theme.dark ? 'rgba(30, 30, 30, 0.98)' : 'rgba(255, 255, 255, 0.98)';
+  const glowOpacityValue = theme.dark ? 0.2 : 0.1;
+  const iconWrapperBg = theme.colors.primary + '15';
+  const pulseCircleBorder = theme.colors.primary + '30';
+
   return (
     <Modal
       transparent
@@ -50,20 +56,28 @@ const ForceUpdateModal: React.FC<ForceUpdateModalProps> = ({ visible, storeUrl }
         
         <Surface 
             style={[
-                styles.modalContainer, 
+                styles.modalContainer,
+                styles.modalSurface,
                 { 
-                    backgroundColor: theme.dark ? 'rgba(30, 30, 30, 0.98)' : 'rgba(255, 255, 255, 0.98)',
+                    backgroundColor: surfaceBackgroundColor,
                     borderColor: theme.colors.outlineVariant,
                 }
             ]} 
             elevation={5}
         >
           {/* Decorative Glow */}
-          <View style={[styles.glowEffect, { backgroundColor: theme.colors.primary, opacity: theme.dark ? 0.2 : 0.1 }]} />
+          <View style={[
+            styles.glowEffect,
+            styles.glowOpacity,
+            {
+              backgroundColor: theme.colors.primary,
+              opacity: glowOpacityValue,
+            }
+          ]} />
 
           <View style={styles.content}>
-            <View style={[styles.iconWrapper, { backgroundColor: theme.colors.primary + '15' }]}>
-                <View style={[styles.pulseCircle, { borderColor: theme.colors.primary + '30' }]} />
+            <View style={[styles.iconWrapper, { backgroundColor: iconWrapperBg }]}>
+                <View style={[styles.pulseCircle, { borderColor: pulseCircleBorder }]} />
                 <MaterialCommunityIcons 
                     name="rocket-launch" 
                     size={48} 
@@ -90,7 +104,7 @@ const ForceUpdateModal: React.FC<ForceUpdateModalProps> = ({ visible, storeUrl }
                 loading={loading}
                 fullWidth
                 style={styles.button}
-                contentStyle={{ height: 56 }}
+                contentStyle={styles.buttonContent}
                 icon="update"
               />
             </View>
@@ -123,6 +137,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     position: 'relative',
   },
+  modalSurface: {},
   glowEffect: {
     position: 'absolute',
     top: -50,
@@ -132,6 +147,7 @@ const styles = StyleSheet.create({
     borderRadius: 100,
     filter: 'blur(40px)',
   },
+  glowOpacity: {},
   content: {
     padding: 32,
     alignItems: 'center',
@@ -177,6 +193,9 @@ const styles = StyleSheet.create({
   button: {
       borderRadius: 16,
       overflow: 'hidden',
+  },
+  buttonContent: {
+    height: 56,
   },
   bottomAccent: {
       position: 'absolute',

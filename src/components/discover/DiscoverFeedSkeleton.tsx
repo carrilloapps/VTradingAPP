@@ -9,10 +9,20 @@ const DiscoverFeedSkeleton = () => {
     const theme = useAppTheme();
     const insets = useSafeAreaInsets();
 
+    const containerStyle = [
+        styles.container,
+        { backgroundColor: theme.colors.background }
+    ];
+
+    const headerStyle = [
+        styles.header,
+        { paddingTop: insets.top + 12 }
+    ];
+
     return (
-        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <View style={containerStyle}>
             {/* Header placeholder */}
-            <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
+            <View style={headerStyle}>
                 <Skeleton width={180} height={32} />
             </View>
 
@@ -36,7 +46,7 @@ const DiscoverFeedSkeleton = () => {
                     <Skeleton width={60} height={16} />
                 </View>
                 <View style={styles.trendingRow}>
-                    <Skeleton width={280} height={160} borderRadius={16} style={{ marginRight: 16 }} />
+                    <Skeleton width={280} height={160} borderRadius={16} style={styles.trendingItem} />
                     <Skeleton width={280} height={160} borderRadius={16} />
                 </View>
 
@@ -88,6 +98,9 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         paddingLeft: 20,
         marginBottom: 32,
+    },
+    trendingItem: {
+        marginRight: 16,
     },
 });
 

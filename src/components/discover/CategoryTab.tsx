@@ -34,11 +34,11 @@ const CategoryTab = ({ name, image, selected, onPress }: CategoryTabProps) => {
 
     return (
         <Animated.View style={{ transform: [{ scale }] }}>
-            <TouchableRipple 
+            <TouchableRipple
                 onPress={onPress}
                 onPressIn={handlePressIn}
                 onPressOut={handlePressOut}
-                style={{ borderRadius: theme.roundness * 6 }}
+                style={[styles.ripple, { borderRadius: theme.roundness * 6 }]}
                 borderless
                 rippleColor={theme.colors.primary}
                 accessibilityRole="button"
@@ -50,11 +50,11 @@ const CategoryTab = ({ name, image, selected, onPress }: CategoryTabProps) => {
                         styles.container,
                         {
                             borderRadius: theme.roundness * 6,
-                            backgroundColor: selected 
-                                ? theme.colors.primaryContainer 
+                            backgroundColor: selected
+                                ? theme.colors.primaryContainer
                                 : theme.colors.elevation.level1,
-                            borderColor: selected 
-                                ? theme.colors.primary 
+                            borderColor: selected
+                                ? theme.colors.primary
                                 : theme.colors.outline,
                         }
                     ]}
@@ -63,39 +63,39 @@ const CategoryTab = ({ name, image, selected, onPress }: CategoryTabProps) => {
                     <View style={styles.content}>
                         {/* Icon Container */}
                         {image ? (
-                            <Image 
-                                source={{ uri: image }} 
+                            <Image
+                                source={{ uri: image }}
                                 style={styles.iconImage}
                                 resizeMode="cover"
                             />
                         ) : (
                             <View style={[
                                 styles.iconContainer,
-                                { 
-                                    backgroundColor: selected 
-                                        ? theme.colors.primary 
+                                {
+                                    backgroundColor: selected
+                                        ? theme.colors.primary
                                         : theme.colors.surfaceVariant,
                                     borderRadius: theme.roundness * 3,
                                 }
                             ]}>
-                                <MaterialCommunityIcons 
+                                <MaterialCommunityIcons
                                     name={getCategoryIcon(name)}
                                     size={18}
-                                    color={selected 
-                                        ? theme.colors.onPrimary 
+                                    color={selected
+                                        ? theme.colors.onPrimary
                                         : theme.colors.onSurfaceVariant}
                                 />
                             </View>
                         )}
-                        
+
                         {/* Label */}
-                        <Text 
+                        <Text
                             variant="labelMedium"
                             style={[
-                                styles.label, 
-                                { 
-                                    color: selected 
-                                        ? theme.colors.onPrimaryContainer 
+                                styles.label,
+                                {
+                                    color: selected
+                                        ? theme.colors.onPrimaryContainer
                                         : theme.colors.onSurface,
                                 }
                             ]}
@@ -111,6 +111,8 @@ const CategoryTab = ({ name, image, selected, onPress }: CategoryTabProps) => {
 };
 
 const styles = StyleSheet.create({
+    ripple: {
+    },
     container: {
         borderWidth: 1,
         paddingHorizontal: 12,

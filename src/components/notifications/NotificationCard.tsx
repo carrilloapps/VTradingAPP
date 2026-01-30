@@ -43,7 +43,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
   const theme = useAppTheme();
   const iconConfig = getNotificationIconConfig(notification, theme);
   const formattedTime = formatTimeAgo(notification.timestamp);
-  
+
   // Use fallback title if current title is generic "Notificación"
   const displayTitle = notification.title === 'Notificación' ? iconConfig.fallbackTitle : notification.title;
 
@@ -59,7 +59,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
 
     return (
       <View style={[styles.rightAction, { backgroundColor: theme.colors.primaryContainer }]}>
-        <Animated.View style={{ transform: [{ scale }] }}>
+        <Animated.View style={[styles.actionIcon, { transform: [{ scale }] }]}>
           <MaterialCommunityIcons name="archive" size={24} color={theme.colors.onPrimaryContainer} />
         </Animated.View>
       </View>
@@ -78,7 +78,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
 
     return (
       <View style={[styles.leftAction, { backgroundColor: theme.colors.errorContainer }]}>
-        <Animated.View style={{ transform: [{ scale }] }}>
+        <Animated.View style={[styles.actionIcon, { transform: [{ scale }] }]}>
           <MaterialCommunityIcons name="trash-can" size={24} color={theme.colors.onErrorContainer} />
         </Animated.View>
       </View>
@@ -97,12 +97,12 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
       if (numberMatch) {
         const originalNumberStr = numberMatch[0];
         const numericVal = parseFloat(originalNumberStr);
-        
+
         if (!isNaN(numericVal)) {
           const formattedNumber = numericVal.toFixed(2);
           // Replace only the number part in highlight
           const formattedHighlight = highlight.replace(originalNumberStr, formattedNumber);
-          
+
           // Replace the highlight in the full message
           if (displayMessage.includes(highlight)) {
             displayMessage = displayMessage.replace(highlight, formattedHighlight);
@@ -114,7 +114,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
 
     if (!highlight) {
       return (
-        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }} numberOfLines={3}>
+        <Text variant="bodyMedium" style={[styles.message, { color: theme.colors.onSurfaceVariant }]} numberOfLines={3}>
           {displayMessage}
         </Text>
       );
@@ -122,20 +122,20 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
 
     const parts = displayMessage.split(highlight);
     if (parts.length < 2) {
-       return (
-        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }} numberOfLines={3}>
+      return (
+        <Text variant="bodyMedium" style={[styles.message, { color: theme.colors.onSurfaceVariant }]} numberOfLines={3}>
           {displayMessage}
         </Text>
       );
     }
 
     return (
-      <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant, marginTop: 4 }} numberOfLines={3}>
+      <Text variant="bodyMedium" style={[styles.message, { color: theme.colors.onSurfaceVariant }]} numberOfLines={3}>
         {parts.map((part, index) => (
           <React.Fragment key={index}>
             {part}
             {index < parts.length - 1 && (
-              <Text style={{ fontWeight: 'bold', color: theme.colors.onSurface }}>
+              <Text style={[styles.messageHighlight, { color: theme.colors.onSurface }]}>
                 {highlight}
               </Text>
             )}
@@ -172,10 +172,10 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
           {/* Text Section */}
           <View style={styles.textContainer}>
             <View style={styles.headerRow}>
-              <Text variant="labelLarge" style={{ color: theme.colors.onSurface, fontWeight: '700', flex: 1, marginRight: 8 }} numberOfLines={2}>
+              <Text variant="labelLarge" style={[styles.title, { color: theme.colors.onSurface }]} numberOfLines={2}>
                 {displayTitle}
               </Text>
-              <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant }}>
+              <Text variant="labelSmall" style={[styles.time, { color: theme.colors.onSurfaceVariant }]}>
                 {formattedTime}
               </Text>
             </View>
@@ -186,7 +186,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
             {showSwipeHint && (
               <View style={styles.swipeHint}>
                 <MaterialCommunityIcons name="gesture-swipe-horizontal" size={12} color={theme.colors.onSurfaceVariant} />
-                <Text variant="labelSmall" style={{ color: theme.colors.onSurfaceVariant, marginLeft: 4, textTransform: 'uppercase', fontSize: 10, fontWeight: 'bold' }}>
+                <Text variant="labelSmall" style={[styles.swipeHintText, { color: theme.colors.onSurfaceVariant }]}>
                   DESLIZA: ARCHIVAR / BORRAR
                 </Text>
               </View>
@@ -214,6 +214,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
+  title: {
+    fontWeight: '700',
+    flex: 1,
+    marginRight: 8,
+  },
+  time: {
+  },
+  message: {
+    marginTop: 4,
+  },
+  messageHighlight: {
+    fontWeight: 'bold',
+  },
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -226,6 +239,8 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingHorizontal: 24,
     flex: 1,
+  },
+  actionIcon: {
   },
   leftAction: {
     justifyContent: 'center',
@@ -240,6 +255,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 12,
     opacity: 0.7,
+  },
+  swipeHintText: {
+    marginLeft: 4,
+    textTransform: 'uppercase',
+    fontSize: 10,
+    fontWeight: 'bold',
   },
 });
 
