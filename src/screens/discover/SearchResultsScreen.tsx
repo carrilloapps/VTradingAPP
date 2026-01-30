@@ -5,7 +5,9 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { wordPressService, FormattedPost, WordPressCategory, WordPressTag } from '../../services/WordPressService';
 import { observabilityService } from '../../services/ObservabilityService';
 import ArticleCard from '../../components/discover/ArticleCard';
+import ArticleSkeleton from '../../components/discover/ArticleSkeleton';
 import DiscoverEmptyView from '../../components/discover/DiscoverEmptyView';
+import Skeleton from '../../components/ui/Skeleton';
 import SearchBar from '../../components/ui/SearchBar';
 import { useDebounce } from '../../hooks/useDebounce';
 import CategoryCard from '../../components/discover/CategoryCard';
@@ -33,7 +35,7 @@ const SearchResultsScreen = () => {
   const [posts, setPosts] = useState<FormattedPost[]>([]);
   const [searchState, setSearchState] = useState<SearchState>('idle');
   const [errorMessage, setErrorMessage] = useState<string>('');
-  
+
   // Pagination
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -44,10 +46,10 @@ const SearchResultsScreen = () => {
   const [loadingCategories, setLoadingCategories] = useState(true);
   const [trendingTags, setTrendingTags] = useState<WordPressTag[]>([]);
   const [loadingTags, setLoadingTags] = useState(true);
-  
+
   // Refresh state for pull-to-refresh
   const [refreshing, setRefreshing] = useState(false);
-  
+
   // Flag to skip auto-search when filtering by category/tag
   const skipAutoSearchRef = useRef(false);
 
@@ -60,13 +62,13 @@ const SearchResultsScreen = () => {
       try {
         setLoadingCategories(true);
         setLoadingTags(true);
-        
+
         // Fetch categories and tags in parallel
         const [cats, tags] = await Promise.all([
           wordPressService.getCategories(),
           wordPressService.getTags()
         ]);
-        
+
         setCategories(cats.slice(0, 5)); // Show top 5 categories
         setTrendingTags(tags.slice(0, 10)); // Top 10 tags
       } catch (error) {
@@ -84,14 +86,14 @@ const SearchResultsScreen = () => {
   // Handle search execution
   const executeSearch = useCallback(async (query: string, pageNum = 1, isLoadMore = false) => {
     const trimmedQuery = query.trim();
-    
+
     // Validate minimum length
     if (trimmedQuery.length === 0) {
       setPosts([]);
       setSearchState('idle');
       return;
     }
-    
+
     if (trimmedQuery.length < 2) {
       setPosts([]);
       setSearchState('too_short');
@@ -105,7 +107,7 @@ const SearchResultsScreen = () => {
       setSearchState('searching');
       setErrorMessage('');
     }
-   
+
     try {
       const results = await wordPressService.searchPosts(trimmedQuery, pageNum, 10);
 
@@ -114,31 +116,31 @@ const SearchResultsScreen = () => {
       } else {
         setPosts(prev => [...prev, ...results]);
       }
-      
+
       setHasMore(results.length === 10);
       setPage(pageNum);
       setSearchState(results.length === 0 && pageNum === 1 ? 'success' : 'success');
     } catch (error: any) {
       const isNetworkError = error?.message?.toLowerCase().includes('network');
       const is400Error = error?.message?.includes('400');
-      
+
       let userMessage = 'Error al buscar. Por favor, intenta de nuevo.';
-      
+
       if (isNetworkError) {
         userMessage = 'Sin conexión a internet. Verifica tu conexión.';
       } else if (is400Error) {
         userMessage = 'Búsqueda inválida. Intenta con otros términos.';
       }
-      
+
       setErrorMessage(userMessage);
       setSearchState('error');
-      
+
       // Only capture non-network errors to Sentry
       if (!isNetworkError) {
-        observabilityService.captureError(error, { 
-          context: 'SearchResultsScreen.executeSearch', 
-          query: trimmedQuery, 
-          pageNum 
+        observabilityService.captureError(error, {
+          context: 'SearchResultsScreen.executeSearch',
+          query: trimmedQuery,
+          pageNum
         });
       }
     } finally {
@@ -155,7 +157,7 @@ const SearchResultsScreen = () => {
       skipAutoSearchRef.current = false; // Reset flag
       return;
     }
-    
+
     executeSearch(debouncedQuery, 1, false);
   }, [debouncedQuery, executeSearch]);
 
@@ -190,14 +192,14 @@ const SearchResultsScreen = () => {
 
   // Handle category press - filter by category ID
   const handleCategoryPress = useCallback(async (category: WordPressCategory) => {
-    
+
     // Set flag to skip auto-search
     skipAutoSearchRef.current = true;
-    
+
     setSearchQuery(category.name); // Update search bar (won't trigger search due to flag)
     setSearchState('searching');
     setErrorMessage('');
-    
+
     try {
       // Use category filtering instead of text search
       const results = await wordPressService.getPostsByCategory(category.id, 1, 10);
@@ -218,7 +220,7 @@ const SearchResultsScreen = () => {
 
     // Find the tag object to get its ID
     const tagObj = trendingTags.find(t => t.name === tagName.replace('#', ''));
-    
+
     if (!tagObj) {
       console.error('[SearchResults] Tag not found in trendingTags:', {
         searchedFor: tagName.replace('#', ''),
@@ -226,14 +228,14 @@ const SearchResultsScreen = () => {
       });
       return;
     }
-    
+
     // Set flag to skip auto-search
     skipAutoSearchRef.current = true;
-    
+
     setSearchQuery(tagObj.name); // Update search bar (won't trigger search due to flag)
     setSearchState('searching');
     setErrorMessage('');
-    
+
     try {
       // Use tag filtering instead of text search
       const results = await wordPressService.getPostsByTag(tagObj.id, 1, 10);
@@ -252,13 +254,13 @@ const SearchResultsScreen = () => {
   // Render discovery content (idle state)
   const renderDiscoveryContent = () => {
     return (
-      <ScrollView 
+      <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl 
-            refreshing={refreshing} 
+          <RefreshControl
+            refreshing={refreshing}
             onRefresh={handleRefresh}
             colors={[theme.colors.primary]}
             tintColor={theme.colors.primary}
@@ -269,7 +271,11 @@ const SearchResultsScreen = () => {
         <SectionHeader title="Categorías" />
         <View style={styles.sectionContent}>
           {loadingCategories ? (
-            <ActivityIndicator size="small" color={theme.colors.primary} style={{ marginVertical: 20 }} />
+            <View style={{ gap: 8, marginVertical: 8 }}>
+              <Skeleton width="100%" height={60} borderRadius={12} />
+              <Skeleton width="100%" height={60} borderRadius={12} />
+              <Skeleton width="100%" height={60} borderRadius={12} />
+            </View>
           ) : (
             categories.map((category) => (
               <CategoryCard
@@ -285,11 +291,16 @@ const SearchResultsScreen = () => {
         <SectionHeader title="Tags populares" />
         <View style={styles.sectionContent}>
           {loadingTags ? (
-            <ActivityIndicator size="small" color={theme.colors.primary} style={{ marginVertical: 20 }} />
+            <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginVertical: 8 }}>
+              <Skeleton width={80} height={32} borderRadius={16} />
+              <Skeleton width={60} height={32} borderRadius={16} />
+              <Skeleton width={90} height={32} borderRadius={16} />
+              <Skeleton width={70} height={32} borderRadius={16} />
+            </View>
           ) : trendingTags.length > 0 ? (
-            <TagCloud 
-              tags={trendingTags.map(t => `#${t.name}`)} 
-              onTagPress={handleTagPress} 
+            <TagCloud
+              tags={trendingTags.map(t => `#${t.name}`)}
+              onTagPress={handleTagPress}
             />
           ) : (
             <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant, fontStyle: 'italic' }}>
@@ -320,12 +331,12 @@ const SearchResultsScreen = () => {
     if (searchState === 'error') {
       return (
         <View style={styles.centered}>
-          <DiscoverEmptyView 
-            message={errorMessage} 
+          <DiscoverEmptyView
+            message={errorMessage}
             icon="alert-circle-outline"
           />
-          <Button 
-            mode="contained" 
+          <Button
+            mode="contained"
             onPress={handleRetry}
             style={{ marginTop: 16 }}
           >
@@ -345,39 +356,42 @@ const SearchResultsScreen = () => {
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar barStyle={theme.dark ? 'light-content' : 'dark-content'} />
-      <Appbar.Header 
-        elevated 
-        style={{ 
+      <Appbar.Header
+        elevated
+        style={{
           backgroundColor: theme.colors.surface,
           borderBottomWidth: 1,
-          borderBottomColor: theme.colors.outline 
+          borderBottomColor: theme.colors.outline
         }}
       >
         <Appbar.BackAction onPress={() => navigation.goBack()} />
         <View style={{ flex: 1, paddingHorizontal: 8 }}>
-             <SearchBar
-                placeholder="Buscar noticias, tickers o tags..."
-                onChangeText={setSearchQuery}
-                value={searchQuery}
-                onSubmitEditing={() => {
-                    executeSearch(searchQuery, 1, false);
-                    Keyboard.dismiss();
-                }}
-                autoFocus={!initialQuery}
-            />
+          <SearchBar
+            placeholder="Buscar noticias, tickers o tags..."
+            onChangeText={setSearchQuery}
+            value={searchQuery}
+            onSubmitEditing={() => {
+              executeSearch(searchQuery, 1, false);
+              Keyboard.dismiss();
+            }}
+            autoFocus={!initialQuery}
+          />
         </View>
-        <Appbar.Action 
-          icon="bell-outline" 
+        <Appbar.Action
+          icon="bell-outline"
           onPress={() => navigation.navigate('Notifications')}
           accessibilityLabel="Notificaciones"
         />
       </Appbar.Header>
 
       {searchState === 'searching' && page === 1 ? (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text style={{ marginTop: 16, color: theme.colors.onBackground }}>Buscando...</Text>
-        </View>
+        <FlatList
+          data={[1, 2, 3, 4, 5]}
+          keyExtractor={(item) => item.toString()}
+          renderItem={() => <ArticleSkeleton />}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+        />
       ) : showDiscoveryContent ? (
         renderDiscoveryContent()
       ) : showSearchResults ? (
@@ -385,8 +399,8 @@ const SearchResultsScreen = () => {
           data={posts}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
-            <ArticleCard 
-              article={item} 
+            <ArticleCard
+              article={item}
               onPress={() => navigation.navigate('ArticleDetail', { article: item })}
               variant="compact"
             />
@@ -396,16 +410,16 @@ const SearchResultsScreen = () => {
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.5}
           ListHeaderComponent={(
-              <Text variant="labelLarge" style={[styles.resultsCount, { color: theme.colors.onSurfaceVariant }]}>
-                  {posts.length} resultado{posts.length !== 1 ? 's' : ''} para "{debouncedQuery}"
-              </Text>
+            <Text variant="labelLarge" style={[styles.resultsCount, { color: theme.colors.onSurfaceVariant }]}>
+              {posts.length} resultado{posts.length !== 1 ? 's' : ''} para "{debouncedQuery}"
+            </Text>
           )}
           ListFooterComponent={() => (
             loadingMore ? (
               <ActivityIndicator style={{ marginVertical: 20 }} color={theme.colors.primary} />
             ) : !hasMore && posts.length > 0 ? (
               <Text style={{ textAlign: 'center', marginVertical: 32, opacity: 0.5, color: theme.colors.onSurface }}>
-                  Fin de los resultados
+                Fin de los resultados
               </Text>
             ) : null
           )}

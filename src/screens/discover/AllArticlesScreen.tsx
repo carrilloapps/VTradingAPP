@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { wordPressService, FormattedPost } from '../../services/WordPressService';
 import { observabilityService } from '../../services/ObservabilityService';
 import ArticleCard from '../../components/discover/ArticleCard';
+import ArticleSkeleton from '../../components/discover/ArticleSkeleton';
 import DiscoverEmptyView from '../../components/discover/DiscoverEmptyView';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -60,17 +61,20 @@ const AllArticlesScreen = () => {
       </Appbar.Header>
 
       {loading && page === 1 ? (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text style={{ marginTop: 16 }}>Cargando artículos...</Text>
-        </View>
+        <FlatList
+          data={[1, 2, 3, 4, 5, 6]}
+          keyExtractor={(item) => item.toString()}
+          renderItem={() => <ArticleSkeleton />}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+        />
       ) : (
         <FlatList
           data={posts}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <ArticleCard 
-              article={item} 
+            <ArticleCard
+              article={item}
               onPress={() => navigation.navigate('ArticleDetail', { article: item })}
             />
           )}

@@ -1,74 +1,76 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { useTheme } from 'react-native-paper';
+import { useAppTheme } from '../../theme/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Skeleton from '../ui/Skeleton';
 
-const DiscoverSkeleton = () => {
-  const theme = useTheme();
+/**
+ * Specialized skeleton for the Discover screen when feature is disabled (Construction view)
+ */
+const DiscoverConstructionSkeleton = () => {
+  const theme = useAppTheme();
   const insets = useSafeAreaInsets();
-  const r = theme.roundness;
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      {/* Header Skeleton matches UnifiedHeader section variant */}
+      {/* Header Skeleton */}
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
-         <Skeleton width={150} height={32} />
+        <Skeleton width={150} height={32} />
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        
-        {/* Hero Section */}
+
+        {/* Modern Hero Section */}
         <View style={styles.heroSection}>
           <View style={styles.iconContainer}>
-            <Skeleton width={120} height={120} borderRadius={60} />
+            <Skeleton width={140} height={140} borderRadius={70} />
           </View>
-          
-          <Skeleton width={140} height={32} borderRadius={20} style={styles.badge} />
-          
-          <Skeleton width={200} height={36} style={styles.title} />
-          <Skeleton width="90%" height={20} style={styles.description} />
-          <Skeleton width="80%" height={20} style={styles.descriptionLine} />
+
+          <Skeleton width={120} height={28} borderRadius={14} style={styles.badge} />
+
+          <Skeleton width={240} height={40} style={styles.title} />
+          <Skeleton width="85%" height={20} style={styles.description} />
+          <Skeleton width="60%" height={20} style={styles.descriptionLine} />
         </View>
 
-        {/* Progress Section */}
+        {/* Dynamic Progress Section */}
         <View style={styles.progressSection}>
           <View style={styles.progressHeader}>
-            <Skeleton width={150} height={16} />
+            <Skeleton width={100} height={16} />
             <Skeleton width={40} height={16} />
           </View>
-          <Skeleton width="100%" height={8} borderRadius={4} />
+          <Skeleton width="100%" height={10} borderRadius={5} />
         </View>
 
-        {/* Features Preview */}
+        {/* Roadmap Preview */}
         <View style={styles.featuresContainer}>
-          <Skeleton width={120} height={24} style={styles.featuresTitle} />
-          
-          {[1, 2, 3].map((_, index) => (
-            <View 
-              key={index} 
+          <Skeleton width={140} height={24} style={styles.featuresTitle} />
+
+          {[1, 2, 3].map((item) => (
+            <View
+              key={item}
               style={[
-                styles.featureItem, 
-                { 
+                styles.featureItem,
+                {
                   backgroundColor: theme.colors.elevation.level1,
-                  borderColor: theme.colors.outline,
-                  borderRadius: 24, // Matches standard in DiscoverScreen
+                  borderColor: theme.colors.outlineVariant,
+                  borderRadius: 20,
                 }
               ]}
             >
-              <Skeleton width={48} height={48} borderRadius={12} />
+              <Skeleton width={44} height={44} borderRadius={12} />
               <View style={styles.featureText}>
-                <Skeleton width={150} height={20} style={styles.featureTitleSkeleton} />
-                <Skeleton width="100%" height={14} style={styles.featureDescSkeleton} />
+                <Skeleton width="60%" height={20} style={styles.featureTitleSkeleton} />
+                <Skeleton width="90%" height={14} style={styles.featureDescSkeleton} />
               </View>
             </View>
           ))}
         </View>
 
-        {/* Action Button */}
+        {/* Action Button Area */}
         <View style={styles.actionContainer}>
-          <Skeleton width="100%" height={48} borderRadius={12} />
-          <Skeleton width={250} height={14} style={styles.notificationText} />
+          <Skeleton width="100%" height={56} borderRadius={28} />
+          <Skeleton width={200} height={14} style={styles.notificationText} />
         </View>
 
       </ScrollView>
@@ -86,46 +88,44 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   content: {
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingTop: 20,
-    paddingBottom: 100,
+    paddingBottom: 60,
   },
   heroSection: {
     alignItems: 'center',
-    marginBottom: 32,
+    marginBottom: 40,
   },
   iconContainer: {
-    marginBottom: 24,
+    marginBottom: 32,
   },
   badge: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   title: {
-    marginBottom: 12,
+    marginBottom: 16,
   },
   description: {
-    marginBottom: 8,
+    marginBottom: 10,
   },
   descriptionLine: {
     marginBottom: 0,
   },
   progressSection: {
     width: '100%',
-    marginBottom: 32,
-    paddingHorizontal: 10,
+    marginBottom: 40,
   },
   progressHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    marginBottom: 12,
   },
   featuresContainer: {
     width: '100%',
-    marginBottom: 32,
+    marginBottom: 40,
   },
   featuresTitle: {
-    marginBottom: 16,
-    marginLeft: 4,
+    marginBottom: 20,
   },
   featureItem: {
     flexDirection: 'row',
@@ -147,11 +147,10 @@ const styles = StyleSheet.create({
   actionContainer: {
     width: '100%',
     alignItems: 'center',
-    marginBottom: 20,
   },
   notificationText: {
-    marginTop: 12,
+    marginTop: 16,
   },
 });
 
-export default DiscoverSkeleton;
+export default DiscoverConstructionSkeleton;

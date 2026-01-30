@@ -6,6 +6,7 @@ import { wordPressService, FormattedPost, WordPressCategory } from '../../servic
 import { observabilityService } from '../../services/ObservabilityService';
 import { useAppTheme } from '../../theme/theme';
 import ArticleCard from '../../components/discover/ArticleCard';
+import CategoryTagSkeleton from '../../components/discover/CategoryTagSkeleton';
 import DiscoverEmptyView from '../../components/discover/DiscoverEmptyView';
 import GradientAppbar from '../../components/common/GradientAppbar';
 import DetailHeroHeader from '../../components/discover/DetailHeroHeader';
@@ -200,10 +201,7 @@ const CategoryDetailScreen = () => {
       />
 
       {loading && posts.length === 0 ? (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text variant="bodyMedium" style={styles.loadingText}>Preparando contenido exclusivo...</Text>
-        </View>
+        <CategoryTagSkeleton />
       ) : (
         <Animated.FlatList
           data={posts}

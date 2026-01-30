@@ -6,6 +6,7 @@ import { wordPressService, FormattedPost, WordPressTag } from '../../services/Wo
 import { observabilityService } from '../../services/ObservabilityService';
 import { useAppTheme } from '../../theme/theme';
 import ArticleCard from '../../components/discover/ArticleCard';
+import CategoryTagSkeleton from '../../components/discover/CategoryTagSkeleton';
 import DiscoverEmptyView from '../../components/discover/DiscoverEmptyView';
 import GradientAppbar from '../../components/common/GradientAppbar';
 import DetailHeroHeader from '../../components/discover/DetailHeroHeader';
@@ -214,10 +215,7 @@ const TagDetailScreen = () => {
       />
 
       {loading && posts.length === 0 ? (
-        <View style={styles.centered}>
-          <ActivityIndicator size="large" color={theme.colors.primary} />
-          <Text variant="bodyMedium" style={styles.loadingText}>Escaneando etiquetas...</Text>
-        </View>
+        <CategoryTagSkeleton />
       ) : (
         <Animated.FlatList
           data={posts}

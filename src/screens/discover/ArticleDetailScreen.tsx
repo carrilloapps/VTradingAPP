@@ -28,6 +28,7 @@ import { remoteConfigService } from '../../services/firebase/RemoteConfigService
 import { observabilityService } from '../../services/ObservabilityService';
 import { CommentsList } from '../../components/discover/CommentsList';
 import ArticleCard from '../../components/discover/ArticleCard';
+import ArticleDetailSkeleton from '../../components/discover/ArticleDetailSkeleton';
 import AuthorCard from '../../components/discover/AuthorCard';
 import DiscoverErrorView from '../../components/discover/DiscoverErrorView';
 import XIcon from '../../components/common/XIcon';
@@ -102,7 +103,7 @@ const ArticleDetailScreen = () => {
 
   // New states for deep linking
   const [articleData, setArticleData] = React.useState<any>(null);
-  const [isLoading, setIsLoading] = React.useState(false);
+  const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [relatedPosts, setRelatedPosts] = React.useState<FormattedPost[]>([]);
   const [loadingRelated, setLoadingRelated] = React.useState(false);
@@ -151,7 +152,7 @@ const ArticleDetailScreen = () => {
       // Always fetch full article data to ensure we have the complete content, 
       // as list views might only contain excerpts or truncated content.
       if (slug || currentArticle?.id) {
-        setIsLoading(!currentArticle); // Only show full loader if we don't even have partial data
+        setIsLoading(true); // Always show skeleton while fetching full data
         setError(null);
         try {
           const fetchedArticle = slug
@@ -288,15 +289,15 @@ const ArticleDetailScreen = () => {
         // Controlled by 'discover_web' remote config
         let shareExactDeepLink = true;
         try {
-            shareExactDeepLink = await remoteConfigService.getFeature('discover_web');
+          shareExactDeepLink = await remoteConfigService.getFeature('discover_web');
         } catch (_) {
-            // Fallback to true if config fails
-            shareExactDeepLink = false;
+          // Fallback to true if config fails
+          shareExactDeepLink = false;
         }
 
         const shareMessage = shareExactDeepLink
-            ? `📰 ${article.title}\n\n${article.excerpt}\n\n🔗 ${webLink}`
-            : `📰 ${article.title}\n\n${article.excerpt}\n\n🚀 ¡Domina los mercados con VTrading!\n📲 Noticias, análisis y señales en tiempo real.\n\n👇 Descárgala GRATIS aquí:\nhttps://vtrading.app`;
+          ? `📰 ${article.title}\n\n${article.excerpt}\n\n🔗 ${webLink}`
+          : `📰 ${article.title}\n\n${article.excerpt}\n\n🚀 ¡Domina los mercados con VTrading!\n📲 Noticias, análisis y señales en tiempo real.\n\n👇 Descárgala GRATIS aquí:\nhttps://vtrading.app`;
 
         await Share.open({
           url: sharePath,
@@ -437,12 +438,7 @@ const ArticleDetailScreen = () => {
   };
 
   if (isLoading) {
-    return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background, justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color={theme.colors.primary} />
-        <Text style={{ marginTop: 16 }}>Cargando artículo...</Text>
-      </View>
-    );
+    return <ArticleDetailSkeleton />;
   }
 
   if (error || !article) {
@@ -858,10 +854,10 @@ const ArticleDetailScreen = () => {
         image={article?.image}
         description={article?.content ? article.content.replace(/<[^>]*>/g, '').replace(/\n+/g, ' ').slice(0, 400) + '...' : ''}
         author={article?.author ? {
-            name: article.author.name,
-            avatar: article.author.avatar,
-            role: article.date ? new Date(article.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : (article.time || ''),
-            socials: article.author.social
+          name: article.author.name,
+          avatar: article.author.avatar,
+          role: article.date ? new Date(article.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : (article.time || ''),
+          socials: article.author.social
         } : undefined}
         categoryName={article?.categories && article.categories.length > 0 ? article.categories[0].name : 'Artículo'}
         aspectRatio={shareFormat}

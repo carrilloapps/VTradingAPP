@@ -5,7 +5,8 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import DiscoverHeader from '../../components/discover/DiscoverHeader';
-import DiscoverSkeleton from '../../components/discover/DiscoverSkeleton';
+import DiscoverConstructionSkeleton from '../../components/discover/DiscoverSkeleton';
+import DiscoverFeedSkeleton from '../../components/discover/DiscoverFeedSkeleton';
 import DiscoverErrorView from '../../components/discover/DiscoverErrorView';
 import ArticleCard from '../../components/discover/ArticleCard';
 import SectionHeader from '../../components/discover/SectionHeader';
@@ -343,39 +344,81 @@ const DiscoverScreen = () => {
   }, [navigation]);
 
   if (isLoading) {
-    return <DiscoverSkeleton />;
+    return featureEnabled ? <DiscoverFeedSkeleton /> : <DiscoverConstructionSkeleton />;
   }
 
   if (!featureEnabled) {
     return (
       <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <StatusBar
+          backgroundColor="transparent"
+          translucent
+          barStyle={theme.dark ? 'light-content' : 'dark-content'}
+        />
         <DiscoverHeader onSearchPress={() => { }} />
-        <ScrollView contentContainerStyle={styles.constructionContent}>
-          <View style={[styles.constructionHero, { marginTop: windowWidth * 0.4 }]}>
+        <ScrollView
+          contentContainerStyle={styles.constructionContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Hero Section */}
+          <View style={[styles.constructionHero, { marginTop: windowWidth * 0.1 }]}>
+            <View style={[styles.glowContainer, { backgroundColor: theme.colors.primaryContainer, opacity: 0.15 }]} />
             <View style={styles.iconContainer}>
-              <Icon source="flask" size={60} color={theme.colors.primary} />
-              <View style={styles.gearIcon}>
-                <Icon source="cog" size={30} color={theme.colors.secondary} />
-              </View>
+              <Icon source="rocket-launch" size={80} color={theme.colors.primary} />
             </View>
-            <View style={[styles.statusBadge, { borderColor: theme.colors.outline }]}>
+            <View style={[styles.statusBadge, { backgroundColor: theme.colors.surfaceVariant, borderColor: theme.colors.outlineVariant }]}>
               <View style={[styles.blinkingDot, { backgroundColor: theme.colors.primary }]} />
-              <Text style={[styles.statusText, { color: theme.colors.primary }]}>En Desarrollo</Text>
+              <Text variant="labelLarge" style={[styles.statusText, { color: theme.colors.primary }]}>En Laboratorio</Text>
             </View>
-            <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.onBackground }]}>
-              V2 Próximamente
+            <Text variant="displaySmall" style={[styles.title, { color: theme.colors.onBackground }]}>
+              News V2.0
             </Text>
-            <Text variant="bodyMedium" style={[styles.description, { color: theme.colors.onSurfaceVariant }]}>
-              Estamos trabajando en una nueva experiencia de noticias.
+            <Text variant="bodyLarge" style={[styles.description, { color: theme.colors.onSurfaceVariant }]}>
+              Estamos construyendo una experiencia de trading inteligente con noticias en tiempo real potenciadas por IA.
             </Text>
           </View>
 
-          <View style={styles.progressSection}>
+          {/* Roadmap Section */}
+          <View style={styles.roadmapSection}>
             <View style={styles.progressHeader}>
-              <Text variant="labelMedium">Progreso</Text>
-              <Text variant="labelMedium" style={{ fontWeight: 'bold', color: theme.colors.primary }}>90%</Text>
+              <Text variant="titleMedium">Fase de Desarrollo</Text>
+              <Text variant="titleMedium" style={{ fontWeight: 'bold', color: theme.colors.primary }}>95%</Text>
             </View>
-            <ProgressBar progress={0.9} color={theme.colors.primary} style={styles.progressBar} />
+            <ProgressBar progress={0.95} color={theme.colors.primary} style={styles.progressBar} />
+            <Text variant="labelSmall" style={styles.progressLabel}>Casi listo para el lanzamiento beta</Text>
+          </View>
+
+          {/* Features Preview List */}
+          <View style={styles.featuresPreview}>
+            <Text variant="titleLarge" style={styles.sectionTitle}>¿Qué esperar?</Text>
+
+            <Surface style={styles.featureItem} elevation={1}>
+              <View style={[styles.featureIcon, { backgroundColor: theme.colors.primaryContainer }]}>
+                <Icon source="star" size={24} color={theme.colors.primary} />
+              </View>
+              <View style={styles.featureDetails}>
+                <Text variant="titleMedium">Alertas Inteligentes</Text>
+                <Text variant="bodySmall">Notificaciones personalizadas según tu portafolio.</Text>
+              </View>
+            </Surface>
+
+            <Surface style={styles.featureItem} elevation={1}>
+              <View style={[styles.featureIcon, { backgroundColor: theme.colors.secondaryContainer }]}>
+                <Icon source="trending-up" size={24} color={theme.colors.secondary} />
+              </View>
+              <View style={styles.featureDetails}>
+                <Text variant="titleMedium">Análisis de Sentimiento</Text>
+                <Text variant="bodySmall">IA procesando el pulso del mercado en segundos.</Text>
+              </View>
+            </Surface>
+          </View>
+
+          {/* Action CTA */}
+          <View style={styles.ctaContainer}>
+            <Surface style={[styles.mainButton, { backgroundColor: theme.colors.primary }]} elevation={4}>
+              <Text style={{ color: theme.colors.onPrimary, fontWeight: 'bold' }}>Notificarme al Lanzamiento</Text>
+            </Surface>
+            <Text variant="bodySmall" style={styles.ctaSubtitle}>Únete a los +10,000 inversores esperando.</Text>
           </View>
         </ScrollView>
       </View>
@@ -474,68 +517,129 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
   },
-  // Construction Styles
+  // Construction Redesign Styles
   constructionContent: {
     flexGrow: 1,
-    alignItems: 'center',
     padding: 24,
+    paddingBottom: 60,
   },
   constructionHero: {
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 48,
+    position: 'relative',
+  },
+  glowContainer: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    top: -20,
+    zIndex: -1,
   },
   iconContainer: {
-    marginBottom: 24,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  gearIcon: {
-    position: 'absolute',
-    right: -10,
-    bottom: -5,
+    marginBottom: 32,
   },
   statusBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 20,
-    borderWidth: 1,
-    marginBottom: 16,
-    gap: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 24,
+    borderWidth: 1.5,
+    marginBottom: 20,
+    gap: 10,
   },
   blinkingDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   statusText: {
-    fontSize: 12,
-    fontWeight: 'bold',
+    fontSize: 13,
+    fontWeight: '800',
     textTransform: 'uppercase',
+    letterSpacing: 1,
   },
   title: {
-    fontWeight: '800',
+    fontWeight: '900',
     textAlign: 'center',
-    marginBottom: 8,
+    marginBottom: 12,
+    letterSpacing: -0.5,
   },
   description: {
     textAlign: 'center',
-    maxWidth: 280,
-    opacity: 0.7,
-  },
-  progressSection: {
-    width: '100%',
     maxWidth: 300,
+    lineHeight: 24,
+    opacity: 0.8,
+  },
+  roadmapSection: {
+    width: '100%',
+    marginBottom: 48,
+    padding: 20,
+    borderRadius: 24,
   },
   progressHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 8,
+    alignItems: 'center',
+    marginBottom: 12,
   },
   progressBar: {
-    height: 6,
-    borderRadius: 3,
+    height: 10,
+    borderRadius: 5,
+    marginBottom: 8,
+  },
+  progressLabel: {
+    opacity: 0.6,
+    textAlign: 'right',
+  },
+  featuresPreview: {
+    width: '100%',
+    marginBottom: 40,
+  },
+  sectionTitle: {
+    fontWeight: '800',
+    marginBottom: 20,
+    marginLeft: 4,
+  },
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 20,
+    marginBottom: 12,
+  },
+  featureIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 16,
+  },
+  featureDetails: {
+    flex: 1,
+  },
+  ctaContainer: {
+    width: '100%',
+    alignItems: 'center',
+    marginTop: 12,
+  },
+  mainButton: {
+    width: '100%',
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
+  ctaSubtitle: {
+    opacity: 0.6,
   }
 });
 
