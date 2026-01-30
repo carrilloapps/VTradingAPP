@@ -257,6 +257,12 @@ const AddAlertScreen = ({ route }: Props) => {
     Keyboard.dismiss();
   };
 
+  const handleSetCurrentPrice = () => {
+    if (!selectedItem) return;
+    setTargetPrice(selectedItem.price.toFixed(selectedItem.price < 1 ? 4 : 2));
+    showToast('Precio objetivo actualizado al valor actual', 'success');
+  };
+
   const handleSaveAlert = async () => {
     if (!selectedItem || !targetPrice) return;
 
@@ -496,7 +502,7 @@ const AddAlertScreen = ({ route }: Props) => {
                     onChangeText={setTargetPrice}
                     keyboardType="numeric"
                     placeholder="0.00"
-                    right={<TextInput.Icon icon="target" />}
+                    right={<TextInput.Icon icon="target" onPress={handleSetCurrentPrice} />}
                     style={{ backgroundColor: theme.colors.background }}
                     outlineColor={theme.colors.outline}
                     activeOutlineColor={theme.colors.primary}
