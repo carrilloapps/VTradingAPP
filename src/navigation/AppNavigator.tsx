@@ -433,7 +433,9 @@ const AppNavigator = () => {
                 component={ArticleDetailScreen}
                 options={{
                   headerShown: false,
-                  animation: 'default'
+                  animation: 'default',
+                  presentation: 'card',
+                  gestureEnabled: true,
                 }}
               />
               <RootStack.Screen

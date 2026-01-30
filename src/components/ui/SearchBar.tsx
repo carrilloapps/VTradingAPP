@@ -37,9 +37,9 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const containerStyle = [
     styles.container,
     {
-      backgroundColor: theme.dark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.95)',
-      borderColor: isFocused ? theme.colors.primary : 'transparent',
-      borderWidth: isFocused ? 2 : 0,
+      backgroundColor: theme.colors.elevation.level2,
+      borderColor: isFocused ? theme.colors.primary : theme.colors.outlineVariant,
+      borderWidth: 1,
     }
   ];
 
