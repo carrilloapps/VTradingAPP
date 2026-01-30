@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
-import { View, StyleSheet, StatusBar, RefreshControl, ScrollView, FlatList, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, RefreshControl, ScrollView, FlatList, useWindowDimensions } from 'react-native';
 import { Text, Surface, Icon, ProgressBar } from 'react-native-paper';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -350,12 +350,11 @@ const DiscoverScreen = () => {
   if (!featureEnabled) {
     return (
       <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <StatusBar
-          backgroundColor="transparent"
-          translucent
-          barStyle={theme.dark ? 'light-content' : 'dark-content'}
+        <DiscoverHeader
+          variant="main"
+          onSearchPress={() => { }}
+          onNotificationsPress={() => navigation.navigate('Notifications')}
         />
-        <DiscoverHeader onSearchPress={() => { }} />
         <ScrollView
           contentContainerStyle={styles.constructionContent}
           showsVerticalScrollIndicator={false}
@@ -439,13 +438,10 @@ const DiscoverScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <StatusBar
-        backgroundColor="transparent"
-        translucent
-        barStyle={theme.dark ? 'light-content' : 'dark-content'}
-      />
       <DiscoverHeader
+        variant="main"
         onSearchPress={() => navigation.navigate('SearchResults', {})}
+        onNotificationsPress={() => navigation.navigate('Notifications')}
       />
       <FlatList
         ref={listRef}

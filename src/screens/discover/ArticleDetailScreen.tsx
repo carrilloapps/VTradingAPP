@@ -34,6 +34,7 @@ import DiscoverErrorView from '../../components/discover/DiscoverErrorView';
 import XIcon from '../../components/common/XIcon';
 import FacebookIcon from '../../components/common/FacebookIcon';
 import { shareTextContent } from '../../utils/ShareUtils';
+import DiscoverHeader from '../../components/discover/DiscoverHeader';
 
 
 // Helper to convert hex to rgba
@@ -460,113 +461,17 @@ const ArticleDetailScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
-      {/* Sticky Header Background (Fades In) */}
-      <Animated.View style={[styles.headerBar, {
-        height: 56 + insets.top,
-        backgroundColor: theme.colors.background,
-        opacity: headerOpacity,
-        borderBottomWidth: 1,
-        borderBottomColor: theme.colors.outlineVariant
-      }]} />
+      <DiscoverHeader
+        variant="detail"
+        onBackPress={() => navigation.goBack()}
+        onSharePress={handleShareButton}
+        title={article.title}
+        scrollY={scrollY}
+        contentHeight={contentHeight}
+      />
 
       {/* Reading Progress Bar (Attached to header) */}
-      <Animated.View
-        style={[
-          styles.progressContainer,
-          {
-            top: 56 + insets.top,
-            opacity: headerOpacity.interpolate({
-              inputRange: [0, 0.5, 1],
-              outputRange: [0, 0, 1]
-            })
-          }
-        ]}
-      >
-        <Animated.View
-          style={[
-            styles.progressBar,
-            {
-              backgroundColor: theme.colors.primary,
-              transform: [{
-                scaleX: scrollY.interpolate({
-                  inputRange: [0, contentHeight > 0 ? contentHeight - windowHeight : 1],
-                  outputRange: [0.0001, 1],
-                  extrapolate: 'clamp',
-                })
-              }, {
-                translateX: scrollY.interpolate({
-                  inputRange: [0, contentHeight > 0 ? contentHeight - windowHeight : 1],
-                  outputRange: [-windowWidth / 2, 0],
-                  extrapolate: 'clamp',
-                })
-              }]
-            }
-          ]}
-        />
-      </Animated.View>
-
-      {/* Header Content (Title fades in, Buttons always visible) */}
-      <View style={[styles.headerOverlay, { top: insets.top, height: 56 }]}>
-        <LinearGradient
-          colors={[hexToRGBA(theme.colors.background, 0.8), 'transparent']}
-          style={[StyleSheet.absoluteFill, { top: -insets.top, height: 160 }]} // Extended height and covered status bar
-          start={{ x: 0, y: 0 }}
-          end={{ x: 0, y: 1 }}
-          pointerEvents="none"
-        />
-
-        {/* Left Button - High Clarity */}
-        <View style={styles.leftButtonContainer}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            activeOpacity={0.7}
-            style={[styles.headerIconButton, { backgroundColor: theme.colors.surface + 'CC' }]}
-          >
-            <MaterialCommunityIcons name="chevron-left" size={28} color={theme.colors.onSurface} />
-          </TouchableOpacity>
-        </View>
-
-        {/* Centered Title & Reading Indicator (Fades In) */}
-        <Animated.View style={[
-          styles.titleContainer,
-          {
-            opacity: headerOpacity,
-            width: headerContentWidth,
-            transform: [{
-              translateY: headerOpacity.interpolate({
-                inputRange: [0, 1],
-                outputRange: [10, 0]
-              })
-            }]
-          }
-        ]}>
-          <Text
-            variant="titleSmall"
-            numberOfLines={1}
-            style={{
-              fontWeight: '700',
-              color: theme.colors.onSurface,
-              textAlign: 'center',
-            }}
-          >
-            {article.title}
-          </Text>
-        </Animated.View>
-
-        {/* Right Buttons - Minimalist Editorial */}
-        <View style={styles.rightButtonsContainer}>
-          <TouchableOpacity
-            onPress={handleShareButton}
-            disabled={sharing}
-            activeOpacity={0.7}
-            style={[styles.headerIconButton, { backgroundColor: theme.colors.surface + 'CC' }]}
-          >
-            <MaterialCommunityIcons name="share-variant-outline" size={22} color={theme.colors.onSurface} />
-          </TouchableOpacity>
-        </View>
-      </View>
 
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
@@ -923,67 +828,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  headerBar: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    zIndex: 10,
-  },
-  headerOverlay: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    zIndex: 20,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    pointerEvents: 'box-none',
-  },
-  headerIconButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  leftButtonContainer: {
-    zIndex: 25,
-  },
-  rightButtonsContainer: {
-    flexDirection: 'row',
-    zIndex: 25,
-    gap: 8,
-  },
-  titleContainer: {
-    position: 'absolute',
-    left: 60,
-    right: 60,
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 15,
-    height: '100%',
-    pointerEvents: 'none',
-  },
-  summaryBox: {
-    padding: 20,
-    paddingTop: 24,
-    borderWidth: 1,
-    marginBottom: 24,
-    position: 'relative',
-  },
-  summaryLabel: {
-    position: 'absolute',
-    top: -10,
-    left: 16,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-  },
-  summaryText: {
-    lineHeight: 22,
-    fontStyle: 'italic',
-    fontWeight: '500',
-  },
   heroContainer: {
     height: 350,
     width: '100%',
@@ -1003,10 +847,24 @@ const styles = StyleSheet.create({
     padding: 24,
     paddingBottom: 40,
   },
-  categoryChip: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#EF4444',
-    height: 28,
+  summaryBox: {
+    padding: 20,
+    paddingTop: 24,
+    borderWidth: 1,
+    marginBottom: 24,
+    position: 'relative',
+  },
+  summaryLabel: {
+    position: 'absolute',
+    top: -10,
+    left: 16,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  summaryText: {
+    lineHeight: 22,
+    fontStyle: 'italic',
+    fontWeight: '500',
   },
   contentContainer: {
     padding: 24,
