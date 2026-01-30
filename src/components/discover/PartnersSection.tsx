@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text, Surface, IconButton, Divider } from 'react-native-paper';
 import { useAppTheme } from '../../theme/theme';
+import SectionHeader from './SectionHeader';
 
 const RECOMMENDED_APPS = [
     { id: 'app1', name: 'TradingView', icon: 'chart-box-outline', color: 'adaptive' },
@@ -20,27 +21,27 @@ const PartnersSection = () => {
     const theme = useAppTheme();
     return (
         <View style={styles.partnersContainer}>
-            <Text variant="titleMedium" style={[styles.sectionTitle, { color: theme.colors.onSurface, marginBottom: 12 }]}>Apps Recomendadas</Text>
+            <SectionHeader title="Apps Recomendadas" onViewAll={() => { }} />
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.appsScroll}>
                 {RECOMMENDED_APPS.map(app => (
-                    <Surface 
-                        key={app.id} 
+                    <Surface
+                        key={app.id}
                         style={[
-                            styles.appCard, 
-                            { 
+                            styles.appCard,
+                            {
                                 backgroundColor: theme.colors.elevation.level2,
                                 borderWidth: 1,
                                 borderColor: theme.colors.outlineVariant,
                                 borderRadius: theme.roundness * 4
                             }
-                        ]} 
+                        ]}
                         elevation={0}
                     >
-                        <IconButton 
-                            icon={app.icon} 
-                            iconColor={app.color === 'adaptive' ? theme.colors.onSurface : app.color} 
-                            size={28} 
-                            style={{ margin: 0 }} 
+                        <IconButton
+                            icon={app.icon}
+                            iconColor={app.color === 'adaptive' ? theme.colors.onSurface : app.color}
+                            size={28}
+                            style={{ margin: 0 }}
                         />
                         <Text variant="labelSmall" style={{ marginTop: 4, color: theme.colors.onSurface }}>{app.name}</Text>
                     </Surface>
@@ -51,7 +52,9 @@ const PartnersSection = () => {
                 <Divider style={{ backgroundColor: theme.colors.outlineVariant }} />
             </View>
 
-            <Text variant="labelMedium" style={[styles.partnersTitle, { color: theme.colors.onSurfaceVariant, opacity: 0.8 }]}>PARTNERS OFICIALES</Text>
+            <View style={{ marginTop: 8 }}>
+                <SectionHeader title="PARTNERS OFICIALES" variant="secondary" center />
+            </View>
             <View style={styles.partnersRow}>
                 {PARTNERS.map(p => (
                     <Text key={p.id} style={{ fontSize: 16, fontWeight: '700', color: theme.colors.onSurfaceVariant, opacity: 0.9 }}>{p.name}</Text>

@@ -7,37 +7,63 @@ interface SectionHeaderProps {
     title: string;
     showViewAll?: boolean;
     onViewAll?: () => void;
+    paddingHorizontal?: number;
+    variant?: 'primary' | 'secondary';
+    center?: boolean;
+    hideAccent?: boolean;
 }
 
-const SectionHeader = ({ title, showViewAll, onViewAll }: SectionHeaderProps) => {
+const SectionHeader = ({
+    title,
+    showViewAll,
+    onViewAll,
+    paddingHorizontal = 16,
+    variant = 'primary',
+    center = false,
+    hideAccent = false
+}: SectionHeaderProps) => {
     const theme = useAppTheme();
     return (
-        <View style={styles.listHeader}>
-            <Text 
-                variant="headlineSmall" 
-                style={[
-                    styles.sectionTitle, 
-                    { 
-                        color: theme.colors.onSurface,
-                        fontWeight: '800',
-                    }
-                ]}
-            >
-                {title}
-            </Text>
-            
+        <View style={[
+            styles.listHeader,
+            { paddingHorizontal },
+            center && { justifyContent: 'center' }
+        ]}>
+            <View style={styles.titleWrapper}>
+                {(variant === 'primary' && !center && !hideAccent) && (
+                    <View style={[styles.accent, { backgroundColor: theme.colors.primary }]} />
+                )}
+                <Text
+                    variant={variant === 'primary' ? 'headlineSmall' : 'labelMedium'}
+                    style={[
+                        styles.sectionTitle,
+                        {
+                            color: variant === 'primary' ? theme.colors.onSurface : theme.colors.onSurfaceVariant,
+                            fontWeight: '900',
+                            textTransform: variant === 'secondary' ? 'uppercase' : 'none',
+                            letterSpacing: variant === 'secondary' ? 2 : -0.75,
+                            opacity: variant === 'secondary' ? 0.7 : 1,
+                            flex: center ? 1 : undefined,
+                            textAlign: center ? 'center' : 'left',
+                        }
+                    ]}
+                >
+                    {title}
+                </Text>
+            </View>
+
             {showViewAll && (
-                <TouchableRipple 
-                    onPress={onViewAll} 
-                    borderless 
+                <TouchableRipple
+                    onPress={onViewAll}
+                    borderless
                     style={{ borderRadius: 12 }}
                 >
                     <View style={styles.actionRow}>
-                        <Text 
-                            variant="labelLarge" 
-                            style={{ 
-                                color: theme.colors.primary, 
-                                fontWeight: '700' 
+                        <Text
+                            variant="labelLarge"
+                            style={{
+                                color: theme.colors.primary,
+                                fontWeight: '700'
                             }}
                         >
                             Ver todo
@@ -55,12 +81,22 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingHorizontal: 20,
         marginTop: 24,
         marginBottom: 12,
     },
     sectionTitle: {
-        letterSpacing: -0.5,
+        // fontWeight handled in component to allow for variant switching
+    },
+    titleWrapper: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        flex: 1,
+    },
+    accent: {
+        width: 4,
+        height: 18,
+        borderRadius: 2,
+        marginRight: 10,
     },
     actionRow: {
         flexDirection: 'row',

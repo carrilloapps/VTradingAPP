@@ -20,8 +20,8 @@ type SearchState = 'idle' | 'searching' | 'success' | 'error' | 'too_short';
 
 // Layout constants for consistent spacing
 const LAYOUT = {
-  HORIZONTAL_PADDING: 12, // Reduced from 20
-  SECTION_SPACING: 14,
+  HORIZONTAL_PADDING: 16,
+  SECTION_SPACING: 20,
   BOTTOM_PADDING: 40,
 };
 
@@ -269,7 +269,10 @@ const SearchResultsScreen = () => {
         }
       >
         {/* Categories Section */}
-        <SectionHeader title="Categorías" />
+        <SectionHeader
+          title="Categorías"
+          paddingHorizontal={0}
+        />
         <View style={styles.sectionContent}>
           {loadingCategories ? (
             <View style={{ gap: 8, marginVertical: 8 }}>
@@ -289,7 +292,10 @@ const SearchResultsScreen = () => {
         </View>
 
         {/* Trending Tags Section */}
-        <SectionHeader title="Tags populares" />
+        <SectionHeader
+          title="Tags populares"
+          paddingHorizontal={0}
+        />
         <View style={styles.sectionContent}>
           {loadingTags ? (
             <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginVertical: 8 }}>
@@ -311,7 +317,10 @@ const SearchResultsScreen = () => {
         </View>
 
         {/* Recommended Apps Section */}
-        <SectionHeader title="Apps de Interés" />
+        <SectionHeader
+          title="Apps Recomendadas"
+          paddingHorizontal={0}
+        />
         <AppRecommendations />
       </ScrollView>
     );
