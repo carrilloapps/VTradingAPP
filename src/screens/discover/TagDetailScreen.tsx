@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, ActivityIndicator, StatusBar, Animated } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useRoute, useNavigation } from '@react-navigation/native';
@@ -8,7 +8,7 @@ import { useAppTheme } from '../../theme/theme';
 import ArticleCard from '../../components/discover/ArticleCard';
 import CategoryTagSkeleton from '../../components/discover/CategoryTagSkeleton';
 import DiscoverEmptyView from '../../components/discover/DiscoverEmptyView';
-import GradientAppbar from '../../components/common/GradientAppbar';
+import DiscoverHeader from '../../components/discover/DiscoverHeader';
 import DetailHeroHeader from '../../components/discover/DetailHeroHeader';
 import Share from 'react-native-share';
 import { captureRef } from 'react-native-view-shot';
@@ -31,6 +31,7 @@ const TagDetailScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   // Share Logic
   const viewShotRef = React.useRef<any>(null);
@@ -192,10 +193,12 @@ const TagDetailScreen = () => {
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar barStyle="light-content" translucent backgroundColor="transparent" />
 
-      <GradientAppbar
-        title={`#${tag?.name || ''}`}
-        onBack={() => navigation.goBack()}
-        onShare={() => setShareDialogVisible(true)}
+      <DiscoverHeader
+        variant="tag"
+        title={tag?.name || ''}
+        onBackPress={() => navigation.goBack()}
+        onSharePress={() => setShareDialogVisible(true)}
+        scrollY={scrollY}
       />
 
       <ShareableDetail
@@ -220,6 +223,11 @@ const TagDetailScreen = () => {
         <Animated.FlatList
           data={posts}
           keyExtractor={(item) => item.id.toString()}
+          scrollEventThrottle={16}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: true }
+          )}
           renderItem={({ item, index }) => (
             <ArticleCard
               article={item}

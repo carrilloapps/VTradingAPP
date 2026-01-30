@@ -14,6 +14,7 @@ import CategoryCard from '../../components/discover/CategoryCard';
 import TagCloud from '../../components/discover/TagCloud';
 import AppRecommendations from '../../components/discover/AppRecommendations';
 import SectionHeader from '../../components/discover/SectionHeader';
+import DiscoverHeader from '../../components/discover/DiscoverHeader';
 
 type SearchState = 'idle' | 'searching' | 'success' | 'error' | 'too_short';
 
@@ -356,33 +357,18 @@ const SearchResultsScreen = () => {
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar barStyle={theme.dark ? 'light-content' : 'dark-content'} />
-      <Appbar.Header
-        elevated
-        style={{
-          backgroundColor: theme.colors.surface,
-          borderBottomWidth: 1,
-          borderBottomColor: theme.colors.outline
+      <DiscoverHeader
+        variant="search"
+        searchTerm={searchQuery}
+        onSearchChange={setSearchQuery}
+        onSearchSubmit={() => {
+          executeSearch(searchQuery, 1, false);
+          Keyboard.dismiss();
         }}
-      >
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <View style={{ flex: 1, paddingHorizontal: 8 }}>
-          <SearchBar
-            placeholder="Buscar noticias, tickers o tags..."
-            onChangeText={setSearchQuery}
-            value={searchQuery}
-            onSubmitEditing={() => {
-              executeSearch(searchQuery, 1, false);
-              Keyboard.dismiss();
-            }}
-            autoFocus={!initialQuery}
-          />
-        </View>
-        <Appbar.Action
-          icon="bell-outline"
-          onPress={() => navigation.navigate('Notifications')}
-          accessibilityLabel="Notificaciones"
-        />
-      </Appbar.Header>
+        onBackPress={() => navigation.goBack()}
+        onNotificationsPress={() => navigation.navigate('Notifications')}
+        autoFocus={!initialQuery}
+      />
 
       {searchState === 'searching' && page === 1 ? (
         <FlatList

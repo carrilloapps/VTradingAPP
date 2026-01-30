@@ -1,12 +1,15 @@
 import React from 'react';
-import { View, StyleSheet, Image, Animated, StatusBar, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, Image, Animated, StatusBar, useWindowDimensions, Keyboard } from 'react-native';
 import { Text, useTheme, TouchableRipple } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import SearchBar from '../ui/SearchBar';
+
+export type DiscoverHeaderVariant = 'main' | 'detail' | 'tag' | 'category' | 'search';
 
 interface DiscoverHeaderProps {
-    variant?: 'main' | 'detail';
+    variant?: DiscoverHeaderVariant;
     onSearchPress?: () => void;
     onNotificationsPress?: () => void;
     onBackPress?: () => void;
@@ -14,67 +17,65 @@ interface DiscoverHeaderProps {
     title?: string;
     scrollY?: Animated.Value;
     contentHeight?: number;
+    // Search specific
+    searchTerm?: string;
+    onSearchChange?: (text: string) => void;
+    onSearchSubmit?: () => void;
+    autoFocus?: boolean;
 }
 
-const DiscoverHeader = ({
+const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
     variant = 'main',
     onSearchPress,
     onNotificationsPress,
     onBackPress,
     onSharePress,
-    title,
+    title = '',
     scrollY,
-    contentHeight = 0
-}: DiscoverHeaderProps) => {
-    const insets = useSafeAreaInsets();
+    contentHeight = 0,
+    searchTerm,
+    onSearchChange,
+    onSearchSubmit,
+    autoFocus = false,
+}) => {
     const theme = useTheme();
+    const insets = useSafeAreaInsets();
     const { width: windowWidth, height: windowHeight } = useWindowDimensions();
 
-    // Default scroll value if none provided
     const scroll = scrollY || new Animated.Value(0);
 
-    // Reading Progress calculation
-    // contentHeight includes the header and other elements, so we need a rough estimate of scrollable area
-    const maxScroll = contentHeight > windowHeight ? contentHeight - windowHeight : 1;
-
-    const progressScaleX = scroll.interpolate({
-        inputRange: [0, maxScroll],
-        outputRange: [0.0001, 1], // Avoid 0 scale issues
-        extrapolate: 'clamp'
-    });
-
-    const progressTranslateX = scroll.interpolate({
-        inputRange: [0, maxScroll],
-        outputRange: [-windowWidth / 2, 0],
-        extrapolate: 'clamp'
-    });
-
-    // Background transition: From Gradient (Top) to Solid (Glass)
+    // Common animations
     const gradientOpacity = scroll.interpolate({
         inputRange: [0, 100],
         outputRange: [1, 0],
         extrapolate: 'clamp'
     });
 
+    const isFadingVariant = variant === 'detail' || variant === 'tag' || variant === 'category';
+
     const solidBgOpacity = variant === 'main'
         ? 0
-        : scroll.interpolate({
-            inputRange: [50, 200],
-            outputRange: [0, 1],
-            extrapolate: 'clamp'
-        });
+        : variant === 'search'
+            ? 1 // Search usually has a solid background for contrast
+            : scroll.interpolate({
+                inputRange: [50, 200],
+                outputRange: [0, 1],
+                extrapolate: 'clamp'
+            });
 
-    // Logo fade-out for detail variant
+    // Logo fade-out for detail/tag/category variants
     const logoOpacity = variant === 'main'
         ? 1
-        : scroll.interpolate({
-            inputRange: [0, 80],
-            outputRange: [1, 0],
-            extrapolate: 'clamp'
-        });
+        : isFadingVariant || variant === 'search'
+            ? scroll.interpolate({
+                inputRange: [0, 80],
+                outputRange: [1, 0],
+                extrapolate: 'clamp'
+            })
+            : 1;
 
-    // Title fade-in for detail variant
-    const titleOpacity = variant === 'main'
+    // Title fade-in for detail/tag/category variants
+    const titleOpacity = variant === 'main' || variant === 'search'
         ? 0
         : scroll.interpolate({
             inputRange: [120, 220],
@@ -84,48 +85,67 @@ const DiscoverHeader = ({
 
     const isDark = theme.dark;
 
-    // Status Bar Style: Adaptive to theme to ensure visibility over the background gradient
-    const barStyle = isDark ? 'light-content' : 'dark-content';
+    // Status Bar Style
+    const barStyle = isDark ? 'light-content' : (variant === 'main' || isFadingVariant ? (isFadingVariant ? 'light-content' : 'dark-content') : 'dark-content');
 
-    // Logo Glow Color: Green in light Mode, Dark in dark mode
-    const logoGlowColor = isDark ? 'rgba(0,0,0,0.8)' : '#22C55E';
-
-    // Button dynamic styles (Match UnifiedHeader) - Glassy style
+    // Button dynamic styles
     const buttonBgColor = isDark ? 'rgba(30, 35, 32, 0.7)' : 'rgba(255, 255, 255, 0.85)';
     const buttonStyles = [
         styles.iconButton,
         {
             backgroundColor: buttonBgColor,
-            borderColor: theme.dark ? 'rgba(255, 255, 255, 0.1)' : theme.colors.outline,
+            borderColor: isDark ? 'rgba(255, 255, 255, 0.1)' : theme.colors.outline,
             borderWidth: 1,
         }
     ];
 
     const hitSlop = { top: 10, bottom: 10, left: 10, right: 10 };
 
+    // Reading Progress calculation (only for detail)
+    const maxScroll = contentHeight > windowHeight ? contentHeight - windowHeight : 1;
+    const isDetail = variant === 'detail';
+
+    const progressScaleX = scroll.interpolate({
+        inputRange: [0, maxScroll],
+        outputRange: [0.0001, 1],
+        extrapolate: 'clamp'
+    });
+
+    const progressTranslateX = scroll.interpolate({
+        inputRange: [0, maxScroll],
+        outputRange: [-windowWidth / 2, 0],
+        extrapolate: 'clamp'
+    });
+
+    const displayTitle = variant === 'tag' && !title.startsWith('#') ? `#${title}` : title;
+
     return (
-        <View style={[styles.container, { height: insets.top + (variant === 'detail' ? 62 : 60) }]}>
+        <View style={[
+            styles.container,
+            { height: insets.top + 62 },
+            variant === 'search' && styles.containerSearch
+        ]}>
             <StatusBar
-                barStyle={barStyle}
+                barStyle={isDark ? 'light-content' : 'dark-content'}
                 translucent
                 backgroundColor="transparent"
             />
 
             {/* Background Layer */}
             <View style={StyleSheet.absoluteFill}>
-                {/* Initial Gradient: Visibility for Main and Initial Detail view */}
+                {/* Gradient Layer (fades out on scroll for fading variants) */}
                 <Animated.View style={[
                     StyleSheet.absoluteFill,
-                    variant === 'detail' ? { opacity: gradientOpacity } : { opacity: 1 }
+                    { opacity: variant === 'main' || isFadingVariant ? gradientOpacity : 0 }
                 ]}>
                     <LinearGradient
-                        colors={[theme.colors.background, 'transparent']}
-                        style={{ height: insets.top + 120 }}
+                        colors={['rgba(0,0,0,0.6)', 'transparent']}
+                        style={{ height: insets.top + 140 }}
                         pointerEvents="none"
                     />
                 </Animated.View>
 
-                {/* Solid Background (Glassmorphism): Fades in only on scroll for DETAIL variant */}
+                {/* Solid Glassy Layer (fades in on scroll for detail/tag/category) */}
                 <Animated.View
                     style={[
                         StyleSheet.absoluteFill,
@@ -135,7 +155,6 @@ const DiscoverHeader = ({
                         }
                     ]}
                 >
-                    {/* Add a subtle bottom separator */}
                     <View style={[
                         styles.separator,
                         {
@@ -150,8 +169,8 @@ const DiscoverHeader = ({
                     ]} />
                 </Animated.View>
 
-                {/* Reading Progress Indicator */}
-                {variant === 'detail' && contentHeight > 0 && (
+                {/* Progress Bar (detail only) */}
+                {isDetail && contentHeight > 0 && (
                     <Animated.View
                         style={[
                             styles.progressBar,
@@ -168,67 +187,65 @@ const DiscoverHeader = ({
                 )}
             </View>
 
-            <View style={[styles.content, { marginTop: insets.top }]}>
+            {/* Content Layer */}
+            <View style={[styles.content, { paddingTop: insets.top }]}>
                 {/* Left Section */}
-                <View style={styles.leftContainer}>
-                    {variant === 'main' ? (
-                        <View style={[styles.logoWrapper, {
-                            shadowColor: logoGlowColor,
-                            shadowRadius: isDark ? 10 : 15,
-                            shadowOpacity: isDark ? 0.3 : 0.6,
-                        }]}>
-                            <Image
-                                source={require('../../assets/images/logotipo.png')}
-                                style={[styles.logo, { tintColor: isDark ? 'white' : theme.colors.onPrimaryContainer }]}
-                                resizeMode="contain"
-                            />
-                        </View>
-                    ) : (
+                <View style={[styles.leftContainer, variant === 'main' && { flex: 1 }]}>
+                    {variant !== 'main' ? (
                         <TouchableRipple
                             onPress={onBackPress}
                             style={buttonStyles}
                             borderless
-                            rippleColor="rgba(0, 0, 0, .1)"
-                            accessibilityRole="button"
-                            accessibilityLabel="Regresar"
-                            accessibilityHint="Volver a la pantalla anterior"
+                            rippleColor="rgba(0,0,0,0.1)"
                             hitSlop={hitSlop}
+                            accessibilityLabel="Volver"
+                            accessibilityRole="button"
                         >
-                            <MaterialCommunityIcons name="chevron-left" size={28} color={theme.colors.onSurface} />
+                            <MaterialCommunityIcons name="arrow-left" size={24} color={theme.colors.onSurface} />
                         </TouchableRipple>
-                    )}
-                </View>
-
-                {/* Center Section (Detail only) */}
-                {variant === 'detail' && (
-                    <View style={styles.centerContainer} pointerEvents="none">
-                        <Animated.View style={[
-                            styles.logoWrapper,
-                            {
-                                opacity: logoOpacity,
-                                shadowColor: logoGlowColor,
-                                shadowRadius: isDark ? 10 : 15,
-                                shadowOpacity: isDark ? 0.3 : 0.5,
-                            }
-                        ]}>
+                    ) : (
+                        <Animated.View style={{ opacity: logoOpacity }}>
                             <Image
                                 source={require('../../assets/images/logotipo.png')}
-                                style={[styles.logo, { tintColor: isDark ? 'white' : theme.colors.onPrimaryContainer }]}
+                                style={styles.logoImage}
                                 resizeMode="contain"
                             />
                         </Animated.View>
+                    )}
+                </View>
 
-                        <Animated.View style={[StyleSheet.absoluteFill, styles.centerContainer, { opacity: titleOpacity }]}>
+                {/* Center Section (Title or SearchBar) */}
+                {variant === 'search' ? (
+                    <View style={styles.searchContainer}>
+                        <SearchBar
+                            placeholder="Buscar noticias..."
+                            value={searchTerm}
+                            onChangeText={onSearchChange}
+                            onSubmitEditing={() => {
+                                onSearchSubmit?.();
+                                Keyboard.dismiss();
+                            }}
+                            autoFocus={autoFocus}
+                            style={{ elevation: 0, shadowOpacity: 0 }}
+                        />
+                    </View>
+                ) : (
+                    <View style={[styles.centerContainer, { top: insets.top }]}>
+                        {isFadingVariant && (
+                            <Animated.View style={{ opacity: logoOpacity, position: 'absolute' }}>
+                                <Image
+                                    source={require('../../assets/images/logotipo.png')}
+                                    style={styles.logoImage}
+                                    resizeMode="contain"
+                                />
+                            </Animated.View>
+                        )}
+                        <Animated.View style={{ opacity: titleOpacity }}>
                             <Text
-                                variant="titleSmall"
                                 numberOfLines={1}
-                                style={{
-                                    fontWeight: '800',
-                                    color: theme.colors.onSurface,
-                                    letterSpacing: -0.5,
-                                }}
+                                style={[styles.headerTitle, { color: theme.colors.onSurface }]}
                             >
-                                {title}
+                                {displayTitle}
                             </Text>
                         </Animated.View>
                     </View>
@@ -236,48 +253,54 @@ const DiscoverHeader = ({
 
                 {/* Right Section */}
                 <View style={styles.rightContainer}>
-                    {onSearchPress && (
-                        <TouchableRipple
-                            onPress={onSearchPress}
-                            style={buttonStyles}
-                            borderless
-                            rippleColor="rgba(0, 0, 0, .1)"
-                            accessibilityRole="button"
-                            accessibilityLabel="Buscar"
-                            accessibilityHint="Abrir el buscador de artículos"
-                            hitSlop={hitSlop}
-                        >
-                            <MaterialCommunityIcons name="magnify" size={26} color={theme.colors.onSurface} />
-                        </TouchableRipple>
-                    )}
-
-                    {onNotificationsPress && (
+                    {variant === 'main' ? (
+                        <View style={styles.rightButtons}>
+                            <TouchableRipple
+                                onPress={onSearchPress}
+                                style={buttonStyles}
+                                borderless
+                                rippleColor="rgba(0,0,0,0.1)"
+                                hitSlop={hitSlop}
+                                accessibilityLabel="Buscar"
+                                accessibilityRole="button"
+                            >
+                                <MaterialCommunityIcons name="magnify" size={24} color={theme.colors.onSurface} />
+                            </TouchableRipple>
+                            <TouchableRipple
+                                onPress={onNotificationsPress}
+                                style={buttonStyles}
+                                borderless
+                                rippleColor="rgba(0,0,0,0.1)"
+                                hitSlop={hitSlop}
+                                accessibilityLabel="Notificaciones"
+                                accessibilityRole="button"
+                            >
+                                <MaterialCommunityIcons name="bell-outline" size={24} color={theme.colors.onSurface} />
+                            </TouchableRipple>
+                        </View>
+                    ) : variant === 'search' ? (
                         <TouchableRipple
                             onPress={onNotificationsPress}
                             style={buttonStyles}
                             borderless
-                            rippleColor="rgba(0, 0, 0, .1)"
-                            accessibilityRole="button"
-                            accessibilityLabel="Notificaciones"
-                            accessibilityHint="Ver tus notificaciones"
+                            rippleColor="rgba(0,0,0,0.1)"
                             hitSlop={hitSlop}
+                            accessibilityLabel="Notificaciones"
+                            accessibilityRole="button"
                         >
                             <MaterialCommunityIcons name="bell-outline" size={24} color={theme.colors.onSurface} />
                         </TouchableRipple>
-                    )}
-
-                    {onSharePress && (
+                    ) : (
                         <TouchableRipple
                             onPress={onSharePress}
                             style={buttonStyles}
                             borderless
-                            rippleColor="rgba(0, 0, 0, .1)"
-                            accessibilityRole="button"
-                            accessibilityLabel="Compartir"
-                            accessibilityHint="Compartir este artículo"
+                            rippleColor="rgba(0,0,0,0.1)"
                             hitSlop={hitSlop}
+                            accessibilityLabel="Compartir"
+                            accessibilityRole="button"
                         >
-                            <MaterialCommunityIcons name="share-variant-outline" size={22} color={theme.colors.onSurface} />
+                            <MaterialCommunityIcons name="share-variant" size={22} color={theme.colors.onSurface} />
                         </TouchableRipple>
                     )}
                 </View>
@@ -288,64 +311,83 @@ const DiscoverHeader = ({
 
 const styles = StyleSheet.create({
     container: {
+        width: '100%',
+        zIndex: 100,
         position: 'absolute',
         top: 0,
         left: 0,
         right: 0,
-        zIndex: 100,
+    },
+    containerSearch: {
+        position: 'relative',
     },
     content: {
         flex: 1,
         flexDirection: 'row',
         alignItems: 'center',
-        paddingHorizontal: 16,
+        paddingHorizontal: 20,
+        justifyContent: 'space-between',
     },
     leftContainer: {
-        flex: 1,
-        flexDirection: 'row',
-        alignItems: 'center',
+        minWidth: 48,
+        justifyContent: 'center',
+        zIndex: 2,
     },
     centerContainer: {
         position: 'absolute',
-        top: 0,
         bottom: 0,
-        left: 38, // Maximized space for title
-        right: 38, // Maximized space for title
+        left: 70,
+        right: 70,
         alignItems: 'center',
         justifyContent: 'center',
     },
-    logoWrapper: {
-        shadowOffset: { width: 0, height: 4 },
-        elevation: 5,
-    },
-    logo: {
-        height: 28,
-        width: 120,
+    searchContainer: {
+        flex: 1,
+        paddingHorizontal: 8,
     },
     rightContainer: {
-        flex: 1,
+        minWidth: 48,
+        alignItems: 'flex-end',
+        justifyContent: 'center',
+        zIndex: 2,
+    },
+    rightButtons: {
         flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
         gap: 8,
     },
     iconButton: {
         width: 40,
         height: 40,
         borderRadius: 20,
-        alignItems: 'center',
         justifyContent: 'center',
-        overflow: 'hidden',
+        alignItems: 'center',
     },
-    separator: {
-        zIndex: 1,
+    headerTitle: {
+        fontSize: 16,
+        fontWeight: '800',
+        letterSpacing: -0.5,
+    },
+    logoImage: {
+        height: 32,
+        width: 130,
+    },
+    logoImageSmall: {
+        height: 24,
+        width: 100,
+    },
+    logoText: {
+        fontStyle: 'italic',
+        fontWeight: '900',
+        letterSpacing: -1,
     },
     progressBar: {
         position: 'absolute',
         bottom: 0,
-        left: 0,
         height: 2,
-        zIndex: 10,
+        left: 0,
+    },
+    separator: {
+        bottom: 0,
     }
 });
 
