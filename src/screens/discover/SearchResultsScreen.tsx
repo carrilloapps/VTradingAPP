@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { View, StyleSheet, FlatList, ActivityIndicator, StatusBar, Keyboard, ScrollView, RefreshControl } from 'react-native';
-import { Text, useTheme, Appbar, Button } from 'react-native-paper';
+import { Text, useTheme, Button } from 'react-native-paper';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { wordPressService, FormattedPost, WordPressCategory, WordPressTag } from '../../services/WordPressService';
 import { observabilityService } from '../../services/ObservabilityService';
@@ -8,7 +8,6 @@ import ArticleCard from '../../components/discover/ArticleCard';
 import ArticleSkeleton from '../../components/discover/ArticleSkeleton';
 import DiscoverEmptyView from '../../components/discover/DiscoverEmptyView';
 import Skeleton from '../../components/ui/Skeleton';
-import SearchBar from '../../components/ui/SearchBar';
 import { useDebounce } from '../../hooks/useDebounce';
 import CategoryCard from '../../components/discover/CategoryCard';
 import TagCloud from '../../components/discover/TagCloud';
