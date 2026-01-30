@@ -32,8 +32,8 @@ const AppCard: React.FC<AppCardProps> = ({ app, onPress }) => {
         return (
           <SvgUri
             uri={app.logoUri}
-            width={64}
-            height={64}
+            width={54}
+            height={54}
             color={accentColor}
             fill={accentColor}
           />
@@ -69,7 +69,7 @@ const AppCard: React.FC<AppCardProps> = ({ app, onPress }) => {
   return (
     <TouchableRipple
       onPress={handlePress}
-      style={{ borderRadius: theme.roundness * 6 }}
+      style={{ borderRadius: theme.roundness * 3 }}
       borderless
       accessibilityRole="button"
       accessibilityLabel={`App ${app.name}`}
@@ -89,7 +89,7 @@ const AppCard: React.FC<AppCardProps> = ({ app, onPress }) => {
         <Text
           variant="labelSmall"
           style={[styles.name, { color: theme.colors.onSurface }]}
-          numberOfLines={2}
+          numberOfLines={1}
         >
           {app.name}
         </Text>
@@ -119,11 +119,12 @@ const styles = StyleSheet.create({
   name: {
     textAlign: 'center',
     fontWeight: '600',
-    fontSize: 9, // Reduced from 10
+    fontSize: 10, // Reduced from 10
+    marginTop: 4, // Reduced from 8
   },
   remoteLogo: {
-    width: 64,
-    height: 64,
+    width: 54,
+    height: 54,
   },
 });
 
