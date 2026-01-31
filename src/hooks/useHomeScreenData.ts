@@ -39,7 +39,7 @@ export const useHomeScreenData = () => {
 
     const calculateSpread = useCallback((data: CurrencyRate[]): number | null => {
         const usdRates = data.filter(r => (r.code === 'USD' || r.code === 'USDT') && r.value > 0);
-        
+
         if (usdRates.length >= 2) {
             const values = usdRates.map(r => r.value);
             const min = Math.min(...values);
@@ -105,7 +105,7 @@ export const useHomeScreenData = () => {
                 updates.spread = calculateSpread(ratesResult.value);
                 ratesSuccess = true;
             } else {
-                observabilityService.captureError(ratesResult.reason, { 
+                observabilityService.captureError(ratesResult.reason, {
                     context: 'useHomeScreenData.loadData.rates',
                     isManualRefresh
                 });
@@ -117,7 +117,7 @@ export const useHomeScreenData = () => {
                 updates.isMarketOpen = StocksService.isMarketOpen();
                 stocksSuccess = true;
             } else {
-                observabilityService.captureError(stocksResult.reason, { 
+                observabilityService.captureError(stocksResult.reason, {
                     context: 'useHomeScreenData.loadData.stocks',
                     isManualRefresh
                 });

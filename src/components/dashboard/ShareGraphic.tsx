@@ -28,28 +28,28 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
   const isVertical = aspectRatio === '16:9';
 
   // Dynamic sizes based on aspect ratio
-  const platformIconSize = isVertical ? 20 : 16;
-  const platformTextSize = isVertical ? 11 : 9;
-  const logoWidth = isVertical ? 200 : 160;
-  const logoHeight = isVertical ? 52 : 42;
-  const freeBadgeTextSize = isVertical ? 9 : 7;
-  const urlTextSize = isVertical ? 16 : 13;
-  const dateIconSize = isVertical ? 18 : 14;
-  const dateTextSize = isVertical ? 13 : 11;
-  const cardTitleSize = isVertical ? 18 : 13;
+  const platformIconSize = 24;
+  const platformTextSize = 12;
+  const logoWidth = isVertical ? 210 : 150;
+  const logoHeight = isVertical ? 54 : 40;
+  const freeBadgeTextSize = isVertical ? 10 : 7;
+  const urlTextSize = isVertical ? 18 : 13;
+  const dateIconSize = 18;
+  const dateTextSize = 14;
+  const cardTitleSize = isVertical ? 20 : 12;
   const cardIconSize = isVertical ? 24 : 20;
-  const cardIconContainerSize = isVertical ? 36 : 26;
-  const valueSize = isVertical ? 68 : 54;
-  const currencySize = isVertical ? 24 : 18;
+  const cardIconContainerSize = isVertical ? 38 : 24;
+  const valueSize = isVertical ? 76 : 48;
+  const currencySize = isVertical ? 26 : 16;
   const trendIconSize = isVertical ? 18 : 14;
-  const trendTextSize = isVertical ? 13 : 11;
-  const detailLabelSize = isVertical ? 12 : 10;
-  const detailValueSize = isVertical ? 24 : 20;
+  const trendTextSize = isVertical ? 14 : 10;
+  const detailLabelSize = isVertical ? 12 : 9;
+  const detailValueSize = isVertical ? 24 : 18;
   const detailCurrencySize = isVertical ? 14 : 12;
-  const spreadIconSize = isVertical ? 22 : 18;
-  const spreadTextSize = isVertical ? 15 : 12;
-  const footerIconSize = isVertical ? 20 : 16;
-  const footerTextSize = isVertical ? 11 : 9;
+  const spreadIconSize = 22;
+  const spreadTextSize = 16;
+  const footerIconSize = 22;
+  const footerTextSize = 12;
 
   // Computed Styles
   const templateStyle = [
@@ -81,7 +81,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
 
   const contentStyle = [
     styles.templateContent,
-    aspectRatio === '16:9' && ({ flex: 1, justifyContent: 'center', gap: 24 } as const)
+    aspectRatio === '16:9' && ({ gap: 40 } as const)
   ];
 
   const footerTextStyle = [styles.templateFooterText, { color: theme.colors.primary, fontSize: footerTextSize }];
@@ -199,7 +199,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
                     </View>
                   </View>
 
-                  {isVertical && (rate.buyValue || rate.sellValue) && (
+                  {isVertical && (rate.buyValue !== undefined || rate.sellValue !== undefined) && (
                     <View style={styles.templateVerticalDetails}>
                       <View style={styles.templateDetailItem}>
                         <Text style={detailLabelStyle}>COMPRA</Text>
@@ -283,6 +283,7 @@ const styles = StyleSheet.create({
     height: 1066,
     paddingVertical: 100,
     paddingHorizontal: 40,
+    justifyContent: 'space-around', // Better distribution
   },
   templateGlow: {
     position: 'absolute',
@@ -299,6 +300,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
     marginTop: 0,
+    marginBottom: 20, // Add separation from content
   },
   platformBadgesContainer: {
     position: 'absolute',
@@ -312,9 +314,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: 'rgba(128,128,128,0.1)',
   },
@@ -346,8 +348,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     backgroundColor: 'rgba(128,128,128,0.05)',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 6,
     borderRadius: 100,
   },
   templateDate: {

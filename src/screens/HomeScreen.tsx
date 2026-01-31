@@ -54,14 +54,14 @@ const HomeScreen = ({ navigation }: any) => {
     setIsReadyToCapture(false); // Reset readiness for new format
 
     showToast('Generando imagen para compartir...', 'info');
-    
+
     // Wait for the graphic to be ready (layout updated)
     // We use a small polling loop as a failsafe if onReady doesn't fire instantly
     // but primarily we rely on the component callback
     let attempts = 0;
     while (!isReadyToCapture && attempts < 20) { // Max 2s wait
-        await new Promise<void>(resolve => setTimeout(() => resolve(), 100));
-        attempts++;
+      await new Promise<void>(resolve => setTimeout(() => resolve(), 100));
+      attempts++;
     }
 
     if (viewShotRef.current) {
@@ -77,10 +77,22 @@ const HomeScreen = ({ navigation }: any) => {
         if (!uri) throw new Error("Failed to capture image");
         const sharePath = uri.startsWith('file://') ? uri : `file://${uri}`;
 
+        const ratesDetails = featuredRates.map(rate => {
+          const buyStr = rate.buyValue ? ` (Compra: ${rate.buyValue})` : '';
+          const sellStr = rate.sellValue ? ` (Venta: ${rate.sellValue})` : '';
+          return `${rate.code === 'USDT' ? '🔶' : '💵'} *${rate.code}:* ${rate.value} Bs${buyStr}${sellStr}`;
+        }).join('\n');
+
+        const message = `📊 *VTrading - Reporte Diario*\n\n` +
+          `${ratesDetails}\n` +
+          (spread ? `⚖️ *Spread:* ${spread.toFixed(2)}% _(Diferencia USD vs USDT contra el VES)_\n` : '') +
+          `⏱️ _Act: ${lastUpdated}_\n\n` +
+          `🌐 vtrading.app`;
+
         await Share.open({
           url: sharePath,
           type: 'image/jpeg',
-          message: `Tasas actualizadas en VTrading (${format})`,
+          message,
         });
 
         // Cleanup (optional, but good practice if supported by fs, here we assume Share handles it mostly)
