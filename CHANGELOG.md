@@ -1,4 +1,4 @@
-# Changelog - VTradingAPP
+# Changelog - VTrading
 
 Todas las novedades y cambios notables de este proyecto se documentarán en este archivo.
 

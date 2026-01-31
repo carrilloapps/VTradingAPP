@@ -1,9 +1,9 @@
 # Estándares de Código y Calidad
 
-Este documento define las directrices técnicas, de accesibilidad y de diseño que rigen el desarrollo de VTradingAPP.
+Este documento define las directrices técnicas, de accesibilidad y de diseño que rigen el desarrollo de VTrading.
 
 ## 1. Arquitectura y Código
-VTradingAPP sigue una arquitectura modular en `src/`:
+VTrading sigue una arquitectura modular en `src/`:
 - **Hooks Personalizados**: La lógica de negocio pesada (ej: `HomeScreen`) debe extraerse a hooks para evitar componentes "clase Dios".
 - **Virtualización**: Se prefiere el uso de `@shopify/flash-list` para el renderizado de listas extensas de tasas.
 - **Seguridad**: Evitar el registro (logging) de Información Personal Identificable (PII) en Sentry o consola.

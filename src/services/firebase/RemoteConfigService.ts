@@ -18,7 +18,7 @@ class RemoteConfigService {
       });
 
       await setDefaults(this.remoteConfig, {
-        welcome_message: 'Bienvenido a VTradingAPP',
+        welcome_message: 'Bienvenido a VTrading',
         enable_new_feature: false,
         api_timeout: 5000,
         refresh_interval: 60,

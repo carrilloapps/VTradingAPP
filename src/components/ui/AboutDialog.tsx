@@ -51,7 +51,7 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
           containerStyle={styles.logoContainer}
         />
         <Text variant="headlineSmall" style={[styles.title, { color: theme.colors.onSurface }]}>
-          {appName || 'VTradingAPP'}
+          {appName || 'VTrading'}
         </Text>
         <Text variant="bodyMedium" style={[styles.version, { color: theme.colors.onSurfaceVariant }]}>
           Versión {version}

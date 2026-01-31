@@ -1,4 +1,4 @@
-# Guía para Agentes VTradingAPP
+# Guía para Agentes VTrading
 
 Este proyecto utiliza documentación distribuida para mantener el contexto cerca del código relevante. Por favor, consulta los archivos `AGENTS.md` en los directorios específicos para detalles de implementación.
 

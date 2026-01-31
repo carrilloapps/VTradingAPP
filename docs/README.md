@@ -1,6 +1,6 @@
-# Documentación de VTradingAPP
+# Documentación de VTrading
 
-Bienvenido a la carpeta de documentación técnica de VTradingAPP. Aquí encontrarás guías funcionales para el desarrollo y mantenimiento del proyecto.
+Bienvenido a la carpeta de documentación técnica de VTrading. Aquí encontrarás guías funcionales para el desarrollo y mantenimiento del proyecto.
 
 ## Guías Principales
 - 📘 **[Guía de API](./API_GUIDE.md)**: Arquitectura de red, caché y referencia técnica de endpoints.

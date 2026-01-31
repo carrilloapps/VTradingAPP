@@ -257,7 +257,7 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
   const handleShareText = async () => {
     setShareDialogVisible(false);
     try {
-      const message = `📊 *VTradingAPP - Mercado de Valores*\n\n` +
+      const message = `📊 *VTrading - Mercado de Valores*\n\n` +
         (indexData ? `📉 *Índice IBC:* ${indexData.value} (${indexData.changePercent})\n` : '') +
         (stocks.length > 0 ? `🚀 *Top Stock:* ${stocks[0].symbol} @ ${stocks[0].price.toFixed(2)} Bs\n` : '') +
         `🌐 vtrading.app`;
