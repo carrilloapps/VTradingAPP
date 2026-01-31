@@ -28,6 +28,8 @@ interface UnifiedHeaderProps {
   rightActionIcon?: string;
   secondaryActionIcon?: string;
   notificationIcon?: string;
+  subtitleIcon?: string;
+  subtitleIconColor?: string;
   showNotification?: boolean;
   showSecondaryAction?: boolean;
   showAd?: boolean;
@@ -52,6 +54,8 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   rightActionIcon = 'refresh',
   secondaryActionIcon = 'share-variant',
   notificationIcon = 'bell-outline',
+  subtitleIcon,
+  subtitleIconColor,
   showNotification = true,
   showSecondaryAction = false,
   showAd = true,
@@ -99,9 +103,19 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
         {title}
       </Text>
       {subtitle && (
-        <Text style={[styles.subtitleText, themeStyles.subtitleText]}>
-          {subtitle}
-        </Text>
+        <View style={styles.subtitleContainer}>
+          {subtitleIcon && (
+            <MaterialCommunityIcons
+              name={subtitleIcon}
+              size={14}
+              color={subtitleIconColor || theme.colors.onSurfaceVariant}
+              style={styles.subtitleIcon}
+            />
+          )}
+          <Text style={[styles.subtitleText, themeStyles.subtitleText, subtitleIcon && styles.noMarginTop]}>
+            {subtitle}
+          </Text>
+        </View>
       )}
     </View>
   );
@@ -220,6 +234,17 @@ const styles = StyleSheet.create({
   },
   simpleTitle: {
     fontWeight: '800',
+  },
+  subtitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  subtitleIcon: {
+    marginRight: 4,
+  },
+  noMarginTop: {
+    marginTop: 0,
   },
   adContainer: {
     alignItems: 'center',

@@ -81,8 +81,16 @@ const RatesSection: React.FC<RatesSectionProps> = ({ rates, navigation }) => {
                 customIcon = <TetherIcon backgroundColor={iconBackground} contentColor="#212121" />;
             }
 
+            const getDescriptiveSubtitle = (r: CurrencyRate) => {
+                if (r.type === 'fiat') return 'Banco Central de Venezuela';
+                if (r.type === 'crypto') return 'Cripto • P2P';
+                if (r.type === 'border') return 'Frontera • P2P';
+                return r.name;
+            };
+
             return {
                 title: rate.name,
+                subtitle: getDescriptiveSubtitle(rate),
                 value: displayValue,
                 currency: 'Bs',
                 changePercent: rate.changePercent !== null ? `${rate.changePercent.toFixed(2)}%` : '0.00%',

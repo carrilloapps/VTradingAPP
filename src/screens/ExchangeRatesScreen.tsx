@@ -183,7 +183,7 @@ const ExchangeRatesScreen = () => {
     const cryptoRates = filteredRates.filter(r => r.type === 'crypto');
     const otherRates = filteredRates.filter(r => r.type !== 'fiat' && r.type !== 'crypto' && r.type !== 'border');
 
-    addSection('Tasa oficial del BCV', officialRates, {
+    addSection('Tasa oficial • BCV', officialRates, {
       label: 'VER MESAS DE CAMBIO',
       onPress: () => navigation.navigate('BankRates')
     });
@@ -216,10 +216,17 @@ const ExchangeRatesScreen = () => {
 
     if (item.type === 'rate' && item.data) {
       const rate = item.data;
+      const getDescriptiveSubtitle = (r: CurrencyRate) => {
+        if (r.type === 'fiat') return 'Banco Central de Venezuela';
+        if (r.type === 'crypto') return 'Cripto • P2P';
+        if (r.type === 'border') return 'Frontera • P2P';
+        return r.name;
+      };
+
       return (
         <RateCard
           title={`${rate.code} / VES`}
-          subtitle={rate.name}
+          subtitle={getDescriptiveSubtitle(rate)}
           value={`${rate.value.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`}
           changePercent={rate.changePercent !== null ? `${Math.abs(rate.changePercent).toFixed(2)}%` : ''}
           isPositive={rate.changePercent !== null ? rate.changePercent >= 0 : true}
@@ -305,7 +312,9 @@ const ExchangeRatesScreen = () => {
         <UnifiedHeader
           variant="section"
           title="Tasas de Cambio"
-          subtitle={isMarketOpen ? "Mercado abierto (Tiempo real)" : "Mercado BCV cerrado • P2P activo (Tiempo real)"}
+          subtitle={isMarketOpen ? "Mercado abierto (Tiempo real)" : "Mercado BCV cerrado • P2P activo"}
+          subtitleIcon={isMarketOpen ? "clock-check-outline" : "clock-alert-outline"}
+          subtitleIconColor={isMarketOpen ? theme.colors.success : theme.colors.warning}
           onActionPress={() => loadRates()}
           rightActionIcon="refresh"
           onNotificationPress={() => { }}

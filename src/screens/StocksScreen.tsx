@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect, useCallback, useDeferredValue } from 'react';
 import { View, StyleSheet, StatusBar, RefreshControl, ActivityIndicator, AccessibilityInfo } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
-import { Text, useTheme } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -25,6 +25,7 @@ import CustomButton from '../components/ui/CustomButton';
 import { captureRef } from 'react-native-view-shot';
 import Share from 'react-native-share';
 import MarketShareGraphic from '../components/stocks/MarketShareGraphic';
+import { useAppTheme } from '../theme/theme';
 
 interface MarketIndexData {
   value: string;
@@ -49,7 +50,7 @@ type StocksScreenProps = {
 };
 
 const StocksScreen = ({ navigation }: StocksScreenProps) => {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const { stockFilters, setStockFilters } = useFilterStore();
   const { query: searchQuery, category: activeFilter } = stockFilters;
   const deferredQuery = useDeferredValue(searchQuery);
@@ -411,6 +412,8 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
           variant="section"
           title="Mercados"
           subtitle="Acciones • ETFs"
+          subtitleIcon="chart-timeline-variant"
+          subtitleIconColor={theme.colors.onSurfaceVariant}
           onActionPress={onRefresh}
           rightActionIcon="refresh"
           showSecondaryAction

@@ -84,7 +84,7 @@ const RateCard: React.FC<RateCardProps> = ({
           </View>
           <View>
             <Text variant="titleMedium" style={[styles.titleText, textPrimaryStyle]}>{title}</Text>
-            <Text variant="bodySmall" style={styles.subtitleText}>{subtitle}</Text>
+            <Text variant="bodySmall" style={[styles.subtitleText, { color: theme.colors.onSurfaceVariant }]}>{subtitle}</Text>
           </View>
         </View>
 
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   subtitleText: {
-    color: '#666666', // Fallback for onSurfaceVariant
+    // Uses theme color dynamically in component
   },
 });
 

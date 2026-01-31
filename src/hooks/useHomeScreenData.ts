@@ -54,6 +54,13 @@ export const useHomeScreenData = () => {
     const processFeaturedRates = useCallback((data: CurrencyRate[]) => {
         const homeRates = data.filter(r => r.code === 'USD' || r.code === 'USDT');
 
+        const getDescriptiveSubtitle = (r: CurrencyRate) => {
+            if (r.type === 'fiat') return 'Banco Central de Venezuela';
+            if (r.type === 'crypto') return 'Cripto • P2P';
+            if (r.type === 'border') return 'Frontera • P2P';
+            return r.name;
+        };
+
         return homeRates.map(rate => {
             let displayValue = '0,00';
             if (rate.value && !isNaN(Number(rate.value))) {
@@ -66,6 +73,7 @@ export const useHomeScreenData = () => {
             return {
                 title: rate.name,
                 code: rate.code,
+                subtitle: getDescriptiveSubtitle(rate),
                 value: displayValue,
                 currency: 'Bs',
                 changePercent: rate.changePercent !== null ? `${rate.changePercent.toFixed(2)}%` : '0.00%',
