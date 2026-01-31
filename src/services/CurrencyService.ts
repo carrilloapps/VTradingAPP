@@ -166,26 +166,26 @@ export class CurrencyService {
           useCache: false, // Disable cache as requested
           cacheTTL: 0
         });
-  
+
         if (!response || (!response.rates && !response.crypto)) {
           throw new Error("Invalid API Response structure");
         }
-  
+
         const rates: CurrencyRate[] = [];
-  
+
         // Optimize: Instantiate date once for the batch
         const nowISO = new Date().toISOString();
-  
+
         // 1. Process FIAT Rates
         if (response.rates && Array.isArray(response.rates)) {
           response.rates.forEach((apiRate, index) => {
             let name = apiRate.currency;
             let iconName = 'currency-usd';
-  
+
             // Standardize names and icons based on currency code
             const sourceLabel = apiRate.source || 'BCV';
             name = `${apiRate.currency}/VES • ${sourceLabel}`;
-  
+
             switch (apiRate.currency) {
               case 'EUR': iconName = 'currency-eur'; break;
               case 'USD': iconName = 'currency-usd'; break;
@@ -199,7 +199,7 @@ export class CurrencyService {
               case 'KRW': iconName = 'currency-krw'; break;
               default: iconName = 'currency-usd';
             }
-  
+
             rates.push({
               id: String(index),
               code: apiRate.currency,
@@ -217,17 +217,17 @@ export class CurrencyService {
             });
           });
         }
-  
+
         // 1.5 Process Border Rates
         if (response.border && Array.isArray(response.border)) {
           response.border.forEach((apiRate, index) => {
             let name = apiRate.currency;
             let iconName = 'currency-usd';
-  
+
             // Standardize names and icons based on currency code
             const sourceLabel = apiRate.source || 'Fronterizo';
             name = `${apiRate.currency}/VES • ${sourceLabel}`;
-  
+
             switch (apiRate.currency) {
               case 'EUR': iconName = 'currency-eur'; break;
               case 'USD': iconName = 'currency-usd'; break;
@@ -242,25 +242,25 @@ export class CurrencyService {
               case 'VES': iconName = 'Bs'; break;
               default: iconName = 'currency-usd';
             }
-  
+
             // Calculate values if average is missing (common in P2P/Border rates)
             const buy = CurrencyService.parseRate(apiRate.rate?.buy);
             const sell = CurrencyService.parseRate(apiRate.rate?.sell);
             const avgValue = apiRate.rate?.average
               ? CurrencyService.parseRate(apiRate.rate.average)
               : (buy + sell) / 2;
-  
+
             // Handle Border Rate Inversion (Tasas Fronterizas are usually Foreign/VES)
             // We need value in VES (Price of 1 Unit of Foreign Currency in VES) for the calculator logic.
             // All border rates from API seem to be based on VES (Foreign/VES).
             let finalValue = avgValue;
             let finalBuy = buy;
             let finalSell = sell;
-  
+
             if (avgValue > 0) finalValue = 1 / avgValue;
             if (buy > 0) finalBuy = 1 / buy;
             if (sell > 0) finalSell = 1 / sell;
-  
+
             // Calculate change percent
             let changePercent = 0;
             if (apiRate.change?.percent !== undefined) {
@@ -270,7 +270,7 @@ export class CurrencyService {
               const sellPercent = apiRate.change?.sell?.percent || 0;
               changePercent = CurrencyService.parsePercentage((buyPercent + sellPercent) / 2);
             }
-  
+
             rates.push({
               id: `border_${index}`,
               code: apiRate.currency,
@@ -288,16 +288,16 @@ export class CurrencyService {
             });
           });
         }
-  
+
         // 2. Process Crypto Rates
         if (response.crypto && Array.isArray(response.crypto)) {
           response.crypto.forEach((cryptoItem) => {
             const currencyCode = cryptoItem.currency.toUpperCase();
             let name = currencyCode;
             let iconName = 'currency-bitcoin';
-  
+
             const sourceLabel = cryptoItem.source || 'P2P';
-  
+
             switch (currencyCode) {
               case 'USDT':
                 name = sourceLabel.toLowerCase() === 'paralelo' ? 'USDT Tether' : `USDT • ${sourceLabel}`;
@@ -315,17 +315,17 @@ export class CurrencyService {
               case 'DOGE': name = `Dogecoin • ${sourceLabel}`; iconName = 'dog'; break;
               default: name = `${currencyCode} • ${sourceLabel}`; iconName = 'currency-btc';
             }
-  
+
             // Calculate average value
             const buy = cryptoItem.rate?.buy || 0;
             const sell = cryptoItem.rate?.sell || 0;
             const avgValue = (buy + sell) / 2;
-  
+
             // Calculate average change percent
             const buyPercent = cryptoItem.change?.buy?.percent || 0;
             const sellPercent = cryptoItem.change?.sell?.percent || 0;
             const avgChange = (buyPercent + sellPercent) / 2;
-  
+
             rates.push({
               id: `${cryptoItem.currency.toLowerCase()}_p2p`,
               code: cryptoItem.currency,
@@ -343,7 +343,7 @@ export class CurrencyService {
             });
           });
         }
-  
+
         // Ensure VES exists as base currency for calculations
         if (!rates.find(r => r.code === 'VES')) {
           rates.unshift({
@@ -357,13 +357,13 @@ export class CurrencyService {
             lastUpdated: new Date().toISOString()
           });
         }
-  
+
         this.currentRates = rates;
         this.lastFetch = Date.now();
         this.notifyListeners(rates);
-  
+
         return rates;
-  
+
       } catch (e) {
         observabilityService.captureError(e, {
           context: 'CurrencyService.getRates',
@@ -373,13 +373,13 @@ export class CurrencyService {
           hasCachedData: this.currentRates.length > 0
         });
         trace.putAttribute('error', 'true');
-  
+
         // If we have stale data in memory, return it but warn
         if (this.currentRates.length > 0) {
           this.notifyListeners([...this.currentRates]);
           return this.currentRates;
         }
-  
+
         throw e;
       } finally {
         await performanceService.stopTrace(trace);
@@ -486,27 +486,29 @@ export class CurrencyService {
     // Rule 1: VES -> All
     if (source.code === 'VES' || source.code === 'Bs') return allRates;
 
-    // Rule 2: BCV (Fiat) -> VES or Crypto
+    // Rule 2: BCV (Fiat) -> VES, Crypto or Border
     if (source.type === 'fiat') {
-      return allRates.filter(r => r.code === 'VES' || r.code === 'Bs' || r.type === 'crypto');
+      return allRates.filter(r => r.code === 'VES' || r.code === 'Bs' || r.type === 'crypto' || r.type === 'border');
     }
 
-    // Rule 3: Border -> VES or Stablecoins
+    // Rule 3: Border -> VES, Stablecoins or Fiat
     if (source.type === 'border') {
       return allRates.filter(r =>
         r.code === 'VES' ||
         r.code === 'Bs' ||
+        r.type === 'fiat' ||
         (r.type === 'crypto' && STABLECOINS.includes(r.code))
       );
     }
 
-    // Rule 4: Crypto -> VES, Border or Crypto
+    // Rule 4: Crypto -> VES, Border, Crypto or Fiat
     if (source.type === 'crypto') {
       return allRates.filter(r =>
         r.code === 'VES' ||
         r.code === 'Bs' ||
         r.type === 'border' ||
-        r.type === 'crypto'
+        r.type === 'crypto' ||
+        r.type === 'fiat'
       );
     }
 
