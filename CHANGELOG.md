@@ -4,7 +4,25 @@ Todas las novedades y cambios notables de este proyecto se documentarán en este
 
 ## [1.0.5] - Build 6 - 2026-01-28
 
-### 🐛 Correcciones Críticas de Errores
+### � Seguridad y Logging
+- **SafeLogger Integrado:** Reemplazo total de `console.log/error/warn` por `SafeLogger` en toda la aplicación.
+- **Sanitización Automática:** Claves sensibles (tokens, passwords, keys) son ofuscadas automáticamente en los logs.
+- **Producción Limpia:** Los logs de nivel `debug/log` son suprimidos en builds de producción para mejorar rendimiento y seguridad.
+- **Variadic Support:** `SafeLogger` ahora soporta múltiples argumentos, manteniendo compatibilidad con la API de consola estándar.
+
+### ⚡ Optimización y Rendimiento
+#### Dashboard (useHomeScreenData)
+- **Carga Granular:** Separación de estados de carga para Tasas (`isLoadingRates`) y Acciones (`isLoadingStocks`). La UI ya no se bloquea completamente si un servicio responde y el otro no.
+- **Promise.allSettled:** Implementación de tolerancia a fallos parciales. Si el servicio de acciones falla, las tasas se muestran correctamente (y viceversa).
+- **Memoización SVG:** El cálculo de gráficos de tendencia (`getPath`) se extrajo del hook para evitar recálculos innecesarios en cada renderizado.
+- **Batch Updates:** Unificación de estados para reducir re-renderizados múltiples al actualizar datos.
+
+#### StocksService
+- **Formato Inteligente:** Nuevo formateador de volumen (1.2k, 5.5M, 2.1B) para mejorar la legibilidad de cifras grandes.
+- **Robustez Numérica:** Validaciones de rango (`Number.MAX_SAFE_INTEGER`) y tipos (`unknown` vs `any`) para prevenir errores con datos corruptos de la API.
+- **Limpieza:** Eliminación de código duplicado en el mapeo de datos bursátiles.
+
+### �🐛 Correcciones Críticas de Errores
 
 Esta versión incluye correcciones importantes para 8 errores identificados en Sentry que afectaban a 185 usuarios con 453 eventos totales.
 
