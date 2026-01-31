@@ -12,9 +12,9 @@ class RemoteConfigService {
    */
   async initialize(): Promise<void> {
     try {
-      // Configure settings: 0 interval for dev (instant updates), 30 min for production
+      // Configure settings: 0 interval for dev (instant updates), 15 min for production
       await this.remoteConfig.setConfigSettings({
-        minimumFetchIntervalMillis: __DEV__ ? 0 : 1800000,
+        minimumFetchIntervalMillis: __DEV__ ? 0 : 3 * 300000,
       });
 
       await setDefaults(this.remoteConfig, {
