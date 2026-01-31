@@ -349,16 +349,16 @@ const DiscoverScreen = () => {
       }
 
       await fcmService.subscribeToTopic('news_waitlist');
-      
+
       const settings = await storageService.getSettings();
       await storageService.saveSettings({
         ...settings,
         newsSubscription: true
       });
-      
+
       setIsSubscribed(true);
       showToast('¡Te avisaremos cuando esté listo!', 'success');
-      
+
       // Analytics
       analyticsService.logEvent('waitlist_signup', { feature: 'news_v2' });
     } catch (e) {
@@ -374,7 +374,7 @@ const DiscoverScreen = () => {
           <MaterialCommunityIcons name={icon} size={24} color={theme.colors.onSecondaryContainer} />
         </View>
         <View style={styles.featureDetails}>
-          <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: 'bold' }}>{title}</Text>
+          <Text variant="titleMedium" style={styles.featureTitleStyle}>{title}</Text>
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>{desc}</Text>
         </View>
       </Surface>
@@ -393,9 +393,9 @@ const DiscoverScreen = () => {
         >
           <View style={[styles.constructionHero, { marginTop: windowWidth * 0.1 }]}>
             <Surface style={[styles.iconContainer, { backgroundColor: theme.colors.elevation.level2 }]} elevation={0}>
-               <MaterialCommunityIcons name="rocket-launch" size={56} color={theme.colors.primary} />
+              <MaterialCommunityIcons name="rocket-launch" size={56} color={theme.colors.primary} />
             </Surface>
-            
+
             <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.onBackground }]}>
               Próximamente
             </Text>
@@ -405,16 +405,16 @@ const DiscoverScreen = () => {
           </View>
 
           <View style={styles.featuresPreview}>
-             <Text variant="titleMedium" style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>
-               Lo que se viene
-             </Text>
-             {renderFeatureItem('chart-timeline-variant', 'Análisis de Mercado', 'Noticias que impactan tus activos en tiempo real.')}
-             {renderFeatureItem('brain', 'Insights con IA', 'Resúmenes inteligentes para tomar decisiones rápidas.')}
-             {renderFeatureItem('bell-ring-outline', 'Alertas Personalizadas', 'Sé el primero en saber cuándo el mercado se mueve.')}
+            <Text variant="titleMedium" style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>
+              Lo que se viene
+            </Text>
+            {renderFeatureItem('chart-timeline-variant', 'Análisis de Mercado', 'Noticias que impactan tus activos en tiempo real.')}
+            {renderFeatureItem('brain', 'Insights con IA', 'Resúmenes inteligentes para tomar decisiones rápidas.')}
+            {renderFeatureItem('bell-ring-outline', 'Alertas Personalizadas', 'Sé el primero en saber cuándo el mercado se mueve.')}
           </View>
 
           <View style={styles.ctaContainer}>
-            <CustomButton 
+            <CustomButton
               variant={isSubscribed ? "secondary" : "primary"}
               label={isSubscribed ? "En lista de espera" : "Notificarme cuando esté listo"}
               onPress={isSubscribed ? () => showToast('Ya estás en la lista de espera', 'info') : handleWaitlistSubscription}
@@ -619,6 +619,9 @@ const styles = StyleSheet.create({
   },
   featureDetails: {
     flex: 1,
+  },
+  featureTitleStyle: {
+    fontWeight: 'bold',
   },
   ctaContainer: {
     width: '100%',

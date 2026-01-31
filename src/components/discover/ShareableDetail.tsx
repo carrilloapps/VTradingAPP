@@ -122,8 +122,6 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
     const isVertical = aspectRatio === '16:9';
 
     // Dynamic sizing based on aspect ratio (Synchronized with ShareGraphic)
-    const platformIconSize = 24 * 2; // Scaled for 1080px base
-    const platformTextSize = 12 * 2;
     const logoWidth = isVertical ? 450 : 350;
     const logoHeight = isVertical ? 120 : 90;
     const pillIconSize = isVertical ? 38 : 32;
@@ -131,7 +129,6 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
     const mainTitleSize = isVertical ? 100 : 70; // FIXED: Prominent title size
     const mainTitleLineHeight = isVertical ? 110 : 80;
     const categoryBadgeFontSize = isVertical ? 32 : 26;
-    const footerIconSize = 48;
     const footerTextSize = 32;
     const urlTextSize = 36;
 
@@ -161,9 +158,9 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
         }
     ];
 
-    const avatarLetterStyle = (isVertical: boolean) => [
+    const avatarLetterStyle = (isVert: boolean) => [
         styles.avatarLetter,
-        { fontSize: isVertical ? 60 : 40, color: theme.colors.onPrimaryContainer }
+        { fontSize: isVert ? 60 : 40, color: theme.colors.onPrimaryContainer }
     ];
 
     const authorNameStyle = (nameSize: number) => [
@@ -171,9 +168,9 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
         { fontSize: nameSize, color: theme.colors.onBackground }
     ];
 
-    const authorMetaRowStyle = (isVertical: boolean) => [
+    const authorMetaRowStyle = (isVert: boolean) => [
         styles.authorMetaRow,
-        { marginTop: isVertical ? 0 : 8 }
+        { marginTop: isVert ? 0 : 8 }
     ];
 
     const authorLabelStyle = (roleSize: number) => [
@@ -190,7 +187,6 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
     const renderAuthorBlock = () => {
         if (!author) return null;
 
-        const isVertical = aspectRatio === '16:9';
         const socials = (typeof author.socials === 'object' && author.socials !== null) ? author.socials : {} as any;
         const showSocials = !!author.socials;
 
@@ -369,7 +365,6 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
         // For Lists (Category/Tag)
         if (!items || items.length === 0) return null;
 
-        const isVertical = aspectRatio === '16:9';
         const heroItem = items[0];
         const listItems = items.slice(1, aspectRatio === '16:9' ? 4 : 0);
 
@@ -546,7 +541,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                         </View>
 
                         {/* Main Content Area */}
-                        <View style={[styles.mainWrapper, isVertical && { gap: 60 }]}>
+                        <View style={[styles.mainWrapper, isVertical && styles.mainWrapperVertical]}>
                             {/* Header Section */}
                             <View style={styles.headerSection}>
                                 <Text style={mainTitleStyleScaled}>
@@ -735,6 +730,9 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         gap: 40,
+    },
+    mainWrapperVertical: {
+        gap: 60,
     },
     headerSection: {
         marginBottom: 0,

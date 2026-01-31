@@ -136,7 +136,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
     } finally {
       setSharing(false);
     }
-  }, [rate, shareFormat, showToast]);
+  }, [rate, shareFormat, showToast, getDynamicShareMessage]);
 
   // Trigger share when sharing state changes and we have a ref
   useEffect(() => {
