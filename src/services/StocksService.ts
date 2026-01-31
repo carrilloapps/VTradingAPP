@@ -127,16 +127,35 @@ export class StocksService {
   }
   /* eslint-enable no-bitwise */
 
-  private static parsePrice(val: any): number {
+  private static parsePrice(val: unknown): number {
     if (val === null || val === undefined) return 0;
-    if (typeof val === 'number') return val;
+    if (typeof val === 'number') {
+        // Range check
+        if (!Number.isFinite(val) || Math.abs(val) > Number.MAX_SAFE_INTEGER) return 0;
+        return val;
+    }
     if (typeof val === 'string') {
       // Handle comma as decimal separator
       const normalized = val.replace(',', '.');
       const num = Number(normalized);
-      return isNaN(num) ? 0 : num;
+      // Range check and NaN check
+      if (isNaN(num) || !Number.isFinite(num) || Math.abs(num) > Number.MAX_SAFE_INTEGER) return 0;
+      return num;
     }
     return 0;
+  }
+
+  private static formatVolume(value: number): string {
+    if (value >= 1_000_000_000) {
+        return `${(value / 1_000_000_000).toFixed(1)}B`;
+    }
+    if (value >= 1_000_000) {
+        return `${(value / 1_000_000).toFixed(1)}M`;
+    }
+    if (value >= 1_000) {
+        return `${(value / 1_000).toFixed(1)}k`;
+    }
+    return value.toString();
   }
 
   private static mapStock(item: ApiStock): StockData {
@@ -152,25 +171,23 @@ export class StocksService {
       changePercent = 0;
     }
 
-    // Ensure changePercent is a valid number
-    if (isNaN(changePercent)) {
-      changePercent = 0;
-    }
-
     let volumeStr: string | undefined;
     let volShares = 0;
     let volAmount = 0;
 
     if (typeof item.volume === 'number') {
       volShares = item.volume;
-      volumeStr = `${(item.volume / 1000).toFixed(1)}k`;
+      volumeStr = this.formatVolume(item.volume);
     } else if (item.volume && typeof item.volume === 'object') {
       if (item.volume.amount) {
         volAmount = item.volume.amount;
-        volumeStr = `${(item.volume.amount / 1000).toFixed(1)}k`;
+        volumeStr = this.formatVolume(item.volume.amount);
       }
       if (item.volume.shares) {
         volShares = item.volume.shares;
+        if (!volumeStr) {
+             volumeStr = this.formatVolume(item.volume.shares);
+        }
       }
     }
 
