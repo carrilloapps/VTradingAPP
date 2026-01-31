@@ -1,7 +1,22 @@
 {
   "name": "vtrading",
-  "version": "1.0.5",
+  "version": "1.0.6",
+  "description": "Aplicación de monitoreo financiero y trading para el mercado venezolano",
+  "author": "José Carrillo",
+  "license": "UNLICENSED",
   "private": true,
+  "keywords": [
+    "react-native",
+    "finance",
+    "trading",
+    "venezuela",
+    "currency",
+    "exchange-rates"
+  ],
+  "homepage": "https://vtrading.app",
+  "bugs": {
+    "email": "info@vtrading.app"
+  },
   "scripts": {
     "android": "react-native run-android",
     "android:run": "react-native run-android --mode=release",
@@ -11,6 +26,7 @@
     "android:clean": "node scripts/android-manager.js clean",
     "ios": "react-native run-ios",
     "ios:pods": "cd ios && pod install && cd ..",
+    "ios:clean": "cd ios && xcodebuild clean -workspace VTradingAPP.xcworkspace -scheme VTradingAPP && cd ..",
     "lint": "eslint .",
     "start": "react-native start",
     "start:reset": "react-native start --reset-cache",
