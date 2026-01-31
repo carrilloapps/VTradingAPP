@@ -423,7 +423,7 @@ const DiscoverScreen = () => {
               disabled={isSubscribed}
             />
             <Text variant="bodySmall" style={[styles.ctaSubtitle, { color: theme.colors.onSurfaceVariant }]}>
-              VTrading {new Date().getFullYear()} - Todos los derechos reservados
+              VTrading {new Date().getFullYear()}
             </Text>
           </View>
         </ScrollView>
