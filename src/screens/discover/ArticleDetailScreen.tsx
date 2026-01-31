@@ -762,7 +762,7 @@ const ArticleDetailScreen = () => {
               }
             ]}>
               <View style={[styles.summaryLabel, { backgroundColor: theme.colors.primary, borderRadius: theme.roundness }]}>
-                <Text variant="labelSmall" style={styles.summaryLabelText}>IMPORTANTE</Text>
+                <Text variant="labelSmall" style={[styles.summaryLabelText, { color: theme.colors.onPrimary }]}>IMPORTANTE</Text>
               </View>
               <Text variant="bodyMedium" style={[styles.summaryText, { color: theme.colors.onSurfaceVariant }]}>
                 {article.seoDescription}
