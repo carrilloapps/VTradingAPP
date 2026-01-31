@@ -95,7 +95,7 @@ class FeatureFlagService {
     /**
      * Get a persistent random number (0-99) for this device for percentage rollouts
      */
-    private async getRolloutId(): Promise<number> {
+    private getRolloutId(): number {
         if (this.rolloutId !== null) return this.rolloutId;
 
         const stored = mmkvStorage.getString('vtrading_rollout_id');
@@ -186,7 +186,7 @@ class FeatureFlagService {
 
         // 8. Rollout Percentage
         if (conditions.rolloutPercentage !== undefined) {
-            const rolloutId = await this.getRolloutId();
+            const rolloutId = this.getRolloutId();
             // If rollout is 10%, we include IDs 0-9
             if (rolloutId >= conditions.rolloutPercentage) {
                 return false;
