@@ -1,7 +1,7 @@
 import { Linking } from 'react-native';
 import { navigationRef } from '../navigation/NavigationRef';
 import { observabilityService } from './ObservabilityService';
-import { analyticsService } from './firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from './firebase/AnalyticsService';
 
 export interface DeepLinkRoute {
     type: 'discover' | 'article' | 'category' | 'tag';
@@ -100,7 +100,7 @@ class DeepLinkService {
         const route = this.parseDeepLink(url);
         if (!route) return false;
 
-        analyticsService.logEvent('deep_link_opened', {
+        analyticsService.logEvent(ANALYTICS_EVENTS.DEEP_LINK_OPENED, {
             url: route.originalUrl,
             type: route.type,
             slug: route.slug || 'none',

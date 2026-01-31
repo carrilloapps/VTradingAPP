@@ -15,7 +15,7 @@ import { useToastStore } from '../stores/toastStore';
 import { storageService, UserAlert } from '../services/StorageService';
 import { observabilityService } from '../services/ObservabilityService';
 import { AppConfig } from '../constants/AppConfig';
-import { analyticsService } from '../services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '../services/firebase/AnalyticsService';
 
 import UserProfileCard from '../components/settings/UserProfileCard';
 import AlertItem from '../components/settings/AlertItem';
@@ -176,7 +176,7 @@ const SettingsScreen = () => {
   const openExternalUrl = (url: string, title?: string) => {
     // @ts-ignore
     navigation.navigate('WebView', { url, title: title || 'Navegador' });
-    analyticsService.logEvent('open_external_link', { url, title });
+    analyticsService.logEvent(ANALYTICS_EVENTS.OPEN_EXTERNAL_LINK, { url, title });
   };
 
   const togglePush = async (value: boolean) => {
@@ -215,13 +215,13 @@ const SettingsScreen = () => {
           // Permisos otorgados, el servicio ya inicializó todo
           setPushEnabled(true);
           await storageService.saveSettings({ pushEnabled: true });
-          await analyticsService.logEvent('toggle_push', { enabled: true });
+          await analyticsService.logEvent(ANALYTICS_EVENTS.TOGGLE_PUSH, { enabled: true });
           showToast('Notificaciones habilitadas', 'success');
         } else {
           // Ya tiene permisos, solo actualizar preferencia
           setPushEnabled(true);
           await storageService.saveSettings({ pushEnabled: true });
-          await analyticsService.logEvent('toggle_push', { enabled: true });
+          await analyticsService.logEvent(ANALYTICS_EVENTS.TOGGLE_PUSH, { enabled: true });
           showToast('Notificaciones habilitadas', 'success');
         }
       } else {
@@ -244,7 +244,7 @@ const SettingsScreen = () => {
           }
         }
         
-        await analyticsService.logEvent('toggle_push', { enabled: false });
+        await analyticsService.logEvent(ANALYTICS_EVENTS.TOGGLE_PUSH, { enabled: false });
         showToast('Notificaciones deshabilitadas. Todas las alertas han sido pausadas.', 'info');
       }
   };
@@ -255,7 +255,7 @@ const SettingsScreen = () => {
       // Artificial delay to show blocking state and ensure smooth transition check
       setTimeout(async () => {
           setThemeMode(mode);
-          await analyticsService.logEvent('change_theme', { mode });
+          await analyticsService.logEvent(ANALYTICS_EVENTS.CHANGE_THEME, { mode });
           setSwitchingTheme(false);
       }, 500); 
   };
@@ -311,7 +311,7 @@ const SettingsScreen = () => {
           alertId: id,
           newValue: value
         });
-        await analyticsService.logEvent('error_toggle_alert', { alertId: id });
+        await analyticsService.logError('toggle_alert', { alertId: id });
         showToast('Error al actualizar alerta', 'error');
         // Revert on error
         setAlerts(originalAlerts);
@@ -354,7 +354,7 @@ const SettingsScreen = () => {
       setAlerts(updated);
       await storageService.saveAlerts(updated);
       if (alert) {
-        await analyticsService.logEvent('delete_alert', { symbol: alert.symbol });
+        await analyticsService.logEvent(ANALYTICS_EVENTS.DELETE_ALERT, { symbol: alert.symbol });
       }
       handleAction('Alerta eliminada');
   };

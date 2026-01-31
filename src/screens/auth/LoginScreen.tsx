@@ -5,7 +5,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DeviceInfo from 'react-native-device-info';
 import { useAuthStore } from '../../stores/authStore';
 import { useToastStore } from '../../stores/toastStore';
-import { analyticsService } from '../../services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '../../services/firebase/AnalyticsService';
 import { observabilityService } from '../../services/ObservabilityService';
 import { useAppTheme } from '../../theme/theme';
 import { AppConfig } from '../../constants/AppConfig';
@@ -105,7 +105,7 @@ const LoginScreen = ({ navigation }: any) => {
     if (validate()) {
       setIsSubmitting(true);
       try {
-        await analyticsService.logEvent('login_attempt', { method: 'password' });
+        await analyticsService.logEvent(ANALYTICS_EVENTS.LOGIN_ATTEMPT, { method: 'password' });
         await signIn(email, password, showToast);
         // Login exitoso ya se trackea en authStore con logLogin
       } catch (e) {
@@ -125,7 +125,7 @@ const LoginScreen = ({ navigation }: any) => {
   const handleGoogleLogin = async () => {
     setIsSubmitting(true);
     try {
-      await analyticsService.logEvent('login_attempt', { method: 'google' });
+      await analyticsService.logEvent(ANALYTICS_EVENTS.LOGIN_ATTEMPT, { method: 'google' });
       await googleSignIn(showToast);
       // Login exitoso ya se trackea en authStore
     } catch (e) {
@@ -142,7 +142,7 @@ const LoginScreen = ({ navigation }: any) => {
   const handleGuestLogin = async () => {
     setIsSubmitting(true);
     try {
-      await analyticsService.logEvent('login_attempt', { method: 'anonymous' });
+      await analyticsService.logEvent(ANALYTICS_EVENTS.LOGIN_ATTEMPT, { method: 'anonymous' });
       await signInAnonymously(showToast);
       // Login exitoso ya se trackea en authStore
     } catch (e) {

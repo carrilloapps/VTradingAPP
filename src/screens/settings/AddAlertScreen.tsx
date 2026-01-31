@@ -19,7 +19,7 @@ import { storageService, UserAlert } from '../../services/StorageService';
 import { fcmService } from '../../services/firebase/FCMService';
 import { useToastStore } from '../../stores/toastStore';
 import { observabilityService } from '../../services/ObservabilityService';
-import { analyticsService } from '../../services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '../../services/firebase/AnalyticsService';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../../navigation/AppNavigator';
 
@@ -175,7 +175,7 @@ const AddAlertScreen = ({ route }: Props) => {
         context: 'AddAlertScreen.loadData',
         action: 'load_market_data'
       });
-      await analyticsService.logEvent('error_load_market_data', {
+      await analyticsService.logError('load_market_data', {
         screen: 'AddAlertScreen'
       });
       showToast('Error cargando datos de mercado', 'error');
@@ -312,7 +312,7 @@ const AddAlertScreen = ({ route }: Props) => {
                  // New topic subscription will happen below
             }
 
-            await analyticsService.logEvent('update_alert', { 
+            await analyticsService.logEvent(ANALYTICS_EVENTS.UPDATE_ALERT, { 
                 symbol: selectedItem.symbol, 
                 target: parseFloat(targetPrice),
                 condition: condition 
@@ -320,7 +320,7 @@ const AddAlertScreen = ({ route }: Props) => {
         } else {
             // Add new
             updatedAlerts = [...alerts, newAlert];
-            await analyticsService.logEvent('create_alert', { 
+            await analyticsService.logEvent(ANALYTICS_EVENTS.CREATE_ALERT, { 
                 symbol: selectedItem.symbol, 
                 target: parseFloat(targetPrice),
                 condition: condition 
@@ -346,7 +346,7 @@ const AddAlertScreen = ({ route }: Props) => {
           condition: condition,
           isEdit: !!editAlert
         });
-        await analyticsService.logEvent('error_save_alert', {
+        await analyticsService.logError('save_alert', {
           symbol: selectedItem.symbol,
           is_edit: !!editAlert
         });
@@ -375,7 +375,7 @@ const AddAlertScreen = ({ route }: Props) => {
               await fcmService.unsubscribeFromTopic(topic);
           }
 
-          await analyticsService.logEvent('delete_alert', { symbol: editAlert.symbol });
+          await analyticsService.logEvent(ANALYTICS_EVENTS.DELETE_ALERT, { symbol: editAlert.symbol });
           showToast('Alerta eliminada', 'success');
           navigation.goBack();
       } catch (e) {
@@ -384,7 +384,7 @@ const AddAlertScreen = ({ route }: Props) => {
             symbol: editAlert.symbol,
             alertId: editAlert.id
           });
-          await analyticsService.logEvent('error_delete_alert', {
+          await analyticsService.logError('delete_alert', {
             symbol: editAlert.symbol
           });
           showToast('Error al eliminar alerta', 'error');

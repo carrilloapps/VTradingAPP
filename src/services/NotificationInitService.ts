@@ -2,7 +2,7 @@ import { fcmService } from './firebase/FCMService';
 import { storageService } from './StorageService';
 import SafeLogger from '../utils/safeLogger';
 import { observabilityService } from './ObservabilityService';
-import { analyticsService } from './firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from './firebase/AnalyticsService';
 
 /**
  * Servicio para inicializar el sistema de notificaciones
@@ -68,7 +68,7 @@ class NotificationInitService {
 
       // 6. Marcar como inicializado
       this.isInitialized = true;
-      await analyticsService.logEvent('notification_system_initialized');
+      await analyticsService.logEvent(ANALYTICS_EVENTS.NOTIFICATION_SYSTEM_INITIALIZED);
       SafeLogger.log('[NotificationInit] Initialization complete');
 
     } catch (error) {
@@ -89,7 +89,7 @@ class NotificationInitService {
     try {
       const granted = await fcmService.requestUserPermission();
       
-      await analyticsService.logEvent('notification_permission_requested', {
+      await analyticsService.logEvent(ANALYTICS_EVENTS.NOTIFICATION_PERMISSION_REQUESTED, {
         granted,
       });
 
@@ -138,7 +138,7 @@ class NotificationInitService {
 
       SafeLogger.log('[NotificationInit] Resubscribed to alert topics', { count: uniqueSymbols.length });
       
-      await analyticsService.logEvent('notification_alerts_resubscribed', {
+      await analyticsService.logEvent(ANALYTICS_EVENTS.NOTIFICATION_ALERTS_RESUBSCRIBED, {
         count: uniqueSymbols.length,
       });
     } catch (error) {

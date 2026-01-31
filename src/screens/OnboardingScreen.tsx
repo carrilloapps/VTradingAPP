@@ -7,7 +7,7 @@ import { useNavigation } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import { storageService } from '../services/StorageService';
 import { fcmService } from '../services/firebase/FCMService';
-import { analyticsService } from '../services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '../services/firebase/AnalyticsService';
 import { useAppTheme } from '../theme/theme';
 import { useToastStore } from '../stores/toastStore';
 import { observabilityService } from '../services/ObservabilityService';
@@ -138,7 +138,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
   const handlePageSelected = (e: any) => {
     const position = e.nativeEvent.position;
     setCurrentPage(position);
-    analyticsService.logEvent('onboarding_step_view', { 
+    analyticsService.logEvent(ANALYTICS_EVENTS.ONBOARDING_STEP_VIEW, { 
         step_index: position, 
         step_name: ONBOARDING_DATA[position]?.key 
     });
@@ -174,7 +174,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
       const hasPermission = await fcmService.requestUserPermission();
       setNotificationPermissionStatus(hasPermission);
       
-      analyticsService.logEvent('notification_permission_result', { 
+      analyticsService.logEvent(ANALYTICS_EVENTS.NOTIFICATION_PERMISSION_RESULT, { 
           granted: hasPermission 
       });
 
@@ -192,7 +192,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
         context: 'OnboardingScreen.handleRequestPermission',
         action: 'request_notification_permission'
       });
-      await analyticsService.logEvent('error_onboarding_permission');
+      await analyticsService.logError('onboarding_permission');
       showToast('Error al solicitar permiso', 'error');
     } finally {
       setIsPaused(false); // Resume after dialog

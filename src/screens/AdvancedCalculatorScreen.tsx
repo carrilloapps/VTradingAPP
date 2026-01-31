@@ -12,7 +12,7 @@ import CurrencySelectorButton from '../components/dashboard/CurrencySelectorButt
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MarketStatus from '../components/ui/MarketStatus';
 import { AppConfig } from '../constants/AppConfig';
-import { analyticsService } from '../services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '../services/firebase/AnalyticsService';
 
 // --- Components ---
 const KeypadButton = ({ label, icon, onPress, isAction = false, isDestructive = false, testID }: { label?: string, icon?: string, onPress: () => void, isAction?: boolean, isDestructive?: boolean, testID?: string }) => {
@@ -278,7 +278,7 @@ const AdvancedCalculatorScreen = () => {
       if (!targetCodes.includes(currency.code)) {
         setTargetCodes(prev => [...prev, currency.code]);
         showToast(`${currency.code} añadida`, 'success');
-        analyticsService.logEvent('calculator_add_currency', { currency: currency.code });
+        analyticsService.logEvent(ANALYTICS_EVENTS.CALCULATOR_ADD_CURRENCY, { currency: currency.code });
     } else {
           showToast(`${currency.code} ya está en la lista`, 'info');
       }
@@ -302,7 +302,7 @@ const AdvancedCalculatorScreen = () => {
       }));
       
       showToast(`Base cambiada a ${currency.code}`, 'success');
-      analyticsService.logEvent('calculator_set_base', { currency: currency.code });
+      analyticsService.logEvent(ANALYTICS_EVENTS.CALCULATOR_SET_BASE, { currency: currency.code });
       setPickerVisible(false);
   };
 

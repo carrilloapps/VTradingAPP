@@ -3,7 +3,7 @@ import { PermissionsAndroid, Platform } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import SafeLogger from '../../utils/safeLogger';
 import { observabilityService } from '../ObservabilityService';
-import { analyticsService } from './AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from './AnalyticsService';
 
 class FCMService {
   private messaging: ReturnType<typeof messaging>;
@@ -78,7 +78,7 @@ class FCMService {
    */
   onMessage(callback: (remoteMessage: any) => void): () => void {
     return this.messaging.onMessage(async (remoteMessage) => {
-      await analyticsService.logEvent('notification_received_foreground', {
+      await analyticsService.logEvent(ANALYTICS_EVENTS.NOTIFICATION_RECEIVED, {
         messageId: remoteMessage.messageId,
         from: remoteMessage.from
       });
@@ -98,7 +98,7 @@ class FCMService {
    */
   onNotificationOpenedApp(callback: (remoteMessage: any) => void): () => void {
     return this.messaging.onNotificationOpenedApp(async (remoteMessage) => {
-      await analyticsService.logEvent('notification_opened', {
+      await analyticsService.logEvent(ANALYTICS_EVENTS.NOTIFICATION_OPENED, {
         messageId: remoteMessage.messageId,
         state: 'background'
       });

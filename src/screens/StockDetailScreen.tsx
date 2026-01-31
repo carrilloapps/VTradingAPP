@@ -87,7 +87,7 @@ const StockDetailScreen = ({ route, navigation }: any) => {
             symbol: stock.symbol,
             format: format
           });
-          await analyticsService.logEvent('error_stock_share_image', { symbol: stock.symbol, format });
+          await analyticsService.logError('stock_share_image', { symbol: stock.symbol, format });
           showToast('No se pudo compartir la imagen', 'error');
         }
       } finally {

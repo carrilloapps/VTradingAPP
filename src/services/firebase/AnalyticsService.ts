@@ -18,6 +18,17 @@ export const ANALYTICS_EVENTS = {
   SELECT_CONTENT: 'select_content',
   SHARE: 'share',
   
+  // Auth Attempts (for funnel tracking)
+  LOGIN_ATTEMPT: 'login_attempt',
+  SIGN_UP_ATTEMPT: 'sign_up_attempt',
+  PASSWORD_RESET_ATTEMPT: 'password_reset_attempt',
+  RESET_PASSWORD_REQUEST: 'reset_password_request',
+  
+  // Account Management
+  DELETE_ACCOUNT: 'delete_account',
+  UPDATE_PROFILE_NAME: 'update_profile_name',
+  EDIT_PROFILE_CLICK: 'edit_profile_click',
+  
   // Interactions
   BUTTON_CLICK: 'button_click',
   CARD_TAP: 'card_tap',
@@ -45,11 +56,51 @@ export const ANALYTICS_EVENTS = {
   WIDGET_ADDED: 'widget_added',
   WIDGET_DELETED: 'widget_deleted',
   WIDGET_REFRESH: 'widget_refresh_manual',
+  WIDGET_SAVE_CONFIG: 'widget_save_config',
   
   // Notifications
   NOTIFICATION_RECEIVED: 'notification_received_foreground',
   NOTIFICATION_OPENED: 'notification_opened',
   NOTIFICATION_PERMISSION_REQUESTED: 'notification_permission_requested',
+  NOTIFICATION_SYSTEM_INITIALIZED: 'notification_system_initialized',
+  NOTIFICATION_ALERTS_RESUBSCRIBED: 'notification_alerts_resubscribed',
+  NOTIFICATION_PERMISSION_RESULT: 'notification_permission_result',
+  
+  // Calculator
+  CALCULATOR_ADD_CURRENCY: 'calculator_add_currency',
+  CALCULATOR_ADD_CURRENCY_PRESSED: 'calculator_add_currency_pressed',
+  CALCULATOR_SET_BASE: 'calculator_set_base',
+  CALCULATOR_CLEAR: 'calculator_clear',
+  
+  // Alerts
+  CREATE_ALERT: 'create_alert',
+  CREATE_ALERT_CLICK: 'create_alert_click',
+  UPDATE_ALERT: 'update_alert',
+  DELETE_ALERT: 'delete_alert',
+  TOGGLE_ALERT: 'toggle_alert',
+  
+  // Settings
+  OPEN_EXTERNAL_LINK: 'open_external_link',
+  TOGGLE_PUSH: 'toggle_push',
+  CHANGE_THEME: 'change_theme',
+  
+  // Data Refresh Operations
+  BANK_RATES_REFRESH: 'bank_rates_refresh',
+  
+  // Onboarding
+  ONBOARDING_START: 'onboarding_start',
+  ONBOARDING_STEP_VIEW: 'onboarding_step_view',
+  ONBOARDING_COMPLETE: 'onboarding_complete',
+  NOTIFICATION_PERMISSION_SKIPPED: 'notification_permission_skipped',
+  
+  // Deep Links
+  DEEP_LINK_OPENED: 'deep_link_opened',
+  
+  // Article/Content
+  ARTICLE_SHARED: 'article_shared',
+  
+  // Stock Operations
+  SEARCH_STOCK: 'search_stock',
 } as const;
 
 /**

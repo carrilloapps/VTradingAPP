@@ -22,7 +22,7 @@ import ShareableDetail from '../../components/discover/ShareableDetail';
 import { deepLinkService } from '../../services/DeepLinkService';
 import { useToastStore } from '../../stores/toastStore';
 import { useAppTheme } from '../../theme/theme';
-import { analyticsService } from '../../services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '../../services/firebase/AnalyticsService';
 import { wordPressService, FormattedComment, FormattedPost } from '../../services/WordPressService';
 import { remoteConfigService } from '../../services/firebase/RemoteConfigService';
 import { observabilityService } from '../../services/ObservabilityService';
@@ -348,7 +348,7 @@ const ArticleDetailScreen = () => {
     });
 
     if (success) {
-      analyticsService.logEvent('article_shared', {
+      analyticsService.logEvent(ANALYTICS_EVENTS.ARTICLE_SHARED, {
         article_id: article.id || 'unknown',
         method: 'text',
       });

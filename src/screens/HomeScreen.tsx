@@ -212,7 +212,7 @@ const HomeScreen = ({ navigation }: any) => {
           context: 'HomeScreen.loadInitialData',
           screen: 'HomeScreen'
         });
-        await analyticsService.logEvent('error_load_initial_data', {
+        await analyticsService.logError('load_initial_data', {
           screen: 'HomeScreen'
         });
         showToast('Error al actualizar datos', 'error');

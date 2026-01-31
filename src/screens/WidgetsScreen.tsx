@@ -15,7 +15,7 @@ import { WidgetItem } from '../widget/types';
 import CurrencyPickerModal from '../components/dashboard/CurrencyPickerModal';
 import { storageService, WidgetConfig } from '../services/StorageService';
 import { useToastStore } from '../stores/toastStore';
-import { analyticsService } from '../services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '../services/firebase/AnalyticsService';
 import { observabilityService } from '../services/ObservabilityService';
 import { requestWidgetUpdate } from 'react-native-android-widget';
 import { buildWidgetElement } from '../widget/widgetTaskHandler';
@@ -148,7 +148,7 @@ const WidgetsScreen = () => {
         };
         await storageService.saveWidgetConfig(config);
         
-        await analyticsService.logEvent('widget_save_config', {
+        await analyticsService.logEvent(ANALYTICS_EVENTS.WIDGET_SAVE_CONFIG, {
             transparent: isTransparent,
             dark_mode: isWidgetDarkMode,
             show_graph: showGraph,

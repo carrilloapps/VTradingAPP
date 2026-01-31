@@ -15,7 +15,7 @@ import { StocksService, StockData } from '../services/StocksService';
 import { useToastStore } from '../stores/toastStore';
 import StocksSkeleton from '../components/stocks/StocksSkeleton';
 import { observabilityService } from '../services/ObservabilityService';
-import { analyticsService } from '../services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '../services/firebase/AnalyticsService';
 import { useAuthStore } from '../stores/authStore';
 import CustomDialog from '../components/ui/CustomDialog';
 import CustomButton from '../components/ui/CustomButton';
@@ -151,7 +151,7 @@ const StocksScreen = ({ navigation, route: _route }: any) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (searchQuery && searchQuery.length > 2) {
-        analyticsService.logEvent('search_stock', { query: searchQuery });
+        analyticsService.logEvent(ANALYTICS_EVENTS.SEARCH_STOCK, { query: searchQuery });
       }
     }, 1500); // 1.5s debounce to capture "finished" typing
 
@@ -195,7 +195,7 @@ const StocksScreen = ({ navigation, route: _route }: any) => {
             action: 'share_market_image',
             format: format
           });
-          await analyticsService.logEvent('error_stocks_share_image', { format });
+          await analyticsService.logError('stocks_share_image', { format });
           showToast('No se pudo compartir la imagen', 'error');
         }
       } finally {
