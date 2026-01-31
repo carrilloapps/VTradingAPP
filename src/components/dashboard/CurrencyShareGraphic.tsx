@@ -12,6 +12,7 @@ interface CurrencyShareGraphicProps {
   lastUpdated: string;
   isPremium?: boolean;
   aspectRatio?: '1:1' | '16:9';
+  status?: string;
 }
 
 const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
@@ -19,7 +20,8 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
   rate,
   lastUpdated,
   isPremium = false,
-  aspectRatio = '1:1'
+  aspectRatio = '1:1',
+  status = 'ACTIVO'
 }) => {
   const theme = useTheme();
 
@@ -46,27 +48,27 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
     : null;
 
   // Dynamic sizes based on aspect ratio
-  const platformIconSize = isVertical ? 18 : 14;
-  const platformTextSize = isVertical ? 11 : 9;
-  const logoWidth = isVertical ? 200 : 160;
-  const logoHeight = isVertical ? 52 : 42;
-  const freeBadgeTextSize = isVertical ? 9 : 7;
-  const urlTextSize = isVertical ? 16 : 13;
-  const dateIconSize = isVertical ? 18 : 14;
-  const dateTextSize = isVertical ? 13 : 11;
+  const platformIconSize = 24;
+  const platformTextSize = 12;
+  const logoWidth = isVertical ? 210 : 150;
+  const logoHeight = isVertical ? 54 : 40;
+  const freeBadgeTextSize = isVertical ? 10 : 7;
+  const urlTextSize = isVertical ? 18 : 13;
+  const dateIconSize = 18;
+  const dateTextSize = 14;
   const iconContainerSize = isVertical ? 72 : 56;
   const iconSize = isVertical ? 40 : 32;
-  const symbolTextSize = isVertical ? 30 : 24;
-  const nameTextSize = isVertical ? 18 : 14;
-  const mainValueSize = isVertical ? 84 : 64;
+  const symbolTextSize = isVertical ? 32 : 24;
+  const nameTextSize = isVertical ? 20 : 14;
+  const mainValueSize = isVertical ? 86 : 64;
   const currencySize = isVertical ? 28 : 22;
   const trendIconSize = isVertical ? 18 : 14;
   const trendTextSize = isVertical ? 15 : 12;
-  const statLabelSize = isVertical ? 11 : 9;
-  const statValueSize = isVertical ? 20 : 16;
-  const statCurrencySize = isVertical ? 12 : 10;
-  const footerIconSize = isVertical ? 20 : 16;
-  const footerTextSize = isVertical ? 11 : 9;
+  const statLabelSize = isVertical ? 13 : 9;
+  const statValueSize = isVertical ? 24 : 16;
+  const statCurrencySize = isVertical ? 14 : 10;
+  const footerIconSize = 22;
+  const footerTextSize = 12;
 
   // Computed Styles
   const templateStyle = [
@@ -77,7 +79,6 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
 
   const glowStyle = [styles.templateGlow, { backgroundColor: theme.colors.primary, opacity: 0.05 }];
   const badgeStyle = [styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }];
-  const badgeTextStyle = [styles.platformText, { color: theme.colors.onSurfaceVariant, fontSize: platformTextSize }];
 
   const logoStyle = [
     styles.templateMainLogo,
@@ -98,7 +99,7 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
 
   const contentStyle = [
     styles.templateContent,
-    isVertical && ({ flex: 1, justifyContent: 'center', gap: 32 } as const)
+    isVertical && ({ gap: 40 } as const)
   ];
 
   const cardStyle = [
@@ -135,6 +136,11 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
 
   const footerTextStyle = [styles.templateFooterText, { color: theme.colors.primary, fontSize: footerTextSize }];
 
+  const platformTextHeaderStyle = (size: number) => [
+    styles.platformText,
+    { color: theme.colors.onSurfaceVariant, fontSize: size }
+  ];
+
   return (
     <View style={styles.hiddenTemplate} pointerEvents="none">
       <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 1.0 }}>
@@ -149,12 +155,12 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
           <View style={styles.platformBadgesContainer}>
             <Surface style={badgeStyle} elevation={1}>
               <Icon source="google-play" size={platformIconSize} color={theme.colors.onSurfaceVariant} />
-              <Text style={badgeTextStyle}>Android</Text>
+              <Text style={platformTextHeaderStyle(platformTextSize)}>Android</Text>
             </Surface>
             <View style={styles.flex1} />
             <Surface style={badgeStyle} elevation={1}>
               <Icon source="apple" size={platformIconSize} color={theme.colors.onSurfaceVariant} />
-              <Text style={badgeTextStyle}>iOS</Text>
+              <Text style={platformTextHeaderStyle(platformTextSize)}>iOS</Text>
             </Surface>
           </View>
 
@@ -222,20 +228,20 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
               {isVertical && (
                 <View style={styles.statsGrid}>
                   <View style={styles.statItem}>
-                    <Text style={statLabelStyle}>PRECIO COMPRA</Text>
+                    <Text style={statLabelStyle}>COMPRA</Text>
                     <Text style={statValueStyle}>{rate.buyValue ? rate.buyValue.toLocaleString('es-VE', { minimumFractionDigits: 2 }) : '--'} <Text style={statCurrencyStyle}>Bs.</Text></Text>
                   </View>
                   <View style={styles.statItem}>
-                    <Text style={statLabelStyle}>PRECIO VENTA</Text>
+                    <Text style={statLabelStyle}>VENTA</Text>
                     <Text style={statValueStyle}>{rate.sellValue ? rate.sellValue.toLocaleString('es-VE', { minimumFractionDigits: 2 }) : '--'} <Text style={statCurrencyStyle}>Bs.</Text></Text>
                   </View>
                   <View style={styles.statItem}>
                     <Text style={statLabelStyle}>SPREAD / BRECHA</Text>
-                    <Text style={statValueStyle}>{spread ? `${spread.toFixed(2)}%` : '--'}</Text>
+                    <Text style={statValueStyle}>{spread !== null ? `${spread.toFixed(2)}%` : '--'}</Text>
                   </View>
                   <View style={styles.statItem}>
                     <Text style={statLabelStyle}>ESTADO MERCADO</Text>
-                    <Text style={statValueStyle}>ACTIVO</Text>
+                    <Text style={statValueStyle}>{status}</Text>
                   </View>
                 </View>
               )}
@@ -288,6 +294,7 @@ const styles = StyleSheet.create({
     height: 1066,
     paddingVertical: 100,
     paddingHorizontal: 40,
+    justifyContent: 'space-around',
   },
   templateGlow: {
     position: 'absolute',

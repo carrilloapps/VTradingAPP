@@ -15,6 +15,7 @@ import CustomButton from '../components/ui/CustomButton';
 import CurrencyShareGraphic from '../components/dashboard/CurrencyShareGraphic';
 import { observabilityService } from '../services/ObservabilityService';
 import { analyticsService } from '../services/firebase/AnalyticsService';
+import { StocksService } from '../services/StocksService';
 
 /* type CurrencyDetailRouteProp = RouteProp<RootStackParamList, 'CurrencyDetail'>; */
 
@@ -48,11 +49,54 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
       ? theme.colors.trendDown
       : theme.colors.onSurfaceVariant;
 
+  const spread = (rate.buyValue && rate.sellValue)
+    ? Math.abs(((rate.sellValue - rate.buyValue) / rate.buyValue) * 100)
+    : null;
+
   const trendIcon = isPositive
     ? 'trending-up'
     : isNegative
       ? 'trending-down'
       : 'minus';
+
+  const getDynamicShareMessage = useCallback((format: '1:1' | '16:9' | 'text' = '1:1') => {
+    const pair = rate.name.split(' • ')[0] || `${rate.code}/VES`;
+    const changeSign = (rate.changePercent || 0) > 0 ? '📈' : (rate.changePercent || 0) < 0 ? '📉' : '📊';
+    const changeText = rate.changePercent ? (rate.changePercent > 0 ? '+' : '') + rate.changePercent.toFixed(2) + '%' : '0.00%';
+    const marketStatus = StocksService.isMarketOpen() ? 'ABIERTO' : 'CERRADO';
+
+    if (format === '16:9') {
+      // Optimized for Stories: Punchy, direct, optimized for visual overlays
+      let msg = `📊 *VTrading - Reporte Divisas*\n\n` +
+        `📉 *Cotización:* ${pair}\n` +
+        `💰 *Valor:* ${rate.value.toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bs.\n` +
+        `${changeSign} *Variación:* ${changeText}\n`;
+
+      if (spread !== null) {
+        msg += `↔️ *Brecha:* ${spread.toFixed(2)}%\n`;
+      }
+
+      msg += `🔔 *Mercado:* ${marketStatus}\n\n` +
+        `🌐 vtrading.app`;
+      return msg;
+    }
+
+    // Default or 1:1: Formal, detailed, structured for permanent posts
+    let message = `📊 *VTrading - Monitor de Divisas*\n\n` +
+      `📌 *Tasa de cambio:* ${pair}\n` +
+      `️👁️ *Fuente:* ${rate.source || 'Promedio del Mercado'}\n` +
+      `💰 *Valor:* ${rate.value.toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bolívares\n` +
+      `${changeSign} *Variación:* ${changeText}\n`;
+
+    if (spread !== null) {
+      message += `↔️ *Brecha (Spread):* ${spread.toFixed(2)}%\n`;
+    }
+
+    message += `🕒 *Estado del mercado:* ${rate.source !== 'P2P' ? marketStatus : 'ABIERTO'}\n` +
+      `📍 *Act:* ${new Date(rate.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}\n\n` +
+      `🌐 vtrading.app`;
+    return message;
+  }, [rate, spread]);
 
   // Trigger share when sharing state changes and we have a ref
   const captureShareImage = useCallback(async () => {
@@ -74,7 +118,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
       await Share.open({
         url: sharePath,
         type: 'image/jpeg',
-        message: `Tasa de cambio: ${rate.code}/VES (${rate.name}) - VTrading`,
+        message: getDynamicShareMessage(shareFormat),
       });
 
       analyticsService.logShare('currency', rate.code, shareFormat === '1:1' ? 'image_square' : 'image_story');
@@ -156,12 +200,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
   const handleShareText = async () => {
     setShareDialogVisible(false);
     try {
-      const message = `📊 *VTrading - Monitor de Divisas*\n\n` +
-        `📉 *Tasa:* ${rate.code} / VES\n` +
-        `🏦 *Origen:* ${rate.source || 'Promedio'}\n` +
-        `💰 *Valor:* ${rate.value.toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bs\n` +
-        `📉 *Cambio:* ${rate.changePercent ? (rate.changePercent > 0 ? '+' : '') + rate.changePercent.toFixed(2) + '%' : '0.00%'}\n` +
-        `🌐 vtrading.app`;
+      const message = getDynamicShareMessage('text');
 
       await Share.open({ message });
       analyticsService.logShare('currency', rate.code, 'text');
@@ -182,9 +221,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
     setShareDialogVisible(true);
   };
 
-  const spread = (rate.buyValue && rate.sellValue)
-    ? Math.abs(((rate.sellValue - rate.buyValue) / rate.buyValue) * 100)
-    : null;
+  /* Removed redundant spread calculation - moved up to avoid duplication */
 
   // Pre-calculate dynamic styles
   const containerBgColor = theme.colors.background;
@@ -365,6 +402,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
         lastUpdated={new Date(rate.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         isPremium={isPremium}
         aspectRatio={shareFormat}
+        status={StocksService.isMarketOpen() ? 'ABIERTO' : 'CERRADO'}
       />
 
       <CustomDialog
