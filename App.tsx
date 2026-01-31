@@ -71,10 +71,10 @@ import ToastContainer from './src/components/ui/ToastContainer';
 function App(): React.JSX.Element {
   useEffect(() => {
     const sessionStartTime = Date.now();
-    
-    // Log session start
+
+    // Log session start (Custom event)
     analyticsService.logSessionStart();
-    
+
     const initializeFirebase = async () => {
       const crashlytics = getCrashlytics();
       await setCrashlyticsCollectionEnabled(crashlytics, true);
@@ -116,10 +116,10 @@ function App(): React.JSX.Element {
     const cleanupDeepLinks = deepLinkService.init();
 
     return () => {
-      // Log session end with duration
+      // Log session end with duration (Custom event)
       const sessionDuration = Date.now() - sessionStartTime;
       analyticsService.logSessionEnd(sessionDuration);
-      
+
       cleanupDeepLinks();
     };
   }, []);

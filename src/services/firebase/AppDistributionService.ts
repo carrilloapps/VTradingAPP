@@ -2,6 +2,7 @@ import { getAppDistribution, checkForUpdate } from '@react-native-firebase/app-d
 import { Platform } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import { observabilityService } from '../ObservabilityService';
+import { AppConfig } from '../../constants/AppConfig';
 
 class AppDistributionService {
   /**
@@ -14,27 +15,29 @@ class AppDistributionService {
       return;
     }
 
+    // Skip in production builds for general users to avoid "platform not supported" noise
+    // App Distribution is intended for pre-release testing.
+    if (AppConfig.IS_PROD) {
+      return;
+    }
+
     // Only supported on Android and iOS
     if (Platform.OS !== 'android' && Platform.OS !== 'ios') {
-      console.log('[AppDistribution] Skipping - not supported on platform:', Platform.OS);
       return;
     }
 
     try {
-      // Skip on emulators/simulators as App Distribution is typically not available
+      // Skip on emulators/simulators
       const isEmulator = await DeviceInfo.isEmulator();
       if (isEmulator) {
-        console.log('[AppDistribution] Skipping - running on emulator/simulator');
         return;
       }
 
       const appDistribution = getAppDistribution();
 
-      // Only check for updates if user is a signed-in tester
-      // This prevents errors for regular production users
+      // Only check if user is a signed-in tester
       const isTester = await appDistribution.isTesterSignedIn();
       if (!isTester) {
-        console.log('[AppDistribution] User is not a signed-in tester');
         return;
       }
 
@@ -42,14 +45,20 @@ class AppDistributionService {
     } catch (e: any) {
       const message = String(e?.message || e || '').toLowerCase();
 
-      // Don't report platform-specific errors to Sentry
-      // These are expected in certain environments
-      if (message.includes('not supported') || message.includes('not available')) {
-        console.warn('[AppDistribution] Service not available on this platform/device');
+      // Proactively silence expected platform errors from reaching Sentry
+      const isExpectedError =
+        message.includes('not supported') ||
+        message.includes('not available') ||
+        message.includes('unsupported') ||
+        message.includes('platform') ||
+        message.includes('framework');
+
+      if (isExpectedError) {
+        console.log('[AppDistribution] Service not available on this device/environment (Safe Skip)');
         return;
       }
 
-      // Report unexpected errors for investigation
+      // Report only real unexpected errors
       observabilityService.captureError(e, { context: 'AppDistribution_checkForUpdate' });
     }
   }
