@@ -17,7 +17,7 @@ const CurrencyConverter: React.FC = () => {
     // State
     const [rates, setRates] = useState<CurrencyRate[]>([]);
 
-    const [amount, setAmount] = useState('1');
+    const [amount, setAmount] = useState('');
     const [fromCurrency, setFromCurrency] = useState<CurrencyRate | null>(null);
 
     const formatInput = (text: string) => {
@@ -33,6 +33,8 @@ const CurrencyConverter: React.FC = () => {
 
         // Remove all non-numeric characters except comma
         cleanText = cleanText.replace(/[^0-9,]/g, '');
+
+        if (!cleanText) return '';
 
         // Handle multiple commas: keep only the first one
         const parts = cleanText.split(',');
@@ -262,14 +264,15 @@ const CurrencyConverter: React.FC = () => {
 
             <Button
                 mode="contained"
-                onPress={() => { /* Optional: Calculate action or just visual feedback */ }}
+                onPress={() => setAmount('')}
+                disabled={!amount}
                 style={[styles.calculateButton, { borderRadius: theme.roundness * 25 }]}
                 contentStyle={styles.calculateButtonContent}
                 labelStyle={styles.calculateButtonLabel}
                 buttonColor={theme.colors.primary}
                 textColor={theme.colors.onPrimary}
             >
-                Calcular
+                Limpiar
             </Button>
 
             <CurrencyPickerModal
@@ -352,6 +355,7 @@ const styles = StyleSheet.create({
         paddingRight: 16,
         justifyContent: 'center',
     },
+
     calculateButton: {
         marginTop: 24,
         height: 56,

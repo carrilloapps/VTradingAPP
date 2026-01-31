@@ -19,7 +19,7 @@ const Calculator: React.FC = () => {
   const themeStyles = React.useMemo(() => ({
     container: {
       backgroundColor: theme.colors.elevation.level1,
-      borderColor: theme.colors.outline,
+      borderColor: theme.colors.primary,
       borderRadius: theme.roundness * 6
     },
     title: {
@@ -34,10 +34,10 @@ const Calculator: React.FC = () => {
       fontWeight: 'bold' as const
     },
     button: {
-        backgroundColor: theme.colors.primaryContainer,
-        borderRadius: theme.roundness * 2,
-        paddingHorizontal: 12,
-        paddingVertical: 6,
+      backgroundColor: theme.colors.primaryContainer,
+      borderRadius: theme.roundness * 2,
+      paddingHorizontal: 12,
+      paddingVertical: 6,
     }
   }), [theme]);
 
