@@ -4,6 +4,7 @@ import { Surface, Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
 import { useAppTheme } from '../../theme/theme';
+import { observabilityService } from '../../services/ObservabilityService';
 import CustomButton from './CustomButton';
 
 interface ForceUpdateModalProps {
@@ -30,6 +31,11 @@ const ForceUpdateModal: React.FC<ForceUpdateModalProps> = ({ visible, storeUrl }
             console.warn("Cannot open URL:", url);
         }
     } catch (err) {
+        observabilityService.captureError(err, {
+            context: 'ForceUpdateModal.handleUpdatePress',
+            action: 'open_store_link',
+            url: url
+        });
         console.error("An error occurred", err);
     } finally {
         setLoading(false);

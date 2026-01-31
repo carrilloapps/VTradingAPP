@@ -30,6 +30,7 @@ import * as Sentry from '@sentry/react-native';
 import { AppConfig } from './src/constants/AppConfig';
 import { deepLinkService } from './src/services/DeepLinkService';
 import { notificationInitService } from './src/services/NotificationInitService';
+import { analyticsService } from './src/services/firebase/AnalyticsService';
 
 // Silence Firebase modular deprecation warnings
 // @ts-ignore
@@ -69,6 +70,11 @@ import ToastContainer from './src/components/ui/ToastContainer';
 
 function App(): React.JSX.Element {
   useEffect(() => {
+    const sessionStartTime = Date.now();
+    
+    // Log session start
+    analyticsService.logSessionStart();
+    
     const initializeFirebase = async () => {
       const crashlytics = getCrashlytics();
       await setCrashlyticsCollectionEnabled(crashlytics, true);
@@ -110,6 +116,10 @@ function App(): React.JSX.Element {
     const cleanupDeepLinks = deepLinkService.init();
 
     return () => {
+      // Log session end with duration
+      const sessionDuration = Date.now() - sessionStartTime;
+      analyticsService.logSessionEnd(sessionDuration);
+      
       cleanupDeepLinks();
     };
   }, []);

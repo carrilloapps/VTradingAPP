@@ -16,9 +16,9 @@ import CurrencyPickerModal from '../components/dashboard/CurrencyPickerModal';
 import { storageService, WidgetConfig } from '../services/StorageService';
 import { useToastStore } from '../stores/toastStore';
 import { analyticsService } from '../services/firebase/AnalyticsService';
+import { observabilityService } from '../services/ObservabilityService';
 import { requestWidgetUpdate } from 'react-native-android-widget';
 import { buildWidgetElement } from '../widget/widgetTaskHandler';
-import { observabilityService } from '../services/ObservabilityService';
 import { BolivarIcon } from '../components/ui/BolivarIcon';
 
 const APP_VERSION = DeviceInfo.getVersion();
@@ -99,6 +99,11 @@ const WidgetsScreen = () => {
             setDefaultRates(rates);
         }
     } catch (error) {
+        observabilityService.captureError(error, {
+            context: 'WidgetsScreen.loadData',
+            action: 'load_widget_data'
+        });
+        await analyticsService.logError('widget_load_data');
         showToast('Error cargando datos', 'error');
     } finally {
         setLoading(false);
@@ -160,7 +165,11 @@ const WidgetsScreen = () => {
         showToast('Widget configurado correctamente', 'success');
         navigation.goBack();
     } catch (e) {
-        observabilityService.captureError(e);
+        observabilityService.captureError(e, {
+            context: 'WidgetsScreen.saveWidgetConfig',
+            action: 'save_widget_config'
+        });
+        await analyticsService.logError('widget_save_config');
         showToast('Error al guardar la configuración del widget', 'error');
     }
   };

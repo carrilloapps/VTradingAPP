@@ -1,5 +1,6 @@
 import notifee, { AndroidImportance } from '@notifee/react-native';
 import { storageService } from './StorageService';
+import { observabilityService } from './ObservabilityService';
 
 // Configuración visual compartida para todas las notificaciones
 const ANDROID_NOTIFICATION_DEFAULTS = {
@@ -104,6 +105,11 @@ export const handleBackgroundMessage = async (remoteMessage: any) => {
                     };
                     await storageService.saveNotifications([newNotif, ...stored]);
                 } catch (e) {
+                    observabilityService.captureError(e, {
+                        context: 'NotificationLogic.handlePriceAlert',
+                        symbol: symbol,
+                        currentPrice: currentPrice
+                    });
                     // Fail silently
                 }
             }
@@ -147,6 +153,10 @@ export const handleBackgroundMessage = async (remoteMessage: any) => {
             };
             await storageService.saveNotifications([newNotif, ...stored]);
         } catch (e) {
+            observabilityService.captureError(e, {
+                context: 'NotificationLogic.handleGeneralNotification',
+                hasData: !!remoteMessage.data
+            });
             // Fail silently
         }
     }

@@ -1,6 +1,7 @@
 import { getRemoteConfig, setDefaults, fetchAndActivate, getValue } from '@react-native-firebase/remote-config';
 import { observabilityService } from '../ObservabilityService';
 import { featureFlagService, RemoteConfigSchema } from '../FeatureFlagService';
+import { analyticsService } from './AnalyticsService';
 
 class RemoteConfigService {
   private remoteConfig = getRemoteConfig();
@@ -25,7 +26,11 @@ class RemoteConfigService {
       // Fetch and activate
       await this.fetchAndActivate();
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'RemoteConfigService.initialize',
+        action: 'init_remote_config'
+      });
+      await analyticsService.logError('remote_config_init');
       // Initialization error
     }
   }
@@ -111,7 +116,11 @@ class RemoteConfigService {
       if (!value) return null;
       return JSON.parse(value) as T;
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'RemoteConfigService.getJson',
+        key,
+        action: 'parse_remote_config'
+      });
       return null;
     }
   }
@@ -131,7 +140,11 @@ class RemoteConfigService {
       const configJson = this.getJson<RemoteConfigSchema>('feature_flags');
       return await featureFlagService.evaluate(featureName, configJson);
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'RemoteConfigService.getFeature',
+        featureName,
+        action: 'evaluate_feature_flag'
+      });
       return false;
     }
   }

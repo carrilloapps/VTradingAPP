@@ -88,7 +88,11 @@ const SettingsScreen = () => {
             setLoading(false);
           }
         } catch (e) {
-          observabilityService.captureError(e);
+          observabilityService.captureError(e, {
+            context: 'SettingsScreen.loadData',
+            screen: 'SettingsScreen'
+          });
+          await analyticsService.logEvent('error_load_settings');
           showToast('Error cargando configuración', 'error');
           if (isActive) {
             setLoading(false);
@@ -119,7 +123,11 @@ const SettingsScreen = () => {
         await signOut(showToast);
         // Navigation will handle the switch to AuthStack automatically via Zustand store
     } catch (e) {
-        observabilityService.captureError(e);
+        observabilityService.captureError(e, {
+            context: 'SettingsScreen.confirmLogout',
+            action: 'logout'
+        });
+        await analyticsService.logEvent('error_logout');
         handleAction("Error al cerrar sesión");
     }
   };
@@ -134,7 +142,11 @@ const SettingsScreen = () => {
       await deleteAccount(showToast);
       setShowDeleteAccountDialog(false);
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'SettingsScreen.confirmDeleteAccount',
+        action: 'delete_account'
+      });
+      await analyticsService.logEvent('error_delete_account');
       handleAction('Error al eliminar la cuenta');
     } finally {
       setDeleteAccountLoading(false);
@@ -151,6 +163,11 @@ const SettingsScreen = () => {
       await updateProfileName(newName, showToast);
       await analyticsService.logEvent('update_profile_name');
     } catch (error) {
+      observabilityService.captureError(error, {
+        context: 'SettingsScreen.saveProfileName',
+        newNameLength: newName?.length
+      });
+      await analyticsService.logEvent('error_update_profile_name');
       handleAction("Error al actualizar el perfil");
       showToast('Error al actualizar el perfil', 'error');
     }
@@ -288,6 +305,13 @@ const SettingsScreen = () => {
         handleAction(`Alerta ${value ? 'activada' : 'desactivada'}`);
 
       } catch (err) {
+        observabilityService.captureError(err, {
+          context: 'SettingsScreen.toggleAlert',
+          action: 'toggle_alert',
+          alertId: id,
+          newValue: value
+        });
+        await analyticsService.logEvent('error_toggle_alert', { alertId: id });
         showToast('Error al actualizar alerta', 'error');
         // Revert on error
         setAlerts(originalAlerts);
@@ -316,7 +340,12 @@ const SettingsScreen = () => {
                 await fcmService.unsubscribeFromTopic(topic);
             }
         } catch (e) {
-            observabilityService.captureError(e);
+            observabilityService.captureError(e, {
+              context: 'SettingsScreen.handleDeleteAlert',
+              action: 'unsubscribe_topic',
+              alertId: id,
+              symbol: alert?.symbol
+            });
             showToast('Error al desuscribir del tema', 'error');
         }
       }
@@ -377,7 +406,7 @@ const SettingsScreen = () => {
         rightActionIcon="information-outline"
         onActionPress={() => {
           setShowAboutDialog(true);
-          analyticsService.logEvent('view_about_dialog');
+          analyticsService.logInteraction('dialog_opened', { dialog_type: 'about' });
         }}
       />
 

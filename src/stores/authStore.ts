@@ -68,7 +68,12 @@ export const useAuthStore = create<AuthState>()(
                     await analyticsService.logLogin('email');
                     showToast('Bienvenido de nuevo', 'success');
                 } catch (e: any) {
-                    observabilityService.captureError(e);
+                    observabilityService.captureError(e, {
+                        context: 'authStore.signIn',
+                        method: 'email',
+                        errorMessage: e.message
+                    });
+                    await analyticsService.logError('sign_in', { method: 'email' });
                     showToast(e.message, 'error');
                     throw e;
                 }
@@ -80,7 +85,12 @@ export const useAuthStore = create<AuthState>()(
                     await analyticsService.logSignUp('email');
                     showToast('Cuenta creada exitosamente', 'success');
                 } catch (e: any) {
-                    observabilityService.captureError(e);
+                    observabilityService.captureError(e, {
+                        context: 'authStore.signUp',
+                        method: 'email',
+                        errorMessage: e.message
+                    });
+                    await analyticsService.logError('sign_up', { method: 'email' });
                     showToast(e.message, 'error');
                     throw e;
                 }
@@ -92,7 +102,11 @@ export const useAuthStore = create<AuthState>()(
                     await analyticsService.logEvent('logout');
                     showToast('Sesión cerrada', 'info');
                 } catch (e: any) {
-                    observabilityService.captureError(e);
+                    observabilityService.captureError(e, {
+                        context: 'authStore.signOut',
+                        errorMessage: e.message
+                    });
+                    await analyticsService.logError('logout');
                     showToast(e.message, 'error');
                     throw e;
                 }
@@ -104,7 +118,12 @@ export const useAuthStore = create<AuthState>()(
                     await analyticsService.logEvent('delete_account');
                     showToast('Cuenta eliminada', 'success');
                 } catch (e: any) {
-                    observabilityService.captureError(e);
+                    observabilityService.captureError(e, {
+                        context: 'authStore.deleteAccount',
+                        action: 'delete_account',
+                        errorMessage: e.message
+                    });
+                    await analyticsService.logError('delete_account');
                     showToast(e.message, 'error');
                     throw e;
                 }
@@ -119,7 +138,13 @@ export const useAuthStore = create<AuthState>()(
                     if (e.code === -5) { // SIGN_IN_CANCELLED
                         return;
                     }
-                    observabilityService.captureError(e);
+                    observabilityService.captureError(e, {
+                        context: 'authStore.googleSignIn',
+                        method: 'google',
+                        errorCode: e.code,
+                        errorMessage: e.message
+                    });
+                    await analyticsService.logError('google_sign_in', { errorCode: e.code });
                     showToast(e.message, 'error');
                     throw e;
                 }
@@ -131,7 +156,13 @@ export const useAuthStore = create<AuthState>()(
                     await analyticsService.logEvent('reset_password_request');
                     showToast('Correo de recuperación enviado', 'success');
                 } catch (e: any) {
-                    observabilityService.captureError(e);
+                    observabilityService.captureError(e, {
+                        context: 'authStore.resetPassword',
+                        action: 'password_reset',
+                        email: email,
+                        errorMessage: e.message
+                    });
+                    await analyticsService.logError('reset_password');
                     showToast(e.message, 'error');
                     throw e;
                 }
@@ -143,7 +174,12 @@ export const useAuthStore = create<AuthState>()(
                     await analyticsService.logLogin('anonymous');
                     showToast('Ingresaste como invitado', 'warning');
                 } catch (e: any) {
-                    observabilityService.captureError(e);
+                    observabilityService.captureError(e, {
+                        context: 'authStore.signInAnonymously',
+                        method: 'anonymous',
+                        errorMessage: e.message
+                    });
+                    await analyticsService.logError('anonymous_sign_in');
                     showToast(e.message, 'error');
                     throw e;
                 }
@@ -156,7 +192,13 @@ export const useAuthStore = create<AuthState>()(
                     await analyticsService.logEvent('update_profile_name');
                     showToast('Perfil actualizado correctamente', 'success');
                 } catch (e: any) {
-                    observabilityService.captureError(e);
+                    observabilityService.captureError(e, {
+                        context: 'authStore.updateProfileName',
+                        action: 'update_profile',
+                        nameLength: newName.length,
+                        errorMessage: e.message
+                    });
+                    await analyticsService.logError('update_profile_name');
                     showToast(e.message, 'error');
                     throw e;
                 }

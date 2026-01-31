@@ -357,7 +357,13 @@ export class CurrencyService {
       return rates;
 
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'CurrencyService.getRates',
+        method: 'GET',
+        endpoint: 'api/general-rates',
+        forceRefresh: forceRefresh,
+        hasCachedData: this.currentRates.length > 0
+      });
       trace.putAttribute('error', 'true');
 
       // If we have stale data in memory, return it but warn
@@ -419,7 +425,13 @@ export class CurrencyService {
       return { rates, pagination: response.pagination };
 
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'CurrencyService.getBankRates',
+        method: 'GET',
+        endpoint: 'api/bank-rates',
+        page: page,
+        limit: limit
+      });
       return {
         rates: [],
         pagination: { page, limit, total: 0, totalPages: 1 }

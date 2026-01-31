@@ -128,7 +128,10 @@ const AdvancedCalculatorScreen = () => {
       setLastRefreshTime(new Date()); // Update time on any data change (manual or pushed)
     });
     CurrencyService.getRates().catch((e) => {
-        observabilityService.captureError(e);
+        observabilityService.captureError(e, {
+            context: 'AdvancedCalculatorScreen.loadRates',
+            action: 'fetch_initial_rates'
+        });
     });
     return () => unsubscribe();
   }, []);
@@ -313,7 +316,10 @@ const AdvancedCalculatorScreen = () => {
         await CurrencyService.getRates(true);
         showToast('Tasas actualizadas', 'success');
     } catch (e) {
-        observabilityService.captureError(e);
+        observabilityService.captureError(e, {
+            context: 'AdvancedCalculatorScreen.onRefresh',
+            action: 'refresh_rates'
+        });
         showToast('Error al actualizar', 'error');
     } finally {
         setRefreshing(false);

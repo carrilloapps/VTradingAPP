@@ -253,7 +253,14 @@ class WordPressService {
 
             return posts.map((post) => this.formatPost(post));
         } catch (error) {
-            observabilityService.captureError(error, { context: 'WordPressService.getPosts' });
+            observabilityService.captureError(error, {
+                context: 'WordPressService.getPosts',
+                method: 'GET',
+                endpoint: 'posts',
+                categoryId: categoryId,
+                tagId: tagId,
+                bypassCache: bypassCache
+            });
             return [];
         }
     }
@@ -306,7 +313,16 @@ class WordPressService {
                 currentPage: page,
             };
         } catch (error) {
-            observabilityService.captureError(error, { context: 'WordPressService.getPostsPaginated' });
+            observabilityService.captureError(error, {
+                context: 'WordPressService.getPostsPaginated',
+                method: 'GET',
+                endpoint: 'posts',
+                page: page,
+                perPage: perPage,
+                categoryId: categoryId,
+                tagId: tagId,
+                bypassCache: bypassCache
+            });
             return {
                 data: [],
                 totalPages: 0,
@@ -342,7 +358,14 @@ class WordPressService {
 
             return posts.map((post) => this.formatPost(post));
         } catch (error) {
-            observabilityService.captureError(error, { context: 'WordPressService.getRelatedPosts', details: { postId, categoryId } });
+            observabilityService.captureError(error, {
+                context: 'WordPressService.getRelatedPosts',
+                method: 'GET',
+                endpoint: 'posts',
+                postId: postId,
+                categoryId: categoryId,
+                limit: limit
+            });
             return [];
         }
     }
@@ -364,7 +387,13 @@ class WordPressService {
 
             return this.formatPost(post);
         } catch (error) {
-            observabilityService.captureError(error, { context: 'WordPressService.getPostById' });
+            observabilityService.captureError(error, {
+                context: 'WordPressService.getPostById',
+                method: 'GET',
+                endpoint: `posts/${id}`,
+                postId: id,
+                bypassCache: bypassCache
+            });
             return null;
         }
     }
@@ -389,7 +418,12 @@ class WordPressService {
             }
             return null;
         } catch (error) {
-            observabilityService.captureError(error, { context: 'WordPressService.getPostBySlug', details: { slug } });
+            observabilityService.captureError(error, {
+                context: 'WordPressService.getPostBySlug',
+                method: 'GET',
+                endpoint: 'posts',
+                slug: slug
+            });
             return null;
         }
     }
@@ -448,12 +482,12 @@ class WordPressService {
         } catch (error) {
             observabilityService.captureError(error, {
                 context: 'WordPressService.searchPosts',
-                details: {
-                    originalQuery: query,
-                    sanitizedQuery,
-                    page,
-                    perPage
-                }
+                method: 'GET',
+                endpoint: 'posts',
+                originalQuery: query,
+                sanitizedQuery: sanitizedQuery,
+                page: page,
+                perPage: perPage
             });
             throw error; // Re-throw to allow proper error handling in UI
         }
@@ -483,7 +517,11 @@ class WordPressService {
             console.error('[WordPressService] getPostsByTag ERROR:', error);
             observabilityService.captureError(error, {
                 context: 'WordPressService.getPostsByTag',
-                details: { tagId, page, perPage }
+                method: 'GET',
+                endpoint: 'posts',
+                tagId: tagId,
+                page: page,
+                perPage: perPage
             });
             throw error;
         }
@@ -513,7 +551,11 @@ class WordPressService {
             console.error('[WordPressService] getPostsByCategory ERROR:', error);
             observabilityService.captureError(error, {
                 context: 'WordPressService.getPostsByCategory',
-                details: { categoryId, page, perPage }
+                method: 'GET',
+                endpoint: 'posts',
+                categoryId: categoryId,
+                page: page,
+                perPage: perPage
             });
             throw error;
         }
@@ -539,7 +581,12 @@ class WordPressService {
 
             return categories;
         } catch (error) {
-            observabilityService.captureError(error, { context: 'WordPressService.getCategories' });
+            observabilityService.captureError(error, {
+                context: 'WordPressService.getCategories',
+                method: 'GET',
+                endpoint: 'categories',
+                bypassCache: bypassCache
+            });
             return [];
         }
     }
@@ -557,7 +604,12 @@ class WordPressService {
 
             return category;
         } catch (error) {
-            observabilityService.captureError(error, { context: 'WordPressService.getCategoryById' });
+            observabilityService.captureError(error, {
+                context: 'WordPressService.getCategoryById',
+                method: 'GET',
+                endpoint: `categories/${id}`,
+                categoryId: id
+            });
             return null;
         }
     }
@@ -581,7 +633,12 @@ class WordPressService {
             }
             return null;
         } catch (error) {
-            observabilityService.captureError(error, { context: 'WordPressService.getCategoryBySlug', details: { slug } });
+            observabilityService.captureError(error, {
+                context: 'WordPressService.getCategoryBySlug',
+                method: 'GET',
+                endpoint: 'categories',
+                slug: slug
+            });
             return null;
         }
     }
@@ -603,7 +660,11 @@ class WordPressService {
 
             return tags;
         } catch (error) {
-            observabilityService.captureError(error, { context: 'WordPressService.getTags' });
+            observabilityService.captureError(error, {
+                context: 'WordPressService.getTags',
+                method: 'GET',
+                endpoint: 'tags'
+            });
             return [];
         }
     }
@@ -625,7 +686,12 @@ class WordPressService {
             if (!user) return null;
             return this.formatAuthor(user);
         } catch (error) {
-            observabilityService.captureError(error, { context: 'WordPressService.getUserById', details: { id } });
+            observabilityService.captureError(error, {
+                context: 'WordPressService.getUserById',
+                method: 'GET',
+                endpoint: `users/${id}`,
+                userId: id
+            });
             return null;
         }
     }
@@ -766,7 +832,12 @@ class WordPressService {
 
             return tag;
         } catch (error) {
-            observabilityService.captureError(error, { context: 'WordPressService.getTagById' });
+            observabilityService.captureError(error, {
+                context: 'WordPressService.getTagById',
+                method: 'GET',
+                endpoint: `tags/${id}`,
+                tagId: id
+            });
             return null;
         }
     }
@@ -790,7 +861,12 @@ class WordPressService {
             }
             return null;
         } catch (error) {
-            observabilityService.captureError(error, { context: 'WordPressService.getTagBySlug', details: { slug } });
+            observabilityService.captureError(error, {
+                context: 'WordPressService.getTagBySlug',
+                method: 'GET',
+                endpoint: 'tags',
+                slug: slug
+            });
             return null;
         }
     }
@@ -965,7 +1041,13 @@ class WordPressService {
 
             return comments.map((comment) => this.formatComment(comment));
         } catch (error) {
-            observabilityService.captureError(error, { context: 'WordPressService.getComments' });
+            observabilityService.captureError(error, {
+                context: 'WordPressService.getComments',
+                method: 'GET',
+                endpoint: 'comments',
+                postId: postId,
+                bypassCache: bypassCache
+            });
             return [];
         }
     }

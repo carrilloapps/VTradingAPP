@@ -66,7 +66,11 @@ class StorageService {
       const data = storage.getString(key);
       return data ? JSON.parse(data) : defaultValue;
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'StorageService.getJSON',
+        action: 'read_storage',
+        key: key
+      });
       return defaultValue;
     }
   }
@@ -75,7 +79,11 @@ class StorageService {
     try {
       storage.set(key, JSON.stringify(value));
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'StorageService.setJSON',
+        action: 'write_storage',
+        key: key
+      });
     }
   }
 
@@ -119,7 +127,10 @@ class StorageService {
         refreshInterval: parsed.refreshInterval || '4',
       };
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'StorageService.getWidgetConfig',
+        action: 'read_widget_config'
+      });
       return null;
     }
   }
@@ -151,7 +162,10 @@ class StorageService {
     try {
       storage.clearAll();
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'StorageService.clearAll',
+        action: 'clear_all_storage'
+      });
     }
   }
 

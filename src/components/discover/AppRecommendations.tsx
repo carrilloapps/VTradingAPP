@@ -4,6 +4,7 @@ import AppCard, { RecommendedApp } from './AppCard';
 import AppRecommendationsSkeleton from './AppRecommendationsSkeleton';
 import { remoteConfigService } from '../../services/firebase/RemoteConfigService';
 import { observabilityService } from '../../services/ObservabilityService';
+import { analyticsService } from '../../services/firebase/AnalyticsService';
 
 interface AppRecommendationsProps {
   apps?: RecommendedApp[];
@@ -140,7 +141,10 @@ const AppRecommendations: React.FC<AppRecommendationsProps> = ({ apps: providedA
         } catch (error) {
           observabilityService.captureError(error, {
             context: 'AppRecommendations.loadRecommendations',
+            action: 'load_app_recommendations',
+            providedApps: !!providedApps
           });
+          await analyticsService.logEvent('error_load_app_recommendations');
 
           await Promise.resolve();
 

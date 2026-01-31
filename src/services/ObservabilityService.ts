@@ -56,7 +56,11 @@ class ObservabilityService {
       }
     } catch (serviceError) {
       // Evitar que un fallo en el servicio de observabilidad rompa la app
-      console.error('[Observability] Failed to report error:', serviceError);
+      console.error('[Observability] Failed to report error:', {
+        originalError: error instanceof Error ? error.message : String(error),
+        serviceError: serviceError instanceof Error ? serviceError.message : String(serviceError),
+        context
+      });
     }
   }
 
@@ -73,7 +77,10 @@ class ObservabilityService {
       Sentry.captureMessage(message);
       getCrashlytics().log(message);
     } catch (e) {
-      console.error('[Observability] Failed to log message:', e);
+      console.error('[Observability] Failed to log message:', {
+        message,
+        error: e instanceof Error ? e.message : String(e)
+      });
     }
   }
 
@@ -100,7 +107,11 @@ class ObservabilityService {
       return null;
     } catch (e) {
       if (__DEV__) {
-        console.warn('[Observability] Failed to start transaction:', e);
+        console.warn('[Observability] Failed to start transaction:', {
+          name,
+          op,
+          error: e instanceof Error ? e.message : String(e)
+        });
       }
       return null;
     }
@@ -130,7 +141,10 @@ class ObservabilityService {
       }
     } catch (e) {
       if (__DEV__) {
-        console.warn('[Observability] Failed to finish transaction:', e);
+        console.warn('[Observability] Failed to finish transaction:', {
+          status,
+          error: e instanceof Error ? e.message : String(e)
+        });
       }
     }
   }
@@ -164,7 +178,11 @@ class ObservabilityService {
       }
     } catch (e) {
       if (__DEV__) {
-        console.warn('[Observability] Failed to set transaction attribute:', e);
+        console.warn('[Observability] Failed to set transaction attribute:', {
+          key,
+          value,
+          error: e instanceof Error ? e.message : String(e)
+        });
       }
     }
   }

@@ -85,7 +85,13 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
         analyticsService.logShare('currency', rate.code, format === '1:1' ? 'image_square' : 'image_story');
       } catch (e) {
         if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
-          observabilityService.captureError(e, { context: 'CurrencyDetail_generateShareImage' });
+          observabilityService.captureError(e, {
+            context: 'CurrencyDetailScreen.handleShareImage',
+            action: 'share_currency_image',
+            currencyCode: rate.code,
+            format,
+            errorMessage: (e as any).message
+          });
           showToast('No se pudo compartir la imagen', 'error');
         }
       } finally {
@@ -108,6 +114,12 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
       analyticsService.logShare('currency', rate.code, 'text');
     } catch (e) {
       if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
+        observabilityService.captureError(e, {
+          context: 'CurrencyDetailScreen.handleShareText',
+          action: 'share_currency_text',
+          currencyCode: rate.code,
+          errorMessage: (e as any).message
+        });
         showToast('Error al compartir texto', 'error');
       }
     }

@@ -4,6 +4,7 @@ import { Text } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../theme/theme';
+import { observabilityService } from '../../services/ObservabilityService';
 
 interface DetailHeroHeaderProps {
     image?: string | null;
@@ -38,6 +39,10 @@ const DetailHeroHeader: React.FC<DetailHeroHeaderProps> = ({
                 year: 'numeric'
             }).format(date);
         } catch (e) {
+            observabilityService.captureError(e, {
+                context: 'DetailHeroHeader.formatDate',
+                dateString: dateString
+            });
             return '---';
         }
     };

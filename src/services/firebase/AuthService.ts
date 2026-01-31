@@ -46,7 +46,11 @@ class AuthService {
     try {
       return await signInWithEmailAndPassword(getAuth(), email, password);
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'AuthService.signInWithEmail',
+        action: 'auth_email_signin',
+        email: email
+      });
       throw this.handleError(e);
     }
   }
@@ -58,7 +62,11 @@ class AuthService {
     try {
       return await createUserWithEmailAndPassword(getAuth(), email, password);
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'AuthService.signUpWithEmail',
+        action: 'auth_email_signup',
+        email: email
+      });
       throw this.handleError(e);
     }
   }
@@ -152,7 +160,10 @@ class AuthService {
     try {
       return await signInAnonymously(getAuth());
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'AuthService.signInAnonymously',
+        action: 'auth_anonymous_signin'
+      });
       throw this.handleError(e);
     }
   }
@@ -174,14 +185,20 @@ class AuthService {
             await GoogleSignin.signOut();
           } catch (googleError) {
             // Ignore Google sign out errors
-            observabilityService.captureError(googleError);
+            observabilityService.captureError(googleError, {
+              context: 'AuthService.signOut.googleSignOut',
+              action: 'google_signout_failed'
+            });
           }
         }
       }
 
       await signOut(getAuth());
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'AuthService.signOut',
+        action: 'auth_signout'
+      });
       throw this.handleError(e);
     }
   }
@@ -194,7 +211,10 @@ class AuthService {
       }
       await currentUser.delete();
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'AuthService.deleteAccount',
+        action: 'auth_delete_account'
+      });
       throw this.handleError(e);
     }
   }
@@ -217,7 +237,11 @@ class AuthService {
       }
       return updatedUser;
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'AuthService.updateProfileName',
+        action: 'auth_update_profile',
+        nameLength: displayName.length
+      });
       throw this.handleError(e);
     }
   }
@@ -229,7 +253,11 @@ class AuthService {
     try {
       await sendPasswordResetEmail(getAuth(), email);
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'AuthService.sendPasswordResetEmail',
+        action: 'auth_password_reset',
+        email: email
+      });
       throw this.handleError(e);
     }
   }

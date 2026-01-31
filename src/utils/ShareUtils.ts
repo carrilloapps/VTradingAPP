@@ -1,4 +1,5 @@
 import Share from 'react-native-share';
+import { observabilityService } from '../services/ObservabilityService';
 
 interface ShareTextOptions {
     title: string;
@@ -66,6 +67,12 @@ export const shareTextContent = async (options: ShareTextOptions) => {
         return true;
     } catch (error: any) {
         if (error && error.message !== 'User did not share' && error.message !== 'CANCELLED') {
+            observabilityService.captureError(error, {
+                context: 'ShareUtils.shareContent',
+                title: options.title,
+                hasUrl: !!options.url,
+                errorMessage: error.message
+            });
             console.error('Share error:', error);
             return false;
         }

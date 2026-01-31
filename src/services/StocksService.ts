@@ -209,7 +209,11 @@ export class StocksService {
       const rawList = response.data || response.stocks || [];
       return rawList.map(item => this.mapStock(item));
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'StocksService.getAllStocks',
+        method: 'GET',
+        endpoint: 'api/bvc/market'
+      });
       return [];
     }
   }
@@ -276,7 +280,13 @@ export class StocksService {
       return this.currentStocks;
 
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'StocksService.fetchAllStocks',
+        method: 'GET',
+        endpoint: 'api/bvc/market',
+        hasCachedData: this.currentStocks.length > 0,
+        lastFetch: this.lastFetch
+      });
       // Error fetching stocks
 
       // Fallback: Return cached if available even if expired, or empty
@@ -350,7 +360,11 @@ export class StocksService {
       // Fallback if no IBC data found in indices (should not happen with correct API)
       return null;
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'StocksService.getIBC',
+        method: 'GET',
+        endpoint: 'api/bvc/indices'
+      });
       return null;
     }
   }

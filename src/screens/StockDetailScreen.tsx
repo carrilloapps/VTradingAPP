@@ -81,7 +81,13 @@ const StockDetailScreen = ({ route, navigation }: any) => {
         analyticsService.logShare('stock', stock.symbol, format === '1:1' ? 'image_square' : 'image_story');
       } catch (e) {
         if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
-          observabilityService.captureError(e, { context: 'StockDetail_generateShareImage' });
+          observabilityService.captureError(e, {
+            context: 'StockDetailScreen.generateShareImage',
+            action: 'share_stock_image',
+            symbol: stock.symbol,
+            format: format
+          });
+          await analyticsService.logEvent('error_stock_share_image', { symbol: stock.symbol, format });
           showToast('No se pudo compartir la imagen', 'error');
         }
       } finally {
@@ -103,6 +109,11 @@ const StockDetailScreen = ({ route, navigation }: any) => {
       analyticsService.logShare('stock', stock.symbol, 'text');
     } catch (e) {
       if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
+        observabilityService.captureError(e, {
+          context: 'StockDetailScreen.handleShareText',
+          action: 'share_stock_text',
+          symbol: stock.symbol
+        });
         showToast('Error al compartir texto', 'error');
       }
     }

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet, Linking } from 'react-native';
 import { Text, Surface, IconButton, Avatar } from 'react-native-paper';
 import { useAppTheme } from '../../theme/theme';
+import { observabilityService } from '../../services/ObservabilityService';
 import XIcon from '../common/XIcon';
 import FacebookIcon from '../common/FacebookIcon';
 
@@ -22,7 +23,15 @@ const AuthorCard = ({ author }: AuthorCardProps) => {
     const theme = useAppTheme();
 
     const handleSocialPress = (url?: string) => {
-        if (url) Linking.openURL(url).catch(() => Linking.openURL(url));
+        if (url) {
+            Linking.openURL(url).catch((e) => {
+                observabilityService.captureError(e, {
+                    context: 'AuthorCard.handleSocialPress',
+                    action: 'open_social_link',
+                    url
+                });
+            });
+        }
     };
 
     if (!author) return null;

@@ -92,7 +92,10 @@ const CurrencyConverter: React.FC = () => {
 
         // Trigger initial fetch
         CurrencyService.getRates().catch(e => {
-            observabilityService.captureError(e);
+            observabilityService.captureError(e, {
+                context: 'CurrencyConverter.loadRates',
+                action: 'fetch_initial_rates'
+            });
         });
 
         return () => unsubscribe();

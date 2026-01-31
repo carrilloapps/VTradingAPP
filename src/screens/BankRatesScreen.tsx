@@ -66,7 +66,12 @@ const BankRatesScreen = () => {
           setPage(Number(pagination.page));
           setHasMore(Number(pagination.page) < Number(pagination.totalPages));
       } catch (e) {
-          observabilityService.captureError(e);
+          observabilityService.captureError(e, {
+              context: 'BankRatesScreen.loadBankRates',
+              action: 'fetch_bank_rates',
+              page: nextInfo.page,
+              isRefresh
+          });
           // Only show error toast if it's the first page or refresh
           if (isRefresh || nextInfo.page === 1) {
              showToast('Error de conexión', 'error');
@@ -171,7 +176,7 @@ const BankRatesScreen = () => {
             buyPercentage={buyPercentage}
             sellPercentage={sellPercentage}
             onPress={() => {
-                analyticsService.logEvent('click_bank_rate', { bank: item.name, code: item.code });
+                analyticsService.logSelectContent('bank_rate', `${item.code}_${item.name}`);
                 (navigation as any).navigate('CurrencyDetail', { rate: item, currencyId: item.id });
             }}
         />

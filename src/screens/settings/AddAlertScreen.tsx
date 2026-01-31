@@ -171,7 +171,13 @@ const AddAlertScreen = ({ route }: Props) => {
 
       setItems(Array.from(itemsMap.values()));
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, { 
+        context: 'AddAlertScreen.loadData',
+        action: 'load_market_data'
+      });
+      await analyticsService.logEvent('error_load_market_data', {
+        screen: 'AddAlertScreen'
+      });
       showToast('Error cargando datos de mercado', 'error');
     } finally {
       setLoading(false);
@@ -333,7 +339,17 @@ const AddAlertScreen = ({ route }: Props) => {
         navigation.goBack();
 
     } catch (error) {
-        observabilityService.captureError(error);
+        observabilityService.captureError(error, {
+          context: 'AddAlertScreen.handleSaveAlert',
+          symbol: selectedItem.symbol,
+          target: targetPrice,
+          condition: condition,
+          isEdit: !!editAlert
+        });
+        await analyticsService.logEvent('error_save_alert', {
+          symbol: selectedItem.symbol,
+          is_edit: !!editAlert
+        });
         showToast('Error al guardar alerta', 'error');
     } finally {
         setSaving(false);
@@ -363,7 +379,14 @@ const AddAlertScreen = ({ route }: Props) => {
           showToast('Alerta eliminada', 'success');
           navigation.goBack();
       } catch (e) {
-          observabilityService.captureError(e);
+          observabilityService.captureError(e, {
+            context: 'AddAlertScreen.handleDeleteConfirm',
+            symbol: editAlert.symbol,
+            alertId: editAlert.id
+          });
+          await analyticsService.logEvent('error_delete_alert', {
+            symbol: editAlert.symbol
+          });
           showToast('Error al eliminar alerta', 'error');
       } finally {
           setDeleting(false);

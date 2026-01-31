@@ -47,7 +47,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             setNotifications(stored);
         }
       } catch (e) {
-        observabilityService.captureError(e);
+        observabilityService.captureError(e, {
+            context: 'NotificationContext.loadNotifications',
+            action: 'load_stored_notifications'
+        });
         // Error loading notifications
       } finally {
         setIsLoading(false);
@@ -101,7 +104,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                  try {
                      navigationRef.navigate('Notifications');
                  } catch (e) {
-                     observabilityService.captureError(e);
+                     observabilityService.captureError(e, {
+                         context: 'NotificationContext.quitStateNavigation',
+                         action: 'navigate_notifications'
+                     });
                      // Navigation failed
                  }
              }
@@ -119,7 +125,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
            try {
                navigationRef.navigate('Notifications');
            } catch (e) {
-               observabilityService.captureError(e);
+               observabilityService.captureError(e, {
+                   context: 'NotificationContext.backgroundStateNavigation',
+                   action: 'navigate_notifications'
+               });
                // Navigation to Notifications failed
            }
        }
@@ -193,7 +202,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                        shouldAdd = false;
                    }
                } catch (e) {
-                   observabilityService.captureError(e);
+                   observabilityService.captureError(e, {
+                       context: 'NotificationContext.processRemoteMessage',
+                       action: 'check_matching_alerts',
+                       symbol: remoteMessage.data?.symbol
+                   });
                    // Error checking alerts in NotificationContext
                    // Fallback: If error checking alerts, add it anyway but try to infer trend
                    // (Keep existing fallback logic if needed, or better safe to not spam?)
@@ -223,13 +236,21 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
               const currentNotifications = await storageService.getNotifications();
               await storageService.saveNotifications([newNotif, ...currentNotifications]);
             } catch (e) {
-              observabilityService.captureError(e);
+              observabilityService.captureError(e, {
+                  context: 'NotificationContext.processRemoteMessage',
+                  action: 'persist_notification',
+                  notificationId: newNotif.id
+              });
               // Failed to persist notification
             }
         }
       }
     } catch (error) {
-      observabilityService.captureError(error);
+      observabilityService.captureError(error, {
+          context: 'NotificationContext.processRemoteMessage',
+          action: 'process_remote_message',
+          messageId: remoteMessage.messageId
+      });
           // Error processing remote message
         }
       };

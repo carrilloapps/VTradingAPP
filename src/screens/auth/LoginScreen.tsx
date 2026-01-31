@@ -107,10 +107,14 @@ const LoginScreen = ({ navigation }: any) => {
       try {
         await analyticsService.logEvent('login_attempt', { method: 'password' });
         await signIn(email, password, showToast);
-        await analyticsService.logEvent('login_success', { method: 'password' });
+        // Login exitoso ya se trackea en authStore con logLogin
       } catch (e) {
-        observabilityService.captureError(e);
-        await analyticsService.logEvent('login_error', { method: 'password' });
+        observabilityService.captureError(e, {
+          context: 'LoginScreen.handleLogin',
+          method: 'password',
+          email
+        });
+        // Error ya se trackea en authStore con logError
         // Error handled in authStore
       } finally {
         setIsSubmitting(false);
@@ -123,10 +127,13 @@ const LoginScreen = ({ navigation }: any) => {
     try {
       await analyticsService.logEvent('login_attempt', { method: 'google' });
       await googleSignIn(showToast);
-      await analyticsService.logEvent('login_success', { method: 'google' });
+      // Login exitoso ya se trackea en authStore
     } catch (e) {
-      observabilityService.captureError(e);
-      await analyticsService.logEvent('login_error', { method: 'google' });
+      observabilityService.captureError(e, {
+        context: 'LoginScreen.handleGoogleLogin',
+        method: 'google'
+      });
+      // Error ya se trackea en authStore
     } finally {
       setIsSubmitting(false);
     }
@@ -137,10 +144,13 @@ const LoginScreen = ({ navigation }: any) => {
     try {
       await analyticsService.logEvent('login_attempt', { method: 'anonymous' });
       await signInAnonymously(showToast);
-      await analyticsService.logEvent('login_success', { method: 'anonymous' });
+      // Login exitoso ya se trackea en authStore
     } catch (e) {
-      observabilityService.captureError(e);
-      await analyticsService.logEvent('login_error', { method: 'anonymous' });
+      observabilityService.captureError(e, {
+        context: 'LoginScreen.handleGuestLogin',
+        method: 'anonymous'
+      });
+      // Error ya se trackea en authStore
     } finally {
       setIsSubmitting(false);
     }

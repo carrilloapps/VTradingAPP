@@ -112,9 +112,14 @@ const RegisterScreen = ({ navigation }: any) => {
       try {
         await analyticsService.logEvent('sign_up_attempt', { method: 'password' });
         await signUp(email, password, showToast);
-        await analyticsService.logEvent('sign_up_success', { method: 'password' });
-      } catch {
-        await analyticsService.logEvent('sign_up_error', { method: 'password' });
+        // Sign up exitoso ya se trackea en authStore con logLogin
+      } catch (e) {
+        observabilityService.captureError(e, {
+          context: 'RegisterScreen.handleRegister',
+          method: 'password',
+          email
+        });
+        // Error ya se trackea en authStore
         // Error handled in authStore
       } finally {
         setIsSubmitting(false);
@@ -127,10 +132,13 @@ const RegisterScreen = ({ navigation }: any) => {
     try {
       await analyticsService.logEvent('sign_up_attempt', { method: 'google' });
       await googleSignIn(showToast);
-      await analyticsService.logEvent('sign_up_success', { method: 'google' });
+      // Sign up exitoso ya se trackea en authStore
     } catch (e) {
-      observabilityService.captureError(e);
-      await analyticsService.logEvent('sign_up_error', { method: 'google' });
+      observabilityService.captureError(e, {
+        context: 'RegisterScreen.handleGoogleRegister',
+        method: 'google'
+      });
+      // Error ya se trackea en authStore
     } finally {
       setIsSubmitting(false);
     }

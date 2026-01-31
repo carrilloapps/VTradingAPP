@@ -75,11 +75,15 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
         await analyticsService.logEvent('password_reset_attempt');
         await resetPassword(email, showToast);
         setSuccessMessage('Se ha enviado un correo para restablecer tu contraseña.');
-        await analyticsService.logEvent('password_reset_success');
+        // Reset exitoso ya se trackea en authStore
       } catch (e) {
-        observabilityService.captureError(e);
+        observabilityService.captureError(e, {
+          context: 'ForgotPasswordScreen.handleResetPassword',
+          action: 'password_reset',
+          email
+        });
         // Error is handled in authStore, but we can clear success message
-        await analyticsService.logEvent('password_reset_error');
+        // Error ya se trackea en authStore
       } finally {
         setIsSubmitting(false);
       }

@@ -119,8 +119,11 @@ const HomeScreen = ({ navigation }: any) => {
           displayValue = Number(rate.value).toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: AppConfig.DECIMAL_PLACES, maximumFractionDigits: AppConfig.DECIMAL_PLACES });
         }
       } catch (e) {
-        observabilityService.captureError(e);
-        // Error formatting value
+        observabilityService.captureError(e, {
+          context: 'HomeScreen.formatValue',
+          rateCode: rate.code,
+          rateValue: rate.value
+        });
       }
 
       // Handle potential undefined/null for buy/sell
@@ -205,7 +208,13 @@ const HomeScreen = ({ navigation }: any) => {
         ]);
         setIsMarketOpen(StocksService.isMarketOpen());
       } catch (e) {
-        observabilityService.captureError(e);
+        observabilityService.captureError(e, {
+          context: 'HomeScreen.loadInitialData',
+          screen: 'HomeScreen'
+        });
+        await analyticsService.logEvent('error_load_initial_data', {
+          screen: 'HomeScreen'
+        });
         showToast('Error al actualizar datos', 'error');
       } finally {
         setLoading(false);
@@ -302,9 +311,12 @@ const HomeScreen = ({ navigation }: any) => {
       setIsMarketOpen(StocksService.isMarketOpen());
       showToast('Datos actualizados', 'success');
       setLastRefreshTime(new Date()); // Force update time immediately on success
-      analyticsService.logEvent('dashboard_refresh');
+      await analyticsService.logDataRefresh('dashboard', true);
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'HomeScreen.onRefresh',
+        action: 'refresh_dashboard_data'
+      });
       showToast('Error al actualizar', 'error');
     } finally {
       setRefreshing(false);
@@ -413,7 +425,7 @@ const HomeScreen = ({ navigation }: any) => {
                 onPress={() => {
                   const rawRate = rates.find(r => r.name === item.title);
                   if (rawRate) {
-                    analyticsService.logEvent('click_currency_detail', { currency: rawRate.code });
+                    analyticsService.logSelectContent('currency', rawRate.code);
                     navigation.navigate('CurrencyDetail', { rate: rawRate });
                   }
                 }}
@@ -445,7 +457,7 @@ const HomeScreen = ({ navigation }: any) => {
                 value={`${stock.price.toLocaleString(AppConfig.DEFAULT_LOCALE, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`}
                 change={`${stock.changePercent > 0 ? '+' : ''}${stock.changePercent.toFixed(2)}%`}
                 onPress={() => {
-                  analyticsService.logEvent('click_stock_detail', { symbol: stock.symbol });
+                  analyticsService.logSelectContent('stock', stock.symbol);
                   navigation.navigate('StockDetail', { stock });
                 }}
               />

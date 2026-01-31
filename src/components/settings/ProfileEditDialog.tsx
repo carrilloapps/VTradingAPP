@@ -4,6 +4,7 @@ import { StyleSheet } from 'react-native';
 import CustomDialog from '../ui/CustomDialog';
 import { useToastStore } from '../../stores/toastStore';
 import { observabilityService } from '../../services/ObservabilityService';
+import { analyticsService } from '../../services/firebase/AnalyticsService';
 
 interface ProfileEditDialogProps {
   visible: boolean;
@@ -34,7 +35,12 @@ const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({
       await onSave(name);
       onDismiss();
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'ProfileEditDialog.handleSave',
+        action: 'save_profile_name',
+        nameLength: name.length
+      });
+      await analyticsService.logEvent('error_save_profile');
       showToast('Error al guardar perfil', 'error');
     } finally {
       setLoading(false);

@@ -72,7 +72,11 @@ class NotificationInitService {
       SafeLogger.log('[NotificationInit] Initialization complete');
 
     } catch (error) {
-      observabilityService.captureError(error);
+      observabilityService.captureError(error, {
+        context: 'NotificationInitService.initialize',
+        action: 'init_notification_system'
+      });
+      await analyticsService.logError('notification_init');
       SafeLogger.error('[NotificationInit] Initialization failed:', { error });
     }
   }
@@ -98,7 +102,11 @@ class NotificationInitService {
 
       return granted;
     } catch (error) {
-      observabilityService.captureError(error);
+      observabilityService.captureError(error, {
+        context: 'NotificationInitService.requestPermission',
+        action: 'request_notification_permission'
+      });
+      await analyticsService.logError('notification_permission');
       return false;
     }
   }
@@ -134,7 +142,11 @@ class NotificationInitService {
         count: uniqueSymbols.length,
       });
     } catch (error) {
-      observabilityService.captureError(error);
+      observabilityService.captureError(error, {
+        context: 'NotificationInitService.resubscribeToAlerts',
+        action: 'resubscribe_alert_topics'
+      });
+      await analyticsService.logError('notification_resubscribe');
       SafeLogger.error('[NotificationInit] Failed to resubscribe to alerts:', { error });
     }
   }
@@ -161,7 +173,10 @@ class NotificationInitService {
         activeAlertsCount,
       };
     } catch (error) {
-      observabilityService.captureError(error);
+      observabilityService.captureError(error, {
+        context: 'NotificationInitService.checkStatus',
+        action: 'check_notification_status'
+      });
       return {
         hasPermission: false,
         hasToken: false,

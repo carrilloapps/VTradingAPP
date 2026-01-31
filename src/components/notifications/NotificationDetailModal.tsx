@@ -28,7 +28,8 @@ const NotificationDetailModal: React.FC<NotificationDetailModalProps> = ({
 
   React.useEffect(() => {
     if (visible && notification) {
-      analyticsService.logEvent('view_notification_detail', {
+      analyticsService.logInteraction('dialog_opened', {
+        dialog_type: 'notification_detail',
         notification_id: notification.id,
         notification_title: notification.title
       });

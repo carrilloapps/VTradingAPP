@@ -15,13 +15,13 @@ import { StocksService, StockData } from '../services/StocksService';
 import { useToastStore } from '../stores/toastStore';
 import StocksSkeleton from '../components/stocks/StocksSkeleton';
 import { observabilityService } from '../services/ObservabilityService';
+import { analyticsService } from '../services/firebase/AnalyticsService';
 import { useAuthStore } from '../stores/authStore';
 import CustomDialog from '../components/ui/CustomDialog';
 import CustomButton from '../components/ui/CustomButton';
 import { captureRef } from 'react-native-view-shot';
 import Share from 'react-native-share';
 import MarketShareGraphic from '../components/stocks/MarketShareGraphic';
-import { analyticsService } from '../services/firebase/AnalyticsService';
 
 const StocksScreen = ({ navigation, route: _route }: any) => {
   const theme = useTheme();
@@ -73,6 +73,11 @@ const StocksScreen = ({ navigation, route: _route }: any) => {
         setIndexData(idx);
         setIsMarketOpen(StocksService.isMarketOpen());
       } catch (error) {
+        observabilityService.captureError(error, {
+          context: 'StocksScreen.loadData',
+          action: 'load_market_data'
+        });
+        await analyticsService.logError('stocks_load_data');
         showToast('Error cargando datos del mercado', 'error');
         setLoading(false);
       }
@@ -92,7 +97,11 @@ const StocksScreen = ({ navigation, route: _route }: any) => {
       setIsMarketOpen(StocksService.isMarketOpen());
       showToast('Mercado actualizado', 'success');
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'StocksScreen.onRefresh',
+        action: 'refresh_market_data'
+      });
+      await analyticsService.logEvent('error_stocks_refresh');
       showToast('Error actualizando mercado', 'error');
     } finally {
       setRefreshing(false);
@@ -181,7 +190,12 @@ const StocksScreen = ({ navigation, route: _route }: any) => {
         await analyticsService.logShare('market_summary', 'all', format === '1:1' ? 'image_square' : 'image_story');
       } catch (e) {
         if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
-          observabilityService.captureError(e, { context: 'StocksScreen_generateShareImage' });
+          observabilityService.captureError(e, {
+            context: 'StocksScreen.generateShareImage',
+            action: 'share_market_image',
+            format: format
+          });
+          await analyticsService.logEvent('error_stocks_share_image', { format });
           showToast('No se pudo compartir la imagen', 'error');
         }
       } finally {
@@ -202,6 +216,10 @@ const StocksScreen = ({ navigation, route: _route }: any) => {
       await analyticsService.logShare('market_summary', 'all', 'text');
     } catch (e) {
       if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
+        observabilityService.captureError(e, {
+          context: 'StocksScreen.handleShareText',
+          action: 'share_market_text'
+        });
         showToast('Error al compartir texto', 'error');
       }
     }

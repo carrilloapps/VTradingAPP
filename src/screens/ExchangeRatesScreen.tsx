@@ -88,7 +88,10 @@ const ExchangeRatesScreen = () => {
     ]).then(() => {
         setIsMarketOpen(StocksService.isMarketOpen());
     }).catch((e) => {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'ExchangeRatesScreen.loadData',
+        action: 'fetch_initial_data'
+      });
       setError('Error al cargar las tasas de cambio');
       showToast('Error de conexión', 'error');
       setLoading(false);
@@ -109,7 +112,10 @@ const ExchangeRatesScreen = () => {
           ]);
           setIsMarketOpen(StocksService.isMarketOpen());
       } catch (e) {
-          observabilityService.captureError(e);
+          observabilityService.captureError(e, {
+              context: 'ExchangeRatesScreen.onRefresh',
+              action: 'refresh_rates_and_stocks'
+          });
           showToast('Error al actualizar', 'error');
       } finally {
           setRefreshing(false);
@@ -119,7 +125,10 @@ const ExchangeRatesScreen = () => {
   const loadRates = useCallback(() => {
       setLoading(true);
       CurrencyService.getRates(true).catch((e) => {
-          observabilityService.captureError(e);
+          observabilityService.captureError(e, {
+              context: 'ExchangeRatesScreen.loadRates',
+              action: 'reload_rates'
+          });
           showToast('Error al recargar', 'error');
           setLoading(false);
       });

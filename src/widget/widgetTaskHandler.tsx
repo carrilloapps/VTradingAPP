@@ -6,7 +6,7 @@ import VTradingWidget from './VTradingWidget';
 import { WidgetItem } from './types';
 import { observabilityService } from '../services/ObservabilityService';
 import { getTrend } from '../utils/trendUtils';
-import { analyticsService } from '../services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '../services/firebase/AnalyticsService';
 
 export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false) {
   console.log('[Widget] buildWidgetElement called', { 
@@ -28,6 +28,7 @@ export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false
   let rates: CurrencyRate[] = [];
   let didFetchFresh = false;
   let lastUpdatedLabel: string | undefined;
+  let lastRefreshAt = 0;
 
   try {
       // 1. Get Widget Configuration
@@ -35,7 +36,7 @@ export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false
       if (config) finalConfig = config;
       const refreshInterval = parseInt(finalConfig.refreshInterval || '4', 10);
       const refreshMeta = await storageService.getWidgetRefreshMeta();
-      const lastRefreshAt = refreshMeta?.lastRefreshAt ?? 0;
+      lastRefreshAt = refreshMeta?.lastRefreshAt ?? 0;
       const shouldRefresh = forceRefresh || !lastRefreshAt || (Date.now() - lastRefreshAt) >= refreshInterval * 60 * 60 * 1000;
 
       // 2. Fetch Latest Rates
@@ -47,7 +48,11 @@ export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false
           rates = await CurrencyService.getRates(false);
       }
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'widgetTaskHandler.fetchRates',
+        action: 'widget_fetch_rates',
+        isForceRefresh: didFetchFresh
+      });
       rates = await CurrencyService.getRates(false);
     }
 
@@ -57,7 +62,12 @@ export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false
       lastUpdatedLabel = new Date(rates[0].lastUpdated).toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' });
     }
   } catch (e) {
-    observabilityService.captureError(e);
+    observabilityService.captureError(e, {
+      context: 'widgetTaskHandler.processLastUpdated',
+      action: 'widget_process_metadata',
+      hasLastRefreshAt: !!lastRefreshAt,
+      ratesCount: rates.length
+    });
     // Service Error
   }
   if (didFetchFresh && rates.length > 0) {
@@ -74,6 +84,10 @@ export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false
     } catch (e) {
       // Fallback to manual formatting if locale not supported
       console.warn('[Widget] toLocaleString failed, using fallback');
+      observabilityService.captureError(e, {
+        context: 'widgetTaskHandler.formatCurrency',
+        value: val
+      });
       return val.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
     }
   };
@@ -168,21 +182,21 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
     if (widgetAction === 'WIDGET_ADDED') {
       console.log('[Widget] Widget added, initializing refresh metadata');
       await storageService.saveWidgetRefreshMeta({ lastRefreshAt: Date.now() });
-      await analyticsService.logEvent('widget_added', { widgetId: widgetInfo?.widgetId });
+      await analyticsService.logEvent(ANALYTICS_EVENTS.WIDGET_ADDED, { widgetId: widgetInfo?.widgetId });
       await analyticsService.setUserProperty('has_widget', 'true');
     }
 
     if (widgetAction === 'WIDGET_DELETED') {
       console.log('[Widget] Widget deleted, clearing metadata');
       await storageService.saveWidgetRefreshMeta({ lastRefreshAt: 0 });
-      await analyticsService.logEvent('widget_deleted', { widgetId: widgetInfo?.widgetId });
+      await analyticsService.logEvent(ANALYTICS_EVENTS.WIDGET_DELETED, { widgetId: widgetInfo?.widgetId });
       await analyticsService.setUserProperty('has_widget', 'false');
       return;
     }
 
     if (widgetAction === 'WIDGET_CLICK' && clickAction === 'REFRESH_WIDGET') {
       console.log('[Widget] Manual refresh triggered');
-      await analyticsService.logEvent('widget_refresh_manual', { widgetId: widgetInfo?.widgetId });
+      await analyticsService.logEvent(ANALYTICS_EVENTS.WIDGET_REFRESH, { widgetId: widgetInfo?.widgetId });
       // Updating widget
       const element = await buildWidgetElement(widgetInfo, true);
       await props.renderWidget(element);
@@ -192,8 +206,12 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
     const element = await buildWidgetElement(widgetInfo, false);
     await props.renderWidget(element);
   } catch (e) {
-    observabilityService.captureError(e);
-    await analyticsService.logEvent('widget_error', { action: widgetAction });
+    observabilityService.captureError(e, {
+      context: 'widgetTaskHandler.main',
+      widgetAction: widgetAction,
+      widgetFamily: widgetInfo.widgetName
+    });
+    await analyticsService.logError('widget', { action: widgetAction });
     // WidgetTaskHandler Error
   }
 }

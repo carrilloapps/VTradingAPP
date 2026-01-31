@@ -125,6 +125,10 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
         const hasPermission = await fcmService.checkPermission();
         setNotificationPermissionStatus(hasPermission);
       } catch (error) {
+        observabilityService.captureError(error, {
+          context: 'OnboardingScreen.checkStatus',
+          action: 'check_initial_permission'
+        });
         // Error checking permission
       }
     };
@@ -184,7 +188,11 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
          }, 1500);
       }
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'OnboardingScreen.handleRequestPermission',
+        action: 'request_notification_permission'
+      });
+      await analyticsService.logEvent('error_onboarding_permission');
       showToast('Error al solicitar permiso', 'error');
     } finally {
       setIsPaused(false); // Resume after dialog

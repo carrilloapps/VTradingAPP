@@ -38,7 +38,11 @@ class AppCheckService {
       if (__DEV__ && (message.includes('Debug') || message.includes('token'))) {
         // Ignore initialization errors in DEV with invalid tokens
       } else {
-        observabilityService.captureError(e);
+        observabilityService.captureError(e, {
+          context: 'AppCheckService.initialize',
+          action: 'init_app_check',
+          isDev: __DEV__
+        });
       }
       // Ignore error
     }

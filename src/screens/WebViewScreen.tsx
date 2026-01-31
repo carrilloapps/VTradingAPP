@@ -20,7 +20,8 @@ const WebViewScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   React.useEffect(() => {
-    analyticsService.logEvent('webview_view', { url, title });
+    analyticsService.logScreenView('WebView', 'WebViewScreen');
+    analyticsService.logFeatureUsage('webview', { url, title });
   }, [url, title]);
 
   // Script para ocultar header, footer y breadcrumbs en vtrading.app
@@ -50,7 +51,8 @@ const WebViewScreen = () => {
            document.head.appendChild(style);
         }
       } catch (e) {
-        // Silent error
+        // Silent error - observability not available in WebView context
+        console.warn('[WebView] CSS injection failed:', e);
       }
     })();
     true;

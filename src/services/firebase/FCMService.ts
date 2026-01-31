@@ -58,7 +58,10 @@ class FCMService {
       SafeLogger.sensitive('FCM', token);
       return token;
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'FCMService.getFCMToken',
+        action: 'get_fcm_token'
+      });
       return null;
     }
   }
@@ -119,7 +122,11 @@ class FCMService {
       const sanitizedTopic = topic.replace(/[^a-zA-Z0-9-_.~%]/g, '_');
       await this.messaging.subscribeToTopic(sanitizedTopic);
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'FCMService.subscribeToTopic',
+        topic,
+        action: 'subscribe_topic'
+      });
       // Ignore error
     }
   }
@@ -159,7 +166,11 @@ class FCMService {
       await Promise.all(topics.map(topic => this.subscribeToTopic(topic)));
       SafeLogger.log('[FCM] Subscribed to demographics', { topicsCount: topics.length });
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'FCMService.subscribeToDemographics',
+        action: 'subscribe_demographics',
+        topicsCount: extraTopics.length
+      });
       // Ignore error
     }
   }
@@ -172,7 +183,11 @@ class FCMService {
       const sanitizedTopic = topic.replace(/[^a-zA-Z0-9-_.~%]/g, '_');
       await this.messaging.unsubscribeFromTopic(sanitizedTopic);
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'FCMService.unsubscribeFromTopic',
+        topic,
+        action: 'unsubscribe_topic'
+      });
       // Ignore error
     }
   }

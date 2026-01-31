@@ -37,7 +37,10 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           setThemeModeState(savedTheme as ThemeType);
         }
       } catch (e) {
-        observabilityService.captureError(e);
+        observabilityService.captureError(e, {
+          context: 'ThemeContext.loadTheme',
+          action: 'load_theme_preference'
+        });
         // Failed to load theme preference
       } finally {
         setIsReady(true);
@@ -51,7 +54,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       setThemeModeState(mode);
       await AsyncStorage.setItem(THEME_KEY, mode);
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'ThemeContext.setThemeMode',
+        action: 'save_theme_preference',
+        mode: mode
+      });
       // Failed to save theme preference
     }
   };

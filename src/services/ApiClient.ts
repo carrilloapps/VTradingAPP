@@ -60,7 +60,11 @@ export class ApiClient {
           }
         }
       } catch (e) {
-        observabilityService.captureError(e);
+        observabilityService.captureError(e, {
+          context: 'ApiClient.get.cacheRead',
+          endpoint: endpoint,
+          cacheKey: cacheKey
+        });
         // Cache read error
       }
     }
@@ -99,7 +103,10 @@ export class ApiClient {
         }
       }
     } catch (e) {
-      observabilityService.captureError(e);
+      observabilityService.captureError(e, {
+        context: 'ApiClient.get.perfSetup',
+        endpoint: endpoint
+      });
       if (__DEV__) console.warn('[ApiClient] Perf setup failed', e);
     }
 
@@ -162,7 +169,11 @@ export class ApiClient {
 
           await metric.stop();
         } catch (e) {
-          observabilityService.captureError(e);
+          observabilityService.captureError(e, {
+            context: 'ApiClient.get.perfStop',
+            endpoint: endpoint,
+            httpStatus: response.status
+          });
           if (__DEV__) console.warn('[ApiClient] Perf stop failed', e);
         }
       }
@@ -193,7 +204,11 @@ export class ApiClient {
           };
           mmkvStorage.set(cacheKey, JSON.stringify(cacheItem));
         } catch (e) {
-          observabilityService.captureError(e);
+          observabilityService.captureError(e, {
+            context: 'ApiClient.get.cacheWrite',
+            endpoint: endpoint,
+            cacheKey: cacheKey
+          });
           // Cache write error
         }
       }
@@ -203,7 +218,12 @@ export class ApiClient {
       const isNetworkError = e instanceof TypeError && e.message === 'Network request failed';
 
       if (!isNetworkError) {
-        observabilityService.captureError(e);
+        observabilityService.captureError(e, {
+          context: 'ApiClient.get',
+          endpoint: endpoint,
+          method: 'GET',
+          hasCache: !!options.useCache
+        });
       }
 
       if (metric) {
@@ -213,7 +233,11 @@ export class ApiClient {
           metric.setHttpResponseCode(0);
           await metric.stop();
         } catch (stopError) {
-          if (!isNetworkError) observabilityService.captureError(stopError);
+          if (!isNetworkError) observabilityService.captureError(stopError, {
+            context: 'ApiClient.request.metricStop',
+            endpoint,
+            action: 'stop_performance_metric'
+          });
         }
       }
 
@@ -229,7 +253,15 @@ export class ApiClient {
             const { data } = JSON.parse(cached) as CacheItem<T>;
             return data;
           }
-        } catch (cacheError) { observabilityService.captureError(cacheError); /* ignore */ }
+        } catch (cacheError) { 
+          observabilityService.captureError(cacheError, {
+            context: 'ApiClient.request.cacheFallback',
+            endpoint,
+            cacheKey,
+            action: 'read_cache_on_error'
+          }); 
+          /* ignore */ 
+        }
       }
 
       throw e;
