@@ -124,7 +124,7 @@ const ArticleDetailScreen = () => {
   const [refreshing, setRefreshing] = React.useState(false);
 
   // New states for deep linking
-  const [articleData, setArticleData] = React.useState<any>(null);
+  const [articleData, setArticleData] = React.useState<FormattedPost | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [relatedPosts, setRelatedPosts] = React.useState<FormattedPost[]>([]);
@@ -142,7 +142,7 @@ const ArticleDetailScreen = () => {
   // Safe width calculation for header content
   // Logic to merge incoming params or fetched data
   // Logic to prioritize fetched data (full article) over incoming params (partial article)
-  const params = route.params as any;
+  const params = route.params as { article?: FormattedPost; slug?: string };
   const incomingArticle = articleData || params?.article;
   const slug = params?.slug;
 
@@ -156,7 +156,7 @@ const ArticleDetailScreen = () => {
     // Use WordPress categories if available
     categories: incomingArticle?.categories || [],
     // Use Yoast SEO description if available
-    seoDescription: incomingArticle?.yoastSEO?.description || incomingArticle?.seoDescription || '',
+    seoDescription: (incomingArticle as any)?.yoastSEO?.description || (incomingArticle as any)?.seoDescription || '',
   } : null;
 
   // Effect to load article by slug if not provided
@@ -176,7 +176,7 @@ const ArticleDetailScreen = () => {
         try {
           const fetchedArticle = slug
             ? await wordPressService.getPostBySlug(slug)
-            : await wordPressService.getPostById(Number(currentArticle.id), true); // Force bypass cache for detail
+            : await wordPressService.getPostById(Number(currentArticle?.id), true); // Force bypass cache for detail
 
           if (fetchedArticle) {
             setArticleData(fetchedArticle);
@@ -253,6 +253,18 @@ const ArticleDetailScreen = () => {
 
     loadCommentsFeature();
   }, [article?.id]);
+
+  if (isLoading || !article) {
+    return (
+      <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background }]}>
+        <ArticleDetailSkeleton />
+      </View>
+    );
+  }
+
+  if (error) {
+    return <DiscoverErrorView message={error} onRetry={() => setArticleData(null)} />;
+  }
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -357,7 +369,16 @@ const ArticleDetailScreen = () => {
 
 
 
-  const renderBlock = (block: any, index: number) => {
+  interface ContentBlock {
+    type: string;
+    text?: string;
+    author?: string;
+    url?: string;
+    caption?: string;
+    items?: any[];
+  }
+
+  const renderBlock = (block: ContentBlock, index: number) => {
     switch (block.type) {
       case 'paragraph': return <BlockParagraph key={index} text={block.text} theme={theme} />;
       case 'heading': return <BlockHeading key={index} text={block.text} theme={theme} />;
@@ -654,32 +675,32 @@ const ArticleDetailScreen = () => {
                 {article.author?.social && (
                   <View style={styles.socialRow}>
                     {article.author.social.twitter && (
-                      <TouchableOpacity onPress={() => Linking.openURL(article.author.social.twitter)}>
+                      <TouchableOpacity onPress={() => Linking.openURL(article.author!.social!.twitter!)}>
                         <XIcon size={16} color={theme.colors.onSurfaceVariant} />
                       </TouchableOpacity>
                     )}
                     {article.author.social.facebook && (
-                      <TouchableOpacity onPress={() => Linking.openURL(article.author.social.facebook)}>
+                      <TouchableOpacity onPress={() => Linking.openURL(article.author!.social!.facebook!)}>
                         <FacebookIcon size={16} color={theme.colors.onSurfaceVariant} />
                       </TouchableOpacity>
                     )}
                     {article.author.social.instagram && (
-                      <TouchableOpacity onPress={() => Linking.openURL(article.author.social.instagram)}>
+                      <TouchableOpacity onPress={() => Linking.openURL(article.author!.social!.instagram!)}>
                         <MaterialCommunityIcons name="instagram" size={16} color={theme.colors.onSurfaceVariant} />
                       </TouchableOpacity>
                     )}
                     {article.author.social.youtube && (
-                      <TouchableOpacity onPress={() => Linking.openURL(article.author.social.youtube)}>
+                      <TouchableOpacity onPress={() => Linking.openURL(article.author!.social!.youtube!)}>
                         <MaterialCommunityIcons name="youtube" size={16} color={theme.colors.onSurfaceVariant} />
                       </TouchableOpacity>
                     )}
                     {article.author.social.linkedin && (
-                      <TouchableOpacity onPress={() => Linking.openURL(article.author.social.linkedin)}>
+                      <TouchableOpacity onPress={() => Linking.openURL(article.author!.social!.linkedin!)}>
                         <MaterialCommunityIcons name="linkedin" size={16} color={theme.colors.onSurfaceVariant} />
                       </TouchableOpacity>
                     )}
                     {article.author.social.tiktok && (
-                      <TouchableOpacity onPress={() => Linking.openURL(article.author.social.tiktok)}>
+                      <TouchableOpacity onPress={() => Linking.openURL(article.author!.social!.tiktok!)}>
                         <MaterialCommunityIcons name="music-note" size={16} color={theme.colors.onSurfaceVariant} />
                       </TouchableOpacity>
                     )}
@@ -725,9 +746,9 @@ const ArticleDetailScreen = () => {
           <View style={styles.articleBody}>
             {typeof article.content === 'string' ? (
               renderHtmlContent()
-            ) : (
-              article.content.map((block: any, idx: number) => renderBlock(block, idx))
-            )}
+            ) : article.content ? (
+              (article.content as ContentBlock[]).map((block: ContentBlock, idx: number) => renderBlock(block, idx))
+            ) : null}
           </View>
 
           {/* Summary / Lead Paragraph Section */}
@@ -825,11 +846,11 @@ const ArticleDetailScreen = () => {
         type="ARTICLE"
         image={article?.image}
         description={article?.content ? article.content.replace(/<[^>]*>/g, '').replace(/\n+/g, ' ').slice(0, 400) + '...' : ''}
-        author={article?.author ? {
-          name: article.author.name,
-          avatar: article.author.avatar,
+        author={article.author ? {
+          name: article.author.name || '',
+          avatar: article.author.avatar || '',
           role: article.date ? new Date(article.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : (article.time || ''),
-          socials: article.author.social
+          socials: article.author.social as any
         } : undefined}
         categoryName={article?.categories && article.categories.length > 0 ? article.categories[0].name : 'Artículo'}
         aspectRatio={shareFormat}
@@ -892,6 +913,9 @@ const ArticleDetailScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+  },
   container: {
     flex: 1,
   },

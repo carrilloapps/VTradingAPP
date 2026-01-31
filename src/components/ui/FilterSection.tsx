@@ -53,7 +53,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
       : (option.color || theme.colors.onSurfaceVariant);
 
     // Create icon renderer outside of JSX to avoid creating new component each render
-    const iconRenderer = option.icon 
+    const iconRenderer = option.icon
       ? () => <ChipIcon iconName={option.icon!} color={contentColor} size={18} />
       : undefined;
 
@@ -66,6 +66,9 @@ const FilterSection: React.FC<FilterSectionProps> = ({
           // Optional: Add animation on selection if desired
           onSelect(option.value);
         }}
+        accessibilityRole="button"
+        accessibilityLabel={`Filtrar por ${option.label}`}
+        accessibilityState={{ selected: isSelected }}
         style={[
           styles.chip,
           isSelected

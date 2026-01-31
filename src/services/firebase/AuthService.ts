@@ -49,7 +49,6 @@ class AuthService {
       observabilityService.captureError(e, {
         context: 'AuthService.signInWithEmail',
         action: 'auth_email_signin',
-        email: email
       });
       throw this.handleError(e);
     }
@@ -65,7 +64,6 @@ class AuthService {
       observabilityService.captureError(e, {
         context: 'AuthService.signUpWithEmail',
         action: 'auth_email_signup',
-        email: email
       });
       throw this.handleError(e);
     }
@@ -84,7 +82,7 @@ class AuthService {
 
       // Validate sign-in result
       if (!signInResult || !signInResult.data) {
-        console.error('[Auth] Google Sign-In returned invalid result:', {
+        SafeLogger.error('[Auth] Google Sign-In returned invalid result', {
           hasResult: !!signInResult,
           hasData: !!signInResult?.data,
         });
@@ -96,7 +94,7 @@ class AuthService {
       // Validate ID token exists
       if (!idToken) {
         // Log additional context for debugging
-        console.error('[Auth] No ID token in sign-in result:', {
+        SafeLogger.error('[Auth] No ID token in sign-in result', {
           hasData: !!signInResult.data,
           dataKeys: signInResult.data ? Object.keys(signInResult.data) : [],
         });
@@ -256,7 +254,6 @@ class AuthService {
       observabilityService.captureError(e, {
         context: 'AuthService.sendPasswordResetEmail',
         action: 'auth_password_reset',
-        email: email
       });
       throw this.handleError(e);
     }

@@ -15,7 +15,7 @@ interface LogMetadata {
 
 class SafeLogger {
     private static readonly SENSITIVE_KEYS = [
-        'token',
+        //'token',
         'password',
         'secret',
         'apiKey',
@@ -24,6 +24,10 @@ class SafeLogger {
         'refreshToken',
         'idToken',
         'credential',
+        'email',
+        'phone',
+        'address',
+        'accountNumber',
     ];
 
     /**

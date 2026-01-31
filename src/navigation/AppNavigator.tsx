@@ -5,6 +5,7 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import SafeLogger from '../utils/safeLogger';
 
 import HomeScreen from '../screens/HomeScreen';
 import SettingsScreen from '../screens/SettingsScreen';
@@ -18,7 +19,6 @@ import CurrencyDetailScreen from '../screens/CurrencyDetailScreen';
 import { useThemeContext } from '../theme/ThemeContext';
 import { analyticsService } from '../services/firebase/AnalyticsService';
 import { useAuthStore } from '../stores/authStore';
-
 import LoginScreen from '../screens/auth/LoginScreen';
 import RegisterScreen from '../screens/auth/RegisterScreen';
 import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
@@ -42,7 +42,7 @@ import CategoryDetailScreen from '../screens/discover/CategoryDetailScreen';
 import TagDetailScreen from '../screens/discover/TagDetailScreen';
 import AllArticlesScreen from '../screens/discover/AllArticlesScreen';
 import SearchResultsScreen from '../screens/discover/SearchResultsScreen';
-import { WordPressCategory, WordPressTag } from '../services/WordPressService';
+import { WordPressCategory, WordPressTag, FormattedPost } from '../services/WordPressService';
 
 export type RootStackParamList = {
   Onboarding: undefined;
@@ -56,7 +56,7 @@ export type RootStackParamList = {
   AddAlert: { editAlert?: UserAlert };
   StockDetail: { stock: StockData };
   CurrencyDetail: { rate: CurrencyRate };
-  ArticleDetail: { article?: any; slug?: string }; // Updated with slug
+  ArticleDetail: { article?: FormattedPost; slug?: string }; // Updated with slug
   CategoryDetail: { category?: WordPressCategory; slug?: string };
   TagDetail: { tag?: WordPressTag; slug?: string };
   AllArticles: undefined;
@@ -271,7 +271,6 @@ const linking = {
 const AppNavigator = () => {
   const theme = useTheme();
   const { isDark } = useThemeContext();
-  const [, _setIsOnboardingComplete] = useState<boolean | null>(null);
 
   // Zustand store selectors
   const user = useAuthStore((state) => state.user);
@@ -302,7 +301,7 @@ const AppNavigator = () => {
         }
       } catch (e) {
         // Fail silently on config check, don't block app unless confirmed
-        console.warn('Failed to check force update', e);
+        SafeLogger.warn('Failed to check force update', { error: e });
       }
 
       setIsReady(true);

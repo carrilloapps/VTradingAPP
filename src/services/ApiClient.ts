@@ -3,6 +3,7 @@ import { getPerformance, httpMetric, initializePerformance, FirebasePerformanceT
 import { mmkvStorage } from './StorageService';
 import { AppConfig } from '../constants/AppConfig';
 import { observabilityService } from './ObservabilityService';
+import SafeLogger from '../utils/safeLogger';
 
 interface CacheItem<T> {
   data: T;
@@ -107,7 +108,7 @@ export class ApiClient {
         context: 'ApiClient.get.perfSetup',
         endpoint: endpoint
       });
-      if (__DEV__) console.warn('[ApiClient] Perf setup failed', e);
+      if (__DEV__) SafeLogger.warn('[ApiClient] Perf setup failed', { error: e });
     }
 
     // 3. Setup Headers
@@ -139,7 +140,7 @@ export class ApiClient {
     try {
       // 4. Perform Request
       if (__DEV__) {
-        console.log(`[ApiClient] Fetching: ${url}`, { headers });
+        SafeLogger.log(`[ApiClient] Fetching: ${endpoint}`);
       }
 
       const response = await fetch(url, {
@@ -148,7 +149,7 @@ export class ApiClient {
       });
 
       if (__DEV__) {
-        console.log(`[ApiClient] Status: ${response.status} for ${url}`);
+        SafeLogger.log(`[ApiClient] Status: ${response.status} for ${endpoint}`);
       }
 
       // 5. Record Performance Data
@@ -174,7 +175,7 @@ export class ApiClient {
             endpoint: endpoint,
             httpStatus: response.status
           });
-          if (__DEV__) console.warn('[ApiClient] Perf stop failed', e);
+          if (__DEV__) SafeLogger.warn('[ApiClient] Perf stop failed', { error: e });
         }
       }
 
@@ -189,7 +190,13 @@ export class ApiClient {
       }
 
       if (!response.ok) {
-        throw new Error(`API Error: ${response.status}`);
+        let errorData;
+        try {
+          errorData = await response.json();
+        } catch (e) {
+          errorData = { message: `HTTP Error ${response.status}` };
+        }
+        throw new Error(errorData.message || errorData.error || `API Error: ${response.status}`);
       }
 
       // 6. Process Response
@@ -253,14 +260,14 @@ export class ApiClient {
             const { data } = JSON.parse(cached) as CacheItem<T>;
             return data;
           }
-        } catch (cacheError) { 
+        } catch (cacheError) {
           observabilityService.captureError(cacheError, {
             context: 'ApiClient.request.cacheFallback',
             endpoint,
             cacheKey,
             action: 'read_cache_on_error'
-          }); 
-          /* ignore */ 
+          });
+          /* ignore */
         }
       }
 
@@ -311,7 +318,13 @@ export class ApiClient {
     });
 
     if (!response.ok) {
-      throw new Error(`API Error: ${response.status}`);
+      let errorData;
+      try {
+        errorData = await response.json();
+      } catch (e) {
+        errorData = { message: `HTTP Error ${response.status}` };
+      }
+      throw new Error(errorData.message || errorData.error || `API Error: ${response.status}`);
     }
 
     const data = await response.json();

@@ -4,6 +4,7 @@ import { FlashList } from '@shopify/flash-list';
 import { Text, useTheme } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MarketStatus from '../components/ui/MarketStatus';
 import IndexHero from '../components/stocks/IndexHero';
@@ -23,7 +24,25 @@ import { captureRef } from 'react-native-view-shot';
 import Share from 'react-native-share';
 import MarketShareGraphic from '../components/stocks/MarketShareGraphic';
 
-const StocksScreen = ({ navigation, route: _route }: any) => {
+interface MarketIndexData {
+  value: string;
+  changePercent: string;
+  isPositive: boolean;
+  volume: string;
+  stats?: {
+    titlesUp: number;
+    titlesDown: number;
+    titlesUnchanged: number;
+    totalVolume: number;
+    totalAmount: number;
+  };
+  statusState?: string;
+  updateDate?: string;
+}
+
+const FlashListTyped = FlashList as any;
+
+const StocksScreen = ({ navigation }: any) => {
   const theme = useTheme();
   const { stockFilters, setStockFilters } = useFilters();
   const { query: searchQuery, category: activeFilter } = stockFilters;
@@ -39,11 +58,19 @@ const StocksScreen = ({ navigation, route: _route }: any) => {
   // Zustand store selector
   const user = useAuthStore((state) => state.user);
 
+  const handleStockPress = useCallback((stock: StockData) => {
+    navigation.navigate('StockDetail', { stock });
+  }, [navigation]);
+
+  const renderStockItem = useCallback(({ item }: { item: StockData }) => (
+    <StockItem {...item} onPress={() => handleStockPress(item)} />
+  ), [handleStockPress]);
+
   const [stocks, setStocks] = useState<StockData[]>([]);
   const [categories, setCategories] = useState<string[]>(['Todos']);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [indexData, setIndexData] = useState<any>(null);
+  const [indexData, setIndexData] = useState<MarketIndexData | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [isMarketOpen, setIsMarketOpen] = useState(false);
 
@@ -139,9 +166,7 @@ const StocksScreen = ({ navigation, route: _route }: any) => {
   const handleSearch = (text: string) => setStockFilters({ query: text });
   const handleSuggestionPress = (suggestion: string) => setStockFilters({ query: suggestion });
 
-  const handleStockPress = (stock: StockData) => {
-    navigation.navigate('StockDetail', { stock });
-  };
+
 
   const handleShare = () => {
     setShareDialogVisible(true);
@@ -314,6 +339,8 @@ const StocksScreen = ({ navigation, route: _route }: any) => {
     );
   }
 
+
+
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar
@@ -350,18 +377,19 @@ const StocksScreen = ({ navigation, route: _route }: any) => {
         </View>
       </View>
 
-      <FlashList
+      <FlashListTyped
         data={filteredStocks}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <StockItem {...item} onPress={() => handleStockPress(item)} />}
+        keyExtractor={(item: StockData) => item.id}
+        renderItem={renderStockItem}
+        estimatedItemSize={80}
         ListHeaderComponent={renderHeader}
         ListFooterComponent={renderFooter}
         contentContainerStyle={styles.flashListContent}
         showsVerticalScrollIndicator={false}
         refreshControl={
-          <RefreshControl 
-            refreshing={refreshing} 
-            onRefresh={onRefresh} 
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
             colors={[theme.colors.primary]}
             progressBackgroundColor={theme.colors.elevation.level3}
           />

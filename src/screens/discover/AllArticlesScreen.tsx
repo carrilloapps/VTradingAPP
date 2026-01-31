@@ -23,6 +23,8 @@ const ListFooter = ({ hasMore, postsLength, theme }: { hasMore: boolean; postsLe
   return null;
 };
 
+const FlashListTyped = FlashList as any;
+
 const AllArticlesScreen = () => {
   const theme = useTheme();
   const navigation = useNavigation<any>();
@@ -96,18 +98,20 @@ const AllArticlesScreen = () => {
       </Appbar.Header>
 
       {loading && page === 1 ? (
-        <FlashList
+        <FlashListTyped
           data={[1, 2, 3, 4, 5, 6]}
-          keyExtractor={(item) => item.toString()}
+          keyExtractor={(item: any) => item.toString()}
           renderItem={renderSkeleton}
+          estimatedItemSize={100}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
         />
       ) : (
-        <FlashList
+        <FlashListTyped
           data={posts}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item: FormattedPost) => item.id.toString()}
           renderItem={renderItem}
+          estimatedItemSize={100}
           showsVerticalScrollIndicator={false}
           onRefresh={handleRefresh}
           refreshing={refreshing}

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useAppTheme } from '../../theme/theme';
 
 export interface StockData {
@@ -103,51 +104,56 @@ const StockItem: React.FC<StockData> = ({
   };
 
   return (
-    <TouchableOpacity
-      style={containerStyle}
-      activeOpacity={0.7}
-      onPress={handlePress}
-    >
-      <View style={styles.leftContent}>
-        <View style={styles.iconBox}>
-          {iconUrl ? (
-            <Image
-              source={{ uri: iconUrl }}
-              style={styles.iconImage}
-              resizeMode="cover"
-            />
-          ) : (
-            <Text style={[styles.initials, { color: theme.dark ? colors.darkText : colors.text }]}>
-              {initials || symbol.substring(0, 3)}
+    <Animated.View entering={FadeInDown.duration(400).delay(100)}>
+      <TouchableOpacity
+        style={containerStyle}
+        activeOpacity={0.7}
+        onPress={handlePress}
+        accessibilityRole="button"
+        accessibilityLabel={`${symbol}, valor ${formattedPrice}. ${isPositive ? 'Subiendo' : isNegative ? 'Bajando' : 'Estable'} ${formattedChange}`}
+        accessibilityHint={`Ver detalles de ${name}`}
+      >
+        <View style={styles.leftContent}>
+          <View style={styles.iconBox}>
+            {iconUrl ? (
+              <Image
+                source={{ uri: iconUrl }}
+                style={styles.iconImage}
+                resizeMode="cover"
+              />
+            ) : (
+              <Text style={[styles.initials, { color: theme.dark ? colors.darkText : colors.text }]}>
+                {initials || symbol.substring(0, 3)}
+              </Text>
+            )}
+          </View>
+          <View style={styles.textContainer}>
+            <Text style={[styles.primaryText, { color: theme.colors.onSurface }]} numberOfLines={1}>
+              {symbol}
             </Text>
-          )}
+            <Text style={[styles.secondaryText, { color: theme.colors.onSurfaceVariant }]} numberOfLines={1}>
+              {name}
+            </Text>
+          </View>
         </View>
-        <View style={styles.textContainer}>
-          <Text style={[styles.primaryText, { color: theme.colors.onSurface }]} numberOfLines={1}>
-            {symbol}
-          </Text>
-          <Text style={[styles.secondaryText, { color: theme.colors.onSurfaceVariant }]} numberOfLines={1}>
-            {name}
-          </Text>
-        </View>
-      </View>
 
-      <View style={styles.rightContent}>
-        <Text style={[styles.price, { color: theme.colors.onSurface }]}>
-          {formattedPrice}
-        </Text>
-        <View style={[styles.changeBadge, !isPositive && !isNegative && styles.neutralBadge, { backgroundColor: badgeBackgroundColor }]}>
-          {isPositive ? (
-            <MaterialCommunityIcons name="trending-up" size={12} color={theme.colors.trendUp} />
-          ) : isNegative ? (
-            <MaterialCommunityIcons name="trending-down" size={12} color={theme.colors.trendDown} />
-          ) : null}
-          <Text style={[styles.changeText, { color: changeColor }]}>
-            {formattedChange}
+        <View style={styles.rightContent}>
+          <Text style={[styles.price, { color: theme.colors.onSurface }]}>
+            {formattedPrice}
           </Text>
+          <View style={[styles.changeBadge, !isPositive && !isNegative && styles.neutralBadge, { backgroundColor: badgeBackgroundColor }]}>
+            {isPositive ? (
+              <MaterialCommunityIcons name="trending-up" size={12} color={theme.colors.trendUp} />
+            ) : isNegative ? (
+              <MaterialCommunityIcons name="trending-down" size={12} color={theme.colors.trendDown} />
+            ) : null}
+            <Text style={[styles.changeText, { color: changeColor }]}>
+              {formattedChange}
+            </Text>
+          </View>
         </View>
-      </View>
-    </TouchableOpacity>
+      </TouchableOpacity>
+    </Animated.View>
   );
 };
 

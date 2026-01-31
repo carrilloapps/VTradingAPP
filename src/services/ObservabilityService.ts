@@ -1,5 +1,6 @@
 import * as Sentry from '@sentry/react-native';
 import { getCrashlytics } from '@react-native-firebase/crashlytics';
+import SafeLogger from '../utils/safeLogger';
 
 class ObservabilityService {
   /**
@@ -9,12 +10,12 @@ class ObservabilityService {
    */
   captureError(error: any, context?: Record<string, any>) {
     // Log en consola siempre para desarrollo y depuración local
-    console.error('[Observability] Error caught:', error);
+    const sanitizedContext = context ? (SafeLogger as any).sanitize(context) : undefined;
 
     if (__DEV__) {
-      console.error('[Observability] Error caught:', error);
-      if (context) {
-        console.error('[Observability] Context:', context);
+      SafeLogger.error('[Observability] Error caught:', error);
+      if (sanitizedContext) {
+        SafeLogger.error('[Observability] Context:', sanitizedContext);
       }
       return;
     }
@@ -42,15 +43,15 @@ class ObservabilityService {
     try {
       // Enviar a Sentry
       Sentry.captureException(error, {
-        extra: context,
+        extra: sanitizedContext,
       });
 
       // Enviar a Crashlytics
       const crashlytics = getCrashlytics();
       crashlytics.recordError(error instanceof Error ? error : new Error(String(error)));
 
-      if (context) {
-        Object.entries(context).forEach(([key, value]) => {
+      if (sanitizedContext) {
+        Object.entries(sanitizedContext).forEach(([key, value]) => {
           crashlytics.setAttribute(key, String(value));
         });
       }

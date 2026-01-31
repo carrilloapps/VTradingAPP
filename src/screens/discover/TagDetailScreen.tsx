@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, StyleSheet, ActivityIndicator, StatusBar, Animated } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useRoute, useNavigation } from '@react-navigation/native';
+import { FlashList } from '@shopify/flash-list';
+
 import { wordPressService, FormattedPost, WordPressTag } from '../../services/WordPressService';
 import { observabilityService } from '../../services/ObservabilityService';
 import { useAppTheme } from '../../theme/theme';
@@ -18,6 +20,8 @@ import ShareableDetail from '../../components/discover/ShareableDetail';
 import { analyticsService } from '../../services/firebase/AnalyticsService';
 import { useToastStore } from '../../stores/toastStore';
 import { shareTextContent } from '../../utils/ShareUtils';
+
+const AnimatedFlashList = Animated.createAnimatedComponent(FlashList) as any;
 
 const ListFooter = ({ hasMore, postsLength, theme }: { hasMore: boolean; postsLength: number; theme: any }) => {
   if (hasMore) {
@@ -242,15 +246,16 @@ const TagDetailScreen = () => {
       {loading && posts.length === 0 ? (
         <CategoryTagSkeleton />
       ) : (
-        <Animated.FlatList
+        <AnimatedFlashList
           data={posts}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item: any) => item.id.toString()}
           scrollEventThrottle={16}
           onScroll={Animated.event(
             [{ nativeEvent: { contentOffset: { y: scrollY } } }],
             { useNativeDriver: true }
           )}
-          renderItem={renderArticle}
+          renderItem={renderArticle as any}
+          estimatedItemSize={250}
           showsVerticalScrollIndicator={false}
           ListHeaderComponent={renderHeader}
           contentContainerStyle={styles.listContent}

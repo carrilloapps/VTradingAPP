@@ -1,6 +1,7 @@
 import { initializeAppCheck, getToken, AppCheck } from '@react-native-firebase/app-check';
 import { getApp } from '@react-native-firebase/app';
 import { observabilityService } from '../ObservabilityService';
+import SafeLogger from '../../utils/safeLogger';
 
 class AppCheckService {
   private appCheckInstance: AppCheck | null = null;
@@ -84,9 +85,9 @@ class AppCheckService {
       // Check for "App not registered" error - this is a configuration issue
       if (message.includes('App not registered') ||
         (message.includes('code: 400') && message.includes('App not registered'))) {
-        console.error('[AppCheck] App not registered in Firebase Console');
-        console.error('[AppCheck] Please verify the Android/iOS app is registered in Firebase');
-        console.error('[AppCheck] Error details:', message);
+        SafeLogger.error('[AppCheck] App not registered in Firebase Console');
+        SafeLogger.error('[AppCheck] Please verify the Android/iOS app is registered in Firebase');
+        SafeLogger.error('[AppCheck] Error details:', { message });
 
         // Only report this configuration error once to avoid spam
         if (this.errorCount === 0) {

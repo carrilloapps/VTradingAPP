@@ -4,6 +4,7 @@ import { Text, TouchableRipple } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Svg, { Path } from 'react-native-svg';
 import LinearGradient from 'react-native-linear-gradient';
+import Animated, { FadeInRight } from 'react-native-reanimated';
 import { useAppTheme } from '../../theme/theme';
 import { BolivarIcon } from '../ui/BolivarIcon';
 
@@ -95,118 +96,154 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
   ];
 
   return (
-    <TouchableRipple
-      onPress={onPress}
-      style={rippleStyle}
-      borderless
-    >
-      <LinearGradient
-        colors={['#0e4981', '#0b3a67', '#082f54']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 1 }}
-        style={cardGradientStyle}
+    <Animated.View entering={FadeInRight.duration(500).delay(200)}>
+      <TouchableRipple
+        onPress={onPress}
+        style={rippleStyle}
+        borderless
+        accessibilityRole="button"
+        accessibilityLabel={`${title}. Valor actual ${value} ${currency}. ${isPositive ? 'Subiendo' : isNeutral ? 'Sin cambios' : 'Bajando'} ${changePercent}`}
+        accessibilityHint="Ver detalles históricos y estadísticos"
       >
-        {/* Background Blur Effect Circle */}
-        <View style={styles.blurCircle} />
+        <LinearGradient
+          colors={['#0e4981', '#0b3a67', '#082f54']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={cardGradientStyle}
+        >
+          {/* Background Blur Effect Circle */}
+          <View style={styles.blurCircle} />
 
-        <View style={[styles.header, styles.headerZIndex1]}>
-          <View style={styles.leftContent}>
-            <View style={iconContainerStyle}>
-              {customIcon ? (
-                customIcon
-              ) : iconUrl ? (
-                <Image source={{ uri: iconUrl }} style={styles.iconImage} />
-              ) : iconName ? (
-                <View style={symbolIconStyle}>
-                  {iconName === 'Bs' ? (
-                    <BolivarIcon color={iconTintColor || theme.colors.onPrimaryContainer} size={24} />
-                  ) : (
-                    <MaterialCommunityIcons
-                      name={iconName} size={32} color={iconTintColor || theme.colors.onPrimaryContainer} />
-                  )}
-                </View>
-              ) : (
-                <View style={symbolIconStyle}>
-                  <Text style={styles.symbolText}>{iconSymbol}</Text>
-                </View>
-              )}
-            </View>
-            <View>
-              <Text variant="labelMedium" style={[styles.titleLabel, styles.titleText]}>{title}</Text>
-              {subtitle ? <Text variant="bodySmall" style={styles.subtitleText}>{subtitle}</Text> : null}
-              <View style={styles.valueContainer}>
-                {buyValue && sellValue ? (
-                  <View style={[styles.dualContainer, isSmallScreen && styles.gap4]}>
-                    {/* GENERAL (Average/Main) */}
-                    <View style={styles.generalContainer}>
-                      <Text variant="labelSmall" style={[styles.labelSmall, isSmallScreen && styles.fontSize8]}>GENERAL</Text>
-                      <View style={styles.rowBaseline}>
-                        <Text variant={isSmallScreen ? "titleMedium" : "titleLarge"} style={styles.whiteBold}>{value}</Text>
-                        <Text variant="bodySmall" style={[styles.currencyLabel, isSmallScreen && styles.fontSize10]}>{currency}</Text>
-                      </View>
-                      <Text variant="labelSmall" style={[styles.trendLabel, { color: trendColor }, isSmallScreen && styles.fontSize8]}>
-                        {changePercent}
-                      </Text>
-                    </View>
-
-                    <View style={[styles.divider, isSmallScreen ? styles.marginH4 : styles.marginH8]} />
-
-                    {/* COMPRA */}
-                    <View style={styles.generalContainer}>
-                      <Text variant="labelSmall" style={[styles.labelSmall, isSmallScreen && styles.fontSize8]}>COMPRA</Text>
-                      <View style={styles.rowBaseline}>
-                        <Text variant={isSmallScreen ? "titleMedium" : "titleLarge"} style={styles.whiteBold}>{buyValue}</Text>
-                        <Text variant="bodySmall" style={[styles.currencyLabel, isSmallScreen && styles.fontSize10]}>{currency}</Text>
-                      </View>
-                      {buyChangePercent && (
-                        <Text variant="labelSmall" style={[styles.trendLabel, { color: getTrendColor(buyChangePercent) }, isSmallScreen && styles.fontSize8]}>
-                          {buyChangePercent}
-                        </Text>
-                      )}
-                    </View>
-
-                    <View style={[styles.divider, isSmallScreen ? styles.marginH4 : styles.marginH8]} />
-
-                    {/* VENTA */}
-                    <View style={styles.generalContainer}>
-                      <Text variant="labelSmall" style={[styles.labelSmall, isSmallScreen && styles.fontSize8]}>VENTA</Text>
-                      <View style={styles.rowBaseline}>
-                        <Text variant={isSmallScreen ? "titleMedium" : "titleLarge"} style={styles.whiteBold}>{sellValue}</Text>
-                        <Text variant="bodySmall" style={[styles.currencyLabel, isSmallScreen && styles.fontSize10]}>{currency}</Text>
-                      </View>
-                      {sellChangePercent && (
-                        <Text variant="labelSmall" style={[styles.trendLabel, { color: getTrendColor(sellChangePercent) }, isSmallScreen && styles.fontSize8]}>
-                          {sellChangePercent}
-                        </Text>
-                      )}
-                    </View>
+          <View style={[styles.header, styles.headerZIndex1]}>
+            <View style={styles.leftContent}>
+              <View style={iconContainerStyle}>
+                {customIcon ? (
+                  customIcon
+                ) : iconUrl ? (
+                  <Image source={{ uri: iconUrl }} style={styles.iconImage} />
+                ) : iconName ? (
+                  <View style={symbolIconStyle}>
+                    {iconName === 'Bs' ? (
+                      <BolivarIcon color={iconTintColor || theme.colors.onPrimaryContainer} size={24} />
+                    ) : (
+                      <MaterialCommunityIcons
+                        name={iconName} size={32} color={iconTintColor || theme.colors.onPrimaryContainer} />
+                    )}
                   </View>
                 ) : (
-                  <View style={styles.rowBaseline}>
-                    <Text variant="headlineMedium" style={[styles.whiteBold, styles.valueText]}>{value}</Text>
-                    <Text variant="titleMedium" style={[styles.currencyLabel, styles.currencyText]}>{currency}</Text>
+                  <View style={symbolIconStyle}>
+                    <Text style={styles.symbolText}>{iconSymbol}</Text>
                   </View>
                 )}
               </View>
+              <View>
+                <Text variant="labelMedium" style={[styles.titleLabel, styles.titleText]}>{title}</Text>
+                {subtitle ? <Text variant="bodySmall" style={styles.subtitleText}>{subtitle}</Text> : null}
+                <View style={styles.valueContainer}>
+                  {buyValue && sellValue ? (
+                    <View style={[styles.dualContainer, isSmallScreen && styles.gap4]}>
+                      {/* GENERAL (Average/Main) */}
+                      <View style={styles.generalContainer}>
+                        <Text variant="labelSmall" style={[styles.labelSmall, isSmallScreen && styles.fontSize8]}>GENERAL</Text>
+                        <View style={styles.rowBaseline}>
+                          <Text variant={isSmallScreen ? "titleMedium" : "titleLarge"} style={styles.whiteBold}>{value}</Text>
+                          <Text variant="bodySmall" style={[styles.currencyLabel, isSmallScreen && styles.fontSize10]}>{currency}</Text>
+                        </View>
+                        <Text variant="labelSmall" style={[styles.trendLabel, { color: trendColor }, isSmallScreen && styles.fontSize8]}>
+                          {changePercent}
+                        </Text>
+                      </View>
+
+                      <View style={[styles.divider, isSmallScreen ? styles.marginH4 : styles.marginH8]} />
+
+                      {/* COMPRA */}
+                      <View style={styles.generalContainer}>
+                        <Text variant="labelSmall" style={[styles.labelSmall, isSmallScreen && styles.fontSize8]}>COMPRA</Text>
+                        <View style={styles.rowBaseline}>
+                          <Text variant={isSmallScreen ? "titleMedium" : "titleLarge"} style={styles.whiteBold}>{buyValue}</Text>
+                          <Text variant="bodySmall" style={[styles.currencyLabel, isSmallScreen && styles.fontSize10]}>{currency}</Text>
+                        </View>
+                        {buyChangePercent && (
+                          <Text variant="labelSmall" style={[styles.trendLabel, { color: getTrendColor(buyChangePercent) }, isSmallScreen && styles.fontSize8]}>
+                            {buyChangePercent}
+                          </Text>
+                        )}
+                      </View>
+
+                      <View style={[styles.divider, isSmallScreen ? styles.marginH4 : styles.marginH8]} />
+
+                      {/* VENTA */}
+                      <View style={styles.generalContainer}>
+                        <Text variant="labelSmall" style={[styles.labelSmall, isSmallScreen && styles.fontSize8]}>VENTA</Text>
+                        <View style={styles.rowBaseline}>
+                          <Text variant={isSmallScreen ? "titleMedium" : "titleLarge"} style={styles.whiteBold}>{sellValue}</Text>
+                          <Text variant="bodySmall" style={[styles.currencyLabel, isSmallScreen && styles.fontSize10]}>{currency}</Text>
+                        </View>
+                        {sellChangePercent && (
+                          <Text variant="labelSmall" style={[styles.trendLabel, { color: getTrendColor(sellChangePercent) }, isSmallScreen && styles.fontSize8]}>
+                            {sellChangePercent}
+                          </Text>
+                        )}
+                      </View>
+                    </View>
+                  ) : (
+                    <View style={styles.rowBaseline}>
+                      <Text variant="headlineMedium" style={[styles.whiteBold, styles.valueText]}>{value}</Text>
+                      <Text variant="titleMedium" style={[styles.currencyLabel, styles.currencyText]}>{currency}</Text>
+                    </View>
+                  )}
+                </View>
+              </View>
             </View>
           </View>
-        </View>
 
-        <View style={styles.trendIndicatorContainer}>
-          {/* Trend Indicator */}
-          {!buyValue && (
-            <View style={trendBadgeStyle}>
-              <MaterialCommunityIcons name={trendIcon} size={16} color={trendColor} />
-              <Text variant="labelMedium" style={[styles.trendText, { color: trendColor }]}>{changePercent}</Text>
-            </View>
-          )}
-        </View>
+          <View style={styles.trendIndicatorContainer}>
+            {/* Trend Indicator */}
+            {!buyValue && (
+              <View style={trendBadgeStyle}>
+                <MaterialCommunityIcons name={trendIcon} size={16} color={trendColor} />
+                <Text variant="labelMedium" style={[styles.trendText, { color: trendColor }]}>{changePercent}</Text>
+              </View>
+            )}
+          </View>
 
-        <View style={styles.chartWrapper}>
-          <Svg height="100%" width="100%" viewBox="0 0 100 40" preserveAspectRatio="none">
-            {buyChartPath && sellChartPath ? (
-              <>
-                {/* Average Line */}
+          <View style={styles.chartWrapper}>
+            <Svg height="100%" width="100%" viewBox="0 0 100 40" preserveAspectRatio="none">
+              {buyChartPath && sellChartPath ? (
+                <>
+                  {/* Average Line */}
+                  <Path
+                    d={chartPath}
+                    fill="none"
+                    stroke={trendColor}
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    opacity={0.6}
+                    strokeDasharray="4, 4"
+                  />
+                  {/* Buy Line */}
+                  <Path
+                    d={buyChartPath}
+                    fill="none"
+                    stroke={buyColor}
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    opacity={0.8}
+                  />
+                  {/* Sell Line */}
+                  <Path
+                    d={sellChartPath}
+                    fill="none"
+                    stroke={sellColor}
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    opacity={0.8}
+                  />
+                </>
+              ) : (
                 <Path
                   d={chartPath}
                   fill="none"
@@ -214,44 +251,13 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
                   strokeWidth="2.5"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  opacity={0.6}
-                  strokeDasharray="4, 4"
                 />
-                {/* Buy Line */}
-                <Path
-                  d={buyChartPath}
-                  fill="none"
-                  stroke={buyColor}
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  opacity={0.8}
-                />
-                {/* Sell Line */}
-                <Path
-                  d={sellChartPath}
-                  fill="none"
-                  stroke={sellColor}
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  opacity={0.8}
-                />
-              </>
-            ) : (
-              <Path
-                d={chartPath}
-                fill="none"
-                stroke={trendColor}
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            )}
-          </Svg>
-        </View>
-      </LinearGradient>
-    </TouchableRipple>
+              )}
+            </Svg>
+          </View>
+        </LinearGradient>
+      </TouchableRipple>
+    </Animated.View>
   );
 };
 

@@ -19,6 +19,8 @@ import { useAppTheme } from '../../theme/theme';
 
 type SearchState = 'idle' | 'searching' | 'success' | 'error' | 'too_short';
 
+const FlashListTyped = FlashList as any;
+
 // Layout constants for consistent spacing
 const LAYOUT = {
   HORIZONTAL_PADDING: 16,
@@ -425,20 +427,22 @@ const SearchResultsScreen = () => {
       />
 
       {searchState === 'searching' && page === 1 ? (
-        <FlashList
+        <FlashListTyped
           data={[1, 2, 3, 4, 5]}
-          keyExtractor={(item) => item.toString()}
+          keyExtractor={(item: any) => item.toString()}
           renderItem={renderSkeleton}
+          estimatedItemSize={100}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
         />
       ) : showDiscoveryContent ? (
         renderDiscoveryContent()
       ) : showSearchResults ? (
-        <FlashList
+        <FlashListTyped
           data={posts}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item: FormattedPost) => item.id.toString()}
           renderItem={renderArticle}
+          estimatedItemSize={100}
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
           onEndReached={handleLoadMore}
