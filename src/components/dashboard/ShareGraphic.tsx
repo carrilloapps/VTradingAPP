@@ -12,6 +12,7 @@ interface ShareGraphicProps {
   lastUpdated: string;
   isPremium?: boolean;
   aspectRatio?: '1:1' | '16:9';
+  onReady?: () => void;
 }
 
 const ShareGraphic: React.FC<ShareGraphicProps> = ({
@@ -20,7 +21,8 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
   spread,
   lastUpdated,
   isPremium = false,
-  aspectRatio = '1:1'
+  aspectRatio = '1:1',
+  onReady
 }) => {
   const theme = useTheme();
   const isVertical = aspectRatio === '16:9';
@@ -83,6 +85,15 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
   ];
 
   const footerTextStyle = [styles.templateFooterText, { color: theme.colors.primary, fontSize: footerTextSize }];
+
+  // Notify parent when ready
+  React.useEffect(() => {
+    if (onReady) {
+      // Small delay to ensure layout is complete
+      const timeout = setTimeout(onReady, 100);
+      return () => clearTimeout(timeout);
+    }
+  }, [featuredRates, onReady]);
 
   return (
     <View style={styles.hiddenTemplate} pointerEvents="none">

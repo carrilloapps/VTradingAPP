@@ -7,6 +7,7 @@ import SafeLogger from '../utils/safeLogger';
 
 interface CacheItem<T> {
   data: T;
+  headers?: Record<string, string>; // Store headers for pagination fallback
   timestamp: number;
 }
 
@@ -261,29 +262,57 @@ export class ApiClient {
   }
 
   async getWithFullResponse<T>(endpoint: string, options: RequestOptions = {}): Promise<{ data: T; headers: Headers }> {
-    // This method now benefits from all the stability of _request
-    // Does not use cache by default unless specified in options (which ApiClient.get does force)
-    // But typically this method is used for pagination where we might want fresh data.
-    // If the caller passes useCache: true, it should probably be handled?
-    // The requirement was "Offline Cache Fallback to getWithFullResponse".
-
-    // So we wrap the cache logic? Or just call _request directly if no cache needed?
-    // Re-using the logic from `get` is hard because `get` returns T, not {data, headers}.
-    // But offline cache (MMKV) only stores `data` (T), not headers.
-    // So we CANNOT fully support offline fallback for `getWithFullResponse` if the caller needs headers from cache (which we don't store).
-    // We will implement fallback for the DATA part, but headers will be missing/mocked if offline.
+    const cleanBaseUrl = this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl;
+    const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+    let cacheKey = `api_cache_full_${cleanBaseUrl}${cleanEndpoint}`;
+    if (options.params) {
+      const queryString = Object.entries(options.params)
+        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+        .join('&');
+      cacheKey += (cacheKey.includes('?') ? '&' : '?') + queryString;
+    }
 
     try {
       const response = await this._request<T>(endpoint, options);
+
+      // Cache full response if requested
+      if (options.useCache || options.updateCache) {
+        try {
+          // Convert Headers to plain object
+          const headerObj: Record<string, string> = {};
+          response.headers.forEach((value, key) => {
+            headerObj[key] = value;
+          });
+
+          const cacheItem: CacheItem<T> = {
+            data: response.data,
+            headers: headerObj,
+            timestamp: Date.now(),
+          };
+          mmkvStorage.set(cacheKey, JSON.stringify(cacheItem));
+        } catch (e) {
+            // Ignore cache write error
+        }
+      }
+
       return { data: response.data, headers: response.headers };
     } catch (e) {
-      // Fallback logic for getWithFullResponse?
-      // Only if useCache is true?
+      // Fallback to Cache
       if (options.useCache) {
-        // Try cache logic similar to get()
-        // ... (Construct key)
-        // const cached = ...
-        // if found, return { data: cached.data, headers: new Headers() }
+        try {
+          const cached = mmkvStorage.getString(cacheKey);
+          if (cached) {
+            const { data, headers: cachedHeaders } = JSON.parse(cached) as CacheItem<T>;
+            
+            // Reconstruct Headers object
+             const headers = new Headers();
+             if (cachedHeaders) {
+                 Object.entries(cachedHeaders).forEach(([k, v]) => headers.append(k, String(v)));
+             }
+
+            return { data, headers };
+          }
+        } catch { }
       }
       throw e;
     }

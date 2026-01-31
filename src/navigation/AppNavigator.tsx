@@ -290,8 +290,20 @@ const AppNavigator = () => {
 
       // 2. Check Force Update
       try {
-        await remoteConfigService.fetchAndActivate();
-        const config = remoteConfigService.getJson<any>('strings'); // Using 'strings' key as requested
+        // Timeout wrapper to prevent blocking app start
+        await Promise.race([
+          remoteConfigService.fetchAndActivate(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
+        ]);
+        
+        interface RemoteConfigStrings {
+            forceUpdate?: {
+                build: number;
+                minVersion?: string;
+            };
+        }
+
+        const config = remoteConfigService.getJson<RemoteConfigStrings>('strings');
 
         if (config && config.forceUpdate) {
           const currentBuild = parseInt(DeviceInfo.getBuildNumber(), 10);
@@ -303,7 +315,7 @@ const AppNavigator = () => {
         }
       } catch (e) {
         // Fail silently on config check, don't block app unless confirmed
-        SafeLogger.warn('Failed to check force update', { error: e });
+        SafeLogger.warn('Failed to check force update or timeout', { error: e });
       }
 
       setIsReady(true);

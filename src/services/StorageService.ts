@@ -1,12 +1,54 @@
-import { createMMKV } from 'react-native-mmkv';
+import { createMMKV, MMKV } from 'react-native-mmkv';
 import { observabilityService } from './ObservabilityService';
+import { InteractionManager } from 'react-native';
+import { KeyService } from './KeyService';
 
-// Create singleton MMKV instance with encryption
-export const storage = createMMKV({
-  id: 'vtrading-storage',
-  // TODO: In production, use a secure key from Keychain/SecureStore
-  // encryptionKey: await SecureStore.getItemAsync('mmkv-encryption-key')
-});
+// Lazy initialized MMKV instance
+let _storage: MMKV | undefined;
+
+/**
+ * Initializes the storage service.
+ * Should be called at app startup (e.g. in App.tsx).
+ */
+export const initializeStorage = async (): Promise<void> => {
+  if (_storage) return;
+
+  const encryptionKey = await KeyService.getEncryptionKey();
+  
+  try {
+    _storage = createMMKV({
+      id: 'vtrading-storage',
+      encryptionKey: encryptionKey
+    });
+  } catch (e) {
+    // If initialization fails (e.g. wrong key due to migration/reinstall),
+    // we might need to fallback to non-encrypted or recreate.
+    // WARNING: This deletes data if key is lost.
+    observabilityService.captureError(e, { context: 'StorageService.initialize', action: 'createMMKV_failed' });
+    console.error('Failed to create MMKV with encryption, falling back to clear storage', e);
+    
+    // Fallback: Try creating without encryption (if key was removed) or re-create
+    _storage = createMMKV({
+        id: 'vtrading-storage',
+        // No key
+    });
+  }
+};
+
+export const getStorage = (): MMKV => {
+  if (!_storage) {
+    // Fallback for sync calls before async init finishes (mainly DEV/Tests)
+    // In PROD, initializeStorage should be awaited in App.tsx
+    _storage = createMMKV({
+      id: 'vtrading-storage',
+      // No encryption for sync fallback to avoid blocking
+    });
+  }
+  return _storage;
+};
+
+// Export for backward compatibility (though direct usage should be avoided)
+export const storage = getStorage();
 
 const KEYS = {
   SETTINGS: 'app_settings',
@@ -59,20 +101,20 @@ export interface UserAlert {
 }
 
 class StorageService {
-
-  private cache: Map<string, any> = new Map();
+  // Cache removed in favor of direct MMKV access
+  // private cache: Map<string, any> = new Map();
 
   // Helper methods for MMKV JSON operations
   private getJSON<T>(key: string, defaultValue: T): T {
-    if (this.cache.has(key)) {
-      return this.cache.get(key) as T;
-    }
-
+    // Removed duplicate memory cache (Map) to reduce memory usage. 
+    // MMKV is already memory-mapped and very fast.
     try {
-      const data = storage.getString(key);
-      const parsed = data ? JSON.parse(data) : defaultValue;
-      this.cache.set(key, parsed);
-      return parsed;
+      const data = getStorage().getString(key);
+      if (!data) return defaultValue;
+      
+      const parsed = JSON.parse(data);
+      // Check for schema version if needed in future
+      return parsed as T;
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'StorageService.getJSON',
@@ -84,16 +126,18 @@ class StorageService {
   }
 
   private setJSON<T>(key: string, value: T): void {
-    try {
-      this.cache.set(key, value);
-      storage.set(key, JSON.stringify(value));
-    } catch (e) {
-      observabilityService.captureError(e, {
-        context: 'StorageService.setJSON',
-        action: 'write_storage',
-        key: key
-      });
-    }
+    // Use InteractionManager to defer heavy serialization/writes
+    InteractionManager.runAfterInteractions(() => {
+        try {
+            getStorage().set(key, JSON.stringify(value));
+        } catch (e) {
+            observabilityService.captureError(e, {
+                context: 'StorageService.setJSON',
+                action: 'write_storage',
+                key: key
+            });
+        }
+    });
   }
 
   // Settings
@@ -128,7 +172,7 @@ class StorageService {
   // Widget Config
   getWidgetConfig(): WidgetConfig | null {
     try {
-      const data = storage.getString(KEYS.WIDGET_CONFIG);
+      const data = getStorage().getString(KEYS.WIDGET_CONFIG);
       if (!data) return null;
       const parsed = JSON.parse(data) as WidgetConfig;
       return {
@@ -159,18 +203,17 @@ class StorageService {
 
   // Onboarding
   getHasSeenOnboarding(): boolean {
-    return storage.getBoolean(KEYS.HAS_SEEN_ONBOARDING) || false;
+    return getStorage().getBoolean(KEYS.HAS_SEEN_ONBOARDING) || false;
   }
 
   setHasSeenOnboarding(value: boolean): void {
-    storage.set(KEYS.HAS_SEEN_ONBOARDING, value);
+    getStorage().set(KEYS.HAS_SEEN_ONBOARDING, value);
   }
 
   // Utility methods
   clearAll(): void {
     try {
-      this.cache.clear();
-      storage.clearAll();
+      getStorage().clearAll();
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'StorageService.clearAll',
@@ -180,14 +223,14 @@ class StorageService {
   }
 
   getAllKeys(): string[] {
-    return storage.getAllKeys();
+    return getStorage().getAllKeys();
   }
 
   delete(key: string): void {
-    this.cache.delete(key);
-    storage.remove(key);
+    getStorage().remove(key);
   }
 }
 
 export const storageService = new StorageService();
+// Deprecated export
 export { storage as mmkvStorage };

@@ -41,14 +41,28 @@ const HomeScreen = ({ navigation }: any) => {
   const [isShareDialogVisible, setShareDialogVisible] = useState(false);
   const [_sharing, setSharing] = useState(false);
   const viewShotRef = React.useRef<any>(null);
+  const [isReadyToCapture, setIsReadyToCapture] = useState(false);
+
+  const onShareGraphicReady = useCallback(() => {
+    setIsReadyToCapture(true);
+  }, []);
 
   const generateShareImage = async (format: '1:1' | '16:9') => {
     setShareDialogVisible(false);
     setShareFormat(format);
     setSharing(true);
+    setIsReadyToCapture(false); // Reset readiness for new format
 
     showToast('Generando imagen para compartir...', 'info');
-    await new Promise(resolve => setTimeout(() => resolve(null), 300));
+    
+    // Wait for the graphic to be ready (layout updated)
+    // We use a small polling loop as a failsafe if onReady doesn't fire instantly
+    // but primarily we rely on the component callback
+    let attempts = 0;
+    while (!isReadyToCapture && attempts < 20) { // Max 2s wait
+        await new Promise<void>(resolve => setTimeout(() => resolve(), 100));
+        attempts++;
+    }
 
     if (viewShotRef.current) {
       try {
@@ -68,6 +82,9 @@ const HomeScreen = ({ navigation }: any) => {
           type: 'image/jpeg',
           message: `Tasas actualizadas en VTrading (${format})`,
         });
+
+        // Cleanup (optional, but good practice if supported by fs, here we assume Share handles it mostly)
+        // or rely on OS temp cleanup.
 
         analyticsService.logShare('dashboard_report', 'all', format === '1:1' ? 'image_square' : 'image_story');
       } catch (e) {
@@ -155,6 +172,7 @@ const HomeScreen = ({ navigation }: any) => {
         lastUpdated={lastUpdated}
         isPremium={userData.isPremium}
         aspectRatio={shareFormat}
+        onReady={onShareGraphicReady}
       />
 
       <KeyboardAvoidingView

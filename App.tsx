@@ -31,6 +31,7 @@ import { deepLinkService } from './src/services/DeepLinkService';
 import { notificationInitService } from './src/services/NotificationInitService';
 import { analyticsService } from './src/services/firebase/AnalyticsService';
 import { useNetworkStore } from './src/stores/networkStore';
+import { initializeStorage } from './src/services/StorageService';
 
 // Silence Firebase modular deprecation warnings
 // @ts-ignore
@@ -91,17 +92,15 @@ function App(): React.JSX.Element {
         // App Check must be first to ensure tokens are ready for other requests
         await appCheckService.initialize();
 
-        await mobileAds().initialize();
-
-        // Initialize Remote Config early to apply feature flags
-        await remoteConfigService.initialize();
-
-        await inAppMessagingService.initialize();
-
-        await appDistributionService.checkForUpdate();
-
-        // Initialize notification system (checks permissions, gets token, subscribes to topics)
-        await notificationInitService.initialize();
+        // Parallelize independent services
+        await Promise.all([
+          mobileAds().initialize(),
+          remoteConfigService.initialize(),
+          inAppMessagingService.initialize(),
+          appDistributionService.checkForUpdate(),
+          notificationInitService.initialize(),
+          initializeStorage()
+        ]);
       } catch (e) {
         // Safe catch to ensure app continues even if initialization fails
         console.error('Firebase initialization error:', e);

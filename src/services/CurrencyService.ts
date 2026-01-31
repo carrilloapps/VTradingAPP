@@ -106,7 +106,8 @@ export class CurrencyService {
   private static currentRates: CurrencyRate[] = [];
   // previousRates removed as requested to avoid manual calculation logic
   private static lastFetch: number = 0;
-  private static CACHE_DURATION = 0; // Disable in-memory cache
+  private static CACHE_DURATION = 60 * 1000; // 1 minute in-memory cache
+  private static fetchPromise: Promise<CurrencyRate[]> | null = null;
 
   /**
    * Suscribe a listener to rate updates
@@ -149,235 +150,246 @@ export class CurrencyService {
       return this.currentRates;
     }
 
-    const trace = await performanceService.startTrace('get_currency_rates_service');
-    try {
-      // We use apiClient's cache as a fallback, but here we manage application state
-      // Header 'X-API-Key' is now handled by ApiClient default
-      const response = await apiClient.get<ApiRatesResponse>('api/rates', {
-        headers: {
-          'Accept': '*/*',
-        },
-        params: forceRefresh ? { _t: Date.now() } : undefined, // Force fresh data from server
-        useCache: false, // Disable cache as requested
-        cacheTTL: 0
-      });
+    // Deduplicate inflight requests
+    if (this.fetchPromise && !forceRefresh) return this.fetchPromise;
 
-      if (!response || (!response.rates && !response.crypto)) {
-        throw new Error("Invalid API Response structure");
-      }
-
-      const rates: CurrencyRate[] = [];
-
-      // Optimize: Instantiate date once for the batch
-      const nowISO = new Date().toISOString();
-
-      // 1. Process FIAT Rates
-      if (response.rates) {
-        response.rates.forEach((apiRate, index) => {
-          let name = apiRate.currency;
-          let iconName = 'currency-usd';
-
-          // Standardize names and icons based on currency code
-          const sourceLabel = apiRate.source || 'BCV';
-          name = `${apiRate.currency}/VES • ${sourceLabel}`;
-
-          switch (apiRate.currency) {
-            case 'EUR': iconName = 'currency-eur'; break;
-            case 'USD': iconName = 'currency-usd'; break;
-            case 'CNY': iconName = 'currency-cny'; break;
-            case 'RUB': iconName = 'currency-rub'; break;
-            case 'TRY': iconName = 'currency-try'; break;
-            case 'GBP': iconName = 'currency-gbp'; break;
-            case 'JPY': iconName = 'currency-jpy'; break;
-            case 'BRL': iconName = 'currency-brl'; break;
-            case 'INR': iconName = 'currency-inr'; break;
-            case 'KRW': iconName = 'currency-krw'; break;
-            default: iconName = 'currency-usd';
-          }
-
-          rates.push({
-            id: String(index),
-            code: apiRate.currency,
-            name: name,
-            value: CurrencyService.parseRate(apiRate.rate?.average),
-            changePercent: CurrencyService.parsePercentage(apiRate.change?.average?.percent || apiRate.change?.percent),
+    this.fetchPromise = (async () => {
+      const trace = await performanceService.startTrace('get_currency_rates_service');
+      try {
+        // We use apiClient's cache as a fallback, but here we manage application state
+        // Header 'X-API-Key' is now handled by ApiClient default
+        const response = await apiClient.get<ApiRatesResponse>('api/rates', {
+          headers: {
+            'Accept': '*/*',
+          },
+          params: forceRefresh ? { _t: Date.now() } : undefined, // Force fresh data from server
+          useCache: false, // Disable cache as requested
+          cacheTTL: 0
+        });
+  
+        if (!response || (!response.rates && !response.crypto)) {
+          throw new Error("Invalid API Response structure");
+        }
+  
+        const rates: CurrencyRate[] = [];
+  
+        // Optimize: Instantiate date once for the batch
+        const nowISO = new Date().toISOString();
+  
+        // 1. Process FIAT Rates
+        if (response.rates && Array.isArray(response.rates)) {
+          response.rates.forEach((apiRate, index) => {
+            let name = apiRate.currency;
+            let iconName = 'currency-usd';
+  
+            // Standardize names and icons based on currency code
+            const sourceLabel = apiRate.source || 'BCV';
+            name = `${apiRate.currency}/VES • ${sourceLabel}`;
+  
+            switch (apiRate.currency) {
+              case 'EUR': iconName = 'currency-eur'; break;
+              case 'USD': iconName = 'currency-usd'; break;
+              case 'CNY': iconName = 'currency-cny'; break;
+              case 'RUB': iconName = 'currency-rub'; break;
+              case 'TRY': iconName = 'currency-try'; break;
+              case 'GBP': iconName = 'currency-gbp'; break;
+              case 'JPY': iconName = 'currency-jpy'; break;
+              case 'BRL': iconName = 'currency-brl'; break;
+              case 'INR': iconName = 'currency-inr'; break;
+              case 'KRW': iconName = 'currency-krw'; break;
+              default: iconName = 'currency-usd';
+            }
+  
+            rates.push({
+              id: String(index),
+              code: apiRate.currency,
+              name: name,
+              value: CurrencyService.parseRate(apiRate.rate?.average),
+              changePercent: CurrencyService.parsePercentage(apiRate.change?.average?.percent || apiRate.change?.percent),
+              type: 'fiat',
+              iconName: iconName,
+              lastUpdated: apiRate.date || nowISO,
+              source: sourceLabel,
+              buyValue: CurrencyService.parseRate(apiRate.rate?.buy),
+              sellValue: CurrencyService.parseRate(apiRate.rate?.sell),
+              buyChangePercent: CurrencyService.parsePercentage(apiRate.change?.buy?.percent),
+              sellChangePercent: CurrencyService.parsePercentage(apiRate.change?.sell?.percent)
+            });
+          });
+        }
+  
+        // 1.5 Process Border Rates
+        if (response.border && Array.isArray(response.border)) {
+          response.border.forEach((apiRate, index) => {
+            let name = apiRate.currency;
+            let iconName = 'currency-usd';
+  
+            // Standardize names and icons based on currency code
+            const sourceLabel = apiRate.source || 'Fronterizo';
+            name = `${apiRate.currency}/VES • ${sourceLabel}`;
+  
+            switch (apiRate.currency) {
+              case 'EUR': iconName = 'currency-eur'; break;
+              case 'USD': iconName = 'currency-usd'; break;
+              case 'CNY': iconName = 'currency-cny'; break;
+              case 'RUB': iconName = 'currency-rub'; break;
+              case 'TRY': iconName = 'currency-try'; break;
+              case 'GBP': iconName = 'currency-gbp'; break;
+              case 'JPY': iconName = 'currency-jpy'; break;
+              case 'COP': iconName = 'currency-usd'; break;
+              case 'BRL': iconName = 'currency-brl'; break;
+              case 'DAI': iconName = 'currency-dai'; break;
+              case 'VES': iconName = 'Bs'; break;
+              default: iconName = 'currency-usd';
+            }
+  
+            // Calculate values if average is missing (common in P2P/Border rates)
+            const buy = CurrencyService.parseRate(apiRate.rate?.buy);
+            const sell = CurrencyService.parseRate(apiRate.rate?.sell);
+            const avgValue = apiRate.rate?.average
+              ? CurrencyService.parseRate(apiRate.rate.average)
+              : (buy + sell) / 2;
+  
+            // Handle Border Rate Inversion (Tasas Fronterizas are usually Foreign/VES)
+            // We need value in VES (Price of 1 Unit of Foreign Currency in VES) for the calculator logic.
+            // All border rates from API seem to be based on VES (Foreign/VES).
+            let finalValue = avgValue;
+            let finalBuy = buy;
+            let finalSell = sell;
+  
+            if (avgValue > 0) finalValue = 1 / avgValue;
+            if (buy > 0) finalBuy = 1 / buy;
+            if (sell > 0) finalSell = 1 / sell;
+  
+            // Calculate change percent
+            let changePercent = 0;
+            if (apiRate.change?.percent !== undefined) {
+              changePercent = CurrencyService.parsePercentage(apiRate.change.percent);
+            } else {
+              const buyPercent = apiRate.change?.buy?.percent || 0;
+              const sellPercent = apiRate.change?.sell?.percent || 0;
+              changePercent = CurrencyService.parsePercentage((buyPercent + sellPercent) / 2);
+            }
+  
+            rates.push({
+              id: `border_${index}`,
+              code: apiRate.currency,
+              name: name,
+              value: finalValue,
+              changePercent: changePercent,
+              type: 'border',
+              iconName: iconName,
+              lastUpdated: apiRate.date || nowISO,
+              source: sourceLabel,
+              buyValue: finalBuy,
+              sellValue: finalSell,
+              buyChangePercent: apiRate.change?.buy?.percent ? CurrencyService.parsePercentage(apiRate.change.buy.percent) : undefined,
+              sellChangePercent: apiRate.change?.sell?.percent ? CurrencyService.parsePercentage(apiRate.change.sell.percent) : undefined
+            });
+          });
+        }
+  
+        // 2. Process Crypto Rates
+        if (response.crypto && Array.isArray(response.crypto)) {
+          response.crypto.forEach((cryptoItem) => {
+            const currencyCode = cryptoItem.currency.toUpperCase();
+            let name = currencyCode;
+            let iconName = 'currency-bitcoin';
+  
+            const sourceLabel = cryptoItem.source || 'P2P';
+  
+            switch (currencyCode) {
+              case 'USDT':
+                name = sourceLabel.toLowerCase() === 'paralelo' ? 'USDT Tether' : `USDT • ${sourceLabel}`;
+                iconName = 'alpha-t-circle-outline';
+                break;
+              case 'BTC': name = `Bitcoin • ${sourceLabel}`; iconName = 'currency-btc'; break;
+              case 'VES': name = `Bolívar • ${sourceLabel}`; iconName = 'Bs'; break;
+              case 'ETH': name = `Ethereum • ${sourceLabel}`; iconName = 'ethereum'; break;
+              case 'USDC': name = `USDC • ${sourceLabel}`; iconName = 'alpha-u-circle-outline'; break;
+              case 'BNB': name = `BNB • ${sourceLabel}`; iconName = 'hexagon-slice-6'; break;
+              case 'DAI': name = `DAI • ${sourceLabel}`; iconName = 'alpha-d-circle-outline'; break;
+              case 'FDUSD': name = `FDUSD • ${sourceLabel}`; iconName = 'alpha-f-circle-outline'; break;
+              case 'BUSD': name = `BUSD • ${sourceLabel}`; iconName = 'alpha-b-circle-outline'; break;
+              case 'LTC': name = `Litecoin • ${sourceLabel}`; iconName = 'litecoin'; break;
+              case 'DOGE': name = `Dogecoin • ${sourceLabel}`; iconName = 'dog'; break;
+              default: name = `${currencyCode} • ${sourceLabel}`; iconName = 'currency-btc';
+            }
+  
+            // Calculate average value
+            const buy = cryptoItem.rate?.buy || 0;
+            const sell = cryptoItem.rate?.sell || 0;
+            const avgValue = (buy + sell) / 2;
+  
+            // Calculate average change percent
+            const buyPercent = cryptoItem.change?.buy?.percent || 0;
+            const sellPercent = cryptoItem.change?.sell?.percent || 0;
+            const avgChange = (buyPercent + sellPercent) / 2;
+  
+            rates.push({
+              id: `${cryptoItem.currency.toLowerCase()}_p2p`,
+              code: cryptoItem.currency,
+              name: name,
+              value: CurrencyService.parseRate(avgValue),
+              changePercent: CurrencyService.parsePercentage(avgChange),
+              type: 'crypto',
+              iconName: iconName,
+              lastUpdated: cryptoItem.date || nowISO,
+              source: sourceLabel,
+              buyValue: CurrencyService.parseRate(cryptoItem.rate?.buy),
+              sellValue: CurrencyService.parseRate(cryptoItem.rate?.sell),
+              buyChangePercent: CurrencyService.parsePercentage(cryptoItem.change?.buy?.percent),
+              sellChangePercent: CurrencyService.parsePercentage(cryptoItem.change?.sell?.percent)
+            });
+          });
+        }
+  
+        // Ensure VES exists as base currency for calculations
+        if (!rates.find(r => r.code === 'VES')) {
+          rates.unshift({
+            id: 'ves_base',
+            code: 'VES',
+            name: 'Bolívar',
+            value: 1,
+            changePercent: null,
             type: 'fiat',
-            iconName: iconName,
-            lastUpdated: apiRate.date || nowISO,
-            source: sourceLabel,
-            buyValue: CurrencyService.parseRate(apiRate.rate?.buy),
-            sellValue: CurrencyService.parseRate(apiRate.rate?.sell),
-            buyChangePercent: CurrencyService.parsePercentage(apiRate.change?.buy?.percent),
-            sellChangePercent: CurrencyService.parsePercentage(apiRate.change?.sell?.percent)
+            iconName: 'Bs', // Custom icon for base
+            lastUpdated: new Date().toISOString()
           });
+        }
+  
+        this.currentRates = rates;
+        this.lastFetch = Date.now();
+        this.notifyListeners(rates);
+  
+        return rates;
+  
+      } catch (e) {
+        observabilityService.captureError(e, {
+          context: 'CurrencyService.getRates',
+          method: 'GET',
+          endpoint: 'api/general-rates',
+          forceRefresh: forceRefresh,
+          hasCachedData: this.currentRates.length > 0
         });
+        trace.putAttribute('error', 'true');
+  
+        // If we have stale data in memory, return it but warn
+        if (this.currentRates.length > 0) {
+          this.notifyListeners([...this.currentRates]);
+          return this.currentRates;
+        }
+  
+        throw e;
+      } finally {
+        await performanceService.stopTrace(trace);
       }
+    })();
 
-      // 1.5 Process Border Rates
-      if (response.border) {
-        response.border.forEach((apiRate, index) => {
-          let name = apiRate.currency;
-          let iconName = 'currency-usd';
-
-          // Standardize names and icons based on currency code
-          const sourceLabel = apiRate.source || 'Fronterizo';
-          name = `${apiRate.currency}/VES • ${sourceLabel}`;
-
-          switch (apiRate.currency) {
-            case 'EUR': iconName = 'currency-eur'; break;
-            case 'USD': iconName = 'currency-usd'; break;
-            case 'CNY': iconName = 'currency-cny'; break;
-            case 'RUB': iconName = 'currency-rub'; break;
-            case 'TRY': iconName = 'currency-try'; break;
-            case 'GBP': iconName = 'currency-gbp'; break;
-            case 'JPY': iconName = 'currency-jpy'; break;
-            case 'COP': iconName = 'currency-usd'; break;
-            case 'BRL': iconName = 'currency-brl'; break;
-            case 'DAI': iconName = 'currency-dai'; break;
-            case 'VES': iconName = 'Bs'; break;
-            default: iconName = 'currency-usd';
-          }
-
-          // Calculate values if average is missing (common in P2P/Border rates)
-          const buy = CurrencyService.parseRate(apiRate.rate?.buy);
-          const sell = CurrencyService.parseRate(apiRate.rate?.sell);
-          const avgValue = apiRate.rate?.average
-            ? CurrencyService.parseRate(apiRate.rate.average)
-            : (buy + sell) / 2;
-
-          // Handle Border Rate Inversion (Tasas Fronterizas are usually Foreign/VES)
-          // We need value in VES (Price of 1 Unit of Foreign Currency in VES) for the calculator logic.
-          // All border rates from API seem to be based on VES (Foreign/VES).
-          let finalValue = avgValue;
-          let finalBuy = buy;
-          let finalSell = sell;
-
-          if (avgValue > 0) finalValue = 1 / avgValue;
-          if (buy > 0) finalBuy = 1 / buy;
-          if (sell > 0) finalSell = 1 / sell;
-
-          // Calculate change percent
-          let changePercent = 0;
-          if (apiRate.change?.percent !== undefined) {
-            changePercent = CurrencyService.parsePercentage(apiRate.change.percent);
-          } else {
-            const buyPercent = apiRate.change?.buy?.percent || 0;
-            const sellPercent = apiRate.change?.sell?.percent || 0;
-            changePercent = CurrencyService.parsePercentage((buyPercent + sellPercent) / 2);
-          }
-
-          rates.push({
-            id: `border_${index}`,
-            code: apiRate.currency,
-            name: name,
-            value: finalValue,
-            changePercent: changePercent,
-            type: 'border',
-            iconName: iconName,
-            lastUpdated: apiRate.date || nowISO,
-            source: sourceLabel,
-            buyValue: finalBuy,
-            sellValue: finalSell,
-            buyChangePercent: apiRate.change?.buy?.percent ? CurrencyService.parsePercentage(apiRate.change.buy.percent) : undefined,
-            sellChangePercent: apiRate.change?.sell?.percent ? CurrencyService.parsePercentage(apiRate.change.sell.percent) : undefined
-          });
-        });
-      }
-
-      // 2. Process Crypto Rates
-      if (response.crypto) {
-        response.crypto.forEach((cryptoItem) => {
-          const currencyCode = cryptoItem.currency.toUpperCase();
-          let name = currencyCode;
-          let iconName = 'currency-bitcoin';
-
-          const sourceLabel = cryptoItem.source || 'P2P';
-
-          switch (currencyCode) {
-            case 'USDT':
-              name = sourceLabel.toLowerCase() === 'paralelo' ? 'USDT Tether' : `USDT • ${sourceLabel}`;
-              iconName = 'alpha-t-circle-outline';
-              break;
-            case 'BTC': name = `Bitcoin • ${sourceLabel}`; iconName = 'currency-btc'; break;
-            case 'VES': name = `Bolívar • ${sourceLabel}`; iconName = 'Bs'; break;
-            case 'ETH': name = `Ethereum • ${sourceLabel}`; iconName = 'ethereum'; break;
-            case 'USDC': name = `USDC • ${sourceLabel}`; iconName = 'alpha-u-circle-outline'; break;
-            case 'BNB': name = `BNB • ${sourceLabel}`; iconName = 'hexagon-slice-6'; break;
-            case 'DAI': name = `DAI • ${sourceLabel}`; iconName = 'alpha-d-circle-outline'; break;
-            case 'FDUSD': name = `FDUSD • ${sourceLabel}`; iconName = 'alpha-f-circle-outline'; break;
-            case 'BUSD': name = `BUSD • ${sourceLabel}`; iconName = 'alpha-b-circle-outline'; break;
-            case 'LTC': name = `Litecoin • ${sourceLabel}`; iconName = 'litecoin'; break;
-            case 'DOGE': name = `Dogecoin • ${sourceLabel}`; iconName = 'dog'; break;
-            default: name = `${currencyCode} • ${sourceLabel}`; iconName = 'currency-btc';
-          }
-
-          // Calculate average value
-          const buy = cryptoItem.rate?.buy || 0;
-          const sell = cryptoItem.rate?.sell || 0;
-          const avgValue = (buy + sell) / 2;
-
-          // Calculate average change percent
-          const buyPercent = cryptoItem.change?.buy?.percent || 0;
-          const sellPercent = cryptoItem.change?.sell?.percent || 0;
-          const avgChange = (buyPercent + sellPercent) / 2;
-
-          rates.push({
-            id: `${cryptoItem.currency.toLowerCase()}_p2p`,
-            code: cryptoItem.currency,
-            name: name,
-            value: CurrencyService.parseRate(avgValue),
-            changePercent: CurrencyService.parsePercentage(avgChange),
-            type: 'crypto',
-            iconName: iconName,
-            lastUpdated: cryptoItem.date || nowISO,
-            source: sourceLabel,
-            buyValue: CurrencyService.parseRate(cryptoItem.rate?.buy),
-            sellValue: CurrencyService.parseRate(cryptoItem.rate?.sell),
-            buyChangePercent: CurrencyService.parsePercentage(cryptoItem.change?.buy?.percent),
-            sellChangePercent: CurrencyService.parsePercentage(cryptoItem.change?.sell?.percent)
-          });
-        });
-      }
-
-      // Ensure VES exists as base currency for calculations
-      if (!rates.find(r => r.code === 'VES')) {
-        rates.unshift({
-          id: 'ves_base',
-          code: 'VES',
-          name: 'Bolívar',
-          value: 1,
-          changePercent: null,
-          type: 'fiat',
-          iconName: 'Bs', // Custom icon for base
-          lastUpdated: new Date().toISOString()
-        });
-      }
-
-      this.currentRates = rates;
-      this.lastFetch = Date.now();
-      this.notifyListeners(rates);
-
-      return rates;
-
-    } catch (e) {
-      observabilityService.captureError(e, {
-        context: 'CurrencyService.getRates',
-        method: 'GET',
-        endpoint: 'api/general-rates',
-        forceRefresh: forceRefresh,
-        hasCachedData: this.currentRates.length > 0
-      });
-      trace.putAttribute('error', 'true');
-
-      // If we have stale data in memory, return it but warn
-      if (this.currentRates.length > 0) {
-        this.notifyListeners([...this.currentRates]);
-        return this.currentRates;
-      }
-
-      throw e;
+    try {
+      return await this.fetchPromise;
     } finally {
-      await performanceService.stopTrace(trace);
+      this.fetchPromise = null;
     }
   }
 

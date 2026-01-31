@@ -100,21 +100,24 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
         // Navigate to Notifications Screen
         // Navigate to Notifications Screen with robust check
-        const attemptNavigation = (attempts = 0) => {
+        const safeNavigate = (screen: string) => {
           if (navigationRef.isReady()) {
-            try {
-              navigationRef.navigate('Notifications');
-            } catch (e) {
-              observabilityService.captureError(e, {
-                context: 'NotificationContext.quitStateNavigation',
-                action: 'navigate_notifications'
-              });
-            }
-          } else if (attempts < 20) { // Try for ~2 seconds (20 * 100ms)
-            setTimeout(() => attemptNavigation(attempts + 1), 100);
+            navigationRef.navigate(screen);
+          } else {
+            // Retry logic (max 5 attempts)
+            let attempts = 0;
+            const interval = setInterval(() => {
+              attempts++;
+              if (navigationRef.isReady()) {
+                navigationRef.navigate(screen);
+                clearInterval(interval);
+              } else if (attempts >= 5) {
+                clearInterval(interval);
+              }
+            }, 500);
           }
         };
-        attemptNavigation();
+        safeNavigate('Notifications');
       }
     });
 
@@ -124,17 +127,26 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       processRemoteMessage(remoteMessage, 'background');
 
       // Navigate to Notifications Screen
-      if (navigationRef.isReady()) {
-        try {
-          navigationRef.navigate('Notifications');
-        } catch (e) {
-          observabilityService.captureError(e, {
-            context: 'NotificationContext.backgroundStateNavigation',
-            action: 'navigate_notifications'
-          });
-          // Navigation to Notifications failed
-        }
-      }
+      // Re-implement safe navigation locally or extract util if needed globally
+      // For now, repeating logic as local function safeNavigate is scoped to the quit handler
+      const safeNavigate = (screen: string) => {
+          if (navigationRef.isReady()) {
+            navigationRef.navigate(screen);
+          } else {
+            // Retry logic (max 5 attempts)
+            let attempts = 0;
+            const interval = setInterval(() => {
+              attempts++;
+              if (navigationRef.isReady()) {
+                navigationRef.navigate(screen);
+                clearInterval(interval);
+              } else if (attempts >= 5) {
+                clearInterval(interval);
+              }
+            }, 500);
+          }
+      };
+      safeNavigate('Notifications');
     });
 
     // 3. Foreground State
@@ -167,10 +179,10 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             const symbol = remoteMessage.data.symbol as string;
             const price = parseFloat(remoteMessage.data.price as string);
 
-            const formatPrice = (val: number) => val < 0.01 ? val : val.toFixed(2);
-            highlightedVal = `${formatPrice(price)}`;
-
             if (!isNaN(price)) {
+              const formatPrice = (val: number) => val < 0.01 ? val : val.toFixed(2);
+              highlightedVal = `${formatPrice(price)}`;
+
               // Check if this price matches any active alert
               // We need to fetch alerts to know if this is UP or DOWN
               try {
@@ -234,18 +246,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             // Add notification to context
             addNotification(newNotif);
 
-            // Explicitly persist to storage immediately
-            try {
-              const currentNotifications = await storageService.getNotifications();
-              await storageService.saveNotifications([newNotif, ...currentNotifications]);
-            } catch (e) {
-              observabilityService.captureError(e, {
-                context: 'NotificationContext.processRemoteMessage',
-                action: 'persist_notification',
-                notificationId: newNotif.id
-              });
-              // Failed to persist notification
-            }
+            // Redundant storage write removed. 
+            // The useEffect on [notifications] will handle persistence automatically.
           }
         }
       } catch (error) {
