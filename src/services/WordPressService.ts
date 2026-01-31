@@ -218,6 +218,8 @@ export interface WordPressQueryParams {
 
 class WordPressService {
     private client: ApiClient;
+    private formattedPostCache = new Map<number, { modified: string; formatted: FormattedPost }>();
+    private serverTimeOffset = 0;
 
     constructor() {
         const baseUrl = Config.WORDPRESS_BASE_URL || 'https://discover.vtrading.app';
@@ -274,7 +276,7 @@ class WordPressService {
                 tagId: tagId,
                 bypassCache: bypassCache
             });
-            return [];
+            throw error; // Propagate error for UI handling
         }
     }
 
@@ -304,6 +306,14 @@ class WordPressService {
                 bypassCache,
                 cacheTTL: 5 * 60 * 1000,
             });
+
+            // Update server time offset from Date header
+            const serverDate = headers.get('Date') || headers.get('date');
+            if (serverDate) {
+                const serverTime = new Date(serverDate).getTime();
+                const localTime = Date.now();
+                this.serverTimeOffset = serverTime - localTime;
+            }
 
             const totalPages = parseInt(
                 headers.get('X-WP-TotalPages') ||
@@ -750,9 +760,9 @@ class WordPressService {
     /**
      * Helper to extract social links from various possible WP structures
      */
-    private discoverSocialLinks(obj: any): Record<string, string> {
+    private discoverSocialLinks(obj: WordPressAuthor | Record<string, any>): Record<string, string> {
         if (!obj) return {};
-        const social: any = {};
+        const social: Record<string, string> = {};
         const platforms = [
             'facebook', 'instagram', 'youtube', 'twitter', 'linkedin',
             'tiktok', 'website', 'github', 'x', 'pinterest',
@@ -760,8 +770,10 @@ class WordPressService {
         ];
 
         // 1. Check Yoast SEO Schema Graph for "sameAs"
-        if (obj.yoast_head_json?.schema?.['@graph']) {
-            const graph = obj.yoast_head_json.schema['@graph'];
+        // Use type guard or optional chaining with known structure
+        const yoastJson = (obj as any).yoast_head_json;
+        if (yoastJson?.schema?.['@graph']) {
+            const graph = yoastJson.schema['@graph'];
 
             graph.forEach((item: any) => {
                 if (Array.isArray(item.sameAs)) {
@@ -793,7 +805,8 @@ class WordPressService {
         }
 
         // 2. Check top level, meta, acf, and common variations
-        const sources = [obj, obj.meta, obj.social_links, obj.acf].filter(Boolean);
+        const anyObj = obj as any;
+        const sources = [obj, anyObj.meta, anyObj.social_links, anyObj.acf].filter(Boolean);
 
         platforms.forEach(p => {
             for (const source of sources) {
@@ -827,8 +840,8 @@ class WordPressService {
         });
 
         // Special fallback for website/url
-        if (!social.website && (obj.url || obj.user_url || obj.link)) {
-            const site = obj.url || obj.user_url || obj.link;
+        if (!social.website && (obj.url || anyObj.user_url || obj.link)) {
+            const site = obj.url || anyObj.user_url || obj.link;
             if (site && site.includes('http') && !site.includes('discover.vtrading.app')) {
                 social.website = site;
             }
@@ -888,6 +901,12 @@ class WordPressService {
      * Helper to format WP post to app-friendly structure
      */
     private formatPost(post: WordPressPost): FormattedPost {
+        // Check cache first
+        const cached = this.formattedPostCache.get(post.id);
+        if (cached && cached.modified === post.modified) {
+            return cached.formatted;
+        }
+
         // Utility to decode HTML entities
         const decodeHtml = (html: string) => {
             return html
@@ -916,7 +935,7 @@ class WordPressService {
         // Calculate relative time (Spanish format) using GMT to avoid timezone issues
         // WP GMT dates often don't include the 'Z' suffix, so we append it
         const date = new Date(post.date_gmt.endsWith('Z') ? post.date_gmt : `${post.date_gmt}Z`);
-        const now = new Date();
+        const now = new Date(Date.now() + this.serverTimeOffset);
         const diffMs = now.getTime() - date.getTime();
         const diffMins = Math.floor(diffMs / 60000);
         const diffHours = Math.floor(diffMins / 60);
@@ -993,33 +1012,37 @@ class WordPressService {
             TRENDING_SLUGS.includes(tag.name.toLowerCase())
         ) || false;
 
-        return {
+        const formatted: FormattedPost = {
             id: String(post.id),
             slug: post.slug,
             title: stripHtml(post.title.rendered),
             description: stripHtml(post.excerpt.rendered).slice(0, 150) + '...',
-            source: 'VTrading',
+            source: 'VTrading News',
             time: timeString,
             image: featuredImage,
             category: primaryCategory,
             categoryId: primaryCategoryId,
             categories,
             tags,
-            readTime: `${readTimeMinutes} min`,
+            readTime: `${readTimeMinutes} min de lectura`,
             link: post.link,
-            excerpt: stripHtml(post.excerpt?.rendered || ''),
-            content: post.content.rendered,
+            excerpt: stripHtml(post.excerpt.rendered),
+            content: post.content.rendered, // Keep HTML for WebView
             modifiedTime: modifiedString,
-            wordCount: wordCount,
-            seoDescription,
+            wordCount,
             isPromo,
             isTrending,
-            isEdited: (mDate.getTime() - date.getTime()) > 300000, // Significant change > 5 mins
-            date: post.date_gmt,
-            modified: post.modified_gmt,
+            date: post.date,
+            modified: post.modified,
             author,
-            yoastSEO: post.yoast_head_json,
+            seoDescription,
+            yoastSEO: post.yoast_head_json
         };
+
+        // Cache the result
+        this.formattedPostCache.set(post.id, { modified: post.modified, formatted });
+
+        return formatted;
     }
 
     /**
