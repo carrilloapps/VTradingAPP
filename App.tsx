@@ -12,7 +12,6 @@ if (Platform.OS === 'android' && !(globalThis as any).nativeFabricUIManager) {
   }
 }
 
-import { FilterProvider } from './src/context/FilterContext';
 import { NotificationProvider } from './src/context/NotificationContext';
 import AppNavigator from './src/navigation/AppNavigator';
 import { inAppMessagingService } from './src/services/firebase/InAppMessagingService';
@@ -31,6 +30,7 @@ import { AppConfig } from './src/constants/AppConfig';
 import { deepLinkService } from './src/services/DeepLinkService';
 import { notificationInitService } from './src/services/NotificationInitService';
 import { analyticsService } from './src/services/firebase/AnalyticsService';
+import { useNetworkStore } from './src/stores/networkStore';
 
 // Silence Firebase modular deprecation warnings
 // @ts-ignore
@@ -115,12 +115,16 @@ function App(): React.JSX.Element {
     // Initialize Deep Link Handling
     const cleanupDeepLinks = deepLinkService.init();
 
+    // Initialize Network Listener
+    const cleanupNetwork = useNetworkStore.getState().initialize();
+
     return () => {
       // Log session end with duration (Custom event)
       const sessionDuration = Date.now() - sessionStartTime;
       analyticsService.logSessionEnd(sessionDuration);
 
       cleanupDeepLinks();
+      cleanupNetwork();
     };
   }, []);
 
@@ -130,14 +134,12 @@ function App(): React.JSX.Element {
         <GestureHandlerRootView style={styles.container}>
           <QueryClientProvider client={queryClient}>
             <ThemeProvider>
-              <FilterProvider>
-                <NotificationProvider>
-                  <NotificationController />
-                  <NoInternetModal />
-                  <ToastContainer />
-                  <AppNavigator />
-                </NotificationProvider>
-              </FilterProvider>
+              <NotificationProvider>
+                <NotificationController />
+                <NoInternetModal />
+                <ToastContainer />
+                <AppNavigator />
+              </NotificationProvider>
             </ThemeProvider>
           </QueryClientProvider>
         </GestureHandlerRootView>

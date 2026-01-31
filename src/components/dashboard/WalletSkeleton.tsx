@@ -4,7 +4,11 @@ import { useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import Skeleton from '../ui/Skeleton';
 
-const WalletSkeleton = () => {
+interface WalletSkeletonProps {
+  itemCount?: number;
+}
+
+const WalletSkeleton = ({ itemCount = 3 }: WalletSkeletonProps) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
@@ -49,11 +53,13 @@ const WalletSkeleton = () => {
           <Skeleton width="100%" height={8} borderRadius={4} />
         </View>
 
+
+
         {/* Features Preview */}
         <View style={styles.featuresContainer}>
           <Skeleton width={120} height={24} style={styles.featuresTitle} />
 
-          {[1, 2, 3].map((_, index) => (
+          {Array.from({ length: itemCount }).map((_, index) => (
             <View
               key={index}
               style={featureItemStyle}
@@ -66,8 +72,8 @@ const WalletSkeleton = () => {
             </View>
           ))}
         </View>
-      </ScrollView>
-    </View>
+      </ScrollView >
+    </View >
   );
 };
 

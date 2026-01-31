@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Text, Platform, View, StatusBar, StyleSheet } from 'react-native';
 import { NavigationContainer, DefaultTheme as NavDefaultTheme, DarkTheme as NavDarkTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { createMaterialTopTabNavigator, MaterialTopTabBarProps } from '@react-navigation/material-top-tabs';
 import { useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import SafeLogger from '../utils/safeLogger';
@@ -143,19 +143,21 @@ const SettingsIcon = ({ color }: { color: string }) => (
 const Tab = createMaterialTopTabNavigator<MainTabParamList>();
 
 // Tab Bar component extracted to avoid re-creation
-const TabBar = (props: any) => <ModernTabBar {...props} />;
+const TabBar = (props: MaterialTopTabBarProps) => <ModernTabBar {...props} />;
 
 function MainTabNavigator() {
+  const screenOptions = React.useMemo(() => ({
+    swipeEnabled: true,
+    tabBarShowLabel: false,
+    tabBarIndicatorStyle: { height: 0 },
+  }), []);
+
   return (
     <Tab.Navigator
       initialRouteName="Home"
       tabBarPosition="bottom"
       tabBar={TabBar}
-      screenOptions={{
-        swipeEnabled: true,
-        tabBarShowLabel: false,
-        tabBarIndicatorStyle: { height: 0 }, // Hide default indicator
-      }}
+      screenOptions={screenOptions}
     >
       <Tab.Screen
         name="Markets"

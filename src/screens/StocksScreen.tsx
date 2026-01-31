@@ -11,7 +11,7 @@ import IndexHero from '../components/stocks/IndexHero';
 import StockItem from '../components/stocks/StockItem';
 import SearchBar from '../components/ui/SearchBar';
 import FilterSection from '../components/ui/FilterSection';
-import { useFilters } from '../context/FilterContext';
+import { useFilterStore } from '../stores/filterStore';
 import { StocksService, StockData } from '../services/StocksService';
 import { useToastStore } from '../stores/toastStore';
 import StocksSkeleton from '../components/stocks/StocksSkeleton';
@@ -44,7 +44,7 @@ const FlashListTyped = FlashList as any;
 
 const StocksScreen = ({ navigation }: any) => {
   const theme = useTheme();
-  const { stockFilters, setStockFilters } = useFilters();
+  const { stockFilters, setStockFilters } = useFilterStore();
   const { query: searchQuery, category: activeFilter } = stockFilters;
   const showToast = useToastStore((state) => state.showToast);
   const isFocused = useIsFocused();

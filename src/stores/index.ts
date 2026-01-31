@@ -28,16 +28,7 @@ export const useToast = () => {
     return { showToast };
 };
 
-export const useFilters = () => {
-    const selectedFilter = useFilterStore((state) => state.selectedFilter);
-    const setFilter = useFilterStore((state) => state.setFilter);
-    return {
-        stockFilters: { category: selectedFilter, query: '' },
-        setStockFilters: (filters: { category?: string; query?: string }) => {
-            if (filters.category) setFilter(filters.category as any);
-        },
-    };
-};
+
 
 export const useNetwork = () => {
     const isConnected = useNetworkStore((state) => state.isConnected);

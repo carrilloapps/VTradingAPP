@@ -51,7 +51,7 @@ const StockItem: React.FC<StockData> = ({
   const isNeutral = !isPositive && !isNegative;
 
   // Format price - Use prop 'value' if available (dashboard), otherwise format 'price'
-  const formattedPrice = value || `${price.toLocaleString('es-VE', { minimumFractionDigits: 4 })} Bs`;
+  const formattedPrice = value || `${price.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`;
 
   let formattedChange = change;
   if (!formattedChange) {

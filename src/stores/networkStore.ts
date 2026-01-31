@@ -1,23 +1,30 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
-import NetInfo from '@react-native-community/netinfo';
+import NetInfo, { NetInfoState } from '@react-native-community/netinfo';
 
 interface NetworkState {
     isConnected: boolean | null;
-    setConnected: (connected: boolean | null) => void;
+    isInternetReachable: boolean | null;
+    setNetworkState: (state: Partial<NetworkState>) => void;
+    initialize: () => () => void;
 }
 
 export const useNetworkStore = create<NetworkState>()(
     devtools(
         (set) => ({
-            isConnected: null,
-            setConnected: (connected) => set({ isConnected: connected }),
+            isConnected: true,
+            isInternetReachable: true,
+            setNetworkState: (newState) => set((state) => ({ ...state, ...newState })),
+            initialize: () => {
+                const unsubscribe = NetInfo.addEventListener((state: NetInfoState) => {
+                    useNetworkStore.getState().setNetworkState({
+                        isConnected: state.isConnected,
+                        isInternetReachable: state.isInternetReachable,
+                    });
+                });
+                return unsubscribe;
+            },
         }),
         { name: 'NetworkStore' }
     )
 );
-
-// Initialize network listener
-NetInfo.addEventListener((state) => {
-    useNetworkStore.getState().setConnected(state.isConnected);
-});

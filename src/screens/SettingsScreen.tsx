@@ -31,12 +31,12 @@ const SettingsScreen = () => {
   const { themeMode, setThemeMode } = useThemeContext();
   const { user, signOut, updateProfileName, deleteAccount } = useAuthStore();
   const showToast = useToastStore((state) => state.showToast);
-  
+
   // App Info State
   const [appName, setAppName] = useState('');
   const [appVersion, setAppVersion] = useState('');
   const [buildNumber, setBuildNumber] = useState('');
-  
+
   // Feedback State
   const [snackbarVisible, setSnackbarVisible] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
@@ -66,22 +66,22 @@ const SettingsScreen = () => {
 
           // Verificar permisos del sistema (esto es la verdad)
           const hasSystemPermission = await fcmService.checkPermission();
-          
+
           // Settings & Alerts
           const settings = await storageService.getSettings();
-          
+
           // Si no tiene permisos del sistema, forzar pushEnabled a false
           const actualPushEnabled = hasSystemPermission && settings.pushEnabled;
-          
+
           if (isActive) {
             setPushEnabled(actualPushEnabled);
-            
+
             // Si el storage dice true pero el sistema dice false, actualizar storage
             if (settings.pushEnabled && !hasSystemPermission) {
               await storageService.saveSettings({ pushEnabled: false });
             }
           }
-          
+
           const savedAlerts = await storageService.getAlerts();
           if (isActive) {
             setAlerts(savedAlerts);
@@ -99,7 +99,7 @@ const SettingsScreen = () => {
           }
         }
       };
-      
+
       loadData();
 
       return () => {
@@ -120,15 +120,15 @@ const SettingsScreen = () => {
   const confirmLogout = async () => {
     setShowLogoutDialog(false);
     try {
-        await signOut(showToast);
-        // Navigation will handle the switch to AuthStack automatically via Zustand store
+      await signOut(showToast);
+      // Navigation will handle the switch to AuthStack automatically via Zustand store
     } catch (e) {
-        observabilityService.captureError(e, {
-            context: 'SettingsScreen.confirmLogout',
-            action: 'logout'
-        });
-        await analyticsService.logError('logout');
-        handleAction("Error al cerrar sesión");
+      observabilityService.captureError(e, {
+        context: 'SettingsScreen.confirmLogout',
+        action: 'logout'
+      });
+      await analyticsService.logError('logout');
+      handleAction("Error al cerrar sesión");
     }
   };
 
@@ -180,84 +180,85 @@ const SettingsScreen = () => {
   };
 
   const togglePush = async (value: boolean) => {
-      if (value) {
-        // Usuario quiere activar notificaciones
-        // Verificar si tiene permisos del sistema
-        const hasPermission = await fcmService.checkPermission();
-        
-        if (!hasPermission) {
-          // No tiene permisos, solicitar
-          const granted = await notificationInitService.requestPermission();
-          
-          if (!granted) {
-            // Usuario denegó permisos
-            setPushEnabled(false);
-            await storageService.saveSettings({ pushEnabled: false });
-            
-            // Mostrar mensaje explicativo
-            Alert.alert(
-              'Permisos requeridos',
-              'Para recibir notificaciones, debes habilitar los permisos en la configuración de tu dispositivo.',
-              [
-                { text: 'Cancelar', style: 'cancel' },
-                { 
-                  text: 'Abrir configuración', 
-                  onPress: () => {
-                    // Abrir configuración del sistema
-                    Linking.openSettings();
-                  }
+    if (value) {
+      // Usuario quiere activar notificaciones
+      // Verificar si tiene permisos del sistema
+      const hasPermission = await fcmService.checkPermission();
+
+      if (!hasPermission) {
+        // No tiene permisos, solicitar
+        const granted = await notificationInitService.requestPermission();
+
+        if (!granted) {
+          // Usuario denegó permisos
+          setPushEnabled(false);
+          await storageService.saveSettings({ pushEnabled: false });
+
+          // Mostrar mensaje explicativo
+          Alert.alert(
+            'Permisos requeridos',
+            'Para recibir notificaciones, debes habilitar los permisos en la configuración de tu dispositivo.',
+            [
+              { text: 'Cancelar', style: 'cancel' },
+              {
+                text: 'Abrir configuración',
+                onPress: () => {
+                  // Abrir configuración del sistema
+                  Linking.openSettings();
                 }
-              ]
-            );
-            return;
-          }
-          
-          // Permisos otorgados, el servicio ya inicializó todo
-          setPushEnabled(true);
-          await storageService.saveSettings({ pushEnabled: true });
-          await analyticsService.logEvent(ANALYTICS_EVENTS.TOGGLE_PUSH, { enabled: true });
-          showToast('Notificaciones habilitadas', 'success');
-        } else {
-          // Ya tiene permisos, solo actualizar preferencia
-          setPushEnabled(true);
-          await storageService.saveSettings({ pushEnabled: true });
-          await analyticsService.logEvent(ANALYTICS_EVENTS.TOGGLE_PUSH, { enabled: true });
-          showToast('Notificaciones habilitadas', 'success');
+              }
+            ]
+          );
+          return;
         }
+
+        // Permisos otorgados, el servicio ya inicializó todo
+        setPushEnabled(true);
+        await storageService.saveSettings({ pushEnabled: true });
+        await analyticsService.logEvent(ANALYTICS_EVENTS.TOGGLE_PUSH, { enabled: true });
+        showToast('Notificaciones habilitadas', 'success');
       } else {
-        // Usuario quiere desactivar notificaciones
-        setPushEnabled(false);
-        await storageService.saveSettings({ pushEnabled: false });
-        
-        // Desactivar TODAS las alertas
-        const currentAlerts = await storageService.getAlerts();
-        if (currentAlerts.length > 0) {
-          const deactivatedAlerts = currentAlerts.map(a => ({ ...a, isActive: false }));
-          await storageService.saveAlerts(deactivatedAlerts);
-          setAlerts(deactivatedAlerts);
-          
-          // Desuscribirse de todos los tópicos de alertas
-          const uniqueSymbols = [...new Set(currentAlerts.map(a => a.symbol))];
-          for (const symbol of uniqueSymbols) {
-            const topic = getTopicName(symbol);
-            await fcmService.unsubscribeFromTopic(topic);
-          }
-        }
-        
-        await analyticsService.logEvent(ANALYTICS_EVENTS.TOGGLE_PUSH, { enabled: false });
-        showToast('Notificaciones deshabilitadas. Todas las alertas han sido pausadas.', 'info');
+        // Ya tiene permisos, solo actualizar preferencia
+        setPushEnabled(true);
+        await storageService.saveSettings({ pushEnabled: true });
+        await analyticsService.logEvent(ANALYTICS_EVENTS.TOGGLE_PUSH, { enabled: true });
+        showToast('Notificaciones habilitadas', 'success');
       }
+    } else {
+      // Usuario quiere desactivar notificaciones
+      setPushEnabled(false);
+      await storageService.saveSettings({ pushEnabled: false });
+
+      // Desactivar TODAS las alertas
+      const currentAlerts = await storageService.getAlerts();
+      if (currentAlerts.length > 0) {
+        const deactivatedAlerts = currentAlerts.map(a => ({ ...a, isActive: false }));
+        await storageService.saveAlerts(deactivatedAlerts);
+        setAlerts(deactivatedAlerts);
+
+        // Desuscribirse de todos los tópicos de alertas
+        const uniqueSymbols = [...new Set(currentAlerts.map(a => a.symbol))];
+        for (const symbol of uniqueSymbols) {
+          const topic = getTopicName(symbol);
+          await fcmService.unsubscribeFromTopic(topic);
+        }
+      }
+
+      await analyticsService.logEvent(ANALYTICS_EVENTS.TOGGLE_PUSH, { enabled: false });
+      showToast('Notificaciones deshabilitadas. Todas las alertas han sido pausadas.', 'info');
+    }
   };
 
   const handleThemeChange = async (mode: 'light' | 'dark' | 'system') => {
-      if (switchingTheme) return;
-      setSwitchingTheme(true);
-      // Artificial delay to show blocking state and ensure smooth transition check
-      setTimeout(async () => {
-          setThemeMode(mode);
-          await analyticsService.logEvent(ANALYTICS_EVENTS.CHANGE_THEME, { mode });
-          setSwitchingTheme(false);
-      }, 500); 
+    if (switchingTheme) return;
+    setSwitchingTheme(true);
+
+    try {
+      setThemeMode(mode);
+      await analyticsService.logEvent(ANALYTICS_EVENTS.CHANGE_THEME, { mode });
+    } finally {
+      setSwitchingTheme(false);
+    }
   };
 
   const getTopicName = (symbol: string) => {
@@ -269,94 +270,94 @@ const SettingsScreen = () => {
   };
 
   const toggleAlert = async (id: string, value: boolean) => {
-      // Prevent double toggle
-      if (togglingIds.has(id)) return;
+    // Prevent double toggle
+    if (togglingIds.has(id)) return;
 
-      const alert = alerts.find(a => a.id === id);
-      if (!alert) return;
+    const alert = alerts.find(a => a.id === id);
+    if (!alert) return;
 
-      // Optimistic update
-      const originalAlerts = [...alerts];
-      const updated = alerts.map(a => a.id === id ? { ...a, isActive: value } : a);
-      setAlerts(updated);
+    // Optimistic update
+    const originalAlerts = [...alerts];
+    const updated = alerts.map(a => a.id === id ? { ...a, isActive: value } : a);
+    setAlerts(updated);
 
-      // Add to toggling set
-      setTogglingIds(prev => new Set(prev).add(id));
+    // Add to toggling set
+    setTogglingIds(prev => new Set(prev).add(id));
 
-      try {
-        // FCM Logic
-        const topic = getTopicName(alert.symbol);
-        
-        if (value) {
-            await fcmService.subscribeToTopic(topic);
-        } else {
-            // Check if other active alerts exist for the same symbol
-            const otherActiveAlerts = updated.filter(a => 
-                a.id !== id && a.symbol === alert.symbol && a.isActive
-            );
-            
-            if (otherActiveAlerts.length === 0) {
-                await fcmService.unsubscribeFromTopic(topic);
-            }
+    try {
+      // FCM Logic
+      const topic = getTopicName(alert.symbol);
+
+      if (value) {
+        await fcmService.subscribeToTopic(topic);
+      } else {
+        // Check if other active alerts exist for the same symbol
+        const otherActiveAlerts = updated.filter(a =>
+          a.id !== id && a.symbol === alert.symbol && a.isActive
+        );
+
+        if (otherActiveAlerts.length === 0) {
+          await fcmService.unsubscribeFromTopic(topic);
         }
-        
-        // Persist to storage
-        await storageService.saveAlerts(updated);
-        handleAction(`Alerta ${value ? 'activada' : 'desactivada'}`);
-
-      } catch (err) {
-        observabilityService.captureError(err, {
-          context: 'SettingsScreen.toggleAlert',
-          action: 'toggle_alert',
-          alertId: id,
-          newValue: value
-        });
-        await analyticsService.logError('toggle_alert', { alertId: id });
-        showToast('Error al actualizar alerta', 'error');
-        // Revert on error
-        setAlerts(originalAlerts);
-        handleAction('Error al actualizar la alerta');
-      } finally {
-        // Remove from toggling set
-        setTogglingIds(prev => {
-            const next = new Set(prev);
-            next.delete(id);
-            return next;
-        });
       }
+
+      // Persist to storage
+      await storageService.saveAlerts(updated);
+      handleAction(`Alerta ${value ? 'activada' : 'desactivada'}`);
+
+    } catch (err) {
+      observabilityService.captureError(err, {
+        context: 'SettingsScreen.toggleAlert',
+        action: 'toggle_alert',
+        alertId: id,
+        newValue: value
+      });
+      await analyticsService.logError('toggle_alert', { alertId: id });
+      showToast('Error al actualizar alerta', 'error');
+      // Revert on error
+      setAlerts(originalAlerts);
+      handleAction('Error al actualizar la alerta');
+    } finally {
+      // Remove from toggling set
+      setTogglingIds(prev => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }
   };
 
   const deleteAlert = async (id: string) => {
-      const alert = alerts.find(a => a.id === id);
-      if (alert && alert.isActive) {
-        const topic = getTopicName(alert.symbol);
-        try {
-             // Solo desuscribir si no hay otras alertas activas para el mismo símbolo
-             const otherActiveAlerts = alerts.filter(a => 
-                a.id !== id && a.symbol === alert.symbol && a.isActive
-            );
-            
-            if (otherActiveAlerts.length === 0) {
-                await fcmService.unsubscribeFromTopic(topic);
-            }
-        } catch (e) {
-            observabilityService.captureError(e, {
-              context: 'SettingsScreen.handleDeleteAlert',
-              action: 'unsubscribe_topic',
-              alertId: id,
-              symbol: alert?.symbol
-            });
-            showToast('Error al desuscribir del tema', 'error');
-        }
-      }
+    const alert = alerts.find(a => a.id === id);
+    if (alert && alert.isActive) {
+      const topic = getTopicName(alert.symbol);
+      try {
+        // Solo desuscribir si no hay otras alertas activas para el mismo símbolo
+        const otherActiveAlerts = alerts.filter(a =>
+          a.id !== id && a.symbol === alert.symbol && a.isActive
+        );
 
-      const updated = alerts.filter(a => a.id !== id);
-      setAlerts(updated);
-      await storageService.saveAlerts(updated);
-      if (alert) {
-        await analyticsService.logEvent(ANALYTICS_EVENTS.DELETE_ALERT, { symbol: alert.symbol });
+        if (otherActiveAlerts.length === 0) {
+          await fcmService.unsubscribeFromTopic(topic);
+        }
+      } catch (e) {
+        observabilityService.captureError(e, {
+          context: 'SettingsScreen.handleDeleteAlert',
+          action: 'unsubscribe_topic',
+          alertId: id,
+          symbol: alert?.symbol
+        });
+        showToast('Error al desuscribir del tema', 'error');
       }
-      handleAction('Alerta eliminada');
+    }
+
+    const updated = alerts.filter(a => a.id !== id);
+    setAlerts(updated);
+    await storageService.saveAlerts(updated);
+    if (alert) {
+      await analyticsService.logEvent(ANALYTICS_EVENTS.DELETE_ALERT, { symbol: alert.symbol });
+    }
+    handleAction('Alerta eliminada');
   };
 
   const handleEditAlert = (alert: UserAlert) => {
@@ -364,12 +365,12 @@ const SettingsScreen = () => {
   };
 
   const handleAddAlert = () => {
-      if (alerts.length >= 5) {
-        Alert.alert('Límite Alcanzado', 'Solo puedes tener un máximo de 5 alertas activas.');
-         return;
-      }
-      (navigation as any).navigate('AddAlert');
-      analyticsService.logEvent(ANALYTICS_EVENTS.CREATE_ALERT_CLICK);
+    if (alerts.length >= 5) {
+      Alert.alert('Límite Alcanzado', 'Solo puedes tener un máximo de 5 alertas activas.');
+      return;
+    }
+    (navigation as any).navigate('AddAlert');
+    analyticsService.logEvent(ANALYTICS_EVENTS.CREATE_ALERT_CLICK);
   };
 
   if (loading) {
@@ -393,10 +394,10 @@ const SettingsScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: containerBgColor }]}>
-      <StatusBar 
+      <StatusBar
         backgroundColor="transparent"
         translucent
-        barStyle={statusBarStyle} 
+        barStyle={statusBarStyle}
       />
 
       {/* Header */}
@@ -410,15 +411,15 @@ const SettingsScreen = () => {
         }}
       />
 
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={[styles.content, styles.scrollContent]}
         showsVerticalScrollIndicator={false}
       >
         {/* User Profile */}
         <View style={styles.section}>
-          <UserProfileCard 
-            user={user} 
-            onEdit={handleEditProfile} 
+          <UserProfileCard
+            user={user}
+            onEdit={handleEditProfile}
             onRegister={handleRegister}
           />
         </View>
@@ -427,7 +428,7 @@ const SettingsScreen = () => {
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
             <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>ALERTAS ACTIVAS</Text>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.addButton, alerts.length >= 5 && styles.addButtonDisabled]}
               onPress={handleAddAlert}
               disabled={alerts.length >= 5}
@@ -436,59 +437,59 @@ const SettingsScreen = () => {
               <Text style={[styles.newAlertText, { color: theme.colors.primary }]}>Nueva alerta</Text>
             </TouchableOpacity>
           </View>
-          
+
           <View style={[styles.cardContainer, { borderColor: cardBorder, backgroundColor: cardBg }]}>
             {alerts.length === 0 ? (
-                <View style={styles.emptyStateContainer}>
-                    <View style={[
-                        styles.emptyIconContainer,
-                        { backgroundColor: theme.colors.elevation.level2 }
-                    ]}>
-                        <MaterialCommunityIcons name="bell-plus" size={32} color={theme.colors.primary} />
-                    </View>
-                    <Text style={[
-                        styles.emptyTitle,
-                        { color: theme.colors.onSurface }
-                    ]}>
-                        Crea tu primera alerta
-                    </Text>
-                    <Text style={[
-                        styles.emptyDescription,
-                        { color: theme.colors.onSurfaceVariant }
-                    ]}>
-                        Recibe notificaciones instantáneas cuando las tasas o acciones alcancen el precio que te interesa.
-                    </Text>
-                    <Button 
-                        mode="outlined" 
-                        onPress={handleAddAlert}
-                        style={[
-                            styles.emptyButton,
-                            { borderColor: theme.colors.outline }
-                        ]}
-                        textColor={theme.colors.primary}
-                    >
-                        Crear Alerta
-                    </Button>
+              <View style={styles.emptyStateContainer}>
+                <View style={[
+                  styles.emptyIconContainer,
+                  { backgroundColor: theme.colors.elevation.level2 }
+                ]}>
+                  <MaterialCommunityIcons name="bell-plus" size={32} color={theme.colors.primary} />
                 </View>
+                <Text style={[
+                  styles.emptyTitle,
+                  { color: theme.colors.onSurface }
+                ]}>
+                  Crea tu primera alerta
+                </Text>
+                <Text style={[
+                  styles.emptyDescription,
+                  { color: theme.colors.onSurfaceVariant }
+                ]}>
+                  Recibe notificaciones instantáneas cuando las tasas o acciones alcancen el precio que te interesa.
+                </Text>
+                <Button
+                  mode="outlined"
+                  onPress={handleAddAlert}
+                  style={[
+                    styles.emptyButton,
+                    { borderColor: theme.colors.outline }
+                  ]}
+                  textColor={theme.colors.primary}
+                >
+                  Crear Alerta
+                </Button>
+              </View>
             ) : (
-                alerts.map((alert, index) => (
-                    <React.Fragment key={alert.id}>
-                        <AlertItem 
-                          symbol={alert.symbol}
-                          status={alert.condition === 'above' ? 'Sube' : 'Baja'}
-                          target={alert.target}
-                          isActive={alert.isActive}
-                          onToggle={(v) => toggleAlert(alert.id, v)}
-                          onDelete={() => deleteAlert(alert.id)}
-                          onPress={() => handleEditAlert(alert)}
-                          disabled={togglingIds.has(alert.id)}
-                          iconName={alert.iconName || 'show-chart'}
-                        />
-                        {index < alerts.length - 1 && (
-                            <View style={[styles.separator, { backgroundColor: separatorBg }]} />
-                        )}
-                    </React.Fragment>
-                ))
+              alerts.map((alert, index) => (
+                <React.Fragment key={alert.id}>
+                  <AlertItem
+                    symbol={alert.symbol}
+                    status={alert.condition === 'above' ? 'Sube' : 'Baja'}
+                    target={alert.target}
+                    isActive={alert.isActive}
+                    onToggle={(v) => toggleAlert(alert.id, v)}
+                    onDelete={() => deleteAlert(alert.id)}
+                    onPress={() => handleEditAlert(alert)}
+                    disabled={togglingIds.has(alert.id)}
+                    iconName={alert.iconName || 'show-chart'}
+                  />
+                  {index < alerts.length - 1 && (
+                    <View style={[styles.separator, { backgroundColor: separatorBg }]} />
+                  )}
+                </React.Fragment>
+              ))
             )}
           </View>
         </View>
@@ -496,7 +497,7 @@ const SettingsScreen = () => {
         {/* Preferences Section */}
         <View style={styles.section}>
           <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>PREFERENCIAS</Text>
-          
+
           <View style={[styles.cardContainer, { borderColor: cardBorder, backgroundColor: cardBg }]}>
             {/* Push Notifications */}
             <View style={styles.prefRow}>
@@ -506,10 +507,10 @@ const SettingsScreen = () => {
                 </View>
                 <Text variant="bodyLarge" style={[styles.prefText, { color: prefTextColor }]}>Notificaciones push</Text>
               </View>
-              <Switch 
-                value={pushEnabled} 
-                onValueChange={togglePush} 
-                color={theme.colors.primary} 
+              <Switch
+                value={pushEnabled}
+                onValueChange={togglePush}
+                color={theme.colors.primary}
               />
             </View>
 
@@ -541,12 +542,12 @@ const SettingsScreen = () => {
                 </View>
                 <Text variant="bodyLarge" style={[styles.prefText, { color: prefTextColor }]}>Apariencia</Text>
                 {switchingTheme && (
-                    <ActivityIndicator size={16} style={styles.activityIndicatorMargin} color={theme.colors.primary} />
+                  <ActivityIndicator size={16} style={styles.activityIndicatorMargin} color={theme.colors.primary} />
                 )}
               </View>
-              <ThemeSelector 
-                currentTheme={themeMode} 
-                onSelect={handleThemeChange} 
+              <ThemeSelector
+                currentTheme={themeMode}
+                onSelect={handleThemeChange}
                 disabled={switchingTheme}
               />
             </View>
@@ -558,25 +559,25 @@ const SettingsScreen = () => {
           <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>CUENTA</Text>
           <View style={[styles.cardContainer, { borderColor: cardBorder, backgroundColor: cardBg }]}>
             <MenuButton
-                      icon="shield-account"
-                      label="Políticas de privacidad"
-                      onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL, 'Políticas de privacidad')}
-                    />
+              icon="shield-account"
+              label="Políticas de privacidad"
+              onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL, 'Políticas de privacidad')}
+            />
             <MenuButton
               icon="gavel"
               label="Términos y condiciones"
               onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL, 'Términos y condiciones')}
               hasTopBorder
             />
-            <MenuButton 
-              icon="logout" 
-              label="Cerrar sesión" 
-              onPress={handleLogout} 
+            <MenuButton
+              icon="logout"
+              label="Cerrar sesión"
+              onPress={handleLogout}
               isDanger
               hasTopBorder
             />
           </View>
-          
+
           <View style={styles.footer}>
             <Text style={[styles.footerText, { color: theme.colors.onSurfaceVariant }]}>
               {appName} v{appVersion} (BUILD {buildNumber}) {__DEV__ ? 'DEBUG' : ''}

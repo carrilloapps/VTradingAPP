@@ -188,8 +188,7 @@ const ArticleDetailScreen = () => {
           observabilityService.captureError(err, { context: 'ArticleDetailScreen.loadArticle', slug, id: currentArticle?.id });
           if (!currentArticle) setError('Error al cargar el artículo');
         } finally {
-          setIsLoading(true); // Temporally keep it so transitions are smooth
-          setTimeout(() => setIsLoading(false), 300);
+          setIsLoading(false);
         }
       }
 

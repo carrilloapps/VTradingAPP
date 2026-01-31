@@ -5,11 +5,11 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import LinearGradient from 'react-native-linear-gradient';
 import NetInfo from '@react-native-community/netinfo';
 import { useAppTheme } from '../../theme/theme';
-import { useNetwork } from '../../context/NetworkContext';
+import { useNetworkStore } from '../../stores/networkStore';
 import CustomButton from './CustomButton';
 
 const NoInternetModal = () => {
-  const { isConnected } = useNetwork();
+  const { isConnected } = useNetworkStore();
   const theme = useAppTheme();
   const [isChecking, setIsChecking] = useState(false);
 
