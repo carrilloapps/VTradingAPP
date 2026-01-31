@@ -250,8 +250,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             // The useEffect on [notifications] will handle persistence automatically.
           }
         }
-      } catch (error) {
-        observabilityService.captureError(error, {
+      } catch (e) {
+        observabilityService.captureError(e, {
           context: 'NotificationContext.processRemoteMessage',
           action: 'process_remote_message',
           messageId: remoteMessage.messageId

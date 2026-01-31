@@ -99,13 +99,13 @@ class NotificationInitService {
       await analyticsService.logEvent(ANALYTICS_EVENTS.NOTIFICATION_SYSTEM_INITIALIZED);
       SafeLogger.log('[NotificationInit] Initialization complete');
 
-    } catch (error) {
-      observabilityService.captureError(error, {
+    } catch (e) {
+      observabilityService.captureError(e, {
         context: 'NotificationInitService.initialize',
         action: 'init_notification_system'
       });
       await analyticsService.logError('notification_init');
-      SafeLogger.error('[NotificationInit] Initialization failed:', { error });
+      SafeLogger.error('[NotificationInit] Initialization failed:', { error: e });
     }
   }
 
@@ -129,8 +129,8 @@ class NotificationInitService {
       }
 
       return granted;
-    } catch (error) {
-      observabilityService.captureError(error, {
+    } catch (e) {
+      observabilityService.captureError(e, {
         context: 'NotificationInitService.requestPermission',
         action: 'request_notification_permission'
       });
@@ -169,13 +169,13 @@ class NotificationInitService {
       await analyticsService.logEvent(ANALYTICS_EVENTS.NOTIFICATION_ALERTS_RESUBSCRIBED, {
         count: uniqueSymbols.length,
       });
-    } catch (error) {
-      observabilityService.captureError(error, {
+    } catch (e) {
+      observabilityService.captureError(e, {
         context: 'NotificationInitService.resubscribeToAlerts',
         action: 'resubscribe_alert_topics'
       });
       await analyticsService.logError('notification_resubscribe');
-      SafeLogger.error('[NotificationInit] Failed to resubscribe to alerts:', { error });
+      SafeLogger.error('[NotificationInit] Failed to resubscribe to alerts:', { error: e });
     }
   }
 
@@ -200,8 +200,8 @@ class NotificationInitService {
         isInitialized: this.isInitialized,
         activeAlertsCount,
       };
-    } catch (error) {
-      observabilityService.captureError(error, {
+    } catch (e) {
+      observabilityService.captureError(e, {
         context: 'NotificationInitService.checkStatus',
         action: 'check_notification_status'
       });

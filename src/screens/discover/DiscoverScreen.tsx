@@ -140,9 +140,9 @@ const DiscoverScreen = () => {
         wordPressService.getPosts(1, 5, undefined, promotedTag.id).then(setPromotedPosts);
       }
 
-    } catch (err) {
-      SafeLogger.error('Failed to load data', err);
-      observabilityService.captureError(err, { context: 'DiscoverScreen.loadData' });
+    } catch (e) {
+      SafeLogger.error('Failed to load data', e);
+      observabilityService.captureError(e, { context: 'DiscoverScreen.loadData' });
       setError('Error al cargar contenido.');
     } finally {
       setIsLoading(false);
@@ -182,7 +182,7 @@ const DiscoverScreen = () => {
       setPosts(fetchedPaginatedPosts.data);
       setTotalPages(fetchedPaginatedPosts.totalPages);
       setCurrentPage(1);
-    } catch (err) {
+    } catch (e) {
       showToast('Error al filtrar', 'error');
     } finally {
       setLoadingPagination(false);
@@ -199,7 +199,9 @@ const DiscoverScreen = () => {
 
       setPosts(prev => [...prev, ...fetchedPaginatedPosts.data]);
       setCurrentPage(nextPage);
-    } catch (err) {
+    } catch (e) {
+      SafeLogger.error('Failed to load more posts', e);
+      observabilityService.captureError(e, { context: 'DiscoverScreen.handleLoadMore' });
       // Silent error or small toast?
     } finally {
       setLoadingPagination(false);

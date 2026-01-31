@@ -174,7 +174,7 @@ export class ApiClient {
 
       return { data, headers: response.headers, status: response.status };
 
-    } catch (e: any) {
+    } catch (e) {
       // Handle Metric Stop on Error
       if (metric) {
         try { metric.stop(); } catch { }

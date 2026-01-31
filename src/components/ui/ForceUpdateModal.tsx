@@ -31,13 +31,13 @@ const ForceUpdateModal: React.FC<ForceUpdateModalProps> = ({ visible, storeUrl }
             // Fallback for emulator or weird states
             SafeLogger.warn("Cannot open URL:", url);
         }
-    } catch (err) {
-        observabilityService.captureError(err, {
+    } catch (e) {
+        observabilityService.captureError(e, {
             context: 'ForceUpdateModal.handleUpdatePress',
             action: 'open_store_link',
             url: url
         });
-        SafeLogger.error("An error occurred", err);
+        SafeLogger.error("An error occurred", e);
     } finally {
         setLoading(false);
     }

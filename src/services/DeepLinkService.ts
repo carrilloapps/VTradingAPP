@@ -107,8 +107,8 @@ class DeepLinkService {
             }
 
             return { type: 'discover', originalUrl: url };
-        } catch (error) {
-            observabilityService.captureError(error, { context: 'DeepLinkService.parseDeepLink', url });
+        } catch (e) {
+            observabilityService.captureError(e, { context: 'DeepLinkService.parseDeepLink', url });
             return null;
         }
     }

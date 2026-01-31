@@ -97,9 +97,9 @@ const SearchResultsScreen = () => {
 
         setCategories(cats.slice(0, 5)); // Show top 5 categories
         setTrendingTags(tags.slice(0, 10)); // Top 10 tags
-      } catch (err) {
-        observabilityService.captureError(err, { context: 'SearchResultsScreen.fetchDiscoveryContent' });
-        SafeLogger.error('[SearchResults] Failed to load discovery content:', err);
+      } catch (e) {
+        observabilityService.captureError(e, { context: 'SearchResultsScreen.fetchDiscoveryContent' });
+        SafeLogger.error('[SearchResults] Failed to load discovery content:', e);
       } finally {
         setLoadingCategories(false);
         setLoadingTags(false);
@@ -146,9 +146,9 @@ const SearchResultsScreen = () => {
       setHasMore(results.length === 10);
       setPage(pageNum);
       setSearchState(results.length === 0 && pageNum === 1 ? 'success' : 'success');
-    } catch (err: any) {
-      const isNetworkError = err?.message?.toLowerCase().includes('network');
-      const is400Error = err?.message?.includes('400');
+    } catch (e) {
+      const isNetworkError = (e as Error)?.message?.toLowerCase().includes('network');
+      const is400Error = (e as Error)?.message?.includes('400');
 
       let userMessage = 'Error al buscar. Por favor, intenta de nuevo.';
 
@@ -163,7 +163,7 @@ const SearchResultsScreen = () => {
 
       // Only capture non-network errors to Sentry
       if (!isNetworkError) {
-        observabilityService.captureError(err, {
+        observabilityService.captureError(e, {
           context: 'SearchResultsScreen.executeSearch',
           query: trimmedQuery,
           pageNum
@@ -208,9 +208,9 @@ const SearchResultsScreen = () => {
       ]);
       setCategories(cats.slice(0, 5));
       setTrendingTags(tags.slice(0, 10));
-    } catch (err) {
-      observabilityService.captureError(err, { context: 'SearchResultsScreen.handleRefresh' });
-      SafeLogger.error('[SearchResults] Refresh error:', err);
+    } catch (e) {
+      observabilityService.captureError(e, { context: 'SearchResultsScreen.handleRefresh' });
+      SafeLogger.error('[SearchResults] Refresh error:', e);
     } finally {
       setRefreshing(false);
     }
@@ -233,11 +233,11 @@ const SearchResultsScreen = () => {
       setHasMore(results.length === 10);
       setPage(1);
       setSearchState('success');
-    } catch (err: any) {
-      SafeLogger.error('[SearchResults] Category filter error:', err);
+    } catch (e) {
+      SafeLogger.error('[SearchResults] Category filter error:', e);
       setSearchState('error');
       setErrorMessage('Error al buscar en esta categoría');
-      observabilityService.captureError(err, { context: 'SearchResultsScreen.handleCategoryPress' });
+      observabilityService.captureError(e, { context: 'SearchResultsScreen.handleCategoryPress' });
     }
   }, []);
 
@@ -269,11 +269,11 @@ const SearchResultsScreen = () => {
       setHasMore(results.length === 10);
       setPage(1);
       setSearchState('success');
-    } catch (err: any) {
-      SafeLogger.error('[SearchResults] Tag filter error:', err);
+    } catch (e) {
+      SafeLogger.error('[SearchResults] Tag filter error:', e);
       setSearchState('error');
       setErrorMessage('Error al buscar con este tag');
-      observabilityService.captureError(err, { context: 'SearchResultsScreen.handleTagPress' });
+      observabilityService.captureError(e, { context: 'SearchResultsScreen.handleTagPress' });
     }
   }, [trendingTags]);
 

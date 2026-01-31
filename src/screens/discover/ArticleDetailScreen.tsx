@@ -185,8 +185,8 @@ const ArticleDetailScreen = () => {
           } else if (!currentArticle) {
             setError('Artículo no encontrado');
           }
-        } catch (err) {
-          observabilityService.captureError(err, { context: 'ArticleDetailScreen.loadArticle', slug, id: currentArticle?.id });
+        } catch (e) {
+          observabilityService.captureError(e, { context: 'ArticleDetailScreen.loadArticle', slug, id: currentArticle?.id });
           if (!currentArticle) setError('Error al cargar el artículo');
         } finally {
           setIsLoading(false);
@@ -215,8 +215,8 @@ const ArticleDetailScreen = () => {
             currentArticle.categories[0].id
           );
           setRelatedPosts(fetchedRelated);
-        } catch (err) {
-          SafeLogger.error('Error fetching related posts:', err);
+        } catch (e) {
+          SafeLogger.error('Error fetching related posts:', e);
         } finally {
           setLoadingRelated(false);
         }
@@ -245,8 +245,8 @@ const ArticleDetailScreen = () => {
           setComments(fetchedComments);
           setCommentsLoading(false);
         }
-      } catch (err) {
-        observabilityService.captureError(err, { context: 'ArticleDetailScreen.loadCommentsFeature' });
+      } catch (e) {
+        observabilityService.captureError(e, { context: 'ArticleDetailScreen.loadCommentsFeature' });
         setCommentsLoading(false);
       }
     };
@@ -275,8 +275,8 @@ const ArticleDetailScreen = () => {
         const fetchedComments = await wordPressService.getComments(Number(article.id), 1, 100, true);
         setComments(fetchedComments);
       }
-    } catch (err) {
-      observabilityService.captureError(err, { context: 'ArticleDetailScreen.handleRefresh' });
+    } catch (e) {
+      observabilityService.captureError(e, { context: 'ArticleDetailScreen.handleRefresh' });
     } finally {
       setRefreshing(false);
     }

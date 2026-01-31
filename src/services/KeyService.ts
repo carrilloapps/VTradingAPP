@@ -28,8 +28,8 @@ export const KeyService = {
         const newKey = generateRandomKey(16); // 16 chars = 128 bit
         await Keychain.setGenericPassword('mmkv-key', newKey, { service: SERVICE_ID });
         return newKey;
-    } catch (error) {
-      SafeLogger.error('[KeyService] Failed to get encryption key', error as any);
+    } catch (e) {
+      SafeLogger.error('[KeyService] Failed to get encryption key', e as any);
       return undefined;
     }
   }

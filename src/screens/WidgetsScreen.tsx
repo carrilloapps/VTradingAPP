@@ -98,8 +98,8 @@ const WidgetsScreen = () => {
         } else {
             setDefaultRates(rates);
         }
-    } catch (error) {
-        observabilityService.captureError(error, {
+    } catch (e) {
+        observabilityService.captureError(e, {
             context: 'WidgetsScreen.loadData',
             action: 'load_widget_data'
         });

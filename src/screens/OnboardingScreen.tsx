@@ -110,8 +110,8 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
       try {
         const hasPermission = await fcmService.checkPermission();
         setNotificationPermissionStatus(hasPermission);
-      } catch (error) {
-        observabilityService.captureError(error, {
+      } catch (e) {
+        observabilityService.captureError(e, {
           context: 'OnboardingScreen.checkStatus',
           action: 'check_initial_permission'
         });

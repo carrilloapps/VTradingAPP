@@ -81,8 +81,8 @@ const TagDetailScreen = () => {
           setPosts(fetchedPosts);
           setHasMore(fetchedPosts.length === 10);
         }
-      } catch (err) {
-        observabilityService.captureError(err, { context: 'TagDetailScreen.fetchData', slug });
+      } catch (e) {
+        observabilityService.captureError(e, { context: 'TagDetailScreen.fetchData', slug });
       } finally {
         setLoading(false);
       }
@@ -99,8 +99,8 @@ const TagDetailScreen = () => {
       setPosts(fetchedPosts);
       setPage(1);
       setHasMore(fetchedPosts.length === 10);
-    } catch (err) {
-      observabilityService.captureError(err, { context: 'TagDetailScreen.refresh' });
+    } catch (e) {
+      observabilityService.captureError(e, { context: 'TagDetailScreen.refresh' });
     } finally {
       setRefreshing(false);
     }
@@ -118,8 +118,8 @@ const TagDetailScreen = () => {
       } else {
         setHasMore(false);
       }
-    } catch (err) {
-      observabilityService.captureError(err, { context: 'TagDetailScreen.loadMore' });
+    } catch (e) {
+      observabilityService.captureError(e, { context: 'TagDetailScreen.loadMore' });
     }
   };
 
@@ -153,8 +153,9 @@ const TagDetailScreen = () => {
         });
 
         analyticsService.logShare('tag_detail', tag?.id.toString() || 'unknown', format === '1:1' ? 'image_square' : 'image_story');
-      } catch (e: any) {
-        if (e.message !== 'User did not share' && e.message !== 'CANCELLED') {
+      } catch (e) {
+        const err = e as any;
+        if (err.message !== 'User did not share' && err.message !== 'CANCELLED') {
           observabilityService.captureError(e, { context: 'TagDetailScreen.shareImage' });
           showToast('Error al compartir imagen', 'error');
         }

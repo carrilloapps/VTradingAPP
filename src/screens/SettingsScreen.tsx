@@ -305,8 +305,8 @@ const SettingsScreen = () => {
       await storageService.saveAlerts(updated);
       handleAction(`Alerta ${value ? 'activada' : 'desactivada'}`);
 
-    } catch (err) {
-      observabilityService.captureError(err, {
+    } catch (e) {
+      observabilityService.captureError(e, {
         context: 'SettingsScreen.toggleAlert',
         action: 'toggle_alert',
         alertId: id,

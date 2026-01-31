@@ -81,8 +81,8 @@ const CategoryDetailScreen = () => {
           setPosts(fetchedPosts);
           setHasMore(fetchedPosts.length === 10);
         }
-      } catch (err) {
-        observabilityService.captureError(err, { context: 'CategoryDetailScreen.fetchData', slug });
+      } catch (e) {
+        observabilityService.captureError(e, { context: 'CategoryDetailScreen.fetchData', slug });
       } finally {
         setLoading(false);
       }
@@ -100,8 +100,8 @@ const CategoryDetailScreen = () => {
       setPage(1);
       setRefreshing(false);
       setHasMore(fetchedPosts.length === 10);
-    } catch (err) {
-      observabilityService.captureError(err, { context: 'CategoryDetailScreen.refresh' });
+    } catch (e) {
+      observabilityService.captureError(e, { context: 'CategoryDetailScreen.refresh' });
       setRefreshing(false);
     }
   };
@@ -118,8 +118,8 @@ const CategoryDetailScreen = () => {
       } else {
         setHasMore(false);
       }
-    } catch (err) {
-      observabilityService.captureError(err, { context: 'CategoryDetailScreen.loadMore' });
+    } catch (e) {
+      observabilityService.captureError(e, { context: 'CategoryDetailScreen.loadMore' });
     }
   };
 
@@ -171,8 +171,9 @@ const CategoryDetailScreen = () => {
         });
 
         analyticsService.logShare('category_detail', category?.id.toString() || 'unknown', format === '1:1' ? 'image_square' : 'image_story');
-      } catch (e: any) {
-        if (e.message !== 'User did not share' && e.message !== 'CANCELLED') {
+      } catch (e) {
+        const err = e as any;
+        if (err.message !== 'User did not share' && err.message !== 'CANCELLED') {
           observabilityService.captureError(e, { context: 'CategoryDetailScreen.shareImage' });
           showToast('Error al compartir imagen', 'error');
         }

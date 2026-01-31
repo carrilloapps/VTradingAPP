@@ -55,7 +55,7 @@ class RemoteConfigService {
       const fetched = await Promise.race([fetchPromise, timeoutPromise]) as boolean;
 
       return fetched;
-    } catch (e: any) {
+    } catch (e) {
       const error = e instanceof Error ? e : new Error(String(e));
       const errorMessage = error.message.toLowerCase();
 

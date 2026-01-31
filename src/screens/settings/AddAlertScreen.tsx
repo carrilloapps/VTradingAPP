@@ -338,8 +338,8 @@ const AddAlertScreen = ({ route }: Props) => {
         showToast(editAlert ? 'Alerta actualizada' : `Alerta creada para ${selectedItem.symbol}`, 'success');
         navigation.goBack();
 
-    } catch (error) {
-        observabilityService.captureError(error, {
+    } catch (e) {
+        observabilityService.captureError(e, {
           context: 'AddAlertScreen.handleSaveAlert',
           symbol: selectedItem.symbol,
           target: targetPrice,

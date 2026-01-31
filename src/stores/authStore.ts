@@ -1,9 +1,10 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { FirebaseAuthTypes } from '@react-native-firebase/auth';
-import { authService } from '../services/firebase/AuthService';
 import { getCrashlytics, setUserId, setAttributes } from '@react-native-firebase/crashlytics';
 import * as Clarity from '@microsoft/react-native-clarity';
+
+import { authService } from '../services/firebase/AuthService';
 import { observabilityService } from '../services/ObservabilityService';
 import { analyticsService, ANALYTICS_EVENTS } from '../services/firebase/AnalyticsService';
 import { ToastType } from './toastStore';
@@ -67,14 +68,15 @@ export const useAuthStore = create<AuthState>()(
                     await authService.signInWithEmail(email, password);
                     await analyticsService.logLogin('email');
                     showToast('Bienvenido de nuevo', 'success');
-                } catch (e: any) {
+                } catch (e) {
+                    const err = e as any;
                     observabilityService.captureError(e, {
                         context: 'authStore.signIn',
                         method: 'email',
-                        errorMessage: e.message
+                        errorMessage: err.message
                     });
                     await analyticsService.logError('sign_in', { method: 'email' });
-                    showToast(e.message, 'error');
+                    showToast(err.message, 'error');
                     throw e;
                 }
             },
@@ -84,14 +86,15 @@ export const useAuthStore = create<AuthState>()(
                     await authService.signUpWithEmail(email, password);
                     await analyticsService.logSignUp('email');
                     showToast('Cuenta creada exitosamente', 'success');
-                } catch (e: any) {
+                } catch (e) {
+                    const err = e as any;
                     observabilityService.captureError(e, {
                         context: 'authStore.signUp',
                         method: 'email',
-                        errorMessage: e.message
+                        errorMessage: err.message
                     });
                     await analyticsService.logError('sign_up', { method: 'email' });
-                    showToast(e.message, 'error');
+                    showToast(err.message, 'error');
                     throw e;
                 }
             },
@@ -101,13 +104,14 @@ export const useAuthStore = create<AuthState>()(
                     await authService.signOut();
                     await analyticsService.logEvent(ANALYTICS_EVENTS.LOGOUT);
                     showToast('Sesión cerrada', 'info');
-                } catch (e: any) {
+                } catch (e) {
+                    const err = e as any;
                     observabilityService.captureError(e, {
                         context: 'authStore.signOut',
-                        errorMessage: e.message
+                        errorMessage: err.message
                     });
                     await analyticsService.logError('logout');
-                    showToast(e.message, 'error');
+                    showToast(err.message, 'error');
                     throw e;
                 }
             },
@@ -117,14 +121,15 @@ export const useAuthStore = create<AuthState>()(
                     await authService.deleteAccount();
                     await analyticsService.logEvent(ANALYTICS_EVENTS.DELETE_ACCOUNT);
                     showToast('Cuenta eliminada', 'success');
-                } catch (e: any) {
+                } catch (e) {
+                    const err = e as any;
                     observabilityService.captureError(e, {
                         context: 'authStore.deleteAccount',
                         action: 'delete_account',
-                        errorMessage: e.message
+                        errorMessage: err.message
                     });
                     await analyticsService.logError('delete_account');
-                    showToast(e.message, 'error');
+                    showToast(err.message, 'error');
                     throw e;
                 }
             },
@@ -134,18 +139,19 @@ export const useAuthStore = create<AuthState>()(
                     await authService.signInWithGoogle();
                     await analyticsService.logLogin('google');
                     showToast('Autenticado con Google', 'success');
-                } catch (e: any) {
-                    if (e.code === -5) { // SIGN_IN_CANCELLED
+                } catch (e) {
+                    const err = e as any;
+                    if (err.code === -5) { // SIGN_IN_CANCELLED
                         return;
                     }
                     observabilityService.captureError(e, {
                         context: 'authStore.googleSignIn',
                         method: 'google',
-                        errorCode: e.code,
-                        errorMessage: e.message
+                        errorCode: err.code,
+                        errorMessage: err.message
                     });
-                    await analyticsService.logError('google_sign_in', { errorCode: e.code });
-                    showToast(e.message, 'error');
+                    await analyticsService.logError('google_sign_in', { errorCode: err.code });
+                    showToast(err.message, 'error');
                     throw e;
                 }
             },
@@ -155,15 +161,16 @@ export const useAuthStore = create<AuthState>()(
                     await authService.sendPasswordResetEmail(email);
                     await analyticsService.logEvent(ANALYTICS_EVENTS.RESET_PASSWORD_REQUEST);
                     showToast('Correo de recuperación enviado', 'success');
-                } catch (e: any) {
+                } catch (e) {
+                    const err = e as any;
                     observabilityService.captureError(e, {
                         context: 'authStore.resetPassword',
                         action: 'password_reset',
                         email: email,
-                        errorMessage: e.message
+                        errorMessage: err.message
                     });
                     await analyticsService.logError('reset_password');
-                    showToast(e.message, 'error');
+                    showToast(err.message, 'error');
                     throw e;
                 }
             },
@@ -173,14 +180,14 @@ export const useAuthStore = create<AuthState>()(
                     await authService.signInAnonymously();
                     await analyticsService.logLogin('anonymous');
                     showToast('Ingresaste como invitado', 'warning');
-                } catch (e: any) {
+                } catch (e) {
                     observabilityService.captureError(e, {
                         context: 'authStore.signInAnonymously',
                         method: 'anonymous',
-                        errorMessage: e.message
+                        errorMessage: (e as Error).message
                     });
                     await analyticsService.logError('anonymous_sign_in');
-                    showToast(e.message, 'error');
+                    showToast((e as Error).message, 'error');
                     throw e;
                 }
             },
@@ -191,15 +198,16 @@ export const useAuthStore = create<AuthState>()(
                     set({ user: updatedUser });
                     await analyticsService.logEvent(ANALYTICS_EVENTS.UPDATE_PROFILE_NAME);
                     showToast('Perfil actualizado correctamente', 'success');
-                } catch (e: any) {
+                } catch (e) {
+                    const err = e as any;
                     observabilityService.captureError(e, {
                         context: 'authStore.updateProfileName',
                         action: 'update_profile',
                         nameLength: newName.length,
-                        errorMessage: e.message
+                        errorMessage: err.message
                     });
                     await analyticsService.logError('update_profile_name');
-                    showToast(e.message, 'error');
+                    showToast(err.message, 'error');
                     throw e;
                 }
             },

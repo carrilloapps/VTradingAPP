@@ -268,8 +268,8 @@ class WordPressService {
             });
 
             return posts.map((post) => this.formatPost(post));
-        } catch (error) {
-            observabilityService.captureError(error, {
+        } catch (e) {
+            observabilityService.captureError(e, {
                 context: 'WordPressService.getPosts',
                 method: 'GET',
                 endpoint: 'posts',
@@ -277,7 +277,7 @@ class WordPressService {
                 tagId: tagId,
                 bypassCache: bypassCache
             });
-            throw error; // Propagate error for UI handling
+            throw e; // Propagate error for UI handling
         }
     }
 
@@ -336,8 +336,8 @@ class WordPressService {
                 totalItems,
                 currentPage: page,
             };
-        } catch (error) {
-            observabilityService.captureError(error, {
+        } catch (e) {
+            observabilityService.captureError(e, {
                 context: 'WordPressService.getPostsPaginated',
                 method: 'GET',
                 endpoint: 'posts',
@@ -381,8 +381,8 @@ class WordPressService {
             });
 
             return posts.map((post) => this.formatPost(post));
-        } catch (error) {
-            observabilityService.captureError(error, {
+        } catch (e) {
+            observabilityService.captureError(e, {
                 context: 'WordPressService.getRelatedPosts',
                 method: 'GET',
                 endpoint: 'posts',
@@ -410,8 +410,8 @@ class WordPressService {
             });
 
             return this.formatPost(post);
-        } catch (error) {
-            observabilityService.captureError(error, {
+        } catch (e) {
+            observabilityService.captureError(e, {
                 context: 'WordPressService.getPostById',
                 method: 'GET',
                 endpoint: `posts/${id}`,
@@ -441,8 +441,8 @@ class WordPressService {
                 return this.formatPost(posts[0]);
             }
             return null;
-        } catch (error) {
-            observabilityService.captureError(error, {
+        } catch (e) {
+            observabilityService.captureError(e, {
                 context: 'WordPressService.getPostBySlug',
                 method: 'GET',
                 endpoint: 'posts',
@@ -503,8 +503,8 @@ class WordPressService {
             });
 
             return posts.map((post) => this.formatPost(post));
-        } catch (error) {
-            observabilityService.captureError(error, {
+        } catch (e) {
+            observabilityService.captureError(e, {
                 context: 'WordPressService.searchPosts',
                 method: 'GET',
                 endpoint: 'posts',
@@ -513,7 +513,7 @@ class WordPressService {
                 page: page,
                 perPage: perPage
             });
-            throw error; // Re-throw to allow proper error handling in UI
+            throw e; // Re-throw to allow proper error handling in UI
         }
     }
 
@@ -537,9 +537,9 @@ class WordPressService {
             });
 
             return posts.map((post) => this.formatPost(post));
-        } catch (error) {
-            SafeLogger.error('[WordPressService] getPostsByTag ERROR:', error);
-            observabilityService.captureError(error, {
+        } catch (e) {
+            SafeLogger.error('[WordPressService] getPostsByTag ERROR:', e);
+            observabilityService.captureError(e, {
                 context: 'WordPressService.getPostsByTag',
                 method: 'GET',
                 endpoint: 'posts',
@@ -547,7 +547,7 @@ class WordPressService {
                 page: page,
                 perPage: perPage
             });
-            throw error;
+            throw e;
         }
     }
 
@@ -571,9 +571,9 @@ class WordPressService {
             });
 
             return posts.map((post) => this.formatPost(post));
-        } catch (error) {
-            SafeLogger.error('[WordPressService] getPostsByCategory ERROR:', error);
-            observabilityService.captureError(error, {
+        } catch (e) {
+            SafeLogger.error('[WordPressService] getPostsByCategory ERROR:', e);
+            observabilityService.captureError(e, {
                 context: 'WordPressService.getPostsByCategory',
                 method: 'GET',
                 endpoint: 'posts',
@@ -581,7 +581,7 @@ class WordPressService {
                 page: page,
                 perPage: perPage
             });
-            throw error;
+            throw e;
         }
     }
 
@@ -604,8 +604,8 @@ class WordPressService {
             });
 
             return categories;
-        } catch (error) {
-            observabilityService.captureError(error, {
+        } catch (e) {
+            observabilityService.captureError(e, {
                 context: 'WordPressService.getCategories',
                 method: 'GET',
                 endpoint: 'categories',
@@ -627,8 +627,8 @@ class WordPressService {
             });
 
             return category;
-        } catch (error) {
-            observabilityService.captureError(error, {
+        } catch (e) {
+            observabilityService.captureError(e, {
                 context: 'WordPressService.getCategoryById',
                 method: 'GET',
                 endpoint: `categories/${id}`,
@@ -656,8 +656,8 @@ class WordPressService {
                 return categories[0];
             }
             return null;
-        } catch (error) {
-            observabilityService.captureError(error, {
+        } catch (e) {
+            observabilityService.captureError(e, {
                 context: 'WordPressService.getCategoryBySlug',
                 method: 'GET',
                 endpoint: 'categories',
@@ -683,8 +683,8 @@ class WordPressService {
             });
 
             return tags;
-        } catch (error) {
-            observabilityService.captureError(error, {
+        } catch (e) {
+            observabilityService.captureError(e, {
                 context: 'WordPressService.getTags',
                 method: 'GET',
                 endpoint: 'tags'
@@ -709,8 +709,8 @@ class WordPressService {
 
             if (!user) return null;
             return this.formatAuthor(user);
-        } catch (error) {
-            observabilityService.captureError(error, {
+        } catch (e) {
+            observabilityService.captureError(e, {
                 context: 'WordPressService.getUserById',
                 method: 'GET',
                 endpoint: `users/${id}`,
@@ -858,8 +858,8 @@ class WordPressService {
             });
 
             return tag;
-        } catch (error) {
-            observabilityService.captureError(error, {
+        } catch (e) {
+            observabilityService.captureError(e, {
                 context: 'WordPressService.getTagById',
                 method: 'GET',
                 endpoint: `tags/${id}`,
@@ -887,8 +887,8 @@ class WordPressService {
                 return tags[0];
             }
             return null;
-        } catch (error) {
-            observabilityService.captureError(error, {
+        } catch (e) {
+            observabilityService.captureError(e, {
                 context: 'WordPressService.getTagBySlug',
                 method: 'GET',
                 endpoint: 'tags',

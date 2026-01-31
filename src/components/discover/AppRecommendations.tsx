@@ -138,8 +138,8 @@ const AppRecommendations: React.FC<AppRecommendationsProps> = ({ apps: providedA
             setRecommendations(normalized);
             setIsLoading(false);
           }
-        } catch (error) {
-          observabilityService.captureError(error, {
+        } catch (e) {
+          observabilityService.captureError(e, {
             context: 'AppRecommendations.loadRecommendations',
             action: 'load_app_recommendations',
             providedApps: !!providedApps

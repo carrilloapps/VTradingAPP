@@ -50,8 +50,8 @@ const AllArticlesScreen = () => {
       }
       setHasMore(fetchedPosts.length === 10);
       setPage(pageNum);
-    } catch (error) {
-      observabilityService.captureError(error, { context: 'AllArticlesScreen.fetchPosts', pageNum });
+    } catch (e) {
+      observabilityService.captureError(e, { context: 'AllArticlesScreen.fetchPosts', pageNum });
     } finally {
       setLoading(false);
       setRefreshing(false);
