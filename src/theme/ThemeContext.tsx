@@ -1,4 +1,10 @@
-import React, { createContext, useState, useCallback, useMemo, useContext } from 'react';
+import React, {
+  createContext,
+  useState,
+  useCallback,
+  useMemo,
+  useContext,
+} from 'react';
 import { useColorScheme } from 'react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { LightTheme, DarkTheme } from './theme';
@@ -16,14 +22,16 @@ interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType>({
   themeMode: 'system',
-  setThemeMode: () => { },
+  setThemeMode: () => {},
   isDark: false,
-  toggleTheme: () => { },
+  toggleTheme: () => {},
 });
 
 const THEME_KEY = 'user_theme_preference';
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const systemScheme = useColorScheme();
 
   // Initialize synchronously with MMKV to prevent theme flicker
@@ -36,7 +44,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'ThemeContext.init',
-        action: 'read_theme_preference'
+        action: 'read_theme_preference',
       });
     }
     return 'system';
@@ -50,13 +58,13 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       observabilityService.captureError(e, {
         context: 'ThemeContext.setThemeMode',
         action: 'save_theme_preference',
-        mode
+        mode,
       });
     }
   }, []);
 
   const toggleTheme = useCallback(() => {
-    setThemeModeState((current) => {
+    setThemeModeState(current => {
       let next: ThemeType;
       if (current === 'light') next = 'dark';
       else if (current === 'dark') next = 'light';
@@ -65,7 +73,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const isSystemDark = systemScheme === 'dark';
         next = isSystemDark ? 'light' : 'dark';
       }
-      
+
       // Persist the change
       try {
         mmkvStorage.set(THEME_KEY, next);
@@ -85,12 +93,15 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const theme = useMemo(() => (isDark ? DarkTheme : LightTheme), [isDark]);
 
-  const contextValue = useMemo(() => ({
-    themeMode,
-    setThemeMode,
-    isDark,
-    toggleTheme
-  }), [themeMode, setThemeMode, isDark, toggleTheme]);
+  const contextValue = useMemo(
+    () => ({
+      themeMode,
+      setThemeMode,
+      isDark,
+      toggleTheme,
+    }),
+    [themeMode, setThemeMode, isDark, toggleTheme],
+  );
 
   return (
     <ThemeContext.Provider value={contextValue}>

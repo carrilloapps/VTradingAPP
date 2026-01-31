@@ -38,7 +38,9 @@ const WidgetPreview: React.FC<WidgetPreviewProps> = ({
   // Colors for wallpaper are now defined inline with more complex gradients
 
   return (
-    <View style={[styles.mockupContainer, { borderColor: theme.colors.outline }]}>
+    <View
+      style={[styles.mockupContainer, { borderColor: theme.colors.outline }]}
+    >
       {/* Phone Bezel/Wallpaper */}
       <View style={styles.wallpaper}>
         <View style={StyleSheet.absoluteFill}>
@@ -71,10 +73,7 @@ const WidgetPreview: React.FC<WidgetPreviewProps> = ({
         <View style={styles.statusBarMockup}>
           <Text
             variant="labelSmall"
-            style={[
-              styles.statusBarTime,
-              { color: statusBarColor }
-            ]}
+            style={[styles.statusBarTime, { color: statusBarColor }]}
           >
             10:42
           </Text>
@@ -118,38 +117,50 @@ const WidgetPreview: React.FC<WidgetPreviewProps> = ({
 
           {/* VTrading App (Active) - Position 2 */}
           <View style={styles.appIconWrapper}>
-            <View style={[
-              styles.appIcon,
-              styles.vtradingAppIcon,
-              { backgroundColor: vtradingAppBg }
-            ]}>
+            <View
+              style={[
+                styles.appIcon,
+                styles.vtradingAppIcon,
+                { backgroundColor: vtradingAppBg },
+              ]}
+            >
               <FastImage
                 source={require('../../assets/images/logo.png')}
                 style={[
                   styles.vtradingLogo,
-                  { tintColor: vtradingLogoTint } as any
+                  { tintColor: vtradingLogoTint } as any,
                 ]}
                 resizeMode={FastImage.resizeMode.contain}
               />
             </View>
             {/* Active Indicator dot */}
-            <View style={[
-              styles.activeIndicator,
-              { backgroundColor: activeIndicatorBg }
-            ]} />
+            <View
+              style={[
+                styles.activeIndicator,
+                { backgroundColor: activeIndicatorBg },
+              ]}
+            />
           </View>
 
           {/* Messages App */}
           <View style={styles.appIconWrapper}>
             <View style={[styles.appIcon, styles.messagesAppIcon]}>
-              <MaterialCommunityIcons name="message-text" size={24} color="#FFF" />
+              <MaterialCommunityIcons
+                name="message-text"
+                size={24}
+                color="#FFF"
+              />
             </View>
           </View>
 
           {/* Maps App */}
           <View style={styles.appIconWrapper}>
             <View style={[styles.appIcon, styles.mapsAppIcon]}>
-              <MaterialCommunityIcons name="google-maps" size={24} color="#FFF" />
+              <MaterialCommunityIcons
+                name="google-maps"
+                size={24}
+                color="#FFF"
+              />
             </View>
           </View>
         </View>

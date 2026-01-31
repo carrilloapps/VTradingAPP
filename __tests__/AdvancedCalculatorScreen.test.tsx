@@ -24,7 +24,8 @@ jest.mock('react-native-safe-area-context', () => {
   };
   return {
     SafeAreaProvider: ({ children }: any) => children,
-    SafeAreaConsumer: ({ children }: any) => children(MOCK_INITIAL_METRICS.insets),
+    SafeAreaConsumer: ({ children }: any) =>
+      children(MOCK_INITIAL_METRICS.insets),
     SafeAreaInsetsContext: ReactMock.createContext(MOCK_INITIAL_METRICS.insets),
     useSafeAreaInsets: () => MOCK_INITIAL_METRICS.insets,
     useSafeAreaFrame: () => MOCK_INITIAL_METRICS.frame,
@@ -37,15 +38,39 @@ jest.mock('react-native-vector-icons/MaterialCommunityIcons', () => 'Icon');
 
 // Mock CurrencyService
 const mockRates = [
-  { code: 'USD', value: 36.5, name: 'Dollar', iconName: 'currency-usd', changePercent: 0.1 },
-  { code: 'VES', value: 1, name: 'Bolivar', iconName: 'attach-money', changePercent: -0.5 },
-  { code: 'EUR', value: 40.0, name: 'Euro', iconName: 'euro', changePercent: 0.0 },
-  { code: 'USDT', value: 37.0, name: 'Tether', iconName: 'attach-money', changePercent: 0.05 },
+  {
+    code: 'USD',
+    value: 36.5,
+    name: 'Dollar',
+    iconName: 'currency-usd',
+    changePercent: 0.1,
+  },
+  {
+    code: 'VES',
+    value: 1,
+    name: 'Bolivar',
+    iconName: 'attach-money',
+    changePercent: -0.5,
+  },
+  {
+    code: 'EUR',
+    value: 40.0,
+    name: 'Euro',
+    iconName: 'euro',
+    changePercent: 0.0,
+  },
+  {
+    code: 'USDT',
+    value: 37.0,
+    name: 'Tether',
+    iconName: 'attach-money',
+    changePercent: 0.05,
+  },
 ];
 
 jest.mock('../src/services/CurrencyService', () => ({
   CurrencyService: {
-    subscribe: jest.fn((callback) => {
+    subscribe: jest.fn(callback => {
       callback(mockRates);
       return () => {};
     }),
@@ -70,15 +95,16 @@ jest.mock('../src/components/ui/UnifiedHeader', () => {
 
 // Mock BottomSheetModal
 jest.mock('../src/components/ui/BottomSheetModal', () => {
-    const { View, Text } = require('react-native');
-    return {
-        BottomSheetModal: ({ visible, children, title }: any) => visible ? (
-            <View testID="bottom-sheet-modal">
-                <Text>{title}</Text>
-                {children}
-            </View>
-        ) : null
-    };
+  const { View, Text } = require('react-native');
+  return {
+    BottomSheetModal: ({ visible, children, title }: any) =>
+      visible ? (
+        <View testID="bottom-sheet-modal">
+          <Text>{title}</Text>
+          {children}
+        </View>
+      ) : null,
+  };
 });
 
 describe('AdvancedCalculatorScreen', () => {
@@ -86,7 +112,7 @@ describe('AdvancedCalculatorScreen', () => {
     return render(
       <PaperProvider>
         <AdvancedCalculatorScreen />
-      </PaperProvider>
+      </PaperProvider>,
     );
   };
 
@@ -96,15 +122,15 @@ describe('AdvancedCalculatorScreen', () => {
 
   it('renders correctly', async () => {
     const { getByText, getByPlaceholderText } = renderScreen();
-    
+
     // Check Header
     expect(getByText('Calculadora')).toBeTruthy();
-    
+
     // Check Initial State
     expect(getByText('MONEDA BASE')).toBeTruthy();
     expect(getByText('USD')).toBeTruthy(); // Default base
     expect(getByPlaceholderText('0')).toBeTruthy();
-    
+
     // Check Target List (initial targets)
     expect(getByText('VES')).toBeTruthy();
     expect(getByText('USDT')).toBeTruthy();
@@ -112,27 +138,27 @@ describe('AdvancedCalculatorScreen', () => {
 
   it('handles keypad input correctly', async () => {
     const { getByText, getByDisplayValue, getByTestId } = renderScreen();
-    
+
     // Clear initial '1'
     fireEvent.press(getByTestId('btn-backspace'));
-    
+
     // Press 1, 2, 3
     fireEvent.press(getByText('1'));
     fireEvent.press(getByText('2'));
     fireEvent.press(getByText('3'));
-    
+
     expect(getByDisplayValue('123')).toBeTruthy();
-    
+
     // Press comma
     fireEvent.press(getByText(','));
     fireEvent.press(getByText('5'));
-    
+
     expect(getByDisplayValue('123,5')).toBeTruthy();
   });
 
   it('prevents multiple commas', () => {
     const { getByText, getByDisplayValue, getByTestId } = renderScreen();
-    
+
     // Clear initial '1'
     fireEvent.press(getByTestId('btn-backspace'));
 
@@ -140,56 +166,56 @@ describe('AdvancedCalculatorScreen', () => {
     fireEvent.press(getByText(','));
     fireEvent.press(getByText('5'));
     fireEvent.press(getByText(',')); // Should be ignored
-    
+
     expect(getByDisplayValue('1,5')).toBeTruthy();
   });
 
   it('updates conversions when base amount changes', async () => {
     const { getByText, getAllByText, getByTestId } = renderScreen();
-    
+
     // 1 USD = 36.5 VES
     // We expect to see 36,50 (or similar formatting)
     // Using regex to be locale-agnostic or flexible
     await waitFor(() => {
-       expect(getAllByText(/36[,.]50/).length).toBeGreaterThan(0);
+      expect(getAllByText(/36[,.]50/).length).toBeGreaterThan(0);
     });
-    
+
     // Change input to 10
     // Clear first
     fireEvent.press(getByTestId('btn-backspace'));
-    
+
     fireEvent.press(getByText('1'));
     fireEvent.press(getByText('0'));
-    
+
     // 10 USD = 365.0 VES
     await waitFor(() => {
-        expect(getAllByText(/365[,.]00/).length).toBeGreaterThan(0);
+      expect(getAllByText(/365[,.]00/).length).toBeGreaterThan(0);
     });
   });
 
   it('opens picker and allows adding currency', async () => {
     const { getByText, getByTestId } = renderScreen();
-    
+
     // Open picker
     fireEvent.press(getByText('AÑADIR OTRA DIVISA'));
-    
+
     await waitFor(() => {
-        expect(getByTestId('bottom-sheet-modal')).toBeTruthy();
-        expect(getByText('Añadir a la lista')).toBeTruthy();
+      expect(getByTestId('bottom-sheet-modal')).toBeTruthy();
+      expect(getByText('Añadir a la lista')).toBeTruthy();
     });
   });
 
   it('deletes digits correctly', () => {
-      const { getByText, getByDisplayValue, getByTestId } = renderScreen();
-      
-      // Clear initial '1' -> '0'
-      fireEvent.press(getByTestId('btn-backspace'));
-      
-      fireEvent.press(getByText('1'));
-      fireEvent.press(getByText('2'));
-      
-      fireEvent.press(getByTestId('btn-backspace'));
-      
-      expect(getByDisplayValue('1')).toBeTruthy();
+    const { getByText, getByDisplayValue, getByTestId } = renderScreen();
+
+    // Clear initial '1' -> '0'
+    fireEvent.press(getByTestId('btn-backspace'));
+
+    fireEvent.press(getByText('1'));
+    fireEvent.press(getByText('2'));
+
+    fireEvent.press(getByTestId('btn-backspace'));
+
+    expect(getByDisplayValue('1')).toBeTruthy();
   });
 });

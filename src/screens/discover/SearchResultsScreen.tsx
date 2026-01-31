@@ -1,10 +1,23 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { View, StyleSheet, ActivityIndicator, StatusBar, Keyboard, ScrollView, RefreshControl } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ActivityIndicator,
+  StatusBar,
+  Keyboard,
+  ScrollView,
+  RefreshControl,
+} from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { Text, Button } from 'react-native-paper';
 import { useNavigation, useRoute } from '@react-navigation/native';
 
-import { wordPressService, FormattedPost, WordPressCategory, WordPressTag } from '../../services/WordPressService';
+import {
+  wordPressService,
+  FormattedPost,
+  WordPressCategory,
+  WordPressTag,
+} from '../../services/WordPressService';
 import { observabilityService } from '../../services/ObservabilityService';
 import SafeLogger from '../../utils/safeLogger';
 import ArticleCard from '../../components/discover/ArticleCard';
@@ -30,15 +43,41 @@ const LAYOUT = {
   BOTTOM_PADDING: 40,
 };
 
-const ListHeader = ({ count, query, theme }: { count: number; query: string; theme: any }) => (
-  <Text variant="labelLarge" style={[styles.resultsCount, { color: theme.colors.onSurfaceVariant }]}>
+const ListHeader = ({
+  count,
+  query,
+  theme,
+}: {
+  count: number;
+  query: string;
+  theme: any;
+}) => (
+  <Text
+    variant="labelLarge"
+    style={[styles.resultsCount, { color: theme.colors.onSurfaceVariant }]}
+  >
     {count} resultado{count !== 1 ? 's' : ''} para "{query}"
   </Text>
 );
 
-const ListFooter = ({ loadingMore, hasMore, postsLength, theme }: { loadingMore: boolean; hasMore: boolean; postsLength: number; theme: any }) => {
+const ListFooter = ({
+  loadingMore,
+  hasMore,
+  postsLength,
+  theme,
+}: {
+  loadingMore: boolean;
+  hasMore: boolean;
+  postsLength: number;
+  theme: any;
+}) => {
   if (loadingMore) {
-    return <ActivityIndicator style={styles.footerLoader} color={theme.colors.primary} />;
+    return (
+      <ActivityIndicator
+        style={styles.footerLoader}
+        color={theme.colors.primary}
+      />
+    );
   }
   if (!hasMore && postsLength > 0) {
     return (
@@ -92,14 +131,19 @@ const SearchResultsScreen = () => {
         // Fetch categories and tags in parallel
         const [cats, tags] = await Promise.all([
           wordPressService.getCategories(),
-          wordPressService.getTags()
+          wordPressService.getTags(),
         ]);
 
         setCategories(cats.slice(0, 5)); // Show top 5 categories
         setTrendingTags(tags.slice(0, 10)); // Top 10 tags
       } catch (e) {
-        observabilityService.captureError(e, { context: 'SearchResultsScreen.fetchDiscoveryContent' });
-        SafeLogger.error('[SearchResults] Failed to load discovery content:', e);
+        observabilityService.captureError(e, {
+          context: 'SearchResultsScreen.fetchDiscoveryContent',
+        });
+        SafeLogger.error(
+          '[SearchResults] Failed to load discovery content:',
+          e,
+        );
       } finally {
         setLoadingCategories(false);
         setLoadingTags(false);
@@ -110,71 +154,82 @@ const SearchResultsScreen = () => {
   }, []);
 
   // Handle search execution
-  const executeSearch = useCallback(async (query: string, pageNum = 1, isLoadMore = false) => {
-    const trimmedQuery = query.trim();
+  const executeSearch = useCallback(
+    async (query: string, pageNum = 1, isLoadMore = false) => {
+      const trimmedQuery = query.trim();
 
-    // Validate minimum length
-    if (trimmedQuery.length === 0) {
-      setPosts([]);
-      setSearchState('idle');
-      return;
-    }
-
-    if (trimmedQuery.length < 2) {
-      setPosts([]);
-      setSearchState('too_short');
-      return;
-    }
-
-    // Set loading state
-    if (isLoadMore) {
-      setLoadingMore(true);
-    } else {
-      setSearchState('searching');
-      setErrorMessage('');
-    }
-
-    try {
-      const results = await wordPressService.searchPosts(trimmedQuery, pageNum, 10);
-
-      if (pageNum === 1) {
-        setPosts(results);
-      } else {
-        setPosts(prev => [...prev, ...results]);
+      // Validate minimum length
+      if (trimmedQuery.length === 0) {
+        setPosts([]);
+        setSearchState('idle');
+        return;
       }
 
-      setHasMore(results.length === 10);
-      setPage(pageNum);
-      setSearchState(results.length === 0 && pageNum === 1 ? 'success' : 'success');
-    } catch (e) {
-      const isNetworkError = (e as Error)?.message?.toLowerCase().includes('network');
-      const is400Error = (e as Error)?.message?.includes('400');
-
-      let userMessage = 'Error al buscar. Por favor, intenta de nuevo.';
-
-      if (isNetworkError) {
-        userMessage = 'Sin conexión a internet. Verifica tu conexión.';
-      } else if (is400Error) {
-        userMessage = 'Búsqueda inválida. Intenta con otros términos.';
+      if (trimmedQuery.length < 2) {
+        setPosts([]);
+        setSearchState('too_short');
+        return;
       }
 
-      setErrorMessage(userMessage);
-      setSearchState('error');
-
-      // Only capture non-network errors to Sentry
-      if (!isNetworkError) {
-        observabilityService.captureError(e, {
-          context: 'SearchResultsScreen.executeSearch',
-          query: trimmedQuery,
-          pageNum
-        });
-      }
-    } finally {
+      // Set loading state
       if (isLoadMore) {
-        setLoadingMore(false);
+        setLoadingMore(true);
+      } else {
+        setSearchState('searching');
+        setErrorMessage('');
       }
-    }
-  }, []);
+
+      try {
+        const results = await wordPressService.searchPosts(
+          trimmedQuery,
+          pageNum,
+          10,
+        );
+
+        if (pageNum === 1) {
+          setPosts(results);
+        } else {
+          setPosts(prev => [...prev, ...results]);
+        }
+
+        setHasMore(results.length === 10);
+        setPage(pageNum);
+        setSearchState(
+          results.length === 0 && pageNum === 1 ? 'success' : 'success',
+        );
+      } catch (e) {
+        const isNetworkError = (e as Error)?.message
+          ?.toLowerCase()
+          .includes('network');
+        const is400Error = (e as Error)?.message?.includes('400');
+
+        let userMessage = 'Error al buscar. Por favor, intenta de nuevo.';
+
+        if (isNetworkError) {
+          userMessage = 'Sin conexión a internet. Verifica tu conexión.';
+        } else if (is400Error) {
+          userMessage = 'Búsqueda inválida. Intenta con otros términos.';
+        }
+
+        setErrorMessage(userMessage);
+        setSearchState('error');
+
+        // Only capture non-network errors to Sentry
+        if (!isNetworkError) {
+          observabilityService.captureError(e, {
+            context: 'SearchResultsScreen.executeSearch',
+            query: trimmedQuery,
+            pageNum,
+          });
+        }
+      } finally {
+        if (isLoadMore) {
+          setLoadingMore(false);
+        }
+      }
+    },
+    [],
+  );
 
   // Effect: Execute search when debounced query changes
   useEffect(() => {
@@ -204,12 +259,14 @@ const SearchResultsScreen = () => {
     try {
       const [cats, tags] = await Promise.all([
         wordPressService.getCategories(),
-        wordPressService.getTags()
+        wordPressService.getTags(),
       ]);
       setCategories(cats.slice(0, 5));
       setTrendingTags(tags.slice(0, 10));
     } catch (e) {
-      observabilityService.captureError(e, { context: 'SearchResultsScreen.handleRefresh' });
+      observabilityService.captureError(e, {
+        context: 'SearchResultsScreen.handleRefresh',
+      });
       SafeLogger.error('[SearchResults] Refresh error:', e);
     } finally {
       setRefreshing(false);
@@ -217,70 +274,93 @@ const SearchResultsScreen = () => {
   }, []);
 
   // Handle category press - filter by category ID
-  const handleCategoryPress = useCallback(async (category: WordPressCategory) => {
+  const handleCategoryPress = useCallback(
+    async (category: WordPressCategory) => {
+      // Set flag to skip auto-search
+      skipAutoSearchRef.current = true;
 
-    // Set flag to skip auto-search
-    skipAutoSearchRef.current = true;
+      setSearchQuery(category.name); // Update search bar (won't trigger search due to flag)
+      setSearchState('searching');
+      setErrorMessage('');
 
-    setSearchQuery(category.name); // Update search bar (won't trigger search due to flag)
-    setSearchState('searching');
-    setErrorMessage('');
-
-    try {
-      // Use category filtering instead of text search
-      const results = await wordPressService.getPostsByCategory(category.id, 1, 10);
-      setPosts(results);
-      setHasMore(results.length === 10);
-      setPage(1);
-      setSearchState('success');
-    } catch (e) {
-      SafeLogger.error('[SearchResults] Category filter error:', e);
-      setSearchState('error');
-      setErrorMessage('Error al buscar en esta categoría');
-      observabilityService.captureError(e, { context: 'SearchResultsScreen.handleCategoryPress' });
-    }
-  }, []);
+      try {
+        // Use category filtering instead of text search
+        const results = await wordPressService.getPostsByCategory(
+          category.id,
+          1,
+          10,
+        );
+        setPosts(results);
+        setHasMore(results.length === 10);
+        setPage(1);
+        setSearchState('success');
+      } catch (e) {
+        SafeLogger.error('[SearchResults] Category filter error:', e);
+        setSearchState('error');
+        setErrorMessage('Error al buscar en esta categoría');
+        observabilityService.captureError(e, {
+          context: 'SearchResultsScreen.handleCategoryPress',
+        });
+      }
+    },
+    [],
+  );
 
   // Handle tag press - filter by tag ID
-  const handleTagPress = useCallback(async (tagName: string) => {
+  const handleTagPress = useCallback(
+    async (tagName: string) => {
+      // Find the tag object to get its ID
+      const tagObj = trendingTags.find(
+        t => t.name === tagName.replace('#', ''),
+      );
 
-    // Find the tag object to get its ID
-    const tagObj = trendingTags.find(t => t.name === tagName.replace('#', ''));
+      if (!tagObj) {
+        SafeLogger.error('[SearchResults] Tag not found in trendingTags:', {
+          searchedFor: tagName.replace('#', ''),
+          availableTags: trendingTags.map(t => t.name),
+        });
+        return;
+      }
 
-    if (!tagObj) {
-      SafeLogger.error('[SearchResults] Tag not found in trendingTags:', {
-        searchedFor: tagName.replace('#', ''),
-        availableTags: trendingTags.map(t => t.name)
-      });
-      return;
-    }
+      // Set flag to skip auto-search
+      skipAutoSearchRef.current = true;
 
-    // Set flag to skip auto-search
-    skipAutoSearchRef.current = true;
+      setSearchQuery(tagObj.name); // Update search bar (won't trigger search due to flag)
+      setSearchState('searching');
+      setErrorMessage('');
 
-    setSearchQuery(tagObj.name); // Update search bar (won't trigger search due to flag)
-    setSearchState('searching');
-    setErrorMessage('');
+      try {
+        // Use tag filtering instead of text search
+        const results = await wordPressService.getPostsByTag(tagObj.id, 1, 10);
+        setPosts(results);
+        setHasMore(results.length === 10);
+        setPage(1);
+        setSearchState('success');
+      } catch (e) {
+        SafeLogger.error('[SearchResults] Tag filter error:', e);
+        setSearchState('error');
+        setErrorMessage('Error al buscar con este tag');
+        observabilityService.captureError(e, {
+          context: 'SearchResultsScreen.handleTagPress',
+        });
+      }
+    },
+    [trendingTags],
+  );
 
-    try {
-      // Use tag filtering instead of text search
-      const results = await wordPressService.getPostsByTag(tagObj.id, 1, 10);
-      setPosts(results);
-      setHasMore(results.length === 10);
-      setPage(1);
-      setSearchState('success');
-    } catch (e) {
-      SafeLogger.error('[SearchResults] Tag filter error:', e);
-      setSearchState('error');
-      setErrorMessage('Error al buscar con este tag');
-      observabilityService.captureError(e, { context: 'SearchResultsScreen.handleTagPress' });
-    }
-  }, [trendingTags]);
-
-  const containerStyle = [styles.container, { backgroundColor: theme.colors.background }];
-  const helperTextStyle = [styles.helperText, { color: theme.colors.onSurfaceVariant }];
+  const containerStyle = [
+    styles.container,
+    { backgroundColor: theme.colors.background },
+  ];
+  const helperTextStyle = [
+    styles.helperText,
+    { color: theme.colors.onSurfaceVariant },
+  ];
   const retryButtonStyle = [styles.retryButton, { marginTop: 16 }];
-  const noTagsTextStyle = [styles.noTagsText, { color: theme.colors.onSurfaceVariant }];
+  const noTagsTextStyle = [
+    styles.noTagsText,
+    { color: theme.colors.onSurfaceVariant },
+  ];
 
   // Render discovery content (idle state)
   const renderDiscoveryContent = () => {
@@ -300,10 +380,7 @@ const SearchResultsScreen = () => {
         }
       >
         {/* Categories Section */}
-        <SectionHeader
-          title="Categorías"
-          paddingHorizontal={0}
-        />
+        <SectionHeader title="Categorías" paddingHorizontal={0} />
         <View style={styles.sectionContent}>
           {loadingCategories ? (
             <View style={styles.skeletonsContainer}>
@@ -312,7 +389,7 @@ const SearchResultsScreen = () => {
               <Skeleton width="100%" height={60} borderRadius={12} />
             </View>
           ) : (
-            categories.map((category) => (
+            categories.map(category => (
               <CategoryCard
                 key={category.id}
                 category={category}
@@ -323,10 +400,7 @@ const SearchResultsScreen = () => {
         </View>
 
         {/* Trending Tags Section */}
-        <SectionHeader
-          title="Tags populares"
-          paddingHorizontal={0}
-        />
+        <SectionHeader title="Tags populares" paddingHorizontal={0} />
         <View style={styles.sectionContent}>
           {loadingTags ? (
             <View style={styles.tagsSkeletonContainer}>
@@ -348,10 +422,7 @@ const SearchResultsScreen = () => {
         </View>
 
         {/* Recommended Apps Section */}
-        <SectionHeader
-          title="Apps Recomendadas"
-          paddingHorizontal={0}
-        />
+        <SectionHeader title="Apps Recomendadas" paddingHorizontal={0} />
         <AppRecommendations />
       </ScrollView>
     );
@@ -403,12 +474,20 @@ const SearchResultsScreen = () => {
   );
 
   const renderSearchResultsFooter = () => (
-    <ListFooter loadingMore={loadingMore} hasMore={hasMore} postsLength={posts.length} theme={theme} />
+    <ListFooter
+      loadingMore={loadingMore}
+      hasMore={hasMore}
+      postsLength={posts.length}
+      theme={theme}
+    />
   );
 
   // Determine what to show
-  const showDiscoveryContent = searchState === 'idle' && searchQuery.trim().length === 0;
-  const showSearchResults = posts.length > 0 && (searchState === 'success' || (searchState === 'searching' && page > 1));
+  const showDiscoveryContent =
+    searchState === 'idle' && searchQuery.trim().length === 0;
+  const showSearchResults =
+    posts.length > 0 &&
+    (searchState === 'success' || (searchState === 'searching' && page > 1));
 
   const renderSkeleton = () => <ArticleSkeleton />;
 

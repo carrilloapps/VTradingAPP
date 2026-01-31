@@ -1,5 +1,8 @@
 import { renderHook, act, waitFor } from '@testing-library/react-native';
-import { NotificationProvider, useNotifications } from '../../src/context/NotificationContext';
+import {
+  NotificationProvider,
+  useNotifications,
+} from '../../src/context/NotificationContext';
 import { StoredNotification } from '../../src/services/StorageService';
 
 // Mock Services
@@ -46,7 +49,7 @@ describe('NotificationContext', () => {
     const { result } = renderHook(() => useNotifications(), {
       wrapper: NotificationProvider,
     });
-    
+
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     const newNotification: StoredNotification = {
@@ -71,7 +74,7 @@ describe('NotificationContext', () => {
     const { result } = renderHook(() => useNotifications(), {
       wrapper: NotificationProvider,
     });
-    
+
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     const notification: StoredNotification = {
@@ -99,7 +102,7 @@ describe('NotificationContext', () => {
     const { result } = renderHook(() => useNotifications(), {
       wrapper: NotificationProvider,
     });
-    
+
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
     const notification: StoredNotification = {

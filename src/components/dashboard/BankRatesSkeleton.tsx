@@ -14,14 +14,11 @@ const BankRatesSkeleton = () => {
         backgroundColor: theme.colors.elevation.level1,
         borderColor: theme.colors.outline,
         borderRadius: r * 6,
-      }
+      },
     ];
 
     return (
-      <View
-        key={key}
-        style={cardStyle}
-      >
+      <View key={key} style={cardStyle}>
         {/* Header part of card */}
         <View style={styles.cardHeader}>
           <View style={styles.leftHeader}>
@@ -37,7 +34,12 @@ const BankRatesSkeleton = () => {
             <Skeleton width={60} height={12} style={styles.labelSkeleton} />
             <Skeleton width={80} height={24} />
           </View>
-          <View style={[styles.separator, { backgroundColor: theme.colors.outline }]} />
+          <View
+            style={[
+              styles.separator,
+              { backgroundColor: theme.colors.outline },
+            ]}
+          />
           <View style={styles.valueCol}>
             <Skeleton width={60} height={12} style={styles.labelSkeleton} />
             <Skeleton width={80} height={24} />
@@ -47,7 +49,10 @@ const BankRatesSkeleton = () => {
     );
   };
 
-  const containerStyle = [styles.container, { backgroundColor: theme.colors.background }];
+  const containerStyle = [
+    styles.container,
+    { backgroundColor: theme.colors.background },
+  ];
 
   return (
     <View style={containerStyle}>
@@ -74,8 +79,14 @@ const BankRatesSkeleton = () => {
 
         {/* Filter Chips Skeleton */}
         <View style={styles.chipsContainer}>
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} width={i === 1 ? 60 : 100} height={32} borderRadius={16} style={styles.chipSkeleton} />
+          {[1, 2, 3].map(i => (
+            <Skeleton
+              key={i}
+              width={i === 1 ? 60 : 100}
+              height={32}
+              borderRadius={16}
+              style={styles.chipSkeleton}
+            />
           ))}
         </View>
 

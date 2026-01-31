@@ -1,5 +1,18 @@
-import React, { useState, useMemo, useEffect, useCallback, useDeferredValue } from 'react';
-import { View, StyleSheet, StatusBar, RefreshControl, ActivityIndicator, AccessibilityInfo } from 'react-native';
+import React, {
+  useState,
+  useMemo,
+  useEffect,
+  useCallback,
+  useDeferredValue,
+} from 'react';
+import {
+  View,
+  StyleSheet,
+  StatusBar,
+  RefreshControl,
+  ActivityIndicator,
+  AccessibilityInfo,
+} from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { Text } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
@@ -18,7 +31,10 @@ import { useToastStore } from '../stores/toastStore';
 import StocksSkeleton from '../components/stocks/StocksSkeleton';
 import ErrorState from '../components/ui/ErrorState';
 import { observabilityService } from '../services/ObservabilityService';
-import { analyticsService, ANALYTICS_EVENTS } from '../services/firebase/AnalyticsService';
+import {
+  analyticsService,
+  ANALYTICS_EVENTS,
+} from '../services/firebase/AnalyticsService';
 import { useAuthStore } from '../stores/authStore';
 import CustomDialog from '../components/ui/CustomDialog';
 import CustomButton from '../components/ui/CustomButton';
@@ -54,11 +70,11 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
   const { stockFilters, setStockFilters } = useFilterStore();
   const { query: searchQuery, category: activeFilter } = stockFilters;
   const deferredQuery = useDeferredValue(searchQuery);
-  const showToast = useToastStore((state) => state.showToast);
+  const showToast = useToastStore(state => state.showToast);
   const isFocused = useIsFocused();
 
   // Zustand store selector
-  const user = useAuthStore((state) => state.user);
+  const user = useAuthStore(state => state.user);
 
   const [stocks, setStocks] = useState<StockData[]>([]);
   const [categories, setCategories] = useState<string[]>(['Todos']);
@@ -93,7 +109,7 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'StocksScreen.loadData',
-        action: 'load_market_data'
+        action: 'load_market_data',
       });
       await analyticsService.logError('stocks_load_data');
       setError(true);
@@ -103,12 +119,14 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
   }, []);
 
   useEffect(() => {
-    const unsubscribe = StocksService.subscribe((data) => {
+    const unsubscribe = StocksService.subscribe(data => {
       setStocks(data);
       if (data.length > 0) setError(false);
 
       // Extract unique categories from data
-      const uniqueCats = Array.from(new Set(data.map(s => s.category))).filter(Boolean).sort();
+      const uniqueCats = Array.from(new Set(data.map(s => s.category)))
+        .filter(Boolean)
+        .sort();
       setCategories(['Todos', ...uniqueCats]);
 
       setIsMarketOpen(StocksService.isMarketOpen());
@@ -130,15 +148,19 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
       setIsMarketOpen(StocksService.isMarketOpen());
       showToast('Mercado actualizado', 'success');
       // Accessibility announcement for refresh completion
-      AccessibilityInfo.announceForAccessibility('Mercado actualizado correctamente');
+      AccessibilityInfo.announceForAccessibility(
+        'Mercado actualizado correctamente',
+      );
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'StocksScreen.onRefresh',
-        action: 'refresh_market_data'
+        action: 'refresh_market_data',
       });
       await analyticsService.logError('stocks_refresh');
       showToast('Error actualizando mercado', 'error');
-      AccessibilityInfo.announceForAccessibility('Error al actualizar el mercado');
+      AccessibilityInfo.announceForAccessibility(
+        'Error al actualizar el mercado',
+      );
     } finally {
       setRefreshing(false);
     }
@@ -154,10 +176,12 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
   // Filter Logic - deferred
   const filteredStocks = useMemo(() => {
     return stocks.filter(stock => {
-      const matchesSearch = stock.name.toLowerCase().includes(deferredQuery.toLowerCase()) ||
+      const matchesSearch =
+        stock.name.toLowerCase().includes(deferredQuery.toLowerCase()) ||
         stock.symbol.toLowerCase().includes(deferredQuery.toLowerCase());
 
-      const matchesCategory = activeFilter === 'Todos' || stock.category === activeFilter;
+      const matchesCategory =
+        activeFilter === 'Todos' || stock.category === activeFilter;
 
       return matchesSearch && matchesCategory;
     });
@@ -166,9 +190,10 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
   // Accessibility Announcement on Filter/Search - Placed AFTER filteredStocks definition
   useEffect(() => {
     if (isFocused && filteredStocks.length > 0) {
-      const message = activeFilter === 'Todos' && !deferredQuery
-        ? `Mostrando ${filteredStocks.length} acciones`
-        : `Mostrando ${filteredStocks.length} resultados filtrados`;
+      const message =
+        activeFilter === 'Todos' && !deferredQuery
+          ? `Mostrando ${filteredStocks.length} acciones`
+          : `Mostrando ${filteredStocks.length} resultados filtrados`;
       AccessibilityInfo.announceForAccessibility(message);
     }
   }, [filteredStocks.length, activeFilter, deferredQuery, isFocused]);
@@ -177,22 +202,33 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
     if (!deferredQuery || deferredQuery.length < 2) return [];
     const lower = deferredQuery.toLowerCase();
     return stocks
-      .filter(s => s.name.toLowerCase().includes(lower) || s.symbol.toLowerCase().includes(lower))
+      .filter(
+        s =>
+          s.name.toLowerCase().includes(lower) ||
+          s.symbol.toLowerCase().includes(lower),
+      )
       .slice(0, 3)
       .map(s => s.symbol);
   }, [stocks, deferredQuery]);
 
   const handleSearch = (text: string) => setStockFilters({ query: text });
-  const handleSuggestionPress = (suggestion: string) => setStockFilters({ query: suggestion });
+  const handleSuggestionPress = (suggestion: string) =>
+    setStockFilters({ query: suggestion });
 
-  const handleStockPress = useCallback((stock: StockData) => {
-    navigation.navigate('StockDetail', { stock });
-  }, [navigation]);
+  const handleStockPress = useCallback(
+    (stock: StockData) => {
+      navigation.navigate('StockDetail', { stock });
+    },
+    [navigation],
+  );
 
-  const renderStockItem = useCallback(({ item }: { item: StockData }) => (
-    // Casting handleStockPress to any to avoid strict variance check between Service/Component interfaces
-    <StockItem {...item} onPress={handleStockPress as any} />
-  ), [handleStockPress]);
+  const renderStockItem = useCallback(
+    ({ item }: { item: StockData }) => (
+      // Casting handleStockPress to any to avoid strict variance check between Service/Component interfaces
+      <StockItem {...item} onPress={handleStockPress as any} />
+    ),
+    [handleStockPress],
+  );
 
   const handleShare = () => {
     setShareDialogVisible(true);
@@ -202,7 +238,9 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (searchQuery && searchQuery.length > 2) {
-        analyticsService.logEvent(ANALYTICS_EVENTS.SEARCH_STOCK, { query: searchQuery });
+        analyticsService.logEvent(ANALYTICS_EVENTS.SEARCH_STOCK, {
+          query: searchQuery,
+        });
       }
     }, 1500); // 1.5s debounce to capture "finished" typing
 
@@ -228,7 +266,7 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
           height: format === '1:1' ? 1080 : 1920,
         });
 
-        if (!uri) throw new Error("Capture failed");
+        if (!uri) throw new Error('Capture failed');
 
         const sharePath = uri.startsWith('file://') ? uri : `file://${uri}`;
 
@@ -236,19 +274,28 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
         const featuredStocks = stocks.slice(0, displayCount);
         const remainingCount = stocks.length - displayCount;
 
-        const stocksDetails = featuredStocks.map(s => {
-          const trendIcon = s.changePercent > 0 ? '📈' : (s.changePercent < 0 ? '📉' : '➖');
-          return `${trendIcon} *${s.symbol}:* ${s.price.toLocaleString('es-VE', { minimumFractionDigits: 2 })} (${s.changePercent > 0 ? '+' : ''}${s.changePercent.toFixed(2)}%)`;
-        }).join('\n');
+        const stocksDetails = featuredStocks
+          .map(s => {
+            const trendIcon =
+              s.changePercent > 0 ? '📈' : s.changePercent < 0 ? '📉' : '➖';
+            return `${trendIcon} *${s.symbol}:* ${s.price.toLocaleString('es-VE', { minimumFractionDigits: 2 })} (${s.changePercent > 0 ? '+' : ''}${s.changePercent.toFixed(2)}%)`;
+          })
+          .join('\n');
 
-        const changeValue = indexData?.changePercent ? parseFloat(indexData.changePercent.replace(',', '.')) : 0;
-        const indexIcon = changeValue > 0 ? '📈' : (changeValue < 0 ? '📉' : '➖');
+        const changeValue = indexData?.changePercent
+          ? parseFloat(indexData.changePercent.replace(',', '.'))
+          : 0;
+        const indexIcon =
+          changeValue > 0 ? '📈' : changeValue < 0 ? '📉' : '➖';
 
-        const message = `📊 *VTrading - Resumen de Mercado*\n\n` +
+        const message =
+          `📊 *VTrading - Resumen de Mercado*\n\n` +
           `${indexIcon} *Índice IBC:* ${indexData?.value || 'N/A'} (${indexData?.changePercent || '0%'})\n` +
           `💰 *Volumen:* ${indexData?.volume || '0'} Bs.\n\n` +
           `🚀 *Acciones Destacadas:*\n${stocksDetails}\n` +
-          (remainingCount > 0 ? `\n➕ *y ${remainingCount} acciones más* disponibles en el app\n` : '\n') +
+          (remainingCount > 0
+            ? `\n➕ *y ${remainingCount} acciones más* disponibles en el app\n`
+            : '\n') +
           `⏱️ _Act: ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}_\n` +
           `🌐 vtrading.app`;
 
@@ -258,13 +305,21 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
           message,
         });
 
-        await analyticsService.logShare('market_summary', 'all', format === '1:1' ? 'image_square' : 'image_story');
+        await analyticsService.logShare(
+          'market_summary',
+          'all',
+          format === '1:1' ? 'image_square' : 'image_story',
+        );
       } catch (e) {
-        if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
+        if (
+          e &&
+          (e as any).message !== 'User did not share' &&
+          (e as any).message !== 'CANCELLED'
+        ) {
           observabilityService.captureError(e, {
             context: 'StocksScreen.generateShareImage',
             action: 'share_market_image',
-            format: format
+            format: format,
           });
           await analyticsService.logError('stocks_share_image', { format });
           showToast('No se pudo compartir la imagen', 'error');
@@ -278,18 +333,27 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
   const handleShareText = async () => {
     setShareDialogVisible(false);
     try {
-      const message = `📊 *VTrading - Mercado de Valores*\n\n` +
-        (indexData ? `📉 *Índice IBC:* ${indexData.value} (${indexData.changePercent})\n` : '') +
-        (stocks.length > 0 ? `🚀 *Top Stock:* ${stocks[0].symbol} @ ${stocks[0].price.toFixed(2)} Bs\n` : '') +
+      const message =
+        `📊 *VTrading - Mercado de Valores*\n\n` +
+        (indexData
+          ? `📉 *Índice IBC:* ${indexData.value} (${indexData.changePercent})\n`
+          : '') +
+        (stocks.length > 0
+          ? `🚀 *Top Stock:* ${stocks[0].symbol} @ ${stocks[0].price.toFixed(2)} Bs\n`
+          : '') +
         `🌐 vtrading.app`;
 
       await Share.open({ message });
       await analyticsService.logShare('market_summary', 'all', 'text');
     } catch (e) {
-      if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
+      if (
+        e &&
+        (e as any).message !== 'User did not share' &&
+        (e as any).message !== 'CANCELLED'
+      ) {
         observabilityService.captureError(e, {
           context: 'StocksScreen.handleShareText',
-          action: 'share_market_text'
+          action: 'share_market_text',
         });
         showToast('Error al compartir texto', 'error');
       }
@@ -297,68 +361,101 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
   };
 
   // MEMOIZED HEADER
-  const HeaderComponent = useMemo(() => (
-    <View style={styles.headerContainer}>
-      {/* Market Status */}
-      <MarketStatus
-        isOpen={isMarketOpen}
-        updatedAt={new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        onRefresh={onRefresh}
-        style={styles.marketStatus}
-      />
+  const HeaderComponent = useMemo(
+    () => (
+      <View style={styles.headerContainer}>
+        {/* Market Status */}
+        <MarketStatus
+          isOpen={isMarketOpen}
+          updatedAt={new Date().toLocaleTimeString([], {
+            hour: '2-digit',
+            minute: '2-digit',
+          })}
+          onRefresh={onRefresh}
+          style={styles.marketStatus}
+        />
 
-      {/* Index Hero */}
-      {indexData && (() => {
-        const stats = indexData.stats;
-        const hasValidStats = stats &&
-          stats.titlesUp !== 0 &&
-          stats.titlesDown !== 0 &&
-          stats.titlesUnchanged !== 0;
+        {/* Index Hero */}
+        {indexData &&
+          (() => {
+            const stats = indexData.stats;
+            const hasValidStats =
+              stats &&
+              stats.titlesUp !== 0 &&
+              stats.titlesDown !== 0 &&
+              stats.titlesUnchanged !== 0;
 
-        let labelOverride;
-        let fallbackValue;
-        let statsToPass;
+            let labelOverride;
+            let fallbackValue;
+            let statsToPass;
 
-        if (hasValidStats) {
-          statsToPass = stats;
-        } else {
-          if (indexData.statusState && indexData.statusState !== 'ABIERTO') {
-            labelOverride = 'ESTADO DEL MERCADO';
-            fallbackValue = indexData.statusState;
-          } else {
-            labelOverride = 'FECHA';
-            fallbackValue = indexData.updateDate;
-          }
-        }
+            if (hasValidStats) {
+              statsToPass = stats;
+            } else {
+              if (
+                indexData.statusState &&
+                indexData.statusState !== 'ABIERTO'
+              ) {
+                labelOverride = 'ESTADO DEL MERCADO';
+                fallbackValue = indexData.statusState;
+              } else {
+                labelOverride = 'FECHA';
+                fallbackValue = indexData.updateDate;
+              }
+            }
 
-        return (
-          <IndexHero
-            value={indexData.value}
-            changePercent={indexData.changePercent}
-            isPositive={indexData.isPositive}
-            volume={indexData.volume}
-            stats={statsToPass}
-            labelOverride={labelOverride}
-            fallbackValue={fallbackValue}
-          />
-        );
-      })()}
+            return (
+              <IndexHero
+                value={indexData.value}
+                changePercent={indexData.changePercent}
+                isPositive={indexData.isPositive}
+                volume={indexData.volume}
+                stats={statsToPass}
+                labelOverride={labelOverride}
+                fallbackValue={fallbackValue}
+              />
+            );
+          })()}
 
-      {/* Filters */}
-      <FilterSection
-        options={categories.map((f: string) => ({ label: f, value: f }))}
-        selectedValue={activeFilter}
-        onSelect={(value) => setStockFilters({ category: value })}
-        mode="scroll"
-      />
+        {/* Filters */}
+        <FilterSection
+          options={categories.map((f: string) => ({ label: f, value: f }))}
+          selectedValue={activeFilter}
+          onSelect={value => setStockFilters({ category: value })}
+          mode="scroll"
+        />
 
-      {/* Stock List Header */}
-      <View style={styles.listHeader}>
-        <Text style={[styles.listHeaderTitle, { color: theme.colors.onSurfaceVariant }]}>EMPRESA / TICKER</Text>
-        <Text style={[styles.listHeaderTitle, { color: theme.colors.onSurfaceVariant }]}>PRECIO & VARIACIÓN</Text>
+        {/* Stock List Header */}
+        <View style={styles.listHeader}>
+          <Text
+            style={[
+              styles.listHeaderTitle,
+              { color: theme.colors.onSurfaceVariant },
+            ]}
+          >
+            EMPRESA / TICKER
+          </Text>
+          <Text
+            style={[
+              styles.listHeaderTitle,
+              { color: theme.colors.onSurfaceVariant },
+            ]}
+          >
+            PRECIO & VARIACIÓN
+          </Text>
+        </View>
       </View>
-    </View>
-  ), [isMarketOpen, indexData, categories, activeFilter, theme.colors.onSurfaceVariant, onRefresh, setStockFilters]);
+    ),
+    [
+      isMarketOpen,
+      indexData,
+      categories,
+      activeFilter,
+      theme.colors.onSurfaceVariant,
+      onRefresh,
+      setStockFilters,
+    ],
+  );
 
   // MEMOIZED FOOTER
   const FooterComponent = useMemo(() => {
@@ -372,7 +469,9 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
 
   if (loading && !refreshing && stocks.length === 0) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
+      >
         <StatusBar
           backgroundColor="transparent"
           translucent
@@ -385,7 +484,9 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
 
   if (error && stocks.length === 0) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
+      >
         <UnifiedHeader
           variant="section"
           title="Mercados"
@@ -400,14 +501,21 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <StatusBar
         backgroundColor="transparent"
         translucent
         barStyle={theme.dark ? 'light-content' : 'dark-content'}
       />
 
-      <View style={[styles.headerContainer, { backgroundColor: theme.colors.background }]}>
+      <View
+        style={[
+          styles.headerContainer,
+          { backgroundColor: theme.colors.background },
+        ]}
+      >
         <UnifiedHeader
           variant="section"
           title="Mercados"
@@ -419,7 +527,7 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
           showSecondaryAction
           onSecondaryActionPress={handleShare}
           secondaryActionIcon="share-variant"
-          onNotificationPress={() => { }}
+          onNotificationPress={() => {}}
           notificationCount={1}
           style={styles.headerStyle}
         />
@@ -457,8 +565,18 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
         onEndReachedThreshold={0.5}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <MaterialCommunityIcons name="emoticon-sad-outline" size={48} color={theme.colors.onSurfaceVariant} style={styles.emptyIcon} />
-            <Text style={[styles.emptyText, { color: theme.colors.onSurfaceVariant }]}>
+            <MaterialCommunityIcons
+              name="emoticon-sad-outline"
+              size={48}
+              color={theme.colors.onSurfaceVariant}
+              style={styles.emptyIcon}
+            />
+            <Text
+              style={[
+                styles.emptyText,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
+            >
               No se encontraron acciones para "{activeFilter}"
             </Text>
           </View>
@@ -468,9 +586,19 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
       {/* Sharing Assets */}
       <MarketShareGraphic
         viewShotRef={viewShotRef}
-        indexData={indexData || { value: '0.00', changePercent: '0.00%', isPositive: true, volume: '0.00' }}
+        indexData={
+          indexData || {
+            value: '0.00',
+            changePercent: '0.00%',
+            isPositive: true,
+            volume: '0.00',
+          }
+        }
         topStocks={stocks}
-        lastUpdated={new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        lastUpdated={new Date().toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        })}
         isPremium={isPremium}
         aspectRatio={shareFormat}
       />
@@ -554,7 +682,7 @@ const styles = StyleSheet.create({
   loaderFooter: {
     paddingVertical: 20,
     alignItems: 'center',
-    marginBottom: 80
+    marginBottom: 80,
   },
   marketStatus: {
     paddingTop: 8,
@@ -582,7 +710,7 @@ const styles = StyleSheet.create({
   },
   dialogButtonsContainer: {
     gap: 12,
-  }
+  },
 });
 
 export default StocksScreen;

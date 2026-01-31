@@ -1,6 +1,22 @@
 import React, { useState, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, TouchableOpacity, Alert, Platform, Linking } from 'react-native';
-import { Text, useTheme, Switch, Snackbar, Button, ActivityIndicator } from 'react-native-paper';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  StatusBar,
+  TouchableOpacity,
+  Alert,
+  Platform,
+  Linking,
+} from 'react-native';
+import {
+  Text,
+  useTheme,
+  Switch,
+  Snackbar,
+  Button,
+  ActivityIndicator,
+} from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DeviceInfo from 'react-native-device-info';
 import { fcmService } from '../services/firebase/FCMService';
@@ -15,7 +31,10 @@ import { useToastStore } from '../stores/toastStore';
 import { storageService, UserAlert } from '../services/StorageService';
 import { observabilityService } from '../services/ObservabilityService';
 import { AppConfig } from '../constants/AppConfig';
-import { analyticsService, ANALYTICS_EVENTS } from '../services/firebase/AnalyticsService';
+import {
+  analyticsService,
+  ANALYTICS_EVENTS,
+} from '../services/firebase/AnalyticsService';
 
 import UserProfileCard from '../components/settings/UserProfileCard';
 import AlertItem from '../components/settings/AlertItem';
@@ -30,7 +49,7 @@ const SettingsScreen = () => {
   const navigation = useNavigation();
   const { themeMode, setThemeMode } = useThemeContext();
   const { user, signOut, updateProfileName, deleteAccount } = useAuthStore();
-  const showToast = useToastStore((state) => state.showToast);
+  const showToast = useToastStore(state => state.showToast);
 
   // App Info State
   const [appName, setAppName] = useState('');
@@ -90,7 +109,7 @@ const SettingsScreen = () => {
         } catch (e) {
           observabilityService.captureError(e, {
             context: 'SettingsScreen.loadData',
-            screen: 'SettingsScreen'
+            screen: 'SettingsScreen',
           });
           await analyticsService.logError('load_settings');
           showToast('Error cargando configuración', 'error');
@@ -105,7 +124,7 @@ const SettingsScreen = () => {
       return () => {
         isActive = false;
       };
-    }, [showToast])
+    }, [showToast]),
   );
 
   const handleAction = (message: string) => {
@@ -125,10 +144,10 @@ const SettingsScreen = () => {
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'SettingsScreen.confirmLogout',
-        action: 'logout'
+        action: 'logout',
       });
       await analyticsService.logError('logout');
-      handleAction("Error al cerrar sesión");
+      handleAction('Error al cerrar sesión');
     }
   };
 
@@ -144,7 +163,7 @@ const SettingsScreen = () => {
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'SettingsScreen.confirmDeleteAccount',
-        action: 'delete_account'
+        action: 'delete_account',
       });
       await analyticsService.logError('delete_account');
       handleAction('Error al eliminar la cuenta');
@@ -165,10 +184,10 @@ const SettingsScreen = () => {
     } catch (error) {
       observabilityService.captureError(error, {
         context: 'SettingsScreen.saveProfileName',
-        newNameLength: newName?.length
+        newNameLength: newName?.length,
       });
       await analyticsService.logError('update_profile_name');
-      handleAction("Error al actualizar el perfil");
+      handleAction('Error al actualizar el perfil');
       showToast('Error al actualizar el perfil', 'error');
     }
   };
@@ -176,7 +195,10 @@ const SettingsScreen = () => {
   const openExternalUrl = (url: string, title?: string) => {
     // @ts-ignore
     navigation.navigate('WebView', { url, title: title || 'Navegador' });
-    analyticsService.logEvent(ANALYTICS_EVENTS.OPEN_EXTERNAL_LINK, { url, title });
+    analyticsService.logEvent(ANALYTICS_EVENTS.OPEN_EXTERNAL_LINK, {
+      url,
+      title,
+    });
   };
 
   const togglePush = async (value: boolean) => {
@@ -205,9 +227,9 @@ const SettingsScreen = () => {
                 onPress: () => {
                   // Abrir configuración del sistema
                   Linking.openSettings();
-                }
-              }
-            ]
+                },
+              },
+            ],
           );
           return;
         }
@@ -215,13 +237,17 @@ const SettingsScreen = () => {
         // Permisos otorgados, el servicio ya inicializó todo
         setPushEnabled(true);
         await storageService.saveSettings({ pushEnabled: true });
-        await analyticsService.logEvent(ANALYTICS_EVENTS.TOGGLE_PUSH, { enabled: true });
+        await analyticsService.logEvent(ANALYTICS_EVENTS.TOGGLE_PUSH, {
+          enabled: true,
+        });
         showToast('Notificaciones habilitadas', 'success');
       } else {
         // Ya tiene permisos, solo actualizar preferencia
         setPushEnabled(true);
         await storageService.saveSettings({ pushEnabled: true });
-        await analyticsService.logEvent(ANALYTICS_EVENTS.TOGGLE_PUSH, { enabled: true });
+        await analyticsService.logEvent(ANALYTICS_EVENTS.TOGGLE_PUSH, {
+          enabled: true,
+        });
         showToast('Notificaciones habilitadas', 'success');
       }
     } else {
@@ -232,7 +258,10 @@ const SettingsScreen = () => {
       // Desactivar TODAS las alertas
       const currentAlerts = await storageService.getAlerts();
       if (currentAlerts.length > 0) {
-        const deactivatedAlerts = currentAlerts.map(a => ({ ...a, isActive: false }));
+        const deactivatedAlerts = currentAlerts.map(a => ({
+          ...a,
+          isActive: false,
+        }));
         await storageService.saveAlerts(deactivatedAlerts);
         setAlerts(deactivatedAlerts);
 
@@ -244,8 +273,13 @@ const SettingsScreen = () => {
         }
       }
 
-      await analyticsService.logEvent(ANALYTICS_EVENTS.TOGGLE_PUSH, { enabled: false });
-      showToast('Notificaciones deshabilitadas. Todas las alertas han sido pausadas.', 'info');
+      await analyticsService.logEvent(ANALYTICS_EVENTS.TOGGLE_PUSH, {
+        enabled: false,
+      });
+      showToast(
+        'Notificaciones deshabilitadas. Todas las alertas han sido pausadas.',
+        'info',
+      );
     }
   };
 
@@ -278,7 +312,9 @@ const SettingsScreen = () => {
 
     // Optimistic update
     const originalAlerts = [...alerts];
-    const updated = alerts.map(a => a.id === id ? { ...a, isActive: value } : a);
+    const updated = alerts.map(a =>
+      a.id === id ? { ...a, isActive: value } : a,
+    );
     setAlerts(updated);
 
     // Add to toggling set
@@ -292,8 +328,8 @@ const SettingsScreen = () => {
         await fcmService.subscribeToTopic(topic);
       } else {
         // Check if other active alerts exist for the same symbol
-        const otherActiveAlerts = updated.filter(a =>
-          a.id !== id && a.symbol === alert.symbol && a.isActive
+        const otherActiveAlerts = updated.filter(
+          a => a.id !== id && a.symbol === alert.symbol && a.isActive,
         );
 
         if (otherActiveAlerts.length === 0) {
@@ -304,13 +340,12 @@ const SettingsScreen = () => {
       // Persist to storage
       await storageService.saveAlerts(updated);
       handleAction(`Alerta ${value ? 'activada' : 'desactivada'}`);
-
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'SettingsScreen.toggleAlert',
         action: 'toggle_alert',
         alertId: id,
-        newValue: value
+        newValue: value,
       });
       await analyticsService.logError('toggle_alert', { alertId: id });
       showToast('Error al actualizar alerta', 'error');
@@ -333,8 +368,8 @@ const SettingsScreen = () => {
       const topic = getTopicName(alert.symbol);
       try {
         // Solo desuscribir si no hay otras alertas activas para el mismo símbolo
-        const otherActiveAlerts = alerts.filter(a =>
-          a.id !== id && a.symbol === alert.symbol && a.isActive
+        const otherActiveAlerts = alerts.filter(
+          a => a.id !== id && a.symbol === alert.symbol && a.isActive,
         );
 
         if (otherActiveAlerts.length === 0) {
@@ -345,7 +380,7 @@ const SettingsScreen = () => {
           context: 'SettingsScreen.handleDeleteAlert',
           action: 'unsubscribe_topic',
           alertId: id,
-          symbol: alert?.symbol
+          symbol: alert?.symbol,
         });
         showToast('Error al desuscribir del tema', 'error');
       }
@@ -355,7 +390,9 @@ const SettingsScreen = () => {
     setAlerts(updated);
     await storageService.saveAlerts(updated);
     if (alert) {
-      await analyticsService.logEvent(ANALYTICS_EVENTS.DELETE_ALERT, { symbol: alert.symbol });
+      await analyticsService.logEvent(ANALYTICS_EVENTS.DELETE_ALERT, {
+        symbol: alert.symbol,
+      });
     }
     handleAction('Alerta eliminada');
   };
@@ -366,7 +403,10 @@ const SettingsScreen = () => {
 
   const handleAddAlert = () => {
     if (alerts.length >= 5) {
-      Alert.alert('Límite Alcanzado', 'Solo puedes tener un máximo de 5 alertas activas.');
+      Alert.alert(
+        'Límite Alcanzado',
+        'Solo puedes tener un máximo de 5 alertas activas.',
+      );
       return;
     }
     (navigation as any).navigate('AddAlert');
@@ -407,7 +447,9 @@ const SettingsScreen = () => {
         rightActionIcon="information-outline"
         onActionPress={() => {
           setShowAboutDialog(true);
-          analyticsService.logInteraction('dialog_opened', { dialog_type: 'about' });
+          analyticsService.logInteraction('dialog_opened', {
+            dialog_type: 'about',
+          });
         }}
       />
 
@@ -427,44 +469,70 @@ const SettingsScreen = () => {
         {/* Alerts Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
-            <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>ALERTAS ACTIVAS</Text>
+            <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>
+              ALERTAS ACTIVAS
+            </Text>
             <TouchableOpacity
-              style={[styles.addButton, alerts.length >= 5 && styles.addButtonDisabled]}
+              style={[
+                styles.addButton,
+                alerts.length >= 5 && styles.addButtonDisabled,
+              ]}
               onPress={handleAddAlert}
               disabled={alerts.length >= 5}
             >
-              <MaterialCommunityIcons name="plus" size={18} color={theme.colors.primary} />
-              <Text style={[styles.newAlertText, { color: theme.colors.primary }]}>Nueva alerta</Text>
+              <MaterialCommunityIcons
+                name="plus"
+                size={18}
+                color={theme.colors.primary}
+              />
+              <Text
+                style={[styles.newAlertText, { color: theme.colors.primary }]}
+              >
+                Nueva alerta
+              </Text>
             </TouchableOpacity>
           </View>
 
-          <View style={[styles.cardContainer, { borderColor: cardBorder, backgroundColor: cardBg }]}>
+          <View
+            style={[
+              styles.cardContainer,
+              { borderColor: cardBorder, backgroundColor: cardBg },
+            ]}
+          >
             {alerts.length === 0 ? (
               <View style={styles.emptyStateContainer}>
-                <View style={[
-                  styles.emptyIconContainer,
-                  { backgroundColor: theme.colors.elevation.level2 }
-                ]}>
-                  <MaterialCommunityIcons name="bell-plus" size={32} color={theme.colors.primary} />
+                <View
+                  style={[
+                    styles.emptyIconContainer,
+                    { backgroundColor: theme.colors.elevation.level2 },
+                  ]}
+                >
+                  <MaterialCommunityIcons
+                    name="bell-plus"
+                    size={32}
+                    color={theme.colors.primary}
+                  />
                 </View>
-                <Text style={[
-                  styles.emptyTitle,
-                  { color: theme.colors.onSurface }
-                ]}>
+                <Text
+                  style={[styles.emptyTitle, { color: theme.colors.onSurface }]}
+                >
                   Crea tu primera alerta
                 </Text>
-                <Text style={[
-                  styles.emptyDescription,
-                  { color: theme.colors.onSurfaceVariant }
-                ]}>
-                  Recibe notificaciones instantáneas cuando las tasas o acciones alcancen el precio que te interesa.
+                <Text
+                  style={[
+                    styles.emptyDescription,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  Recibe notificaciones instantáneas cuando las tasas o acciones
+                  alcancen el precio que te interesa.
                 </Text>
                 <Button
                   mode="outlined"
                   onPress={handleAddAlert}
                   style={[
                     styles.emptyButton,
-                    { borderColor: theme.colors.outline }
+                    { borderColor: theme.colors.outline },
                   ]}
                   textColor={theme.colors.primary}
                 >
@@ -479,14 +547,19 @@ const SettingsScreen = () => {
                     status={alert.condition === 'above' ? 'Sube' : 'Baja'}
                     target={alert.target}
                     isActive={alert.isActive}
-                    onToggle={(v) => toggleAlert(alert.id, v)}
+                    onToggle={v => toggleAlert(alert.id, v)}
                     onDelete={() => deleteAlert(alert.id)}
                     onPress={() => handleEditAlert(alert)}
                     disabled={togglingIds.has(alert.id)}
                     iconName={alert.iconName || 'show-chart'}
                   />
                   {index < alerts.length - 1 && (
-                    <View style={[styles.separator, { backgroundColor: separatorBg }]} />
+                    <View
+                      style={[
+                        styles.separator,
+                        { backgroundColor: separatorBg },
+                      ]}
+                    />
                   )}
                 </React.Fragment>
               ))
@@ -496,16 +569,32 @@ const SettingsScreen = () => {
 
         {/* Preferences Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>PREFERENCIAS</Text>
+          <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>
+            PREFERENCIAS
+          </Text>
 
-          <View style={[styles.cardContainer, { borderColor: cardBorder, backgroundColor: cardBg }]}>
+          <View
+            style={[
+              styles.cardContainer,
+              { borderColor: cardBorder, backgroundColor: cardBg },
+            ]}
+          >
             {/* Push Notifications */}
             <View style={styles.prefRow}>
               <View style={styles.prefLeft}>
                 <View style={[styles.iconBox, { backgroundColor: iconBoxBg }]}>
-                  <MaterialCommunityIcons name="bell-outline" size={20} color={theme.colors.onSurfaceVariant} />
+                  <MaterialCommunityIcons
+                    name="bell-outline"
+                    size={20}
+                    color={theme.colors.onSurfaceVariant}
+                  />
                 </View>
-                <Text variant="bodyLarge" style={[styles.prefText, { color: prefTextColor }]}>Notificaciones push</Text>
+                <Text
+                  variant="bodyLarge"
+                  style={[styles.prefText, { color: prefTextColor }]}
+                >
+                  Notificaciones push
+                </Text>
               </View>
               <Switch
                 value={pushEnabled}
@@ -517,32 +606,66 @@ const SettingsScreen = () => {
             {/* Widgets - Android Only */}
             {Platform.OS === 'android' && (
               <>
-                <View style={[styles.separator, { backgroundColor: separatorBg }]} />
-                <TouchableOpacity onPress={() => navigation.navigate('Widgets' as never)}>
+                <View
+                  style={[styles.separator, { backgroundColor: separatorBg }]}
+                />
+                <TouchableOpacity
+                  onPress={() => navigation.navigate('Widgets' as never)}
+                >
                   <View style={styles.prefRow}>
                     <View style={styles.prefLeft}>
-                      <View style={[styles.iconBox, { backgroundColor: iconBoxBg }]}>
-                        <MaterialCommunityIcons name="widgets" size={20} color={theme.colors.onSurfaceVariant} />
+                      <View
+                        style={[styles.iconBox, { backgroundColor: iconBoxBg }]}
+                      >
+                        <MaterialCommunityIcons
+                          name="widgets"
+                          size={20}
+                          color={theme.colors.onSurfaceVariant}
+                        />
                       </View>
-                      <Text variant="bodyLarge" style={[styles.prefText, { color: prefTextColor }]}>Personalización de widgets</Text>
+                      <Text
+                        variant="bodyLarge"
+                        style={[styles.prefText, { color: prefTextColor }]}
+                      >
+                        Personalización de widgets
+                      </Text>
                     </View>
-                    <MaterialCommunityIcons name="chevron-right" size={24} color={theme.colors.onSurfaceVariant} />
+                    <MaterialCommunityIcons
+                      name="chevron-right"
+                      size={24}
+                      color={theme.colors.onSurfaceVariant}
+                    />
                   </View>
                 </TouchableOpacity>
               </>
             )}
 
-            <View style={[styles.separator, { backgroundColor: separatorBg }]} />
+            <View
+              style={[styles.separator, { backgroundColor: separatorBg }]}
+            />
 
             {/* Appearance */}
             <View style={styles.prefContent}>
               <View style={styles.prefLeft}>
                 <View style={[styles.iconBox, { backgroundColor: iconBoxBg }]}>
-                  <MaterialCommunityIcons name="palette" size={20} color={theme.colors.onSurfaceVariant} />
+                  <MaterialCommunityIcons
+                    name="palette"
+                    size={20}
+                    color={theme.colors.onSurfaceVariant}
+                  />
                 </View>
-                <Text variant="bodyLarge" style={[styles.prefText, { color: prefTextColor }]}>Apariencia</Text>
+                <Text
+                  variant="bodyLarge"
+                  style={[styles.prefText, { color: prefTextColor }]}
+                >
+                  Apariencia
+                </Text>
                 {switchingTheme && (
-                  <ActivityIndicator size={16} style={styles.activityIndicatorMargin} color={theme.colors.primary} />
+                  <ActivityIndicator
+                    size={16}
+                    style={styles.activityIndicatorMargin}
+                    color={theme.colors.primary}
+                  />
                 )}
               </View>
               <ThemeSelector
@@ -556,17 +679,34 @@ const SettingsScreen = () => {
 
         {/* Account Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>CUENTA</Text>
-          <View style={[styles.cardContainer, { borderColor: cardBorder, backgroundColor: cardBg }]}>
+          <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>
+            CUENTA
+          </Text>
+          <View
+            style={[
+              styles.cardContainer,
+              { borderColor: cardBorder, backgroundColor: cardBg },
+            ]}
+          >
             <MenuButton
               icon="shield-account"
               label="Políticas de privacidad"
-              onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL, 'Políticas de privacidad')}
+              onPress={() =>
+                openExternalUrl(
+                  AppConfig.PRIVACY_POLICY_URL,
+                  'Políticas de privacidad',
+                )
+              }
             />
             <MenuButton
               icon="gavel"
               label="Términos y condiciones"
-              onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL, 'Términos y condiciones')}
+              onPress={() =>
+                openExternalUrl(
+                  AppConfig.TERMS_OF_USE_URL,
+                  'Términos y condiciones',
+                )
+              }
               hasTopBorder
             />
             <MenuButton
@@ -579,15 +719,26 @@ const SettingsScreen = () => {
           </View>
 
           <View style={styles.footer}>
-            <Text style={[styles.footerText, { color: theme.colors.onSurfaceVariant }]}>
-              {appName} v{appVersion} (BUILD {buildNumber}) {__DEV__ ? 'DEBUG' : ''}
+            <Text
+              style={[
+                styles.footerText,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
+            >
+              {appName} v{appVersion} (BUILD {buildNumber}){' '}
+              {__DEV__ ? 'DEBUG' : ''}
             </Text>
-            <Text style={[styles.footerSubText, { color: theme.colors.onSurfaceVariant }]}>
-              {DeviceInfo.getDeviceId()} | {DeviceInfo.getSystemName()} {DeviceInfo.getSystemVersion()}
+            <Text
+              style={[
+                styles.footerSubText,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
+            >
+              {DeviceInfo.getDeviceId()} | {DeviceInfo.getSystemName()}{' '}
+              {DeviceInfo.getSystemVersion()}
             </Text>
           </View>
         </View>
-
       </ScrollView>
 
       <Snackbar
@@ -596,7 +747,9 @@ const SettingsScreen = () => {
         duration={2000}
         style={{ backgroundColor: theme.colors.inverseSurface }}
       >
-        <Text style={{ color: theme.colors.inverseOnSurface }}>{snackbarMessage}</Text>
+        <Text style={{ color: theme.colors.inverseOnSurface }}>
+          {snackbarMessage}
+        </Text>
       </Snackbar>
 
       <LogoutDialog

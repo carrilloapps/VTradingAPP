@@ -15,7 +15,7 @@ const AuthLogo: React.FC<AuthLogoProps> = ({
   size = 80,
   showBadge = true,
   tintColor,
-  containerStyle
+  containerStyle,
 }) => {
   const theme = useAppTheme();
   const resolvedTintColor = tintColor || (theme.dark ? undefined : '#212121');
@@ -26,7 +26,11 @@ const AuthLogo: React.FC<AuthLogoProps> = ({
         source={require('../../assets/images/logo.png')}
         style={[
           styles.logo,
-          { width: size, height: size, tintColor: resolvedTintColor || undefined } as any
+          {
+            width: size,
+            height: size,
+            tintColor: resolvedTintColor || undefined,
+          } as any,
         ]}
       />
       {showBadge && (
@@ -37,7 +41,7 @@ const AuthLogo: React.FC<AuthLogoProps> = ({
               backgroundColor: theme.colors.elevation.level2,
               borderColor: theme.colors.warning,
               marginLeft: theme.spacing.m,
-            }
+            },
           ]}
           accessibilityLabel="BETA"
         >

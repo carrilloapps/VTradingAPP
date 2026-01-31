@@ -1,5 +1,17 @@
-import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
-import { View, StyleSheet, RefreshControl, ScrollView, useWindowDimensions } from 'react-native';
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useMemo,
+  useCallback,
+} from 'react';
+import {
+  View,
+  StyleSheet,
+  RefreshControl,
+  ScrollView,
+  useWindowDimensions,
+} from 'react-native';
 import { FlashList, FlashListRef } from '@shopify/flash-list';
 import { Text, Surface, ProgressBar } from 'react-native-paper';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -19,7 +31,11 @@ import FeaturedCarousel from '../../components/discover/FeaturedCarousel';
 import { useToastStore } from '../../stores/toastStore';
 import { observabilityService } from '../../services/ObservabilityService';
 import { remoteConfigService } from '../../services/firebase/RemoteConfigService';
-import { wordPressService, FormattedPost, WordPressCategory } from '../../services/WordPressService';
+import {
+  wordPressService,
+  FormattedPost,
+  WordPressCategory,
+} from '../../services/WordPressService';
 import { fcmService } from '../../services/firebase/FCMService';
 import { storageService } from '../../services/StorageService';
 import { analyticsService } from '../../services/firebase/AnalyticsService';
@@ -29,22 +45,22 @@ import { useAppTheme } from '../../theme/theme';
 
 const FlashListTyped = FlashList as React.ComponentType<any>;
 
-
-
 const DiscoverScreen = () => {
   const theme = useAppTheme();
   const route = useRoute();
   const navigation = useNavigation<any>();
   const insets = useSafeAreaInsets();
   const { width: windowWidth } = useWindowDimensions();
-  const showToast = useToastStore((state) => state.showToast);
+  const showToast = useToastStore(state => state.showToast);
 
   // Data State
   const [posts, setPosts] = useState<FormattedPost[]>([]);
   const [trendingPosts, setTrendingPosts] = useState<FormattedPost[]>([]);
   const [promotedPosts, setPromotedPosts] = useState<FormattedPost[]>([]);
   const [categories, setCategories] = useState<WordPressCategory[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<number | undefined>(undefined);
+  const [selectedCategory, setSelectedCategory] = useState<number | undefined>(
+    undefined,
+  );
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -74,7 +90,7 @@ const DiscoverScreen = () => {
       cta: 'Leer más',
       color: index % 2 === 0 ? theme.colors.primary : theme.colors.secondary, // Cycle colors
       image: post.image,
-      originalPost: post // Keep reference just in case we want to navigate to ArticleDetail instead
+      originalPost: post, // Keep reference just in case we want to navigate to ArticleDetail instead
     }));
   }, [promotedPosts, theme.colors]);
 
@@ -95,15 +111,13 @@ const DiscoverScreen = () => {
       let filterTagId: number | undefined;
 
       // 1. Fetch Tags first to build queries
-      const [
-        trendingTagEn, trendingTagEs,
-        promotedTagEn, promotedTagEs
-      ] = await Promise.all([
-        wordPressService.getTagBySlug('trending'),
-        wordPressService.getTagBySlug('tendencias'),
-        wordPressService.getTagBySlug('promoted'),
-        wordPressService.getTagBySlug('promocionado')
-      ]);
+      const [trendingTagEn, trendingTagEs, promotedTagEn, promotedTagEs] =
+        await Promise.all([
+          wordPressService.getTagBySlug('trending'),
+          wordPressService.getTagBySlug('tendencias'),
+          wordPressService.getTagBySlug('promoted'),
+          wordPressService.getTagBySlug('promocionado'),
+        ]);
 
       const trendingTag = trendingTagEn || trendingTagEs;
       const promotedTag = promotedTagEn || promotedTagEs;
@@ -114,7 +128,12 @@ const DiscoverScreen = () => {
         if (tag) filterTagId = tag.id;
       }
 
-      const postsPromise = wordPressService.getPostsPaginated(1, 10, catId, filterTagId);
+      const postsPromise = wordPressService.getPostsPaginated(
+        1,
+        10,
+        catId,
+        filterTagId,
+      );
 
       // 3. Render critical content as soon as possible
       const [postsResult] = await Promise.all([postsPromise]);
@@ -132,23 +151,28 @@ const DiscoverScreen = () => {
             setSelectedCategory(category.id);
             // Verify if we need to reload filtering by this category if it wasn't set initially
             // Ideally we should have waited if categorySlug was present, but for perceived performance we loaded general first?
-            // No, if categorySlug is present we probably should have waited. 
+            // No, if categorySlug is present we probably should have waited.
             // But let's assume standard flow.
           }
         }
       });
 
       if (trendingTag) {
-        wordPressService.getPosts(1, 4, undefined, trendingTag.id).then(setTrendingPosts);
+        wordPressService
+          .getPosts(1, 4, undefined, trendingTag.id)
+          .then(setTrendingPosts);
       }
 
       if (promotedTag) {
-        wordPressService.getPosts(1, 5, undefined, promotedTag.id).then(setPromotedPosts);
+        wordPressService
+          .getPosts(1, 5, undefined, promotedTag.id)
+          .then(setPromotedPosts);
       }
-
     } catch (e) {
       SafeLogger.error('Failed to load data', e);
-      observabilityService.captureError(e, { context: 'DiscoverScreen.loadData' });
+      observabilityService.captureError(e, {
+        context: 'DiscoverScreen.loadData',
+      });
       setError('Error al cargar contenido.');
     } finally {
       setIsLoading(false);
@@ -195,11 +219,16 @@ const DiscoverScreen = () => {
 
   const handleCategorySelect = async (categoryId: number | undefined) => {
     try {
-      const newCategoryId = categoryId === selectedCategory ? undefined : categoryId;
+      const newCategoryId =
+        categoryId === selectedCategory ? undefined : categoryId;
       setSelectedCategory(newCategoryId);
 
       setLoadingPagination(true);
-      const fetchedPaginatedPosts = await wordPressService.getPostsPaginated(1, 10, newCategoryId);
+      const fetchedPaginatedPosts = await wordPressService.getPostsPaginated(
+        1,
+        10,
+        newCategoryId,
+      );
       setPosts(fetchedPaginatedPosts.data);
       setTotalPages(fetchedPaginatedPosts.totalPages);
       setCurrentPage(1);
@@ -216,13 +245,19 @@ const DiscoverScreen = () => {
     try {
       setLoadingPagination(true);
       const nextPage = currentPage + 1;
-      const fetchedPaginatedPosts = await wordPressService.getPostsPaginated(nextPage, 10, selectedCategory);
+      const fetchedPaginatedPosts = await wordPressService.getPostsPaginated(
+        nextPage,
+        10,
+        selectedCategory,
+      );
 
       setPosts(prev => [...prev, ...fetchedPaginatedPosts.data]);
       setCurrentPage(nextPage);
     } catch (e) {
       SafeLogger.error('Failed to load more posts', e);
-      observabilityService.captureError(e, { context: 'DiscoverScreen.handleLoadMore' });
+      observabilityService.captureError(e, {
+        context: 'DiscoverScreen.handleLoadMore',
+      });
       // Silent error or small toast?
     } finally {
       setLoadingPagination(false);
@@ -232,11 +267,20 @@ const DiscoverScreen = () => {
   // --- DATA PREPARATION ---
 
   // 1. Trending Data (Header)
-  const trendingHeroItems = useMemo(() => trendingPosts.slice(0, 4), [trendingPosts]);
-  const trendingIds = useMemo(() => new Set(trendingHeroItems.map(h => h.id)), [trendingHeroItems]);
+  const trendingHeroItems = useMemo(
+    () => trendingPosts.slice(0, 4),
+    [trendingPosts],
+  );
+  const trendingIds = useMemo(
+    () => new Set(trendingHeroItems.map(h => h.id)),
+    [trendingHeroItems],
+  );
 
   // 2. Filter posts
-  const promotedIds = useMemo(() => new Set(promotedPosts.map(p => p.id)), [promotedPosts]);
+  const promotedIds = useMemo(
+    () => new Set(promotedPosts.map(p => p.id)),
+    [promotedPosts],
+  );
 
   const filteredPosts = useMemo(() => {
     return posts.filter(p => !trendingIds.has(p.id) && !promotedIds.has(p.id));
@@ -245,13 +289,13 @@ const DiscoverScreen = () => {
   const displayCategories = useMemo(() => {
     return categories.map((cat: WordPressCategory) => ({
       ...cat,
-      image: getCategoryImage(cat)
+      image: getCategoryImage(cat),
     }));
   }, [categories]);
 
   // 3. Mixed Feed (Posts + Ads interleaved)
   const mixedFeedData = useMemo(() => {
-    const data: Array<{ type: 'article' | 'ad', data: any }> = [];
+    const data: Array<{ type: 'article' | 'ad'; data: any }> = [];
     let adIndex = 0;
 
     filteredPosts.forEach((post, index) => {
@@ -274,8 +318,8 @@ const DiscoverScreen = () => {
       styles.stickyCategoryBar,
       {
         backgroundColor: theme.colors.background,
-        borderBottomColor: theme.colors.outlineVariant
-      }
+        borderBottomColor: theme.colors.outlineVariant,
+      },
     ];
 
     return (
@@ -297,48 +341,71 @@ const DiscoverScreen = () => {
         {/* Section Header */}
         {mixedFeedData.length > 0 && (
           <View style={styles.sectionHeaderWrapper}>
-            <SectionHeader title="Lo último" showViewAll onViewAll={() => navigation.navigate('AllArticles')} />
+            <SectionHeader
+              title="Lo último"
+              showViewAll
+              onViewAll={() => navigation.navigate('AllArticles')}
+            />
           </View>
         )}
       </View>
     );
   };
 
-  const renderItem = useCallback(({ item }: { item: { type: 'article' | 'ad', data: any } }) => {
-    if (item.type === 'ad') {
+  const renderItem = useCallback(
+    ({ item }: { item: { type: 'article' | 'ad'; data: any } }) => {
+      if (item.type === 'ad') {
+        return (
+          <View style={styles.adWrapper}>
+            <AdCard
+              item={item.data}
+              onPress={() =>
+                navigation.navigate('ArticleDetail', {
+                  article: item.data.originalPost || item.data,
+                })
+              }
+            />
+          </View>
+        );
+      }
       return (
-        <View style={styles.adWrapper}>
-          <AdCard
-            item={item.data}
-            onPress={() => navigation.navigate('ArticleDetail', {
-              article: item.data.originalPost || item.data
-            })}
-          />
-        </View>
+        <ArticleCard
+          article={item.data}
+          variant={'compact'}
+          onPress={() =>
+            navigation.navigate('ArticleDetail', { article: item.data })
+          }
+        />
       );
-    }
-    return (
-      <ArticleCard
-        article={item.data}
-        variant={'compact'}
-        onPress={() => navigation.navigate('ArticleDetail', { article: item.data })}
-      />
-    );
-  }, [navigation]);
-
-  const renderFooter = () => (
-    loadingPagination ? (
-      <View style={styles.footerContainer}>
-        <ProgressBar indeterminate color={theme.colors.primary} style={styles.footerProgressBar} />
-      </View>
-    ) : <View style={{ height: insets.bottom + 20 }} />
+    },
+    [navigation],
   );
 
+  const renderFooter = () =>
+    loadingPagination ? (
+      <View style={styles.footerContainer}>
+        <ProgressBar
+          indeterminate
+          color={theme.colors.primary}
+          style={styles.footerProgressBar}
+        />
+      </View>
+    ) : (
+      <View style={{ height: insets.bottom + 20 }} />
+    );
+
   if (isLoading) {
-    return featureEnabled ? <DiscoverFeedSkeleton /> : <DiscoverConstructionSkeleton />;
+    return featureEnabled ? (
+      <DiscoverFeedSkeleton />
+    ) : (
+      <DiscoverConstructionSkeleton />
+    );
   }
 
-  const screenContainerStyle = [styles.container, { backgroundColor: theme.colors.background }];
+  const screenContainerStyle = [
+    styles.container,
+    { backgroundColor: theme.colors.background },
+  ];
 
   const handleWaitlistSubscription = async () => {
     try {
@@ -353,7 +420,7 @@ const DiscoverScreen = () => {
       const settings = await storageService.getSettings();
       await storageService.saveSettings({
         ...settings,
-        newsSubscription: true
+        newsSubscription: true,
       });
 
       setIsSubscribed(true);
@@ -369,13 +436,36 @@ const DiscoverScreen = () => {
 
   if (!featureEnabled) {
     const renderFeatureItem = (icon: string, title: string, desc: string) => (
-      <Surface style={[styles.featureItem, { backgroundColor: theme.colors.elevation.level1 }]} elevation={0} key={title}>
-        <View style={[styles.featureIcon, { backgroundColor: theme.colors.secondaryContainer }]}>
-          <MaterialCommunityIcons name={icon} size={24} color={theme.colors.onSecondaryContainer} />
+      <Surface
+        style={[
+          styles.featureItem,
+          { backgroundColor: theme.colors.elevation.level1 },
+        ]}
+        elevation={0}
+        key={title}
+      >
+        <View
+          style={[
+            styles.featureIcon,
+            { backgroundColor: theme.colors.secondaryContainer },
+          ]}
+        >
+          <MaterialCommunityIcons
+            name={icon}
+            size={24}
+            color={theme.colors.onSecondaryContainer}
+          />
         </View>
         <View style={styles.featureDetails}>
-          <Text variant="titleMedium" style={styles.featureTitleStyle}>{title}</Text>
-          <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>{desc}</Text>
+          <Text variant="titleMedium" style={styles.featureTitleStyle}>
+            {title}
+          </Text>
+          <Text
+            variant="bodyMedium"
+            style={{ color: theme.colors.onSurfaceVariant }}
+          >
+            {desc}
+          </Text>
         </View>
       </Surface>
     );
@@ -384,45 +474,96 @@ const DiscoverScreen = () => {
       <View style={screenContainerStyle}>
         <DiscoverHeader
           variant="main"
-          onSearchPress={() => { }}
+          onSearchPress={() => {}}
           onNotificationsPress={() => navigation.navigate('Notifications')}
         />
         <ScrollView
           contentContainerStyle={styles.constructionContent}
           showsVerticalScrollIndicator={false}
         >
-          <View style={[styles.constructionHero, { marginTop: windowWidth * 0.1 }]}>
-            <Surface style={[styles.iconContainer, { backgroundColor: theme.colors.elevation.level2 }]} elevation={0}>
-              <MaterialCommunityIcons name="rocket-launch" size={56} color={theme.colors.primary} />
+          <View
+            style={[styles.constructionHero, { marginTop: windowWidth * 0.1 }]}
+          >
+            <Surface
+              style={[
+                styles.iconContainer,
+                { backgroundColor: theme.colors.elevation.level2 },
+              ]}
+              elevation={0}
+            >
+              <MaterialCommunityIcons
+                name="rocket-launch"
+                size={56}
+                color={theme.colors.primary}
+              />
             </Surface>
 
-            <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.onBackground }]}>
+            <Text
+              variant="headlineMedium"
+              style={[styles.title, { color: theme.colors.onBackground }]}
+            >
               Próximamente
             </Text>
-            <Text variant="bodyLarge" style={[styles.description, { color: theme.colors.onSurfaceVariant }]}>
-              Estamos preparando una experiencia de noticias completamente nueva para ti.
+            <Text
+              variant="bodyLarge"
+              style={[
+                styles.description,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
+            >
+              Estamos preparando una experiencia de noticias completamente nueva
+              para ti.
             </Text>
           </View>
 
           <View style={styles.featuresPreview}>
-            <Text variant="titleMedium" style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>
+            <Text
+              variant="titleMedium"
+              style={[styles.sectionTitle, { color: theme.colors.onSurface }]}
+            >
               Lo que se viene
             </Text>
-            {renderFeatureItem('chart-timeline-variant', 'Análisis de Mercado', 'Noticias que impactan tus activos en tiempo real.')}
-            {renderFeatureItem('brain', 'Insights con IA', 'Resúmenes inteligentes para tomar decisiones rápidas.')}
-            {renderFeatureItem('bell-ring-outline', 'Alertas Personalizadas', 'Sé el primero en saber cuándo el mercado se mueve.')}
+            {renderFeatureItem(
+              'chart-timeline-variant',
+              'Análisis de Mercado',
+              'Noticias que impactan tus activos en tiempo real.',
+            )}
+            {renderFeatureItem(
+              'brain',
+              'Insights con IA',
+              'Resúmenes inteligentes para tomar decisiones rápidas.',
+            )}
+            {renderFeatureItem(
+              'bell-ring-outline',
+              'Alertas Personalizadas',
+              'Sé el primero en saber cuándo el mercado se mueve.',
+            )}
           </View>
 
           <View style={styles.ctaContainer}>
             <CustomButton
-              variant={isSubscribed ? "secondary" : "primary"}
-              label={isSubscribed ? "En lista de espera" : "Notificarme cuando esté listo"}
-              onPress={isSubscribed ? () => showToast('Ya estás en la lista de espera', 'info') : handleWaitlistSubscription}
-              icon={isSubscribed ? "check-circle" : "bell-plus"}
+              variant={isSubscribed ? 'secondary' : 'primary'}
+              label={
+                isSubscribed
+                  ? 'En lista de espera'
+                  : 'Notificarme cuando esté listo'
+              }
+              onPress={
+                isSubscribed
+                  ? () => showToast('Ya estás en la lista de espera', 'info')
+                  : handleWaitlistSubscription
+              }
+              icon={isSubscribed ? 'check-circle' : 'bell-plus'}
               style={styles.mainButton}
               disabled={isSubscribed}
             />
-            <Text variant="bodySmall" style={[styles.ctaSubtitle, { color: theme.colors.onSurfaceVariant }]}>
+            <Text
+              variant="bodySmall"
+              style={[
+                styles.ctaSubtitle,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
+            >
               VTrading {new Date().getFullYear()}
             </Text>
           </View>
@@ -434,10 +575,16 @@ const DiscoverScreen = () => {
   if (error) {
     // ... Keep error view
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
+      >
         <DiscoverErrorView
           message={error}
-          onRetry={() => { setError(null); setIsLoading(true); handleRefresh(); }}
+          onRetry={() => {
+            setError(null);
+            setIsLoading(true);
+            handleRefresh();
+          }}
         />
       </View>
     );
@@ -454,7 +601,9 @@ const DiscoverScreen = () => {
         ref={listRef}
         data={mixedFeedData}
         renderItem={renderItem}
-        keyExtractor={(item: any, index: number) => `${item.type}-${item.type === 'article' ? item.data.id : index}`}
+        keyExtractor={(item: any, index: number) =>
+          `${item.type}-${item.type === 'article' ? item.data.id : index}`
+        }
         ListHeaderComponent={renderHeader}
         ListFooterComponent={renderFooter}
         showsVerticalScrollIndicator={false}

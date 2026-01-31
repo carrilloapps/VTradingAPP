@@ -41,11 +41,13 @@ Este documento presenta un análisis exhaustivo de VTradingAPP y un plan de acci
 > Migración crítica de AsyncStorage a MMKV para mejorar rendimiento hasta 30x
 
 #### Problema Actual
+
 - [StorageService.ts](file:///d:/Desarrollo/ReactNative/VTradingAPP/src/services/StorageService.ts) usa AsyncStorage (síncrono bloqueante)
 - [ApiClient.ts](file:///d:/Desarrollo/ReactNative/VTradingAPP/src/services/ApiClient.ts) usa AsyncStorage para caché de API
 - Operaciones I/O bloquean el hilo principal
 
 #### Acción Recomendada
+
 Migrar completamente a MMKV (ya está en dependencias pero no se usa):
 
 ```typescript
@@ -54,7 +56,7 @@ import { MMKV } from 'react-native-mmkv';
 
 const storage = new MMKV({
   id: 'app-storage',
-  encryptionKey: 'secure-key-from-env'
+  encryptionKey: 'secure-key-from-env',
 });
 
 // API síncrona instantánea
@@ -63,6 +65,7 @@ const data = JSON.parse(storage.getString('key') || '{}');
 ```
 
 **Beneficios**:
+
 - ⚡ **30x más rápido** que AsyncStorage
 - 🔒 Encriptación nativa
 - 🎯 API síncrona (no bloquea con async/await inútiles)
@@ -79,7 +82,9 @@ const data = JSON.parse(storage.getString('key') || '{}');
 > Context API causa re-renders innecesarios en toda la app
 
 #### Problema Actual
+
 Análisis de [AuthContext.tsx](file:///d:/Desarrollo/ReactNative/VTradingAPP/src/context/AuthContext.tsx):
+
 - Todo el árbol se re-renderiza cuando cambia `user` o `isLoading`
 - Funciones sin memoización se recrean en cada render
 - No hay separación de estado mutable e inmutable
@@ -87,6 +92,7 @@ Análisis de [AuthContext.tsx](file:///d:/Desarrollo/ReactNative/VTradingAPP/src
 #### Acción Recomendada
 
 **Opción 1: Zustand** (Recomendado)
+
 ```bash
 npm install zustand
 ```
@@ -110,18 +116,20 @@ export const useAuthStore = create<AuthState>()(
     signIn: async (email, password) => {
       // lógica...
       set({ user: newUser });
-    }
-  }))
+    },
+  })),
 );
 ```
 
 **Beneficios**:
+
 - 🎯 Re-renders quirúrgicos (solo componentes que usan ese slice)
 - 📦 4kb (vs Context API que es built-in pero ineficiente)
 - 🔧 DevTools integradas
 - 🚀 Performance superior
 
 **Opción 2: Jotai/Recoil** (Estado atómico)
+
 - Más granular pero con curva de aprendizaje
 
 **Esfuerzo**: 8-12 horas (migrar 5 contexts)  
@@ -135,7 +143,9 @@ export const useAuthStore = create<AuthState>()(
 > Cacheo inteligente y sincronización de estado del servidor
 
 #### Problema Actual
+
 [ApiClient.ts](file:///d:/Desarrollo/ReactNative/VTradingAPP/src/services/ApiClient.ts#L27-L198):
+
 - Caché manual básico con AsyncStorage
 - No hay invalidación automática
 - No hay retry logic robusto
@@ -164,6 +174,7 @@ export function useCurrencies() {
 ```
 
 **Beneficios**:
+
 - 🚀 Caché automático optimizado
 - 🔄 Background refetching
 - 📡 Offline support mejorado
@@ -182,7 +193,9 @@ export function useCurrencies() {
 > FlatList tiene problemas conocidos de rendimiento
 
 #### Problema Actual
+
 Probablemente se usa `FlatList` en pantallas como:
+
 - HomeScreen (lista de divisas)
 - StocksScreen (lista de acciones)
 - NotificationsScreen (lista de notificaciones)
@@ -206,6 +219,7 @@ import { FlashList } from '@shopify/flash-list';
 ```
 
 **Beneficios**:
+
 - ⚡ **10-20x más fluido** en listas grandes
 - 📉 Reduce dropped frames
 - 🎯 Mejor uso de memoria
@@ -222,7 +236,9 @@ import { FlashList } from '@shopify/flash-list';
 > DSN de Sentry y claves expuestas en código
 
 #### Problema Actual
+
 [App.tsx](file:///d:/Desarrollo/ReactNative/VTradingAPP/App.tsx#L43) y [ApiClient.ts](file:///d:/Desarrollo/ReactNative/VTradingAPP/src/services/ApiClient.ts#L102):
+
 ```typescript
 // ❌ Hardcoded en código fuente
 dsn: 'https://8978e60b895f59f65a44a1aee2a3e1f3@o456904.ingest.us.sentry.io/...',
@@ -255,6 +271,7 @@ export const AppConfig = {
 ```
 
 **Beneficios**:
+
 - 🔒 Secretos fuera de git
 - 🎯 Configuración por ambiente (dev/staging/prod)
 - 🔐 Menor superficie de ataque
@@ -270,9 +287,10 @@ export const AppConfig = {
 > Babel Core desactualizado (7.25.9 → 7.28.6)
 
 #### Problema Actual
+
 ```json
 {
-  "@babel/core": "~7.25.2", // Versión actual
+  "@babel/core": "~7.25.2" // Versión actual
   // Última: 7.28.6
 }
 ```
@@ -284,6 +302,7 @@ npm install --save-dev @babel/core@latest @babel/preset-env@latest
 ```
 
 **Beneficios**:
+
 - 🔒 Parches de seguridad
 - ⚡ Mejoras de transformación
 - 🐛 Bugfixes
@@ -298,10 +317,13 @@ npm install --save-dev @babel/core@latest @babel/preset-env@latest
 ### 7. Performance - Memoización en Contextos
 
 #### Problema
+
 Contextos recrean funciones en cada render:
+
 ```typescript
 // AuthContext.tsx línea 60-69
-const signIn = async (email: string, pass: string) => { // ❌ Nueva función cada render
+const signIn = async (email: string, pass: string) => {
+  // ❌ Nueva función cada render
   // ...
 };
 ```
@@ -311,17 +333,21 @@ const signIn = async (email: string, pass: string) => { // ❌ Nueva función ca
 ```typescript
 import { useCallback } from 'react';
 
-const signIn = useCallback(async (email: string, pass: string) => {
-  try {
-    await authService.signInWithEmail(email, pass);
-    showToast('Bienvenido de nuevo', 'success');
-  } catch (e: any) {
-    // ...
-  }
-}, [showToast]); // Dependencias explícitas
+const signIn = useCallback(
+  async (email: string, pass: string) => {
+    try {
+      await authService.signInWithEmail(email, pass);
+      showToast('Bienvenido de nuevo', 'success');
+    } catch (e: any) {
+      // ...
+    }
+  },
+  [showToast],
+); // Dependencias explícitas
 ```
 
 **Aplicar en**:
+
 - AuthContext (10 funciones)
 - NotificationContext
 - ToastContext
@@ -353,6 +379,7 @@ const SettingsScreen = lazy(() => import('../screens/SettingsScreen'));
 ```
 
 **Beneficios**:
+
 - 📦 Reduce bundle inicial
 - ⚡ Faster TTI (Time to Interactive)
 
@@ -364,6 +391,7 @@ const SettingsScreen = lazy(() => import('../screens/SettingsScreen'));
 ### 9. Código - TypeScript Strict Mode
 
 #### Problema Actual
+
 [tsconfig.json](file:///d:/Desarrollo/ReactNative/VTradingAPP/tsconfig.json) usa configuración base sin strict mode
 
 #### Acción Recomendada
@@ -383,6 +411,7 @@ const SettingsScreen = lazy(() => import('../screens/SettingsScreen'));
 ```
 
 **Beneficios**:
+
 - 🐛 Menos bugs en runtime
 - 🔒 Type safety real
 
@@ -409,6 +438,7 @@ npm install --save-dev @jest/coverage-istanbul-reporter
 ```
 
 **Integrar con CI/CD**:
+
 - Codecov o Coveralls
 - Bloquear PRs con cobertura < 80%
 
@@ -420,6 +450,7 @@ npm install --save-dev @jest/coverage-istanbul-reporter
 ### 11. Observabilidad - Firebase Performance Traces Personalizados
 
 #### Mejora Actual
+
 [ApiClient.ts](file:///d:/Desarrollo/ReactNative/VTradingAPP/src/services/ApiClient.ts#L66-L73) ya tiene trazas, pero se puede expandir:
 
 ```typescript
@@ -432,6 +463,7 @@ await loginTrace.stop();
 ```
 
 **Aplicar en**:
+
 - Carga inicial de datos
 - Cálculos complejos (CalculatorEngine)
 - Renderizado de listas grandes
@@ -446,7 +478,9 @@ await loginTrace.stop();
 ### 12. UI - Reemplazar React Native Paper por NativeWind
 
 #### Análisis
+
 React Native Paper es bueno pero agrega peso. NativeWind ofrece:
+
 - Tailwind CSS para React Native
 - Menor bundle size
 - Mayor flexibilidad
@@ -457,11 +491,13 @@ npm install --save-dev tailwindcss
 ```
 
 **Pros**:
+
 - 🎨 Diseño más flexible
 - 📦 Menor peso
 - ⚡ Mejor performance (estilos inline optimizados)
 
 **Contras**:
+
 - 🔄 Requiere reescribir todos los componentes
 - ⏱️ Gran esfuerzo (40+ horas)
 
@@ -473,6 +509,7 @@ npm install --save-dev tailwindcss
 ### 13. Networking - Axios con Interceptors
 
 #### Opción
+
 Reemplazar `fetch` en [ApiClient.ts](file:///d:/Desarrollo/ReactNative/VTradingAPP/src/services/ApiClient.ts#L115-L118) por Axios:
 
 ```typescript
@@ -494,16 +531,18 @@ axiosInstance.interceptors.response.use(
   error => {
     observabilityService.captureError(error);
     return Promise.reject(error);
-  }
+  },
 );
 ```
 
 **Pros**:
+
 - 🔄 Interceptors nativos
 - 📊 Mejor manejo de errores
 - ⏱️ Timeout configuración fácil
 
 **Contras**:
+
 - 📦 +13KB bundle size
 - ❓ Fetch es nativo y suficiente si se usa React Query
 
@@ -517,23 +556,23 @@ axiosInstance.interceptors.response.use(
 
 ### Performance (15 mejoras)
 
-| # | Mejora | Prioridad | Esfuerzo | Impacto |
-|---|--------|-----------|----------|---------|
-| 1 | Migración AsyncStorage → MMKV | P0 | 6h | 🔴 Crítico |
-| 2 | Context API → Zustand | P0 | 12h | 🔴 Crítico |
-| 3 | Implementar React Query | P0 | 16h | 🔴 Crítico |
-| 4 | FlatList → FlashList | P0 | 4h | 🟠 Alto |
-| 5 | Memoización en Contexts (useCallback) | P1 | 3h | 🟡 Medio |
-| 6 | Lazy Loading de Pantallas | P1 | 6h | 🟡 Medio |
-| 7 | useMemo para cálculos pesados | P1 | 4h | 🟡 Medio |
-| 8 | Optimizar re-renders con React.memo | P1 | 4h | 🟡 Medio |
-| 9 | Implementar virtualización en grids | P2 | 6h | 🟢 Bajo |
-| 10 | Hermes optimizations (ya habilitado) | - | 0h | ✅ |
-| 11 | Image optimization (react-native-fast-image) | P2 | 3h | 🟢 Bajo |
-| 12 | Reanimated worklets para animaciones | P1 | 8h | 🟡 Medio |
-| 13 | Reducir JS bundle size (analizar con metro) | P1 | 4h | 🟡 Medio |
-| 14 | Implementar Code Splitting | P2 | 8h | 🟢 Bajo |
-| 15 | Performance budget en CI | P2 | 3h | 🟢 Bajo |
+| #   | Mejora                                       | Prioridad | Esfuerzo | Impacto    |
+| --- | -------------------------------------------- | --------- | -------- | ---------- |
+| 1   | Migración AsyncStorage → MMKV                | P0        | 6h       | 🔴 Crítico |
+| 2   | Context API → Zustand                        | P0        | 12h      | 🔴 Crítico |
+| 3   | Implementar React Query                      | P0        | 16h      | 🔴 Crítico |
+| 4   | FlatList → FlashList                         | P0        | 4h       | 🟠 Alto    |
+| 5   | Memoización en Contexts (useCallback)        | P1        | 3h       | 🟡 Medio   |
+| 6   | Lazy Loading de Pantallas                    | P1        | 6h       | 🟡 Medio   |
+| 7   | useMemo para cálculos pesados                | P1        | 4h       | 🟡 Medio   |
+| 8   | Optimizar re-renders con React.memo          | P1        | 4h       | 🟡 Medio   |
+| 9   | Implementar virtualización en grids          | P2        | 6h       | 🟢 Bajo    |
+| 10  | Hermes optimizations (ya habilitado)         | -         | 0h       | ✅         |
+| 11  | Image optimization (react-native-fast-image) | P2        | 3h       | 🟢 Bajo    |
+| 12  | Reanimated worklets para animaciones         | P1        | 8h       | 🟡 Medio   |
+| 13  | Reducir JS bundle size (analizar con metro)  | P1        | 4h       | 🟡 Medio   |
+| 14  | Implementar Code Splitting                   | P2        | 8h       | 🟢 Bajo    |
+| 15  | Performance budget en CI                     | P2        | 3h       | 🟢 Bajo    |
 
 **Total Performance**: ~87 horas de esfuerzo
 
@@ -541,20 +580,20 @@ axiosInstance.interceptors.response.use(
 
 ### Seguridad (12 mejoras)
 
-| # | Mejora | Prioridad | Esfuerzo | Impacto |
-|---|--------|-----------|----------|---------|
-| 1 | Variables de entorno (react-native-config) | P0 | 4h | 🔴 Crítico |
-| 2 | Actualizar @babel/core | P0 | 1h | 🟠 Alto |
-| 3 | Auditoría de dependencias (npm audit) | P0 | 2h | 🟠 Alto |
-| 4 | Implementar Certificate Pinning | P1 | 6h | 🟡 Medio |
-| 5 | SecureStore para tokens sensibles | P1 | 3h | 🟡 Medio |
-| 6 | Sanitización de inputs | P1 | 4h | 🟡 Medio |
-| 7 | ProGuard/R8 configuración (Android) | P1 | 3h | 🟡 Medio |
-| 8 | Habilitar App Transport Security (iOS) | P1 | 2h | 🟡 Medio |
-| 9 | Implementar rate limiting en API | P2 | 4h | 🟢 Bajo |
-| 10 | Jailbreak/Root detection | P2 | 4h | 🟢 Bajo |
-| 11 | Logs seguros (remover PII) | P1 | 3h | 🟡 Medio |
-| 12 | Dependabot configuración | P2 | 1h | 🟢 Bajo |
+| #   | Mejora                                     | Prioridad | Esfuerzo | Impacto    |
+| --- | ------------------------------------------ | --------- | -------- | ---------- |
+| 1   | Variables de entorno (react-native-config) | P0        | 4h       | 🔴 Crítico |
+| 2   | Actualizar @babel/core                     | P0        | 1h       | 🟠 Alto    |
+| 3   | Auditoría de dependencias (npm audit)      | P0        | 2h       | 🟠 Alto    |
+| 4   | Implementar Certificate Pinning            | P1        | 6h       | 🟡 Medio   |
+| 5   | SecureStore para tokens sensibles          | P1        | 3h       | 🟡 Medio   |
+| 6   | Sanitización de inputs                     | P1        | 4h       | 🟡 Medio   |
+| 7   | ProGuard/R8 configuración (Android)        | P1        | 3h       | 🟡 Medio   |
+| 8   | Habilitar App Transport Security (iOS)     | P1        | 2h       | 🟡 Medio   |
+| 9   | Implementar rate limiting en API           | P2        | 4h       | 🟢 Bajo    |
+| 10  | Jailbreak/Root detection                   | P2        | 4h       | 🟢 Bajo    |
+| 11  | Logs seguros (remover PII)                 | P1        | 3h       | 🟡 Medio   |
+| 12  | Dependabot configuración                   | P2        | 1h       | 🟢 Bajo    |
 
 **Total Seguridad**: ~37 horas de esfuerzo
 
@@ -562,18 +601,18 @@ axiosInstance.interceptors.response.use(
 
 ### Estabilidad (10 mejoras)
 
-| # | Mejora | Prioridad | Esfuerzo | Impacto |
-|---|--------|-----------|----------|---------|
-| 1 | Error Boundaries globales | P0 | 3h | 🔴 Crítico |
-| 2 | Retry logic en API calls | P0 | 3h | 🟠 Alto |
-| 3 | Offline queue (react-native-offline) | P1 | 8h | 🟡 Medio |
-| 4 | Graceful degradation en features | P1 | 6h | 🟡 Medio |
-| 5 | Timeout handling consistente | P1 | 3h | 🟡 Medio |
-| 6 | Loading/Empty/Error states estandarizados | P1 | 6h | 🟡 Medio |
-| 7 | Implementar Circuit Breaker pattern | P2 | 8h | 🟢 Bajo |
-| 8 | Heartbeat monitoring | P2 | 4h | 🟢 Bajo |
-| 9 | Crash reporting mejorado | P1 | 3h | 🟡 Medio |
-| 10 | Rollback automático con Remote Config | P2 | 4h | 🟢 Bajo |
+| #   | Mejora                                    | Prioridad | Esfuerzo | Impacto    |
+| --- | ----------------------------------------- | --------- | -------- | ---------- |
+| 1   | Error Boundaries globales                 | P0        | 3h       | 🔴 Crítico |
+| 2   | Retry logic en API calls                  | P0        | 3h       | 🟠 Alto    |
+| 3   | Offline queue (react-native-offline)      | P1        | 8h       | 🟡 Medio   |
+| 4   | Graceful degradation en features          | P1        | 6h       | 🟡 Medio   |
+| 5   | Timeout handling consistente              | P1        | 3h       | 🟡 Medio   |
+| 6   | Loading/Empty/Error states estandarizados | P1        | 6h       | 🟡 Medio   |
+| 7   | Implementar Circuit Breaker pattern       | P2        | 8h       | 🟢 Bajo    |
+| 8   | Heartbeat monitoring                      | P2        | 4h       | 🟢 Bajo    |
+| 9   | Crash reporting mejorado                  | P1        | 3h       | 🟡 Medio   |
+| 10  | Rollback automático con Remote Config     | P2        | 4h       | 🟢 Bajo    |
 
 **Total Estabilidad**: ~48 horas de esfuerzo
 
@@ -581,18 +620,18 @@ axiosInstance.interceptors.response.use(
 
 ### Arquitectura (10 mejoras)
 
-| # | Mejora | Prioridad | Esfuerzo | Impacto |
-|---|--------|-----------|----------|---------|
-| 1 | TypeScript strict mode | P1 | 10h | 🟡 Medio |
-| 2 | Separar lógica de UI (Custom Hooks) | P1 | 12h | 🟡 Medio |
-| 3 | Implementar Repository Pattern | P1 | 10h | 🟡 Medio |
-| 4 | Dependency Injection container | P2 | 8h | 🟢 Bajo |
-| 5 | Feature-based folder structure | P2 | 6h | 🟢 Bajo |
-| 6 | Composition over inheritance | P2 | 4h | 🟢 Bajo |
-| 7 | Implementar Clean Architecture | P2 | 20h | 🟢 Bajo |
-| 8 | Monorepo setup (si aplica) | P2 | 12h | 🟢 Bajo |
-| 9 | Shared types package | P2 | 4h | 🟢 Bajo |
-| 10 | API versioning strategy | P1 | 3h | 🟡 Medio |
+| #   | Mejora                              | Prioridad | Esfuerzo | Impacto  |
+| --- | ----------------------------------- | --------- | -------- | -------- |
+| 1   | TypeScript strict mode              | P1        | 10h      | 🟡 Medio |
+| 2   | Separar lógica de UI (Custom Hooks) | P1        | 12h      | 🟡 Medio |
+| 3   | Implementar Repository Pattern      | P1        | 10h      | 🟡 Medio |
+| 4   | Dependency Injection container      | P2        | 8h       | 🟢 Bajo  |
+| 5   | Feature-based folder structure      | P2        | 6h       | 🟢 Bajo  |
+| 6   | Composition over inheritance        | P2        | 4h       | 🟢 Bajo  |
+| 7   | Implementar Clean Architecture      | P2        | 20h      | 🟢 Bajo  |
+| 8   | Monorepo setup (si aplica)          | P2        | 12h      | 🟢 Bajo  |
+| 9   | Shared types package                | P2        | 4h       | 🟢 Bajo  |
+| 10  | API versioning strategy             | P1        | 3h       | 🟡 Medio |
 
 **Total Arquitectura**: ~89 horas de esfuerzo
 
@@ -600,18 +639,18 @@ axiosInstance.interceptors.response.use(
 
 ### Testing (10 mejoras)
 
-| # | Mejora | Prioridad | Esfuerzo | Impacto |
-|---|--------|-----------|----------|---------|
-| 1 | Aumentar cobertura a 90%+ | P0 | 20h | 🔴 Crítico |
-| 2 | E2E tests con Maestro | P1 | 16h | 🟡 Medio |
-| 3 | Visual regression testing | P2 | 8h | 🟢 Bajo |
-| 4 | Performance testing automatizado | P2 | 6h | 🟢 Bajo |
-| 5 | Integration tests para servicios | P1 | 10h | 🟡 Medio |
-| 6 | Mock service worker (MSW) | P1 | 6h | 🟡 Medio |
-| 7 | Snapshot testing para componentes | P1 | 4h | 🟡 Medio |
-| 8 | Accessibility testing | P1 | 8h | 🟡 Medio |
-| 9 | Load testing | P2 | 4h | 🟢 Bajo |
-| 10 | Contract testing (API) | P2 | 6h | 🟢 Bajo |
+| #   | Mejora                            | Prioridad | Esfuerzo | Impacto    |
+| --- | --------------------------------- | --------- | -------- | ---------- |
+| 1   | Aumentar cobertura a 90%+         | P0        | 20h      | 🔴 Crítico |
+| 2   | E2E tests con Maestro             | P1        | 16h      | 🟡 Medio   |
+| 3   | Visual regression testing         | P2        | 8h       | 🟢 Bajo    |
+| 4   | Performance testing automatizado  | P2        | 6h       | 🟢 Bajo    |
+| 5   | Integration tests para servicios  | P1        | 10h      | 🟡 Medio   |
+| 6   | Mock service worker (MSW)         | P1        | 6h       | 🟡 Medio   |
+| 7   | Snapshot testing para componentes | P1        | 4h       | 🟡 Medio   |
+| 8   | Accessibility testing             | P1        | 8h       | 🟡 Medio   |
+| 9   | Load testing                      | P2        | 4h       | 🟢 Bajo    |
+| 10  | Contract testing (API)            | P2        | 6h       | 🟢 Bajo    |
 
 **Total Testing**: ~88 horas de esfuerzo
 
@@ -619,18 +658,18 @@ axiosInstance.interceptors.response.use(
 
 ### DevOps & CI/CD (10 mejoras)
 
-| # | Mejora | Prioridad | Esfuerzo | Impacto |
-|---|--------|-----------|----------|---------|
-| 1 | GitHub Actions CI pipeline | P0 | 6h | 🔴 Crítico |
-| 2 | Automated versioning (semantic-release) | P1 | 4h | 🟡 Medio |
-| 3 | Fastlane setup para deploys | P1 | 8h | 🟡 Medio |
-| 4 | Pre-commit hooks (husky + lint-staged) | P1 | 2h | 🟡 Medio |
-| 5 | Danger.js para PR reviews | P2 | 3h | 🟢 Bajo |
-| 6 | Bundle size monitoring | P1 | 3h | 🟡 Medio |
-| 7 | Automated changelogs | P2 | 2h | 🟢 Bajo |
-| 8 | Deploy previews (Expo EAS) | P2 | 4h | 🟢 Bajo |
-| 9 | Staging environment separation | P1 | 4h | 🟡 Medio |
-| 10 | Rollback strategy automatizada | P2 | 4h | 🟢 Bajo |
+| #   | Mejora                                  | Prioridad | Esfuerzo | Impacto    |
+| --- | --------------------------------------- | --------- | -------- | ---------- |
+| 1   | GitHub Actions CI pipeline              | P0        | 6h       | 🔴 Crítico |
+| 2   | Automated versioning (semantic-release) | P1        | 4h       | 🟡 Medio   |
+| 3   | Fastlane setup para deploys             | P1        | 8h       | 🟡 Medio   |
+| 4   | Pre-commit hooks (husky + lint-staged)  | P1        | 2h       | 🟡 Medio   |
+| 5   | Danger.js para PR reviews               | P2        | 3h       | 🟢 Bajo    |
+| 6   | Bundle size monitoring                  | P1        | 3h       | 🟡 Medio   |
+| 7   | Automated changelogs                    | P2        | 2h       | 🟢 Bajo    |
+| 8   | Deploy previews (Expo EAS)              | P2        | 4h       | 🟢 Bajo    |
+| 9   | Staging environment separation          | P1        | 4h       | 🟡 Medio   |
+| 10  | Rollback strategy automatizada          | P2        | 4h       | 🟢 Bajo    |
 
 **Total DevOps**: ~40 horas de esfuerzo
 
@@ -678,6 +717,7 @@ npm install @react-native-firebase/app@latest @react-native-firebase/auth@latest
 8. ✅ CI/CD básico con GitHub Actions (P0)
 
 **Entregables**:
+
 - App 30% más rápida
 - Secretos protegidos
 - Pipeline automatizado
@@ -698,6 +738,7 @@ npm install @react-native-firebase/app@latest @react-native-firebase/auth@latest
 8. ✅ Certificate Pinning (P1)
 
 **Entregables**:
+
 - Arquitectura robusta
 - Coverage 90%+
 - Deploys automatizados
@@ -716,6 +757,7 @@ npm install @react-native-firebase/app@latest @react-native-firebase/auth@latest
 6. ✅ Monitoreo avanzado (P2)
 
 **Entregables**:
+
 - App tier-1 production-ready
 - Métricas completas
 - Documentación exhaustiva
@@ -790,11 +832,13 @@ npm install @react-native-firebase/app@latest @react-native-firebase/auth@latest
 ### React Native 0.83.1 → 0.76.x LTS
 
 **Pros**:
+
 - Soporte extendido
 - Bugfixes críticos
 - Mejoras de estabilidad
 
 **Contras**:
+
 - Breaking changes importantes
 - Riesgo alto de regresiones
 - 40-60 horas de esfuerzo
@@ -808,10 +852,12 @@ npm install @react-native-firebase/app@latest @react-native-firebase/auth@latest
 **Estado**: React Native 0.83.1 lo soporta opcionalmente
 
 **Pros**:
+
 - Mejor performance (30-40%)
 - Sincronización JS-Native mejorada
 
 **Contras**:
+
 - Requiere verificar compatibilidad de TODAS las libs
 - Potenciales incompatibilidades
 - Complejidad adicional
@@ -823,15 +869,18 @@ npm install @react-native-firebase/app@latest @react-native-firebase/auth@latest
 ## 🎓 Recursos de Aprendizaje Recomendados
 
 ### Performance
+
 - [React Native Performance Optimization](https://reactnative.dev/docs/performance)
 - [Reanimated 3 Documentation](https://docs.swmansion.com/react-native-reanimated/)
 - [FlashList Best Practices](https://shopify.github.io/flash-list/)
 
 ### State Management
+
 - [Zustand Documentation](https://docs.pmnd.rs/zustand/getting-started/introduction)
 - [React Query v5 Guide](https://tanstack.com/query/latest/docs/framework/react/overview)
 
 ### Testing
+
 - [Maestro E2E Testing](https://maestro.mobile.dev/)
 - [React Native Testing Library](https://callstack.github.io/react-native-testing-library/)
 
@@ -840,6 +889,7 @@ npm install @react-native-firebase/app@latest @react-native-firebase/auth@latest
 ## 📋 Checklist de Implementación
 
 ### Antes de Empezar
+
 - [ ] Backup completo del código actual
 - [ ] Crear branch `feature/improvements`
 - [ ] Documentar baseline de performance
@@ -847,6 +897,7 @@ npm install @react-native-firebase/app@latest @react-native-firebase/auth@latest
 - [ ] Establecer criterios de éxito
 
 ### Durante Cada Mejora
+
 - [ ] Escribir tests antes de cambios
 - [ ] Implementar cambio incremental
 - [ ] Verificar performance impact
@@ -855,6 +906,7 @@ npm install @react-native-firebase/app@latest @react-native-firebase/auth@latest
 - [ ] Testing en dispositivos reales
 
 ### Post-Implementación
+
 - [ ] Verificar cobertura de tests
 - [ ] Actualizar documentación
 - [ ] Deploy a staging
@@ -865,15 +917,15 @@ npm install @react-native-firebase/app@latest @react-native-firebase/auth@latest
 
 ## 💰 Estimación de Esfuerzo Total
 
-| Categoría | Horas | Semanas (40h) |
-|-----------|-------|---------------|
-| Performance | 87h | 2.2 semanas |
-| Seguridad | 37h | 0.9 semanas |
-| Estabilidad | 48h | 1.2 semanas |
-| Arquitectura | 89h | 2.2 semanas |
-| Testing | 88h | 2.2 semanas |
-| DevOps | 40h | 1.0 semana |
-| **TOTAL** | **389h** | **~10 semanas** |
+| Categoría    | Horas    | Semanas (40h)   |
+| ------------ | -------- | --------------- |
+| Performance  | 87h      | 2.2 semanas     |
+| Seguridad    | 37h      | 0.9 semanas     |
+| Estabilidad  | 48h      | 1.2 semanas     |
+| Arquitectura | 89h      | 2.2 semanas     |
+| Testing      | 88h      | 2.2 semanas     |
+| DevOps       | 40h      | 1.0 semana      |
+| **TOTAL**    | **389h** | **~10 semanas** |
 
 **Con equipo de 2 desarrolladores**: ~5 semanas  
 **Con equipo de 3 desarrolladores**: ~3-4 semanas
@@ -883,6 +935,7 @@ npm install @react-native-firebase/app@latest @react-native-firebase/auth@latest
 ## 🎯 Priorización Final
 
 ### Must Have (P0) - Hacer YA
+
 1. MMKV migration
 2. React Query implementation
 3. Variables de entorno
@@ -893,6 +946,7 @@ npm install @react-native-firebase/app@latest @react-native-firebase/auth@latest
 **Impacto**: 🔴🔴🔴 Transformacional
 
 ### Should Have (P1) - Siguiente Sprint
+
 1. Zustand migration
 2. FlashList adoption
 3. TypeScript strict
@@ -903,6 +957,7 @@ npm install @react-native-firebase/app@latest @react-native-firebase/auth@latest
 **Impacto**: 🟠🟠 Muy Alto
 
 ### Nice to Have (P2) - Roadmap Futuro
+
 1. Visual regression
 2. Clean architecture
 3. Monorepo
@@ -915,30 +970,32 @@ npm install @react-native-firebase/app@latest @react-native-firebase/auth@latest
 ## 🚨 Riesgos Identificados
 
 ### Alto Riesgo
+
 - **Migración de estado global**: Puede romper flujos existentes
-  - *Mitigación*: Tests comprehensivos, rollout gradual
-  
+  - _Mitigación_: Tests comprehensivos, rollout gradual
 - **Actualización de dependencias**: Incompatibilidades
-  - *Mitigación*: Actualizar de una en una, testing exhaustivo
+  - _Mitigación_: Actualizar de una en una, testing exhaustivo
 
 ### Medio Riesgo
+
 - **New Architecture**: Compatibilidad de librerías
-  - *Mitigación*: Auditoría previa, fallback plan
-  
+  - _Mitigación_: Auditoría previa, fallback plan
 - **Performance regressions**: Cambios pueden introducir bugs
-  - *Mitigación*: Benchmarks antes/después, monitoreo continuo
+  - _Mitigación_: Benchmarks antes/después, monitoreo continuo
 
 ---
 
 ## ✅ Conclusión
 
 VTradingAPP tiene una **base sólida** con:
+
 - ✅ Arquitectura modular bien pensada
 - ✅ Observabilidad triple (Sentry + Firebase + Clarity)
 - ✅ Stack moderno (React Native 0.83.1, TypeScript)
 - ✅ Suite de testing configurada
 
 Las **67 mejoras identificadas** se enfocan en:
+
 1. 🚀 **Performance**: 30-50% de mejora esperada
 2. 🔒 **Seguridad**: Protección de secretos y actualizaciones
 3. 🎯 **Estabilidad**: Manejo robusto de errores
@@ -947,11 +1004,12 @@ Las **67 mejoras identificadas** se enfocan en:
 **Recomendación Final**: Abordar en 3 fases (semanas 1-2, 3-4, 5-6) priorizando P0 → P1 → P2.
 
 El ROI más alto está en:
+
 - MMKV + React Query + Zustand = **Transformación de performance**
 - Variables de entorno + Actualizaciones = **Seguridad enterprise-grade**
 - CI/CD + Testing = **Velocity y confianza**
 
 ---
 
-*Análisis realizado el 2026-01-28*  
-*Basado en React Native 0.83.1 y dependencias actuales*
+_Análisis realizado el 2026-01-28_  
+_Basado en React Native 0.83.1 y dependencias actuales_

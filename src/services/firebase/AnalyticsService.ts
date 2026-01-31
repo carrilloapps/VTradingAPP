@@ -1,4 +1,9 @@
-import { getAnalytics, logEvent, setUserProperty, setUserId } from '@react-native-firebase/analytics';
+import {
+  getAnalytics,
+  logEvent,
+  setUserProperty,
+  setUserId,
+} from '@react-native-firebase/analytics';
 import * as Clarity from '@microsoft/react-native-clarity';
 import * as Sentry from '@sentry/react-native';
 import { observabilityService } from '../ObservabilityService';
@@ -164,7 +169,7 @@ class AnalyticsService {
         context: 'AnalyticsService.logEvent',
         eventName: name,
         hasParams: !!params,
-        paramCount: params ? Object.keys(params).length : 0
+        paramCount: params ? Object.keys(params).length : 0,
       });
     }
   }
@@ -189,7 +194,7 @@ class AnalyticsService {
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'AnalyticsService.logScreenView',
-        screenName: screenName
+        screenName: screenName,
       });
     }
   }
@@ -207,18 +212,22 @@ class AnalyticsService {
   async logSelectContent(contentType: string, itemId: string): Promise<void> {
     return this.logEvent(ANALYTICS_EVENTS.SELECT_CONTENT, {
       content_type: contentType,
-      item_id: itemId
+      item_id: itemId,
     });
   }
 
   /**
    * Log share event
    */
-  async logShare(contentType: string, itemId: string, method: string): Promise<void> {
+  async logShare(
+    contentType: string,
+    itemId: string,
+    method: string,
+  ): Promise<void> {
     return this.logEvent(ANALYTICS_EVENTS.SHARE, {
       content_type: contentType,
       item_id: itemId,
-      method: method // e.g. "image_square", "image_story", "text"
+      method: method, // e.g. "image_square", "image_story", "text"
     });
   }
 
@@ -239,36 +248,50 @@ class AnalyticsService {
   /**
    * Log user interaction (button clicks, taps, etc.)
    */
-  async logInteraction(interactionType: UserInteractionEvent, params?: AnalyticsEventParams): Promise<void> {
+  async logInteraction(
+    interactionType: UserInteractionEvent,
+    params?: AnalyticsEventParams,
+  ): Promise<void> {
     return this.logEvent(interactionType, params);
   }
 
   /**
    * Log feature usage
    */
-  async logFeatureUsage(featureName: string, params?: AnalyticsEventParams): Promise<void> {
+  async logFeatureUsage(
+    featureName: string,
+    params?: AnalyticsEventParams,
+  ): Promise<void> {
     return this.logEvent(ANALYTICS_EVENTS.FEATURE_USED, {
       feature_name: featureName,
-      ...params
+      ...params,
     });
   }
 
   /**
    * Log error event with standardized format
    */
-  async logError(errorType: string, params?: AnalyticsEventParams): Promise<void> {
+  async logError(
+    errorType: string,
+    params?: AnalyticsEventParams,
+  ): Promise<void> {
     return this.logEvent(`${ANALYTICS_EVENTS.ERROR}_${errorType}`, params);
   }
 
   /**
    * Log API call metrics
    */
-  async logApiCall(endpoint: string, method: string, success: boolean, durationMs?: number): Promise<void> {
+  async logApiCall(
+    endpoint: string,
+    method: string,
+    success: boolean,
+    durationMs?: number,
+  ): Promise<void> {
     return this.logEvent(ANALYTICS_EVENTS.API_CALL, {
       endpoint,
       method,
       success: success.toString(),
-      duration_ms: durationMs
+      duration_ms: durationMs,
     });
   }
 
@@ -278,7 +301,7 @@ class AnalyticsService {
   async logDataRefresh(dataType: string, success: boolean): Promise<void> {
     return this.logEvent(ANALYTICS_EVENTS.DATA_REFRESH, {
       data_type: dataType,
-      success: success.toString()
+      success: success.toString(),
     });
   }
 
@@ -292,7 +315,7 @@ class AnalyticsService {
       const duration = Date.now() - startTime;
       this.logEvent('operation_timing', {
         operation: operationName,
-        duration_ms: duration
+        duration_ms: duration,
       });
     };
   }
@@ -310,17 +333,20 @@ class AnalyticsService {
   async logSessionEnd(durationMs: number): Promise<void> {
     return this.logEvent(ANALYTICS_EVENTS.V_SESSION_END, {
       duration_ms: durationMs,
-      duration_minutes: Math.round(durationMs / 60000)
+      duration_minutes: Math.round(durationMs / 60000),
     });
   }
 
   /**
    * Log when user engages with content
    */
-  async logEngagement(contentType: string, engagementTime: number): Promise<void> {
+  async logEngagement(
+    contentType: string,
+    engagementTime: number,
+  ): Promise<void> {
     return this.logEvent(ANALYTICS_EVENTS.USER_ENGAGEMENT, {
       content_type: contentType,
-      engagement_time_ms: engagementTime
+      engagement_time_ms: engagementTime,
     });
   }
 
@@ -338,7 +364,7 @@ class AnalyticsService {
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'AnalyticsService.setUserProperty',
-        propertyName: name
+        propertyName: name,
       });
     }
   }
@@ -348,7 +374,7 @@ class AnalyticsService {
    */
   async setUserProperties(properties: Record<string, string>): Promise<void> {
     const promises = Object.entries(properties).map(([name, value]) =>
-      this.setUserProperty(name, value)
+      this.setUserProperty(name, value),
     );
     await Promise.all(promises);
   }
@@ -365,7 +391,7 @@ class AnalyticsService {
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'AnalyticsService.setUserId',
-        hasUserId: !!userId
+        hasUserId: !!userId,
       });
       // Error setting user ID
     }
@@ -386,7 +412,7 @@ class AnalyticsService {
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'AnalyticsService.setAnalyticsCollectionEnabled',
-        enabled: enabled
+        enabled: enabled,
       });
     }
   }

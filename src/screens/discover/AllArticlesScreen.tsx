@@ -3,15 +3,31 @@ import { View, StyleSheet, ActivityIndicator, StatusBar } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { Text, useTheme, Appbar } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { wordPressService, FormattedPost } from '../../services/WordPressService';
+import {
+  wordPressService,
+  FormattedPost,
+} from '../../services/WordPressService';
 import { observabilityService } from '../../services/ObservabilityService';
 import ArticleCard from '../../components/discover/ArticleCard';
 import ArticleSkeleton from '../../components/discover/ArticleSkeleton';
 import DiscoverEmptyView from '../../components/discover/DiscoverEmptyView';
 
-const ListFooter = ({ hasMore, postsLength, theme }: { hasMore: boolean; postsLength: number; theme: any }) => {
+const ListFooter = ({
+  hasMore,
+  postsLength,
+  theme,
+}: {
+  hasMore: boolean;
+  postsLength: number;
+  theme: any;
+}) => {
   if (hasMore) {
-    return <ActivityIndicator style={styles.footerLoader} color={theme.colors.primary} />;
+    return (
+      <ActivityIndicator
+        style={styles.footerLoader}
+        color={theme.colors.primary}
+      />
+    );
   }
   if (postsLength > 0) {
     return (
@@ -42,7 +58,13 @@ const AllArticlesScreen = () => {
   const fetchPosts = async (pageNum = 1, shouldRefresh = false) => {
     if (pageNum === 1) setLoading(true);
     try {
-      const fetchedPosts = await wordPressService.getPosts(pageNum, 10, undefined, undefined, shouldRefresh);
+      const fetchedPosts = await wordPressService.getPosts(
+        pageNum,
+        10,
+        undefined,
+        undefined,
+        shouldRefresh,
+      );
       if (shouldRefresh) {
         setPosts(fetchedPosts);
       } else {
@@ -51,7 +73,10 @@ const AllArticlesScreen = () => {
       setHasMore(fetchedPosts.length === 10);
       setPage(pageNum);
     } catch (e) {
-      observabilityService.captureError(e, { context: 'AllArticlesScreen.fetchPosts', pageNum });
+      observabilityService.captureError(e, {
+        context: 'AllArticlesScreen.fetchPosts',
+        pageNum,
+      });
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -70,7 +95,7 @@ const AllArticlesScreen = () => {
 
   const containerStyle = [
     styles.container,
-    { backgroundColor: theme.colors.background }
+    { backgroundColor: theme.colors.background },
   ];
 
   const renderSkeleton = () => <ArticleSkeleton />;
@@ -83,11 +108,10 @@ const AllArticlesScreen = () => {
   const renderFooter = () => (
     <ListFooter hasMore={hasMore} postsLength={posts.length} theme={theme} />
   );
-  const renderEmpty = () => (
+  const renderEmpty = () =>
     !loading ? (
       <DiscoverEmptyView message="No se encontraron artículos" />
-    ) : null
-  );
+    ) : null;
 
   return (
     <View style={containerStyle}>

@@ -4,11 +4,17 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '../../theme/theme';
 import { MaterialTopTabBarProps } from '@react-navigation/material-top-tabs';
 
-const ModernTabBar: React.FC<MaterialTopTabBarProps> = ({ state, descriptors, navigation }) => {
+const ModernTabBar: React.FC<MaterialTopTabBarProps> = ({
+  state,
+  descriptors,
+  navigation,
+}) => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
   // Create animated values for each tab
-  const animatedValues = useRef(state.routes.map(() => new Animated.Value(0))).current;
+  const animatedValues = useRef(
+    state.routes.map(() => new Animated.Value(0)),
+  ).current;
 
   useEffect(() => {
     // Animate the active tab
@@ -26,15 +32,17 @@ const ModernTabBar: React.FC<MaterialTopTabBarProps> = ({ state, descriptors, na
 
   return (
     <View pointerEvents="box-none" style={styles.mainContainer}>
-      <View style={[
-        styles.barBackground,
-        {
-          backgroundColor: theme.colors.elevation.level1,
-          paddingBottom: insets.bottom,
-          height: 60 + insets.bottom,
-        },
-        styles.elevationShadow
-      ]}>
+      <View
+        style={[
+          styles.barBackground,
+          {
+            backgroundColor: theme.colors.elevation.level1,
+            paddingBottom: insets.bottom,
+            height: 60 + insets.bottom,
+          },
+          styles.elevationShadow,
+        ]}
+      >
         <View style={styles.content}>
           {state.routes.map((route, index) => {
             const { options } = descriptors[route.key];
@@ -65,25 +73,29 @@ const ModernTabBar: React.FC<MaterialTopTabBarProps> = ({ state, descriptors, na
             // Animations
             const translateY = animatedValues[index].interpolate({
               inputRange: [0, 1],
-              outputRange: [0, -20]
+              outputRange: [0, -20],
             });
 
             const scale = animatedValues[index].interpolate({
               inputRange: [0, 1],
-              outputRange: [1, 1.1]
+              outputRange: [1, 1.1],
             });
 
             const circleScale = animatedValues[index].interpolate({
               inputRange: [0, 1],
-              outputRange: [0, 1]
+              outputRange: [0, 1],
             });
 
             const iconTranslateY = animatedValues[index].interpolate({
               inputRange: [0, 1],
-              outputRange: [0, 0]
+              outputRange: [0, 0],
             });
 
-            const iconColor = isFocused ? (theme.dark ? theme.colors.onPrimary : '#212121') : theme.colors.onSurfaceVariant;
+            const iconColor = isFocused
+              ? theme.dark
+                ? theme.colors.onPrimary
+                : '#212121'
+              : theme.colors.onSurfaceVariant;
 
             return (
               <TouchableOpacity
@@ -96,29 +108,40 @@ const ModernTabBar: React.FC<MaterialTopTabBarProps> = ({ state, descriptors, na
                 style={styles.tabItem}
                 activeOpacity={0.8}
               >
-                <Animated.View style={[
-                  styles.iconContainer,
-                  {
-                    transform: [{ translateY }],
-                  }
-                ]}>
-                  {/* Background Circle for Active State */}
-                  <Animated.View style={[
-                    StyleSheet.absoluteFill,
-                    styles.activeCircle,
+                <Animated.View
+                  style={[
+                    styles.iconContainer,
                     {
-                      backgroundColor: theme.dark ? theme.colors.primary : theme.colors.inversePrimary,
-                      transform: [{ scale: circleScale }],
-                      opacity: circleScale
-                    }
-                  ]} />
+                      transform: [{ translateY }],
+                    },
+                  ]}
+                >
+                  {/* Background Circle for Active State */}
+                  <Animated.View
+                    style={[
+                      StyleSheet.absoluteFill,
+                      styles.activeCircle,
+                      {
+                        backgroundColor: theme.dark
+                          ? theme.colors.primary
+                          : theme.colors.inversePrimary,
+                        transform: [{ scale: circleScale }],
+                        opacity: circleScale,
+                      },
+                    ]}
+                  />
 
                   {/* Icon */}
-                  <Animated.View style={{ transform: [{ scale }, { translateY: iconTranslateY }] }}>
-                    {IconComponent && IconComponent({
-                      focused: isFocused,
-                      color: iconColor
-                    })}
+                  <Animated.View
+                    style={{
+                      transform: [{ scale }, { translateY: iconTranslateY }],
+                    }}
+                  >
+                    {IconComponent &&
+                      IconComponent({
+                        focused: isFocused,
+                        color: iconColor,
+                      })}
                   </Animated.View>
                 </Animated.View>
               </TouchableOpacity>
@@ -175,7 +198,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-  }
+  },
 });
 
 export default ModernTabBar;

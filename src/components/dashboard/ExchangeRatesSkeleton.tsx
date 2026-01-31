@@ -15,14 +15,11 @@ const ExchangeRatesSkeleton = () => {
       {
         backgroundColor: theme.colors.elevation.level1,
         borderColor: theme.colors.outline,
-      }
+      },
     ];
 
     return (
-      <View
-        key={key}
-        style={cardStyle}
-      >
+      <View key={key} style={cardStyle}>
         <View style={styles.leftContent}>
           <Skeleton width={48} height={48} style={styles.iconSkeleton} />
           <View style={styles.textContainer}>
@@ -40,7 +37,7 @@ const ExchangeRatesSkeleton = () => {
 
   const containerStyle = [
     styles.container,
-    { paddingTop: insets.top, backgroundColor: theme.colors.background }
+    { paddingTop: insets.top, backgroundColor: theme.colors.background },
   ];
 
   return (
@@ -66,8 +63,14 @@ const ExchangeRatesSkeleton = () => {
       <View style={styles.scrollContent}>
         {/* Filter Chips Skeleton */}
         <View style={styles.chipsContainer}>
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} width={i === 1 ? 60 : 80} height={32} borderRadius={16} style={styles.chipSkeleton} />
+          {[1, 2, 3, 4].map(i => (
+            <Skeleton
+              key={i}
+              width={i === 1 ? 60 : 80}
+              height={32}
+              borderRadius={16}
+              style={styles.chipSkeleton}
+            />
           ))}
         </View>
 
@@ -173,7 +176,7 @@ const styles = StyleSheet.create({
   },
   chipSkeleton: {
     marginRight: 8,
-  }
+  },
 });
 
 export default ExchangeRatesSkeleton;

@@ -29,7 +29,9 @@ class FCMService {
           sound: 'default',
         });
       } catch (e) {
-        SafeLogger.warn('[FCM] Failed to create notification channels', { error: e });
+        SafeLogger.warn('[FCM] Failed to create notification channels', {
+          error: e,
+        });
       }
     }
   }
@@ -46,7 +48,7 @@ class FCMService {
       );
     } else if (Platform.OS === 'android' && Platform.Version >= 33) {
       return await PermissionsAndroid.check(
-        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
       );
     }
     return true;
@@ -64,7 +66,7 @@ class FCMService {
       return enabled;
     } else if (Platform.OS === 'android' && Platform.Version >= 33) {
       const granted = await PermissionsAndroid.request(
-        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS
+        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
       );
       return granted === PermissionsAndroid.RESULTS.GRANTED;
     }
@@ -86,7 +88,7 @@ class FCMService {
       if (!isRegistrationLimit) {
         observabilityService.captureError(e, {
           context: 'FCMService.getFCMToken',
-          action: 'get_fcm_token'
+          action: 'get_fcm_token',
         });
       } else {
         SafeLogger.warn('[FCM] Registration limit reached (Safe Skip)');
@@ -106,10 +108,10 @@ class FCMService {
    * Foreground message handler
    */
   onMessage(callback: (remoteMessage: any) => void): () => void {
-    return this.messaging.onMessage(async (remoteMessage) => {
+    return this.messaging.onMessage(async remoteMessage => {
       await analyticsService.logEvent(ANALYTICS_EVENTS.NOTIFICATION_RECEIVED, {
         messageId: remoteMessage.messageId,
-        from: remoteMessage.from
+        from: remoteMessage.from,
       });
       callback(remoteMessage);
     });
@@ -118,7 +120,9 @@ class FCMService {
   /**
    * Background message handler (must be called outside of UI components)
    */
-  setBackgroundMessageHandler(handler: (remoteMessage: any) => Promise<any>): void {
+  setBackgroundMessageHandler(
+    handler: (remoteMessage: any) => Promise<any>,
+  ): void {
     this.messaging.setBackgroundMessageHandler(handler);
   }
 
@@ -126,10 +130,10 @@ class FCMService {
    * Notification opened from background state
    */
   onNotificationOpenedApp(callback: (remoteMessage: any) => void): () => void {
-    return this.messaging.onNotificationOpenedApp(async (remoteMessage) => {
+    return this.messaging.onNotificationOpenedApp(async remoteMessage => {
       await analyticsService.logEvent(ANALYTICS_EVENTS.NOTIFICATION_OPENED, {
         messageId: remoteMessage.messageId,
-        state: 'background'
+        state: 'background',
       });
       callback(remoteMessage);
     });
@@ -154,7 +158,7 @@ class FCMService {
       observabilityService.captureError(e, {
         context: 'FCMService.subscribeToTopic',
         topic,
-        action: 'subscribe_topic'
+        action: 'subscribe_topic',
       });
       // Ignore error
     }
@@ -175,7 +179,10 @@ class FCMService {
 
       const appVerTopic = `app_version_${DeviceInfo.getVersion().replace(/\./g, '_')}`;
       topics.push(appVerTopic);
-      await analyticsService.setUserProperty('app_version', DeviceInfo.getVersion());
+      await analyticsService.setUserProperty(
+        'app_version',
+        DeviceInfo.getVersion(),
+      );
 
       const buildTopic = `build_${DeviceInfo.getBuildNumber()}`;
       topics.push(buildTopic);
@@ -193,12 +200,14 @@ class FCMService {
       }
 
       await Promise.all(topics.map(topic => this.subscribeToTopic(topic)));
-      SafeLogger.log('[FCM] Subscribed to demographics', { topicsCount: topics.length });
+      SafeLogger.log('[FCM] Subscribed to demographics', {
+        topicsCount: topics.length,
+      });
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'FCMService.subscribeToDemographics',
         action: 'subscribe_demographics',
-        topicsCount: extraTopics.length
+        topicsCount: extraTopics.length,
       });
       // Ignore error
     }
@@ -215,7 +224,7 @@ class FCMService {
       observabilityService.captureError(e, {
         context: 'FCMService.unsubscribeFromTopic',
         topic,
-        action: 'unsubscribe_topic'
+        action: 'unsubscribe_topic',
       });
       // Ignore error
     }

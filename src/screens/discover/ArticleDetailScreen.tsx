@@ -1,5 +1,14 @@
 import React from 'react';
-import { View, StyleSheet, Animated, StatusBar, RefreshControl, ActivityIndicator, TouchableOpacity, Linking } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Animated,
+  StatusBar,
+  RefreshControl,
+  ActivityIndicator,
+  TouchableOpacity,
+  Linking,
+} from 'react-native';
 import {
   Text,
   IconButton,
@@ -7,7 +16,7 @@ import {
   Button,
   Divider,
   Avatar,
-  Surface
+  Surface,
 } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -22,8 +31,15 @@ import ShareableDetail from '../../components/discover/ShareableDetail';
 import { deepLinkService } from '../../services/DeepLinkService';
 import { useToastStore } from '../../stores/toastStore';
 import { useAppTheme } from '../../theme/theme';
-import { analyticsService, ANALYTICS_EVENTS } from '../../services/firebase/AnalyticsService';
-import { wordPressService, FormattedComment, FormattedPost } from '../../services/WordPressService';
+import {
+  analyticsService,
+  ANALYTICS_EVENTS,
+} from '../../services/firebase/AnalyticsService';
+import {
+  wordPressService,
+  FormattedComment,
+  FormattedPost,
+} from '../../services/WordPressService';
 import { remoteConfigService } from '../../services/firebase/RemoteConfigService';
 import { observabilityService } from '../../services/ObservabilityService';
 import { CommentsList } from '../../components/discover/CommentsList';
@@ -40,12 +56,20 @@ import FastImage from 'react-native-fast-image';
 
 const BlockParagraph = ({ text, theme }: any) => {
   const paragraphStyle = [styles.paragraph, { color: theme.colors.onSurface }];
-  return <Text variant="bodyLarge" style={paragraphStyle}>{text}</Text>;
+  return (
+    <Text variant="bodyLarge" style={paragraphStyle}>
+      {text}
+    </Text>
+  );
 };
 
 const BlockHeading = ({ text, theme }: any) => {
   const headingStyle = [styles.heading, { color: theme.colors.primary }];
-  return <Text variant="titleLarge" style={headingStyle}>{text}</Text>;
+  return (
+    <Text variant="titleLarge" style={headingStyle}>
+      {text}
+    </Text>
+  );
 };
 
 const BlockQuote = ({ text, author, theme }: any) => {
@@ -54,17 +78,29 @@ const BlockQuote = ({ text, author, theme }: any) => {
     {
       borderLeftColor: theme.colors.primary,
       backgroundColor: theme.colors.elevation.level2,
-      borderRadius: theme.roundness * 2
-    }
+      borderRadius: theme.roundness * 2,
+    },
   ];
   const quoteTextStyle = [styles.quoteText, { color: theme.colors.onSurface }];
-  const quoteAuthorStyle = [styles.quoteAuthor, { color: theme.colors.outline }];
+  const quoteAuthorStyle = [
+    styles.quoteAuthor,
+    { color: theme.colors.outline },
+  ];
 
   return (
     <View style={quoteContainerStyle}>
-      <MaterialCommunityIcons name="format-quote-open" size={32} color={theme.colors.primary} style={styles.quoteIcon} />
+      <MaterialCommunityIcons
+        name="format-quote-open"
+        size={32}
+        color={theme.colors.primary}
+        style={styles.quoteIcon}
+      />
       <Text style={quoteTextStyle}>{text}</Text>
-      {author && <Text variant="labelMedium" style={quoteAuthorStyle}>— {author}</Text>}
+      {author && (
+        <Text variant="labelMedium" style={quoteAuthorStyle}>
+          — {author}
+        </Text>
+      )}
     </View>
   );
 };
@@ -72,11 +108,14 @@ const BlockQuote = ({ text, author, theme }: any) => {
 const BlockImage = ({ url, caption, theme }: any) => {
   const contentImageStyle = [
     styles.contentImage,
-    { borderRadius: theme.roundness * 3, backgroundColor: theme.colors.surfaceVariant }
+    {
+      borderRadius: theme.roundness * 3,
+      backgroundColor: theme.colors.surfaceVariant,
+    },
   ];
   const imageCaptionStyle = [
     styles.imageCaption,
-    { color: theme.colors.outline }
+    { color: theme.colors.outline },
   ];
 
   return (
@@ -87,7 +126,11 @@ const BlockImage = ({ url, caption, theme }: any) => {
         accessibilityRole="image"
         accessibilityLabel={caption || 'Imagen del artículo'}
       />
-      {caption && <Text variant="labelSmall" style={imageCaptionStyle}>{caption}</Text>}
+      {caption && (
+        <Text variant="labelSmall" style={imageCaptionStyle}>
+          {caption}
+        </Text>
+      )}
     </View>
   );
 };
@@ -95,11 +138,11 @@ const BlockImage = ({ url, caption, theme }: any) => {
 const BlockList = ({ items, theme }: any) => {
   const bulletStyle = [
     styles.bullet,
-    { backgroundColor: theme.colors.primary }
+    { backgroundColor: theme.colors.primary },
   ];
   const listItemTextStyle = [
     styles.listItemText,
-    { color: theme.colors.onSurface }
+    { color: theme.colors.onSurface },
   ];
 
   return (
@@ -107,7 +150,9 @@ const BlockList = ({ items, theme }: any) => {
       {items.map((item: string, index: number) => (
         <View key={index} style={styles.listItem}>
           <View style={bulletStyle} />
-          <Text variant="bodyMedium" style={listItemTextStyle}>{item}</Text>
+          <Text variant="bodyMedium" style={listItemTextStyle}>
+            {item}
+          </Text>
         </View>
       ))}
     </View>
@@ -126,7 +171,9 @@ const ArticleDetailScreen = () => {
   const [refreshing, setRefreshing] = React.useState(false);
 
   // New states for deep linking
-  const [articleData, setArticleData] = React.useState<FormattedPost | null>(null);
+  const [articleData, setArticleData] = React.useState<FormattedPost | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [relatedPosts, setRelatedPosts] = React.useState<FormattedPost[]>([]);
@@ -139,7 +186,7 @@ const ArticleDetailScreen = () => {
   const [isShareDialogVisible, setShareDialogVisible] = React.useState(false);
   const [shareFormat, setShareFormat] = React.useState<'1:1' | '16:9'>('1:1');
   const [_sharing, setSharing] = React.useState(false);
-  const showToast = useToastStore((state) => state.showToast);
+  const showToast = useToastStore(state => state.showToast);
 
   // Safe width calculation for header content
   // Logic to merge incoming params or fetched data
@@ -148,18 +195,26 @@ const ArticleDetailScreen = () => {
   const incomingArticle = articleData || params?.article;
   const slug = params?.slug;
 
-  const article = incomingArticle ? {
-    ...incomingArticle,
-    author: {
-      ...(incomingArticle?.author || {})
-    },
-    // Use WordPress tags if available
-    tags: incomingArticle?.tags?.map((tag: any) => typeof tag === 'string' ? { name: tag } : tag) || [],
-    // Use WordPress categories if available
-    categories: incomingArticle?.categories || [],
-    // Use Yoast SEO description if available
-    seoDescription: (incomingArticle as any)?.yoastSEO?.description || (incomingArticle as any)?.seoDescription || '',
-  } : null;
+  const article = incomingArticle
+    ? {
+        ...incomingArticle,
+        author: {
+          ...(incomingArticle?.author || {}),
+        },
+        // Use WordPress tags if available
+        tags:
+          incomingArticle?.tags?.map((tag: any) =>
+            typeof tag === 'string' ? { name: tag } : tag,
+          ) || [],
+        // Use WordPress categories if available
+        categories: incomingArticle?.categories || [],
+        // Use Yoast SEO description if available
+        seoDescription:
+          (incomingArticle as any)?.yoastSEO?.description ||
+          (incomingArticle as any)?.seoDescription ||
+          '',
+      }
+    : null;
 
   // Effect to load article by slug if not provided
   React.useEffect(() => {
@@ -170,7 +225,7 @@ const ArticleDetailScreen = () => {
       setArticleData(null);
       setWebViewHeight(100);
 
-      // Always fetch full article data to ensure we have the complete content, 
+      // Always fetch full article data to ensure we have the complete content,
       // as list views might only contain excerpts or truncated content.
       if (slug || currentArticle?.id) {
         setIsLoading(true); // Always show skeleton while fetching full data
@@ -178,7 +233,10 @@ const ArticleDetailScreen = () => {
         try {
           const fetchedArticle = slug
             ? await wordPressService.getPostBySlug(slug)
-            : await wordPressService.getPostById(Number(currentArticle?.id), true); // Force bypass cache for detail
+            : await wordPressService.getPostById(
+                Number(currentArticle?.id),
+                true,
+              ); // Force bypass cache for detail
 
           if (fetchedArticle) {
             setArticleData(fetchedArticle);
@@ -187,7 +245,11 @@ const ArticleDetailScreen = () => {
             setError('Artículo no encontrado');
           }
         } catch (e) {
-          observabilityService.captureError(e, { context: 'ArticleDetailScreen.loadArticle', slug, id: currentArticle?.id });
+          observabilityService.captureError(e, {
+            context: 'ArticleDetailScreen.loadArticle',
+            slug,
+            id: currentArticle?.id,
+          });
           if (!currentArticle) setError('Error al cargar el artículo');
         } finally {
           setIsLoading(false);
@@ -200,20 +262,22 @@ const ArticleDetailScreen = () => {
         try {
           // Enrich author data if it was slim (social might be missing in embed)
           if (currentArticle.author?.id) {
-            wordPressService.getUserById(currentArticle.author.id).then(fullAuthor => {
-              if (fullAuthor) {
-                setArticleData((prev: any) => {
-                  const base = prev || params?.article;
-                  if (!base) return null;
-                  return { ...base, author: fullAuthor };
-                });
-              }
-            });
+            wordPressService
+              .getUserById(currentArticle.author.id)
+              .then(fullAuthor => {
+                if (fullAuthor) {
+                  setArticleData((prev: any) => {
+                    const base = prev || params?.article;
+                    if (!base) return null;
+                    return { ...base, author: fullAuthor };
+                  });
+                }
+              });
           }
 
           const fetchedRelated = await wordPressService.getRelatedPosts(
             Number(currentArticle.id),
-            currentArticle.categories[0].id
+            currentArticle.categories[0].id,
           );
           setRelatedPosts(fetchedRelated);
         } catch (e) {
@@ -237,17 +301,22 @@ const ArticleDetailScreen = () => {
     const loadCommentsFeature = async () => {
       try {
         await remoteConfigService.fetchAndActivate();
-        const isCommentsActive = await remoteConfigService.getFeature('comments');
+        const isCommentsActive =
+          await remoteConfigService.getFeature('comments');
         setCommentsEnabled(isCommentsActive);
 
         if (isCommentsActive && article?.id) {
           setCommentsLoading(true);
-          const fetchedComments = await wordPressService.getComments(Number(article.id));
+          const fetchedComments = await wordPressService.getComments(
+            Number(article.id),
+          );
           setComments(fetchedComments);
           setCommentsLoading(false);
         }
       } catch (e) {
-        observabilityService.captureError(e, { context: 'ArticleDetailScreen.loadCommentsFeature' });
+        observabilityService.captureError(e, {
+          context: 'ArticleDetailScreen.loadCommentsFeature',
+        });
         setCommentsLoading(false);
       }
     };
@@ -257,14 +326,21 @@ const ArticleDetailScreen = () => {
 
   if (isLoading || !article) {
     return (
-      <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background }]}>
+      <View
+        style={[
+          styles.loadingContainer,
+          { backgroundColor: theme.colors.background },
+        ]}
+      >
         <ArticleDetailSkeleton />
       </View>
     );
   }
 
   if (error) {
-    return <DiscoverErrorView message={error} onRetry={() => setArticleData(null)} />;
+    return (
+      <DiscoverErrorView message={error} onRetry={() => setArticleData(null)} />
+    );
   }
 
   const handleRefresh = async () => {
@@ -273,11 +349,18 @@ const ArticleDetailScreen = () => {
     try {
       if (commentsEnabled && article?.id) {
         // Force bypass cache to get fresh comments
-        const fetchedComments = await wordPressService.getComments(Number(article.id), 1, 100, true);
+        const fetchedComments = await wordPressService.getComments(
+          Number(article.id),
+          1,
+          100,
+          true,
+        );
         setComments(fetchedComments);
       }
     } catch (e) {
-      observabilityService.captureError(e, { context: 'ArticleDetailScreen.handleRefresh' });
+      observabilityService.captureError(e, {
+        context: 'ArticleDetailScreen.handleRefresh',
+      });
     } finally {
       setRefreshing(false);
     }
@@ -307,7 +390,7 @@ const ArticleDetailScreen = () => {
           height: format === '1:1' ? 1080 : 1920,
         });
 
-        if (!uri) throw new Error("URI generation failed");
+        if (!uri) throw new Error('URI generation failed');
 
         const sharePath = uri.startsWith('file://') ? uri : `file://${uri}`;
 
@@ -321,7 +404,8 @@ const ArticleDetailScreen = () => {
         // Controlled by 'discover_web' remote config
         let shareExactDeepLink = true;
         try {
-          shareExactDeepLink = await remoteConfigService.getFeature('discover_web');
+          shareExactDeepLink =
+            await remoteConfigService.getFeature('discover_web');
         } catch (_) {
           // Fallback to true if config fails
           shareExactDeepLink = false;
@@ -338,10 +422,16 @@ const ArticleDetailScreen = () => {
           type: 'image/jpeg',
         });
 
-        analyticsService.logShare('article_detail', article.id.toString() || 'unknown', format === '1:1' ? 'image_square' : 'image_story');
+        analyticsService.logShare(
+          'article_detail',
+          article.id.toString() || 'unknown',
+          format === '1:1' ? 'image_square' : 'image_story',
+        );
       } catch (e: any) {
         if (e.message !== 'User did not share' && e.message !== 'CANCELLED') {
-          observabilityService.captureError(e, { context: 'ArticleDetailScreen.shareImage' });
+          observabilityService.captureError(e, {
+            context: 'ArticleDetailScreen.shareImage',
+          });
           showToast('Error al compartir imagen', 'error');
         }
       } finally {
@@ -357,7 +447,7 @@ const ArticleDetailScreen = () => {
       excerpt: article.excerpt,
       url: `https://discover.vtrading.app/article/${article.id || article.slug}`,
       type: 'ARTICLE',
-      author: article.author?.name
+      author: article.author?.name,
     });
 
     if (success) {
@@ -367,8 +457,6 @@ const ArticleDetailScreen = () => {
       });
     }
   };
-
-
 
   interface ContentBlock {
     type: string;
@@ -381,12 +469,32 @@ const ArticleDetailScreen = () => {
 
   const renderBlock = (block: ContentBlock, index: number) => {
     switch (block.type) {
-      case 'paragraph': return <BlockParagraph key={index} text={block.text} theme={theme} />;
-      case 'heading': return <BlockHeading key={index} text={block.text} theme={theme} />;
-      case 'quote': return <BlockQuote key={index} text={block.text} author={block.author} theme={theme} />;
-      case 'image': return <BlockImage key={index} url={block.url} caption={block.caption} theme={theme} />;
-      case 'list': return <BlockList key={index} items={block.items} theme={theme} />;
-      default: return null;
+      case 'paragraph':
+        return <BlockParagraph key={index} text={block.text} theme={theme} />;
+      case 'heading':
+        return <BlockHeading key={index} text={block.text} theme={theme} />;
+      case 'quote':
+        return (
+          <BlockQuote
+            key={index}
+            text={block.text}
+            author={block.author}
+            theme={theme}
+          />
+        );
+      case 'image':
+        return (
+          <BlockImage
+            key={index}
+            url={block.url}
+            caption={block.caption}
+            theme={theme}
+          />
+        );
+      case 'list':
+        return <BlockList key={index} items={block.items} theme={theme} />;
+      default:
+        return null;
     }
   };
 
@@ -470,7 +578,7 @@ const ArticleDetailScreen = () => {
         source={{ html: htmlContent }}
         style={webViewStyle}
         scrollEnabled={false}
-        onMessage={(event) => {
+        onMessage={event => {
           const h = Number(event.nativeEvent.data);
           if (h > 0) setWebViewHeight(h);
         }}
@@ -487,16 +595,30 @@ const ArticleDetailScreen = () => {
   }
 
   if (error || !article) {
-    const errorContainerStyle = [styles.container, { backgroundColor: theme.colors.background }];
+    const errorContainerStyle = [
+      styles.container,
+      { backgroundColor: theme.colors.background },
+    ];
     const errorSubContainerStyle = { flex: 1, paddingTop: insets.top };
-    const errorHeaderStyle = { height: 56, justifyContent: 'center' as const, paddingHorizontal: 4 };
+    const errorHeaderStyle = {
+      height: 56,
+      justifyContent: 'center' as const,
+      paddingHorizontal: 4,
+    };
 
     return (
       <View style={errorContainerStyle}>
-        <StatusBar barStyle={theme.dark ? 'light-content' : 'dark-content'} translucent backgroundColor="transparent" />
+        <StatusBar
+          barStyle={theme.dark ? 'light-content' : 'dark-content'}
+          translucent
+          backgroundColor="transparent"
+        />
         <View style={errorSubContainerStyle}>
           <View style={errorHeaderStyle}>
-            <IconButton icon="chevron-left" onPress={() => navigation.goBack()} />
+            <IconButton
+              icon="chevron-left"
+              onPress={() => navigation.goBack()}
+            />
           </View>
           <DiscoverErrorView
             message={error || 'Artículo no encontrado'}
@@ -507,33 +629,36 @@ const ArticleDetailScreen = () => {
     );
   }
 
-  const mainContainerStyle = [styles.container, { backgroundColor: theme.colors.background }];
+  const mainContainerStyle = [
+    styles.container,
+    { backgroundColor: theme.colors.background },
+  ];
   const scrollViewContentStyle = { paddingBottom: insets.bottom + 40 };
 
   const heroPlaceholderStyle = [
     styles.heroContainer,
-    { backgroundColor: theme.colors.surfaceVariant, height: 280 }
+    { backgroundColor: theme.colors.surfaceVariant, height: 280 },
   ];
-  const heroPlaceholderIconSubStyle = { alignItems: 'center' as const, justifyContent: 'center' as const, flex: 1 };
+  const heroPlaceholderIconSubStyle = {
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+    flex: 1,
+  };
   const heroPlaceholderIconStyle = { opacity: 0.3 };
 
   const promoBadgeStyle = [
     styles.promoBadge,
-    { backgroundColor: theme.colors.warning }
+    { backgroundColor: theme.colors.warning },
   ];
   const trendingBadgeStyle = [
     styles.promoBadge,
-    { backgroundColor: theme.colors.onPrimaryContainer }
+    { backgroundColor: theme.colors.onPrimaryContainer },
   ];
   const badgeIconStyle = { marginRight: 4 };
-  const badgeTextStyle = [
-    styles.promoText,
-    { color: theme.colors.onPrimary }
-  ];
+  const badgeTextStyle = [styles.promoText, { color: theme.colors.onPrimary }];
 
   return (
     <View style={mainContainerStyle}>
-
       <DiscoverHeader
         variant="detail"
         onBackPress={() => navigation.goBack()}
@@ -550,7 +675,7 @@ const ArticleDetailScreen = () => {
         onContentSizeChange={(_, h) => setContentHeight(h)}
         onScroll={Animated.event(
           [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true }
+          { useNativeDriver: true },
         )}
         scrollEventThrottle={16}
         contentContainerStyle={scrollViewContentStyle}
@@ -567,23 +692,36 @@ const ArticleDetailScreen = () => {
         {/* Hero Image with Theme-Aware Gradient */}
         {article.image ? (
           <View style={styles.heroContainer}>
-            <FastImage source={{ uri: article.image }} style={styles.heroImage} />
+            <FastImage
+              source={{ uri: article.image }}
+              style={styles.heroImage}
+            />
             <LinearGradient
               colors={[
                 'transparent',
                 theme.dark ? 'rgba(0,0,0,0.4)' : 'rgba(255,255,255,0.3)',
-                theme.colors.background
+                theme.colors.background,
               ]}
               style={styles.heroGradient}
             />
             {article.isPromo ? (
               <Surface style={promoBadgeStyle} elevation={4}>
-                <MaterialCommunityIcons name="bullhorn-variant-outline" size={12} color={theme.colors.onPrimary} style={badgeIconStyle} />
+                <MaterialCommunityIcons
+                  name="bullhorn-variant-outline"
+                  size={12}
+                  color={theme.colors.onPrimary}
+                  style={badgeIconStyle}
+                />
                 <Text style={badgeTextStyle}>PROMO</Text>
               </Surface>
             ) : article.isTrending ? (
               <Surface style={trendingBadgeStyle} elevation={4}>
-                <MaterialCommunityIcons name="star" size={12} color={theme.colors.onPrimary} style={badgeIconStyle} />
+                <MaterialCommunityIcons
+                  name="star"
+                  size={12}
+                  color={theme.colors.onPrimary}
+                  style={badgeIconStyle}
+                />
                 <Text style={badgeTextStyle}>TRENDING</Text>
               </Surface>
             ) : null}
@@ -600,12 +738,22 @@ const ArticleDetailScreen = () => {
             </View>
             {article.isPromo ? (
               <Surface style={promoBadgeStyle} elevation={4}>
-                <MaterialCommunityIcons name="bullhorn-variant-outline" size={12} color={theme.colors.onPrimary} style={badgeIconStyle} />
+                <MaterialCommunityIcons
+                  name="bullhorn-variant-outline"
+                  size={12}
+                  color={theme.colors.onPrimary}
+                  style={badgeIconStyle}
+                />
                 <Text style={badgeTextStyle}>PROMO</Text>
               </Surface>
             ) : article.isTrending ? (
               <Surface style={trendingBadgeStyle} elevation={4}>
-                <MaterialCommunityIcons name="star" size={12} color={theme.colors.onPrimary} style={badgeIconStyle} />
+                <MaterialCommunityIcons
+                  name="star"
+                  size={12}
+                  color={theme.colors.onPrimary}
+                  style={badgeIconStyle}
+                />
                 <Text style={badgeTextStyle}>TRENDING</Text>
               </Surface>
             ) : null}
@@ -623,7 +771,7 @@ const ArticleDetailScreen = () => {
                     backgroundColor: theme.colors.primaryContainer,
                     marginRight: 8,
                     borderRadius: theme.roundness * 2,
-                  }
+                  },
                 ];
                 const categoryChipTextStyle = {
                   color: theme.colors.onPrimaryContainer,
@@ -638,7 +786,12 @@ const ArticleDetailScreen = () => {
                     style={categoryChipStyle}
                     textStyle={categoryChipTextStyle}
                     compact
-                    onPress={() => navigation.navigate('CategoryDetail', { category: cat, slug: cat.slug })}
+                    onPress={() =>
+                      navigation.navigate('CategoryDetail', {
+                        category: cat,
+                        slug: cat.slug,
+                      })
+                    }
                   >
                     {cat.name.toUpperCase()}
                   </Chip>
@@ -648,7 +801,10 @@ const ArticleDetailScreen = () => {
           )}
 
           {/* Title */}
-          <Text variant="headlineLarge" style={[styles.title, { color: theme.colors.onSurface }]}>
+          <Text
+            variant="headlineLarge"
+            style={[styles.title, { color: theme.colors.onSurface }]}
+          >
             {article.title}
           </Text>
 
@@ -662,13 +818,31 @@ const ArticleDetailScreen = () => {
 
             <View style={styles.metadataText}>
               <View style={styles.metadataRow}>
-                <Text variant="labelLarge" style={{ fontWeight: '600' as const, color: theme.colors.onSurface }}>
+                <Text
+                  variant="labelLarge"
+                  style={{
+                    fontWeight: '600' as const,
+                    color: theme.colors.onSurface,
+                  }}
+                >
                   {article.author?.name || article.source}
                 </Text>
                 {article.author?.role && article.author.role.length < 50 && (
                   <>
-                    <Text variant="bodySmall" style={[styles.metadataSeparator, { color: theme.colors.onSurfaceVariant }]}>•</Text>
-                    <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }} numberOfLines={1}>
+                    <Text
+                      variant="bodySmall"
+                      style={[
+                        styles.metadataSeparator,
+                        { color: theme.colors.onSurfaceVariant },
+                      ]}
+                    >
+                      •
+                    </Text>
+                    <Text
+                      variant="bodySmall"
+                      style={{ color: theme.colors.onSurfaceVariant }}
+                      numberOfLines={1}
+                    >
                       {article.author.role}
                     </Text>
                   </>
@@ -676,43 +850,108 @@ const ArticleDetailScreen = () => {
                 {article.author?.social && (
                   <View style={styles.socialRow}>
                     {article.author.social.twitter && (
-                      <TouchableOpacity onPress={() => Linking.openURL(article.author!.social!.twitter!)}>
-                        <XIcon size={16} color={theme.colors.onSurfaceVariant} />
+                      <TouchableOpacity
+                        onPress={() =>
+                          Linking.openURL(article.author!.social!.twitter!)
+                        }
+                      >
+                        <XIcon
+                          size={16}
+                          color={theme.colors.onSurfaceVariant}
+                        />
                       </TouchableOpacity>
                     )}
                     {article.author.social.facebook && (
-                      <TouchableOpacity onPress={() => Linking.openURL(article.author!.social!.facebook!)}>
-                        <FacebookIcon size={16} color={theme.colors.onSurfaceVariant} />
+                      <TouchableOpacity
+                        onPress={() =>
+                          Linking.openURL(article.author!.social!.facebook!)
+                        }
+                      >
+                        <FacebookIcon
+                          size={16}
+                          color={theme.colors.onSurfaceVariant}
+                        />
                       </TouchableOpacity>
                     )}
                     {article.author.social.instagram && (
-                      <TouchableOpacity onPress={() => Linking.openURL(article.author!.social!.instagram!)}>
-                        <MaterialCommunityIcons name="instagram" size={16} color={theme.colors.onSurfaceVariant} />
+                      <TouchableOpacity
+                        onPress={() =>
+                          Linking.openURL(article.author!.social!.instagram!)
+                        }
+                      >
+                        <MaterialCommunityIcons
+                          name="instagram"
+                          size={16}
+                          color={theme.colors.onSurfaceVariant}
+                        />
                       </TouchableOpacity>
                     )}
                     {article.author.social.youtube && (
-                      <TouchableOpacity onPress={() => Linking.openURL(article.author!.social!.youtube!)}>
-                        <MaterialCommunityIcons name="youtube" size={16} color={theme.colors.onSurfaceVariant} />
+                      <TouchableOpacity
+                        onPress={() =>
+                          Linking.openURL(article.author!.social!.youtube!)
+                        }
+                      >
+                        <MaterialCommunityIcons
+                          name="youtube"
+                          size={16}
+                          color={theme.colors.onSurfaceVariant}
+                        />
                       </TouchableOpacity>
                     )}
                     {article.author.social.linkedin && (
-                      <TouchableOpacity onPress={() => Linking.openURL(article.author!.social!.linkedin!)}>
-                        <MaterialCommunityIcons name="linkedin" size={16} color={theme.colors.onSurfaceVariant} />
+                      <TouchableOpacity
+                        onPress={() =>
+                          Linking.openURL(article.author!.social!.linkedin!)
+                        }
+                      >
+                        <MaterialCommunityIcons
+                          name="linkedin"
+                          size={16}
+                          color={theme.colors.onSurfaceVariant}
+                        />
                       </TouchableOpacity>
                     )}
                     {article.author.social.tiktok && (
-                      <TouchableOpacity onPress={() => Linking.openURL(article.author!.social!.tiktok!)}>
-                        <MaterialCommunityIcons name="music-note" size={16} color={theme.colors.onSurfaceVariant} />
+                      <TouchableOpacity
+                        onPress={() =>
+                          Linking.openURL(article.author!.social!.tiktok!)
+                        }
+                      >
+                        <MaterialCommunityIcons
+                          name="music-note"
+                          size={16}
+                          color={theme.colors.onSurfaceVariant}
+                        />
                       </TouchableOpacity>
                     )}
                   </View>
                 )}
                 {article.isEdited && article.modifiedTime && (
                   <>
-                    <Text variant="bodySmall" style={[styles.separator, { color: theme.colors.onSurfaceVariant }]}>•</Text>
+                    <Text
+                      variant="bodySmall"
+                      style={[
+                        styles.separator,
+                        { color: theme.colors.onSurfaceVariant },
+                      ]}
+                    >
+                      •
+                    </Text>
                     <View style={styles.metadataItem}>
-                      <MaterialCommunityIcons name="pencil-outline" size={14} color={theme.colors.onSurfaceVariant} style={styles.metadataIconOpacity} />
-                      <Text variant="bodySmall" style={[styles.metadataTextMarginOpacity, { color: theme.colors.onSurfaceVariant }]}>
+                      <MaterialCommunityIcons
+                        name="pencil-outline"
+                        size={14}
+                        color={theme.colors.onSurfaceVariant}
+                        style={styles.metadataIconOpacity}
+                      />
+                      <Text
+                        variant="bodySmall"
+                        style={[
+                          styles.metadataTextMarginOpacity,
+                          { color: theme.colors.onSurfaceVariant },
+                        ]}
+                      >
                         {article.modifiedTime}
                       </Text>
                     </View>
@@ -721,20 +960,50 @@ const ArticleDetailScreen = () => {
               </View>
               <View style={styles.metadataRow}>
                 <View style={styles.metadataItem}>
-                  <MaterialCommunityIcons name="clock-outline" size={14} color={theme.colors.onSurfaceVariant} />
-                  <Text variant="bodySmall" style={[styles.metadataTextMargin, { color: theme.colors.onSurfaceVariant }]}>
+                  <MaterialCommunityIcons
+                    name="clock-outline"
+                    size={14}
+                    color={theme.colors.onSurfaceVariant}
+                  />
+                  <Text
+                    variant="bodySmall"
+                    style={[
+                      styles.metadataTextMargin,
+                      { color: theme.colors.onSurfaceVariant },
+                    ]}
+                  >
                     {article.time}
                   </Text>
                 </View>
 
-                <Text variant="bodySmall" style={[styles.separator, { color: theme.colors.onSurfaceVariant }]}>•</Text>
+                <Text
+                  variant="bodySmall"
+                  style={[
+                    styles.separator,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
+                  •
+                </Text>
 
                 <View style={styles.metadataItem}>
-                  <Text variant="bodySmall" style={[styles.readTimeText, { color: theme.colors.primary }]}>
+                  <Text
+                    variant="bodySmall"
+                    style={[
+                      styles.readTimeText,
+                      { color: theme.colors.primary },
+                    ]}
+                  >
                     {article.readTime}
                   </Text>
                   {article.wordCount && (
-                    <Text variant="bodySmall" style={[styles.wordCountText, { color: theme.colors.onSurfaceVariant }]}>
+                    <Text
+                      variant="bodySmall"
+                      style={[
+                        styles.wordCountText,
+                        { color: theme.colors.onSurfaceVariant },
+                      ]}
+                    >
                       ({article.wordCount} palabras)
                     </Text>
                   )}
@@ -745,27 +1014,54 @@ const ArticleDetailScreen = () => {
 
           {/* Content Body: Support both Legacy Blocks and HTML (WP) */}
           <View style={styles.articleBody}>
-            {typeof article.content === 'string' ? (
-              renderHtmlContent()
-            ) : article.content ? (
-              (article.content as ContentBlock[]).map((block: ContentBlock, idx: number) => renderBlock(block, idx))
-            ) : null}
+            {typeof article.content === 'string'
+              ? renderHtmlContent()
+              : article.content
+                ? (article.content as ContentBlock[]).map(
+                    (block: ContentBlock, idx: number) =>
+                      renderBlock(block, idx),
+                  )
+                : null}
           </View>
 
           {/* Summary / Lead Paragraph Section */}
           {article.seoDescription && (
-            <View style={[
-              styles.summaryBox,
-              {
-                backgroundColor: theme.colors.elevation.level1,
-                borderColor: theme.colors.outlineVariant,
-                borderRadius: theme.roundness * 4
-              }
-            ]}>
-              <View style={[styles.summaryLabel, { backgroundColor: theme.colors.primary, borderRadius: theme.roundness }]}>
-                <Text variant="labelSmall" style={[styles.summaryLabelText, { color: theme.colors.onPrimary }]}>IMPORTANTE</Text>
+            <View
+              style={[
+                styles.summaryBox,
+                {
+                  backgroundColor: theme.colors.elevation.level1,
+                  borderColor: theme.colors.outlineVariant,
+                  borderRadius: theme.roundness * 4,
+                },
+              ]}
+            >
+              <View
+                style={[
+                  styles.summaryLabel,
+                  {
+                    backgroundColor: theme.colors.primary,
+                    borderRadius: theme.roundness,
+                  },
+                ]}
+              >
+                <Text
+                  variant="labelSmall"
+                  style={[
+                    styles.summaryLabelText,
+                    { color: theme.colors.onPrimary },
+                  ]}
+                >
+                  IMPORTANTE
+                </Text>
               </View>
-              <Text variant="bodyMedium" style={[styles.summaryText, { color: theme.colors.onSurfaceVariant }]}>
+              <Text
+                variant="bodyMedium"
+                style={[
+                  styles.summaryText,
+                  { color: theme.colors.onSurfaceVariant },
+                ]}
+              >
                 {article.seoDescription}
               </Text>
             </View>
@@ -774,15 +1070,25 @@ const ArticleDetailScreen = () => {
           {/* SEO/Tags */}
           {article.tags && article.tags.length > 0 && (
             <>
-              <Text variant="titleSmall" style={[styles.tagTitle, { color: theme.colors.onSurface }]}>Etiquetas</Text>
+              <Text
+                variant="titleSmall"
+                style={[styles.tagTitle, { color: theme.colors.onSurface }]}
+              >
+                Etiquetas
+              </Text>
               <View style={styles.tagsContainer}>
                 {article.tags.map((tag: any, idx: number) => (
                   <Chip
                     key={idx}
-                    style={[styles.tagChip, { borderRadius: theme.roundness * 2 }]}
+                    style={[
+                      styles.tagChip,
+                      { borderRadius: theme.roundness * 2 },
+                    ]}
                     textStyle={styles.tagChipText}
                     mode="outlined"
-                    onPress={() => navigation.navigate('TagDetail', { tag, slug: tag.slug })}
+                    onPress={() =>
+                      navigation.navigate('TagDetail', { tag, slug: tag.slug })
+                    }
                   >
                     {tag.name}
                   </Chip>
@@ -794,43 +1100,84 @@ const ArticleDetailScreen = () => {
           {/* Author Section */}
           {article.author && <AuthorCard author={article.author} />}
 
-          <Divider style={[styles.divider, { backgroundColor: theme.colors.outlineVariant }]} />
+          <Divider
+            style={[
+              styles.divider,
+              { backgroundColor: theme.colors.outlineVariant },
+            ]}
+          />
 
           {/* Recommended Articles Section */}
           <View style={styles.recommendedSection}>
             <View style={styles.sectionHeader}>
-              <Text variant="titleLarge" style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>Relacionados</Text>
-              <Button mode="text" onPress={() => navigation.navigate('CategoryDetail', { category: article.categories[0], slug: article.categories[0].slug })}>
+              <Text
+                variant="titleLarge"
+                style={[styles.sectionTitle, { color: theme.colors.onSurface }]}
+              >
+                Relacionados
+              </Text>
+              <Button
+                mode="text"
+                onPress={() =>
+                  navigation.navigate('CategoryDetail', {
+                    category: article.categories[0],
+                    slug: article.categories[0].slug,
+                  })
+                }
+              >
                 Ver más
               </Button>
             </View>
 
             {loadingRelated ? (
-              <ActivityIndicator style={styles.loader} color={theme.colors.primary} />
+              <ActivityIndicator
+                style={styles.loader}
+                color={theme.colors.primary}
+              />
             ) : relatedPosts.length > 0 ? (
               <View style={styles.relatedGrid}>
-                {relatedPosts.map((related) => (
+                {relatedPosts.map(related => (
                   <ArticleCard
                     key={related.id}
                     article={related}
-                    onPress={() => navigation.push('ArticleDetail', { article: related })}
+                    onPress={() =>
+                      navigation.push('ArticleDetail', { article: related })
+                    }
                   />
                 ))}
               </View>
             ) : (
-              <Text style={styles.emptyText}>No hay recomendaciones en este momento</Text>
+              <Text style={styles.emptyText}>
+                No hay recomendaciones en este momento
+              </Text>
             )}
           </View>
 
-          <Divider style={[styles.divider, { backgroundColor: theme.colors.outlineVariant }]} />
+          <Divider
+            style={[
+              styles.divider,
+              { backgroundColor: theme.colors.outlineVariant },
+            ]}
+          />
 
           {/* Comments Section - WordPress Integration */}
           {commentsEnabled && (
             <>
-              <Divider style={[styles.divider, { backgroundColor: theme.colors.outlineVariant }]} />
+              <Divider
+                style={[
+                  styles.divider,
+                  { backgroundColor: theme.colors.outlineVariant },
+                ]}
+              />
 
               <View style={styles.commentsSection}>
-                <Text variant="titleMedium" style={[styles.commentsTitle, { color: theme.colors.onSurface }]}>
+                <Text
+                  variant="titleMedium"
+                  style={[
+                    styles.commentsTitle,
+                    { color: theme.colors.onSurface },
+                  ]}
+                >
                   Comentarios ({comments.length})
                 </Text>
 
@@ -838,7 +1185,6 @@ const ArticleDetailScreen = () => {
               </View>
             </>
           )}
-
         </View>
       </Animated.ScrollView>
       <ShareableDetail
@@ -846,30 +1192,53 @@ const ArticleDetailScreen = () => {
         title={article?.title || 'Artículo'}
         type="ARTICLE"
         image={article?.image}
-        description={article?.content ? article.content.replace(/<[^>]*>/g, '').replace(/\n+/g, ' ').slice(0, 400) + '...' : ''}
-        author={article.author ? {
-          name: article.author.name || '',
-          avatar: article.author.avatar || '',
-          role: article.date ? new Date(article.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) : (article.time || ''),
-          socials: article.author.social as any
-        } : undefined}
-        categoryName={article?.categories && article.categories.length > 0 ? article.categories[0].name : 'Artículo'}
+        description={
+          article?.content
+            ? article.content
+                .replace(/<[^>]*>/g, '')
+                .replace(/\n+/g, ' ')
+                .slice(0, 400) + '...'
+            : ''
+        }
+        author={
+          article.author
+            ? {
+                name: article.author.name || '',
+                avatar: article.author.avatar || '',
+                role: article.date
+                  ? new Date(article.date).toLocaleDateString('es-ES', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric',
+                    })
+                  : article.time || '',
+                socials: article.author.social as any,
+              }
+            : undefined
+        }
+        categoryName={
+          article?.categories && article.categories.length > 0
+            ? article.categories[0].name
+            : 'Artículo'
+        }
         aspectRatio={shareFormat}
         items={[
           // Hero Item (Current Article)
           {
             title: article?.title || 'Artículo',
             image: article?.image,
-            date: article?.date ? new Date(article.date).toLocaleDateString() : (article?.time || ''),
-            author: article?.author?.name || 'VTrading'
+            date: article?.date
+              ? new Date(article.date).toLocaleDateString()
+              : article?.time || '',
+            author: article?.author?.name || 'VTrading',
           },
           // Related Items (List)
           ...relatedPosts.slice(0, shareFormat === '16:9' ? 4 : 2).map(p => ({
             title: p.title.replace(/&#8211;/g, '-').replace(/&#8217;/g, "'"),
             image: p.image,
             date: new Date(p.date).toLocaleDateString(),
-            author: p.author?.name || 'VTrading'
-          }))
+            author: p.author?.name || 'VTrading',
+          })),
         ]}
       />
 
@@ -882,7 +1251,13 @@ const ArticleDetailScreen = () => {
         confirmLabel="Cerrar"
         onConfirm={() => setShareDialogVisible(false)}
       >
-        <Text variant="bodyMedium" style={[styles.dialogDescription, { color: theme.colors.onSurfaceVariant }]}>
+        <Text
+          variant="bodyMedium"
+          style={[
+            styles.dialogDescription,
+            { color: theme.colors.onSurfaceVariant },
+          ]}
+        >
           Selecciona el formato ideal para compartir en tus redes sociales
         </Text>
         <View style={styles.dialogActions}>

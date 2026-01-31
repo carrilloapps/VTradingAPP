@@ -1,7 +1,11 @@
 import React from 'react';
 import Svg, { Circle, Path, G } from 'react-native-svg';
 
-export const TetherIcon = ({ backgroundColor = '#26A17B', contentColor = '#FFF', ...props }: any) => (
+export const TetherIcon = ({
+  backgroundColor = '#26A17B',
+  contentColor = '#FFF',
+  ...props
+}: any) => (
   <Svg width={40} height={40} viewBox="0 0 32 32" {...props}>
     <G fill="none" fillRule="evenodd">
       <Circle cx="16" cy="16" r="16" fill={backgroundColor} />

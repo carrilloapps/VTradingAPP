@@ -8,7 +8,7 @@ interface AdvancedCalculatorCTAProps {
   spread: number | null;
 }
 
-const AdvancedCalculatorCTA: React.FC<AdvancedCalculatorCTAProps> = ({ 
+const AdvancedCalculatorCTA: React.FC<AdvancedCalculatorCTAProps> = ({
   spread,
 }) => {
   const theme = useAppTheme();
@@ -23,23 +23,23 @@ const AdvancedCalculatorCTA: React.FC<AdvancedCalculatorCTAProps> = ({
   const accentColor = theme.colors.warning;
   // Flat design: Use level1 for background, similar to other cards
   const containerColor = theme.colors.elevation.level1;
-  
+
   // Text color for the badge (Dark text on Light Orange in Dark Mode, White text on Dark Orange in Light Mode)
   const badgeTextColor = theme.dark ? '#2A2A2A' : '#FFFFFF';
 
   return (
     <Surface
       style={[
-        styles.container, 
-        { 
+        styles.container,
+        {
           backgroundColor: containerColor,
           borderColor: accentColor,
           borderRadius: theme.roundness * 6,
-        }
+        },
       ]}
       elevation={0} // Flat design: No elevation
     >
-      <TouchableOpacity 
+      <TouchableOpacity
         onPress={handlePress}
         activeOpacity={0.8}
         style={styles.touchable}
@@ -48,28 +48,43 @@ const AdvancedCalculatorCTA: React.FC<AdvancedCalculatorCTAProps> = ({
           <View style={styles.leftColumn}>
             <View style={styles.headerRow}>
               <Icon source="calculator-variant" size={24} color={accentColor} />
-              <Text variant="titleMedium" style={[styles.title, { color: theme.colors.onSurface }]}>
+              <Text
+                variant="titleMedium"
+                style={[styles.title, { color: theme.colors.onSurface }]}
+              >
                 Calculadora profesional
               </Text>
             </View>
-            <Text variant="bodySmall" style={[styles.subtitle, { color: theme.colors.onSurfaceVariant }]}>
+            <Text
+              variant="bodySmall"
+              style={[
+                styles.subtitle,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
+            >
               Herramienta para trading y comercio
             </Text>
-            
+
             <View style={styles.noteContainer}>
-                <Icon source="information-outline" size={12} color={theme.colors.onSurfaceVariant} />
-                <Text style={[styles.noteText, { color: theme.colors.onSurfaceVariant }]}>
-                    Spread: Diferencia USD vs USDT
-                </Text>
+              <Icon
+                source="information-outline"
+                size={12}
+                color={theme.colors.onSurfaceVariant}
+              />
+              <Text
+                style={[
+                  styles.noteText,
+                  { color: theme.colors.onSurfaceVariant },
+                ]}
+              >
+                Spread: Diferencia USD vs USDT
+              </Text>
             </View>
           </View>
 
           {spread !== null && (
             <View style={styles.rightColumn}>
-              <View style={[
-                styles.badge, 
-                { backgroundColor: accentColor }
-              ]}>
+              <View style={[styles.badge, { backgroundColor: accentColor }]}>
                 <Text style={[styles.badgeLabel, { color: badgeTextColor }]}>
                   SPREAD
                 </Text>
@@ -77,7 +92,11 @@ const AdvancedCalculatorCTA: React.FC<AdvancedCalculatorCTAProps> = ({
                   {spread.toFixed(2)}%
                 </Text>
               </View>
-              <Icon source="chevron-right" size={24} color={theme.colors.onSurfaceVariant} />
+              <Icon
+                source="chevron-right"
+                size={24}
+                color={theme.colors.onSurfaceVariant}
+              />
             </View>
           )}
         </View>

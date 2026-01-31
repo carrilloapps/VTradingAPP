@@ -1,4 +1,8 @@
-import { getInAppMessaging, setMessagesDisplaySuppressed, triggerEvent } from '@react-native-firebase/in-app-messaging';
+import {
+  getInAppMessaging,
+  setMessagesDisplaySuppressed,
+  triggerEvent,
+} from '@react-native-firebase/in-app-messaging';
 
 class InAppMessagingService {
   private inAppMessaging = getInAppMessaging();
@@ -22,7 +26,7 @@ class InAppMessagingService {
    * Trigger an event manually (if configured in Firebase Console)
    */
   triggerEvent(eventId: string): void {
-      triggerEvent(this.inAppMessaging, eventId);
+    triggerEvent(this.inAppMessaging, eventId);
   }
 }
 

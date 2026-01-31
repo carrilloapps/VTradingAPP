@@ -1,9 +1,11 @@
 # Copilot Instructions for VTradingAPP
 
 ## Overview
+
 VTradingAPP is a React Native application designed for trading and financial operations. The project is structured as a multi-platform app with Android and iOS support, leveraging TypeScript for type safety and modular architecture for scalability.
 
 ## Project Structure
+
 - **`src/`**: Contains the main application code.
   - **`components/`**: Reusable UI components, organized by feature (e.g., `dashboard`, `settings`).
   - **`context/`**: Context providers for state management (e.g., `AuthContext`, `FilterContext`).
@@ -19,6 +21,7 @@ VTradingAPP is a React Native application designed for trading and financial ope
 ## Key Workflows
 
 ### Development
+
 1. Install dependencies:
    ```bash
    npm install
@@ -34,6 +37,7 @@ VTradingAPP is a React Native application designed for trading and financial ope
    ```
 
 ### Testing
+
 - Run all tests:
   ```bash
   npm test
@@ -45,6 +49,7 @@ VTradingAPP is a React Native application designed for trading and financial ope
 - Test files are located in the `__tests__/` directory, mirroring the structure of the `src/` folder.
 
 ### Building
+
 - Build the Android app:
   ```bash
   cd android && ./gradlew assembleRelease
@@ -55,6 +60,7 @@ VTradingAPP is a React Native application designed for trading and financial ope
   ```
 
 ## Project-Specific Conventions
+
 - **TypeScript**: Strong typing is enforced. Avoid using `any` unless absolutely necessary.
 - **Component Structure**: Components are organized by feature. Each feature folder contains related components, styles, and tests.
 - **State Management**: Context API is used for global state management. Refer to `src/context/` for examples.
@@ -62,16 +68,19 @@ VTradingAPP is a React Native application designed for trading and financial ope
 - **Testing**: Follow the TDD approach. Each component or module should have a corresponding test file in the `__tests__/` directory.
 
 ## External Dependencies
+
 - **Firebase**: Integrated for app services. Configuration files are located in `android/app/google-services.json` and `ios/`.
 - **MMKV**: Used for efficient key-value storage. Refer to `REPORT_MIGRATION_MMKV.md` for migration details.
 - **React Navigation**: Used for navigation. Main navigator is defined in `src/navigation/AppNavigator.tsx`.
 
 ## Integration Points
+
 - **API Client**: All API calls are managed through `src/services/ApiClient.ts`. Use this module for network requests.
 - **Currency Service**: Handles currency-related operations. See `src/services/CurrencyService.ts`.
 - **Authentication**: Managed via `AuthContext` in `src/context/AuthContext.tsx`.
 
 ## Notes for AI Agents
+
 - Follow the existing folder structure and naming conventions.
 - Prioritize reusability and modularity in components and services.
 - Always write tests for new features or changes and ensure 100% coverage.

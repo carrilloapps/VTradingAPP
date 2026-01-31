@@ -21,7 +21,7 @@ const NotificationButton: React.FC<NotificationButtonProps> = ({
   const theme = useTheme();
   const navigation = useNavigation<any>();
   const { unreadCount } = useNotifications();
-  
+
   // Animation for badge
   const scaleAnim = useRef(new Animated.Value(0)).current;
 
@@ -59,11 +59,11 @@ const NotificationButton: React.FC<NotificationButtonProps> = ({
       style={[
         styles.container,
         theme.dark ? styles.darkBorder : styles.lightBorder,
-        { 
+        {
           backgroundColor: buttonBgColor,
           borderColor: borderColorValue,
         },
-        style
+        style,
       ]}
       borderless
       rippleColor="rgba(0, 0, 0, .1)"
@@ -74,27 +74,27 @@ const NotificationButton: React.FC<NotificationButtonProps> = ({
     >
       <View style={styles.content}>
         <MaterialCommunityIcons name={icon} size={size} color={iconColor} />
-        
+
         {unreadCount > 0 && (
-          <Animated.View 
+          <Animated.View
             style={[
-              styles.badge, 
-              { 
+              styles.badge,
+              {
                 backgroundColor: badgeColor,
                 borderColor: badgeBorderColor,
-                transform: [{ scale: scaleAnim }]
-              }
+                transform: [{ scale: scaleAnim }],
+              },
             ]}
           >
             {unreadCount > 99 ? (
-               <View style={styles.smallDot} /> 
+              <View style={styles.smallDot} />
             ) : (
-                // Optional: Show number if needed, but the design often uses just a dot or small number
-                // The UnifiedHeader used a simple dot. The prompt asks for "indicador visual (badge) que muestre el número".
-                // So I should show the number.
-                <Text style={[styles.badgeText, { color: theme.colors.onError }]}>
-                    {unreadCount}
-                </Text>
+              // Optional: Show number if needed, but the design often uses just a dot or small number
+              // The UnifiedHeader used a simple dot. The prompt asks for "indicador visual (badge) que muestre el número".
+              // So I should show the number.
+              <Text style={[styles.badgeText, { color: theme.colors.onError }]}>
+                {unreadCount}
+              </Text>
             )}
           </Animated.View>
         )}
@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 3,
     backgroundColor: 'white',
-  }
+  },
 });
 
 export default NotificationButton;

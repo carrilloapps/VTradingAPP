@@ -1,8 +1,15 @@
 import React, { useState } from 'react';
 import { Text, Platform, View, StatusBar, StyleSheet } from 'react-native';
-import { NavigationContainer, DefaultTheme as NavDefaultTheme, DarkTheme as NavDarkTheme } from '@react-navigation/native';
+import {
+  NavigationContainer,
+  DefaultTheme as NavDefaultTheme,
+  DarkTheme as NavDarkTheme,
+} from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createMaterialTopTabNavigator, MaterialTopTabBarProps } from '@react-navigation/material-top-tabs';
+import {
+  createMaterialTopTabNavigator,
+  MaterialTopTabBarProps,
+} from '@react-navigation/material-top-tabs';
 import { useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import SafeLogger from '../utils/safeLogger';
@@ -42,7 +49,11 @@ import CategoryDetailScreen from '../screens/discover/CategoryDetailScreen';
 import TagDetailScreen from '../screens/discover/TagDetailScreen';
 import AllArticlesScreen from '../screens/discover/AllArticlesScreen';
 import SearchResultsScreen from '../screens/discover/SearchResultsScreen';
-import { WordPressCategory, WordPressTag, FormattedPost } from '../services/WordPressService';
+import {
+  WordPressCategory,
+  WordPressTag,
+  FormattedPost,
+} from '../services/WordPressService';
 
 export type RootStackParamList = {
   Onboarding: undefined;
@@ -81,7 +92,11 @@ function HomeStackScreen() {
   return (
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
       <HomeStack.Screen name="HomeMain" component={HomeScreen} />
-      <HomeStack.Screen name="Discover" component={DiscoverScreen} options={{ headerShown: true, title: 'Descubre' }} />
+      <HomeStack.Screen
+        name="Discover"
+        component={DiscoverScreen}
+        options={{ headerShown: true, title: 'Descubre' }}
+      />
     </HomeStack.Navigator>
   );
 }
@@ -94,7 +109,10 @@ function AuthNavigator() {
     <AuthStack.Navigator screenOptions={{ headerShown: false }}>
       <AuthStack.Screen name="Login" component={LoginScreen} />
       <AuthStack.Screen name="Register" component={RegisterScreen} />
-      <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+      <AuthStack.Screen
+        name="ForgotPassword"
+        component={ForgotPasswordScreen}
+      />
       <AuthStack.Screen name="WebView" component={WebViewScreen} />
     </AuthStack.Navigator>
   );
@@ -115,13 +133,15 @@ const RatesIcon = ({ color }: { color: string }) => (
 
 const HomeIcon = ({ color }: { color: string }) => (
   <View style={tabStyles.homeIconContainer}>
-    <Text style={[
-      tabStyles.homeIconText,
-      {
-        color: color,
-      },
-      Platform.OS === 'android' && tabStyles.androidMargin
-    ]}>
+    <Text
+      style={[
+        tabStyles.homeIconText,
+        {
+          color: color,
+        },
+        Platform.OS === 'android' && tabStyles.androidMargin,
+      ]}
+    >
       Bs
     </Text>
   </View>
@@ -146,11 +166,14 @@ const Tab = createMaterialTopTabNavigator<MainTabParamList>();
 const TabBar = (props: MaterialTopTabBarProps) => <ModernTabBar {...props} />;
 
 function MainTabNavigator() {
-  const screenOptions = React.useMemo(() => ({
-    swipeEnabled: true,
-    tabBarShowLabel: false,
-    tabBarIndicatorStyle: { height: 0 },
-  }), []);
+  const screenOptions = React.useMemo(
+    () => ({
+      swipeEnabled: true,
+      tabBarShowLabel: false,
+      tabBarIndicatorStyle: { height: 0 },
+    }),
+    [],
+  );
 
   return (
     <Tab.Navigator
@@ -275,8 +298,8 @@ const AppNavigator = () => {
   const { isDark } = useThemeContext();
 
   // Zustand store selectors
-  const user = useAuthStore((state) => state.user);
-  const authLoading = useAuthStore((state) => state.isLoading);
+  const user = useAuthStore(state => state.user);
+  const authLoading = useAuthStore(state => state.isLoading);
   const [isReady, setIsReady] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showForceUpdate, setShowForceUpdate] = useState(false);
@@ -293,17 +316,20 @@ const AppNavigator = () => {
         // Timeout wrapper to prevent blocking app start
         await Promise.race([
           remoteConfigService.fetchAndActivate(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000))
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Timeout')), 3000),
+          ),
         ]);
-        
+
         interface RemoteConfigStrings {
-            forceUpdate?: {
-                build: number;
-                minVersion?: string;
-            };
+          forceUpdate?: {
+            build: number;
+            minVersion?: string;
+          };
         }
 
-        const config = remoteConfigService.getJson<RemoteConfigStrings>('strings');
+        const config =
+          remoteConfigService.getJson<RemoteConfigStrings>('strings');
 
         if (config && config.forceUpdate) {
           const currentBuild = parseInt(DeviceInfo.getBuildNumber(), 10);
@@ -315,7 +341,9 @@ const AppNavigator = () => {
         }
       } catch (e) {
         // Fail silently on config check, don't block app unless confirmed
-        SafeLogger.warn('Failed to check force update or timeout', { error: e });
+        SafeLogger.warn('Failed to check force update or timeout', {
+          error: e,
+        });
       }
 
       setIsReady(true);
@@ -343,7 +371,11 @@ const AppNavigator = () => {
   if (showForceUpdate) {
     return (
       <React.Fragment>
-        <StatusBar backgroundColor="transparent" translucent barStyle="light-content" />
+        <StatusBar
+          backgroundColor="transparent"
+          translucent
+          barStyle="light-content"
+        />
         <ForceUpdateModal visible={true} />
       </React.Fragment>
     );
@@ -364,7 +396,10 @@ const AppNavigator = () => {
           const currentRouteName = currentRoute?.name;
 
           if (previousRouteName !== currentRouteName && currentRouteName) {
-            await analyticsService.logScreenView(currentRouteName, currentRouteName);
+            await analyticsService.logScreenView(
+              currentRouteName,
+              currentRouteName,
+            );
           }
           routeNameRef.current = currentRouteName;
         }}
@@ -372,7 +407,12 @@ const AppNavigator = () => {
         <RootStack.Navigator screenOptions={{ headerShown: false }}>
           {showOnboarding ? (
             <RootStack.Screen name="Onboarding">
-              {(props) => <OnboardingScreen {...props} onFinish={() => setShowOnboarding(false)} />}
+              {props => (
+                <OnboardingScreen
+                  {...props}
+                  onFinish={() => setShowOnboarding(false)}
+                />
+              )}
             </RootStack.Screen>
           ) : user ? (
             <>
@@ -406,7 +446,7 @@ const AppNavigator = () => {
                 component={AdvancedCalculatorScreen}
                 options={{
                   headerShown: false,
-                  animation: 'default'
+                  animation: 'default',
                 }}
               />
               <RootStack.Screen
@@ -414,7 +454,7 @@ const AppNavigator = () => {
                 component={BankRatesScreen}
                 options={{
                   headerShown: false,
-                  animation: 'default'
+                  animation: 'default',
                 }}
               />
               <RootStack.Screen
@@ -422,7 +462,7 @@ const AppNavigator = () => {
                 component={WebViewScreen}
                 options={{
                   headerShown: false,
-                  animation: 'slide_from_bottom'
+                  animation: 'slide_from_bottom',
                 }}
               />
               <RootStack.Screen
@@ -430,7 +470,7 @@ const AppNavigator = () => {
                 component={AddAlertScreen}
                 options={{
                   headerShown: false,
-                  animation: 'default'
+                  animation: 'default',
                 }}
               />
               <RootStack.Screen
@@ -438,7 +478,7 @@ const AppNavigator = () => {
                 component={CurrencyDetailScreen}
                 options={{
                   headerShown: false,
-                  animation: 'default'
+                  animation: 'default',
                 }}
               />
               <RootStack.Screen
@@ -456,7 +496,7 @@ const AppNavigator = () => {
                 component={CategoryDetailScreen}
                 options={{
                   headerShown: false,
-                  animation: 'default'
+                  animation: 'default',
                 }}
               />
               <RootStack.Screen
@@ -464,7 +504,7 @@ const AppNavigator = () => {
                 component={TagDetailScreen}
                 options={{
                   headerShown: false,
-                  animation: 'default'
+                  animation: 'default',
                 }}
               />
               <RootStack.Screen
@@ -472,7 +512,7 @@ const AppNavigator = () => {
                 component={AllArticlesScreen}
                 options={{
                   headerShown: false,
-                  animation: 'default'
+                  animation: 'default',
                 }}
               />
               <RootStack.Screen
@@ -480,7 +520,7 @@ const AppNavigator = () => {
                 component={SearchResultsScreen}
                 options={{
                   headerShown: false,
-                  animation: 'default'
+                  animation: 'default',
                 }}
               />
             </>

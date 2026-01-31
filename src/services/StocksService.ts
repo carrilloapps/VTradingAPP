@@ -28,10 +28,12 @@ interface ApiStock {
     amount: number;
     percent: number;
   };
-  volume?: number | {
-    shares: number;
-    amount: number;
-  };
+  volume?:
+    | number
+    | {
+        shares: number;
+        amount: number;
+      };
   openingPrice?: number;
   category?: string; // Changed from sector to category
   meta?: {
@@ -118,7 +120,16 @@ export class StocksService {
 
   /* eslint-disable no-bitwise */
   private static getColorForStock(symbol: string): string {
-    const colors = ['emerald', 'blue', 'orange', 'amber', 'indigo', 'rose', 'cyan', 'violet'];
+    const colors = [
+      'emerald',
+      'blue',
+      'orange',
+      'amber',
+      'indigo',
+      'rose',
+      'cyan',
+      'violet',
+    ];
     let hash = 0;
     for (let i = 0; i < symbol.length; i++) {
       hash = symbol.charCodeAt(i) + ((hash << 5) - hash);
@@ -130,16 +141,22 @@ export class StocksService {
   private static parsePrice(val: unknown): number {
     if (val === null || val === undefined) return 0;
     if (typeof val === 'number') {
-        // Range check
-        if (!Number.isFinite(val) || Math.abs(val) > Number.MAX_SAFE_INTEGER) return 0;
-        return val;
+      // Range check
+      if (!Number.isFinite(val) || Math.abs(val) > Number.MAX_SAFE_INTEGER)
+        return 0;
+      return val;
     }
     if (typeof val === 'string') {
       // Handle comma as decimal separator
       const normalized = val.replace(',', '.');
       const num = Number(normalized);
       // Range check and NaN check
-      if (isNaN(num) || !Number.isFinite(num) || Math.abs(num) > Number.MAX_SAFE_INTEGER) return 0;
+      if (
+        isNaN(num) ||
+        !Number.isFinite(num) ||
+        Math.abs(num) > Number.MAX_SAFE_INTEGER
+      )
+        return 0;
       return num;
     }
     return 0;
@@ -147,13 +164,13 @@ export class StocksService {
 
   private static formatVolume(value: number): string {
     if (value >= 1_000_000_000) {
-        return `${(value / 1_000_000_000).toFixed(1)}B`;
+      return `${(value / 1_000_000_000).toFixed(1)}B`;
     }
     if (value >= 1_000_000) {
-        return `${(value / 1_000_000).toFixed(1)}M`;
+      return `${(value / 1_000_000).toFixed(1)}M`;
     }
     if (value >= 1_000) {
-        return `${(value / 1_000).toFixed(1)}k`;
+      return `${(value / 1_000).toFixed(1)}k`;
     }
     return value.toString();
   }
@@ -186,7 +203,7 @@ export class StocksService {
       if (item.volume.shares) {
         volShares = item.volume.shares;
         if (!volumeStr) {
-             volumeStr = this.formatVolume(item.volume.shares);
+          volumeStr = this.formatVolume(item.volume.shares);
         }
       }
     }
@@ -210,26 +227,29 @@ export class StocksService {
       volumeAmount: volAmount,
       opening: this.parsePrice(item.openingPrice),
       iconUrl: item.meta?.iconUrl,
-      category: item.category || 'Otros'
+      category: item.category || 'Otros',
     };
   }
 
   /**
-    * Fetch all stocks for autocomplete (limit 500)
-    */
+   * Fetch all stocks for autocomplete (limit 500)
+   */
   static async getAllStocks(): Promise<StockData[]> {
     try {
-      const response = await apiClient.get<ApiStocksResponse>('api/bvc/market', {
-        params: { page: 1, limit: 500 },
-        useCache: false
-      });
+      const response = await apiClient.get<ApiStocksResponse>(
+        'api/bvc/market',
+        {
+          params: { page: 1, limit: 500 },
+          useCache: false,
+        },
+      );
       const rawList = response.data || response.stocks || [];
       return rawList.map(item => this.mapStock(item));
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'StocksService.getAllStocks',
         method: 'GET',
-        endpoint: 'api/bvc/market'
+        endpoint: 'api/bvc/market',
       });
       return [];
     }
@@ -247,7 +267,12 @@ export class StocksService {
     }
 
     // Cache check only for first page
-    if (!forceRefresh && page === 1 && this.currentStocks.length > 0 && (Date.now() - this.lastFetch < this.CACHE_DURATION)) {
+    if (
+      !forceRefresh &&
+      page === 1 &&
+      this.currentStocks.length > 0 &&
+      Date.now() - this.lastFetch < this.CACHE_DURATION
+    ) {
       return this.currentStocks;
     }
 
@@ -259,11 +284,14 @@ export class StocksService {
     const trace = await performanceService.startTrace('get_stocks_service');
     try {
       // API Call with Pagination
-      const response = await apiClient.get<ApiStocksResponse>('api/bvc/market', {
-        params: { page, limit: 20 },
-        useCache: !forceRefresh && page === 1,
-        updateCache: forceRefresh && page === 1
-      });
+      const response = await apiClient.get<ApiStocksResponse>(
+        'api/bvc/market',
+        {
+          params: { page, limit: 20 },
+          useCache: !forceRefresh && page === 1,
+          updateCache: forceRefresh && page === 1,
+        },
+      );
 
       // Handle both "data" (standard) and "stocks" (legacy/fallback) fields
       const rawList = response.data || response.stocks || [];
@@ -281,7 +309,9 @@ export class StocksService {
         this.currentPage = response.pagination.page;
       }
 
-      const newStocks: StockData[] = rawList.map((item, _index) => this.mapStock(item));
+      const newStocks: StockData[] = rawList.map((item, _index) =>
+        this.mapStock(item),
+      );
 
       if (page === 1) {
         this.currentStocks = newStocks;
@@ -295,14 +325,13 @@ export class StocksService {
       this.lastFetch = Date.now();
       this.notifyListeners(this.currentStocks);
       return this.currentStocks;
-
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'StocksService.fetchAllStocks',
         method: 'GET',
         endpoint: 'api/bvc/market',
         hasCachedData: this.currentStocks.length > 0,
-        lastFetch: this.lastFetch
+        lastFetch: this.lastFetch,
       });
       // Error fetching stocks
 
@@ -334,10 +363,13 @@ export class StocksService {
   static async getMarketIndex(): Promise<any> {
     try {
       // Fetch real market data
-      const response = await apiClient.get<ApiStocksResponse>('api/bvc/market', {
-        useCache: true, // Use cache for index as well
-        params: { limit: 1 } // We just need metadata if possible, but endpoint might return all
-      });
+      const response = await apiClient.get<ApiStocksResponse>(
+        'api/bvc/market',
+        {
+          useCache: true, // Use cache for index as well
+          params: { limit: 1 }, // We just need metadata if possible, but endpoint might return all
+        },
+      );
 
       const ibcData = response.indices?.find(i => i.symbol === 'IBC');
       const stats = response.stats;
@@ -355,13 +387,15 @@ export class StocksService {
         const volumeStr = this.formatCurrency(totalAmount);
 
         // Provide stats
-        const marketStats = stats ? {
-          titlesUp: stats.titlesUp,
-          titlesDown: stats.titlesDown,
-          titlesUnchanged: stats.titlesUnchanged,
-          totalVolume: stats.totalVolume, // Shares
-          totalAmount: stats.totalAmount  // Money
-        } : undefined;
+        const marketStats = stats
+          ? {
+              titlesUp: stats.titlesUp,
+              titlesDown: stats.titlesDown,
+              titlesUnchanged: stats.titlesUnchanged,
+              totalVolume: stats.totalVolume, // Shares
+              totalAmount: stats.totalAmount, // Money
+            }
+          : undefined;
 
         return {
           value: this.formatCurrency(value),
@@ -370,7 +404,8 @@ export class StocksService {
           volume: volumeStr, // Displaying Total Amount in VES as "Volume" in Hero
           stats: marketStats,
           statusState: response.status?.state,
-          updateDate: response.status?.date || new Date().toLocaleDateString('es-VE')
+          updateDate:
+            response.status?.date || new Date().toLocaleDateString('es-VE'),
         };
       }
 
@@ -380,7 +415,7 @@ export class StocksService {
       observabilityService.captureError(e, {
         context: 'StocksService.getIBC',
         method: 'GET',
-        endpoint: 'api/bvc/indices'
+        endpoint: 'api/bvc/indices',
       });
       return null;
     }

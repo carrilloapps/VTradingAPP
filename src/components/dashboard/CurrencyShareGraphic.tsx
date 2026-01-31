@@ -22,7 +22,7 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
   lastUpdated,
   isPremium = false,
   aspectRatio = '1:1',
-  status = 'ACTIVO'
+  status = 'ACTIVO',
 }) => {
   const theme = useTheme();
 
@@ -44,9 +44,10 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
 
   const isVertical = aspectRatio === '16:9';
 
-  const spread = (rate.buyValue && rate.sellValue)
-    ? Math.abs(((rate.sellValue - rate.buyValue) / rate.buyValue) * 100)
-    : null;
+  const spread =
+    rate.buyValue && rate.sellValue
+      ? Math.abs(((rate.sellValue - rate.buyValue) / rate.buyValue) * 100)
+      : null;
 
   // Dynamic sizes based on aspect ratio
   const platformIconSize = 24;
@@ -75,41 +76,64 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
   const templateStyle = [
     styles.shareTemplate,
     isVertical ? styles.shareTemplateVertical : styles.shareTemplateSquare,
-    { backgroundColor: theme.dark ? '#051911' : '#F0FDF4' }
+    { backgroundColor: theme.dark ? '#051911' : '#F0FDF4' },
   ];
 
-  const glowStyle = [styles.templateGlow, { backgroundColor: theme.colors.primary, opacity: 0.05 }];
-  const badgeStyle = [styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }];
+  const glowStyle = [
+    styles.templateGlow,
+    { backgroundColor: theme.colors.primary, opacity: 0.05 },
+  ];
+  const badgeStyle = [
+    styles.platformBadge,
+    { backgroundColor: theme.colors.surfaceVariant },
+  ];
 
   const logoStyle = [
     styles.templateMainLogo,
     {
       tintColor: theme.dark ? undefined : theme.colors.primary,
       width: logoWidth,
-      height: logoHeight
-    }
+      height: logoHeight,
+    },
   ];
 
-  const freeBadgeStyle = [styles.freeBadge, { backgroundColor: (theme.colors as any).error || '#FF5252' }];
-  const freeBadgeTextStyle = [styles.freeBadgeText, { fontSize: freeBadgeTextSize }];
+  const freeBadgeStyle = [
+    styles.freeBadge,
+    { backgroundColor: (theme.colors as any).error || '#FF5252' },
+  ];
+  const freeBadgeTextStyle = [
+    styles.freeBadgeText,
+    { fontSize: freeBadgeTextSize },
+  ];
 
-  const urlBadgeStyle = [styles.templateUrlBadge, { backgroundColor: theme.colors.primary + '15', marginBottom: 8 }];
-  const urlTextStyle = [styles.templateUrlText, { color: theme.colors.primary, fontSize: urlTextSize }];
+  const urlBadgeStyle = [
+    styles.templateUrlBadge,
+    { backgroundColor: theme.colors.primary + '15', marginBottom: 8 },
+  ];
+  const urlTextStyle = [
+    styles.templateUrlText,
+    { color: theme.colors.primary, fontSize: urlTextSize },
+  ];
 
-  const dateTextStyle = [styles.templateDate, { color: theme.colors.onSurfaceVariant, fontSize: dateTextSize }];
+  const dateTextStyle = [
+    styles.templateDate,
+    { color: theme.colors.onSurfaceVariant, fontSize: dateTextSize },
+  ];
 
   const contentStyle = [
     styles.templateContent,
-    isVertical && ({ gap: 40 } as const)
+    isVertical && ({ gap: 40 } as const),
   ];
 
   const cardStyle = [
     styles.mainCard,
     isVertical && styles.mainCardVertical,
     {
-      backgroundColor: theme.dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
-      borderColor: theme.colors.outlineVariant
-    }
+      backgroundColor: theme.dark
+        ? 'rgba(255,255,255,0.03)'
+        : 'rgba(0,0,0,0.02)',
+      borderColor: theme.colors.outlineVariant,
+    },
   ];
 
   const iconContainerStyle = [
@@ -117,29 +141,53 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
     {
       backgroundColor: theme.colors.primary + '20',
       width: iconContainerSize,
-      height: iconContainerSize
-    }
+      height: iconContainerSize,
+    },
   ];
 
-  const symbolTextStyle = [styles.stockSymbolLabel, { color: theme.colors.onSurface, fontSize: symbolTextSize }];
-  const nameTextStyle = [styles.stockNameLabel, { color: theme.colors.onSurfaceVariant, fontSize: nameTextSize }];
+  const symbolTextStyle = [
+    styles.stockSymbolLabel,
+    { color: theme.colors.onSurface, fontSize: symbolTextSize },
+  ];
+  const nameTextStyle = [
+    styles.stockNameLabel,
+    { color: theme.colors.onSurfaceVariant, fontSize: nameTextSize },
+  ];
 
-  const mainValueTextStyle = [styles.mainValueText, { fontSize: mainValueSize, color: theme.colors.onSurface }];
+  const mainValueTextStyle = [
+    styles.mainValueText,
+    { fontSize: mainValueSize, color: theme.colors.onSurface },
+  ];
   const labelColumnStyle = [styles.labelColumn, { height: mainValueSize }];
-  const currencyTextStyle = [styles.currencyText, { color: theme.colors.onSurfaceVariant, fontSize: currencySize }];
+  const currencyTextStyle = [
+    styles.currencyText,
+    { color: theme.colors.onSurfaceVariant, fontSize: currencySize },
+  ];
 
-  const trendBadgeStyle = [styles.trendBadge, { backgroundColor: trendColor + '15' }];
-  const trendPercentTextStyle = [styles.trendPercentText, { color: trendColor, fontSize: trendTextSize }];
+  const trendBadgeStyle = [
+    styles.trendBadge,
+    { backgroundColor: trendColor + '15' },
+  ];
+  const trendPercentTextStyle = [
+    styles.trendPercentText,
+    { color: trendColor, fontSize: trendTextSize },
+  ];
 
   const statLabelStyle = [styles.statLabel, { fontSize: statLabelSize }];
   const statValueStyle = [styles.statValue, { fontSize: statValueSize }];
-  const statCurrencyStyle = [styles.statCurrency, { fontSize: statCurrencySize }];
+  const statCurrencyStyle = [
+    styles.statCurrency,
+    { fontSize: statCurrencySize },
+  ];
 
-  const footerTextStyle = [styles.templateFooterText, { color: theme.colors.primary, fontSize: footerTextSize }];
+  const footerTextStyle = [
+    styles.templateFooterText,
+    { color: theme.colors.primary, fontSize: footerTextSize },
+  ];
 
   const platformTextHeaderStyle = (size: number) => [
     styles.platformText,
-    { color: theme.colors.onSurfaceVariant, fontSize: size }
+    { color: theme.colors.onSurfaceVariant, fontSize: size },
   ];
 
   return (
@@ -155,12 +203,22 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
           {/* Platform Badges */}
           <View style={styles.platformBadgesContainer}>
             <Surface style={badgeStyle} elevation={1}>
-              <Icon source="google-play" size={platformIconSize} color={theme.colors.onSurfaceVariant} />
-              <Text style={platformTextHeaderStyle(platformTextSize)}>Android</Text>
+              <Icon
+                source="google-play"
+                size={platformIconSize}
+                color={theme.colors.onSurfaceVariant}
+              />
+              <Text style={platformTextHeaderStyle(platformTextSize)}>
+                Android
+              </Text>
             </Surface>
             <View style={styles.flex1} />
             <Surface style={badgeStyle} elevation={1}>
-              <Icon source="apple" size={platformIconSize} color={theme.colors.onSurfaceVariant} />
+              <Icon
+                source="apple"
+                size={platformIconSize}
+                color={theme.colors.onSurfaceVariant}
+              />
               <Text style={platformTextHeaderStyle(platformTextSize)}>iOS</Text>
             </Surface>
           </View>
@@ -183,9 +241,19 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
               <Text style={urlTextStyle}>vtrading.app</Text>
             </View>
             <View style={styles.templateDateBox}>
-              <Icon source="calendar-clock" size={dateIconSize} color={theme.colors.onSurfaceVariant} />
+              <Icon
+                source="calendar-clock"
+                size={dateIconSize}
+                color={theme.colors.onSurfaceVariant}
+              />
               <Text style={dateTextStyle}>
-                {new Date().toLocaleDateString('es-VE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} • {lastUpdated}
+                {new Date().toLocaleDateString('es-VE', {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                })}{' '}
+                • {lastUpdated}
               </Text>
             </View>
           </View>
@@ -199,7 +267,11 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
                   {rate.iconName === 'Bs' ? (
                     <BolivarIcon size={iconSize} color={theme.colors.primary} />
                   ) : (
-                    <Icon source={rate.iconName || 'currency-usd'} size={iconSize} color={theme.colors.primary} />
+                    <Icon
+                      source={rate.iconName || 'currency-usd'}
+                      size={iconSize}
+                      color={theme.colors.primary}
+                    />
                   )}
                 </View>
                 <View>
@@ -211,14 +283,22 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
               <View style={styles.priceSection}>
                 <View style={styles.valueRow}>
                   <Text style={mainValueTextStyle}>
-                    {rate.value.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    {rate.value.toLocaleString('es-VE', {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
                   </Text>
                   <View style={labelColumnStyle}>
                     <Text style={currencyTextStyle}>Bs.</Text>
                     <View style={trendBadgeStyle}>
-                      <Icon source={trendIcon} size={trendIconSize} color={trendColor} />
+                      <Icon
+                        source={trendIcon}
+                        size={trendIconSize}
+                        color={trendColor}
+                      />
                       <Text style={trendPercentTextStyle}>
-                        {isNeutral ? '' : (isPositive ? '+' : '')}{(rate.changePercent || 0).toFixed(2)}%
+                        {isNeutral ? '' : isPositive ? '+' : ''}
+                        {(rate.changePercent || 0).toFixed(2)}%
                       </Text>
                     </View>
                   </View>
@@ -230,15 +310,31 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
                 <View style={styles.statsGrid}>
                   <View style={styles.statItem}>
                     <Text style={statLabelStyle}>COMPRA</Text>
-                    <Text style={statValueStyle}>{rate.buyValue ? rate.buyValue.toLocaleString('es-VE', { minimumFractionDigits: 2 }) : '--'} <Text style={statCurrencyStyle}>Bs.</Text></Text>
+                    <Text style={statValueStyle}>
+                      {rate.buyValue
+                        ? rate.buyValue.toLocaleString('es-VE', {
+                            minimumFractionDigits: 2,
+                          })
+                        : '--'}{' '}
+                      <Text style={statCurrencyStyle}>Bs.</Text>
+                    </Text>
                   </View>
                   <View style={styles.statItem}>
                     <Text style={statLabelStyle}>VENTA</Text>
-                    <Text style={statValueStyle}>{rate.sellValue ? rate.sellValue.toLocaleString('es-VE', { minimumFractionDigits: 2 }) : '--'} <Text style={statCurrencyStyle}>Bs.</Text></Text>
+                    <Text style={statValueStyle}>
+                      {rate.sellValue
+                        ? rate.sellValue.toLocaleString('es-VE', {
+                            minimumFractionDigits: 2,
+                          })
+                        : '--'}{' '}
+                      <Text style={statCurrencyStyle}>Bs.</Text>
+                    </Text>
                   </View>
                   <View style={styles.statItem}>
                     <Text style={statLabelStyle}>SPREAD / BRECHA</Text>
-                    <Text style={statValueStyle}>{spread !== null ? `${spread.toFixed(2)}%` : '--'}</Text>
+                    <Text style={statValueStyle}>
+                      {spread !== null ? `${spread.toFixed(2)}%` : '--'}
+                    </Text>
                   </View>
                   <View style={styles.statItem}>
                     <Text style={statLabelStyle}>ESTADO MERCADO</Text>
@@ -252,12 +348,21 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
           {/* Footer */}
           <View style={styles.templateFooter}>
             <LinearGradient
-              colors={[theme.colors.primary + '00', theme.colors.primary + '10', theme.colors.primary + '00']}
-              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+              colors={[
+                theme.colors.primary + '00',
+                theme.colors.primary + '10',
+                theme.colors.primary + '00',
+              ]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
               style={styles.templateDivider}
             />
             <View style={styles.templateFooterRow}>
-              <Icon source={isPremium ? "shield-check-outline" : "shield-outline"} size={footerIconSize} color={theme.colors.primary} />
+              <Icon
+                source={isPremium ? 'shield-check-outline' : 'shield-outline'}
+                size={footerIconSize}
+                color={theme.colors.primary}
+              />
               <Text style={footerTextStyle}>
                 MONITOREO FINANCIERO{isPremium ? ' PREMIUM' : ''}
               </Text>
@@ -337,8 +442,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 4,
   },
-  templateMainLogo: {
-  },
+  templateMainLogo: {},
   freeBadge: {
     paddingHorizontal: 5,
     paddingVertical: 1,
@@ -484,7 +588,7 @@ const styles = StyleSheet.create({
   templateFooterText: {
     fontWeight: '900',
     letterSpacing: 1.2,
-  }
+  },
 });
 
 export default CurrencyShareGraphic;

@@ -1,5 +1,11 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, StyleProp, ViewStyle } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  StyleProp,
+  ViewStyle,
+} from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { BolivarIcon } from '../ui/BolivarIcon';
@@ -11,55 +17,65 @@ interface CurrencySelectorButtonProps {
   style?: StyleProp<ViewStyle>;
 }
 
-const CurrencySelectorButton: React.FC<CurrencySelectorButtonProps> = ({ 
-  currencyCode, 
-  iconName = 'currency-usd', 
+const CurrencySelectorButton: React.FC<CurrencySelectorButtonProps> = ({
+  currencyCode,
+  iconName = 'currency-usd',
   onPress,
-  style 
+  style,
 }) => {
   const theme = useTheme();
 
-  const themeStyles = React.useMemo(() => ({
-    container: {
-      backgroundColor: theme.colors.elevation.level2,
-      borderRadius: theme.roundness * 6, // 24px
-    },
-    iconPlaceholder: {
-      backgroundColor: theme.colors.elevation.level4,
-      borderRadius: theme.roundness * 3.5, // 14px
-    },
-    textPrimary: {
-      color: theme.colors.onSurface,
-    },
-    icon: {
-        marginLeft: 4
-    }
-  }), [theme]);
+  const themeStyles = React.useMemo(
+    () => ({
+      container: {
+        backgroundColor: theme.colors.elevation.level2,
+        borderRadius: theme.roundness * 6, // 24px
+      },
+      iconPlaceholder: {
+        backgroundColor: theme.colors.elevation.level4,
+        borderRadius: theme.roundness * 3.5, // 14px
+      },
+      textPrimary: {
+        color: theme.colors.onSurface,
+      },
+      icon: {
+        marginLeft: 4,
+      },
+    }),
+    [theme],
+  );
 
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       style={[styles.currencyButton, themeStyles.container, style]}
       onPress={onPress}
       accessibilityRole="button"
       accessibilityLabel={`Seleccionar moneda. Actual: ${currencyCode}`}
     >
       <View style={[styles.iconPlaceholder, themeStyles.iconPlaceholder]}>
-        {(iconName === 'Bs' || currencyCode === 'VES') ? (
-             <BolivarIcon color={theme.colors.onSurface} size={18} />
+        {iconName === 'Bs' || currencyCode === 'VES' ? (
+          <BolivarIcon color={theme.colors.onSurface} size={18} />
         ) : (
-            <MaterialCommunityIcons name={iconName} size={18} color={theme.colors.onSurface} />
+          <MaterialCommunityIcons
+            name={iconName}
+            size={18}
+            color={theme.colors.onSurface}
+          />
         )}
       </View>
-      
-      <Text variant="titleMedium" style={[styles.boldText, themeStyles.textPrimary]}>
+
+      <Text
+        variant="titleMedium"
+        style={[styles.boldText, themeStyles.textPrimary]}
+      >
         {currencyCode}
       </Text>
-      
-      <MaterialCommunityIcons 
-        name="chevron-down" 
-        size={24} 
-        color={theme.colors.onSurfaceVariant} 
-        style={themeStyles.icon} 
+
+      <MaterialCommunityIcons
+        name="chevron-down"
+        size={24}
+        color={theme.colors.onSurfaceVariant}
+        style={themeStyles.icon}
       />
     </TouchableOpacity>
   );
@@ -75,15 +91,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   iconPlaceholder: {
-    width: 28, 
-    height: 28, 
+    width: 28,
+    height: 28,
     marginRight: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
   boldText: {
     fontWeight: 'bold',
-  }
+  },
 });
 
 export default CurrencySelectorButton;

@@ -10,29 +10,33 @@ const PromoCard: React.FC = () => {
     {
       backgroundColor: theme.colors.primaryContainer,
       borderColor: theme.colors.outline,
-    }
+    },
   ];
 
-  const titleStyle = [styles.titleText, { color: theme.colors.onPrimaryContainer }];
+  const titleStyle = [
+    styles.titleText,
+    { color: theme.colors.onPrimaryContainer },
+  ];
   const descriptionStyle = [
     styles.descriptionText,
     styles.descriptionTextWithOpacity,
-    { color: theme.colors.onPrimaryContainer }
+    { color: theme.colors.onPrimaryContainer },
   ];
   const buttonStyle = [
     styles.button,
     {
       backgroundColor: theme.colors.primary,
-      borderColor: theme.colors.outline
-    }
+      borderColor: theme.colors.outline,
+    },
   ];
-  const buttonTextStyle = [styles.buttonText, { color: theme.colors.onPrimary }];
+  const buttonTextStyle = [
+    styles.buttonText,
+    { color: theme.colors.onPrimary },
+  ];
 
   return (
     <View style={containerStyle}>
-      <Text style={titleStyle}>
-        ¿Necesitas cambiar divisas?
-      </Text>
+      <Text style={titleStyle}>¿Necesitas cambiar divisas?</Text>
       <Text style={descriptionStyle}>
         Usa nuestra calculadora integrada para conversiones exactas.
       </Text>

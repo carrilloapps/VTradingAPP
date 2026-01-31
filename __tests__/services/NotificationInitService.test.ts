@@ -15,14 +15,18 @@ describe('NotificationInitService', () => {
   it('should initialize notification system when permission is granted', async () => {
     (fcmService.checkPermission as jest.Mock).mockResolvedValue(true);
     (fcmService.getFCMToken as jest.Mock).mockResolvedValue('test-token');
-    (fcmService.subscribeToDemographics as jest.Mock).mockResolvedValue(undefined);
+    (fcmService.subscribeToDemographics as jest.Mock).mockResolvedValue(
+      undefined,
+    );
     (storageService.getAlerts as jest.Mock).mockResolvedValue([]);
 
     await notificationInitService.initialize();
 
     expect(fcmService.checkPermission).toHaveBeenCalled();
     expect(fcmService.getFCMToken).toHaveBeenCalled();
-    expect(fcmService.subscribeToDemographics).toHaveBeenCalledWith(['all_users']);
+    expect(fcmService.subscribeToDemographics).toHaveBeenCalledWith([
+      'all_users',
+    ]);
   });
 
   it('should not initialize when permission is denied', async () => {
@@ -37,12 +41,32 @@ describe('NotificationInitService', () => {
   it('should resubscribe to active alerts', async () => {
     (fcmService.checkPermission as jest.Mock).mockResolvedValue(true);
     (fcmService.getFCMToken as jest.Mock).mockResolvedValue('test-token');
-    (fcmService.subscribeToDemographics as jest.Mock).mockResolvedValue(undefined);
+    (fcmService.subscribeToDemographics as jest.Mock).mockResolvedValue(
+      undefined,
+    );
     (fcmService.subscribeToTopic as jest.Mock).mockResolvedValue(undefined);
     (storageService.getAlerts as jest.Mock).mockResolvedValue([
-      { id: '1', symbol: 'USD/VES', target: '40', condition: 'above', isActive: true },
-      { id: '2', symbol: 'USD/VES', target: '35', condition: 'below', isActive: true },
-      { id: '3', symbol: 'EUR/VES', target: '45', condition: 'above', isActive: true },
+      {
+        id: '1',
+        symbol: 'USD/VES',
+        target: '40',
+        condition: 'above',
+        isActive: true,
+      },
+      {
+        id: '2',
+        symbol: 'USD/VES',
+        target: '35',
+        condition: 'below',
+        isActive: true,
+      },
+      {
+        id: '3',
+        symbol: 'EUR/VES',
+        target: '45',
+        condition: 'above',
+        isActive: true,
+      },
     ]);
 
     await notificationInitService.initialize();
@@ -57,7 +81,9 @@ describe('NotificationInitService', () => {
     (fcmService.requestUserPermission as jest.Mock).mockResolvedValue(true);
     (fcmService.checkPermission as jest.Mock).mockResolvedValue(true);
     (fcmService.getFCMToken as jest.Mock).mockResolvedValue('test-token');
-    (fcmService.subscribeToDemographics as jest.Mock).mockResolvedValue(undefined);
+    (fcmService.subscribeToDemographics as jest.Mock).mockResolvedValue(
+      undefined,
+    );
     (storageService.getAlerts as jest.Mock).mockResolvedValue([]);
 
     const granted = await notificationInitService.requestPermission();
@@ -71,8 +97,20 @@ describe('NotificationInitService', () => {
     (fcmService.checkPermission as jest.Mock).mockResolvedValue(true);
     (fcmService.getFCMToken as jest.Mock).mockResolvedValue('test-token');
     (storageService.getAlerts as jest.Mock).mockResolvedValue([
-      { id: '1', symbol: 'USD/VES', target: '40', condition: 'above', isActive: true },
-      { id: '2', symbol: 'EUR/VES', target: '45', condition: 'below', isActive: false },
+      {
+        id: '1',
+        symbol: 'USD/VES',
+        target: '40',
+        condition: 'above',
+        isActive: true,
+      },
+      {
+        id: '2',
+        symbol: 'EUR/VES',
+        target: '45',
+        condition: 'below',
+        isActive: false,
+      },
     ]);
 
     const status = await notificationInitService.checkStatus();

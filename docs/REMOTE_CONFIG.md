@@ -7,6 +7,7 @@ Este documento detalla la arquitectura de configuración remota, segmentación d
 El sistema se basa en **Firebase Remote Config** para obtener configuraciones desde la nube, pero delega la lógica de segmentación compleja a un motor de reglas local (`FeatureFlagService`).
 
 **Componentes Principales:**
+
 - **RemoteConfigService**: Wrapper de Firebase que obtiene y cachéa la configuración.
 - **FeatureFlagService**: Evalúa reglas JSON complejas contra el contexto del dispositivo/usuario.
 - **ForceUpdateModal**: Bloquea la app si la versión es obsoleta.
@@ -42,19 +43,20 @@ Toda la configuración avanzada reside bajo la clave `settings` en Firebase Remo
 ```
 
 ### Condiciones Disponibles
+
 Todas las condiciones en una regla actúan como **AND** (todas deben cumplirse).
 
-| Campo | Tipo | Descripción |
-|-------|------|-------------|
-| `platform` | string | 'android' o 'ios' |
-| `minBuild` | number | Build number mínimo (inclusive) |
-| `maxBuild` | number | Build number máximo (inclusive) |
-| `minVersion` | string | Versión semántica mínima (ej. "1.0.4") |
-| `userIds` | string[] | Lista de IDs de usuario permitidos |
-| `fcmTokens` | string[] | Lista de tokens FCM permitidos (para pruebas en dispositivo específico) |
-| `models` | string[] | Coincidencia parcial de nombre de modelo (ej. "Pixel", "Samsung") |
-| `notificationsEnabled` | boolean | `true` si el usuario tiene permisos de notificación activos |
-| `rolloutPercentage` | number | 0-100. % de usuarios aleatorios que verán la feature. |
+| Campo                  | Tipo     | Descripción                                                             |
+| ---------------------- | -------- | ----------------------------------------------------------------------- |
+| `platform`             | string   | 'android' o 'ios'                                                       |
+| `minBuild`             | number   | Build number mínimo (inclusive)                                         |
+| `maxBuild`             | number   | Build number máximo (inclusive)                                         |
+| `minVersion`           | string   | Versión semántica mínima (ej. "1.0.4")                                  |
+| `userIds`              | string[] | Lista de IDs de usuario permitidos                                      |
+| `fcmTokens`            | string[] | Lista de tokens FCM permitidos (para pruebas en dispositivo específico) |
+| `models`               | string[] | Coincidencia parcial de nombre de modelo (ej. "Pixel", "Samsung")       |
+| `notificationsEnabled` | boolean  | `true` si el usuario tiene permisos de notificación activos             |
+| `rolloutPercentage`    | number   | 0-100. % de usuarios aleatorios que verán la feature.                   |
 
 ---
 
@@ -63,6 +65,7 @@ Todas las condiciones en una regla actúan como **AND** (todas deben cumplirse).
 El sistema de actualización forzada impide el uso de versiones obsoletas de la app.
 
 ### Configuración
+
 Se define bajo la clave `strings` (JSON) en Remote Config:
 
 ```json
@@ -76,6 +79,7 @@ Se define bajo la clave `strings` (JSON) en Remote Config:
 ```
 
 ### Comportamiento
+
 1. Al iniciar la app, `AppNavigator` consulta `remoteConfigService`.
 2. Si `device.buildNumber < forceUpdate.build`, se muestra `ForceUpdateModal`.
 3. El modal **no se puede cerrar** y redirige a la tienda de aplicaciones.
@@ -92,10 +96,10 @@ import { remoteConfigService } from '../services/firebase/RemoteConfigService';
 const checkFeature = async () => {
   // Asegura tener la última config
   await remoteConfigService.fetchAndActivate();
-  
+
   // Evalúa reglas localmente
   const isEnabled = await remoteConfigService.getFeature('discover');
-  
+
   if (isEnabled) {
     // Mostrar nueva funcionalidad
   }
@@ -103,6 +107,7 @@ const checkFeature = async () => {
 ```
 
 ### Añadir una Nueva Feature
+
 1. Definir la feature en el JSON de Firebase (`settings`).
 2. Consumirla en el código usando `getFeature('nombre_feature')`.
 
@@ -117,6 +122,7 @@ Para realizar un despliegue gradual (Phased Rollout):
 3. Si `rolloutId < rolloutPercentage`, la condición se cumple.
 
 Ejemplo: Activar al 10% de usuarios.
+
 ```json
 {
   "conditions": {

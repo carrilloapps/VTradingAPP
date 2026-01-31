@@ -10,16 +10,29 @@ interface AppRecommendationsSkeletonProps {
 
 const MIN_PLACEHOLDERS = 4;
 
-const AppRecommendationsSkeleton: React.FC<AppRecommendationsSkeletonProps> = ({ columns = MIN_PLACEHOLDERS }) => {
+const AppRecommendationsSkeleton: React.FC<AppRecommendationsSkeletonProps> = ({
+  columns = MIN_PLACEHOLDERS,
+}) => {
   const theme = useAppTheme();
-  const effectiveColumns = useMemo(() => Math.max(1, Math.floor(columns)), [columns]);
-  const columnWidth = useMemo<DimensionValue>(() => `${100 / effectiveColumns}%` as DimensionValue, [effectiveColumns]);
-  const placeholders = useMemo(() => Math.max(MIN_PLACEHOLDERS, effectiveColumns), [effectiveColumns]);
+  const effectiveColumns = useMemo(
+    () => Math.max(1, Math.floor(columns)),
+    [columns],
+  );
+  const columnWidth = useMemo<DimensionValue>(
+    () => `${100 / effectiveColumns}%` as DimensionValue,
+    [effectiveColumns],
+  );
+  const placeholders = useMemo(
+    () => Math.max(MIN_PLACEHOLDERS, effectiveColumns),
+    [effectiveColumns],
+  );
 
   return (
     <View style={styles.container} testID="app-recommendations-skeleton">
       {Array.from({ length: placeholders }).map((_, index) => (
-        <View key={`app-recommendation-skeleton-${index}`} style={[styles.cardWrapper, { width: columnWidth }]}
+        <View
+          key={`app-recommendation-skeleton-${index}`}
+          style={[styles.cardWrapper, { width: columnWidth }]}
         >
           <Surface
             elevation={0}
@@ -32,7 +45,11 @@ const AppRecommendationsSkeleton: React.FC<AppRecommendationsSkeletonProps> = ({
               },
             ]}
           >
-            <View style={[styles.iconContainer, { borderRadius: theme.roundness * 3 }]}
+            <View
+              style={[
+                styles.iconContainer,
+                { borderRadius: theme.roundness * 3 },
+              ]}
             >
               <Skeleton width={32} height={32} borderRadius={16} />
             </View>

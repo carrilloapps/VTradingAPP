@@ -15,23 +15,29 @@ export const initializeStorage = async (): Promise<void> => {
   if (_storage) return;
 
   const encryptionKey = await KeyService.getEncryptionKey();
-  
+
   try {
     _storage = createMMKV({
       id: 'vtrading-storage',
-      encryptionKey: encryptionKey
+      encryptionKey: encryptionKey,
     });
   } catch (e) {
     // If initialization fails (e.g. wrong key due to migration/reinstall),
     // we might need to fallback to non-encrypted or recreate.
     // WARNING: This deletes data if key is lost.
-    observabilityService.captureError(e, { context: 'StorageService.initialize', action: 'createMMKV_failed' });
-    SafeLogger.error('Failed to create MMKV with encryption, falling back to clear storage', e);
-    
+    observabilityService.captureError(e, {
+      context: 'StorageService.initialize',
+      action: 'createMMKV_failed',
+    });
+    SafeLogger.error(
+      'Failed to create MMKV with encryption, falling back to clear storage',
+      e,
+    );
+
     // Fallback: Try creating without encryption (if key was removed) or re-create
     _storage = createMMKV({
-        id: 'vtrading-storage',
-        // No key
+      id: 'vtrading-storage',
+      // No key
     });
   }
 };
@@ -107,12 +113,12 @@ class StorageService {
 
   // Helper methods for MMKV JSON operations
   private getJSON<T>(key: string, defaultValue: T): T {
-    // Removed duplicate memory cache (Map) to reduce memory usage. 
+    // Removed duplicate memory cache (Map) to reduce memory usage.
     // MMKV is already memory-mapped and very fast.
     try {
       const data = getStorage().getString(key);
       if (!data) return defaultValue;
-      
+
       const parsed = JSON.parse(data);
       // Check for schema version if needed in future
       return parsed as T;
@@ -120,7 +126,7 @@ class StorageService {
       observabilityService.captureError(e, {
         context: 'StorageService.getJSON',
         action: 'read_storage',
-        key: key
+        key: key,
       });
       return defaultValue;
     }
@@ -129,15 +135,15 @@ class StorageService {
   private setJSON<T>(key: string, value: T): void {
     // Use InteractionManager to defer heavy serialization/writes
     InteractionManager.runAfterInteractions(() => {
-        try {
-            getStorage().set(key, JSON.stringify(value));
-        } catch (e) {
-            observabilityService.captureError(e, {
-                context: 'StorageService.setJSON',
-                action: 'write_storage',
-                key: key
-            });
-        }
+      try {
+        getStorage().set(key, JSON.stringify(value));
+      } catch (e) {
+        observabilityService.captureError(e, {
+          context: 'StorageService.setJSON',
+          action: 'write_storage',
+          key: key,
+        });
+      }
     });
   }
 
@@ -183,7 +189,7 @@ class StorageService {
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'StorageService.getWidgetConfig',
-        action: 'read_widget_config'
+        action: 'read_widget_config',
       });
       return null;
     }
@@ -218,7 +224,7 @@ class StorageService {
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'StorageService.clearAll',
-        action: 'clear_all_storage'
+        action: 'clear_all_storage',
       });
     }
   }

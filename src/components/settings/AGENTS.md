@@ -7,20 +7,21 @@ Este directorio contiene los componentes utilizados en la pantalla de configurac
 Este componente es el **ESTÁNDAR DE REFERENCIA (Gold Standard)** para todos los diálogos de formulario en la aplicación. Cualquier otro modal o diálogo que contenga inputs y botones de acción debe replicar sus estilos.
 
 ### Estándares Visuales Clave
-*   **Inputs:**
-    *   Fondo: `theme.colors.surfaceVariant`.
-    *   Bordes: Redondeados (12px - `borderTopLeftRadius`, etc. manual o via theme).
-    *   Placeholder: `theme.colors.onSurfaceVariant`.
-    *   Texto: `theme.colors.onSurface`.
-*   **Botones:**
-    *   **Primario (Guardar/Acción):** `mode="contained"`, `buttonColor={theme.colors.primary}`, `textColor={theme.colors.onPrimary}`.
-    *   **Secundario (Cancelar/Archivar):** `mode="outlined"`, `borderColor={theme.colors.primary}`, `textColor={theme.colors.primary}`. **IMPORTANTE:** No usar gris, usar el color primario para denotar interactividad.
-    *   **Dimensiones:** Altura fija y bordes redondeados consistentes.
+
+- **Inputs:**
+  - Fondo: `theme.colors.surfaceVariant`.
+  - Bordes: Redondeados (12px - `borderTopLeftRadius`, etc. manual o via theme).
+  - Placeholder: `theme.colors.onSurfaceVariant`.
+  - Texto: `theme.colors.onSurface`.
+- **Botones:**
+  - **Primario (Guardar/Acción):** `mode="contained"`, `buttonColor={theme.colors.primary}`, `textColor={theme.colors.onPrimary}`.
+  - **Secundario (Cancelar/Archivar):** `mode="outlined"`, `borderColor={theme.colors.primary}`, `textColor={theme.colors.primary}`. **IMPORTANTE:** No usar gris, usar el color primario para denotar interactividad.
+  - **Dimensiones:** Altura fija y bordes redondeados consistentes.
 
 ### Ejemplo de Estructura
 
 ```tsx
-<CustomDialog 
+<CustomDialog
   visible={...}
   onDismiss={...}
   title="Título"
@@ -44,13 +45,14 @@ Este componente es el **ESTÁNDAR DE REFERENCIA (Gold Standard)** para todos los
 Componente para la selección del tema de la aplicación (Claro / Oscuro / Sistema).
 
 ### Características
-*   **Visualización:** Muestra tarjetas seleccionables con previsualización de colores.
-*   **Interacción:** Usa `TouchableOpacity` para selección.
-*   **Estado Activo:** Indica la selección actual con un borde `primary` y un icono de check.
+
+- **Visualización:** Muestra tarjetas seleccionables con previsualización de colores.
+- **Interacción:** Usa `TouchableOpacity` para selección.
+- **Estado Activo:** Indica la selección actual con un borde `primary` y un icono de check.
 
 ### Props
 
-| Prop | Tipo | Descripción |
-|---|---|---|
-| `currentTheme` | `'light' \| 'dark' \| 'system'` | Tema actual seleccionado. |
-| `onSelect` | `(theme: 'light' \| 'dark' \| 'system')` | Callback al seleccionar un tema. |
+| Prop           | Tipo                                     | Descripción                      |
+| -------------- | ---------------------------------------- | -------------------------------- |
+| `currentTheme` | `'light' \| 'dark' \| 'system'`          | Tema actual seleccionado.        |
+| `onSelect`     | `(theme: 'light' \| 'dark' \| 'system')` | Callback al seleccionar un tema. |

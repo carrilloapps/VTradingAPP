@@ -4,7 +4,11 @@ import { Text, useTheme, TouchableRipple } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { AppConfig } from '../../constants/AppConfig';
-import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
+import {
+  BannerAd,
+  BannerAdSize,
+  TestIds,
+} from 'react-native-google-mobile-ads';
 import { useAuthStore } from '../../stores/authStore';
 import ProfileInfo from './header/ProfileInfo';
 import HeaderActions from './header/HeaderActions';
@@ -64,42 +68,52 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
 }) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
-  const user = useAuthStore((state) => state.user);
-  const resolvedIsPremium = typeof isPremium === 'boolean' ? isPremium : !!(user && !user.isAnonymous);
-  const adUnitId = Platform.OS === 'ios' ? AppConfig.ADMOB_BANNER_ID_IOS : AppConfig.ADMOB_BANNER_ID_ANDROID;
+  const user = useAuthStore(state => state.user);
+  const resolvedIsPremium =
+    typeof isPremium === 'boolean' ? isPremium : !!(user && !user.isAnonymous);
+  const adUnitId =
+    Platform.OS === 'ios'
+      ? AppConfig.ADMOB_BANNER_ID_IOS
+      : AppConfig.ADMOB_BANNER_ID_ANDROID;
   // Use TestIds.BANNER in dev, or real ID in prod (if configured)
   const bannerId = __DEV__ ? TestIds.BANNER : adUnitId;
   const shouldShowAd = showAd && !resolvedIsPremium && !!bannerId;
 
-  const themeStyles = React.useMemo(() => ({
-    container: {
-      backgroundColor: theme.colors.background,
-      borderBottomColor: theme.colors.outline,
-      borderBottomWidth: hideDivider ? 0 : 1,
-    },
-    sectionTitle: {
-      color: theme.colors.onSurface,
-    },
-    subtitleText: {
-      color: theme.colors.onSurfaceVariant,
-    },
-    simpleTitle: {
-      color: theme.colors.onSurface,
-    },
-    iconButton: {
-      backgroundColor: theme.colors.elevation.level1,
-      borderWidth: 1,
-      borderColor: theme.dark ? 'transparent' : theme.colors.outline,
-    },
-    adContainer: {
-      backgroundColor: theme.colors.background,
-      borderBottomColor: theme.colors.outline,
-    },
-  }), [theme, hideDivider]);
+  const themeStyles = React.useMemo(
+    () => ({
+      container: {
+        backgroundColor: theme.colors.background,
+        borderBottomColor: theme.colors.outline,
+        borderBottomWidth: hideDivider ? 0 : 1,
+      },
+      sectionTitle: {
+        color: theme.colors.onSurface,
+      },
+      subtitleText: {
+        color: theme.colors.onSurfaceVariant,
+      },
+      simpleTitle: {
+        color: theme.colors.onSurface,
+      },
+      iconButton: {
+        backgroundColor: theme.colors.elevation.level1,
+        borderWidth: 1,
+        borderColor: theme.dark ? 'transparent' : theme.colors.outline,
+      },
+      adContainer: {
+        backgroundColor: theme.colors.background,
+        borderBottomColor: theme.colors.outline,
+      },
+    }),
+    [theme, hideDivider],
+  );
 
   const renderSectionContent = () => (
     <View style={styles.textContainer} accessibilityRole="header">
-      <Text variant="headlineSmall" style={[styles.sectionTitle, themeStyles.sectionTitle]}>
+      <Text
+        variant="headlineSmall"
+        style={[styles.sectionTitle, themeStyles.sectionTitle]}
+      >
         {title}
       </Text>
       {subtitle && (
@@ -112,7 +126,13 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
               style={styles.subtitleIcon}
             />
           )}
-          <Text style={[styles.subtitleText, themeStyles.subtitleText, subtitleIcon && styles.noMarginTop]}>
+          <Text
+            style={[
+              styles.subtitleText,
+              themeStyles.subtitleText,
+              subtitleIcon && styles.noMarginTop,
+            ]}
+          >
             {subtitle}
           </Text>
         </View>
@@ -121,8 +141,14 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   );
 
   const renderSimpleContent = () => (
-    <View style={[styles.textContainer, styles.simpleHeaderContainer]} accessibilityRole="header">
-      <Text variant="titleLarge" style={[styles.simpleTitle, themeStyles.simpleTitle]}>
+    <View
+      style={[styles.textContainer, styles.simpleHeaderContainer]}
+      accessibilityRole="header"
+    >
+      <Text
+        variant="titleLarge"
+        style={[styles.simpleTitle, themeStyles.simpleTitle]}
+      >
         {title}
       </Text>
     </View>
@@ -130,14 +156,25 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
 
   return (
     <View style={[styles.wrapper, style]}>
-      <View style={[styles.container, themeStyles.container, {
-        paddingTop: insets.top + (styles.headerPadding.paddingTop as number),
-      }]}>
+      <View
+        style={[
+          styles.container,
+          themeStyles.container,
+          {
+            paddingTop:
+              insets.top + (styles.headerPadding.paddingTop as number),
+          },
+        ]}
+      >
         <View style={styles.leftContent}>
           {onBackPress && (
             <TouchableRipple
               onPress={onBackPress}
-              style={[styles.iconButton, themeStyles.iconButton, styles.backButton]}
+              style={[
+                styles.iconButton,
+                themeStyles.iconButton,
+                styles.backButton,
+              ]}
               borderless
               rippleColor="rgba(0, 0, 0, .1)"
               accessibilityRole="button"
@@ -145,7 +182,11 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
               accessibilityHint="Volver a la pantalla anterior"
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <MaterialCommunityIcons name="arrow-left" size={22} color={theme.colors.onSurface} />
+              <MaterialCommunityIcons
+                name="arrow-left"
+                size={22}
+                color={theme.colors.onSurface}
+              />
             </TouchableRipple>
           )}
 
@@ -176,10 +217,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
       </View>
       {shouldShowAd && (
         <View style={[styles.adContainer, themeStyles.adContainer]}>
-          <BannerAd
-            unitId={bannerId}
-            size={BannerAdSize.BANNER}
-          />
+          <BannerAd unitId={bannerId} size={BannerAdSize.BANNER} />
         </View>
       )}
     </View>

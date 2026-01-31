@@ -10,23 +10,26 @@ Para garantizar una percepción de rendimiento fluido y evitar saltos de conteni
 
 Este componente replica la estructura exacta de `StocksScreen` mientras se cargan los datos.
 
-*   **Estructura Replicada:**
-    1.  **Header:** Título y botones de acción (Search, Filter).
-    2.  **Search Bar:** Input de búsqueda inactivo.
-    3.  **Market Status:** Estado del mercado (Abierto/Cerrado).
-    4.  **Index Hero:** Tarjeta destacada del índice principal.
-    5.  **Stock List:** Lista de acciones (`StockItem`).
+- **Estructura Replicada:**
 
-*   **Sincronización Visual:**
-    *   **StockItem Skeleton:** Usa las mismas dimensiones, padding y `borderRadius` que el componente `StockItem` real.
-    *   **Elevación y Bordes:**
-        *   **Global:** Aplica `elevation: 0` (Flat), `borderWidth: 1` con color `theme.colors.outline`, y fondo `theme.colors.elevation.level1`.
-        *   **Regla:** No usar sombras ni bordes transparentes condicionales. El borde debe ser visible y consistente en ambos modos (Light/Dark).
-    *   **Animación:** Utiliza el componente base `Skeleton` (gradiente animado) para indicar actividad.
+  1.  **Header:** Título y botones de acción (Search, Filter).
+  2.  **Search Bar:** Input de búsqueda inactivo.
+  3.  **Market Status:** Estado del mercado (Abierto/Cerrado).
+  4.  **Index Hero:** Tarjeta destacada del índice principal.
+  5.  **Stock List:** Lista de acciones (`StockItem`).
+
+- **Sincronización Visual:**
+  - **StockItem Skeleton:** Usa las mismas dimensiones, padding y `borderRadius` que el componente `StockItem` real.
+  - **Elevación y Bordes:**
+    - **Global:** Aplica `elevation: 0` (Flat), `borderWidth: 1` con color `theme.colors.outline`, y fondo `theme.colors.elevation.level1`.
+    - **Regla:** No usar sombras ni bordes transparentes condicionales. El borde debe ser visible y consistente en ambos modos (Light/Dark).
+  - **Animación:** Utiliza el componente base `Skeleton` (gradiente animado) para indicar actividad.
 
 ### Componentes Relacionados
-*   `src/components/ui/Skeleton.tsx`: Componente base animado.
-*   `src/components/stocks/StockItem.tsx`: Componente "vivo" que se imita.
+
+- `src/components/ui/Skeleton.tsx`: Componente base animado.
+- `src/components/stocks/StockItem.tsx`: Componente "vivo" que se imita.
 
 ---
-*Última actualización: 20 de Enero de 2026*
+
+_Última actualización: 20 de Enero de 2026_

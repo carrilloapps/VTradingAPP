@@ -1,10 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, ActivityIndicator, StatusBar, Animated } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ActivityIndicator,
+  StatusBar,
+  Animated,
+} from 'react-native';
 import { Text } from 'react-native-paper';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
 
-import { wordPressService, FormattedPost, WordPressCategory } from '../../services/WordPressService';
+import {
+  wordPressService,
+  FormattedPost,
+  WordPressCategory,
+} from '../../services/WordPressService';
 import { observabilityService } from '../../services/ObservabilityService';
 import { useAppTheme } from '../../theme/theme';
 import ArticleCard from '../../components/discover/ArticleCard';
@@ -23,15 +33,35 @@ import { shareTextContent } from '../../utils/ShareUtils';
 
 const AnimatedFlashList = Animated.createAnimatedComponent(FlashList) as any;
 
-const ListFooter = ({ hasMore, postsLength, theme }: { hasMore: boolean; postsLength: number; theme: any }) => {
+const ListFooter = ({
+  hasMore,
+  postsLength,
+  theme,
+}: {
+  hasMore: boolean;
+  postsLength: number;
+  theme: any;
+}) => {
   if (hasMore) {
-    return <ActivityIndicator style={styles.footerLoader} color={theme.colors.primary} />;
+    return (
+      <ActivityIndicator
+        style={styles.footerLoader}
+        color={theme.colors.primary}
+      />
+    );
   }
   if (postsLength > 0) {
     return (
       <View style={styles.endContainer}>
-        <View style={[styles.endLine, { backgroundColor: theme.colors.outlineVariant }]} />
-        <Text variant="labelLarge" style={styles.endText}>HAS LLEGADO AL FINAL</Text>
+        <View
+          style={[
+            styles.endLine,
+            { backgroundColor: theme.colors.outlineVariant },
+          ]}
+        />
+        <Text variant="labelLarge" style={styles.endText}>
+          HAS LLEGADO AL FINAL
+        </Text>
       </View>
     );
   }
@@ -44,7 +74,9 @@ const CategoryDetailScreen = () => {
   const navigation = useNavigation<any>();
   const { category: initialCategory, slug } = (route.params as any) || {};
 
-  const [category, setCategory] = useState<WordPressCategory | null>(initialCategory || null);
+  const [category, setCategory] = useState<WordPressCategory | null>(
+    initialCategory || null,
+  );
   const [posts, setPosts] = useState<FormattedPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -57,7 +89,7 @@ const CategoryDetailScreen = () => {
   const [isShareDialogVisible, setShareDialogVisible] = useState(false);
   const [shareFormat, setShareFormat] = useState<'1:1' | '16:9'>('1:1');
   const [, setSharing] = useState(false);
-  const showToast = useToastStore((state) => state.showToast);
+  const showToast = useToastStore(state => state.showToast);
 
   useEffect(() => {
     const fetchCategoryAndPosts = async () => {
@@ -71,18 +103,27 @@ const CategoryDetailScreen = () => {
 
         if (currentCategory) {
           // Refetch to get latest count
-          const freshCategory = await wordPressService.getCategoryById(currentCategory.id);
+          const freshCategory = await wordPressService.getCategoryById(
+            currentCategory.id,
+          );
           if (freshCategory) {
             setCategory(freshCategory);
             currentCategory = freshCategory;
           }
 
-          const fetchedPosts = await wordPressService.getPosts(1, 10, currentCategory.id);
+          const fetchedPosts = await wordPressService.getPosts(
+            1,
+            10,
+            currentCategory.id,
+          );
           setPosts(fetchedPosts);
           setHasMore(fetchedPosts.length === 10);
         }
       } catch (e) {
-        observabilityService.captureError(e, { context: 'CategoryDetailScreen.fetchData', slug });
+        observabilityService.captureError(e, {
+          context: 'CategoryDetailScreen.fetchData',
+          slug,
+        });
       } finally {
         setLoading(false);
       }
@@ -95,13 +136,21 @@ const CategoryDetailScreen = () => {
     if (!category) return;
     setRefreshing(true);
     try {
-      const fetchedPosts = await wordPressService.getPosts(1, 10, category.id, undefined, true);
+      const fetchedPosts = await wordPressService.getPosts(
+        1,
+        10,
+        category.id,
+        undefined,
+        true,
+      );
       setPosts(fetchedPosts);
       setPage(1);
       setRefreshing(false);
       setHasMore(fetchedPosts.length === 10);
     } catch (e) {
-      observabilityService.captureError(e, { context: 'CategoryDetailScreen.refresh' });
+      observabilityService.captureError(e, {
+        context: 'CategoryDetailScreen.refresh',
+      });
       setRefreshing(false);
     }
   };
@@ -110,7 +159,11 @@ const CategoryDetailScreen = () => {
     if (!category || !hasMore || refreshing || loading) return;
     try {
       const nextPage = page + 1;
-      const morePosts = await wordPressService.getPosts(nextPage, 10, category.id);
+      const morePosts = await wordPressService.getPosts(
+        nextPage,
+        10,
+        category.id,
+      );
       if (morePosts.length > 0) {
         setPosts([...posts, ...morePosts]);
         setPage(nextPage);
@@ -119,7 +172,9 @@ const CategoryDetailScreen = () => {
         setHasMore(false);
       }
     } catch (e) {
-      observabilityService.captureError(e, { context: 'CategoryDetailScreen.loadMore' });
+      observabilityService.captureError(e, {
+        context: 'CategoryDetailScreen.loadMore',
+      });
     }
   };
 
@@ -132,7 +187,11 @@ const CategoryDetailScreen = () => {
         image={firstArticleImage}
         categoryName="CATEGORÍA"
         title={category?.name || 'Categoría'}
-        description={category?.yoast_head_json?.description || category?.description || 'Explora las noticias más recientes y análisis técnicos profundos en nuestra sección especializada.'}
+        description={
+          category?.yoast_head_json?.description ||
+          category?.description ||
+          'Explora las noticias más recientes y análisis técnicos profundos en nuestra sección especializada.'
+        }
         lastUpdateDate={lastUpdateDate}
         articleCount={category?.count || 0}
         sectionTitle={`PRÓXIMAS LECTURAS EN ${category?.name.toUpperCase()}`}
@@ -160,7 +219,7 @@ const CategoryDetailScreen = () => {
           height: format === '1:1' ? 1080 : 1920,
         });
 
-        if (!uri) throw new Error("URI generation failed");
+        if (!uri) throw new Error('URI generation failed');
 
         const sharePath = uri.startsWith('file://') ? uri : `file://${uri}`;
 
@@ -170,11 +229,20 @@ const CategoryDetailScreen = () => {
           message: `Mira lo nuevo en ${category?.name || 'VTrading'}`,
         });
 
-        analyticsService.logShare('category_detail', category?.id.toString() || 'unknown', format === '1:1' ? 'image_square' : 'image_story');
+        analyticsService.logShare(
+          'category_detail',
+          category?.id.toString() || 'unknown',
+          format === '1:1' ? 'image_square' : 'image_story',
+        );
       } catch (e) {
         const err = e as any;
-        if (err.message !== 'User did not share' && err.message !== 'CANCELLED') {
-          observabilityService.captureError(e, { context: 'CategoryDetailScreen.shareImage' });
+        if (
+          err.message !== 'User did not share' &&
+          err.message !== 'CANCELLED'
+        ) {
+          observabilityService.captureError(e, {
+            context: 'CategoryDetailScreen.shareImage',
+          });
           showToast('Error al compartir imagen', 'error');
         }
       } finally {
@@ -190,15 +258,31 @@ const CategoryDetailScreen = () => {
       excerpt: category?.description,
       url: `https://discover.vtrading.app/categoria/${category?.slug || category?.id}`,
       type: 'CATEGORY',
-      count: category?.count
+      count: category?.count,
     });
-    analyticsService.logShare('category_detail', category?.id.toString() || 'unknown', 'text');
+    analyticsService.logShare(
+      'category_detail',
+      category?.id.toString() || 'unknown',
+      'text',
+    );
   };
 
-  const containerStyle = [styles.container, { backgroundColor: theme.colors.background }];
-  const dialogDescriptionStyle = [styles.dialogDescription, { color: theme.colors.onSurfaceVariant }];
+  const containerStyle = [
+    styles.container,
+    { backgroundColor: theme.colors.background },
+  ];
+  const dialogDescriptionStyle = [
+    styles.dialogDescription,
+    { color: theme.colors.onSurfaceVariant },
+  ];
 
-  const renderArticle = ({ item, index }: { item: FormattedPost; index: number }) => (
+  const renderArticle = ({
+    item,
+    index,
+  }: {
+    item: FormattedPost;
+    index: number;
+  }) => (
     <ArticleCard
       article={item}
       onPress={() => navigation.navigate('ArticleDetail', { article: item })}
@@ -210,15 +294,18 @@ const CategoryDetailScreen = () => {
     <ListFooter hasMore={hasMore} postsLength={posts.length} theme={theme} />
   );
 
-  const renderEmpty = () => (
+  const renderEmpty = () =>
     !loading ? (
       <DiscoverEmptyView message="No hay artículos en esta categoría" />
-    ) : null
-  );
+    ) : null;
 
   return (
     <View style={containerStyle}>
-      <StatusBar barStyle={theme.dark ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
+      <StatusBar
+        barStyle={theme.dark ? 'light-content' : 'dark-content'}
+        backgroundColor="transparent"
+        translucent
+      />
 
       <DiscoverHeader
         variant="category"
@@ -238,9 +325,13 @@ const CategoryDetailScreen = () => {
         items={posts.slice(0, 6).map(p => ({
           title: p.title.replace(/&#8211;/g, '-').replace(/&#8217;/g, "'"),
           image: p.image,
-          date: new Date(p.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }),
+          date: new Date(p.date).toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
           author: p.author?.name || 'VTrading',
-          authorAvatar: p.author?.avatar
+          authorAvatar: p.author?.avatar,
         }))}
       />
 
@@ -253,7 +344,7 @@ const CategoryDetailScreen = () => {
           scrollEventThrottle={16}
           onScroll={Animated.event(
             [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { useNativeDriver: true }
+            { useNativeDriver: true },
           )}
           renderItem={renderArticle as any}
           estimatedItemSize={250}

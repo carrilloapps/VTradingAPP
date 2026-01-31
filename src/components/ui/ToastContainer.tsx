@@ -7,31 +7,45 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 
 const ToastContainer = () => {
   const theme = useAppTheme();
-  const toasts = useToastStore((state) => state.toasts);
-  const hideToast = useToastStore((state) => state.hideToast);
+  const toasts = useToastStore(state => state.toasts);
+  const hideToast = useToastStore(state => state.hideToast);
 
   const getIconName = (type: string) => {
     switch (type) {
-      case 'success': return 'check-circle';
-      case 'error': return 'alert-circle';
-      case 'warning': return 'alert';
-      case 'trendUp': return 'trending-up';
-      case 'trendDown': return 'trending-down';
-      case 'info': return 'information';
-      default: return 'information';
+      case 'success':
+        return 'check-circle';
+      case 'error':
+        return 'alert-circle';
+      case 'warning':
+        return 'alert';
+      case 'trendUp':
+        return 'trending-up';
+      case 'trendDown':
+        return 'trending-down';
+      case 'info':
+        return 'information';
+      default:
+        return 'information';
     }
   };
 
   const getIconColor = (type: string) => {
     // Ensure distinct colors for all types
     switch (type) {
-      case 'success': return theme.colors.primary;
-      case 'error': return theme.colors.error;
-      case 'warning': return (theme.colors as any).warning || theme.colors.error;
-      case 'trendUp': return (theme.colors as any).trendUp;
-      case 'trendDown': return (theme.colors as any).trendDown;
-      case 'info': return theme.colors.info;
-      default: return theme.colors.primary;
+      case 'success':
+        return theme.colors.primary;
+      case 'error':
+        return theme.colors.error;
+      case 'warning':
+        return (theme.colors as any).warning || theme.colors.error;
+      case 'trendUp':
+        return (theme.colors as any).trendUp;
+      case 'trendDown':
+        return (theme.colors as any).trendDown;
+      case 'info':
+        return theme.colors.info;
+      default:
+        return theme.colors.primary;
     }
   };
 
@@ -55,21 +69,29 @@ const ToastContainer = () => {
               {
                 backgroundColor,
                 // Lifted to 90 to clear TabBar (approx 80px)
-                bottom: toast.position === 'bottom' ? 100 + (index * 70) : undefined,
-                top: toast.position === 'top' ? 56 + (index * 70) : undefined,
+                bottom:
+                  toast.position === 'bottom' ? 100 + index * 70 : undefined,
+                top: toast.position === 'top' ? 56 + index * 70 : undefined,
                 borderColor: typeColor, // Dynamic border color = TYPE variation
                 // Info type does not need a border as per user request, others do
                 borderWidth: toast.type === 'success' ? 0 : 1.5,
-              }
-            ]}
-            action={toast.action ? {
-              label: toast.action.label,
-              onPress: () => {
-                toast.action?.onPress();
-                hideToast(toast.id);
               },
-              labelStyle: { color: theme.colors.primary, fontWeight: 'bold' }
-            } : undefined}
+            ]}
+            action={
+              toast.action
+                ? {
+                    label: toast.action.label,
+                    onPress: () => {
+                      toast.action?.onPress();
+                      hideToast(toast.id);
+                    },
+                    labelStyle: {
+                      color: theme.colors.primary,
+                      fontWeight: 'bold',
+                    },
+                  }
+                : undefined
+            }
           >
             <View style={styles.toastContent}>
               <MaterialCommunityIcons
@@ -88,7 +110,9 @@ const ToastContainer = () => {
                     accessible={true}
                     accessibilityRole="header"
                   >
-                    {typeof toast.title === 'string' ? toast.title : toast.title}
+                    {typeof toast.title === 'string'
+                      ? toast.title
+                      : toast.title}
                   </Text>
                 )}
                 <Text
@@ -96,7 +120,9 @@ const ToastContainer = () => {
                   numberOfLines={2}
                   accessible={true}
                 >
-                  {typeof toast.message === 'string' ? toast.message : toast.message}
+                  {typeof toast.message === 'string'
+                    ? toast.message
+                    : toast.message}
                 </Text>
               </View>
               {!toast.action && (

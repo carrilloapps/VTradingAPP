@@ -23,7 +23,8 @@ interface AppCardProps {
 
 const AppCard: React.FC<AppCardProps> = ({ app, onPress }) => {
   const theme = useTheme();
-  const accentColor = app.color || (app.useTint ? theme.colors.primary : theme.colors.onSurface);
+  const accentColor =
+    app.color || (app.useTint ? theme.colors.primary : theme.colors.onSurface);
 
   const renderVisual = useCallback(() => {
     if (app.logoUri) {
@@ -44,7 +45,10 @@ const AppCard: React.FC<AppCardProps> = ({ app, onPress }) => {
       return (
         <FastImage
           source={{ uri: app.logoUri }}
-          style={[styles.remoteLogo, app.useTint && { tintColor: accentColor } as any]}
+          style={[
+            styles.remoteLogo,
+            app.useTint && ({ tintColor: accentColor } as any),
+          ]}
           resizeMode={FastImage.resizeMode.contain}
         />
       );
@@ -100,8 +104,7 @@ const AppCard: React.FC<AppCardProps> = ({ app, onPress }) => {
 };
 
 const styles = StyleSheet.create({
-  ripple: {
-  },
+  ripple: {},
   container: {
     flex: 1,
     aspectRatio: 1,

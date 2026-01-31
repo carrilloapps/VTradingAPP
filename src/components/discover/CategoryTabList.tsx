@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Animated, LayoutAnimation, Platform, UIManager, useWindowDimensions } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Animated,
+  LayoutAnimation,
+  Platform,
+  UIManager,
+  useWindowDimensions,
+} from 'react-native';
 import { IconButton, useTheme, Surface } from 'react-native-paper';
 import { WordPressCategory } from '../../services/WordPressService';
 import CategoryTab from './CategoryTab';
 
 // Enable LayoutAnimation on Android
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+if (
+  Platform.OS === 'android' &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
@@ -36,7 +47,9 @@ const CategoryTabList: React.FC<CategoryTabListProps> = ({
     const BUTTON_WIDTH = 48; // + button width
 
     // Calculate how many tabs fit including the + button space
-    let maxTabs = Math.floor((availableWidth - BUTTON_WIDTH - GAP) / (AVERAGE_TAB_WIDTH + GAP));
+    let maxTabs = Math.floor(
+      (availableWidth - BUTTON_WIDTH - GAP) / (AVERAGE_TAB_WIDTH + GAP),
+    );
 
     // Default to 3 categories, ensure at least 2
     maxTabs = Math.max(2, Math.min(maxTabs, categories.length));
@@ -58,8 +71,8 @@ const CategoryTabList: React.FC<CategoryTabListProps> = ({
       LayoutAnimation.create(
         300,
         LayoutAnimation.Types.easeInEaseOut,
-        LayoutAnimation.Properties.opacity
-      )
+        LayoutAnimation.Properties.opacity,
+      ),
     );
     setShowAll(!showAll);
   };
@@ -73,7 +86,7 @@ const CategoryTabList: React.FC<CategoryTabListProps> = ({
     <View style={styles.container}>
       {/* Categories Grid */}
       <View style={styles.categoriesGrid}>
-        {visibleCategories.map((cat) => (
+        {visibleCategories.map(cat => (
           <View key={cat.id} style={styles.categoryWrapper}>
             <CategoryTab
               name={cat.name}
@@ -94,7 +107,7 @@ const CategoryTabList: React.FC<CategoryTabListProps> = ({
               {
                 backgroundColor: theme.colors.elevation.level1,
                 borderColor: theme.colors.outline,
-              }
+              },
             ]}
           >
             <IconButton
@@ -124,7 +137,7 @@ const CategoryTabList: React.FC<CategoryTabListProps> = ({
               {
                 backgroundColor: theme.colors.surfaceVariant,
                 borderColor: theme.colors.outline,
-              }
+              },
             ]}
           >
             <IconButton
@@ -204,4 +217,3 @@ const styles = StyleSheet.create({
 });
 
 export default React.memo(CategoryTabList);
-

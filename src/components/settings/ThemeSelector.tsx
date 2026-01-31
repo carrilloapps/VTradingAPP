@@ -24,7 +24,7 @@ const ThemeOption: React.FC<ThemeOptionProps> = ({
   renderPreview,
   currentTheme,
   onSelect,
-  disabled
+  disabled,
 }) => {
   const theme = useAppTheme();
   const isSelected = currentTheme === mode;
@@ -43,25 +43,37 @@ const ThemeOption: React.FC<ThemeOptionProps> = ({
           backgroundColor: bg,
           borderWidth,
         },
-        disabled && styles.disabledOpacity
+        disabled && styles.disabledOpacity,
       ]}
     >
       {renderPreview()}
-      <Text style={[
-        styles.label,
-        { color: isSelected ? theme.colors.primary : theme.colors.onSurfaceVariant },
-        isSelected && styles.selectedLabel
-      ]}>
+      <Text
+        style={[
+          styles.label,
+          {
+            color: isSelected
+              ? theme.colors.primary
+              : theme.colors.onSurfaceVariant,
+          },
+          isSelected && styles.selectedLabel,
+        ]}
+      >
         {label}
       </Text>
       {isSelected && (
-        <View style={[styles.checkDot, { backgroundColor: theme.colors.primary }]} />
+        <View
+          style={[styles.checkDot, { backgroundColor: theme.colors.primary }]}
+        />
       )}
     </TouchableOpacity>
   );
 };
 
-const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onSelect, disabled }) => {
+const ThemeSelector: React.FC<ThemeSelectorProps> = ({
+  currentTheme,
+  onSelect,
+  disabled,
+}) => {
   const theme = useAppTheme();
 
   return (
@@ -102,7 +114,13 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onSelect, d
         onSelect={onSelect}
         disabled={disabled}
         renderPreview={() => (
-          <View style={[styles.previewBox, styles.systemPreview, { borderColor: theme.colors.outline }]}>
+          <View
+            style={[
+              styles.previewBox,
+              styles.systemPreview,
+              { borderColor: theme.colors.outline },
+            ]}
+          >
             <View style={styles.systemLeft} />
             <View style={styles.systemRight} />
           </View>
@@ -184,7 +202,7 @@ const styles = StyleSheet.create({
   },
   disabledOpacity: {
     opacity: 0.6,
-  }
+  },
 });
 
 export default ThemeSelector;

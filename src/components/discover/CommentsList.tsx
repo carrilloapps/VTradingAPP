@@ -10,13 +10,16 @@ interface CommentsListProps {
   loading: boolean;
 }
 
-export const CommentsList: React.FC<CommentsListProps> = ({ comments, loading }) => {
+export const CommentsList: React.FC<CommentsListProps> = ({
+  comments,
+  loading,
+}) => {
   const theme = useAppTheme();
 
   if (loading) {
     const loadingTextStyle = [
       styles.loadingText,
-      { color: theme.colors.onSurfaceVariant }
+      { color: theme.colors.onSurfaceVariant },
     ];
 
     return (
@@ -32,22 +35,26 @@ export const CommentsList: React.FC<CommentsListProps> = ({ comments, loading })
   if (comments.length === 0) {
     const emptyBoxStyle = [
       styles.emptyCommentsBox,
-      { backgroundColor: theme.colors.elevation.level1 }
+      { backgroundColor: theme.colors.elevation.level1 },
     ];
 
     const emptyTitleStyle = [
       styles.emptyTitle,
-      { color: theme.colors.onSurfaceVariant }
+      { color: theme.colors.onSurfaceVariant },
     ];
 
     const emptySubtitleStyle = [
       styles.emptySubtitle,
-      { color: theme.colors.outline }
+      { color: theme.colors.outline },
     ];
 
     return (
       <Surface style={emptyBoxStyle} elevation={0}>
-        <MaterialCommunityIcons name="comment-outline" size={48} color={theme.colors.outline} />
+        <MaterialCommunityIcons
+          name="comment-outline"
+          size={48}
+          color={theme.colors.outline}
+        />
         <Text variant="bodyMedium" style={emptyTitleStyle}>
           No hay comentarios aún
         </Text>
@@ -60,10 +67,10 @@ export const CommentsList: React.FC<CommentsListProps> = ({ comments, loading })
 
   return (
     <>
-      {comments.map((comment) => {
+      {comments.map(comment => {
         const itemStyle = [
           styles.commentItem,
-          comment.isReply && styles.replyItem
+          comment.isReply && styles.replyItem,
         ];
 
         return (
@@ -71,10 +78,25 @@ export const CommentsList: React.FC<CommentsListProps> = ({ comments, loading })
             <Avatar.Image size={32} source={{ uri: comment.avatar }} />
             <View style={styles.commentContent}>
               <View style={styles.commentHeader}>
-                <Text style={[styles.authorName, { color: theme.colors.onSurface }]}>{comment.author}</Text>
-                <Text style={[styles.commentDate, { color: theme.colors.outline }]}>{comment.date}</Text>
+                <Text
+                  style={[styles.authorName, { color: theme.colors.onSurface }]}
+                >
+                  {comment.author}
+                </Text>
+                <Text
+                  style={[styles.commentDate, { color: theme.colors.outline }]}
+                >
+                  {comment.date}
+                </Text>
               </View>
-              <Text style={[styles.commentBody, { color: theme.colors.onSurfaceVariant }]}>{comment.content}</Text>
+              <Text
+                style={[
+                  styles.commentBody,
+                  { color: theme.colors.onSurfaceVariant },
+                ]}
+              >
+                {comment.content}
+              </Text>
             </View>
           </View>
         );

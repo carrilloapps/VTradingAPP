@@ -45,7 +45,7 @@ describe('NotificationButton', () => {
   it('renders correctly without badge when unreadCount is 0', () => {
     mockUseNotifications.mockReturnValue({ unreadCount: 0 });
     const { getByTestId, queryByText } = render(<NotificationButton />);
-    
+
     expect(getByTestId('notification-button')).toBeTruthy();
     expect(queryByText('0')).toBeNull();
   });
@@ -61,15 +61,15 @@ describe('NotificationButton', () => {
     const { queryByText } = render(<NotificationButton />);
     // Should NOT show number "100"
     expect(queryByText('100')).toBeNull();
-    // Should show the dot (checking via existence of badge container could be one way, 
-    // but without testID on the dot it's harder. 
+    // Should show the dot (checking via existence of badge container could be one way,
+    // but without testID on the dot it's harder.
     // However, since we don't render text, queryByText should be null).
   });
 
   it('navigates to Notifications screen on press', () => {
     mockUseNotifications.mockReturnValue({ unreadCount: 2 });
     const { getByTestId } = render(<NotificationButton />);
-    
+
     fireEvent.press(getByTestId('notification-button'));
     expect(mockNavigate).toHaveBeenCalledWith('Notifications');
   });

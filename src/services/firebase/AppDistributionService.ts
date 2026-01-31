@@ -1,4 +1,7 @@
-import { getAppDistribution, checkForUpdate } from '@react-native-firebase/app-distribution';
+import {
+  getAppDistribution,
+  checkForUpdate,
+} from '@react-native-firebase/app-distribution';
 import { Platform } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import { observabilityService } from '../ObservabilityService';
@@ -55,12 +58,16 @@ class AppDistributionService {
         message.includes('framework');
 
       if (isExpectedError) {
-        SafeLogger.log('[AppDistribution] Service not available on this device/environment (Safe Skip)');
+        SafeLogger.log(
+          '[AppDistribution] Service not available on this device/environment (Safe Skip)',
+        );
         return;
       }
 
       // Report only real unexpected errors
-      observabilityService.captureError(e, { context: 'AppDistribution_checkForUpdate' });
+      observabilityService.captureError(e, {
+        context: 'AppDistribution_checkForUpdate',
+      });
     }
   }
 }

@@ -20,7 +20,7 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
   visible,
   onDismiss,
   showDeleteAccount = false,
-  onDeleteAccount
+  onDeleteAccount,
 }) => {
   const theme = useAppTheme();
   const navigation = useNavigation();
@@ -50,39 +50,70 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
           tintColor={theme.colors.primary}
           containerStyle={styles.logoContainer}
         />
-        <Text variant="headlineSmall" style={[styles.title, { color: theme.colors.onSurface }]}>
+        <Text
+          variant="headlineSmall"
+          style={[styles.title, { color: theme.colors.onSurface }]}
+        >
           {appName || 'VTrading'}
         </Text>
-        <Text variant="bodyMedium" style={[styles.version, { color: theme.colors.onSurfaceVariant }]}>
+        <Text
+          variant="bodyMedium"
+          style={[styles.version, { color: theme.colors.onSurfaceVariant }]}
+        >
           Versión {version}
         </Text>
-        <Text variant="bodySmall" style={[styles.description, { color: theme.colors.onSurfaceVariant }]}>
+        <Text
+          variant="bodySmall"
+          style={[styles.description, { color: theme.colors.onSurfaceVariant }]}
+        >
           Diseñado para el seguimiento financiero en tiempo real.
         </Text>
 
         <View style={styles.aboutLinksContainer}>
-          <View style={[styles.cardContainer, { borderColor: theme.colors.outline, backgroundColor: theme.colors.elevation.level1 }]}>
+          <View
+            style={[
+              styles.cardContainer,
+              {
+                borderColor: theme.colors.outline,
+                backgroundColor: theme.colors.elevation.level1,
+              },
+            ]}
+          >
             <MenuButton
               icon="shield-account"
               label="Políticas de privacidad"
-              onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL, 'Políticas de privacidad')}
+              onPress={() =>
+                openExternalUrl(
+                  AppConfig.PRIVACY_POLICY_URL,
+                  'Políticas de privacidad',
+                )
+              }
             />
             <MenuButton
               icon="gavel"
               label="Términos y condiciones"
-              onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL, 'Términos y condiciones')}
+              onPress={() =>
+                openExternalUrl(
+                  AppConfig.TERMS_OF_USE_URL,
+                  'Términos y condiciones',
+                )
+              }
               hasTopBorder
             />
             <MenuButton
               icon="clipboard-text"
               label="Licencias de uso"
-              onPress={() => openExternalUrl(AppConfig.LICENSES_URL, 'Licencias de uso')}
+              onPress={() =>
+                openExternalUrl(AppConfig.LICENSES_URL, 'Licencias de uso')
+              }
               hasTopBorder
             />
             <MenuButton
               icon="web"
               label="Uso de Cookies"
-              onPress={() => openExternalUrl(AppConfig.COOKIES_URL, 'Uso de Cookies')}
+              onPress={() =>
+                openExternalUrl(AppConfig.COOKIES_URL, 'Uso de Cookies')
+              }
               hasTopBorder
             />
             {showDeleteAccount && onDeleteAccount && (
@@ -141,7 +172,7 @@ const styles = StyleSheet.create({
   },
   copyright: {
     color: '#8e8e93', // Fallback or use theme if possible, but earlier it was theme.colors.outline
-  }
+  },
 });
 
 export default AboutDialog;

@@ -20,7 +20,7 @@ const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({
   onSave,
 }) => {
   const theme = useTheme();
-  const showToast = useToastStore((state) => state.showToast);
+  const showToast = useToastStore(state => state.showToast);
   const [name, setName] = useState(currentName);
   const [loading, setLoading] = useState(false);
 
@@ -38,7 +38,7 @@ const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({
       observabilityService.captureError(e, {
         context: 'ProfileEditDialog.handleSave',
         action: 'save_profile_name',
-        nameLength: name.length
+        nameLength: name.length,
       });
       await analyticsService.logError('save_profile');
       showToast('Error al guardar perfil', 'error');

@@ -1,6 +1,12 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Text, useTheme, Switch, IconButton, TouchableRipple } from 'react-native-paper';
+import {
+  Text,
+  useTheme,
+  Switch,
+  IconButton,
+  TouchableRipple,
+} from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 interface AlertItemProps {
@@ -24,39 +30,49 @@ const AlertItem: React.FC<AlertItemProps> = ({
   onDelete,
   onPress,
   iconName,
-  disabled = false
+  disabled = false,
 }) => {
   const theme = useTheme();
   const colors = theme.colors as any;
 
-  const statusColor = status === 'Sube'
-    ? colors.success
-    : colors.error;
+  const statusColor = status === 'Sube' ? colors.success : colors.error;
 
-  const statusBg = status === 'Sube'
-    ? colors.successContainer
-    : colors.errorContainer;
+  const statusBg =
+    status === 'Sube' ? colors.successContainer : colors.errorContainer;
 
   const iconColor = status === 'Sube' ? colors.success : colors.error;
-  const iconBgColor = status === 'Sube' ? colors.successContainer : colors.errorContainer;
+  const iconBgColor =
+    status === 'Sube' ? colors.successContainer : colors.errorContainer;
 
   return (
     <TouchableRipple
       onPress={onPress}
       disabled={disabled}
-      style={[styles.container, {
-        borderBottomColor: theme.colors.outline,
-      }]}
+      style={[
+        styles.container,
+        {
+          borderBottomColor: theme.colors.outline,
+        },
+      ]}
     >
       <View style={styles.innerContainer}>
         <View style={styles.leftContent}>
-          <View style={[styles.iconContainer, { backgroundColor: iconBgColor }]}>
-            <MaterialCommunityIcons name={iconName} size={24} color={iconColor} />
+          <View
+            style={[styles.iconContainer, { backgroundColor: iconBgColor }]}
+          >
+            <MaterialCommunityIcons
+              name={iconName}
+              size={24}
+              color={iconColor}
+            />
           </View>
 
           <View style={styles.textContainer}>
             <View style={styles.headerRow}>
-              <Text variant="titleMedium" style={[styles.symbolText, { color: theme.colors.onSurface }]}>
+              <Text
+                variant="titleMedium"
+                style={[styles.symbolText, { color: theme.colors.onSurface }]}
+              >
                 {symbol}
               </Text>
               <View style={[styles.statusBadge, { backgroundColor: statusBg }]}>
@@ -65,8 +81,19 @@ const AlertItem: React.FC<AlertItemProps> = ({
                 </Text>
               </View>
             </View>
-            <Text variant="bodySmall" style={[styles.targetLabel, { color: theme.colors.onSurfaceVariant }]}>
-              Objetivo: <Text style={[styles.targetText, { color: theme.colors.onSurface }]}>{target}</Text>
+            <Text
+              variant="bodySmall"
+              style={[
+                styles.targetLabel,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
+            >
+              Objetivo:{' '}
+              <Text
+                style={[styles.targetText, { color: theme.colors.onSurface }]}
+              >
+                {target}
+              </Text>
             </Text>
           </View>
         </View>
@@ -131,8 +158,7 @@ const styles = StyleSheet.create({
   symbolText: {
     fontWeight: 'bold',
   },
-  targetLabel: {
-  },
+  targetLabel: {},
   targetText: {
     fontWeight: 'bold',
   },
@@ -145,7 +171,7 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 0.5,
-  }
+  },
 });
 
 export default AlertItem;

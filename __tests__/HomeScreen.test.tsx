@@ -18,7 +18,7 @@ jest.mock('react-native-paper', () => {
       outline: '#cccccc',
       elevation: {
         level1: '#f5f5f5',
-      }
+      },
     },
     spacing: { xs: 4, s: 8, m: 12, l: 16, xl: 20, xxl: 24 },
     roundness: 4,
@@ -42,7 +42,7 @@ const mockTheme = {
     outline: '#cccccc',
     elevation: {
       level1: '#f5f5f5',
-    }
+    },
   },
   spacing: { xs: 4, s: 8, m: 12, l: 16, xl: 20, xxl: 24 },
   roundness: 4,
@@ -52,7 +52,11 @@ const mockTheme = {
 // Mock AuthContext
 jest.mock('../src/context/AuthContext', () => ({
   useAuth: () => ({
-    user: { displayName: 'Carlos', email: 'carlos@test.com', isAnonymous: false },
+    user: {
+      displayName: 'Carlos',
+      email: 'carlos@test.com',
+      isAnonymous: false,
+    },
   }),
 }));
 
@@ -65,14 +69,17 @@ jest.mock('../src/context/ToastContext', () => ({
 }));
 
 // Mock CurrencyService
-jest.mock('../src/components/dashboard/DashboardSkeleton', () => 'DashboardSkeleton');
+jest.mock(
+  '../src/components/dashboard/DashboardSkeleton',
+  () => 'DashboardSkeleton',
+);
 
 jest.mock('../src/services/StocksService', () => ({
   StocksService: {
     getStocks: jest.fn(() => Promise.resolve([])),
-    subscribe: jest.fn((callback) => {
+    subscribe: jest.fn(callback => {
       callback([]);
-      return () => { };
+      return () => {};
     }),
     isMarketOpen: jest.fn(() => true),
   },
@@ -90,16 +97,28 @@ jest.mock('../src/components/dashboard/Calculator', () => {
 jest.mock('../src/components/dashboard/ShareGraphic', () => 'ShareGraphic');
 jest.mock('../src/components/ui/MarketStatus', () => {
   const { View, Text } = require('react-native');
-  return () => <View><Text>MERCADO ABIERTO</Text></View>;
+  return () => (
+    <View>
+      <Text>MERCADO ABIERTO</Text>
+    </View>
+  );
 });
 jest.mock('../src/components/dashboard/ExchangeCard', () => {
   const { View, Text } = require('react-native');
-  return ({ title }: { title: string }) => <View><Text>{title}</Text></View>;
+  return ({ title }: { title: string }) => (
+    <View>
+      <Text>{title}</Text>
+    </View>
+  );
 });
 jest.mock('../src/components/stocks/StockItem', () => 'StockItem');
 jest.mock('../src/components/ui/UnifiedHeader', () => {
   const { View, Text } = require('react-native');
-  return ({ userName }: { userName: string }) => <View><Text>Hola, {userName}</Text></View>;
+  return ({ userName }: { userName: string }) => (
+    <View>
+      <Text>Hola, {userName}</Text>
+    </View>
+  );
 });
 
 jest.mock('../src/services/firebase/AnalyticsService', () => ({
@@ -118,30 +137,32 @@ jest.mock('../src/services/ObservabilityService', () => ({
 
 jest.mock('../src/services/CurrencyService', () => ({
   CurrencyService: {
-    getRates: jest.fn(() => Promise.resolve([
-      {
-        id: '1',
-        code: 'USD',
-        name: 'Dólar Estadounidense (BCV)',
-        value: 36.58,
-        changePercent: 0.14,
-        type: 'fiat',
-        iconName: 'account-balance',
-        lastUpdated: new Date().toISOString(),
-      },
-      {
-        id: '4',
-        code: 'BTC',
-        name: 'Bitcoin',
-        value: 2345901.00,
-        changePercent: 2.45,
-        type: 'crypto',
-        iconName: 'currency-bitcoin',
-        lastUpdated: new Date().toISOString(),
-      }
-    ])),
+    getRates: jest.fn(() =>
+      Promise.resolve([
+        {
+          id: '1',
+          code: 'USD',
+          name: 'Dólar Estadounidense (BCV)',
+          value: 36.58,
+          changePercent: 0.14,
+          type: 'fiat',
+          iconName: 'account-balance',
+          lastUpdated: new Date().toISOString(),
+        },
+        {
+          id: '4',
+          code: 'BTC',
+          name: 'Bitcoin',
+          value: 2345901.0,
+          changePercent: 2.45,
+          type: 'crypto',
+          iconName: 'currency-bitcoin',
+          lastUpdated: new Date().toISOString(),
+        },
+      ]),
+    ),
     getAvailableTargetRates: jest.fn(() => []), // Add this for AdvancedCalculatorScreen
-    subscribe: jest.fn((callback) => {
+    subscribe: jest.fn(callback => {
       // Use setTimeout to break the synchronous loop and avoid maximum update depth exceeded
       setTimeout(() => {
         callback([
@@ -159,26 +180,22 @@ jest.mock('../src/services/CurrencyService', () => ({
             id: '2',
             code: 'USDT',
             name: 'Tether',
-            value: 37.00,
+            value: 37.0,
             changePercent: 0.05,
             type: 'crypto',
             iconName: 'attach-money',
             lastUpdated: new Date().toISOString(),
-          }
+          },
         ]);
       }, 0);
-      return () => { };
+      return () => {};
     }),
   },
 }));
 
 // Helper to wrap component with necessary providers
 const renderWithProviders = (component: React.ReactNode) => {
-  return render(
-    <PaperProvider theme={mockTheme}>
-      {component}
-    </PaperProvider>
-  );
+  return render(<PaperProvider theme={mockTheme}>{component}</PaperProvider>);
 };
 
 describe('HomeScreen', () => {

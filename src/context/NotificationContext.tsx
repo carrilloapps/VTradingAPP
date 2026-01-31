@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
 import { storageService, StoredNotification } from '../services/StorageService';
 import { fcmService } from '../services/firebase/FCMService';
 import { navigationRef } from '../navigation/NavigationRef';
@@ -19,16 +25,18 @@ const NotificationContext = createContext<NotificationContextType>({
   notifications: [],
   unreadCount: 0,
   isLoading: true,
-  addNotification: () => { },
-  markAsRead: () => { },
-  markAllAsRead: () => { },
-  archiveNotification: () => { },
-  deleteNotification: () => { },
+  addNotification: () => {},
+  markAsRead: () => {},
+  markAllAsRead: () => {},
+  archiveNotification: () => {},
+  deleteNotification: () => {},
 });
 
 export const useNotifications = () => useContext(NotificationContext);
 
-export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   const [notifications, setNotifications] = useState<StoredNotification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -49,7 +57,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       } catch (e) {
         observabilityService.captureError(e, {
           context: 'NotificationContext.loadNotifications',
-          action: 'load_stored_notifications'
+          action: 'load_stored_notifications',
         });
         // Error loading notifications
       } finally {
@@ -74,7 +82,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, []);
 
   const markAsRead = useCallback((id: string) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+    setNotifications(prev =>
+      prev.map(n => (n.id === id ? { ...n, isRead: true } : n)),
+    );
   }, []);
 
   const markAllAsRead = useCallback(() => {
@@ -82,7 +92,11 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, []);
 
   const archiveNotification = useCallback((id: string) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isArchived: true, isRead: true } : n));
+    setNotifications(prev =>
+      prev.map(n =>
+        n.id === id ? { ...n, isArchived: true, isRead: true } : n,
+      ),
+    );
   }, []);
 
   const deleteNotification = useCallback((id: string) => {
@@ -122,14 +136,15 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
     });
 
     // 2. Background State
-    const unsubscribeOpened = fcmService.onNotificationOpenedApp((remoteMessage) => {
-      // Process and add to notifications list
-      processRemoteMessage(remoteMessage, 'background');
+    const unsubscribeOpened = fcmService.onNotificationOpenedApp(
+      remoteMessage => {
+        // Process and add to notifications list
+        processRemoteMessage(remoteMessage, 'background');
 
-      // Navigate to Notifications Screen
-      // Re-implement safe navigation locally or extract util if needed globally
-      // For now, repeating logic as local function safeNavigate is scoped to the quit handler
-      const safeNavigate = (screen: string) => {
+        // Navigate to Notifications Screen
+        // Re-implement safe navigation locally or extract util if needed globally
+        // For now, repeating logic as local function safeNavigate is scoped to the quit handler
+        const safeNavigate = (screen: string) => {
           if (navigationRef.isReady()) {
             navigationRef.navigate(screen);
           } else {
@@ -145,26 +160,32 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
               }
             }, 500);
           }
-      };
-      safeNavigate('Notifications');
-    });
+        };
+        safeNavigate('Notifications');
+      },
+    );
 
     // 3. Foreground State
-    const unsubscribeMessage = fcmService.onMessage(async (remoteMessage) => {
+    const unsubscribeMessage = fcmService.onMessage(async remoteMessage => {
       // Process and add to notifications list
       await processRemoteMessage(remoteMessage, 'foreground');
     });
 
     // Process remote message and add to notifications list
-    const processRemoteMessage = async (remoteMessage: any, _state: 'foreground' | 'background' | 'quit') => {
+    const processRemoteMessage = async (
+      remoteMessage: any,
+      _state: 'foreground' | 'background' | 'quit',
+    ) => {
       try {
         // Add to list
         if (remoteMessage.notification || remoteMessage.data) {
           // Extract content with fallbacks
-          const dataTitle = (remoteMessage.data?.title as string);
-          const notifTitle = (remoteMessage.notification?.title as string);
-          const dataBody = (remoteMessage.data?.message as string) || (remoteMessage.data?.body as string);
-          const notifBody = (remoteMessage.notification?.body as string);
+          const dataTitle = remoteMessage.data?.title as string;
+          const notifTitle = remoteMessage.notification?.title as string;
+          const dataBody =
+            (remoteMessage.data?.message as string) ||
+            (remoteMessage.data?.body as string);
+          const notifBody = remoteMessage.notification?.body as string;
 
           // Prioritize data title if notification title is generic "Notificación" or missing
           let finalTitle = notifTitle || dataTitle || 'Notificación';
@@ -180,20 +201,22 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             const price = parseFloat(remoteMessage.data.price as string);
 
             if (!isNaN(price)) {
-              const formatPrice = (val: number) => val < 0.01 ? val : val.toFixed(2);
+              const formatPrice = (val: number) =>
+                val < 0.01 ? val : val.toFixed(2);
               highlightedVal = `${formatPrice(price)}`;
 
               // Check if this price matches any active alert
               // We need to fetch alerts to know if this is UP or DOWN
               try {
                 const alerts = await storageService.getAlerts();
-                const matchingAlerts = alerts.filter(a =>
-                  a.isActive &&
-                  a.symbol === symbol &&
-                  (
-                    (a.condition === 'above' && price >= parseFloat(a.target)) ||
-                    (a.condition === 'below' && price <= parseFloat(a.target))
-                  )
+                const matchingAlerts = alerts.filter(
+                  a =>
+                    a.isActive &&
+                    a.symbol === symbol &&
+                    ((a.condition === 'above' &&
+                      price >= parseFloat(a.target)) ||
+                      (a.condition === 'below' &&
+                        price <= parseFloat(a.target))),
                 );
 
                 if (matchingAlerts.length > 0) {
@@ -205,7 +228,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                   const directionText = isUp ? 'Subida' : 'Bajada';
                   const actionVerb = isUp ? 'subió' : 'bajó';
                   const targetPrice = parseFloat(alert.target);
-                  const formatTargetPrice = (val: number) => val < 0.01 ? val : val.toFixed(2);
+                  const formatTargetPrice = (val: number) =>
+                    val < 0.01 ? val : val.toFixed(2);
                   const currentPriceFormatted = formatTargetPrice(price);
                   const targetPriceFormatted = formatTargetPrice(targetPrice);
 
@@ -220,7 +244,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
                 observabilityService.captureError(e, {
                   context: 'NotificationContext.processRemoteMessage',
                   action: 'check_matching_alerts',
-                  symbol: remoteMessage.data?.symbol
+                  symbol: remoteMessage.data?.symbol,
                 });
                 // Error checking alerts in NotificationContext
                 // Fallback: If error checking alerts, add it anyway but try to infer trend
@@ -233,7 +257,9 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
           if (shouldAdd) {
             const newNotif: StoredNotification = {
               id: remoteMessage.messageId || Date.now().toString(),
-              type: (remoteMessage.data?.type as any) || (remoteMessage.data?.symbol ? 'price_alert' : 'system'),
+              type:
+                (remoteMessage.data?.type as any) ||
+                (remoteMessage.data?.symbol ? 'price_alert' : 'system'),
               title: finalTitle,
               message: finalBody,
               timestamp: new Date().toISOString(),
@@ -246,7 +272,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             // Add notification to context
             addNotification(newNotif);
 
-            // Redundant storage write removed. 
+            // Redundant storage write removed.
             // The useEffect on [notifications] will handle persistence automatically.
           }
         }
@@ -254,7 +280,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         observabilityService.captureError(e, {
           context: 'NotificationContext.processRemoteMessage',
           action: 'process_remote_message',
-          messageId: remoteMessage.messageId
+          messageId: remoteMessage.messageId,
         });
         // Error processing remote message
       }
@@ -267,16 +293,18 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
   }, [addNotification]);
 
   return (
-    <NotificationContext.Provider value={{
-      notifications,
-      unreadCount,
-      isLoading,
-      addNotification,
-      markAsRead,
-      markAllAsRead,
-      archiveNotification,
-      deleteNotification
-    }}>
+    <NotificationContext.Provider
+      value={{
+        notifications,
+        unreadCount,
+        isLoading,
+        addNotification,
+        markAsRead,
+        markAllAsRead,
+        archiveNotification,
+        deleteNotification,
+      }}
+    >
       {children}
     </NotificationContext.Provider>
   );

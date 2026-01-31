@@ -49,11 +49,15 @@ const isPlatformSupported = (platforms?: SupportedPlatform[]): boolean => {
   }
 
   const current = Platform.OS as SupportedPlatform;
-  const normalized = platforms.map((platform) => platform.toLowerCase() as SupportedPlatform);
+  const normalized = platforms.map(
+    platform => platform.toLowerCase() as SupportedPlatform,
+  );
   return normalized.includes('all') || normalized.includes(current);
 };
 
-const resolveUrl = (recommendation: RemoteConfigRecommendation): string | undefined => {
+const resolveUrl = (
+  recommendation: RemoteConfigRecommendation,
+): string | undefined => {
   const urls = [
     recommendation.androidUrl,
     recommendation.iosUrl,
@@ -67,11 +71,14 @@ const resolveUrl = (recommendation: RemoteConfigRecommendation): string | undefi
     default: recommendation.webUrl || recommendation.url,
   });
 
-  const resolved = platformUrl || urls.find((candidate) => !!candidate);
+  const resolved = platformUrl || urls.find(candidate => !!candidate);
   return resolved?.trim() || undefined;
 };
 
-const mapRemoteRecommendation = (recommendation: RemoteConfigRecommendation, index: number): RecommendedApp | null => {
+const mapRemoteRecommendation = (
+  recommendation: RemoteConfigRecommendation,
+  index: number,
+): RecommendedApp | null => {
   if (!recommendation?.title) {
     return null;
   }
@@ -95,18 +102,30 @@ const mapRemoteRecommendation = (recommendation: RemoteConfigRecommendation, ind
   };
 };
 
-const normalizeRemoteConfig = (config: AppRecommendationsRemoteConfig | null | undefined): RecommendedApp[] => {
+const normalizeRemoteConfig = (
+  config: AppRecommendationsRemoteConfig | null | undefined,
+): RecommendedApp[] => {
   if (!config || !Array.isArray(config.apps)) {
     return [];
   }
 
   return config.apps
-    .map((recommendation, index) => mapRemoteRecommendation(recommendation, index))
-    .filter((recommendation): recommendation is RecommendedApp => recommendation !== null);
+    .map((recommendation, index) =>
+      mapRemoteRecommendation(recommendation, index),
+    )
+    .filter(
+      (recommendation): recommendation is RecommendedApp =>
+        recommendation !== null,
+    );
 };
 
-const AppRecommendations: React.FC<AppRecommendationsProps> = ({ apps: providedApps, columns = DEFAULT_COLUMNS }) => {
-  const [recommendations, setRecommendations] = useState<RecommendedApp[]>(providedApps ?? []);
+const AppRecommendations: React.FC<AppRecommendationsProps> = ({
+  apps: providedApps,
+  columns = DEFAULT_COLUMNS,
+}) => {
+  const [recommendations, setRecommendations] = useState<RecommendedApp[]>(
+    providedApps ?? [],
+  );
   const [isLoading, setIsLoading] = useState<boolean>(!providedApps);
 
   useEffect(() => {
@@ -121,13 +140,19 @@ const AppRecommendations: React.FC<AppRecommendationsProps> = ({ apps: providedA
 
       const loadRecommendations = async () => {
         try {
-          const initialConfig = remoteConfigService.getJson<AppRecommendationsRemoteConfig>('app_recommendations');
+          const initialConfig =
+            remoteConfigService.getJson<AppRecommendationsRemoteConfig>(
+              'app_recommendations',
+            );
           let normalized = normalizeRemoteConfig(initialConfig);
 
           if (normalized.length === 0) {
             const fetched = await remoteConfigService.fetchAndActivate();
             if (fetched) {
-              const refreshedConfig = remoteConfigService.getJson<AppRecommendationsRemoteConfig>('app_recommendations');
+              const refreshedConfig =
+                remoteConfigService.getJson<AppRecommendationsRemoteConfig>(
+                  'app_recommendations',
+                );
               normalized = normalizeRemoteConfig(refreshedConfig);
             }
           }
@@ -142,7 +167,7 @@ const AppRecommendations: React.FC<AppRecommendationsProps> = ({ apps: providedA
           observabilityService.captureError(e, {
             context: 'AppRecommendations.loadRecommendations',
             action: 'load_app_recommendations',
-            providedApps: !!providedApps
+            providedApps: !!providedApps,
           });
           await analyticsService.logError('load_app_recommendations');
 
@@ -163,10 +188,16 @@ const AppRecommendations: React.FC<AppRecommendationsProps> = ({ apps: providedA
     };
   }, [providedApps]);
 
-  const effectiveColumns = useMemo(() => Math.max(1, Math.floor(columns)), [columns]);
+  const effectiveColumns = useMemo(
+    () => Math.max(1, Math.floor(columns)),
+    [columns],
+  );
 
   // We avoid returning a plain object to prevent inland-style linting
-  const columnWidth = useMemo<DimensionValue>(() => `${100 / effectiveColumns}%` as DimensionValue, [effectiveColumns]);
+  const columnWidth = useMemo<DimensionValue>(
+    () => `${100 / effectiveColumns}%` as DimensionValue,
+    [effectiveColumns],
+  );
 
   if (isLoading) {
     return <AppRecommendationsSkeleton columns={columns} />;
@@ -178,7 +209,7 @@ const AppRecommendations: React.FC<AppRecommendationsProps> = ({ apps: providedA
 
   return (
     <View style={styles.container} testID="app-recommendations-container">
-      {recommendations.map((app) => (
+      {recommendations.map(app => (
         <View key={app.id} style={[styles.cardWrapper, { width: columnWidth }]}>
           <AppCard app={app} />
         </View>

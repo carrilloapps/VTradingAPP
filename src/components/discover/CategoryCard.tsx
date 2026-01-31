@@ -10,8 +10,6 @@ interface CategoryCardProps {
   onPress: (category: WordPressCategory) => void;
 }
 
-
-
 const CategoryCard: React.FC<CategoryCardProps> = ({ category, onPress }) => {
   const theme = useTheme();
   const icon = getCategoryIcon(category.name);
@@ -26,11 +24,14 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, onPress }) => {
     >
       <Surface
         elevation={0}
-        style={[styles.card, {
-          backgroundColor: theme.colors.elevation.level1,
-          borderColor: theme.colors.outline,
-          borderRadius: theme.roundness * 6
-        }]}
+        style={[
+          styles.card,
+          {
+            backgroundColor: theme.colors.elevation.level1,
+            borderColor: theme.colors.outline,
+            borderRadius: theme.roundness * 6,
+          },
+        ]}
       >
         <View style={styles.content}>
           <View
@@ -38,7 +39,7 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, onPress }) => {
               styles.iconContainer,
               {
                 backgroundColor: theme.colors.primaryContainer,
-                borderRadius: theme.roundness * 4
+                borderRadius: theme.roundness * 4,
               },
             ]}
           >
@@ -48,7 +49,10 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, onPress }) => {
               color={theme.colors.primary}
             />
           </View>
-          <Text variant="titleMedium" style={[styles.title, { color: theme.colors.onSurface }]}>
+          <Text
+            variant="titleMedium"
+            style={[styles.title, { color: theme.colors.onSurface }]}
+          >
             {category.name}
           </Text>
         </View>

@@ -11,15 +11,24 @@ interface NotificationIconProps {
   size?: number;
 }
 
-export const getNotificationIconConfig = (notification: NotificationData, theme: any) => {
+export const getNotificationIconConfig = (
+  notification: NotificationData,
+  theme: any,
+) => {
   const effectiveType = notification.type || 'system';
 
   switch (effectiveType) {
     case 'price_alert':
       return {
         name: 'cash-multiple',
-        color: notification.trend === 'up' ? theme.colors.success : theme.colors.error,
-        bgColor: notification.trend === 'up' ? theme.colors.successContainer : theme.colors.errorContainer,
+        color:
+          notification.trend === 'up'
+            ? theme.colors.success
+            : theme.colors.error,
+        bgColor:
+          notification.trend === 'up'
+            ? theme.colors.successContainer
+            : theme.colors.errorContainer,
         badge: notification.trend === 'up' ? 'trending-up' : 'trending-down',
         fallbackTitle: 'Alerta de precio',
       };
@@ -34,7 +43,10 @@ export const getNotificationIconConfig = (notification: NotificationData, theme:
     case 'system':
     default:
       // Try to infer from title if type is generic
-      if (notification.title.toLowerCase().includes('bs') || notification.title.toLowerCase().includes('bolivar')) {
+      if (
+        notification.title.toLowerCase().includes('bs') ||
+        notification.title.toLowerCase().includes('bolivar')
+      ) {
         return {
           name: 'Bs', // Special marker
           color: theme.colors.primary,
@@ -62,23 +74,32 @@ export const getNotificationIconConfig = (notification: NotificationData, theme:
   }
 };
 
-const NotificationIcon: React.FC<NotificationIconProps> = ({ notification, size = 24 }) => {
+const NotificationIcon: React.FC<NotificationIconProps> = ({
+  notification,
+  size = 24,
+}) => {
   const theme = useAppTheme();
   const iconConfig = getNotificationIconConfig(notification, theme);
 
   return (
-    <View style={[
-      styles.iconContainer,
-      {
-        backgroundColor: iconConfig.bgColor,
-        width: size * 2,
-        height: size * 2
-      }
-    ]}>
+    <View
+      style={[
+        styles.iconContainer,
+        {
+          backgroundColor: iconConfig.bgColor,
+          width: size * 2,
+          height: size * 2,
+        },
+      ]}
+    >
       {iconConfig.name === 'Bs' ? (
         <BolivarIcon color={iconConfig.color} size={size} />
       ) : (
-        <MaterialCommunityIcons name={iconConfig.name} size={size} color={iconConfig.color} />
+        <MaterialCommunityIcons
+          name={iconConfig.name}
+          size={size}
+          color={iconConfig.color}
+        />
       )}
       {iconConfig.badge && (
         <View
@@ -90,7 +111,11 @@ const NotificationIcon: React.FC<NotificationIconProps> = ({ notification, size 
             },
           ]}
         >
-          <MaterialCommunityIcons name={iconConfig.badge} size={size * 0.5} color={theme.colors.surface} />
+          <MaterialCommunityIcons
+            name={iconConfig.badge}
+            size={size * 0.5}
+            color={theme.colors.surface}
+          />
         </View>
       )}
     </View>

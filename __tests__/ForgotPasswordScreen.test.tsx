@@ -35,8 +35,10 @@ describe('ForgotPasswordScreen', () => {
   const renderScreen = () =>
     render(
       <PaperProvider theme={mockTheme}>
-        <ForgotPasswordScreen navigation={{ goBack: jest.fn(), navigate: jest.fn() }} />
-      </PaperProvider>
+        <ForgotPasswordScreen
+          navigation={{ goBack: jest.fn(), navigate: jest.fn() }}
+        />
+      </PaperProvider>,
     );
 
   beforeEach(() => {
@@ -46,7 +48,7 @@ describe('ForgotPasswordScreen', () => {
 
   it('muestra loading durante la recuperación', async () => {
     let resolveReset: () => void = () => {};
-    const resetPromise = new Promise<void>((resolve) => {
+    const resetPromise = new Promise<void>(resolve => {
       resolveReset = resolve;
     });
 
@@ -56,9 +58,13 @@ describe('ForgotPasswordScreen', () => {
       isLoading: false,
     } as any);
 
-    const { getByLabelText, getByText, getByTestId, queryByTestId } = renderScreen();
+    const { getByLabelText, getByText, getByTestId, queryByTestId } =
+      renderScreen();
 
-    fireEvent.changeText(getByLabelText('Correo electrónico'), 'test@example.com');
+    fireEvent.changeText(
+      getByLabelText('Correo electrónico'),
+      'test@example.com',
+    );
     fireEvent.press(getByText('Enviar enlace'));
 
     await waitFor(() => {

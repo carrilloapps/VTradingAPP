@@ -1,5 +1,12 @@
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, TouchableOpacity, Animated, StyleProp, ViewStyle } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Animated,
+  StyleProp,
+  ViewStyle,
+} from 'react-native';
 import { Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../theme/theme';
@@ -12,7 +19,13 @@ export interface MarketStatusProps {
   style?: StyleProp<ViewStyle>;
 }
 
-const MarketStatus: React.FC<MarketStatusProps> = ({ isOpen, updatedAt, onRefresh, showBadge = true, style }) => {
+const MarketStatus: React.FC<MarketStatusProps> = ({
+  isOpen,
+  updatedAt,
+  onRefresh,
+  showBadge = true,
+  style,
+}) => {
   const theme = useAppTheme();
   const fadeAnim = useRef(new Animated.Value(0.4)).current;
 
@@ -30,31 +43,36 @@ const MarketStatus: React.FC<MarketStatusProps> = ({ isOpen, updatedAt, onRefres
             duration: 1000,
             useNativeDriver: true,
           }),
-        ])
+        ]),
       ).start();
     } else {
       fadeAnim.setValue(0.4); // Reset if closed
     }
   }, [isOpen, fadeAnim]);
 
-  const themeStyles = React.useMemo(() => ({
-    statusBadge: {
-      backgroundColor: isOpen ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', // Keep opacity manual or use util
-      borderColor: isOpen ? theme.colors.trendUp : theme.colors.trendDown,
-    },
-    dot: {
-      backgroundColor: isOpen ? theme.colors.trendUp : theme.colors.trendDown,
-    },
-    statusText: {
-      color: isOpen ? theme.colors.trendUp : theme.colors.trendDown,
-    },
-    timeText: {
-      color: theme.colors.onSurfaceVariant,
-    },
-    refreshIcon: {
-      marginLeft: 4,
-    }
-  }), [theme, isOpen]);
+  const themeStyles = React.useMemo(
+    () => ({
+      statusBadge: {
+        backgroundColor: isOpen
+          ? 'rgba(16, 185, 129, 0.1)'
+          : 'rgba(239, 68, 68, 0.1)', // Keep opacity manual or use util
+        borderColor: isOpen ? theme.colors.trendUp : theme.colors.trendDown,
+      },
+      dot: {
+        backgroundColor: isOpen ? theme.colors.trendUp : theme.colors.trendDown,
+      },
+      statusText: {
+        color: isOpen ? theme.colors.trendUp : theme.colors.trendDown,
+      },
+      timeText: {
+        color: theme.colors.onSurfaceVariant,
+      },
+      refreshIcon: {
+        marginLeft: 4,
+      },
+    }),
+    [theme, isOpen],
+  );
 
   return (
     <View style={[styles.container, style, !showBadge && styles.justifyEnd]}>

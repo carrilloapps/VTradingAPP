@@ -15,46 +15,51 @@ describe('CurrencyService', () => {
     source: 'BCV',
     rates: [
       { currency: 'EUR', rate: { average: 55.45 } },
-      { currency: 'USD', rate: { average: 36.58 } }
+      { currency: 'USD', rate: { average: 36.58 } },
     ],
     publicationDate: '2024-01-16T00:00:00.000Z',
-    timestamp: 'string'
+    timestamp: 'string',
   };
 
   it('fetches and maps rates correctly', async () => {
     (apiClient.get as jest.Mock).mockResolvedValue(mockApiResponse);
-    
+
     const traceMock = { putAttribute: jest.fn(), stop: jest.fn() };
     (performanceService.startTrace as jest.Mock).mockResolvedValue(traceMock);
 
     const rates = await CurrencyService.getRates();
 
-    expect(apiClient.get).toHaveBeenCalledWith('api/rates', expect.objectContaining({
-      headers: {
-        'Accept': '*/*',
-      },
-      useCache: false,
-      cacheTTL: 0
-    }));
+    expect(apiClient.get).toHaveBeenCalledWith(
+      'api/rates',
+      expect.objectContaining({
+        headers: {
+          Accept: '*/*',
+        },
+        useCache: false,
+        cacheTTL: 0,
+      }),
+    );
 
     expect(rates).toHaveLength(3); // VES + 2 mocked rates
     expect(rates[0].code).toBe('VES');
-    
+
     expect(rates[1].code).toBe('EUR');
     expect(rates[1].value).toBe(55.45);
     expect(rates[1].name).toBe('EUR/VES • BCV');
-    
+
     expect(rates[2].code).toBe('USD');
     expect(rates[2].value).toBe(36.58);
     expect(rates[2].name).toBe('USD/VES • BCV');
 
-    expect(performanceService.startTrace).toHaveBeenCalledWith('get_currency_rates_service');
+    expect(performanceService.startTrace).toHaveBeenCalledWith(
+      'get_currency_rates_service',
+    );
     expect(performanceService.stopTrace).toHaveBeenCalledWith(traceMock);
   });
 
   it('returns mock data on error', async () => {
     (apiClient.get as jest.Mock).mockRejectedValue(new Error('Network error'));
-    
+
     const traceMock = { putAttribute: jest.fn(), stop: jest.fn() };
     (performanceService.startTrace as jest.Mock).mockResolvedValue(traceMock);
 
@@ -69,8 +74,24 @@ describe('CurrencyService', () => {
   it('searches currencies correctly', async () => {
     // Mock getRates to return our controlled list
     jest.spyOn(CurrencyService, 'getRates').mockResolvedValue([
-      { id: '1', code: 'USD', name: 'Dólar', value: 1, changePercent: 0, type: 'fiat', lastUpdated: '' },
-      { id: '2', code: 'EUR', name: 'Euro', value: 1.1, changePercent: 0, type: 'fiat', lastUpdated: '' }
+      {
+        id: '1',
+        code: 'USD',
+        name: 'Dólar',
+        value: 1,
+        changePercent: 0,
+        type: 'fiat',
+        lastUpdated: '',
+      },
+      {
+        id: '2',
+        code: 'EUR',
+        name: 'Euro',
+        value: 1.1,
+        changePercent: 0,
+        type: 'fiat',
+        lastUpdated: '',
+      },
     ]);
 
     const results = await CurrencyService.searchCurrencies('euro');

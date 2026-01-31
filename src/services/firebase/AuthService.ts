@@ -8,9 +8,12 @@ import {
   signOut,
   GoogleAuthProvider,
   FirebaseAuthTypes,
-  sendPasswordResetEmail
+  sendPasswordResetEmail,
 } from '@react-native-firebase/auth';
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 import { AppConfig } from '../../constants/AppConfig';
 import { observabilityService } from '../ObservabilityService';
 import SafeLogger from '../../utils/safeLogger';
@@ -28,7 +31,9 @@ class AuthService {
   /**
    * Listen to auth state changes
    */
-  onAuthStateChanged(callback: (user: FirebaseAuthTypes.User | null) => void): () => void {
+  onAuthStateChanged(
+    callback: (user: FirebaseAuthTypes.User | null) => void,
+  ): () => void {
     return onAuthStateChanged(getAuth(), callback);
   }
 
@@ -42,7 +47,10 @@ class AuthService {
   /**
    * Sign in with email and password
    */
-  async signInWithEmail(email: string, password: string): Promise<FirebaseAuthTypes.UserCredential> {
+  async signInWithEmail(
+    email: string,
+    password: string,
+  ): Promise<FirebaseAuthTypes.UserCredential> {
     try {
       return await signInWithEmailAndPassword(getAuth(), email, password);
     } catch (e) {
@@ -57,7 +65,10 @@ class AuthService {
   /**
    * Sign up with email and password
    */
-  async signUpWithEmail(email: string, password: string): Promise<FirebaseAuthTypes.UserCredential> {
+  async signUpWithEmail(
+    email: string,
+    password: string,
+  ): Promise<FirebaseAuthTypes.UserCredential> {
     try {
       return await createUserWithEmailAndPassword(getAuth(), email, password);
     } catch (e) {
@@ -75,7 +86,9 @@ class AuthService {
   async signInWithGoogle(): Promise<FirebaseAuthTypes.UserCredential | null> {
     try {
       // Check if Google Play Services is available
-      await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
+      await GoogleSignin.hasPlayServices({
+        showPlayServicesUpdateDialog: true,
+      });
 
       // Get the users ID token
       const signInResult = await GoogleSignin.signIn();
@@ -86,7 +99,9 @@ class AuthService {
           hasResult: !!signInResult,
           hasData: !!signInResult?.data,
         });
-        throw new Error('Google Sign-In was cancelled or returned invalid data. Please try again.');
+        throw new Error(
+          'Google Sign-In was cancelled or returned invalid data. Please try again.',
+        );
       }
 
       const idToken = signInResult.data?.idToken;
@@ -107,10 +122,12 @@ class AuthService {
             errorType: 'missing_id_token',
             hasSignInResult: !!signInResult,
             hasData: !!signInResult?.data,
-          }
+          },
         );
 
-        throw new Error('No se pudo obtener el token de autenticación de Google. Por favor, intenta nuevamente.');
+        throw new Error(
+          'No se pudo obtener el token de autenticación de Google. Por favor, intenta nuevamente.',
+        );
       }
 
       // Create a Google credential with the token
@@ -132,13 +149,18 @@ class AuthService {
           context: 'AuthService_signInWithGoogle',
           errorType: 'play_services_unavailable',
         });
-        throw new Error('Google Play Services no está disponible o está desactualizado');
+        throw new Error(
+          'Google Play Services no está disponible o está desactualizado',
+        );
       } else {
         // Report unexpected errors with context
-        const isIdTokenError = e.message?.includes('No ID token') ||
+        const isIdTokenError =
+          e.message?.includes('No ID token') ||
           e.message?.includes('No se pudo obtener el token');
 
-        const isInternalError = e.code === 'auth/internal-error' || e.message?.includes('INTERNAL_ERROR');
+        const isInternalError =
+          e.code === 'auth/internal-error' ||
+          e.message?.includes('INTERNAL_ERROR');
 
         if (!isIdTokenError && !isInternalError) {
           // Only report if not already reported above and not a common internal/cancellation noise
@@ -162,7 +184,7 @@ class AuthService {
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'AuthService.signInAnonymously',
-        action: 'auth_anonymous_signin'
+        action: 'auth_anonymous_signin',
       });
       throw this.handleError(e);
     }
@@ -177,7 +199,7 @@ class AuthService {
       if (currentUser) {
         // If signed in with Google, sign out from Google as well
         const isGoogleUser = currentUser.providerData.some(
-          provider => provider.providerId === 'google.com'
+          provider => provider.providerId === 'google.com',
         );
 
         if (isGoogleUser) {
@@ -187,7 +209,7 @@ class AuthService {
             // Ignore Google sign out errors
             observabilityService.captureError(googleError, {
               context: 'AuthService.signOut.googleSignOut',
-              action: 'google_signout_failed'
+              action: 'google_signout_failed',
             });
           }
         }
@@ -197,7 +219,7 @@ class AuthService {
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'AuthService.signOut',
-        action: 'auth_signout'
+        action: 'auth_signout',
       });
       throw this.handleError(e);
     }
@@ -213,13 +235,15 @@ class AuthService {
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'AuthService.deleteAccount',
-        action: 'auth_delete_account'
+        action: 'auth_delete_account',
       });
       throw this.handleError(e);
     }
   }
 
-  async updateProfileName(displayName: string): Promise<FirebaseAuthTypes.User> {
+  async updateProfileName(
+    displayName: string,
+  ): Promise<FirebaseAuthTypes.User> {
     try {
       const trimmedName = displayName.trim();
       if (!trimmedName) {
@@ -240,7 +264,7 @@ class AuthService {
       observabilityService.captureError(e, {
         context: 'AuthService.updateProfileName',
         action: 'auth_update_profile',
-        nameLength: displayName.length
+        nameLength: displayName.length,
       });
       throw this.handleError(e);
     }
@@ -267,7 +291,8 @@ class AuthService {
       switch (error.code) {
         // Registro y Email
         case 'auth/email-already-in-use':
-          message = 'Este correo electrónico ya está registrado. Intenta iniciar sesión.';
+          message =
+            'Este correo electrónico ya está registrado. Intenta iniciar sesión.';
           break;
         case 'auth/invalid-email':
           message = 'El formato del correo electrónico no es válido.';
@@ -276,7 +301,8 @@ class AuthService {
           message = 'El método de autenticación no está habilitado.';
           break;
         case 'auth/weak-password':
-          message = 'La contraseña es muy débil. Usa al menos 6 caracteres con letras y números.';
+          message =
+            'La contraseña es muy débil. Usa al menos 6 caracteres con letras y números.';
           break;
 
         // Inicio de Sesión
@@ -289,7 +315,8 @@ class AuthService {
           message = 'Correo o contraseña incorrectos.';
           break;
         case 'auth/too-many-requests':
-          message = 'Demasiados intentos fallidos. Tu cuenta ha sido bloqueada temporalmente por seguridad. Intenta más tarde.';
+          message =
+            'Demasiados intentos fallidos. Tu cuenta ha sido bloqueada temporalmente por seguridad. Intenta más tarde.';
           break;
         case 'auth/user-token-expired':
           message = 'Tu sesión ha expirado. Por favor, inicia sesión de nuevo.';
@@ -297,7 +324,8 @@ class AuthService {
 
         // Google Sign-In y Credenciales
         case 'auth/account-exists-with-different-credential':
-          message = 'Ya existe una cuenta vinculada a este correo con otro método de inicio de sesión.';
+          message =
+            'Ya existe una cuenta vinculada a este correo con otro método de inicio de sesión.';
           break;
         case 'auth/credential-already-in-use':
           message = 'Esta credencial ya está vinculada a otro usuario.';
@@ -305,7 +333,8 @@ class AuthService {
 
         // Acciones de Usuario
         case 'auth/requires-recent-login':
-          message = 'Por seguridad, debes haber iniciado sesión recientemente para realizar esta acción. Vuelve a ingresar.';
+          message =
+            'Por seguridad, debes haber iniciado sesión recientemente para realizar esta acción. Vuelve a ingresar.';
           break;
         case 'auth/no-current-user':
           message = 'No se encontró una sesión activa.';
@@ -313,10 +342,12 @@ class AuthService {
 
         // Red y Errores Generales
         case 'auth/network-request-failed':
-          message = 'Error de conexión. Verifica tu conexión a internet e intenta de nuevo.';
+          message =
+            'Error de conexión. Verifica tu conexión a internet e intenta de nuevo.';
           break;
         case 'auth/internal-error':
-          message = 'Error interno del servidor. Intenta de nuevo en unos minutos.';
+          message =
+            'Error interno del servidor. Intenta de nuevo en unos minutos.';
           break;
         case 'auth/timeout':
           message = 'La operación ha tardado demasiado. Reintenta de nuevo.';
@@ -327,7 +358,8 @@ class AuthService {
           message = 'Inicio de sesión cancelado.';
           break;
         case 'PLAY_SERVICES_NOT_AVAILABLE':
-          message = 'Los servicios de Google Play no están disponibles o están desactualizados.';
+          message =
+            'Los servicios de Google Play no están disponibles o están desactualizados.';
           break;
 
         default:

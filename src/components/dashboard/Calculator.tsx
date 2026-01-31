@@ -16,30 +16,33 @@ const Calculator: React.FC = () => {
   const theme = useTheme();
   const navigation = useNavigation<NavigationProp>();
 
-  const themeStyles = React.useMemo(() => ({
-    container: {
-      backgroundColor: theme.colors.elevation.level1,
-      borderColor: theme.colors.primary,
-      borderRadius: theme.roundness * 6
-    },
-    title: {
-      fontWeight: 'bold' as const,
-      color: theme.colors.onSurface
-    },
-    icon: {
-      marginRight: 4
-    },
-    expandText: {
-      color: theme.colors.onPrimaryContainer,
-      fontWeight: 'bold' as const
-    },
-    button: {
-      backgroundColor: theme.colors.primaryContainer,
-      borderRadius: theme.roundness * 2,
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-    }
-  }), [theme]);
+  const themeStyles = React.useMemo(
+    () => ({
+      container: {
+        backgroundColor: theme.colors.elevation.level1,
+        borderColor: theme.colors.primary,
+        borderRadius: theme.roundness * 6,
+      },
+      title: {
+        fontWeight: 'bold' as const,
+        color: theme.colors.onSurface,
+      },
+      icon: {
+        marginRight: 4,
+      },
+      expandText: {
+        color: theme.colors.onPrimaryContainer,
+        fontWeight: 'bold' as const,
+      },
+      button: {
+        backgroundColor: theme.colors.primaryContainer,
+        borderRadius: theme.roundness * 2,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
+      },
+    }),
+    [theme],
+  );
 
   return (
     <View style={[styles.container, themeStyles.container]}>
@@ -54,8 +57,15 @@ const Calculator: React.FC = () => {
           accessibilityLabel="Abrir calculadora avanzada"
           accessibilityRole="button"
         >
-          <MaterialCommunityIcons name="calculator-variant" size={20} color={theme.colors.onPrimaryContainer} style={themeStyles.icon} />
-          <Text variant="labelMedium" style={themeStyles.expandText}>Ampliar</Text>
+          <MaterialCommunityIcons
+            name="calculator-variant"
+            size={20}
+            color={theme.colors.onPrimaryContainer}
+            style={themeStyles.icon}
+          />
+          <Text variant="labelMedium" style={themeStyles.expandText}>
+            Ampliar
+          </Text>
         </TouchableOpacity>
       </View>
       <MemoizedCurrencyConverter />
@@ -74,13 +84,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16
+    marginBottom: 16,
   },
   expandButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 4
-  }
+    padding: 4,
+  },
 });
 
 export default Calculator;

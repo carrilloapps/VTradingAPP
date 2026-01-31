@@ -1,12 +1,22 @@
 import React, { useEffect, useMemo, useState, useRef } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  StatusBar,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { Text, TextInput, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DeviceInfo from 'react-native-device-info';
 
 import { useAuthStore } from '../../stores/authStore';
 import { useToastStore } from '../../stores/toastStore';
-import { analyticsService, ANALYTICS_EVENTS } from '../../services/firebase/AnalyticsService';
+import {
+  analyticsService,
+  ANALYTICS_EVENTS,
+} from '../../services/firebase/AnalyticsService';
 import { observabilityService } from '../../services/ObservabilityService';
 import { useAppTheme } from '../../theme/theme';
 import { AppConfig } from '../../constants/AppConfig';
@@ -21,7 +31,7 @@ const LoginScreen = ({ navigation }: any) => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
   const { signIn, googleSignIn, signInAnonymously, isLoading } = useAuthStore();
-  const showToast = useToastStore((state) => state.showToast);
+  const showToast = useToastStore(state => state.showToast);
 
   useEffect(() => {
     analyticsService.logScreenView('Login');
@@ -29,47 +39,50 @@ const LoginScreen = ({ navigation }: any) => {
 
   const appName = DeviceInfo.getApplicationName();
 
-  const themeStyles = useMemo(() => ({
-    container: {
-      backgroundColor: theme.colors.background,
-    },
-    title: {
-      color: theme.colors.primary,
-      marginTop: theme.spacing.s,
-      fontWeight: 'bold' as const,
-    },
-    subtitle: {
-      color: theme.colors.onSurfaceVariant,
-      marginTop: theme.spacing.xs,
-    },
-    linkText: {
-      color: theme.colors.primary,
-    },
-    dividerLine: {
-      backgroundColor: theme.colors.outline,
-    },
-    dividerText: {
-      marginHorizontal: theme.spacing.s,
-      color: theme.colors.onSurfaceVariant,
-    },
-    footerText: {
-      color: theme.colors.onSurface,
-    },
-    legalText: {
-      color: theme.colors.onSurfaceVariant,
-    },
-    registerText: {
-      color: theme.colors.primary,
-      fontWeight: 'bold' as const,
-      marginLeft: theme.spacing.xs,
-    },
-    titleRow: {
-      // Removed marginBottom as it now only contains title
-    },
-    forgotPassword: {
-      marginBottom: 0,
-    },
-  }), [theme]);
+  const themeStyles = useMemo(
+    () => ({
+      container: {
+        backgroundColor: theme.colors.background,
+      },
+      title: {
+        color: theme.colors.primary,
+        marginTop: theme.spacing.s,
+        fontWeight: 'bold' as const,
+      },
+      subtitle: {
+        color: theme.colors.onSurfaceVariant,
+        marginTop: theme.spacing.xs,
+      },
+      linkText: {
+        color: theme.colors.primary,
+      },
+      dividerLine: {
+        backgroundColor: theme.colors.outline,
+      },
+      dividerText: {
+        marginHorizontal: theme.spacing.s,
+        color: theme.colors.onSurfaceVariant,
+      },
+      footerText: {
+        color: theme.colors.onSurface,
+      },
+      legalText: {
+        color: theme.colors.onSurfaceVariant,
+      },
+      registerText: {
+        color: theme.colors.primary,
+        fontWeight: 'bold' as const,
+        marginLeft: theme.spacing.xs,
+      },
+      titleRow: {
+        // Removed marginBottom as it now only contains title
+      },
+      forgotPassword: {
+        marginBottom: 0,
+      },
+    }),
+    [theme],
+  );
 
   const passwordRef = useRef<any>(null); // Ref for password input
   const [email, setEmail] = useState('');
@@ -116,11 +129,14 @@ const LoginScreen = ({ navigation }: any) => {
     if (validate()) {
       setIsSubmitting(true);
       try {
-        await analyticsService.logEvent(ANALYTICS_EVENTS.LOGIN_ATTEMPT, { method: 'password' });
+        await analyticsService.logEvent(ANALYTICS_EVENTS.LOGIN_ATTEMPT, {
+          method: 'password',
+        });
         await signIn(email, password, showToast);
       } catch (e: any) {
         // Obfuscate error for security
-        if (!e.message?.includes('CANCELLED')) { // Don't show generic error for cancellation or handled errors
+        if (!e.message?.includes('CANCELLED')) {
+          // Don't show generic error for cancellation or handled errors
           // Let authStore handle the toast, but ensure we don't leak user existence
           // The authStore uses firebase error mapping which is safe enough, but we can override toast here if needed.
           // For now we rely on authStore but catch unexpected ones.
@@ -129,7 +145,7 @@ const LoginScreen = ({ navigation }: any) => {
         observabilityService.captureError(e, {
           context: 'LoginScreen.handleLogin',
           method: 'password',
-          emailHash: hashPII(email) // Hash PII before logging
+          emailHash: hashPII(email), // Hash PII before logging
         });
       } finally {
         setIsSubmitting(false);
@@ -140,13 +156,19 @@ const LoginScreen = ({ navigation }: any) => {
   const handleGoogleLogin = async () => {
     setIsSubmitting(true);
     try {
-      await analyticsService.logEvent(ANALYTICS_EVENTS.LOGIN_ATTEMPT, { method: 'google' });
+      await analyticsService.logEvent(ANALYTICS_EVENTS.LOGIN_ATTEMPT, {
+        method: 'google',
+      });
       await googleSignIn(showToast);
     } catch (e: any) {
-      if (e.message !== 'SIGN_IN_CANCELLED' && e.code !== 'SIGN_IN_CANCELLED' && !e.message?.includes('cancelled')) {
+      if (
+        e.message !== 'SIGN_IN_CANCELLED' &&
+        e.code !== 'SIGN_IN_CANCELLED' &&
+        !e.message?.includes('cancelled')
+      ) {
         observabilityService.captureError(e, {
           context: 'LoginScreen.handleGoogleLogin',
-          method: 'google'
+          method: 'google',
         });
       }
     } finally {
@@ -157,13 +179,15 @@ const LoginScreen = ({ navigation }: any) => {
   const handleGuestLogin = async () => {
     setIsSubmitting(true);
     try {
-      await analyticsService.logEvent(ANALYTICS_EVENTS.LOGIN_ATTEMPT, { method: 'anonymous' });
+      await analyticsService.logEvent(ANALYTICS_EVENTS.LOGIN_ATTEMPT, {
+        method: 'anonymous',
+      });
       await signInAnonymously(showToast);
       // Login exitoso ya se trackea en authStore
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'LoginScreen.handleGuestLogin',
-        method: 'anonymous'
+        method: 'anonymous',
       });
       // Error ya se trackea en authStore
     } finally {
@@ -193,7 +217,7 @@ const LoginScreen = ({ navigation }: any) => {
         style={{ backgroundColor: theme.colors.background }}
       />
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.flex1}
       >
         <ScrollView
@@ -203,8 +227,8 @@ const LoginScreen = ({ navigation }: any) => {
             {
               paddingTop: theme.spacing.m,
               paddingBottom: insets.bottom + theme.spacing.xl,
-              paddingHorizontal: theme.spacing.xl
-            }
+              paddingHorizontal: theme.spacing.xl,
+            },
           ]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
@@ -243,11 +267,21 @@ const LoginScreen = ({ navigation }: any) => {
                 accessibilityLabel="Correo electrónico"
                 accessibilityHint="Ingresa tu correo para iniciar sesión"
                 error={!!emailError}
-                left={<TextInput.Icon icon="email" accessibilityLabel="Icono de correo" />}
+                left={
+                  <TextInput.Icon
+                    icon="email"
+                    accessibilityLabel="Icono de correo"
+                  />
+                }
                 style={styles.input}
                 disabled={isBusy}
               />
-              <HelperText type="error" visible={!!emailError} style={{ marginBottom: -theme.spacing.xs }} accessibilityLiveRegion="polite">
+              <HelperText
+                type="error"
+                visible={!!emailError}
+                style={{ marginBottom: -theme.spacing.xs }}
+                accessibilityLiveRegion="polite"
+              >
                 {emailError}
               </HelperText>
             </View>
@@ -266,23 +300,43 @@ const LoginScreen = ({ navigation }: any) => {
                 accessibilityLabel="Contraseña"
                 accessibilityHint="Ingresa tu contraseña"
                 error={!!passwordError}
-                left={<TextInput.Icon icon="lock" accessibilityLabel="Icono de candado" />}
+                left={
+                  <TextInput.Icon
+                    icon="lock"
+                    accessibilityLabel="Icono de candado"
+                  />
+                }
                 right={
                   <TextInput.Icon
-                    icon={secureTextEntry ? "eye" : "eye-off"}
+                    icon={secureTextEntry ? 'eye' : 'eye-off'}
                     onPress={() => setSecureTextEntry(!secureTextEntry)}
-                    accessibilityLabel={secureTextEntry ? "Mostrar contraseña" : "Ocultar contraseña"}
+                    accessibilityLabel={
+                      secureTextEntry
+                        ? 'Mostrar contraseña'
+                        : 'Ocultar contraseña'
+                    }
                   />
                 }
                 style={styles.input}
                 disabled={isBusy}
               />
-              <HelperText type="error" visible={!!passwordError} style={{ marginBottom: -theme.spacing.xs }} accessibilityLiveRegion="polite">
+              <HelperText
+                type="error"
+                visible={!!passwordError}
+                style={{ marginBottom: -theme.spacing.xs }}
+                accessibilityLiveRegion="polite"
+              >
                 {passwordError}
               </HelperText>
             </View>
 
-            <View style={[styles.forgotPassword, themeStyles.forgotPassword, { marginTop: -theme.spacing.l }]}>
+            <View
+              style={[
+                styles.forgotPassword,
+                themeStyles.forgotPassword,
+                { marginTop: -theme.spacing.l },
+              ]}
+            >
               <CustomButton
                 label="¿Olvidaste tu contraseña?"
                 variant="link"
@@ -338,18 +392,31 @@ const LoginScreen = ({ navigation }: any) => {
             </View>
 
             <View style={[styles.legal, { marginTop: theme.spacing.m }]}>
-              <Text variant="bodySmall" style={[themeStyles.legalText, styles.legalText]}>
+              <Text
+                variant="bodySmall"
+                style={[themeStyles.legalText, styles.legalText]}
+              >
                 Al continuar aceptas nuestras{' '}
                 <Text
                   style={[styles.linkText, { color: theme.colors.primary }]}
-                  onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL, 'Políticas de privacidad')}
+                  onPress={() =>
+                    openExternalUrl(
+                      AppConfig.PRIVACY_POLICY_URL,
+                      'Políticas de privacidad',
+                    )
+                  }
                 >
                   Políticas de privacidad
                 </Text>
                 {' y '}
                 <Text
                   style={[styles.linkText, { color: theme.colors.primary }]}
-                  onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL, 'Términos y condiciones')}
+                  onPress={() =>
+                    openExternalUrl(
+                      AppConfig.TERMS_OF_USE_URL,
+                      'Términos y condiciones',
+                    )
+                  }
                 >
                   Términos y condiciones
                 </Text>

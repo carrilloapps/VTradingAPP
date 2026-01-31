@@ -1,4 +1,9 @@
-import { getRemoteConfig, setDefaults, fetchAndActivate, getValue } from '@react-native-firebase/remote-config';
+import {
+  getRemoteConfig,
+  setDefaults,
+  fetchAndActivate,
+  getValue,
+} from '@react-native-firebase/remote-config';
 import { observabilityService } from '../ObservabilityService';
 import { featureFlagService, RemoteConfigSchema } from '../FeatureFlagService';
 import { analyticsService } from './AnalyticsService';
@@ -29,7 +34,7 @@ class RemoteConfigService {
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'RemoteConfigService.initialize',
-        action: 'init_remote_config'
+        action: 'init_remote_config',
       });
       await analyticsService.logError('remote_config_init');
       // Initialization error
@@ -47,12 +52,18 @@ class RemoteConfigService {
     try {
       // Create a timeout promise
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error('Remote Config fetch timeout')), TIMEOUT_MS)
+        setTimeout(
+          () => reject(new Error('Remote Config fetch timeout')),
+          TIMEOUT_MS,
+        ),
       );
 
       // Race between fetch and timeout
       const fetchPromise = fetchAndActivate(this.remoteConfig);
-      const fetched = await Promise.race([fetchPromise, timeoutPromise]) as boolean;
+      const fetched = (await Promise.race([
+        fetchPromise,
+        timeoutPromise,
+      ])) as boolean;
 
       return fetched;
     } catch (e) {
@@ -60,7 +71,8 @@ class RemoteConfigService {
       const errorMessage = error.message.toLowerCase();
 
       // Check if it's a network/timeout error
-      const isNetworkError = errorMessage.includes('network') ||
+      const isNetworkError =
+        errorMessage.includes('network') ||
         errorMessage.includes('timeout') ||
         errorMessage.includes('fetch') ||
         errorMessage.includes('connection');
@@ -70,7 +82,7 @@ class RemoteConfigService {
         const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 1s, 2s, 4s
         SafeLogger.warn(
           `[RemoteConfig] Fetch failed, retrying in ${delay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`,
-          errorMessage
+          errorMessage,
         );
 
         await new Promise<void>(resolve => setTimeout(() => resolve(), delay));
@@ -86,7 +98,9 @@ class RemoteConfigService {
         });
       }
 
-      SafeLogger.error('[RemoteConfig] Fetch failed after retries:', { errorMessage });
+      SafeLogger.error('[RemoteConfig] Fetch failed after retries:', {
+        errorMessage,
+      });
 
       // Return false instead of throwing to prevent app crash
       // App will use default values
@@ -120,7 +134,7 @@ class RemoteConfigService {
       observabilityService.captureError(e, {
         context: 'RemoteConfigService.getJson',
         key,
-        action: 'parse_remote_config'
+        action: 'parse_remote_config',
       });
       return null;
     }
@@ -144,7 +158,7 @@ class RemoteConfigService {
       observabilityService.captureError(e, {
         context: 'RemoteConfigService.getFeature',
         featureName,
-        action: 'evaluate_feature_flag'
+        action: 'evaluate_feature_flag',
       });
       return false;
     }

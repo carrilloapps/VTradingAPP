@@ -66,16 +66,18 @@ const WebViewScreen = () => {
   `;
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <StatusBar 
-        backgroundColor="transparent" 
-        translucent 
-        barStyle={theme.dark ? 'light-content' : 'dark-content'} 
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
+      <StatusBar
+        backgroundColor="transparent"
+        translucent
+        barStyle={theme.dark ? 'light-content' : 'dark-content'}
       />
-      
-      <UnifiedHeader 
-        title={title || 'Navegador'} 
-        variant="simple" 
+
+      <UnifiedHeader
+        title={title || 'Navegador'}
+        variant="simple"
         showNotification={false}
         showAd={false}
         onBackPress={() => navigation.goBack()}
@@ -90,10 +92,19 @@ const WebViewScreen = () => {
           style={[styles.webView, { backgroundColor: theme.colors.background }]}
           containerStyle={{ backgroundColor: theme.colors.background }}
         />
-        
+
         {isLoading && (
-          <View style={[styles.loadingContainer, { backgroundColor: theme.colors.backdrop }]}>
-            <ActivityIndicator animating={true} size="large" color={theme.colors.primary} />
+          <View
+            style={[
+              styles.loadingContainer,
+              { backgroundColor: theme.colors.backdrop },
+            ]}
+          >
+            <ActivityIndicator
+              animating={true}
+              size="large"
+              color={theme.colors.primary}
+            />
           </View>
         )}
       </View>

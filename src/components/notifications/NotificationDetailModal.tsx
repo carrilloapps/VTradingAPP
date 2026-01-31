@@ -5,7 +5,9 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { useAppTheme } from '../../theme/theme';
 import { analyticsService } from '../../services/firebase/AnalyticsService';
 import { NotificationData } from './NotificationCard';
-import NotificationIcon, { getNotificationIconConfig } from './NotificationIcon';
+import NotificationIcon, {
+  getNotificationIconConfig,
+} from './NotificationIcon';
 import { formatTimeAgo } from '../../utils/dateUtils';
 import { BottomSheetModal } from '../ui/BottomSheetModal';
 import CustomButton from '../ui/CustomButton';
@@ -31,7 +33,7 @@ const NotificationDetailModal: React.FC<NotificationDetailModalProps> = ({
       analyticsService.logInteraction('dialog_opened', {
         dialog_type: 'notification_detail',
         notification_id: notification.id,
-        notification_title: notification.title
+        notification_title: notification.title,
       });
     }
   }, [visible, notification]);
@@ -40,7 +42,10 @@ const NotificationDetailModal: React.FC<NotificationDetailModalProps> = ({
 
   const iconConfig = getNotificationIconConfig(notification, theme);
   const formattedTime = formatTimeAgo(notification.timestamp);
-  const displayTitle = notification.title === 'Notificación' ? iconConfig.fallbackTitle : notification.title;
+  const displayTitle =
+    notification.title === 'Notificación'
+      ? iconConfig.fallbackTitle
+      : notification.title;
 
   const formatPrice = (val: string | number) => {
     const num = typeof val === 'string' ? parseFloat(val) : val;
@@ -57,7 +62,10 @@ const NotificationDetailModal: React.FC<NotificationDetailModalProps> = ({
       style={styles.modal}
     >
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text variant="bodySmall" style={[styles.timeText, { color: theme.colors.onSurfaceVariant }]}>
+        <Text
+          variant="bodySmall"
+          style={[styles.timeText, { color: theme.colors.onSurfaceVariant }]}
+        >
           {formattedTime}
         </Text>
 
@@ -67,52 +75,92 @@ const NotificationDetailModal: React.FC<NotificationDetailModalProps> = ({
         </View>
 
         {/* Message */}
-        <Text variant="bodyLarge" style={[styles.messageText, { color: theme.colors.onSurface }]}>
+        <Text
+          variant="bodyLarge"
+          style={[styles.messageText, { color: theme.colors.onSurface }]}
+        >
           {notification.message}
         </Text>
 
         {/* Extra Data (Symbol/Price) */}
-        {notification.data && (notification.data.symbol || notification.data.price) && (
-          <View style={[styles.dataContainer, { backgroundColor: theme.colors.surfaceVariant }]}>
-            {notification.data.symbol && (
-              <View style={styles.dataRow}>
-                <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>Divisa</Text>
-                <Text variant="titleMedium" style={[styles.boldText, { color: theme.colors.onSurface }]}>{notification.data.symbol}</Text>
-              </View>
-            )}
-            {notification.data.symbol && notification.data.price && (
-              <View style={[styles.divider, { backgroundColor: theme.colors.outlineVariant }]} />
-            )}
-            {notification.data.price && (
-              <View style={styles.dataRow}>
-                <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>Precio</Text>
-                <View style={styles.priceContainer}>
+        {notification.data &&
+          (notification.data.symbol || notification.data.price) && (
+            <View
+              style={[
+                styles.dataContainer,
+                { backgroundColor: theme.colors.surfaceVariant },
+              ]}
+            >
+              {notification.data.symbol && (
+                <View style={styles.dataRow}>
+                  <Text
+                    variant="bodyMedium"
+                    style={{ color: theme.colors.onSurfaceVariant }}
+                  >
+                    Divisa
+                  </Text>
                   <Text
                     variant="titleMedium"
-                    style={[
-                      styles.boldText,
-                      {
-                        color: notification.trend === 'up' ? theme.colors.success :
-                          notification.trend === 'down' ? theme.colors.error :
-                            theme.colors.onSurface,
-                      }
-                    ]}
+                    style={[styles.boldText, { color: theme.colors.onSurface }]}
                   >
-                    Bs. {formatPrice(notification.data.price)}
+                    {notification.data.symbol}
                   </Text>
-                  {notification.trend && (
-                    <MaterialCommunityIcons
-                      name={notification.trend === 'up' ? 'trending-up' : 'trending-down'}
-                      size={20}
-                      color={notification.trend === 'up' ? theme.colors.success : theme.colors.error}
-                      style={styles.trendIcon}
-                    />
-                  )}
                 </View>
-              </View>
-            )}
-          </View>
-        )}
+              )}
+              {notification.data.symbol && notification.data.price && (
+                <View
+                  style={[
+                    styles.divider,
+                    { backgroundColor: theme.colors.outlineVariant },
+                  ]}
+                />
+              )}
+              {notification.data.price && (
+                <View style={styles.dataRow}>
+                  <Text
+                    variant="bodyMedium"
+                    style={{ color: theme.colors.onSurfaceVariant }}
+                  >
+                    Precio
+                  </Text>
+                  <View style={styles.priceContainer}>
+                    <Text
+                      variant="titleMedium"
+                      style={[
+                        styles.boldText,
+                        {
+                          color:
+                            notification.trend === 'up'
+                              ? theme.colors.success
+                              : notification.trend === 'down'
+                                ? theme.colors.error
+                                : theme.colors.onSurface,
+                        },
+                      ]}
+                    >
+                      Bs. {formatPrice(notification.data.price)}
+                    </Text>
+                    {notification.trend && (
+                      <MaterialCommunityIcons
+                        name={
+                          notification.trend === 'up'
+                            ? 'trending-up'
+                            : 'trending-down'
+                        }
+                        size={20}
+                        color={
+                          notification.trend === 'up'
+                            ? theme.colors.success
+                            : theme.colors.error
+                        }
+                        style={styles.trendIcon}
+                      />
+                    )}
+                  </View>
+                </View>
+              )}
+            </View>
+          )}
 
         {/* Actions - Standardized with CustomButton */}
         <View style={styles.actionsContainer}>
@@ -192,7 +240,7 @@ const styles = StyleSheet.create({
   },
   button: {
     flex: 1,
-  }
+  },
 });
 
 export default NotificationDetailModal;

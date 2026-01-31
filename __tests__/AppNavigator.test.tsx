@@ -23,7 +23,7 @@ describe('AppNavigator', () => {
     const { getByText } = render(
       <PaperProvider>
         <AppNavigator />
-      </PaperProvider>
+      </PaperProvider>,
     );
 
     expect(getByText(/Cargando/i)).toBeTruthy();

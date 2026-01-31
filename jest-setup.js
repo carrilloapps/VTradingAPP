@@ -1,6 +1,9 @@
 /* global jest */
 
-jest.mock('react-native-safe-area-context', () => require('react-native-safe-area-context/jest/mock').default);
+jest.mock(
+  'react-native-safe-area-context',
+  () => require('react-native-safe-area-context/jest/mock').default,
+);
 
 jest.mock('react-native-linear-gradient', () => 'LinearGradient');
 
@@ -49,7 +52,7 @@ jest.mock('react-native-device-info', () => {
 });
 
 jest.mock('@react-native-async-storage/async-storage', () =>
-  require('@react-native-async-storage/async-storage/jest/async-storage-mock')
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
 jest.mock('@react-navigation/native', () => {
@@ -61,7 +64,7 @@ jest.mock('@react-navigation/native', () => {
       goBack: jest.fn(),
       dispatch: jest.fn(),
     }),
-    useFocusEffect: jest.fn((callback) => callback()),
+    useFocusEffect: jest.fn(callback => callback()),
     createNavigationContainerRef: jest.fn(() => ({
       isReady: jest.fn().mockReturnValue(true),
       navigate: jest.fn(),
@@ -110,7 +113,7 @@ jest.mock('react-native-reanimated', () => {
 
   // The mock for `call` immediately calls the callback which is incorrect
   // So we override it with a no-op
-  Reanimated.default.call = () => { };
+  Reanimated.default.call = () => {};
 
   return Reanimated;
 });
@@ -149,7 +152,8 @@ jest.mock('react-native-webview', () => {
 
 jest.mock('@react-native-google-signin/google-signin', () => {
   // Use environment variable or generate dynamic mock token
-  const mockToken = process.env.JEST_MOCK_GOOGLE_TOKEN || `mock-token-${Date.now()}`;
+  const mockToken =
+    process.env.JEST_MOCK_GOOGLE_TOKEN || `mock-token-${Date.now()}`;
 
   return {
     GoogleSignin: {
@@ -210,16 +214,19 @@ jest.mock(
       setUserId: jest.fn((instance, id) => Promise.resolve()),
       setAttributes: jest.fn((instance, attrs) => Promise.resolve()),
       setAttribute: jest.fn((instance, key, val) => Promise.resolve()),
-      setCrashlyticsCollectionEnabled: jest.fn((instance, enabled) => Promise.resolve()),
+      setCrashlyticsCollectionEnabled: jest.fn((instance, enabled) =>
+        Promise.resolve(),
+      ),
       log: jest.fn((instance, msg) => Promise.resolve()),
       recordError: jest.fn((instance, error) => Promise.resolve()),
     };
   },
-  { virtual: true }
+  { virtual: true },
 );
 
 jest.mock('@react-native-firebase/app-check', () => {
-  const mockToken = process.env.JEST_MOCK_APPCHECK_TOKEN || `mock-appcheck-${Date.now()}`;
+  const mockToken =
+    process.env.JEST_MOCK_APPCHECK_TOKEN || `mock-appcheck-${Date.now()}`;
 
   return {
     initializeAppCheck: jest.fn(() => Promise.resolve({})),
@@ -236,7 +243,7 @@ jest.mock('@react-native-firebase/remote-config', () => {
     setDefaults: jest.fn(),
     fetchAndActivate: jest.fn(() => Promise.resolve(true)),
     setConfigSettings: jest.fn(),
-    getValue: jest.fn((key) => ({
+    getValue: jest.fn(key => ({
       asString: () => 'mock-string',
       asNumber: () => 123,
       asBoolean: () => true,
@@ -312,7 +319,7 @@ jest.mock('react-native-google-mobile-ads', () => ({
 
 jest.mock('@sentry/react-native', () => ({
   init: jest.fn(),
-  wrap: jest.fn((c) => c),
+  wrap: jest.fn(c => c),
   captureException: jest.fn(),
   captureMessage: jest.fn(),
   startTransaction: jest.fn(() => ({
@@ -352,7 +359,7 @@ jest.mock('react-native-view-shot', () => {
   const { View } = require('react-native');
   return {
     captureRef: jest.fn(() => Promise.resolve('mock-uri')),
-    default: (props) => React.createElement(View, props),
+    default: props => React.createElement(View, props),
     __esModule: true,
   };
 });
@@ -369,10 +376,10 @@ jest.mock('@react-native-community/netinfo', () => ({
 jest.mock('react-native-svg', () => {
   const React = require('react');
   const { View } = require('react-native');
-  const Svg = (props) => React.createElement(View, props);
-  const Circle = (props) => React.createElement(View, props);
-  const Rect = (props) => React.createElement(View, props);
-  const Path = (props) => React.createElement(View, props);
+  const Svg = props => React.createElement(View, props);
+  const Circle = props => React.createElement(View, props);
+  const Rect = props => React.createElement(View, props);
+  const Path = props => React.createElement(View, props);
   return {
     __esModule: true,
     default: Svg,
@@ -380,18 +387,18 @@ jest.mock('react-native-svg', () => {
     Rect,
     Path,
     Svg,
-    G: (props) => React.createElement(View, props),
-    Defs: (props) => React.createElement(View, props),
-    ClipPath: (props) => React.createElement(View, props),
-    LinearGradient: (props) => React.createElement(View, props),
-    Stop: (props) => React.createElement(View, props),
+    G: props => React.createElement(View, props),
+    Defs: props => React.createElement(View, props),
+    ClipPath: props => React.createElement(View, props),
+    LinearGradient: props => React.createElement(View, props),
+    Stop: props => React.createElement(View, props),
   };
 });
 
 jest.mock('react-native-pager-view', () => {
   const React = require('react');
   const { View } = require('react-native');
-  return (props) => React.createElement(View, props);
+  return props => React.createElement(View, props);
 });
 
 jest.mock('react-native-screens', () => ({

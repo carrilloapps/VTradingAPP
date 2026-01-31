@@ -23,8 +23,16 @@ import NoInternetModal from './src/components/ui/NoInternetModal';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { queryClient } from './src/config/queryClient';
 import mobileAds from 'react-native-google-mobile-ads';
-import { getCrashlytics, setCrashlyticsCollectionEnabled, log } from '@react-native-firebase/crashlytics';
-import { getPerformance, trace, initializePerformance } from '@react-native-firebase/perf';
+import {
+  getCrashlytics,
+  setCrashlyticsCollectionEnabled,
+  log,
+} from '@react-native-firebase/crashlytics';
+import {
+  getPerformance,
+  trace,
+  initializePerformance,
+} from '@react-native-firebase/perf';
 import * as Sentry from '@sentry/react-native';
 import { AppConfig } from './src/constants/AppConfig';
 import { deepLinkService } from './src/services/DeepLinkService';
@@ -99,7 +107,7 @@ function App(): React.JSX.Element {
           inAppMessagingService.initialize(),
           appDistributionService.checkForUpdate(),
           notificationInitService.initialize(),
-          initializeStorage()
+          initializeStorage(),
         ]);
       } catch (e) {
         // Safe catch to ensure app continues even if initialization fails

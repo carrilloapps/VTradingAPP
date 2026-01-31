@@ -4,7 +4,14 @@ import { Text, useTheme, Surface } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export type ToastType = 'success' | 'error' | 'info' | 'warning' | 'alert' | 'trendUp' | 'trendDown';
+export type ToastType =
+  | 'success'
+  | 'error'
+  | 'info'
+  | 'warning'
+  | 'alert'
+  | 'trendUp'
+  | 'trendDown';
 
 interface TopToastProps {
   visible: boolean;
@@ -44,7 +51,7 @@ const TopToast: React.FC<TopToastProps> = ({
         useNativeDriver: true,
       }),
     ]).start(() => {
-        if (visible) onDismiss();
+      if (visible) onDismiss();
     });
   }, [onDismiss, opacity, translateY, visible]);
 
@@ -78,43 +85,75 @@ const TopToast: React.FC<TopToastProps> = ({
   const getColors = () => {
     switch (type) {
       case 'success':
-        return { bg: themeColors.successContainer, border: themeColors.success, icon: themeColors.success, text: theme.colors.onSurface, textVariant: theme.colors.onSurfaceVariant };
+        return {
+          bg: themeColors.successContainer,
+          border: themeColors.success,
+          icon: themeColors.success,
+          text: theme.colors.onSurface,
+          textVariant: theme.colors.onSurfaceVariant,
+        };
       case 'error':
-        return { bg: themeColors.errorContainer, border: themeColors.error, icon: themeColors.error, text: theme.colors.onSurface, textVariant: theme.colors.onSurfaceVariant };
+        return {
+          bg: themeColors.errorContainer,
+          border: themeColors.error,
+          icon: themeColors.error,
+          text: theme.colors.onSurface,
+          textVariant: theme.colors.onSurfaceVariant,
+        };
       case 'trendUp':
-        return { 
-          bg: themeColors.trendUp, 
-          border: themeColors.trendUp, 
-          icon: themeColors.onPrimary, 
-          text: themeColors.onPrimary, 
-          textVariant: themeColors.onPrimary 
+        return {
+          bg: themeColors.trendUp,
+          border: themeColors.trendUp,
+          icon: themeColors.onPrimary,
+          text: themeColors.onPrimary,
+          textVariant: themeColors.onPrimary,
         };
       case 'trendDown':
-        return { 
-          bg: themeColors.trendDown, 
-          border: themeColors.trendDown, 
-          icon: themeColors.onError, 
-          text: themeColors.onError, 
-          textVariant: themeColors.onError 
+        return {
+          bg: themeColors.trendDown,
+          border: themeColors.trendDown,
+          icon: themeColors.onError,
+          text: themeColors.onError,
+          textVariant: themeColors.onError,
         };
       case 'alert':
       case 'warning':
-        return { bg: theme.colors.elevation.level3, border: themeColors.warning, icon: themeColors.warning, text: theme.colors.onSurface, textVariant: theme.colors.onSurfaceVariant };
+        return {
+          bg: theme.colors.elevation.level3,
+          border: themeColors.warning,
+          icon: themeColors.warning,
+          text: theme.colors.onSurface,
+          textVariant: theme.colors.onSurfaceVariant,
+        };
       case 'info':
       default:
-        return { bg: theme.colors.elevation.level3, border: themeColors.info || theme.colors.primary, icon: themeColors.info || theme.colors.primary, text: theme.colors.onSurface, textVariant: theme.colors.onSurfaceVariant };
+        return {
+          bg: theme.colors.elevation.level3,
+          border: themeColors.info || theme.colors.primary,
+          icon: themeColors.info || theme.colors.primary,
+          text: theme.colors.onSurface,
+          textVariant: theme.colors.onSurfaceVariant,
+        };
     }
   };
 
   const getIcon = () => {
     switch (type) {
-      case 'success': return 'check-circle';
-      case 'error': return 'alert-circle';
-      case 'alert': return 'bell-ring';
-      case 'warning': return 'alert';
-      case 'trendUp': return 'trending-up';
-      case 'trendDown': return 'trending-down';
-      case 'info': default: return 'information';
+      case 'success':
+        return 'check-circle';
+      case 'error':
+        return 'alert-circle';
+      case 'alert':
+        return 'bell-ring';
+      case 'warning':
+        return 'alert';
+      case 'trendUp':
+        return 'trending-up';
+      case 'trendDown':
+        return 'trending-down';
+      case 'info':
+      default:
+        return 'information';
     }
   };
 
@@ -141,13 +180,24 @@ const TopToast: React.FC<TopToastProps> = ({
         ]}
         elevation={4}
       >
-        <TouchableOpacity style={styles.content} onPress={hide} activeOpacity={0.9}>
+        <TouchableOpacity
+          style={styles.content}
+          onPress={hide}
+          activeOpacity={0.9}
+        >
           <View style={styles.iconContainer}>
-            <MaterialCommunityIcons name={getIcon()} size={28} color={colors.icon} />
+            <MaterialCommunityIcons
+              name={getIcon()}
+              size={28}
+              color={colors.icon}
+            />
           </View>
           <View style={styles.textContainer}>
             {title && (
-              <Text variant="titleSmall" style={[styles.title, { color: colors.text }]}>
+              <Text
+                variant="titleSmall"
+                style={[styles.title, { color: colors.text }]}
+              >
                 {title}
               </Text>
             )}
@@ -156,15 +206,28 @@ const TopToast: React.FC<TopToastProps> = ({
             </Text>
             {caption && (
               <View style={styles.captionContainer}>
-                <MaterialCommunityIcons name="target" size={14} color={colors.textVariant} style={styles.captionIcon} />
-                <Text variant="labelSmall" style={[styles.captionText, { color: colors.textVariant }]}>
+                <MaterialCommunityIcons
+                  name="target"
+                  size={14}
+                  color={colors.textVariant}
+                  style={styles.captionIcon}
+                />
+                <Text
+                  variant="labelSmall"
+                  style={[styles.captionText, { color: colors.textVariant }]}
+                >
                   {caption}
                 </Text>
               </View>
             )}
           </View>
           <TouchableOpacity onPress={hide} style={styles.closeButton}>
-            <MaterialCommunityIcons name="close" size={20} color={colors.textVariant} style={styles.closeIcon} />
+            <MaterialCommunityIcons
+              name="close"
+              size={20}
+              color={colors.textVariant}
+              style={styles.closeIcon}
+            />
           </TouchableOpacity>
         </TouchableOpacity>
       </Surface>

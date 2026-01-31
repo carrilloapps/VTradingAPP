@@ -3,3 +3,5 @@ ios/
 node_modules/
 dist/
 coverage/
+.bundle/
+*.lock

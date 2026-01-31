@@ -1,5 +1,5 @@
-import { 
-  MD3LightTheme as DefaultLightTheme, 
+import {
+  MD3LightTheme as DefaultLightTheme,
   MD3DarkTheme as DefaultDarkTheme,
   useTheme as usePaperTheme,
   MD3Theme,
@@ -17,26 +17,26 @@ export const spacing = {
 
 // Define Custom Colors Interface
 export interface CustomColors {
-    trendUp: string;
-    trendDown: string;
-    skeleton: string;
-    skeletonHighlight: string;
-    success: string;
-    successContainer: string;
-    info: string;
-    infoContainer: string;
-    neutral: string;
-    neutralContainer: string;
-    danger: string;
-    warning: string;
-    buttonBorder: string;
-    exchangeCardBorder: string;
+  trendUp: string;
+  trendDown: string;
+  skeleton: string;
+  skeletonHighlight: string;
+  success: string;
+  successContainer: string;
+  info: string;
+  infoContainer: string;
+  neutral: string;
+  neutralContainer: string;
+  danger: string;
+  warning: string;
+  buttonBorder: string;
+  exchangeCardBorder: string;
 }
 
 // Define AppTheme Type
 export type AppTheme = Omit<MD3Theme, 'colors'> & {
-    colors: MD3Theme['colors'] & CustomColors;
-    spacing: typeof spacing;
+  colors: MD3Theme['colors'] & CustomColors;
+  spacing: typeof spacing;
 };
 
 // Custom Hook to use the theme with types
@@ -78,7 +78,7 @@ const lightColors = {
   inversePrimary: '#6DDBAC',
   elevation: {
     level0: 'transparent',
-    level1: '#F0F5F2', 
+    level1: '#F0F5F2',
     level2: '#EAF1ED',
     level3: '#E4EDE8',
     level4: '#E2ECE7',
@@ -132,17 +132,17 @@ const darkColors = {
 const semanticColors = {
   trendUp: '#006C4C', // Using primary green for positive trend
   trendDown: '#BA1A1A', // Using error red for negative trend
-  
+
   // Custom Semantic definitions mapped to M3 logic
   success: '#006C4C',
   successContainer: '#89F8C6',
-  
+
   info: '#3E6373', // Using Tertiary for info
   infoContainer: '#C2E8FB',
-  
+
   neutral: '#4C6358', // Using Secondary for neutral
   neutralContainer: '#CEE9DA',
-  
+
   danger: '#BA1A1A', // Error
   warning: '#E6C449', // Custom yellow/gold, ensuring visibility
 };
@@ -153,13 +153,13 @@ export const LightTheme: AppTheme = {
   colors: {
     ...DefaultLightTheme.colors,
     ...lightColors,
-    
+
     // Custom Semantic
     ...semanticColors,
     trendUp: '#168953', // Slightly brighter green for charts/trends
     trendDown: '#D32F2F', // Standard Red
     warning: '#F57C00', // Orange-ish warning
-    
+
     skeleton: '#E1E9EE',
     skeletonHighlight: '#F2F8FC',
     buttonBorder: '#5F6964',
@@ -174,25 +174,25 @@ export const DarkTheme: AppTheme = {
   colors: {
     ...DefaultDarkTheme.colors,
     ...darkColors,
-    
+
     // Custom Semantic
     ...semanticColors,
     // Adjust semantics for dark mode visibility
     trendUp: '#6DDBAC', // Primary Light Green
     trendDown: '#FFB4AB', // Error Light Red
-    
+
     success: '#6DDBAC',
     successContainer: '#005138',
-    
+
     info: '#A6CCE0',
     infoContainer: '#254B5B',
-    
+
     neutral: '#B3CCBE',
     neutralContainer: '#354B41',
-    
+
     danger: '#FFB4AB',
     warning: '#FFCC80', // Light Orange
-    
+
     skeleton: '#2C312E', // Matches elevation level 4
     skeletonHighlight: '#303532', // Matches elevation level 5
     buttonBorder: '#B3BEB9',

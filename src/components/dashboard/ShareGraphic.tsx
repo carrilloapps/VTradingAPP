@@ -23,7 +23,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
   lastUpdated,
   isPremium = false,
   aspectRatio = '1:1',
-  onReady
+  onReady,
 }) => {
   const theme = useTheme();
   const isVertical = aspectRatio === '16:9';
@@ -55,37 +55,67 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
   // Computed Styles
   const templateStyle = [
     styles.shareTemplate,
-    aspectRatio === '16:9' ? styles.shareTemplateVertical : styles.shareTemplateSquare,
-    { backgroundColor: theme.dark ? '#051911' : '#F0FDF4' }
+    aspectRatio === '16:9'
+      ? styles.shareTemplateVertical
+      : styles.shareTemplateSquare,
+    { backgroundColor: theme.dark ? '#051911' : '#F0FDF4' },
   ];
 
-  const glowStyle = [styles.templateGlow, styles.templateGlowOpacity, { backgroundColor: theme.colors.primary }];
-  const badgeStyle = [styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }];
-  const badgeTextStyle = (size: number) => [styles.platformText, { color: theme.colors.onSurfaceVariant, fontSize: size }];
+  const glowStyle = [
+    styles.templateGlow,
+    styles.templateGlowOpacity,
+    { backgroundColor: theme.colors.primary },
+  ];
+  const badgeStyle = [
+    styles.platformBadge,
+    { backgroundColor: theme.colors.surfaceVariant },
+  ];
+  const badgeTextStyle = (size: number) => [
+    styles.platformText,
+    { color: theme.colors.onSurfaceVariant, fontSize: size },
+  ];
 
   const logoStyle = [
     styles.templateMainLogo,
     {
       tintColor: theme.dark ? undefined : theme.colors.primary,
       width: logoWidth,
-      height: logoHeight
-    }
+      height: logoHeight,
+    },
   ];
 
-  const freeBadgeStyle = [styles.freeBadge, { backgroundColor: theme.colors.error }];
-  const freeBadgeTextStyle = [styles.freeBadgeText, { fontSize: freeBadgeTextSize }];
+  const freeBadgeStyle = [
+    styles.freeBadge,
+    { backgroundColor: theme.colors.error },
+  ];
+  const freeBadgeTextStyle = [
+    styles.freeBadgeText,
+    { fontSize: freeBadgeTextSize },
+  ];
 
-  const urlBadgeStyle = [styles.templateUrlBadge, { backgroundColor: theme.colors.primary + '15', marginBottom: 8 }];
-  const urlTextStyle = [styles.templateUrlText, { color: theme.colors.primary, fontSize: urlTextSize }];
+  const urlBadgeStyle = [
+    styles.templateUrlBadge,
+    { backgroundColor: theme.colors.primary + '15', marginBottom: 8 },
+  ];
+  const urlTextStyle = [
+    styles.templateUrlText,
+    { color: theme.colors.primary, fontSize: urlTextSize },
+  ];
 
-  const dateTextStyle = [styles.templateDate, { color: theme.colors.onSurfaceVariant, fontSize: dateTextSize }];
+  const dateTextStyle = [
+    styles.templateDate,
+    { color: theme.colors.onSurfaceVariant, fontSize: dateTextSize },
+  ];
 
   const contentStyle = [
     styles.templateContent,
-    aspectRatio === '16:9' && ({ gap: 40 } as const)
+    aspectRatio === '16:9' && ({ gap: 40 } as const),
   ];
 
-  const footerTextStyle = [styles.templateFooterText, { color: theme.colors.primary, fontSize: footerTextSize }];
+  const footerTextStyle = [
+    styles.templateFooterText,
+    { color: theme.colors.primary, fontSize: footerTextSize },
+  ];
 
   // Notify parent when ready
   React.useEffect(() => {
@@ -109,12 +139,20 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
           {/* Platform Badges */}
           <View style={styles.platformBadgesContainer}>
             <Surface style={badgeStyle} elevation={1}>
-              <Icon source="google-play" size={platformIconSize} color={theme.colors.onSurfaceVariant} />
+              <Icon
+                source="google-play"
+                size={platformIconSize}
+                color={theme.colors.onSurfaceVariant}
+              />
               <Text style={badgeTextStyle(platformTextSize)}>Android</Text>
             </Surface>
             <View style={styles.flex1} />
             <Surface style={badgeStyle} elevation={1}>
-              <Icon source="apple" size={platformIconSize} color={theme.colors.onSurfaceVariant} />
+              <Icon
+                source="apple"
+                size={platformIconSize}
+                color={theme.colors.onSurfaceVariant}
+              />
               <Text style={badgeTextStyle(platformTextSize)}>iOS</Text>
             </Surface>
           </View>
@@ -136,9 +174,19 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
               <Text style={urlTextStyle}>vtrading.app</Text>
             </View>
             <View style={styles.templateDateBox}>
-              <Icon source="calendar-clock" size={dateIconSize} color={theme.colors.onSurfaceVariant} />
+              <Icon
+                source="calendar-clock"
+                size={dateIconSize}
+                color={theme.colors.onSurfaceVariant}
+              />
               <Text style={dateTextStyle}>
-                {new Date().toLocaleDateString('es-VE', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })} • {lastUpdated}
+                {new Date().toLocaleDateString('es-VE', {
+                  weekday: 'long',
+                  day: 'numeric',
+                  month: 'long',
+                  year: 'numeric',
+                })}{' '}
+                • {lastUpdated}
               </Text>
             </View>
           </View>
@@ -148,43 +196,95 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
               const isNeutral = rate.changePercent.includes('0.00');
               const trendColor = isNeutral
                 ? theme.colors.onSurfaceVariant
-                : (rate.isPositive ? (theme.colors as any).success || '#6EE7B7' : (theme.colors as any).error || '#F87171');
+                : rate.isPositive
+                  ? (theme.colors as any).success || '#6EE7B7'
+                  : (theme.colors as any).error || '#F87171';
               const trendIcon = isNeutral
                 ? 'minus'
-                : (rate.isPositive ? 'trending-up' : 'trending-down');
+                : rate.isPositive
+                  ? 'trending-up'
+                  : 'trending-down';
 
               const cardStyle = [
                 styles.templateCard,
                 isVertical && styles.templateCardVertical,
                 {
-                  backgroundColor: theme.dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
-                  borderColor: theme.colors.outlineVariant
-                }
+                  backgroundColor: theme.dark
+                    ? 'rgba(255,255,255,0.03)'
+                    : 'rgba(0,0,0,0.02)',
+                  borderColor: theme.colors.outlineVariant,
+                },
               ];
               const cardIconContainerStyle = [
                 styles.templateIconSmall,
                 {
                   width: cardIconContainerSize,
                   height: cardIconContainerSize,
-                  backgroundColor: theme.colors.primary + '20'
-                }
+                  backgroundColor: theme.colors.primary + '20',
+                },
               ];
-              const cardTitleStyle = [styles.templateCardTitle, { fontSize: cardTitleSize, color: theme.colors.onSurfaceVariant }];
-              const valueTextStyle = [styles.templateValue, { fontSize: valueSize, color: theme.colors.onSurface }];
-              const valueLabelColumnStyle = [styles.templateValueLabelColumn, { height: valueSize }];
-              const currencyTextStyle = [styles.templateCurrency, { fontSize: currencySize, color: theme.colors.onSurfaceVariant }];
-              const trendBoxStyle = [styles.templateTrendBox, { backgroundColor: trendColor + '15' }];
-              const trendTextStyle = [styles.templateTrendText, { color: trendColor, fontSize: trendTextSize }];
+              const cardTitleStyle = [
+                styles.templateCardTitle,
+                {
+                  fontSize: cardTitleSize,
+                  color: theme.colors.onSurfaceVariant,
+                },
+              ];
+              const valueTextStyle = [
+                styles.templateValue,
+                { fontSize: valueSize, color: theme.colors.onSurface },
+              ];
+              const valueLabelColumnStyle = [
+                styles.templateValueLabelColumn,
+                { height: valueSize },
+              ];
+              const currencyTextStyle = [
+                styles.templateCurrency,
+                {
+                  fontSize: currencySize,
+                  color: theme.colors.onSurfaceVariant,
+                },
+              ];
+              const trendBoxStyle = [
+                styles.templateTrendBox,
+                { backgroundColor: trendColor + '15' },
+              ];
+              const trendTextStyle = [
+                styles.templateTrendText,
+                { color: trendColor, fontSize: trendTextSize },
+              ];
 
-              const detailLabelStyle = [styles.templateDetailLabel, { fontSize: detailLabelSize }];
-              const detailValueTextStyle = [styles.templateDetailValue, { fontSize: detailValueSize }];
-              const detailCurrencyTextStyle = [styles.templateDetailCurrency, { fontSize: detailCurrencySize }];
+              const detailLabelStyle = [
+                styles.templateDetailLabel,
+                { fontSize: detailLabelSize },
+              ];
+              const detailValueTextStyle = [
+                styles.templateDetailValue,
+                { fontSize: detailValueSize },
+              ];
+              const detailCurrencyTextStyle = [
+                styles.templateDetailCurrency,
+                { fontSize: detailCurrencySize },
+              ];
 
               return (
                 <Surface key={idx} style={cardStyle} elevation={0}>
-                  <View style={[styles.templateCardHeader, isVertical && styles.marginBottom12]}>
+                  <View
+                    style={[
+                      styles.templateCardHeader,
+                      isVertical && styles.marginBottom12,
+                    ]}
+                  >
                     <View style={cardIconContainerStyle}>
-                      <Icon source={rate.code === 'USDT' || rate.title.includes('USDT') ? 'alpha-t-circle-outline' : 'currency-usd'} size={cardIconSize} color={theme.colors.primary} />
+                      <Icon
+                        source={
+                          rate.code === 'USDT' || rate.title.includes('USDT')
+                            ? 'alpha-t-circle-outline'
+                            : 'currency-usd'
+                        }
+                        size={cardIconSize}
+                        color={theme.colors.primary}
+                      />
                     </View>
                     <Text style={cardTitleStyle}>{rate.title}</Text>
                   </View>
@@ -194,59 +294,89 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
                     <View style={valueLabelColumnStyle}>
                       <Text style={currencyTextStyle}>Bs.</Text>
                       <View style={trendBoxStyle}>
-                        <Icon source={trendIcon} size={trendIconSize} color={trendColor} />
+                        <Icon
+                          source={trendIcon}
+                          size={trendIconSize}
+                          color={trendColor}
+                        />
                         <Text style={trendTextStyle}>{rate.changePercent}</Text>
                       </View>
                     </View>
                   </View>
 
-                  {isVertical && (rate.buyValue !== undefined || rate.sellValue !== undefined) && (
-                    <View style={styles.templateVerticalDetails}>
-                      <View style={styles.templateDetailItem}>
-                        <Text style={detailLabelStyle}>COMPRA</Text>
-                        <Text style={detailValueTextStyle}>{rate.buyValue || '--'} <Text style={detailCurrencyTextStyle}>Bs.</Text></Text>
+                  {isVertical &&
+                    (rate.buyValue !== undefined ||
+                      rate.sellValue !== undefined) && (
+                      <View style={styles.templateVerticalDetails}>
+                        <View style={styles.templateDetailItem}>
+                          <Text style={detailLabelStyle}>COMPRA</Text>
+                          <Text style={detailValueTextStyle}>
+                            {rate.buyValue || '--'}{' '}
+                            <Text style={detailCurrencyTextStyle}>Bs.</Text>
+                          </Text>
+                        </View>
+                        <View style={styles.templateVerticalDivider} />
+                        <View style={styles.templateDetailItem}>
+                          <Text style={detailLabelStyle}>VENTA</Text>
+                          <Text style={detailValueTextStyle}>
+                            {rate.sellValue || '--'}{' '}
+                            <Text style={detailCurrencyTextStyle}>Bs.</Text>
+                          </Text>
+                        </View>
                       </View>
-                      <View style={styles.templateVerticalDivider} />
-                      <View style={styles.templateDetailItem}>
-                        <Text style={detailLabelStyle}>VENTA</Text>
-                        <Text style={detailValueTextStyle}>{rate.sellValue || '--'} <Text style={detailCurrencyTextStyle}>Bs.</Text></Text>
-                      </View>
-                    </View>
-                  )}
+                    )}
                 </Surface>
               );
             })}
 
-            {spread !== null && (() => {
-              const warningColor = (theme.colors as any).warning || '#F59E0B';
-              const spreadBoxStyle = [
-                styles.templateSpreadBox,
-                {
-                  backgroundColor: warningColor + '15',
-                  borderColor: warningColor + '30'
-                }
-              ];
-              const spreadTextStyle = [styles.templateSpreadText, { color: warningColor, fontSize: spreadTextSize }];
+            {spread !== null &&
+              (() => {
+                const warningColor = (theme.colors as any).warning || '#F59E0B';
+                const spreadBoxStyle = [
+                  styles.templateSpreadBox,
+                  {
+                    backgroundColor: warningColor + '15',
+                    borderColor: warningColor + '30',
+                  },
+                ];
+                const spreadTextStyle = [
+                  styles.templateSpreadText,
+                  { color: warningColor, fontSize: spreadTextSize },
+                ];
 
-              return (
-                <View style={spreadBoxStyle}>
-                  <Icon source="swap-horizontal" size={spreadIconSize} color={warningColor} />
-                  <Text style={spreadTextStyle}>
-                    SPREAD (Diferencia USD vs USDT): <Text style={styles.bold900}>{spread.toFixed(2)}%</Text>
-                  </Text>
-                </View>
-              );
-            })()}
+                return (
+                  <View style={spreadBoxStyle}>
+                    <Icon
+                      source="swap-horizontal"
+                      size={spreadIconSize}
+                      color={warningColor}
+                    />
+                    <Text style={spreadTextStyle}>
+                      SPREAD (Diferencia USD vs USDT):{' '}
+                      <Text style={styles.bold900}>{spread.toFixed(2)}%</Text>
+                    </Text>
+                  </View>
+                );
+              })()}
           </View>
 
           <View style={styles.templateFooter}>
             <LinearGradient
-              colors={[theme.colors.primary + '00', theme.colors.primary + '10', theme.colors.primary + '00']}
-              start={{ x: 0, y: 0 }} end={{ x: 1, y: 0 }}
+              colors={[
+                theme.colors.primary + '00',
+                theme.colors.primary + '10',
+                theme.colors.primary + '00',
+              ]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
               style={styles.templateDivider}
             />
             <View style={styles.templateFooterRow}>
-              <Icon source={isPremium ? "shield-check-outline" : "shield-outline"} size={footerIconSize} color={theme.colors.primary} />
+              <Icon
+                source={isPremium ? 'shield-check-outline' : 'shield-outline'}
+                size={footerIconSize}
+                color={theme.colors.primary}
+              />
               <Text style={footerTextStyle}>
                 MONITOREO FINANCIERO{isPremium ? ' PREMIUM' : ''}
               </Text>
@@ -331,8 +461,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 4,
   },
-  templateMainLogo: {
-  },
+  templateMainLogo: {},
   freeBadge: {
     paddingHorizontal: 5,
     paddingVertical: 1,

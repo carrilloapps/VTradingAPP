@@ -11,8 +11,12 @@ jest.mock('react-native-paper', () => {
     ...Actual,
     Switch: (props: any) => <View testID="switch" {...props} />,
     Snackbar: (props: any) => <View testID="snackbar" {...props} />,
-    Button: (props: any) => <View testID="button" {...props} >{props.children}</View>,
-    Text: (props: any) => <Text {...props} >{props.children}</Text>,
+    Button: (props: any) => (
+      <View testID="button" {...props}>
+        {props.children}
+      </View>
+    ),
+    Text: (props: any) => <Text {...props}>{props.children}</Text>,
   };
 });
 
@@ -102,7 +106,8 @@ jest.mock('../src/components/settings/MenuButton', () => {
 
 jest.mock('../src/components/ui/CustomDialog', () => {
   const { View } = require('react-native');
-  return ({ visible, children }: any) => visible ? <View testID="custom-dialog">{children}</View> : null;
+  return ({ visible, children }: any) =>
+    visible ? <View testID="custom-dialog">{children}</View> : null;
 });
 
 jest.mock('../src/components/ui/AboutDialog', () => {
@@ -128,7 +133,8 @@ jest.mock('react-native-safe-area-context', () => {
   };
   return {
     SafeAreaProvider: ({ children }: any) => children,
-    SafeAreaConsumer: ({ children }: any) => children(MOCK_INITIAL_METRICS.insets),
+    SafeAreaConsumer: ({ children }: any) =>
+      children(MOCK_INITIAL_METRICS.insets),
     SafeAreaInsetsContext: ReactMock.createContext(MOCK_INITIAL_METRICS.insets),
     useSafeAreaInsets: () => MOCK_INITIAL_METRICS.insets,
     useSafeAreaFrame: () => MOCK_INITIAL_METRICS.frame,
@@ -154,9 +160,10 @@ jest.mock('@react-navigation/native', () => {
   const MockReact = require('react');
   return {
     useNavigation: () => mockNavigation,
-    useFocusEffect: (effect: any) => MockReact.useEffect(() => {
-      effect();
-    }, [effect]),
+    useFocusEffect: (effect: any) =>
+      MockReact.useEffect(() => {
+        effect();
+      }, [effect]),
     createNavigationContainerRef: jest.fn(() => ({
       isReady: jest.fn().mockReturnValue(true),
       navigate: jest.fn(),
@@ -199,9 +206,7 @@ jest.mock('../src/services/ObservabilityService', () => ({
 describe('SettingsScreen', () => {
   const renderWithProvider = (component: React.ReactElement) => {
     return render(
-      <PaperProvider theme={LightTheme}>
-        {component}
-      </PaperProvider>
+      <PaperProvider theme={LightTheme}>{component}</PaperProvider>,
     );
   };
 

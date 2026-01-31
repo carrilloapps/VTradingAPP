@@ -29,7 +29,7 @@ const IndexHero: React.FC<IndexHeroProps> = ({
   volume,
   stats,
   labelOverride,
-  fallbackValue
+  fallbackValue,
 }) => {
   const trend = getTrend(changePercent);
   const trendIcon = getTrendIcon(trend);
@@ -48,52 +48,115 @@ const IndexHero: React.FC<IndexHeroProps> = ({
         {/* Content */}
         <View style={styles.contentContainer}>
           <View style={styles.headerRow}>
-            <Text variant="labelMedium" style={styles.headerText}>ÍNDICE BURSÁTIL CARACAS</Text>
+            <Text variant="labelMedium" style={styles.headerText}>
+              ÍNDICE BURSÁTIL CARACAS
+            </Text>
             <View style={styles.iconContainer}>
-              <MaterialCommunityIcons name="chart-line-variant" size={18} color="white" />
+              <MaterialCommunityIcons
+                name="chart-line-variant"
+                size={18}
+                color="white"
+              />
             </View>
           </View>
 
           <View style={styles.mainValueRow}>
-            <Text variant="displaySmall" style={styles.valueText}>Bs. {value}</Text>
-            <View style={[styles.changeBadge, trend === 'neutral' ? styles.neutralBg : styles.positiveBg]}>
-              <MaterialCommunityIcons name={trendIcon} size={16} color={trend === 'neutral' ? '#D1D5DB' : '#6EE7B7'} />
-              <Text variant="labelLarge" style={[styles.changeText, trend === 'neutral' ? styles.trendNeutralText : styles.trendUpText]}>{changePercent}</Text>
+            <Text variant="displaySmall" style={styles.valueText}>
+              Bs. {value}
+            </Text>
+            <View
+              style={[
+                styles.changeBadge,
+                trend === 'neutral' ? styles.neutralBg : styles.positiveBg,
+              ]}
+            >
+              <MaterialCommunityIcons
+                name={trendIcon}
+                size={16}
+                color={trend === 'neutral' ? '#D1D5DB' : '#6EE7B7'}
+              />
+              <Text
+                variant="labelLarge"
+                style={[
+                  styles.changeText,
+                  trend === 'neutral'
+                    ? styles.trendNeutralText
+                    : styles.trendUpText,
+                ]}
+              >
+                {changePercent}
+              </Text>
             </View>
           </View>
 
           <View style={styles.statsRow}>
             <View>
-              <Text variant="labelSmall" style={styles.labelSmall}>VOLUMEN</Text>
+              <Text variant="labelSmall" style={styles.labelSmall}>
+                VOLUMEN
+              </Text>
               <Text variant="bodyMedium" style={styles.whiteBold}>
-                {volume} <Text variant="labelSmall" style={styles.unitText}>VES</Text>
+                {volume}{' '}
+                <Text variant="labelSmall" style={styles.unitText}>
+                  VES
+                </Text>
               </Text>
             </View>
             <View style={styles.rightAlign}>
-              <Text variant="labelSmall" style={styles.labelSmall}>{labelOverride || 'TÍTULOS NEGOCIADOS'}</Text>
+              <Text variant="labelSmall" style={styles.labelSmall}>
+                {labelOverride || 'TÍTULOS NEGOCIADOS'}
+              </Text>
               {stats ? (
                 <View style={styles.breadthRow}>
                   <View style={styles.breadthItem}>
-                    <MaterialCommunityIcons name="arrow-up-bold" size={14} color="#6EE7B7" />
-                    <Text variant="bodyMedium" style={[styles.whiteBold, styles.trendUpText]}>{stats.titlesUp}</Text>
+                    <MaterialCommunityIcons
+                      name="arrow-up-bold"
+                      size={14}
+                      color="#6EE7B7"
+                    />
+                    <Text
+                      variant="bodyMedium"
+                      style={[styles.whiteBold, styles.trendUpText]}
+                    >
+                      {stats.titlesUp}
+                    </Text>
                   </View>
                   <View style={styles.breadthItem}>
-                    <MaterialCommunityIcons name="arrow-down-bold" size={14} color="#F87171" />
-                    <Text variant="bodyMedium" style={[styles.whiteBold, styles.trendDownText]}>{stats.titlesDown}</Text>
+                    <MaterialCommunityIcons
+                      name="arrow-down-bold"
+                      size={14}
+                      color="#F87171"
+                    />
+                    <Text
+                      variant="bodyMedium"
+                      style={[styles.whiteBold, styles.trendDownText]}
+                    >
+                      {stats.titlesDown}
+                    </Text>
                   </View>
                   <View style={styles.breadthItem}>
-                    <MaterialCommunityIcons name="minus" size={14} color="#D1D5DB" />
-                    <Text variant="bodyMedium" style={[styles.whiteBold, styles.trendNeutralText]}>{stats.titlesUnchanged}</Text>
+                    <MaterialCommunityIcons
+                      name="minus"
+                      size={14}
+                      color="#D1D5DB"
+                    />
+                    <Text
+                      variant="bodyMedium"
+                      style={[styles.whiteBold, styles.trendNeutralText]}
+                    >
+                      {stats.titlesUnchanged}
+                    </Text>
                   </View>
                 </View>
               ) : (
-                <Text variant="bodyMedium" style={styles.whiteBold}>{fallbackValue || '-'}</Text>
+                <Text variant="bodyMedium" style={styles.whiteBold}>
+                  {fallbackValue || '-'}
+                </Text>
               )}
             </View>
           </View>
         </View>
-      </LinearGradient >
-    </View >
+      </LinearGradient>
+    </View>
   );
 };
 

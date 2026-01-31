@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, Switch } from 'react-native';
-import { Text, TextInput, IconButton, Button, SegmentedButtons, Avatar } from 'react-native-paper';
+import {
+  Text,
+  TextInput,
+  IconButton,
+  Button,
+  SegmentedButtons,
+  Avatar,
+} from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -15,7 +22,10 @@ import { WidgetItem } from '../widget/types';
 import CurrencyPickerModal from '../components/dashboard/CurrencyPickerModal';
 import { storageService, WidgetConfig } from '../services/StorageService';
 import { useToastStore } from '../stores/toastStore';
-import { analyticsService, ANALYTICS_EVENTS } from '../services/firebase/AnalyticsService';
+import {
+  analyticsService,
+  ANALYTICS_EVENTS,
+} from '../services/firebase/AnalyticsService';
 import { observabilityService } from '../services/ObservabilityService';
 import { requestWidgetUpdate } from 'react-native-android-widget';
 import { buildWidgetElement } from '../widget/widgetTaskHandler';
@@ -25,28 +35,34 @@ const APP_VERSION = DeviceInfo.getVersion();
 
 // Helper to format rate for widget display
 const mapRateToWidgetItem = (rate: CurrencyRate): WidgetItem => {
-    const change = Number((rate.changePercent || 0).toFixed(2));
-    const isUp = change > 0;
-    const isDown = change < 0;
-    
-    return {
-        id: rate.id,
-        // Simplificar nombre: "DOLAR BCV" en lugar de "USD/VES • BCV" si es posible, o usar el name
-        label: rate.name.split('•')[0].replace('/VES', '').trim().toUpperCase() + (rate.name.includes('•') ? ` (${rate.name.split('•')[1].trim()})` : ''),
-        value: rate.value.toFixed(2),
-        currency: 'VES',
-        trend: isUp ? 'up' : isDown ? 'down' : 'neutral',
-        trendValue: `${isUp ? '+' : ''}${rate.changePercent || 0}%`,
-        trendColor: isUp ? '#00A86B' : isDown ? '#FF3B30' : '#64748B',
-        trendBg: isUp ? 'rgba(0, 168, 107, 0.15)' : isDown ? 'rgba(255, 59, 48, 0.15)' : 'rgba(100, 116, 139, 0.15)'
-    };
+  const change = Number((rate.changePercent || 0).toFixed(2));
+  const isUp = change > 0;
+  const isDown = change < 0;
+
+  return {
+    id: rate.id,
+    // Simplificar nombre: "DOLAR BCV" en lugar de "USD/VES • BCV" si es posible, o usar el name
+    label:
+      rate.name.split('•')[0].replace('/VES', '').trim().toUpperCase() +
+      (rate.name.includes('•') ? ` (${rate.name.split('•')[1].trim()})` : ''),
+    value: rate.value.toFixed(2),
+    currency: 'VES',
+    trend: isUp ? 'up' : isDown ? 'down' : 'neutral',
+    trendValue: `${isUp ? '+' : ''}${rate.changePercent || 0}%`,
+    trendColor: isUp ? '#00A86B' : isDown ? '#FF3B30' : '#64748B',
+    trendBg: isUp
+      ? 'rgba(0, 168, 107, 0.15)'
+      : isDown
+        ? 'rgba(255, 59, 48, 0.15)'
+        : 'rgba(100, 116, 139, 0.15)',
+  };
 };
 
 const WidgetsScreen = () => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
-  const showToast = useToastStore((state) => state.showToast);
+  const showToast = useToastStore(state => state.showToast);
 
   // Data State
   const [availableRates, setAvailableRates] = useState<CurrencyRate[]>([]);
@@ -65,48 +81,51 @@ const WidgetsScreen = () => {
 
   const loadData = useCallback(async () => {
     try {
-        const allRates = await CurrencyService.getRates();
-        // Filtrar VES ya que es la moneda base y no tiene sentido monitorizarla contra sí misma
-        const rates = allRates.filter(r => r.code !== 'VES');
-        setAvailableRates(rates);
-        
-        // Load saved config
-        const config = await storageService.getWidgetConfig();
-        
-        if (config) {
-            setWidgetTitle(config.title);
-            setIsWallpaperDark(config.isWallpaperDark);
-            setIsTransparent(config.isTransparent);
-            setShowGraph(config.showGraph);
-            setIsWidgetDarkMode(config.isWidgetDarkMode);
-            setRefreshInterval(config.refreshInterval || '4');
-            
-            if (config.selectedCurrencyIds && config.selectedCurrencyIds.length > 0) {
-                // Restore selected rates maintaining order
-                const restoredRates = config.selectedCurrencyIds
-                    .map(id => rates.find(r => r.id === id))
-                    .filter(r => r !== undefined && r.code !== 'VES') as CurrencyRate[];
-                    
-                if (restoredRates.length > 0) {
-                    setSelectedRates(restoredRates);
-                } else {
-                    setDefaultRates(rates);
-                }
-            } else {
-                setDefaultRates(rates);
-            }
-        } else {
+      const allRates = await CurrencyService.getRates();
+      // Filtrar VES ya que es la moneda base y no tiene sentido monitorizarla contra sí misma
+      const rates = allRates.filter(r => r.code !== 'VES');
+      setAvailableRates(rates);
+
+      // Load saved config
+      const config = await storageService.getWidgetConfig();
+
+      if (config) {
+        setWidgetTitle(config.title);
+        setIsWallpaperDark(config.isWallpaperDark);
+        setIsTransparent(config.isTransparent);
+        setShowGraph(config.showGraph);
+        setIsWidgetDarkMode(config.isWidgetDarkMode);
+        setRefreshInterval(config.refreshInterval || '4');
+
+        if (
+          config.selectedCurrencyIds &&
+          config.selectedCurrencyIds.length > 0
+        ) {
+          // Restore selected rates maintaining order
+          const restoredRates = config.selectedCurrencyIds
+            .map(id => rates.find(r => r.id === id))
+            .filter(r => r !== undefined && r.code !== 'VES') as CurrencyRate[];
+
+          if (restoredRates.length > 0) {
+            setSelectedRates(restoredRates);
+          } else {
             setDefaultRates(rates);
+          }
+        } else {
+          setDefaultRates(rates);
         }
+      } else {
+        setDefaultRates(rates);
+      }
     } catch (e) {
-        observabilityService.captureError(e, {
-            context: 'WidgetsScreen.loadData',
-            action: 'load_widget_data'
-        });
-        await analyticsService.logError('widget_load_data');
-        showToast('Error cargando datos', 'error');
+      observabilityService.captureError(e, {
+        context: 'WidgetsScreen.loadData',
+        action: 'load_widget_data',
+      });
+      await analyticsService.logError('widget_load_data');
+      showToast('Error cargando datos', 'error');
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   }, [showToast]);
 
@@ -121,56 +140,54 @@ const WidgetsScreen = () => {
     const usdtArray = rates.filter(r => r.code === 'USDT');
     // Prefer binance usdt if available
     const usdt = usdtArray.find(r => r.id?.includes('binance')) || usdtArray[0];
-    
+
     if (usd) defaults.push(usd);
     if (usdt) defaults.push(usdt);
-    
+
     // Fallback if defaults not found
     if (defaults.length === 0 && rates.length > 0) {
-        defaults.push(...rates.slice(0, 2));
+      defaults.push(...rates.slice(0, 2));
     }
 
     setSelectedRates(defaults);
   };
 
-
-
   const handleSave = async () => {
     try {
-        const config: WidgetConfig = {
-            title: widgetTitle,
-            selectedCurrencyIds: selectedRates.map(r => r.id),
-            isWallpaperDark,
-            isTransparent,
-            showGraph,
-            isWidgetDarkMode,
-            refreshInterval
-        };
-        await storageService.saveWidgetConfig(config);
-        
-        await analyticsService.logEvent(ANALYTICS_EVENTS.WIDGET_SAVE_CONFIG, {
-            transparent: isTransparent,
-            dark_mode: isWidgetDarkMode,
-            show_graph: showGraph,
-            currency_count: selectedRates.length,
-            refresh: refreshInterval
-        });
+      const config: WidgetConfig = {
+        title: widgetTitle,
+        selectedCurrencyIds: selectedRates.map(r => r.id),
+        isWallpaperDark,
+        isTransparent,
+        showGraph,
+        isWidgetDarkMode,
+        refreshInterval,
+      };
+      await storageService.saveWidgetConfig(config);
 
-        // Request widget update
-        await requestWidgetUpdate({
-            widgetName: 'VTradingWidget',
-            renderWidget: buildWidgetElement,
-        });
+      await analyticsService.logEvent(ANALYTICS_EVENTS.WIDGET_SAVE_CONFIG, {
+        transparent: isTransparent,
+        dark_mode: isWidgetDarkMode,
+        show_graph: showGraph,
+        currency_count: selectedRates.length,
+        refresh: refreshInterval,
+      });
 
-        showToast('Widget configurado correctamente', 'success');
-        navigation.goBack();
+      // Request widget update
+      await requestWidgetUpdate({
+        widgetName: 'VTradingWidget',
+        renderWidget: buildWidgetElement,
+      });
+
+      showToast('Widget configurado correctamente', 'success');
+      navigation.goBack();
     } catch (e) {
-        observabilityService.captureError(e, {
-            context: 'WidgetsScreen.saveWidgetConfig',
-            action: 'save_widget_config'
-        });
-        await analyticsService.logError('widget_save_config');
-        showToast('Error al guardar la configuración del widget', 'error');
+      observabilityService.captureError(e, {
+        context: 'WidgetsScreen.saveWidgetConfig',
+        action: 'save_widget_config',
+      });
+      await analyticsService.logError('widget_save_config');
+      showToast('Error al guardar la configuración del widget', 'error');
     }
   };
 
@@ -180,27 +197,30 @@ const WidgetsScreen = () => {
 
   // Order & Selection Handlers
   const moveRate = (index: number, direction: 'up' | 'down') => {
-      if (direction === 'up' && index === 0) return;
-      if (direction === 'down' && index === selectedRates.length - 1) return;
+    if (direction === 'up' && index === 0) return;
+    if (direction === 'down' && index === selectedRates.length - 1) return;
 
-      const newRates = [...selectedRates];
-      const targetIndex = direction === 'up' ? index - 1 : index + 1;
-      [newRates[index], newRates[targetIndex]] = [newRates[targetIndex], newRates[index]];
-      setSelectedRates(newRates);
+    const newRates = [...selectedRates];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    [newRates[index], newRates[targetIndex]] = [
+      newRates[targetIndex],
+      newRates[index],
+    ];
+    setSelectedRates(newRates);
   };
 
   const toggleRateSelection = (rate: CurrencyRate) => {
-      const isSelected = selectedRates.some(r => r.id === rate.id);
-      
-      if (isSelected) {
-          setSelectedRates(prev => prev.filter(r => r.id !== rate.id));
-      } else {
-          if (selectedRates.length >= 4) {
-              showToast('Máximo 4 divisas permitidas', 'info');
-              return; 
-          }
-          setSelectedRates(prev => [...prev, rate]);
+    const isSelected = selectedRates.some(r => r.id === rate.id);
+
+    if (isSelected) {
+      setSelectedRates(prev => prev.filter(r => r.id !== rate.id));
+    } else {
+      if (selectedRates.length >= 4) {
+        showToast('Máximo 4 divisas permitidas', 'info');
+        return;
       }
+      setSelectedRates(prev => [...prev, rate]);
+    }
   };
 
   // Widget Preview Data
@@ -228,240 +248,424 @@ const WidgetsScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: containerBgColor }]}>
-      <StatusBar 
+      <StatusBar
         backgroundColor="transparent"
-        translucent 
-        barStyle={statusBarStyle} 
+        translucent
+        barStyle={statusBarStyle}
       />
-      
-      <UnifiedHeader 
-        variant="simple" 
-        title="Personalización" 
+
+      <UnifiedHeader
+        variant="simple"
+        title="Personalización"
         onBackPress={() => navigation.goBack()}
       />
 
-      <ScrollView 
-        contentContainerStyle={[styles.content, { paddingBottom: contentPaddingBottom }]}
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          { paddingBottom: contentPaddingBottom },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.headerSection}>
-          <Text variant="bodyMedium" style={[styles.headerText, { color: headerTextColor }]}>
-            Previsualiza cómo se verá el widget <Text style={[styles.headerTextBold, { color: headerTextBoldColor }]}>Widget Tracker</Text> en tu pantalla de inicio para Android e iOS.
+          <Text
+            variant="bodyMedium"
+            style={[styles.headerText, { color: headerTextColor }]}
+          >
+            Previsualiza cómo se verá el widget{' '}
+            <Text
+              style={[styles.headerTextBold, { color: headerTextBoldColor }]}
+            >
+              Widget Tracker
+            </Text>{' '}
+            en tu pantalla de inicio para Android e iOS.
           </Text>
         </View>
 
         {/* Mockup Container */}
-        <WidgetPreview 
-            items={widgetItems}
-            widgetTitle={widgetTitle}
-            isWallpaperDark={isWallpaperDark}
-            isTransparent={isTransparent}
-            isWidgetDarkMode={isWidgetDarkMode}
-            showGraph={showGraph}
+        <WidgetPreview
+          items={widgetItems}
+          widgetTitle={widgetTitle}
+          isWallpaperDark={isWallpaperDark}
+          isTransparent={isTransparent}
+          isWidgetDarkMode={isWidgetDarkMode}
+          showGraph={showGraph}
         />
 
         {/* Customization Section */}
         <View style={styles.section}>
-            <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>PERSONALIZACIÓN</Text>
+          <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>
+            PERSONALIZACIÓN
+          </Text>
 
-            <View style={[styles.cardContainer, { borderColor: cardContainerBorder, backgroundColor: cardContainerBg }]}>
-                {/* Title Input */}
-                <View style={[styles.prefRow, styles.columnLayoutGap12]}>
-                    <View style={styles.rowAlignCenter}>
-                        <View style={[styles.iconBox, { backgroundColor: iconBoxPrimaryBg }]}>
-                            <MaterialCommunityIcons name="format-title" size={20} color={theme.colors.onPrimaryContainer} />
-                        </View>
-                        <Text variant="bodyLarge" style={[styles.prefText, styles.marginLeft12, { color: prefTextColor }]}>Título del Widget</Text>
-                    </View>
-                    <TextInput
-                        mode="outlined"
-                        value={widgetTitle}
-                        onChangeText={setWidgetTitle}
-                        placeholder="Escribe un título..."
-                        style={{ backgroundColor: textInputBg }}
-                        dense
-                    />
+          <View
+            style={[
+              styles.cardContainer,
+              {
+                borderColor: cardContainerBorder,
+                backgroundColor: cardContainerBg,
+              },
+            ]}
+          >
+            {/* Title Input */}
+            <View style={[styles.prefRow, styles.columnLayoutGap12]}>
+              <View style={styles.rowAlignCenter}>
+                <View
+                  style={[
+                    styles.iconBox,
+                    { backgroundColor: iconBoxPrimaryBg },
+                  ]}
+                >
+                  <MaterialCommunityIcons
+                    name="format-title"
+                    size={20}
+                    color={theme.colors.onPrimaryContainer}
+                  />
                 </View>
-
-                <View style={[styles.separator, { backgroundColor: separatorBg }]} />
-
-                {/* Currency Header */}
-                <View style={styles.prefRow}>
-                     <View style={styles.prefLeft}>
-                        <View style={[styles.iconBox, { backgroundColor: iconBoxLevel2Bg }]}>
-                            <MaterialCommunityIcons name="currency-usd" size={20} color={currencyIconColor} />
-                        </View>
-                        <Text variant="bodyLarge" style={[styles.prefText, { color: prefTextColor }]}>Divisas ({selectedRates.length})</Text>
-                     </View>
-                     <Button mode="text" onPress={() => setIsSelectionModalVisible(true)} compact>
-                        Editar
-                    </Button>
-                </View>
-
-                {/* Currency List */}
-                {selectedRates.map((rate, index) => {
-                    let iconName = 'currency-usd';
-                    let iconColor = theme.colors.onSurfaceVariant;
-                    let iconBg = theme.colors.elevation.level2;
-
-                    // Standardize icons using MaterialCommunityIcons via react-native-paper
-                    if (rate.code === 'USDT') {
-                        iconName = 'alpha-t-circle-outline';
-                        iconColor = theme.colors.onSecondaryContainer;
-                        iconBg = theme.colors.secondaryContainer;
-                    } else if (rate.type === 'crypto') {
-                        iconName = rate.iconName === 'ethereum' ? 'ethereum' : 'bitcoin';
-                        iconColor = '#FFFFFF';
-                        iconBg = rate.iconName === 'ethereum' ? '#627EEA' : '#F7931A';
-                    } else if (rate.code === 'VES' || rate.iconName === 'Bs') {
-                        iconName = 'cash-multiple';
-                    } else if (rate.iconName && rate.iconName !== 'attach-money') {
-                        iconName = rate.iconName;
-                    }
-
-                    return (
-                        <React.Fragment key={rate.id}>
-                             <View style={[styles.separator, { backgroundColor: separatorBg }]} />
-                             <View style={[styles.prefRow, styles.paddingVertical8]}>
-                                <View style={styles.flex1Currency}>
-                                     { (rate.code === 'VES' || rate.iconName === 'Bs') ? (
-                                         <View style={[styles.iconBoxSmall, { backgroundColor: iconBg }]}>
-                                             <BolivarIcon color={iconColor} size={20} />
-                                         </View>
-                                     ) : (
-                                         <Avatar.Icon 
-                                            size={32} 
-                                            icon={iconName} 
-                                            color={iconColor} 
-                                            style={[styles.borderRadius8, { backgroundColor: iconBg }]} 
-                                         />
-                                     )}
-                                     <Text variant="bodyMedium" numberOfLines={1} style={[styles.flex1Text, { color: theme.colors.onSurface }]}>{rate.name}</Text>
-                                </View>
-                                <View style={styles.rowAlignCenter}>
-                                    <IconButton icon="arrow-up" size={20} disabled={index === 0} onPress={() => moveRate(index, 'up')} />
-                                    <IconButton icon="arrow-down" size={20} disabled={index === selectedRates.length - 1} onPress={() => moveRate(index, 'down')} />
-                                </View>
-                             </View>
-                        </React.Fragment>
-                    );
-                })}
-                
-                {selectedRates.length === 0 && (
-                     <Text style={[styles.errorText, { color: errorTextColor }]}>Selecciona al menos una divisa</Text>
-                )}
-
-                <View style={[styles.separator, { backgroundColor: separatorBg }]} />
-
-                <View style={[styles.prefRow, styles.columnLayoutGap12]}>
-                    <View style={styles.rowAlignCenter}>
-                        <View style={[styles.iconBox, { backgroundColor: iconBoxLevel2Bg }]}>
-                            <MaterialCommunityIcons name="refresh" size={20} color={currencyIconColor} />
-                        </View>
-                        <Text variant="bodyLarge" style={[styles.prefText, styles.marginLeft12, { color: prefTextColor }]}>Refresco automático</Text>
-                    </View>
-                    <SegmentedButtons
-                        value={refreshInterval}
-                        onValueChange={value => setRefreshInterval(value as '4' | '2' | '1')}
-                        buttons={[
-                            { value: '4', label: '4 horas' },
-                            { value: '2', label: '2 horas' },
-                            { value: '1', label: '1 hora' },
-                        ]}
-                    />
-                </View>
+                <Text
+                  variant="bodyLarge"
+                  style={[
+                    styles.prefText,
+                    styles.marginLeft12,
+                    { color: prefTextColor },
+                  ]}
+                >
+                  Título del Widget
+                </Text>
+              </View>
+              <TextInput
+                mode="outlined"
+                value={widgetTitle}
+                onChangeText={setWidgetTitle}
+                placeholder="Escribe un título..."
+                style={{ backgroundColor: textInputBg }}
+                dense
+              />
             </View>
+
+            <View
+              style={[styles.separator, { backgroundColor: separatorBg }]}
+            />
+
+            {/* Currency Header */}
+            <View style={styles.prefRow}>
+              <View style={styles.prefLeft}>
+                <View
+                  style={[styles.iconBox, { backgroundColor: iconBoxLevel2Bg }]}
+                >
+                  <MaterialCommunityIcons
+                    name="currency-usd"
+                    size={20}
+                    color={currencyIconColor}
+                  />
+                </View>
+                <Text
+                  variant="bodyLarge"
+                  style={[styles.prefText, { color: prefTextColor }]}
+                >
+                  Divisas ({selectedRates.length})
+                </Text>
+              </View>
+              <Button
+                mode="text"
+                onPress={() => setIsSelectionModalVisible(true)}
+                compact
+              >
+                Editar
+              </Button>
+            </View>
+
+            {/* Currency List */}
+            {selectedRates.map((rate, index) => {
+              let iconName = 'currency-usd';
+              let iconColor = theme.colors.onSurfaceVariant;
+              let iconBg = theme.colors.elevation.level2;
+
+              // Standardize icons using MaterialCommunityIcons via react-native-paper
+              if (rate.code === 'USDT') {
+                iconName = 'alpha-t-circle-outline';
+                iconColor = theme.colors.onSecondaryContainer;
+                iconBg = theme.colors.secondaryContainer;
+              } else if (rate.type === 'crypto') {
+                iconName =
+                  rate.iconName === 'ethereum' ? 'ethereum' : 'bitcoin';
+                iconColor = '#FFFFFF';
+                iconBg = rate.iconName === 'ethereum' ? '#627EEA' : '#F7931A';
+              } else if (rate.code === 'VES' || rate.iconName === 'Bs') {
+                iconName = 'cash-multiple';
+              } else if (rate.iconName && rate.iconName !== 'attach-money') {
+                iconName = rate.iconName;
+              }
+
+              return (
+                <React.Fragment key={rate.id}>
+                  <View
+                    style={[styles.separator, { backgroundColor: separatorBg }]}
+                  />
+                  <View style={[styles.prefRow, styles.paddingVertical8]}>
+                    <View style={styles.flex1Currency}>
+                      {rate.code === 'VES' || rate.iconName === 'Bs' ? (
+                        <View
+                          style={[
+                            styles.iconBoxSmall,
+                            { backgroundColor: iconBg },
+                          ]}
+                        >
+                          <BolivarIcon color={iconColor} size={20} />
+                        </View>
+                      ) : (
+                        <Avatar.Icon
+                          size={32}
+                          icon={iconName}
+                          color={iconColor}
+                          style={[
+                            styles.borderRadius8,
+                            { backgroundColor: iconBg },
+                          ]}
+                        />
+                      )}
+                      <Text
+                        variant="bodyMedium"
+                        numberOfLines={1}
+                        style={[
+                          styles.flex1Text,
+                          { color: theme.colors.onSurface },
+                        ]}
+                      >
+                        {rate.name}
+                      </Text>
+                    </View>
+                    <View style={styles.rowAlignCenter}>
+                      <IconButton
+                        icon="arrow-up"
+                        size={20}
+                        disabled={index === 0}
+                        onPress={() => moveRate(index, 'up')}
+                      />
+                      <IconButton
+                        icon="arrow-down"
+                        size={20}
+                        disabled={index === selectedRates.length - 1}
+                        onPress={() => moveRate(index, 'down')}
+                      />
+                    </View>
+                  </View>
+                </React.Fragment>
+              );
+            })}
+
+            {selectedRates.length === 0 && (
+              <Text style={[styles.errorText, { color: errorTextColor }]}>
+                Selecciona al menos una divisa
+              </Text>
+            )}
+
+            <View
+              style={[styles.separator, { backgroundColor: separatorBg }]}
+            />
+
+            <View style={[styles.prefRow, styles.columnLayoutGap12]}>
+              <View style={styles.rowAlignCenter}>
+                <View
+                  style={[styles.iconBox, { backgroundColor: iconBoxLevel2Bg }]}
+                >
+                  <MaterialCommunityIcons
+                    name="refresh"
+                    size={20}
+                    color={currencyIconColor}
+                  />
+                </View>
+                <Text
+                  variant="bodyLarge"
+                  style={[
+                    styles.prefText,
+                    styles.marginLeft12,
+                    { color: prefTextColor },
+                  ]}
+                >
+                  Refresco automático
+                </Text>
+              </View>
+              <SegmentedButtons
+                value={refreshInterval}
+                onValueChange={value =>
+                  setRefreshInterval(value as '4' | '2' | '1')
+                }
+                buttons={[
+                  { value: '4', label: '4 horas' },
+                  { value: '2', label: '2 horas' },
+                  { value: '1', label: '1 hora' },
+                ]}
+              />
+            </View>
+          </View>
         </View>
 
         <View style={styles.section}>
-             <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>APARIENCIA</Text>
-             <View style={[styles.cardContainer, { borderColor: cardContainerBorder, backgroundColor: cardContainerBg }]}>
-                 {/* Wallpaper */}
-                 <View style={styles.prefRow}>
-                    <View style={styles.prefLeft}>
-                        <View style={[styles.iconBox, { backgroundColor: iconBoxLevel2Bg }]}>
-                             <MaterialCommunityIcons name="wallpaper" size={20} color={currencyIconColor} />
-                        </View>
-                        <Text variant="bodyLarge" style={[styles.prefText, { color: prefTextColor }]}>Fondo de pantalla oscuro</Text>
-                    </View>
-                    <Switch 
-                        value={isWallpaperDark} 
-                        onValueChange={setIsWallpaperDark}
-                        trackColor={{ false: theme.colors.surfaceVariant, true: theme.colors.primary }}
-                        thumbColor={'#FFF'}
-                    />
-                 </View>
-                 
-                 <View style={[styles.separator, { backgroundColor: separatorBg }]} />
-                 
-                 {/* Transparent */}
-                 <View style={styles.prefRow}>
-                    <View style={styles.prefLeft}>
-                        <View style={[styles.iconBox, { backgroundColor: iconBoxLevel2Bg }]}>
-                             <MaterialCommunityIcons name="opacity" size={20} color={currencyIconColor} />
-                        </View>
-                        <Text variant="bodyLarge" style={[styles.prefText, { color: prefTextColor }]}>Widget transparente</Text>
-                    </View>
-                    <Switch 
-                        value={isTransparent} 
-                        onValueChange={setIsTransparent}
-                        trackColor={{ false: theme.colors.surfaceVariant, true: theme.colors.primary }}
-                        thumbColor={'#FFF'}
-                    />
-                 </View>
+          <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>
+            APARIENCIA
+          </Text>
+          <View
+            style={[
+              styles.cardContainer,
+              {
+                borderColor: cardContainerBorder,
+                backgroundColor: cardContainerBg,
+              },
+            ]}
+          >
+            {/* Wallpaper */}
+            <View style={styles.prefRow}>
+              <View style={styles.prefLeft}>
+                <View
+                  style={[styles.iconBox, { backgroundColor: iconBoxLevel2Bg }]}
+                >
+                  <MaterialCommunityIcons
+                    name="wallpaper"
+                    size={20}
+                    color={currencyIconColor}
+                  />
+                </View>
+                <Text
+                  variant="bodyLarge"
+                  style={[styles.prefText, { color: prefTextColor }]}
+                >
+                  Fondo de pantalla oscuro
+                </Text>
+              </View>
+              <Switch
+                value={isWallpaperDark}
+                onValueChange={setIsWallpaperDark}
+                trackColor={{
+                  false: theme.colors.surfaceVariant,
+                  true: theme.colors.primary,
+                }}
+                thumbColor={'#FFF'}
+              />
+            </View>
 
-                 <View style={[styles.separator, { backgroundColor: separatorBg }]} />
+            <View
+              style={[styles.separator, { backgroundColor: separatorBg }]}
+            />
 
-                 {/* Graph */}
-                 <View style={styles.prefRow}>
-                    <View style={styles.prefLeft}>
-                        <View style={[styles.iconBox, { backgroundColor: iconBoxLevel2Bg }]}>
-                             <MaterialCommunityIcons name="chart-line-variant" size={20} color={currencyIconColor} />
-                        </View>
-                        <Text variant="bodyLarge" style={[styles.prefText, { color: prefTextColor }]}>Mostrar porcentaje</Text>
-                    </View>
-                    <Switch 
-                        value={showGraph} 
-                        onValueChange={setShowGraph}
-                        trackColor={{ false: theme.colors.surfaceVariant, true: theme.colors.primary }}
-                        thumbColor={'#FFF'}
-                    />
-                 </View>
-                 
-                 <View style={[styles.separator, { backgroundColor: separatorBg }]} />
+            {/* Transparent */}
+            <View style={styles.prefRow}>
+              <View style={styles.prefLeft}>
+                <View
+                  style={[styles.iconBox, { backgroundColor: iconBoxLevel2Bg }]}
+                >
+                  <MaterialCommunityIcons
+                    name="opacity"
+                    size={20}
+                    color={currencyIconColor}
+                  />
+                </View>
+                <Text
+                  variant="bodyLarge"
+                  style={[styles.prefText, { color: prefTextColor }]}
+                >
+                  Widget transparente
+                </Text>
+              </View>
+              <Switch
+                value={isTransparent}
+                onValueChange={setIsTransparent}
+                trackColor={{
+                  false: theme.colors.surfaceVariant,
+                  true: theme.colors.primary,
+                }}
+                thumbColor={'#FFF'}
+              />
+            </View>
 
-                 {/* Dark Mode */}
-                 <View style={styles.prefRow}>
-                    <View style={styles.prefLeft}>
-                        <View style={[styles.iconBox, { backgroundColor: iconBoxLevel2Bg }]}>
-                             <MaterialCommunityIcons name="brightness-6" size={20} color={currencyIconColor} />
-                        </View>
-                        <Text variant="bodyLarge" style={[styles.prefText, { color: prefTextColor }]}>Widget modo oscuro</Text>
-                    </View>
-                    <Switch 
-                        value={isWidgetDarkMode} 
-                        onValueChange={setIsWidgetDarkMode}
-                        trackColor={{ false: theme.colors.surfaceVariant, true: theme.colors.primary }}
-                        thumbColor={'#FFF'}
-                    />
-                 </View>
-             </View>
+            <View
+              style={[styles.separator, { backgroundColor: separatorBg }]}
+            />
+
+            {/* Graph */}
+            <View style={styles.prefRow}>
+              <View style={styles.prefLeft}>
+                <View
+                  style={[styles.iconBox, { backgroundColor: iconBoxLevel2Bg }]}
+                >
+                  <MaterialCommunityIcons
+                    name="chart-line-variant"
+                    size={20}
+                    color={currencyIconColor}
+                  />
+                </View>
+                <Text
+                  variant="bodyLarge"
+                  style={[styles.prefText, { color: prefTextColor }]}
+                >
+                  Mostrar porcentaje
+                </Text>
+              </View>
+              <Switch
+                value={showGraph}
+                onValueChange={setShowGraph}
+                trackColor={{
+                  false: theme.colors.surfaceVariant,
+                  true: theme.colors.primary,
+                }}
+                thumbColor={'#FFF'}
+              />
+            </View>
+
+            <View
+              style={[styles.separator, { backgroundColor: separatorBg }]}
+            />
+
+            {/* Dark Mode */}
+            <View style={styles.prefRow}>
+              <View style={styles.prefLeft}>
+                <View
+                  style={[styles.iconBox, { backgroundColor: iconBoxLevel2Bg }]}
+                >
+                  <MaterialCommunityIcons
+                    name="brightness-6"
+                    size={20}
+                    color={currencyIconColor}
+                  />
+                </View>
+                <Text
+                  variant="bodyLarge"
+                  style={[styles.prefText, { color: prefTextColor }]}
+                >
+                  Widget modo oscuro
+                </Text>
+              </View>
+              <Switch
+                value={isWidgetDarkMode}
+                onValueChange={setIsWidgetDarkMode}
+                trackColor={{
+                  false: theme.colors.surfaceVariant,
+                  true: theme.colors.primary,
+                }}
+                thumbColor={'#FFF'}
+              />
+            </View>
+          </View>
         </View>
-
       </ScrollView>
 
       {/* Footer Action */}
-      <View style={[styles.footer, { 
-          backgroundColor: footerBg,
-          borderTopColor: footerBorderTop,
-          paddingBottom: footerPaddingBottom
-      }]}>
-          <CustomButton 
-            label="Guardar" 
-            onPress={handleSave} 
-            variant="primary"
-            icon="content-save"
-          />
+      <View
+        style={[
+          styles.footer,
+          {
+            backgroundColor: footerBg,
+            borderTopColor: footerBorderTop,
+            paddingBottom: footerPaddingBottom,
+          },
+        ]}
+      >
+        <CustomButton
+          label="Guardar"
+          onPress={handleSave}
+          variant="primary"
+          icon="content-save"
+        />
       </View>
 
       {/* Selection Modal */}
@@ -534,7 +738,7 @@ const styles = StyleSheet.create({
     borderWidth: 8,
     overflow: 'hidden',
     marginBottom: 32,
-    aspectRatio: 9/16,
+    aspectRatio: 9 / 16,
     maxHeight: 600,
     alignSelf: 'center',
     width: '80%',

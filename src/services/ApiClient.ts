@@ -1,5 +1,10 @@
 import { appCheckService } from './firebase/AppCheckService';
-import { getPerformance, httpMetric, initializePerformance, FirebasePerformanceTypes } from '@react-native-firebase/perf';
+import {
+  getPerformance,
+  httpMetric,
+  initializePerformance,
+  FirebasePerformanceTypes,
+} from '@react-native-firebase/perf';
 import { mmkvStorage } from './StorageService';
 import { AppConfig } from '../constants/AppConfig';
 import { observabilityService } from './ObservabilityService';
@@ -35,7 +40,10 @@ export class ApiClient {
   private baseUrl: string;
   private config: ApiClientConfig;
 
-  constructor(baseUrl: string, config: ApiClientConfig = { apiKey: AppConfig.API_KEY, useAppCheck: true }) {
+  constructor(
+    baseUrl: string,
+    config: ApiClientConfig = { apiKey: AppConfig.API_KEY, useAppCheck: true },
+  ) {
     this.baseUrl = baseUrl;
     this.config = config;
     this.initializeMonitoring();
@@ -48,7 +56,8 @@ export class ApiClient {
         await initializePerformance(perf.app, { dataCollectionEnabled: true });
       }
     } catch (e) {
-      if (__DEV__) SafeLogger.warn('[ApiClient] Perf init failed', { error: e });
+      if (__DEV__)
+        SafeLogger.warn('[ApiClient] Perf init failed', { error: e });
     }
   }
 
@@ -66,7 +75,10 @@ export class ApiClient {
     }
   }
 
-  private async getHeaders(options: RequestOptions, metric?: FirebasePerformanceTypes.HttpMetric | null): Promise<Record<string, string>> {
+  private async getHeaders(
+    options: RequestOptions,
+    metric?: FirebasePerformanceTypes.HttpMetric | null,
+  ): Promise<Record<string, string>> {
     let token: string | undefined;
 
     // Only fetch AppCheck token if enabled in config (dflt: true)
@@ -76,7 +88,7 @@ export class ApiClient {
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
+      Accept: 'application/json',
       ...options.headers,
     };
 
@@ -99,15 +111,23 @@ export class ApiClient {
    * Core request method that handles Network, Headers, Metrics, and Response parsing.
    * Does NOT handle caching.
    */
-  private async _request<T>(endpoint: string, options: RequestOptions): Promise<ApiResponse<T>> {
-    const cleanBaseUrl = this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl;
+  private async _request<T>(
+    endpoint: string,
+    options: RequestOptions,
+  ): Promise<ApiResponse<T>> {
+    const cleanBaseUrl = this.baseUrl.endsWith('/')
+      ? this.baseUrl.slice(0, -1)
+      : this.baseUrl;
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
     let url = `${cleanBaseUrl}${cleanEndpoint}`;
 
     // Append query params if present
     if (options.params) {
       const queryString = Object.entries(options.params)
-        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+        .map(
+          ([key, value]) =>
+            `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
+        )
         .join('&');
       url += (url.includes('?') ? '&' : '?') + queryString;
     }
@@ -122,7 +142,10 @@ export class ApiClient {
       metric.putAttribute('api_endpoint', endpoint);
       await metric.start();
 
-      sentryTransaction = observabilityService.startTransaction(`GET ${endpoint}`, 'http.client');
+      sentryTransaction = observabilityService.startTransaction(
+        `GET ${endpoint}`,
+        'http.client',
+      );
     } catch (e) {
       // Ignore perf setup errors
     }
@@ -144,13 +167,21 @@ export class ApiClient {
         const contentType = response.headers.get('Content-Type');
         if (contentType) metric.setResponseContentType(contentType);
         const contentLength = response.headers.get('Content-Length');
-        if (contentLength) metric.setResponsePayloadSize(parseInt(contentLength, 10));
+        if (contentLength)
+          metric.setResponsePayloadSize(parseInt(contentLength, 10));
         await metric.stop();
       }
 
       if (sentryTransaction) {
-        observabilityService.setTransactionAttribute(sentryTransaction, 'http.status_code', String(response.status));
-        observabilityService.finishTransaction(sentryTransaction, response.ok ? 'ok' : 'unknown_error');
+        observabilityService.setTransactionAttribute(
+          sentryTransaction,
+          'http.status_code',
+          String(response.status),
+        );
+        observabilityService.finishTransaction(
+          sentryTransaction,
+          response.ok ? 'ok' : 'unknown_error',
+        );
       }
 
       if (!response.ok) {
@@ -159,37 +190,52 @@ export class ApiClient {
         try {
           errorData = JSON.parse(text);
         } catch {
-          errorData = { message: `HTTP Error ${response.status}`, details: text.substring(0, 100) };
+          errorData = {
+            message: `HTTP Error ${response.status}`,
+            details: text.substring(0, 100),
+          };
         }
-        throw new Error(errorData.message || errorData.error || `API Error: ${response.status}`);
+        throw new Error(
+          errorData.message ||
+            errorData.error ||
+            `API Error: ${response.status}`,
+        );
       }
 
       const text = await response.text();
       let data: T;
       try {
-        data = text ? JSON.parse(text) : {} as T;
+        data = text ? JSON.parse(text) : ({} as T);
       } catch (e) {
-        throw new Error(`JSON Parse Error: ${e instanceof Error ? e.message : String(e)}`);
+        throw new Error(
+          `JSON Parse Error: ${e instanceof Error ? e.message : String(e)}`,
+        );
       }
 
       return { data, headers: response.headers, status: response.status };
-
     } catch (e) {
       // Handle Metric Stop on Error
       if (metric) {
-        try { metric.stop(); } catch { }
+        try {
+          metric.stop();
+        } catch {}
       }
       if (sentryTransaction) {
-        const isNetworkError = e instanceof TypeError && e.message === 'Network request failed';
-        observabilityService.finishTransaction(sentryTransaction, isNetworkError ? 'deadline_exceeded' : 'internal_error');
+        const isNetworkError =
+          e instanceof TypeError && e.message === 'Network request failed';
+        observabilityService.finishTransaction(
+          sentryTransaction,
+          isNetworkError ? 'deadline_exceeded' : 'internal_error',
+        );
       }
 
-      const isNetworkError = e instanceof TypeError && e.message === 'Network request failed';
+      const isNetworkError =
+        e instanceof TypeError && e.message === 'Network request failed';
       if (!isNetworkError) {
         observabilityService.captureError(e, {
           context: 'ApiClient._request',
           endpoint,
-          url: this.sanitizeUrl(url)
+          url: this.sanitizeUrl(url),
         });
       }
 
@@ -198,7 +244,9 @@ export class ApiClient {
   }
 
   async get<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-    const cleanBaseUrl = this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl;
+    const cleanBaseUrl = this.baseUrl.endsWith('/')
+      ? this.baseUrl.slice(0, -1)
+      : this.baseUrl;
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
     // Re-construct URL just for cache key, or pass it?
     // Using simple approach: base + endpoint because query params might vary.
@@ -208,7 +256,10 @@ export class ApiClient {
     let cacheKey = `api_cache_${cleanBaseUrl}${cleanEndpoint}`;
     if (options.params) {
       const queryString = Object.entries(options.params)
-        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+        .map(
+          ([key, value]) =>
+            `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
+        )
         .join('&');
       cacheKey += (cacheKey.includes('?') ? '&' : '?') + queryString;
     }
@@ -255,19 +306,27 @@ export class ApiClient {
             const { data } = JSON.parse(cached) as CacheItem<T>;
             return data;
           }
-        } catch { }
+        } catch {}
       }
       throw e;
     }
   }
 
-  async getWithFullResponse<T>(endpoint: string, options: RequestOptions = {}): Promise<{ data: T; headers: Headers }> {
-    const cleanBaseUrl = this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl;
+  async getWithFullResponse<T>(
+    endpoint: string,
+    options: RequestOptions = {},
+  ): Promise<{ data: T; headers: Headers }> {
+    const cleanBaseUrl = this.baseUrl.endsWith('/')
+      ? this.baseUrl.slice(0, -1)
+      : this.baseUrl;
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
     let cacheKey = `api_cache_full_${cleanBaseUrl}${cleanEndpoint}`;
     if (options.params) {
       const queryString = Object.entries(options.params)
-        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
+        .map(
+          ([key, value]) =>
+            `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
+        )
         .join('&');
       cacheKey += (cacheKey.includes('?') ? '&' : '?') + queryString;
     }
@@ -291,7 +350,7 @@ export class ApiClient {
           };
           mmkvStorage.set(cacheKey, JSON.stringify(cacheItem));
         } catch (e) {
-            // Ignore cache write error
+          // Ignore cache write error
         }
       }
 
@@ -302,17 +361,21 @@ export class ApiClient {
         try {
           const cached = mmkvStorage.getString(cacheKey);
           if (cached) {
-            const { data, headers: cachedHeaders } = JSON.parse(cached) as CacheItem<T>;
-            
+            const { data, headers: cachedHeaders } = JSON.parse(
+              cached,
+            ) as CacheItem<T>;
+
             // Reconstruct Headers object
-             const headers = new Headers();
-             if (cachedHeaders) {
-                 Object.entries(cachedHeaders).forEach(([k, v]) => headers.append(k, String(v)));
-             }
+            const headers = new Headers();
+            if (cachedHeaders) {
+              Object.entries(cachedHeaders).forEach(([k, v]) =>
+                headers.append(k, String(v)),
+              );
+            }
 
             return { data, headers };
           }
-        } catch { }
+        } catch {}
       }
       throw e;
     }

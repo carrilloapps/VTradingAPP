@@ -1,10 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, ActivityIndicator, StatusBar, Animated } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ActivityIndicator,
+  StatusBar,
+  Animated,
+} from 'react-native';
 import { Text } from 'react-native-paper';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
 
-import { wordPressService, FormattedPost, WordPressTag } from '../../services/WordPressService';
+import {
+  wordPressService,
+  FormattedPost,
+  WordPressTag,
+} from '../../services/WordPressService';
 import { observabilityService } from '../../services/ObservabilityService';
 import { useAppTheme } from '../../theme/theme';
 import ArticleCard from '../../components/discover/ArticleCard';
@@ -23,15 +33,35 @@ import { shareTextContent } from '../../utils/ShareUtils';
 
 const AnimatedFlashList = Animated.createAnimatedComponent(FlashList) as any;
 
-const ListFooter = ({ hasMore, postsLength, theme }: { hasMore: boolean; postsLength: number; theme: any }) => {
+const ListFooter = ({
+  hasMore,
+  postsLength,
+  theme,
+}: {
+  hasMore: boolean;
+  postsLength: number;
+  theme: any;
+}) => {
   if (hasMore) {
-    return <ActivityIndicator style={styles.footerLoader} color={theme.colors.primary} />;
+    return (
+      <ActivityIndicator
+        style={styles.footerLoader}
+        color={theme.colors.primary}
+      />
+    );
   }
   if (postsLength > 0) {
     return (
       <View style={styles.endContainer}>
-        <View style={[styles.endDash, { backgroundColor: theme.colors.outlineVariant }]} />
-        <Text variant="labelLarge" style={styles.endText}>HAS LLEGADO AL FINAL</Text>
+        <View
+          style={[
+            styles.endDash,
+            { backgroundColor: theme.colors.outlineVariant },
+          ]}
+        />
+        <Text variant="labelLarge" style={styles.endText}>
+          HAS LLEGADO AL FINAL
+        </Text>
       </View>
     );
   }
@@ -57,7 +87,7 @@ const TagDetailScreen = () => {
   const [isShareDialogVisible, setShareDialogVisible] = useState(false);
   const [shareFormat, setShareFormat] = useState<'1:1' | '16:9'>('1:1');
   const [, setSharing] = useState(false);
-  const showToast = useToastStore((state) => state.showToast);
+  const showToast = useToastStore(state => state.showToast);
 
   useEffect(() => {
     const fetchTagAndPosts = async () => {
@@ -77,12 +107,20 @@ const TagDetailScreen = () => {
             currentTag = freshTag;
           }
 
-          const fetchedPosts = await wordPressService.getPosts(1, 10, undefined, currentTag.id);
+          const fetchedPosts = await wordPressService.getPosts(
+            1,
+            10,
+            undefined,
+            currentTag.id,
+          );
           setPosts(fetchedPosts);
           setHasMore(fetchedPosts.length === 10);
         }
       } catch (e) {
-        observabilityService.captureError(e, { context: 'TagDetailScreen.fetchData', slug });
+        observabilityService.captureError(e, {
+          context: 'TagDetailScreen.fetchData',
+          slug,
+        });
       } finally {
         setLoading(false);
       }
@@ -95,12 +133,20 @@ const TagDetailScreen = () => {
     if (!tag) return;
     setRefreshing(true);
     try {
-      const fetchedPosts = await wordPressService.getPosts(1, 10, undefined, tag.id, true);
+      const fetchedPosts = await wordPressService.getPosts(
+        1,
+        10,
+        undefined,
+        tag.id,
+        true,
+      );
       setPosts(fetchedPosts);
       setPage(1);
       setHasMore(fetchedPosts.length === 10);
     } catch (e) {
-      observabilityService.captureError(e, { context: 'TagDetailScreen.refresh' });
+      observabilityService.captureError(e, {
+        context: 'TagDetailScreen.refresh',
+      });
     } finally {
       setRefreshing(false);
     }
@@ -110,7 +156,12 @@ const TagDetailScreen = () => {
     if (!tag || !hasMore || refreshing || loading) return;
     try {
       const nextPage = page + 1;
-      const morePosts = await wordPressService.getPosts(nextPage, 10, undefined, tag.id);
+      const morePosts = await wordPressService.getPosts(
+        nextPage,
+        10,
+        undefined,
+        tag.id,
+      );
       if (morePosts.length > 0) {
         setPosts([...posts, ...morePosts]);
         setPage(nextPage);
@@ -119,7 +170,9 @@ const TagDetailScreen = () => {
         setHasMore(false);
       }
     } catch (e) {
-      observabilityService.captureError(e, { context: 'TagDetailScreen.loadMore' });
+      observabilityService.captureError(e, {
+        context: 'TagDetailScreen.loadMore',
+      });
     }
   };
 
@@ -142,7 +195,7 @@ const TagDetailScreen = () => {
           height: format === '1:1' ? 1080 : 1920,
         });
 
-        if (!uri) throw new Error("URI generation failed");
+        if (!uri) throw new Error('URI generation failed');
 
         const sharePath = uri.startsWith('file://') ? uri : `file://${uri}`;
 
@@ -152,11 +205,20 @@ const TagDetailScreen = () => {
           message: `Mira esta etiqueta #${tag?.name || 'VTrading'}`,
         });
 
-        analyticsService.logShare('tag_detail', tag?.id.toString() || 'unknown', format === '1:1' ? 'image_square' : 'image_story');
+        analyticsService.logShare(
+          'tag_detail',
+          tag?.id.toString() || 'unknown',
+          format === '1:1' ? 'image_square' : 'image_story',
+        );
       } catch (e) {
         const err = e as any;
-        if (err.message !== 'User did not share' && err.message !== 'CANCELLED') {
-          observabilityService.captureError(e, { context: 'TagDetailScreen.shareImage' });
+        if (
+          err.message !== 'User did not share' &&
+          err.message !== 'CANCELLED'
+        ) {
+          observabilityService.captureError(e, {
+            context: 'TagDetailScreen.shareImage',
+          });
           showToast('Error al compartir imagen', 'error');
         }
       } finally {
@@ -172,9 +234,13 @@ const TagDetailScreen = () => {
       excerpt: tag?.description,
       url: `https://discover.vtrading.app/tag/${tag?.slug || tag?.id}`,
       type: 'TAG',
-      count: tag?.count
+      count: tag?.count,
     });
-    analyticsService.logShare('tag_detail', tag?.id.toString() || 'unknown', 'text');
+    analyticsService.logShare(
+      'tag_detail',
+      tag?.id.toString() || 'unknown',
+      'text',
+    );
   };
 
   const renderHeader = () => {
@@ -195,10 +261,22 @@ const TagDetailScreen = () => {
     );
   };
 
-  const containerStyle = [styles.container, { backgroundColor: theme.colors.background }];
-  const dialogDescriptionStyle = [styles.dialogDescription, { color: theme.colors.onSurfaceVariant }];
+  const containerStyle = [
+    styles.container,
+    { backgroundColor: theme.colors.background },
+  ];
+  const dialogDescriptionStyle = [
+    styles.dialogDescription,
+    { color: theme.colors.onSurfaceVariant },
+  ];
 
-  const renderArticle = ({ item, index }: { item: FormattedPost; index: number }) => (
+  const renderArticle = ({
+    item,
+    index,
+  }: {
+    item: FormattedPost;
+    index: number;
+  }) => (
     <ArticleCard
       article={item}
       onPress={() => navigation.navigate('ArticleDetail', { article: item })}
@@ -210,15 +288,21 @@ const TagDetailScreen = () => {
     <ListFooter hasMore={hasMore} postsLength={posts.length} theme={theme} />
   );
 
-  const renderEmpty = () => (
+  const renderEmpty = () =>
     !loading ? (
-      <DiscoverEmptyView message="No hay artículos con esta etiqueta" icon="tag-off-outline" />
-    ) : null
-  );
+      <DiscoverEmptyView
+        message="No hay artículos con esta etiqueta"
+        icon="tag-off-outline"
+      />
+    ) : null;
 
   return (
     <View style={containerStyle}>
-      <StatusBar barStyle={theme.dark ? "light-content" : "dark-content"} backgroundColor="transparent" translucent />
+      <StatusBar
+        barStyle={theme.dark ? 'light-content' : 'dark-content'}
+        backgroundColor="transparent"
+        translucent
+      />
 
       <DiscoverHeader
         variant="tag"
@@ -238,9 +322,13 @@ const TagDetailScreen = () => {
         items={posts.slice(0, 6).map(p => ({
           title: p.title.replace(/&#8211;/g, '-').replace(/&#8217;/g, "'"),
           image: p.image,
-          date: new Date(p.date).toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }),
+          date: new Date(p.date).toLocaleDateString('es-ES', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          }),
           author: p.author?.name || 'VTrading',
-          authorAvatar: p.author?.avatar
+          authorAvatar: p.author?.avatar,
         }))}
       />
 
@@ -253,7 +341,7 @@ const TagDetailScreen = () => {
           scrollEventThrottle={16}
           onScroll={Animated.event(
             [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { useNativeDriver: true }
+            { useNativeDriver: true },
           )}
           renderItem={renderArticle as any}
           estimatedItemSize={250}

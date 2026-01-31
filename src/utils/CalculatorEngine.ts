@@ -59,7 +59,11 @@ export class CalculatorEngine {
   }
 
   reset() {
-    this.state = { ...INITIAL_STATE, memory: this.state.memory, history: this.state.history };
+    this.state = {
+      ...INITIAL_STATE,
+      memory: this.state.memory,
+      history: this.state.history,
+    };
     this.notify();
   }
 
@@ -78,7 +82,8 @@ export class CalculatorEngine {
       // Prevent overflow (simple length check, can be improved)
       if (currentValue.length > 15) return;
 
-      this.state.currentValue = currentValue === '0' && digit !== '.' ? digit : currentValue + digit;
+      this.state.currentValue =
+        currentValue === '0' && digit !== '.' ? digit : currentValue + digit;
     }
     this.notify();
   }
@@ -97,7 +102,8 @@ export class CalculatorEngine {
   }
 
   calculate() {
-    if (this.state.error || !this.state.operation || !this.state.previousValue) return;
+    if (this.state.error || !this.state.operation || !this.state.previousValue)
+      return;
 
     try {
       const prev = new Decimal(this.state.previousValue);
@@ -127,12 +133,15 @@ export class CalculatorEngine {
 
       // Check for finite/overflow handled by Decimal.js but good to catch
       if (!result.isFinite()) {
-         this.setError('Error Matemático');
-         return;
+        this.setError('Error Matemático');
+        return;
       }
 
       const resultStr = result.toString();
-      this.addToHistory(`${prev} ${this.state.operation} ${current} = ${resultStr}`, resultStr);
+      this.addToHistory(
+        `${prev} ${this.state.operation} ${current} = ${resultStr}`,
+        resultStr,
+      );
 
       this.state.currentValue = resultStr;
       this.state.previousValue = null;
@@ -148,24 +157,24 @@ export class CalculatorEngine {
   memoryAdd() {
     if (this.state.error) return;
     try {
-        const val = new Decimal(this.state.currentValue);
-        this.state.memory = this.state.memory.plus(val);
-        this.state.isNewEntry = true;
-        this.notify();
+      const val = new Decimal(this.state.currentValue);
+      this.state.memory = this.state.memory.plus(val);
+      this.state.isNewEntry = true;
+      this.notify();
     } catch (e) {
-        this.setError('Error de Memoria');
+      this.setError('Error de Memoria');
     }
   }
 
   memorySub() {
     if (this.state.error) return;
     try {
-        const val = new Decimal(this.state.currentValue);
-        this.state.memory = this.state.memory.minus(val);
-        this.state.isNewEntry = true;
-        this.notify();
+      const val = new Decimal(this.state.currentValue);
+      this.state.memory = this.state.memory.minus(val);
+      this.state.isNewEntry = true;
+      this.notify();
     } catch (e) {
-        this.setError('Error de Memoria');
+      this.setError('Error de Memoria');
     }
   }
 
@@ -184,9 +193,9 @@ export class CalculatorEngine {
   // History
   private addToHistory(expression: string, result: string) {
     const item: HistoryItem = {
-        expression,
-        result,
-        timestamp: Date.now()
+      expression,
+      result,
+      timestamp: Date.now(),
     };
     this.state.history = [item, ...this.state.history].slice(0, 10); // Keep last 10
   }
@@ -200,23 +209,23 @@ export class CalculatorEngine {
   toggleSign() {
     if (this.state.error) return;
     try {
-        const val = new Decimal(this.state.currentValue);
-        this.state.currentValue = val.negated().toString();
-        this.notify();
+      const val = new Decimal(this.state.currentValue);
+      this.state.currentValue = val.negated().toString();
+      this.notify();
     } catch (e) {
-        // Ignore invalid values
+      // Ignore invalid values
     }
   }
 
   percentage() {
     if (this.state.error) return;
     try {
-        const val = new Decimal(this.state.currentValue);
-        this.state.currentValue = val.dividedBy(100).toString();
-        this.state.isNewEntry = true;
-        this.notify();
+      const val = new Decimal(this.state.currentValue);
+      this.state.currentValue = val.dividedBy(100).toString();
+      this.state.isNewEntry = true;
+      this.notify();
     } catch (e) {
-        this.setError('Error');
+      this.setError('Error');
     }
   }
 }

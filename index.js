@@ -1,7 +1,7 @@
 if (!__DEV__) {
-    console.log = () => { };
-    console.info = () => { };
-    console.debug = () => { };
+  console.log = () => {};
+  console.info = () => {};
+  console.debug = () => {};
 }
 
 import { AppRegistry } from 'react-native';

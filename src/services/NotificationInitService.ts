@@ -2,7 +2,10 @@ import { fcmService } from './firebase/FCMService';
 import { storageService } from './StorageService';
 import SafeLogger from '../utils/safeLogger';
 import { observabilityService } from './ObservabilityService';
-import { analyticsService, ANALYTICS_EVENTS } from './firebase/AnalyticsService';
+import {
+  analyticsService,
+  ANALYTICS_EVENTS,
+} from './firebase/AnalyticsService';
 import notifee, { AndroidImportance } from '@notifee/react-native';
 
 /**
@@ -29,10 +32,12 @@ class NotificationInitService {
         name: 'General',
         importance: AndroidImportance.DEFAULT,
       });
-      
+
       SafeLogger.log('[NotificationInit] Notification channels created');
     } catch (e) {
-      observabilityService.captureError(e, { context: 'NotificationInitService.createChannels' });
+      observabilityService.captureError(e, {
+        context: 'NotificationInitService.createChannels',
+      });
     }
   }
 
@@ -60,18 +65,28 @@ class NotificationInitService {
       SafeLogger.log('[NotificationInit] Has permission:', { hasPermission });
 
       if (!hasPermission) {
-        SafeLogger.log('[NotificationInit] No permission yet, will request on user interaction');
+        SafeLogger.log(
+          '[NotificationInit] No permission yet, will request on user interaction',
+        );
         // No solicitamos automáticamente, esperamos a que el usuario interactúe
         // Pero registramos que no tiene permisos
-        await analyticsService.setUserProperty('notification_permission', 'denied');
+        await analyticsService.setUserProperty(
+          'notification_permission',
+          'denied',
+        );
         return;
       }
 
       // 2. Verificar preferencia del usuario (pushEnabled)
       const settings = await storageService.getSettings();
       if (!settings.pushEnabled) {
-        SafeLogger.log('[NotificationInit] Notifications disabled by user preference');
-        await analyticsService.setUserProperty('notification_preference', 'disabled');
+        SafeLogger.log(
+          '[NotificationInit] Notifications disabled by user preference',
+        );
+        await analyticsService.setUserProperty(
+          'notification_preference',
+          'disabled',
+        );
         return;
       }
 
@@ -80,7 +95,10 @@ class NotificationInitService {
       if (token) {
         SafeLogger.log('[NotificationInit] FCM Token obtained');
         await analyticsService.setUserProperty('fcm_token_status', 'active');
-        await analyticsService.setUserProperty('notification_preference', 'enabled');
+        await analyticsService.setUserProperty(
+          'notification_preference',
+          'enabled',
+        );
       } else {
         SafeLogger.log('[NotificationInit] Failed to obtain FCM token');
         await analyticsService.setUserProperty('fcm_token_status', 'failed');
@@ -96,16 +114,19 @@ class NotificationInitService {
 
       // 6. Marcar como inicializado
       this.isInitialized = true;
-      await analyticsService.logEvent(ANALYTICS_EVENTS.NOTIFICATION_SYSTEM_INITIALIZED);
+      await analyticsService.logEvent(
+        ANALYTICS_EVENTS.NOTIFICATION_SYSTEM_INITIALIZED,
+      );
       SafeLogger.log('[NotificationInit] Initialization complete');
-
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'NotificationInitService.initialize',
-        action: 'init_notification_system'
+        action: 'init_notification_system',
       });
       await analyticsService.logError('notification_init');
-      SafeLogger.error('[NotificationInit] Initialization failed:', { error: e });
+      SafeLogger.error('[NotificationInit] Initialization failed:', {
+        error: e,
+      });
     }
   }
 
@@ -116,12 +137,18 @@ class NotificationInitService {
   async requestPermission(): Promise<boolean> {
     try {
       const granted = await fcmService.requestUserPermission();
-      
-      await analyticsService.logEvent(ANALYTICS_EVENTS.NOTIFICATION_PERMISSION_REQUESTED, {
-        granted,
-      });
 
-      await analyticsService.setUserProperty('notification_permission', granted ? 'granted' : 'denied');
+      await analyticsService.logEvent(
+        ANALYTICS_EVENTS.NOTIFICATION_PERMISSION_REQUESTED,
+        {
+          granted,
+        },
+      );
+
+      await analyticsService.setUserProperty(
+        'notification_permission',
+        granted ? 'granted' : 'denied',
+      );
 
       if (granted) {
         // Si se otorgó permiso, inicializar todo
@@ -132,7 +159,7 @@ class NotificationInitService {
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'NotificationInitService.requestPermission',
-        action: 'request_notification_permission'
+        action: 'request_notification_permission',
       });
       await analyticsService.logError('notification_permission');
       return false;
@@ -164,18 +191,25 @@ class NotificationInitService {
         SafeLogger.log('[NotificationInit] Resubscribed to:', { topic });
       }
 
-      SafeLogger.log('[NotificationInit] Resubscribed to alert topics', { count: uniqueSymbols.length });
-      
-      await analyticsService.logEvent(ANALYTICS_EVENTS.NOTIFICATION_ALERTS_RESUBSCRIBED, {
+      SafeLogger.log('[NotificationInit] Resubscribed to alert topics', {
         count: uniqueSymbols.length,
       });
+
+      await analyticsService.logEvent(
+        ANALYTICS_EVENTS.NOTIFICATION_ALERTS_RESUBSCRIBED,
+        {
+          count: uniqueSymbols.length,
+        },
+      );
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'NotificationInitService.resubscribeToAlerts',
-        action: 'resubscribe_alert_topics'
+        action: 'resubscribe_alert_topics',
       });
       await analyticsService.logError('notification_resubscribe');
-      SafeLogger.error('[NotificationInit] Failed to resubscribe to alerts:', { error: e });
+      SafeLogger.error('[NotificationInit] Failed to resubscribe to alerts:', {
+        error: e,
+      });
     }
   }
 
@@ -203,7 +237,7 @@ class NotificationInitService {
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'NotificationInitService.checkStatus',
-        action: 'check_notification_status'
+        action: 'check_notification_status',
       });
       return {
         hasPermission: false,

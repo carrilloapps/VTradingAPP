@@ -4,13 +4,13 @@ import { Button, useTheme } from 'react-native-paper';
 import { AppTheme } from '../../theme/theme';
 
 export type ButtonVariant =
-  | 'primary'      // Contained, Primary Color (Default)
-  | 'secondary'    // Contained, Secondary Color
-  | 'outlined'     // Outlined, Primary Color
-  | 'ghost'        // Text only, Primary Color
-  | 'destructive'  // Contained, Error Color
+  | 'primary' // Contained, Primary Color (Default)
+  | 'secondary' // Contained, Secondary Color
+  | 'outlined' // Outlined, Primary Color
+  | 'ghost' // Text only, Primary Color
+  | 'destructive' // Contained, Error Color
   | 'outlined-destructive' // Outlined, Error Color
-  | 'link';        // Text only, Link style (Underlined optional)
+  | 'link'; // Text only, Link style (Underlined optional)
 
 interface CustomButtonProps {
   label: string;
@@ -129,15 +129,18 @@ const CustomButton: React.FC<CustomButtonProps> = ({
       style={[
         styles.button,
         fullWidth && styles.fullWidth,
-        (variant === 'outlined' || variant === 'outlined-destructive') && [styles.outlined, { borderColor: getBorderColor() }],
+        (variant === 'outlined' || variant === 'outlined-destructive') && [
+          styles.outlined,
+          { borderColor: getBorderColor() },
+        ],
         variant === 'link' && styles.linkButton,
-        style
+        style,
       ]}
       contentStyle={contentStyle}
       labelStyle={[
         styles.label,
         variant === 'link' && styles.linkLabel,
-        labelStyle
+        labelStyle,
       ]}
       testID={testID}
     >
@@ -151,8 +154,7 @@ const styles = StyleSheet.create({
     borderRadius: 12, // Standard Pill/Rounded Shape for VTradingAPP
     marginVertical: 4,
   },
-  outlined: {
-  },
+  outlined: {},
   fullWidth: {
     width: '100%',
   },
@@ -170,7 +172,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     textDecorationLine: 'none',
     marginHorizontal: 4, // Small margin for links as requested
-  }
+  },
 });
 
 export default CustomButton;

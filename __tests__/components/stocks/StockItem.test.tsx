@@ -4,7 +4,10 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import StockItem from '../../../src/components/stocks/StockItem';
 
 // Mock MaterialCommunityIcons to avoid rendering issues
-jest.mock('react-native-vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons');
+jest.mock(
+  'react-native-vector-icons/MaterialCommunityIcons',
+  () => 'MaterialCommunityIcons',
+);
 
 describe('StockItem', () => {
   const mockStock = {
@@ -14,20 +17,20 @@ describe('StockItem', () => {
     price: 123.4567,
     changePercent: 1.23,
     initials: 'ABC',
-    color: 'blue'
+    color: 'blue',
   };
 
   const renderComponent = (props = {}) => {
     return render(
       <PaperProvider>
         <StockItem {...mockStock} {...props} />
-      </PaperProvider>
+      </PaperProvider>,
     );
   };
 
   it('renders correctly with default props', () => {
     const { getByText } = renderComponent();
-    
+
     // Check if name and symbol are rendered
     // Note: We inverted the display order:
     // Symbol (ABC.A) is now Primary (Top)
@@ -40,21 +43,21 @@ describe('StockItem', () => {
     // Note: toLocaleString might behave differently in test env (node) vs device (JSC/Hermes).
     // Usually Node uses en-US by default unless full ICU is loaded.
     // We'll check for partial match or use a flexible matcher if strict formatting fails.
-    
+
     // Check change percentage
     expect(getByText('+1.23%')).toBeTruthy();
   });
 
   it('preserves numerical values when rendering', () => {
-     const { getByText } = renderComponent({ 
-         price: 1000, 
-         changePercent: -5.5 
-     });
-     
-     // Check change formatting
-     expect(getByText('-5.50%')).toBeTruthy();
-     
-     // Price check (might need adjustment based on locale in test env)
-     // expect(getByText(/1.000,0000/)).toBeTruthy(); 
+    const { getByText } = renderComponent({
+      price: 1000,
+      changePercent: -5.5,
+    });
+
+    // Check change formatting
+    expect(getByText('-5.50%')).toBeTruthy();
+
+    // Price check (might need adjustment based on locale in test env)
+    // expect(getByText(/1.000,0000/)).toBeTruthy();
   });
 });

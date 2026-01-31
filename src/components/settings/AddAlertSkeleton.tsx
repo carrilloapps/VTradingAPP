@@ -15,7 +15,9 @@ const AddAlertSkeleton = ({ variant = 'list' }: Props) => {
 
   if (variant === 'form') {
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
+      >
         {/* Header Skeleton matches UnifiedHeader default */}
         <View style={[styles.headerSimple, { paddingTop: insets.top + 12 }]}>
           <View style={styles.headerInner}>
@@ -27,7 +29,12 @@ const AddAlertSkeleton = ({ variant = 'list' }: Props) => {
         <ScrollView contentContainerStyle={styles.formScrollContent}>
           {/* Symbol Header Section */}
           <View style={styles.centeredColumn}>
-            <Skeleton width={80} height={80} borderRadius={40} style={styles.mb16} />
+            <Skeleton
+              width={80}
+              height={80}
+              borderRadius={40}
+              style={styles.mb16}
+            />
             <View style={styles.centeredGap}>
               <Skeleton width={140} height={32} />
               <Skeleton width={180} height={20} />
@@ -35,7 +42,12 @@ const AddAlertSkeleton = ({ variant = 'list' }: Props) => {
           </View>
 
           {/* Price Card */}
-          <View style={[styles.priceCardSkeleton, { backgroundColor: theme.colors.elevation.level1 }]}>
+          <View
+            style={[
+              styles.priceCardSkeleton,
+              { backgroundColor: theme.colors.elevation.level1 },
+            ]}
+          >
             <Skeleton width={100} height={12} style={styles.mb12} />
             <Skeleton width={150} height={48} style={styles.mb12} />
             <Skeleton width={80} height={20} borderRadius={4} />
@@ -64,7 +76,9 @@ const AddAlertSkeleton = ({ variant = 'list' }: Props) => {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       {/* Header Skeleton */}
       <View style={[styles.headerSimple, { paddingTop: insets.top + 12 }]}>
         <View style={styles.headerInner}>
@@ -81,8 +95,14 @@ const AddAlertSkeleton = ({ variant = 'list' }: Props) => {
 
         {/* Filters Skeleton */}
         <View style={styles.filters}>
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} width={80} height={32} borderRadius={16} style={styles.filterSpacer} />
+          {[1, 2, 3, 4].map(i => (
+            <Skeleton
+              key={i}
+              width={80}
+              height={32}
+              borderRadius={16}
+              style={styles.filterSpacer}
+            />
           ))}
         </View>
       </View>
@@ -90,14 +110,17 @@ const AddAlertSkeleton = ({ variant = 'list' }: Props) => {
       <View style={styles.content}>
         {/* List Items Skeleton */}
         <View style={styles.list}>
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <View key={i} style={[
-              styles.item,
-              {
-                borderColor: theme.colors.outline,
-                backgroundColor: theme.colors.elevation.level1,
-              }
-            ]}>
+          {[1, 2, 3, 4, 5, 6].map(i => (
+            <View
+              key={i}
+              style={[
+                styles.item,
+                {
+                  borderColor: theme.colors.outline,
+                  backgroundColor: theme.colors.elevation.level1,
+                },
+              ]}
+            >
               <View style={styles.leftContent}>
                 <Skeleton width={40} height={40} borderRadius={20} />
                 <View style={styles.textContainer}>
@@ -176,39 +199,39 @@ const styles = StyleSheet.create({
   headerInner: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 20
+    paddingHorizontal: 20,
   },
   ml16: {
-    marginLeft: 16
+    marginLeft: 16,
   },
   centeredColumn: {
     alignItems: 'center',
     marginBottom: 32,
-    marginTop: 8
+    marginTop: 8,
   },
   mb16: {
-    marginBottom: 16
+    marginBottom: 16,
   },
   centeredGap: {
     alignItems: 'center',
-    gap: 8
+    gap: 8,
   },
   mb12: {
-    marginBottom: 12
+    marginBottom: 12,
   },
   mb24: {
-    marginBottom: 24
+    marginBottom: 24,
   },
   buttonGap: {
     gap: 12,
-    marginTop: 8
+    marginTop: 8,
   },
   filterSpacer: {
-    marginRight: 8
+    marginRight: 8,
   },
   mb6: {
-    marginBottom: 6
-  }
+    marginBottom: 6,
+  },
 });
 
 export default AddAlertSkeleton;

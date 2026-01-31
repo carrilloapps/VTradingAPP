@@ -1,10 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  StatusBar,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { Text, TextInput, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../stores/authStore';
 import { useToastStore } from '../../stores/toastStore';
-import { analyticsService, ANALYTICS_EVENTS } from '../../services/firebase/AnalyticsService';
+import {
+  analyticsService,
+  ANALYTICS_EVENTS,
+} from '../../services/firebase/AnalyticsService';
 import AuthLoading from '../../components/auth/AuthLoading';
 import CustomButton from '../../components/ui/CustomButton';
 import UnifiedHeader from '../../components/ui/UnifiedHeader';
@@ -16,37 +26,40 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
   const { resetPassword, isLoading } = useAuthStore();
-  const showToast = useToastStore((state) => state.showToast);
+  const showToast = useToastStore(state => state.showToast);
 
-  const themeStyles = React.useMemo(() => ({
-    container: {
-      backgroundColor: theme.colors.background,
-    },
-    description: {
-      color: theme.colors.onSurfaceVariant,
-      marginBottom: theme.spacing.m,
-      textAlign: 'center' as const,
-    },
-    footerText: {
-      color: theme.colors.onSurface,
-    },
-    loginText: {
-      color: theme.colors.primary,
-      fontWeight: 'bold' as const,
-      marginLeft: theme.spacing.xs,
-    },
-    title: {
-      color: theme.colors.primary,
-      fontWeight: 'bold' as const,
-    },
-    titleRow: {
-      // Removed flex direction as it now only contains title
-      alignItems: 'center' as const,
-      justifyContent: 'center' as const,
-      marginTop: 0,
-      marginBottom: theme.spacing.s,
-    },
-  }), [theme]);
+  const themeStyles = React.useMemo(
+    () => ({
+      container: {
+        backgroundColor: theme.colors.background,
+      },
+      description: {
+        color: theme.colors.onSurfaceVariant,
+        marginBottom: theme.spacing.m,
+        textAlign: 'center' as const,
+      },
+      footerText: {
+        color: theme.colors.onSurface,
+      },
+      loginText: {
+        color: theme.colors.primary,
+        fontWeight: 'bold' as const,
+        marginLeft: theme.spacing.xs,
+      },
+      title: {
+        color: theme.colors.primary,
+        fontWeight: 'bold' as const,
+      },
+      titleRow: {
+        // Removed flex direction as it now only contains title
+        alignItems: 'center' as const,
+        justifyContent: 'center' as const,
+        marginTop: 0,
+        marginBottom: theme.spacing.s,
+      },
+    }),
+    [theme],
+  );
 
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState('');
@@ -72,15 +85,19 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
       setIsSubmitting(true);
       setSuccessMessage('');
       try {
-        await analyticsService.logEvent(ANALYTICS_EVENTS.PASSWORD_RESET_ATTEMPT);
+        await analyticsService.logEvent(
+          ANALYTICS_EVENTS.PASSWORD_RESET_ATTEMPT,
+        );
         await resetPassword(email, showToast);
-        setSuccessMessage('Se ha enviado un correo para restablecer tu contraseña.');
+        setSuccessMessage(
+          'Se ha enviado un correo para restablecer tu contraseña.',
+        );
         // Reset exitoso ya se trackea en authStore
       } catch (e) {
         observabilityService.captureError(e, {
           context: 'ForgotPasswordScreen.handleResetPassword',
           action: 'password_reset',
-          email
+          email,
         });
         // Error is handled in authStore, but we can clear success message
         // Error ya se trackea en authStore
@@ -96,12 +113,12 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
 
   return (
     <View style={[styles.screen, themeStyles.container]}>
-      <StatusBar 
-        backgroundColor="transparent" 
-        translucent 
-        barStyle={theme.dark ? 'light-content' : 'dark-content'} 
+      <StatusBar
+        backgroundColor="transparent"
+        translucent
+        barStyle={theme.dark ? 'light-content' : 'dark-content'}
       />
-      <UnifiedHeader 
+      <UnifiedHeader
         variant="section"
         onBackPress={() => navigation.goBack()}
         style={{ backgroundColor: theme.colors.background }}
@@ -109,27 +126,27 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
         showAd={false}
         hideDivider
       />
-      <KeyboardAvoidingView 
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.flex1}
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={[
-            styles.container, 
+            styles.container,
             themeStyles.container,
-            { 
+            {
               paddingTop: theme.spacing.m,
               paddingBottom: insets.bottom + theme.spacing.xl,
-              paddingHorizontal: theme.spacing.xl
-            }
+              paddingHorizontal: theme.spacing.xl,
+            },
           ]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.headerContent}>
-            <AuthLogo 
-              size={80} 
-              containerStyle={{ marginBottom: theme.spacing.s }} 
+            <AuthLogo
+              size={80}
+              containerStyle={{ marginBottom: theme.spacing.s }}
             />
             <View style={themeStyles.titleRow}>
               <Text variant="headlineSmall" style={themeStyles.title}>
@@ -137,7 +154,8 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
               </Text>
             </View>
             <Text variant="bodyMedium" style={themeStyles.description}>
-              Ingresa tu correo electrónico y te enviaremos un enlace para que puedas crear una nueva contraseña.
+              Ingresa tu correo electrónico y te enviaremos un enlace para que
+              puedas crear una nueva contraseña.
             </Text>
           </View>
 
@@ -146,7 +164,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
               <TextInput
                 label="Correo electrónico"
                 value={email}
-                onChangeText={(text) => {
+                onChangeText={text => {
                   setEmail(text);
                   if (successMessage) setSuccessMessage('');
                 }}
@@ -159,7 +177,12 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
                 accessibilityLabel="Correo electrónico"
                 accessibilityHint="Ingresa el correo asociado a tu cuenta"
                 error={!!emailError}
-                left={<TextInput.Icon icon="email" accessibilityLabel="Icono de correo" />}
+                left={
+                  <TextInput.Icon
+                    icon="email"
+                    accessibilityLabel="Icono de correo"
+                  />
+                }
                 style={styles.input}
                 disabled={isBusy}
               />
@@ -167,7 +190,11 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
                 {emailError}
               </HelperText>
               {successMessage ? (
-                <HelperText type="info" visible={!!successMessage} style={{ color: theme.colors.primary }}>
+                <HelperText
+                  type="info"
+                  visible={!!successMessage}
+                  style={{ color: theme.colors.primary }}
+                >
                   {successMessage}
                 </HelperText>
               ) : null}

@@ -19,7 +19,8 @@ import { StocksService } from '../services/StocksService';
 
 /* type CurrencyDetailRouteProp = RouteProp<RootStackParamList, 'CurrencyDetail'>; */
 
-const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed component signature
+const CurrencyDetailScreen = ({ route, navigation }: any) => {
+  // Changed component signature
   const theme = useAppTheme();
   // const navigation = useNavigation(); // Removed
   // const route = useRoute<CurrencyDetailRouteProp>(); // Removed
@@ -30,8 +31,8 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
   }, [currencyId]);
 
   // Zustand store selector
-  const user = useAuthStore((state) => state.user); // Changed from useAuth
-  const showToast = useToastStore((state) => state.showToast);
+  const user = useAuthStore(state => state.user); // Changed from useAuth
+  const showToast = useToastStore(state => state.showToast);
 
   const [isShareDialogVisible, setShareDialogVisible] = useState(false);
   const [shareFormat, setShareFormat] = useState<'1:1' | '16:9'>('1:1');
@@ -49,9 +50,10 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
       ? theme.colors.trendDown
       : theme.colors.onSurfaceVariant;
 
-  const spread = (rate.buyValue && rate.sellValue)
-    ? Math.abs(((rate.sellValue - rate.buyValue) / rate.buyValue) * 100)
-    : null;
+  const spread =
+    rate.buyValue && rate.sellValue
+      ? Math.abs(((rate.sellValue - rate.buyValue) / rate.buyValue) * 100)
+      : null;
 
   const trendIcon = isPositive
     ? 'trending-up'
@@ -59,44 +61,58 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
       ? 'trending-down'
       : 'minus';
 
-  const getDynamicShareMessage = useCallback((format: '1:1' | '16:9' | 'text' = '1:1') => {
-    const pair = rate.name.split(' • ')[0] || `${rate.code}/VES`;
-    const changeSign = (rate.changePercent || 0) > 0 ? '📈' : (rate.changePercent || 0) < 0 ? '📉' : '📊';
-    const changeText = rate.changePercent ? (rate.changePercent > 0 ? '+' : '') + rate.changePercent.toFixed(2) + '%' : '0.00%';
-    const marketStatus = StocksService.isMarketOpen() ? 'ABIERTO' : 'CERRADO';
+  const getDynamicShareMessage = useCallback(
+    (format: '1:1' | '16:9' | 'text' = '1:1') => {
+      const pair = rate.name.split(' • ')[0] || `${rate.code}/VES`;
+      const changeSign =
+        (rate.changePercent || 0) > 0
+          ? '📈'
+          : (rate.changePercent || 0) < 0
+            ? '📉'
+            : '📊';
+      const changeText = rate.changePercent
+        ? (rate.changePercent > 0 ? '+' : '') +
+          rate.changePercent.toFixed(2) +
+          '%'
+        : '0.00%';
+      const marketStatus = StocksService.isMarketOpen() ? 'ABIERTO' : 'CERRADO';
 
-    if (format === '16:9') {
-      // Optimized for Stories: Punchy, direct, optimized for visual overlays
-      let msg = `📊 *VTrading - Reporte Divisas*\n\n` +
-        `📉 *Cotización:* ${pair}\n` +
-        `💰 *Valor:* ${rate.value.toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bs.\n` +
+      if (format === '16:9') {
+        // Optimized for Stories: Punchy, direct, optimized for visual overlays
+        let msg =
+          `📊 *VTrading - Reporte Divisas*\n\n` +
+          `📉 *Cotización:* ${pair}\n` +
+          `💰 *Valor:* ${rate.value.toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bs.\n` +
+          `${changeSign} *Variación:* ${changeText}\n`;
+
+        if (spread !== null) {
+          msg += `↔️ *Brecha:* ${spread.toFixed(2)}%\n`;
+        }
+
+        msg += `🔔 *Mercado:* ${marketStatus}\n\n` + `🌐 vtrading.app`;
+        return msg;
+      }
+
+      // Default or 1:1: Formal, detailed, structured for permanent posts
+      let message =
+        `📊 *VTrading - Monitor de Divisas*\n\n` +
+        `📌 *Tasa de cambio:* ${pair}\n` +
+        `️👁️ *Fuente:* ${rate.source || 'Promedio del Mercado'}\n` +
+        `💰 *Valor:* ${rate.value.toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bolívares\n` +
         `${changeSign} *Variación:* ${changeText}\n`;
 
       if (spread !== null) {
-        msg += `↔️ *Brecha:* ${spread.toFixed(2)}%\n`;
+        message += `↔️ *Brecha (Spread):* ${spread.toFixed(2)}%\n`;
       }
 
-      msg += `🔔 *Mercado:* ${marketStatus}\n\n` +
+      message +=
+        `🕒 *Estado del mercado:* ${rate.source !== 'P2P' ? marketStatus : 'ABIERTO'}\n` +
+        `📍 *Act:* ${new Date(rate.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}\n\n` +
         `🌐 vtrading.app`;
-      return msg;
-    }
-
-    // Default or 1:1: Formal, detailed, structured for permanent posts
-    let message = `📊 *VTrading - Monitor de Divisas*\n\n` +
-      `📌 *Tasa de cambio:* ${pair}\n` +
-      `️👁️ *Fuente:* ${rate.source || 'Promedio del Mercado'}\n` +
-      `💰 *Valor:* ${rate.value.toLocaleString('es-VE', { minimumFractionDigits: 2 })} Bolívares\n` +
-      `${changeSign} *Variación:* ${changeText}\n`;
-
-    if (spread !== null) {
-      message += `↔️ *Brecha (Spread):* ${spread.toFixed(2)}%\n`;
-    }
-
-    message += `🕒 *Estado del mercado:* ${rate.source !== 'P2P' ? marketStatus : 'ABIERTO'}\n` +
-      `📍 *Act:* ${new Date(rate.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}\n\n` +
-      `🌐 vtrading.app`;
-    return message;
-  }, [rate, spread]);
+      return message;
+    },
+    [rate, spread],
+  );
 
   // Trigger share when sharing state changes and we have a ref
   const captureShareImage = useCallback(async () => {
@@ -111,7 +127,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
         height: shareFormat === '1:1' ? 1080 : 1920,
       });
 
-      if (!uri) throw new Error("Capture failed");
+      if (!uri) throw new Error('Capture failed');
 
       const sharePath = uri.startsWith('file://') ? uri : `file://${uri}`;
 
@@ -121,15 +137,23 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
         message: getDynamicShareMessage(shareFormat),
       });
 
-      analyticsService.logShare('currency', rate.code, shareFormat === '1:1' ? 'image_square' : 'image_story');
+      analyticsService.logShare(
+        'currency',
+        rate.code,
+        shareFormat === '1:1' ? 'image_square' : 'image_story',
+      );
     } catch (e) {
-      if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
+      if (
+        e &&
+        (e as any).message !== 'User did not share' &&
+        (e as any).message !== 'CANCELLED'
+      ) {
         observabilityService.captureError(e, {
           context: 'CurrencyDetailScreen.handleShareImage',
           action: 'share_currency_image',
           currencyCode: rate.code,
           format: shareFormat,
-          errorMessage: (e as any).message
+          errorMessage: (e as any).message,
         });
         showToast('No se pudo compartir la imagen', 'error');
       }
@@ -205,12 +229,16 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
       await Share.open({ message });
       analyticsService.logShare('currency', rate.code, 'text');
     } catch (e) {
-      if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
+      if (
+        e &&
+        (e as any).message !== 'User did not share' &&
+        (e as any).message !== 'CANCELLED'
+      ) {
         observabilityService.captureError(e, {
           context: 'CurrencyDetailScreen.handleShareText',
           action: 'share_currency_text',
           currencyCode: rate.code,
-          errorMessage: (e as any).message
+          errorMessage: (e as any).message,
         });
         showToast('Error al compartir texto', 'error');
       }
@@ -243,7 +271,8 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
   const chartPlaceholderTextColor = theme.colors.onSurfaceVariant;
   const shareDialogTextColor = theme.colors.onSurfaceVariant;
 
-  const a11yPriceLabel = `Tasa actual: ${rate.value.toLocaleString('es-VE')} Bolívares. ` +
+  const a11yPriceLabel =
+    `Tasa actual: ${rate.value.toLocaleString('es-VE')} Bolívares. ` +
     `Variación: ${rate.changePercent ? rate.changePercent.toFixed(2) : 0} por ciento. ` +
     (spread ? `Spread estimado del ${spread.toFixed(2)} por ciento.` : '');
 
@@ -256,7 +285,10 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
         onActionPress={handleShare}
       />
 
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
         {/* Header Section - Immersive Design */}
         <View
           style={styles.immersiveHeader}
@@ -266,52 +298,88 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
         >
           <View style={styles.iconWrapper}>
             {/* Halo Glow effect behind the icon */}
-            <View style={[
-              styles.haloEffect,
-              { backgroundColor: theme.colors.primary, opacity: haloOpacityValue }
-            ]} />
+            <View
+              style={[
+                styles.haloEffect,
+                {
+                  backgroundColor: theme.colors.primary,
+                  opacity: haloOpacityValue,
+                },
+              ]}
+            />
 
-            <View style={[
-              styles.iconContainer,
-              styles.borderWidthOne,
-              {
-                backgroundColor: iconContainerBg,
-                borderColor: iconContainerBorder,
-              }
-            ]}>
+            <View
+              style={[
+                styles.iconContainer,
+                styles.borderWidthOne,
+                {
+                  backgroundColor: iconContainerBg,
+                  borderColor: iconContainerBorder,
+                },
+              ]}
+            >
               {rate.iconName === 'Bs' ? (
                 <BolivarIcon size={40} color={theme.colors.primary} />
               ) : (
-                <Icon source={rate.iconName || 'currency-usd'} size={40} color={theme.colors.primary} />
+                <Icon
+                  source={rate.iconName || 'currency-usd'}
+                  size={40}
+                  color={theme.colors.primary}
+                />
               )}
             </View>
           </View>
 
           <View style={styles.headerInfo}>
-            <Text variant="headlineSmall" style={[styles.name, { color: nameTextColor }]}>{rate.name}</Text>
+            <Text
+              variant="headlineSmall"
+              style={[styles.name, { color: nameTextColor }]}
+            >
+              {rate.name}
+            </Text>
             <Surface
               style={[styles.badgeContainer, { backgroundColor: badgeBgColor }]}
             >
               <Text style={[styles.badgeText, { color: badgeTextColor }]}>
-                {rate.type === 'fiat' ? 'TASA BCV' : rate.type === 'crypto' ? 'CRIPTOACTIVO' : 'TASA FRONTERIZA'}
+                {rate.type === 'fiat'
+                  ? 'TASA BCV'
+                  : rate.type === 'crypto'
+                    ? 'CRIPTOACTIVO'
+                    : 'TASA FRONTERIZA'}
               </Text>
             </Surface>
           </View>
 
           <View style={styles.priceContainer}>
             <View style={styles.currencyRow}>
-              <Text variant="headlineLarge" style={[styles.priceLarge, { color: priceLargeColor }]}>
-                {rate.value.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              <Text
+                variant="headlineLarge"
+                style={[styles.priceLarge, { color: priceLargeColor }]}
+              >
+                {rate.value.toLocaleString('es-VE', {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
               </Text>
               <View style={styles.bolivarIcon}>
                 <BolivarIcon size={28} color={theme.colors.onSurface} />
               </View>
             </View>
 
-            <View style={[styles.trendBadge, { backgroundColor: trendBgColor }]}>
-              <MaterialCommunityIcons name={trendIcon} size={20} color={trendColor} />
+            <View
+              style={[styles.trendBadge, { backgroundColor: trendBgColor }]}
+            >
+              <MaterialCommunityIcons
+                name={trendIcon}
+                size={20}
+                color={trendColor}
+              />
               <Text style={[styles.trendText, { color: trendColor }]}>
-                {rate.changePercent ? (rate.changePercent > 0 ? '+' : '') + rate.changePercent.toFixed(2) + '%' : '0.00%'}
+                {rate.changePercent
+                  ? (rate.changePercent > 0 ? '+' : '') +
+                    rate.changePercent.toFixed(2) +
+                    '%'
+                  : '0.00%'}
               </Text>
             </View>
           </View>
@@ -319,37 +387,88 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
 
         {/* Stats Grid */}
         <View style={styles.sectionHeader}>
-          <Text variant="labelLarge" style={[styles.sectionTitle, styles.sectionTitleLetterSpacing, { color: sectionTitleColor }]}>ESTADÍSTICAS DEL DÍA</Text>
+          <Text
+            variant="labelLarge"
+            style={[
+              styles.sectionTitle,
+              styles.sectionTitleLetterSpacing,
+              { color: sectionTitleColor },
+            ]}
+          >
+            ESTADÍSTICAS DEL DÍA
+          </Text>
         </View>
 
         <View style={styles.statsGrid}>
-          <Surface style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]} elevation={0}
+          <Surface
+            style={[
+              styles.statCard,
+              { backgroundColor: statCardBg, borderColor: statCardBorder },
+            ]}
+            elevation={0}
             accessible={true}
             accessibilityLabel={`Precio de compra: ${rate.buyValue || 'No disponible'}`}
           >
             <View style={styles.statHeader}>
-              <MaterialCommunityIcons name="arrow-down-circle-outline" size={18} color={theme.colors.primary} />
-              <Text variant="labelSmall" style={[styles.statLabelBold, { color: statLabelColor }]}>COMPRA</Text>
+              <MaterialCommunityIcons
+                name="arrow-down-circle-outline"
+                size={18}
+                color={theme.colors.primary}
+              />
+              <Text
+                variant="labelSmall"
+                style={[styles.statLabelBold, { color: statLabelColor }]}
+              >
+                COMPRA
+              </Text>
             </View>
             <View style={styles.statValueRow}>
-              <Text variant="titleMedium" style={[styles.statValueBold, { color: statValueColor }]}>
-                {rate.buyValue ? rate.buyValue.toLocaleString('es-VE', { minimumFractionDigits: 2 }) : '--'}
+              <Text
+                variant="titleMedium"
+                style={[styles.statValueBold, { color: statValueColor }]}
+              >
+                {rate.buyValue
+                  ? rate.buyValue.toLocaleString('es-VE', {
+                      minimumFractionDigits: 2,
+                    })
+                  : '--'}
               </Text>
               <BolivarIcon size={14} color={theme.colors.onSurface} />
             </View>
           </Surface>
 
-          <Surface style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]} elevation={0}
+          <Surface
+            style={[
+              styles.statCard,
+              { backgroundColor: statCardBg, borderColor: statCardBorder },
+            ]}
+            elevation={0}
             accessible={true}
             accessibilityLabel={`Precio de venta: ${rate.sellValue || 'No disponible'}`}
           >
             <View style={styles.statHeader}>
-              <MaterialCommunityIcons name="arrow-up-circle-outline" size={18} color={theme.colors.primary} />
-              <Text variant="labelSmall" style={[styles.statLabelBold, { color: statLabelColor }]}>VENTA</Text>
+              <MaterialCommunityIcons
+                name="arrow-up-circle-outline"
+                size={18}
+                color={theme.colors.primary}
+              />
+              <Text
+                variant="labelSmall"
+                style={[styles.statLabelBold, { color: statLabelColor }]}
+              >
+                VENTA
+              </Text>
             </View>
             <View style={styles.statValueRow}>
-              <Text variant="titleMedium" style={[styles.statValueBold, { color: statValueColor }]}>
-                {rate.sellValue ? rate.sellValue.toLocaleString('es-VE', { minimumFractionDigits: 2 }) : '--'}
+              <Text
+                variant="titleMedium"
+                style={[styles.statValueBold, { color: statValueColor }]}
+              >
+                {rate.sellValue
+                  ? rate.sellValue.toLocaleString('es-VE', {
+                      minimumFractionDigits: 2,
+                    })
+                  : '--'}
               </Text>
               <BolivarIcon size={14} color={theme.colors.onSurface} />
             </View>
@@ -357,49 +476,118 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
         </View>
 
         <View style={styles.statsGrid}>
-          <Surface style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]} elevation={0}
+          <Surface
+            style={[
+              styles.statCard,
+              { backgroundColor: statCardBg, borderColor: statCardBorder },
+            ]}
+            elevation={0}
             accessible={true}
             accessibilityLabel={`Spread: ${spread ? spread.toFixed(2) + '%' : 'No disponible'}`}
           >
             <View style={styles.statHeader}>
-              <MaterialCommunityIcons name="swap-horizontal" size={18} color={theme.colors.primary} />
-              <Text variant="labelSmall" style={[styles.statLabelBold, { color: statLabelColor }]}>BRECHA / SPREAD</Text>
+              <MaterialCommunityIcons
+                name="swap-horizontal"
+                size={18}
+                color={theme.colors.primary}
+              />
+              <Text
+                variant="labelSmall"
+                style={[styles.statLabelBold, { color: statLabelColor }]}
+              >
+                BRECHA / SPREAD
+              </Text>
             </View>
-            <Text variant="titleMedium" style={[styles.statValueBold, { color: statValueColor }]}>
+            <Text
+              variant="titleMedium"
+              style={[styles.statValueBold, { color: statValueColor }]}
+            >
               {spread ? `${spread.toFixed(2)}%` : 'N/A'}
             </Text>
           </Surface>
 
-          <Surface style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]} elevation={0}
+          <Surface
+            style={[
+              styles.statCard,
+              { backgroundColor: statCardBg, borderColor: statCardBorder },
+            ]}
+            elevation={0}
             accessible={true}
             accessibilityLabel={`Última actualización: ${new Date(rate.lastUpdated).toLocaleTimeString()}`}
           >
             <View style={styles.statHeader}>
-              <MaterialCommunityIcons name="clock-outline" size={18} color={theme.colors.primary} />
-              <Text variant="labelSmall" style={[styles.statLabelBold, { color: statLabelColor }]}>ÚLT. ACT.</Text>
+              <MaterialCommunityIcons
+                name="clock-outline"
+                size={18}
+                color={theme.colors.primary}
+              />
+              <Text
+                variant="labelSmall"
+                style={[styles.statLabelBold, { color: statLabelColor }]}
+              >
+                ÚLT. ACT.
+              </Text>
             </View>
-            <Text variant="titleMedium" style={[styles.statValueBold, { color: statValueColor }]}>
-              {new Date(rate.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            <Text
+              variant="titleMedium"
+              style={[styles.statValueBold, { color: statValueColor }]}
+            >
+              {new Date(rate.lastUpdated).toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+              })}
             </Text>
           </Surface>
         </View>
 
         {/* Technical Placeholder */}
         <View style={styles.sectionHeader}>
-          <Text variant="labelLarge" style={[styles.sectionTitle, styles.sectionTitleLetterSpacing, { color: sectionTitleColor }]}>EVOLUCIÓN TEMPORAL</Text>
+          <Text
+            variant="labelLarge"
+            style={[
+              styles.sectionTitle,
+              styles.sectionTitleLetterSpacing,
+              { color: sectionTitleColor },
+            ]}
+          >
+            EVOLUCIÓN TEMPORAL
+          </Text>
         </View>
-        <Surface style={[styles.chartPlaceholder, { backgroundColor: chartPlaceholderBg, borderColor: chartPlaceholderBorder }]} elevation={0}>
-          <MaterialCommunityIcons name="chart-bell-curve-cumulative" size={48} color={theme.colors.outline} />
-          <Text variant="bodyMedium" style={[styles.chartPlaceholderText, { color: chartPlaceholderTextColor }]}>Gráfico detallado próximamente</Text>
+        <Surface
+          style={[
+            styles.chartPlaceholder,
+            {
+              backgroundColor: chartPlaceholderBg,
+              borderColor: chartPlaceholderBorder,
+            },
+          ]}
+          elevation={0}
+        >
+          <MaterialCommunityIcons
+            name="chart-bell-curve-cumulative"
+            size={48}
+            color={theme.colors.outline}
+          />
+          <Text
+            variant="bodyMedium"
+            style={[
+              styles.chartPlaceholderText,
+              { color: chartPlaceholderTextColor },
+            ]}
+          >
+            Gráfico detallado próximamente
+          </Text>
         </Surface>
-
       </ScrollView>
 
       {/* Sharing Assets */}
       <CurrencyShareGraphic
         viewShotRef={viewShotRef}
         rate={rate}
-        lastUpdated={new Date(rate.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+        lastUpdated={new Date(rate.lastUpdated).toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        })}
         isPremium={isPremium}
         aspectRatio={shareFormat}
         status={StocksService.isMarketOpen() ? 'ABIERTO' : 'CERRADO'}
@@ -413,7 +601,10 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
         confirmLabel="Cerrar"
         onConfirm={() => setShareDialogVisible(false)}
       >
-        <Text variant="bodyMedium" style={[styles.shareDialogText, { color: shareDialogTextColor }]}>
+        <Text
+          variant="bodyMedium"
+          style={[styles.shareDialogText, { color: shareDialogTextColor }]}
+        >
           Comparte el valor de {rate.code} en tus redes sociales
         </Text>
 

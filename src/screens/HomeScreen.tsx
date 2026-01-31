@@ -1,5 +1,13 @@
 import React, { useState, useCallback, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, RefreshControl, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  StatusBar,
+  RefreshControl,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import Share from 'react-native-share';
 import { captureRef } from 'react-native-view-shot';
 import { useTheme, Text } from 'react-native-paper';
@@ -22,8 +30,8 @@ import AdvancedCalculatorCTA from '../components/dashboard/AdvancedCalculatorCTA
 
 const HomeScreen = ({ navigation }: any) => {
   const theme = useTheme();
-  const user = useAuthStore((state) => state.user);
-  const showToast = useToastStore((state) => state.showToast);
+  const user = useAuthStore(state => state.user);
+  const showToast = useToastStore(state => state.showToast);
 
   const {
     loading,
@@ -34,7 +42,7 @@ const HomeScreen = ({ navigation }: any) => {
     stocks,
     lastUpdated,
     isMarketOpen,
-    onRefresh
+    onRefresh,
   } = useHomeScreenData();
 
   const [shareFormat, setShareFormat] = useState<'1:1' | '16:9'>('1:1');
@@ -59,7 +67,8 @@ const HomeScreen = ({ navigation }: any) => {
     // We use a small polling loop as a failsafe if onReady doesn't fire instantly
     // but primarily we rely on the component callback
     let attempts = 0;
-    while (!isReadyToCapture && attempts < 20) { // Max 2s wait
+    while (!isReadyToCapture && attempts < 20) {
+      // Max 2s wait
       await new Promise<void>(resolve => setTimeout(() => resolve(), 100));
       attempts++;
     }
@@ -74,18 +83,23 @@ const HomeScreen = ({ navigation }: any) => {
           height: format === '1:1' ? 1080 : 1920,
         });
 
-        if (!uri) throw new Error("Failed to capture image");
+        if (!uri) throw new Error('Failed to capture image');
         const sharePath = uri.startsWith('file://') ? uri : `file://${uri}`;
 
-        const ratesDetails = featuredRates.map(rate => {
-          const buyStr = rate.buyValue ? ` (Compra: ${rate.buyValue})` : '';
-          const sellStr = rate.sellValue ? ` (Venta: ${rate.sellValue})` : '';
-          return `${rate.code === 'USDT' ? '🔶' : '💵'} *${rate.code}:* ${rate.value} Bs${buyStr}${sellStr}`;
-        }).join('\n');
+        const ratesDetails = featuredRates
+          .map(rate => {
+            const buyStr = rate.buyValue ? ` (Compra: ${rate.buyValue})` : '';
+            const sellStr = rate.sellValue ? ` (Venta: ${rate.sellValue})` : '';
+            return `${rate.code === 'USDT' ? '🔶' : '💵'} *${rate.code}:* ${rate.value} Bs${buyStr}${sellStr}`;
+          })
+          .join('\n');
 
-        const message = `📊 *VTrading - Reporte Diario*\n\n` +
+        const message =
+          `📊 *VTrading - Reporte Diario*\n\n` +
           `${ratesDetails}\n` +
-          (spread ? `⚖️ *Spread:* ${spread.toFixed(2)}% _(Diferencia USD vs USDT contra el VES)_\n` : '') +
+          (spread
+            ? `⚖️ *Spread:* ${spread.toFixed(2)}% _(Diferencia USD vs USDT contra el VES)_\n`
+            : '') +
           `⏱️ _Act: ${lastUpdated}_\n\n` +
           `🌐 vtrading.app`;
 
@@ -98,10 +112,20 @@ const HomeScreen = ({ navigation }: any) => {
         // Cleanup (optional, but good practice if supported by fs, here we assume Share handles it mostly)
         // or rely on OS temp cleanup.
 
-        analyticsService.logShare('dashboard_report', 'all', format === '1:1' ? 'image_square' : 'image_story');
+        analyticsService.logShare(
+          'dashboard_report',
+          'all',
+          format === '1:1' ? 'image_square' : 'image_story',
+        );
       } catch (e) {
-        if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
-          observabilityService.captureError(e, { context: 'HomeScreen_generateShareImage' });
+        if (
+          e &&
+          (e as any).message !== 'User did not share' &&
+          (e as any).message !== 'CANCELLED'
+        ) {
+          observabilityService.captureError(e, {
+            context: 'HomeScreen_generateShareImage',
+          });
           showToast('Error al compartir imagen', 'error');
         }
       } finally {
@@ -120,7 +144,8 @@ const HomeScreen = ({ navigation }: any) => {
       const bcvVal = bcv?.value ? Number(bcv.value).toFixed(2) : 'N/A';
       const p2pVal = p2p?.value ? Number(p2p.value).toFixed(2) : 'N/A';
 
-      const message = `📊 *VTrading - Reporte Diario*\n\n` +
+      const message =
+        `📊 *VTrading - Reporte Diario*\n\n` +
         (bcv ? `💵 *USD BCV:* ${bcvVal} Bs\n` : '') +
         (p2p ? `🔶 *USDT P2P:* ${p2pVal} Bs\n` : '') +
         (spread ? `⚖️ *Spread:* ${spread.toFixed(2)}%\n` : '') +
@@ -130,7 +155,11 @@ const HomeScreen = ({ navigation }: any) => {
       await Share.open({ message });
       analyticsService.logShare('dashboard_report', 'all', 'text');
     } catch (e) {
-      if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
+      if (
+        e &&
+        (e as any).message !== 'User did not share' &&
+        (e as any).message !== 'CANCELLED'
+      ) {
         showToast('Error al compartir texto', 'error');
       }
     }
@@ -140,28 +169,41 @@ const HomeScreen = ({ navigation }: any) => {
     setShareDialogVisible(true);
   }, []);
 
-
-
-  const userData = useMemo(() => ({
-    name: user?.displayName || user?.email?.split('@')[0] || 'Invitado',
-    avatarUrl: user?.photoURL,
-    email: user?.email,
-    notificationCount: 3,
-    isPremium: !!(user && !user.isAnonymous)
-  }), [user]);
+  const userData = useMemo(
+    () => ({
+      name: user?.displayName || user?.email?.split('@')[0] || 'Invitado',
+      avatarUrl: user?.photoURL,
+      email: user?.email,
+      notificationCount: 3,
+      isPremium: !!(user && !user.isAnonymous),
+    }),
+    [user],
+  );
 
   if (loading) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <StatusBar backgroundColor="transparent" translucent barStyle={theme.dark ? 'light-content' : 'dark-content'} />
+      <View
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
+      >
+        <StatusBar
+          backgroundColor="transparent"
+          translucent
+          barStyle={theme.dark ? 'light-content' : 'dark-content'}
+        />
         <DashboardSkeleton />
       </View>
     );
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-      <StatusBar backgroundColor="transparent" translucent barStyle={theme.dark ? 'light-content' : 'dark-content'} />
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
+      <StatusBar
+        backgroundColor="transparent"
+        translucent
+        barStyle={theme.dark ? 'light-content' : 'dark-content'}
+      />
 
       <UnifiedHeader
         variant="profile"
@@ -213,17 +255,11 @@ const HomeScreen = ({ navigation }: any) => {
             onRefresh={onRefresh}
           />
 
-          <RatesSection
-            rates={rates}
-            navigation={navigation}
-          />
+          <RatesSection rates={rates} navigation={navigation} />
 
           <AdvancedCalculatorCTA spread={spread} />
 
-          <MarketsSection
-            stocks={stocks}
-            navigation={navigation}
-          />
+          <MarketsSection stocks={stocks} navigation={navigation} />
 
           <View style={styles.section}>
             <Calculator />
@@ -279,7 +315,7 @@ const styles = StyleSheet.create({
   flex1: { flex: 1 },
   marketStatus: { paddingHorizontal: 22, paddingTop: 15, paddingBottom: 20 },
   dialogDescription: { textAlign: 'center', marginBottom: 20 },
-  dialogButtonsContainer: { gap: 12 }
+  dialogButtonsContainer: { gap: 12 },
 });
 
 export default HomeScreen;

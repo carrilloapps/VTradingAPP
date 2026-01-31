@@ -10,7 +10,7 @@ const NotificationsSkeleton = () => {
     <View style={styles.container}>
       {/* Notification Cards Skeleton */}
       <View style={styles.list}>
-        {[1, 2, 3, 4, 5, 6].map((key) => (
+        {[1, 2, 3, 4, 5, 6].map(key => (
           <View
             key={key}
             style={[
@@ -18,7 +18,7 @@ const NotificationsSkeleton = () => {
               {
                 borderColor: theme.colors.outline,
                 backgroundColor: theme.colors.elevation.level1,
-              }
+              },
             ]}
           >
             <View style={styles.cardContent}>
@@ -28,8 +28,16 @@ const NotificationsSkeleton = () => {
                   <Skeleton width={100} height={16} />
                   <Skeleton width={60} height={12} />
                 </View>
-                <Skeleton width="90%" height={14} style={styles.skeletonSpacer} />
-                <Skeleton width="60%" height={14} style={styles.skeletonSpacerSmall} />
+                <Skeleton
+                  width="90%"
+                  height={14}
+                  style={styles.skeletonSpacer}
+                />
+                <Skeleton
+                  width="60%"
+                  height={14}
+                  style={styles.skeletonSpacerSmall}
+                />
               </View>
             </View>
           </View>
@@ -72,7 +80,7 @@ const styles = StyleSheet.create({
   },
   skeletonSpacerSmall: {
     marginTop: 6,
-  }
+  },
 });
 
 export default NotificationsSkeleton;

@@ -1,5 +1,14 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { View, StyleSheet, StatusBar, TouchableOpacity, RefreshControl, LayoutAnimation, Platform, UIManager } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  StatusBar,
+  TouchableOpacity,
+  RefreshControl,
+  LayoutAnimation,
+  Platform,
+  UIManager,
+} from 'react-native';
 import { Text } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -43,9 +52,7 @@ const ExchangeRatesScreen = () => {
 
   const { exchangeRateFilters, setExchangeRateFilters } = useFilterStore();
   const { query: searchQuery, type: filterType } = exchangeRateFilters;
-  const showToast = useToastStore((state) => state.showToast);
-
-
+  const showToast = useToastStore(state => state.showToast);
 
   // State
   const [loading, setLoading] = useState(true);
@@ -53,7 +60,9 @@ const ExchangeRatesScreen = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [allRates, setAllRates] = useState<CurrencyRate[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [isMarketOpen, setIsMarketOpen] = useState(StocksService.isMarketOpen());
+  const [isMarketOpen, setIsMarketOpen] = useState(
+    StocksService.isMarketOpen(),
+  );
 
   const handleSearch = (text: string) => {
     setExchangeRateFilters({ query: text });
@@ -70,9 +79,10 @@ const ExchangeRatesScreen = () => {
     // Filter by query
     if (searchQuery) {
       const lowerQuery = searchQuery.toLowerCase();
-      result = result.filter(r =>
-        r.code.toLowerCase().includes(lowerQuery) ||
-        r.name.toLowerCase().includes(lowerQuery)
+      result = result.filter(
+        r =>
+          r.code.toLowerCase().includes(lowerQuery) ||
+          r.name.toLowerCase().includes(lowerQuery),
       );
     }
 
@@ -81,9 +91,11 @@ const ExchangeRatesScreen = () => {
 
   // Subscription and Data Loading
   useEffect(() => {
-    const unsubscribe = CurrencyService.subscribe((data) => {
+    const unsubscribe = CurrencyService.subscribe(data => {
       // Filter out VES (Base Currency) as showing VES/VES = 1 is redundant
-      const displayRates = data.filter(r => r.code !== 'VES' && r.code !== 'Bs');
+      const displayRates = data.filter(
+        r => r.code !== 'VES' && r.code !== 'Bs',
+      );
       setAllRates(displayRates);
       setLoading(false);
       setError(null);
@@ -95,20 +107,19 @@ const ExchangeRatesScreen = () => {
     });
 
     // Initial Fetch
-    Promise.all([
-      CurrencyService.getRates(),
-      StocksService.getStocks()
-    ]).then(() => {
-      setIsMarketOpen(StocksService.isMarketOpen());
-    }).catch((e) => {
-      observabilityService.captureError(e, {
-        context: 'ExchangeRatesScreen.loadData',
-        action: 'fetch_initial_data'
+    Promise.all([CurrencyService.getRates(), StocksService.getStocks()])
+      .then(() => {
+        setIsMarketOpen(StocksService.isMarketOpen());
+      })
+      .catch(e => {
+        observabilityService.captureError(e, {
+          context: 'ExchangeRatesScreen.loadData',
+          action: 'fetch_initial_data',
+        });
+        setError('Error al cargar las tasas de cambio');
+        showToast('Error de conexión', 'error');
+        setLoading(false);
       });
-      setError('Error al cargar las tasas de cambio');
-      showToast('Error de conexión', 'error');
-      setLoading(false);
-    });
 
     return () => {
       unsubscribe();
@@ -121,13 +132,13 @@ const ExchangeRatesScreen = () => {
     try {
       await Promise.all([
         CurrencyService.getRates(true),
-        StocksService.getStocks(true)
+        StocksService.getStocks(true),
       ]);
       setIsMarketOpen(StocksService.isMarketOpen());
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'ExchangeRatesScreen.onRefresh',
-        action: 'refresh_rates_and_stocks'
+        action: 'refresh_rates_and_stocks',
       });
       showToast('Error al actualizar', 'error');
     } finally {
@@ -137,10 +148,10 @@ const ExchangeRatesScreen = () => {
 
   const loadRates = useCallback(() => {
     setLoading(true);
-    CurrencyService.getRates(true).catch((e) => {
+    CurrencyService.getRates(true).catch(e => {
       observabilityService.captureError(e, {
         context: 'ExchangeRatesScreen.loadRates',
-        action: 'reload_rates'
+        action: 'reload_rates',
       });
       showToast('Error al recargar', 'error');
       setLoading(false);
@@ -150,13 +161,19 @@ const ExchangeRatesScreen = () => {
   // Flatten Data for FlashList
   const listData = useMemo<ListItem[]>(() => {
     if (loading && !refreshing && allRates.length === 0) return [];
-    if (error && filteredRates.length === 0) return [{ type: 'empty', id: 'error-state' }];
-    if (filteredRates.length === 0) return [{ type: 'empty', id: 'empty-state' }];
+    if (error && filteredRates.length === 0)
+      return [{ type: 'empty', id: 'error-state' }];
+    if (filteredRates.length === 0)
+      return [{ type: 'empty', id: 'empty-state' }];
 
     const items: ListItem[] = [];
 
     // Helper to add section
-    const addSection = (title: string, rates: CurrencyRate[], action?: { label: string, onPress: () => void }) => {
+    const addSection = (
+      title: string,
+      rates: CurrencyRate[],
+      action?: { label: string; onPress: () => void },
+    ) => {
       if (rates.length > 0) {
         items.push({ type: 'header', id: `header-${title}`, title, action });
         rates.forEach(r => items.push({ type: 'rate', id: r.id, data: r }));
@@ -164,28 +181,34 @@ const ExchangeRatesScreen = () => {
     };
 
     // Group rates
-    const officialRates = filteredRates.filter(r => r.type === 'fiat').sort((a, b) => {
-      if (a.code === 'USD') return -1;
-      if (b.code === 'USD') return 1;
-      if (a.code === 'EUR') return -1;
-      if (b.code === 'EUR') return 1;
-      return 0;
-    });
+    const officialRates = filteredRates
+      .filter(r => r.type === 'fiat')
+      .sort((a, b) => {
+        if (a.code === 'USD') return -1;
+        if (b.code === 'USD') return 1;
+        if (a.code === 'EUR') return -1;
+        if (b.code === 'EUR') return 1;
+        return 0;
+      });
 
-    const borderRates = filteredRates.filter(r => r.type === 'border').sort((a, b) => {
-      if (a.code === 'USD') return -1;
-      if (b.code === 'USD') return 1;
-      if (a.code === 'EUR') return -1;
-      if (b.code === 'EUR') return 1;
-      return 0;
-    });
+    const borderRates = filteredRates
+      .filter(r => r.type === 'border')
+      .sort((a, b) => {
+        if (a.code === 'USD') return -1;
+        if (b.code === 'USD') return 1;
+        if (a.code === 'EUR') return -1;
+        if (b.code === 'EUR') return 1;
+        return 0;
+      });
 
     const cryptoRates = filteredRates.filter(r => r.type === 'crypto');
-    const otherRates = filteredRates.filter(r => r.type !== 'fiat' && r.type !== 'crypto' && r.type !== 'border');
+    const otherRates = filteredRates.filter(
+      r => r.type !== 'fiat' && r.type !== 'crypto' && r.type !== 'border',
+    );
 
     addSection('Tasa oficial • BCV', officialRates, {
       label: 'VER MESAS DE CAMBIO',
-      onPress: () => navigation.navigate('BankRates')
+      onPress: () => navigation.navigate('BankRates'),
     });
     addSection('Mercado Fronterizo (P2P)', borderRates);
     addSection('Mercado Cripto (P2P)', cryptoRates);
@@ -194,76 +217,132 @@ const ExchangeRatesScreen = () => {
     return items;
   }, [filteredRates, loading, refreshing, allRates, error, navigation]);
 
-  const renderItem = useCallback(({ item }: { item: ListItem }) => {
-    if (item.type === 'header') {
-      return (
-        <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>{item.title}</Text>
-          {item.action && (
-            <TouchableOpacity
-              onPress={item.action.onPress}
-              activeOpacity={0.7}
-              style={[styles.tag, styles.tagContainer, { backgroundColor: theme.colors.primaryContainer }]}>
-              <Text style={[styles.tagText, { color: theme.colors.onPrimaryContainer }]}>
-                {item.action.label}
-              </Text>
-              <MaterialCommunityIcons name="arrow-right" size={12} color={theme.colors.onPrimaryContainer} />
-            </TouchableOpacity>
-          )}
-        </View>
-      );
-    }
-
-    if (item.type === 'rate' && item.data) {
-      const rate = item.data;
-      const getDescriptiveSubtitle = (r: CurrencyRate) => {
-        if (r.type === 'fiat') return 'Banco Central de Venezuela';
-        if (r.type === 'crypto') return 'Cripto • P2P';
-        if (r.type === 'border') return 'Frontera • P2P';
-        return r.name;
-      };
-
-      return (
-        <RateCard
-          title={`${rate.code} / VES`}
-          subtitle={getDescriptiveSubtitle(rate)}
-          value={`${rate.value.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`}
-          changePercent={rate.changePercent !== null ? `${Math.abs(rate.changePercent).toFixed(2)}%` : ''}
-          isPositive={rate.changePercent !== null ? rate.changePercent >= 0 : true}
-          iconName={rate.iconName || 'currency-usd'}
-          iconBgColor={rate.type === 'crypto' ? undefined : theme.colors.infoContainer}
-          iconColor={rate.type === 'crypto' ? undefined : theme.colors.info}
-          onPress={() => navigation.navigate('CurrencyDetail', { rate })}
-        />
-      );
-    }
-
-    if (item.type === 'empty') {
-      if (error) {
+  const renderItem = useCallback(
+    ({ item }: { item: ListItem }) => {
+      if (item.type === 'header') {
         return (
-          <View style={styles.centerContainer}>
-            <MaterialCommunityIcons name="alert-circle-outline" size={40} color={theme.colors.error} />
-            <Text style={[styles.messageText, { color: theme.colors.onSurface }]}>{error}</Text>
-            <TouchableOpacity onPress={() => loadRates()} style={styles.retryButton}>
-              <Text style={[styles.retryText, { color: theme.colors.primary }]}>Reintentar</Text>
-            </TouchableOpacity>
+          <View style={styles.sectionHeader}>
+            <Text
+              style={[
+                styles.sectionTitle,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
+            >
+              {item.title}
+            </Text>
+            {item.action && (
+              <TouchableOpacity
+                onPress={item.action.onPress}
+                activeOpacity={0.7}
+                style={[
+                  styles.tag,
+                  styles.tagContainer,
+                  { backgroundColor: theme.colors.primaryContainer },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.tagText,
+                    { color: theme.colors.onPrimaryContainer },
+                  ]}
+                >
+                  {item.action.label}
+                </Text>
+                <MaterialCommunityIcons
+                  name="arrow-right"
+                  size={12}
+                  color={theme.colors.onPrimaryContainer}
+                />
+              </TouchableOpacity>
+            )}
           </View>
         );
       }
-      return (
-        <View style={styles.centerContainer}>
-          <MaterialCommunityIcons name="magnify-remove-outline" size={40} color={theme.colors.onSurfaceVariant} />
-          <Text style={[styles.messageText, { color: theme.colors.onSurfaceVariant }]}>
-            {filterType !== 'all'
-              ? `No hay resultados para "${filterType}"`
-              : "No se encontraron resultados"}
-          </Text>
-        </View>
-      );
-    }
 
-    return null;
-  }, [theme.colors, navigation, error, loadRates, filterType]);
+      if (item.type === 'rate' && item.data) {
+        const rate = item.data;
+        const getDescriptiveSubtitle = (r: CurrencyRate) => {
+          if (r.type === 'fiat') return 'Banco Central de Venezuela';
+          if (r.type === 'crypto') return 'Cripto • P2P';
+          if (r.type === 'border') return 'Frontera • P2P';
+          return r.name;
+        };
+
+        return (
+          <RateCard
+            title={`${rate.code} / VES`}
+            subtitle={getDescriptiveSubtitle(rate)}
+            value={`${rate.value.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`}
+            changePercent={
+              rate.changePercent !== null
+                ? `${Math.abs(rate.changePercent).toFixed(2)}%`
+                : ''
+            }
+            isPositive={
+              rate.changePercent !== null ? rate.changePercent >= 0 : true
+            }
+            iconName={rate.iconName || 'currency-usd'}
+            iconBgColor={
+              rate.type === 'crypto' ? undefined : theme.colors.infoContainer
+            }
+            iconColor={rate.type === 'crypto' ? undefined : theme.colors.info}
+            onPress={() => navigation.navigate('CurrencyDetail', { rate })}
+          />
+        );
+      }
+
+      if (item.type === 'empty') {
+        if (error) {
+          return (
+            <View style={styles.centerContainer}>
+              <MaterialCommunityIcons
+                name="alert-circle-outline"
+                size={40}
+                color={theme.colors.error}
+              />
+              <Text
+                style={[styles.messageText, { color: theme.colors.onSurface }]}
+              >
+                {error}
+              </Text>
+              <TouchableOpacity
+                onPress={() => loadRates()}
+                style={styles.retryButton}
+              >
+                <Text
+                  style={[styles.retryText, { color: theme.colors.primary }]}
+                >
+                  Reintentar
+                </Text>
+              </TouchableOpacity>
+            </View>
+          );
+        }
+        return (
+          <View style={styles.centerContainer}>
+            <MaterialCommunityIcons
+              name="magnify-remove-outline"
+              size={40}
+              color={theme.colors.onSurfaceVariant}
+            />
+            <Text
+              style={[
+                styles.messageText,
+                { color: theme.colors.onSurfaceVariant },
+              ]}
+            >
+              {filterType !== 'all'
+                ? `No hay resultados para "${filterType}"`
+                : 'No se encontraron resultados'}
+            </Text>
+          </View>
+        );
+      }
+
+      return null;
+    },
+    [theme.colors, navigation, error, loadRates, filterType],
+  );
 
   const renderHeader = () => (
     <View>
@@ -275,7 +354,7 @@ const ExchangeRatesScreen = () => {
           { label: 'Fronterizo', value: 'border' },
         ]}
         selectedValue={filterType}
-        onSelect={(value) => {
+        onSelect={value => {
           LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
           setExchangeRateFilters({ type: value as any });
         }}
@@ -288,7 +367,9 @@ const ExchangeRatesScreen = () => {
 
   if (loading && !refreshing && allRates.length === 0) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+      <View
+        style={[styles.container, { backgroundColor: theme.colors.background }]}
+      >
         <StatusBar
           backgroundColor="transparent"
           translucent
@@ -300,7 +381,9 @@ const ExchangeRatesScreen = () => {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       <StatusBar
         backgroundColor="transparent"
         translucent
@@ -308,16 +391,29 @@ const ExchangeRatesScreen = () => {
       />
 
       {/* Header */}
-      <View style={[styles.headerContainer, { backgroundColor: theme.colors.background }]}>
+      <View
+        style={[
+          styles.headerContainer,
+          { backgroundColor: theme.colors.background },
+        ]}
+      >
         <UnifiedHeader
           variant="section"
           title="Tasas de Cambio"
-          subtitle={isMarketOpen ? "Mercado abierto (Tiempo real)" : "Mercado BCV cerrado • P2P activo"}
-          subtitleIcon={isMarketOpen ? "clock-check-outline" : "clock-alert-outline"}
-          subtitleIconColor={isMarketOpen ? theme.colors.success : theme.colors.warning}
+          subtitle={
+            isMarketOpen
+              ? 'Mercado abierto (Tiempo real)'
+              : 'Mercado BCV cerrado • P2P activo'
+          }
+          subtitleIcon={
+            isMarketOpen ? 'clock-check-outline' : 'clock-alert-outline'
+          }
+          subtitleIconColor={
+            isMarketOpen ? theme.colors.success : theme.colors.warning
+          }
           onActionPress={() => loadRates()}
           rightActionIcon="refresh"
-          onNotificationPress={() => { }}
+          onNotificationPress={() => {}}
           notificationCount={1}
           style={styles.headerStyle}
         />
@@ -328,7 +424,9 @@ const ExchangeRatesScreen = () => {
             onChangeText={handleSearch}
             placeholder="Buscar moneda o token..."
             onFilterPress={() => {
-              LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+              LayoutAnimation.configureNext(
+                LayoutAnimation.Presets.easeInEaseOut,
+              );
               setShowFilters(!showFilters);
             }}
           />

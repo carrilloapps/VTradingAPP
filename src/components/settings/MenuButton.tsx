@@ -12,45 +12,51 @@ interface MenuButtonProps {
   hasTopBorder?: boolean;
 }
 
-const MenuButton: React.FC<MenuButtonProps> = ({ 
-  icon, 
-  label, 
-  onPress, 
-  isDanger = false, 
+const MenuButton: React.FC<MenuButtonProps> = ({
+  icon,
+  label,
+  onPress,
+  isDanger = false,
   showChevron = true,
-  hasTopBorder = false
+  hasTopBorder = false,
 }) => {
   const theme = useTheme();
   const colors = theme.colors as any;
-  
-  const textColor = isDanger 
-    ? colors.danger
-    : theme.colors.onSurface;
-    
-  const iconColor = isDanger 
-    ? colors.danger
-    : theme.colors.onSurfaceVariant;
+
+  const textColor = isDanger ? colors.danger : theme.colors.onSurface;
+
+  const iconColor = isDanger ? colors.danger : theme.colors.onSurfaceVariant;
 
   return (
-    <TouchableOpacity 
+    <TouchableOpacity
       onPress={onPress}
       style={[
-        styles.container, 
-        { 
+        styles.container,
+        {
           backgroundColor: theme.colors.elevation.level1,
         },
         hasTopBorder && styles.topBorder,
         hasTopBorder && {
           borderTopColor: theme.colors.outline,
-        }
+        },
       ]}
     >
       <MaterialCommunityIcons name={icon} size={24} color={iconColor} />
-      <Text style={[styles.label, { color: textColor }, isDanger && styles.boldLabel]}>
+      <Text
+        style={[
+          styles.label,
+          { color: textColor },
+          isDanger && styles.boldLabel,
+        ]}
+      >
         {label}
       </Text>
       {showChevron && !isDanger && (
-        <MaterialCommunityIcons name="chevron-right" size={24} color={theme.colors.onSurfaceVariant} />
+        <MaterialCommunityIcons
+          name="chevron-right"
+          size={24}
+          color={theme.colors.onSurfaceVariant}
+        />
       )}
     </TouchableOpacity>
   );
@@ -73,7 +79,7 @@ const styles = StyleSheet.create({
   },
   topBorder: {
     borderTopWidth: 1,
-  }
+  },
 });
 
 export default MenuButton;

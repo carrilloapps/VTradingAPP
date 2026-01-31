@@ -7,24 +7,29 @@ jest.mock('react-native-vector-icons/MaterialCommunityIcons', () => 'Icon');
 
 describe('SearchBar', () => {
   it('renders correctly with placeholder', () => {
-    const { getByPlaceholderText } = render(<SearchBar placeholder="Test placeholder" />);
+    const { getByPlaceholderText } = render(
+      <SearchBar placeholder="Test placeholder" />,
+    );
     expect(getByPlaceholderText('Test placeholder')).toBeTruthy();
   });
 
   it('calls onChangeText when text changes', () => {
     const mockOnChange = jest.fn();
     const { getByPlaceholderText } = render(
-      <SearchBar onChangeText={mockOnChange} />
+      <SearchBar onChangeText={mockOnChange} />,
     );
 
-    fireEvent.changeText(getByPlaceholderText('Buscar moneda o token...'), 'test');
+    fireEvent.changeText(
+      getByPlaceholderText('Buscar moneda o token...'),
+      'test',
+    );
     expect(mockOnChange).toHaveBeenCalledWith('test');
   });
 
   it('calls onFilterPress when filter button is pressed', () => {
     const mockOnFilter = jest.fn();
     const { getByLabelText } = render(
-      <SearchBar onFilterPress={mockOnFilter} />
+      <SearchBar onFilterPress={mockOnFilter} />,
     );
 
     fireEvent.press(getByLabelText('Filtros'));
@@ -35,11 +40,11 @@ describe('SearchBar', () => {
     const suggestions = ['Suggestion 1', 'Suggestion 2'];
     const mockOnSuggestionPress = jest.fn();
     const { getByPlaceholderText, getByText } = render(
-      <SearchBar 
-        value="Sug" 
-        suggestions={suggestions} 
+      <SearchBar
+        value="Sug"
+        suggestions={suggestions}
         onSuggestionPress={mockOnSuggestionPress}
-      />
+      />,
     );
 
     // Focus input to show suggestions
@@ -53,11 +58,11 @@ describe('SearchBar', () => {
     const suggestions = ['Suggestion 1'];
     const mockOnSuggestionPress = jest.fn();
     const { getByPlaceholderText, getByText } = render(
-      <SearchBar 
-        value="Sug" 
-        suggestions={suggestions} 
+      <SearchBar
+        value="Sug"
+        suggestions={suggestions}
         onSuggestionPress={mockOnSuggestionPress}
-      />
+      />,
     );
 
     fireEvent(getByPlaceholderText('Buscar moneda o token...'), 'focus');
@@ -69,7 +74,7 @@ describe('SearchBar', () => {
   it('shows clear button when value is present', () => {
     const mockOnChange = jest.fn();
     const { getByLabelText } = render(
-      <SearchBar value="test" onChangeText={mockOnChange} />
+      <SearchBar value="test" onChangeText={mockOnChange} />,
     );
 
     const clearButton = getByLabelText('Limpiar búsqueda');
@@ -79,7 +84,7 @@ describe('SearchBar', () => {
   it('calls onChangeText with empty string when clear button is pressed', () => {
     const mockOnChange = jest.fn();
     const { getByLabelText } = render(
-      <SearchBar value="test" onChangeText={mockOnChange} />
+      <SearchBar value="test" onChangeText={mockOnChange} />,
     );
 
     fireEvent.press(getByLabelText('Limpiar búsqueda'));
@@ -87,9 +92,7 @@ describe('SearchBar', () => {
   });
 
   it('does not show clear button when value is empty', () => {
-    const { queryByLabelText } = render(
-      <SearchBar value="" />
-    );
+    const { queryByLabelText } = render(<SearchBar value="" />);
 
     expect(queryByLabelText('Limpiar búsqueda')).toBeNull();
   });
@@ -97,7 +100,7 @@ describe('SearchBar', () => {
   it('has correct accessibility attributes', () => {
     const { getByLabelText } = render(<SearchBar />);
     const input = getByLabelText('Campo de búsqueda');
-    
+
     expect(input.props.accessibilityRole).toBe('search');
     expect(input.props.accessibilityHint).toBe('Introduce texto para buscar');
   });

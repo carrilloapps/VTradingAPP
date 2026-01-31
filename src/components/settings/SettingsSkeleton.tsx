@@ -9,7 +9,9 @@ const SettingsSkeleton = () => {
   const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+    <View
+      style={[styles.container, { backgroundColor: theme.colors.background }]}
+    >
       {/* Header Skeleton matches UnifiedHeader section variant */}
       <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
         <View style={styles.headerContent}>
@@ -20,8 +22,10 @@ const SettingsSkeleton = () => {
         </View>
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-
+      <ScrollView
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+      >
         {/* User Profile Skeleton */}
         <View style={styles.section}>
           <View
@@ -30,7 +34,7 @@ const SettingsSkeleton = () => {
               {
                 backgroundColor: theme.colors.elevation.level1,
                 borderColor: theme.colors.outline,
-              }
+              },
             ]}
           >
             <View style={styles.profileContent}>
@@ -57,11 +61,14 @@ const SettingsSkeleton = () => {
               {
                 backgroundColor: theme.colors.elevation.level1,
                 borderColor: theme.colors.outline,
-              }
+              },
             ]}
           >
             {[1, 2].map((_, index) => (
-              <View key={index} style={[styles.itemRow, index === 1 && styles.mb0]}>
+              <View
+                key={index}
+                style={[styles.itemRow, index === 1 && styles.mb0]}
+              >
                 <View style={styles.itemLeft}>
                   <Skeleton width={40} height={40} borderRadius={20} />
                   <View style={styles.itemText}>
@@ -85,11 +92,14 @@ const SettingsSkeleton = () => {
               {
                 backgroundColor: theme.colors.elevation.level1,
                 borderColor: theme.colors.outline,
-              }
+              },
             ]}
           >
             {[1, 2].map((_, index) => (
-              <View key={index} style={[styles.itemRow, index === 1 && styles.mb0]}>
+              <View
+                key={index}
+                style={[styles.itemRow, index === 1 && styles.mb0]}
+              >
                 <View style={styles.itemLeft}>
                   <Skeleton width={32} height={32} borderRadius={8} />
                   <Skeleton width={120} height={16} style={styles.ml12} />
@@ -110,11 +120,14 @@ const SettingsSkeleton = () => {
               {
                 backgroundColor: theme.colors.elevation.level1,
                 borderColor: theme.colors.outline,
-              }
+              },
             ]}
           >
             {[1, 2, 3].map((_, index) => (
-              <View key={index} style={[styles.itemRow, index === 2 && styles.mb0]}>
+              <View
+                key={index}
+                style={[styles.itemRow, index === 2 && styles.mb0]}
+              >
                 <View style={styles.itemLeft}>
                   <Skeleton width={24} height={24} borderRadius={4} />
                   <Skeleton width={150} height={16} style={styles.ml12} />
@@ -129,7 +142,6 @@ const SettingsSkeleton = () => {
             <Skeleton width={150} height={12} />
           </View>
         </View>
-
       </ScrollView>
     </View>
   );
@@ -212,17 +224,17 @@ const styles = StyleSheet.create({
     marginTop: 32,
   },
   mb0: {
-    marginBottom: 0
+    marginBottom: 0,
   },
   mt6: {
-    marginTop: 6
+    marginTop: 6,
   },
   ml12: {
-    marginLeft: 12
+    marginLeft: 12,
   },
   mb8: {
-    marginBottom: 8
-  }
+    marginBottom: 8,
+  },
 });
 
 export default SettingsSkeleton;

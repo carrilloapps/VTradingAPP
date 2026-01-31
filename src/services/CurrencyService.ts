@@ -146,7 +146,11 @@ export class CurrencyService {
    */
   static async getRates(forceRefresh = false): Promise<CurrencyRate[]> {
     // Return in-memory data if valid and not forcing refresh
-    if (!forceRefresh && this.currentRates.length > 0 && (Date.now() - this.lastFetch < this.CACHE_DURATION)) {
+    if (
+      !forceRefresh &&
+      this.currentRates.length > 0 &&
+      Date.now() - this.lastFetch < this.CACHE_DURATION
+    ) {
       return this.currentRates;
     }
 
@@ -154,21 +158,23 @@ export class CurrencyService {
     if (this.fetchPromise && !forceRefresh) return this.fetchPromise;
 
     this.fetchPromise = (async () => {
-      const trace = await performanceService.startTrace('get_currency_rates_service');
+      const trace = await performanceService.startTrace(
+        'get_currency_rates_service',
+      );
       try {
         // We use apiClient's cache as a fallback, but here we manage application state
         // Header 'X-API-Key' is now handled by ApiClient default
         const response = await apiClient.get<ApiRatesResponse>('api/rates', {
           headers: {
-            'Accept': '*/*',
+            Accept: '*/*',
           },
           params: forceRefresh ? { _t: Date.now() } : undefined, // Force fresh data from server
           useCache: false, // Disable cache as requested
-          cacheTTL: 0
+          cacheTTL: 0,
         });
 
         if (!response || (!response.rates && !response.crypto)) {
-          throw new Error("Invalid API Response structure");
+          throw new Error('Invalid API Response structure');
         }
 
         const rates: CurrencyRate[] = [];
@@ -187,17 +193,38 @@ export class CurrencyService {
             name = `${apiRate.currency}/VES • ${sourceLabel}`;
 
             switch (apiRate.currency) {
-              case 'EUR': iconName = 'currency-eur'; break;
-              case 'USD': iconName = 'currency-usd'; break;
-              case 'CNY': iconName = 'currency-cny'; break;
-              case 'RUB': iconName = 'currency-rub'; break;
-              case 'TRY': iconName = 'currency-try'; break;
-              case 'GBP': iconName = 'currency-gbp'; break;
-              case 'JPY': iconName = 'currency-jpy'; break;
-              case 'BRL': iconName = 'currency-brl'; break;
-              case 'INR': iconName = 'currency-inr'; break;
-              case 'KRW': iconName = 'currency-krw'; break;
-              default: iconName = 'currency-usd';
+              case 'EUR':
+                iconName = 'currency-eur';
+                break;
+              case 'USD':
+                iconName = 'currency-usd';
+                break;
+              case 'CNY':
+                iconName = 'currency-cny';
+                break;
+              case 'RUB':
+                iconName = 'currency-rub';
+                break;
+              case 'TRY':
+                iconName = 'currency-try';
+                break;
+              case 'GBP':
+                iconName = 'currency-gbp';
+                break;
+              case 'JPY':
+                iconName = 'currency-jpy';
+                break;
+              case 'BRL':
+                iconName = 'currency-brl';
+                break;
+              case 'INR':
+                iconName = 'currency-inr';
+                break;
+              case 'KRW':
+                iconName = 'currency-krw';
+                break;
+              default:
+                iconName = 'currency-usd';
             }
 
             rates.push({
@@ -205,15 +232,21 @@ export class CurrencyService {
               code: apiRate.currency,
               name: name,
               value: CurrencyService.parseRate(apiRate.rate?.average),
-              changePercent: CurrencyService.parsePercentage(apiRate.change?.average?.percent || apiRate.change?.percent),
+              changePercent: CurrencyService.parsePercentage(
+                apiRate.change?.average?.percent || apiRate.change?.percent,
+              ),
               type: 'fiat',
               iconName: iconName,
               lastUpdated: apiRate.date || nowISO,
               source: sourceLabel,
               buyValue: CurrencyService.parseRate(apiRate.rate?.buy),
               sellValue: CurrencyService.parseRate(apiRate.rate?.sell),
-              buyChangePercent: CurrencyService.parsePercentage(apiRate.change?.buy?.percent),
-              sellChangePercent: CurrencyService.parsePercentage(apiRate.change?.sell?.percent)
+              buyChangePercent: CurrencyService.parsePercentage(
+                apiRate.change?.buy?.percent,
+              ),
+              sellChangePercent: CurrencyService.parsePercentage(
+                apiRate.change?.sell?.percent,
+              ),
             });
           });
         }
@@ -229,18 +262,41 @@ export class CurrencyService {
             name = `${apiRate.currency}/VES • ${sourceLabel}`;
 
             switch (apiRate.currency) {
-              case 'EUR': iconName = 'currency-eur'; break;
-              case 'USD': iconName = 'currency-usd'; break;
-              case 'CNY': iconName = 'currency-cny'; break;
-              case 'RUB': iconName = 'currency-rub'; break;
-              case 'TRY': iconName = 'currency-try'; break;
-              case 'GBP': iconName = 'currency-gbp'; break;
-              case 'JPY': iconName = 'currency-jpy'; break;
-              case 'COP': iconName = 'currency-usd'; break;
-              case 'BRL': iconName = 'currency-brl'; break;
-              case 'DAI': iconName = 'currency-dai'; break;
-              case 'VES': iconName = 'Bs'; break;
-              default: iconName = 'currency-usd';
+              case 'EUR':
+                iconName = 'currency-eur';
+                break;
+              case 'USD':
+                iconName = 'currency-usd';
+                break;
+              case 'CNY':
+                iconName = 'currency-cny';
+                break;
+              case 'RUB':
+                iconName = 'currency-rub';
+                break;
+              case 'TRY':
+                iconName = 'currency-try';
+                break;
+              case 'GBP':
+                iconName = 'currency-gbp';
+                break;
+              case 'JPY':
+                iconName = 'currency-jpy';
+                break;
+              case 'COP':
+                iconName = 'currency-usd';
+                break;
+              case 'BRL':
+                iconName = 'currency-brl';
+                break;
+              case 'DAI':
+                iconName = 'currency-dai';
+                break;
+              case 'VES':
+                iconName = 'Bs';
+                break;
+              default:
+                iconName = 'currency-usd';
             }
 
             // Calculate values if average is missing (common in P2P/Border rates)
@@ -264,11 +320,15 @@ export class CurrencyService {
             // Calculate change percent
             let changePercent = 0;
             if (apiRate.change?.percent !== undefined) {
-              changePercent = CurrencyService.parsePercentage(apiRate.change.percent);
+              changePercent = CurrencyService.parsePercentage(
+                apiRate.change.percent,
+              );
             } else {
               const buyPercent = apiRate.change?.buy?.percent || 0;
               const sellPercent = apiRate.change?.sell?.percent || 0;
-              changePercent = CurrencyService.parsePercentage((buyPercent + sellPercent) / 2);
+              changePercent = CurrencyService.parsePercentage(
+                (buyPercent + sellPercent) / 2,
+              );
             }
 
             rates.push({
@@ -283,15 +343,19 @@ export class CurrencyService {
               source: sourceLabel,
               buyValue: finalBuy,
               sellValue: finalSell,
-              buyChangePercent: apiRate.change?.buy?.percent ? CurrencyService.parsePercentage(apiRate.change.buy.percent) : undefined,
-              sellChangePercent: apiRate.change?.sell?.percent ? CurrencyService.parsePercentage(apiRate.change.sell.percent) : undefined
+              buyChangePercent: apiRate.change?.buy?.percent
+                ? CurrencyService.parsePercentage(apiRate.change.buy.percent)
+                : undefined,
+              sellChangePercent: apiRate.change?.sell?.percent
+                ? CurrencyService.parsePercentage(apiRate.change.sell.percent)
+                : undefined,
             });
           });
         }
 
         // 2. Process Crypto Rates
         if (response.crypto && Array.isArray(response.crypto)) {
-          response.crypto.forEach((cryptoItem) => {
+          response.crypto.forEach(cryptoItem => {
             const currencyCode = cryptoItem.currency.toUpperCase();
             let name = currencyCode;
             let iconName = 'currency-bitcoin';
@@ -300,20 +364,55 @@ export class CurrencyService {
 
             switch (currencyCode) {
               case 'USDT':
-                name = sourceLabel.toLowerCase() === 'paralelo' ? 'USDT Tether' : `USDT • ${sourceLabel}`;
+                name =
+                  sourceLabel.toLowerCase() === 'paralelo'
+                    ? 'USDT Tether'
+                    : `USDT • ${sourceLabel}`;
                 iconName = 'alpha-t-circle-outline';
                 break;
-              case 'BTC': name = `Bitcoin • ${sourceLabel}`; iconName = 'currency-btc'; break;
-              case 'VES': name = `Bolívar • ${sourceLabel}`; iconName = 'Bs'; break;
-              case 'ETH': name = `Ethereum • ${sourceLabel}`; iconName = 'ethereum'; break;
-              case 'USDC': name = `USDC • ${sourceLabel}`; iconName = 'alpha-u-circle-outline'; break;
-              case 'BNB': name = `BNB • ${sourceLabel}`; iconName = 'hexagon-slice-6'; break;
-              case 'DAI': name = `DAI • ${sourceLabel}`; iconName = 'alpha-d-circle-outline'; break;
-              case 'FDUSD': name = `FDUSD • ${sourceLabel}`; iconName = 'alpha-f-circle-outline'; break;
-              case 'BUSD': name = `BUSD • ${sourceLabel}`; iconName = 'alpha-b-circle-outline'; break;
-              case 'LTC': name = `Litecoin • ${sourceLabel}`; iconName = 'litecoin'; break;
-              case 'DOGE': name = `Dogecoin • ${sourceLabel}`; iconName = 'dog'; break;
-              default: name = `${currencyCode} • ${sourceLabel}`; iconName = 'currency-btc';
+              case 'BTC':
+                name = `Bitcoin • ${sourceLabel}`;
+                iconName = 'currency-btc';
+                break;
+              case 'VES':
+                name = `Bolívar • ${sourceLabel}`;
+                iconName = 'Bs';
+                break;
+              case 'ETH':
+                name = `Ethereum • ${sourceLabel}`;
+                iconName = 'ethereum';
+                break;
+              case 'USDC':
+                name = `USDC • ${sourceLabel}`;
+                iconName = 'alpha-u-circle-outline';
+                break;
+              case 'BNB':
+                name = `BNB • ${sourceLabel}`;
+                iconName = 'hexagon-slice-6';
+                break;
+              case 'DAI':
+                name = `DAI • ${sourceLabel}`;
+                iconName = 'alpha-d-circle-outline';
+                break;
+              case 'FDUSD':
+                name = `FDUSD • ${sourceLabel}`;
+                iconName = 'alpha-f-circle-outline';
+                break;
+              case 'BUSD':
+                name = `BUSD • ${sourceLabel}`;
+                iconName = 'alpha-b-circle-outline';
+                break;
+              case 'LTC':
+                name = `Litecoin • ${sourceLabel}`;
+                iconName = 'litecoin';
+                break;
+              case 'DOGE':
+                name = `Dogecoin • ${sourceLabel}`;
+                iconName = 'dog';
+                break;
+              default:
+                name = `${currencyCode} • ${sourceLabel}`;
+                iconName = 'currency-btc';
             }
 
             // Calculate average value
@@ -338,8 +437,12 @@ export class CurrencyService {
               source: sourceLabel,
               buyValue: CurrencyService.parseRate(cryptoItem.rate?.buy),
               sellValue: CurrencyService.parseRate(cryptoItem.rate?.sell),
-              buyChangePercent: CurrencyService.parsePercentage(cryptoItem.change?.buy?.percent),
-              sellChangePercent: CurrencyService.parsePercentage(cryptoItem.change?.sell?.percent)
+              buyChangePercent: CurrencyService.parsePercentage(
+                cryptoItem.change?.buy?.percent,
+              ),
+              sellChangePercent: CurrencyService.parsePercentage(
+                cryptoItem.change?.sell?.percent,
+              ),
             });
           });
         }
@@ -354,7 +457,7 @@ export class CurrencyService {
             changePercent: null,
             type: 'fiat',
             iconName: 'Bs', // Custom icon for base
-            lastUpdated: new Date().toISOString()
+            lastUpdated: new Date().toISOString(),
           });
         }
 
@@ -363,14 +466,13 @@ export class CurrencyService {
         this.notifyListeners(rates);
 
         return rates;
-
       } catch (e) {
         observabilityService.captureError(e, {
           context: 'CurrencyService.getRates',
           method: 'GET',
           endpoint: 'api/general-rates',
           forceRefresh: forceRefresh,
-          hasCachedData: this.currentRates.length > 0
+          hasCachedData: this.currentRates.length > 0,
         });
         trace.putAttribute('error', 'true');
 
@@ -402,25 +504,38 @@ export class CurrencyService {
     if (!query) return rates;
 
     const lowerQuery = query.toLowerCase().trim();
-    return rates.filter(rate =>
-      rate.code.toLowerCase().includes(lowerQuery) ||
-      rate.name.toLowerCase().includes(lowerQuery)
+    return rates.filter(
+      rate =>
+        rate.code.toLowerCase().includes(lowerQuery) ||
+        rate.name.toLowerCase().includes(lowerQuery),
     );
   }
 
   /**
    * Obtiene tasas bancarias con paginación
    */
-  static async getBankRates(page = 1, limit = 15): Promise<{ rates: CurrencyRate[], pagination: ApiBankRatesResponse['pagination'] }> {
+  static async getBankRates(
+    page = 1,
+    limit = 15,
+  ): Promise<{
+    rates: CurrencyRate[];
+    pagination: ApiBankRatesResponse['pagination'];
+  }> {
     const trace = await performanceService.startTrace('get_bank_rates_service');
     try {
-      const response = await apiClient.get<ApiBankRatesResponse>('api/rates/banks', {
-        params: { page, limit },
-        useCache: false
-      });
+      const response = await apiClient.get<ApiBankRatesResponse>(
+        'api/rates/banks',
+        {
+          params: { page, limit },
+          useCache: false,
+        },
+      );
 
       if (!response || !response.rates) {
-        return { rates: [], pagination: { page: 1, limit, total: 0, totalPages: 1 } };
+        return {
+          rates: [],
+          pagination: { page: 1, limit, total: 0, totalPages: 1 },
+        };
       }
 
       const rates: CurrencyRate[] = response.rates.map((rate, index) => ({
@@ -438,18 +553,17 @@ export class CurrencyService {
       }));
 
       return { rates, pagination: response.pagination };
-
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'CurrencyService.getBankRates',
         method: 'GET',
         endpoint: 'api/bank-rates',
         page: page,
-        limit: limit
+        limit: limit,
       });
       return {
         rates: [],
-        pagination: { page, limit, total: 0, totalPages: 1 }
+        pagination: { page, limit, total: 0, totalPages: 1 },
       };
     } finally {
       await performanceService.stopTrace(trace);
@@ -460,7 +574,7 @@ export class CurrencyService {
    * Convierte un monto de una divisa base a VES
    */
   static convert(amount: number, rateValue: number): number {
-    if (amount < 0) throw new Error("Amount cannot be negative");
+    if (amount < 0) throw new Error('Amount cannot be negative');
     return amount * rateValue;
   }
 
@@ -468,7 +582,11 @@ export class CurrencyService {
    * Safe cross-rate conversion: (Amount * FromRate) / ToRate
    * Reduces floating point errors by multiplying before dividing.
    */
-  static convertCrossRate(amount: number, fromRate: number, toRate: number): number {
+  static convertCrossRate(
+    amount: number,
+    fromRate: number,
+    toRate: number,
+  ): number {
     if (amount < 0) return 0;
     if (toRate === 0) return 0;
     return (amount * fromRate) / toRate;
@@ -482,33 +600,44 @@ export class CurrencyService {
    * 3. Border -> VES/Bs OR Stablecoins (USDT, USDC, DAI, FDUSD) allowed.
    * 4. Crypto -> VES/Bs, Border OR Crypto allowed.
    */
-  static getAvailableTargetRates(source: CurrencyRate, allRates: CurrencyRate[]): CurrencyRate[] {
+  static getAvailableTargetRates(
+    source: CurrencyRate,
+    allRates: CurrencyRate[],
+  ): CurrencyRate[] {
     // Rule 1: VES -> All
     if (source.code === 'VES' || source.code === 'Bs') return allRates;
 
     // Rule 2: BCV (Fiat) -> VES, Crypto or Border
     if (source.type === 'fiat') {
-      return allRates.filter(r => r.code === 'VES' || r.code === 'Bs' || r.type === 'crypto' || r.type === 'border');
+      return allRates.filter(
+        r =>
+          r.code === 'VES' ||
+          r.code === 'Bs' ||
+          r.type === 'crypto' ||
+          r.type === 'border',
+      );
     }
 
     // Rule 3: Border -> VES, Stablecoins or Fiat
     if (source.type === 'border') {
-      return allRates.filter(r =>
-        r.code === 'VES' ||
-        r.code === 'Bs' ||
-        r.type === 'fiat' ||
-        (r.type === 'crypto' && STABLECOINS.includes(r.code))
+      return allRates.filter(
+        r =>
+          r.code === 'VES' ||
+          r.code === 'Bs' ||
+          r.type === 'fiat' ||
+          (r.type === 'crypto' && STABLECOINS.includes(r.code)),
       );
     }
 
     // Rule 4: Crypto -> VES, Border, Crypto or Fiat
     if (source.type === 'crypto') {
-      return allRates.filter(r =>
-        r.code === 'VES' ||
-        r.code === 'Bs' ||
-        r.type === 'border' ||
-        r.type === 'crypto' ||
-        r.type === 'fiat'
+      return allRates.filter(
+        r =>
+          r.code === 'VES' ||
+          r.code === 'Bs' ||
+          r.type === 'border' ||
+          r.type === 'crypto' ||
+          r.type === 'fiat',
       );
     }
 

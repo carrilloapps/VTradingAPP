@@ -1,11 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ScrollView, StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  StatusBar,
+  KeyboardAvoidingView,
+  Platform,
+} from 'react-native';
 import { Text, TextInput, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuthStore } from '../../stores/authStore';
 import { useToastStore } from '../../stores/toastStore';
-import { analyticsService, ANALYTICS_EVENTS } from '../../services/firebase/AnalyticsService';
+import {
+  analyticsService,
+  ANALYTICS_EVENTS,
+} from '../../services/firebase/AnalyticsService';
 import { AppConfig } from '../../constants/AppConfig';
 import AuthLoading from '../../components/auth/AuthLoading';
 import CustomButton from '../../components/ui/CustomButton';
@@ -18,42 +28,45 @@ const RegisterScreen = ({ navigation }: any) => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
   const { signUp, googleSignIn, isLoading } = useAuthStore();
-  const showToast = useToastStore((state) => state.showToast);
+  const showToast = useToastStore(state => state.showToast);
 
-  const themeStyles = React.useMemo(() => ({
-    container: {
-      backgroundColor: theme.colors.background,
-    },
-    footerText: {
-      color: theme.colors.onSurface,
-    },
-    legalText: {
-      color: theme.colors.onSurfaceVariant,
-    },
-    dividerLine: {
-      backgroundColor: theme.colors.outline,
-    },
-    dividerText: {
-      marginHorizontal: theme.spacing.s,
-      color: theme.colors.onSurfaceVariant,
-    },
-    title: {
-      color: theme.colors.primary,
-      fontWeight: 'bold' as const,
-    },
-    titleRow: {
-      // Removed flex direction as it now only contains title
-      alignItems: 'center' as const,
-      justifyContent: 'center' as const,
-      marginTop: 0,
-      marginBottom: theme.spacing.s,
-    },
-    subtitle: {
-      color: theme.colors.onSurfaceVariant,
-      textAlign: 'center' as const,
-      marginBottom: theme.spacing.l,
-    },
-  }), [theme]);
+  const themeStyles = React.useMemo(
+    () => ({
+      container: {
+        backgroundColor: theme.colors.background,
+      },
+      footerText: {
+        color: theme.colors.onSurface,
+      },
+      legalText: {
+        color: theme.colors.onSurfaceVariant,
+      },
+      dividerLine: {
+        backgroundColor: theme.colors.outline,
+      },
+      dividerText: {
+        marginHorizontal: theme.spacing.s,
+        color: theme.colors.onSurfaceVariant,
+      },
+      title: {
+        color: theme.colors.primary,
+        fontWeight: 'bold' as const,
+      },
+      titleRow: {
+        // Removed flex direction as it now only contains title
+        alignItems: 'center' as const,
+        justifyContent: 'center' as const,
+        marginTop: 0,
+        marginBottom: theme.spacing.s,
+      },
+      subtitle: {
+        color: theme.colors.onSurfaceVariant,
+        textAlign: 'center' as const,
+        marginBottom: theme.spacing.l,
+      },
+    }),
+    [theme],
+  );
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -111,14 +124,16 @@ const RegisterScreen = ({ navigation }: any) => {
     if (validate()) {
       setIsSubmitting(true);
       try {
-        await analyticsService.logEvent(ANALYTICS_EVENTS.SIGN_UP_ATTEMPT, { method: 'password' });
+        await analyticsService.logEvent(ANALYTICS_EVENTS.SIGN_UP_ATTEMPT, {
+          method: 'password',
+        });
         await signUp(email, password, showToast);
         // Sign up exitoso ya se trackea en authStore con logLogin
       } catch (e) {
         observabilityService.captureError(e, {
           context: 'RegisterScreen.handleRegister',
           method: 'password',
-          email
+          email,
         });
         // Error ya se trackea en authStore
         // Error handled in authStore
@@ -131,13 +146,15 @@ const RegisterScreen = ({ navigation }: any) => {
   const handleGoogleRegister = async () => {
     setIsSubmitting(true);
     try {
-      await analyticsService.logEvent(ANALYTICS_EVENTS.SIGN_UP_ATTEMPT, { method: 'google' });
+      await analyticsService.logEvent(ANALYTICS_EVENTS.SIGN_UP_ATTEMPT, {
+        method: 'google',
+      });
       await googleSignIn(showToast);
       // Sign up exitoso ya se trackea en authStore
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'RegisterScreen.handleGoogleRegister',
-        method: 'google'
+        method: 'google',
       });
       // Error ya se trackea en authStore
     } finally {
@@ -165,7 +182,7 @@ const RegisterScreen = ({ navigation }: any) => {
         hideDivider
       />
       <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.flex1}
       >
         <ScrollView
@@ -175,8 +192,8 @@ const RegisterScreen = ({ navigation }: any) => {
             {
               paddingTop: theme.spacing.m,
               paddingBottom: insets.bottom + theme.spacing.xl,
-              paddingHorizontal: theme.spacing.xl
-            }
+              paddingHorizontal: theme.spacing.xl,
+            },
           ]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
@@ -211,11 +228,20 @@ const RegisterScreen = ({ navigation }: any) => {
                 accessibilityLabel="Correo electrónico"
                 accessibilityHint="Ingresa tu correo para registrarte"
                 error={!!emailError}
-                left={<TextInput.Icon icon="email" accessibilityLabel="Icono de correo" />}
+                left={
+                  <TextInput.Icon
+                    icon="email"
+                    accessibilityLabel="Icono de correo"
+                  />
+                }
                 style={styles.input}
                 disabled={isBusy}
               />
-              <HelperText type="error" visible={!!emailError} style={{ marginBottom: -theme.spacing.xs }}>
+              <HelperText
+                type="error"
+                visible={!!emailError}
+                style={{ marginBottom: -theme.spacing.xs }}
+              >
                 {emailError}
               </HelperText>
             </View>
@@ -230,18 +256,31 @@ const RegisterScreen = ({ navigation }: any) => {
                 accessibilityLabel="Contraseña"
                 accessibilityHint="Crea una contraseña segura"
                 error={!!passwordError}
-                left={<TextInput.Icon icon="lock" accessibilityLabel="Icono de candado" />}
+                left={
+                  <TextInput.Icon
+                    icon="lock"
+                    accessibilityLabel="Icono de candado"
+                  />
+                }
                 right={
                   <TextInput.Icon
-                    icon={secureTextEntry ? "eye" : "eye-off"}
+                    icon={secureTextEntry ? 'eye' : 'eye-off'}
                     onPress={() => setSecureTextEntry(!secureTextEntry)}
-                    accessibilityLabel={secureTextEntry ? "Mostrar contraseña" : "Ocultar contraseña"}
+                    accessibilityLabel={
+                      secureTextEntry
+                        ? 'Mostrar contraseña'
+                        : 'Ocultar contraseña'
+                    }
                   />
                 }
                 style={styles.input}
                 disabled={isBusy}
               />
-              <HelperText type="error" visible={!!passwordError} style={{ marginBottom: -theme.spacing.xs }}>
+              <HelperText
+                type="error"
+                visible={!!passwordError}
+                style={{ marginBottom: -theme.spacing.xs }}
+              >
                 {passwordError}
               </HelperText>
             </View>
@@ -256,12 +295,23 @@ const RegisterScreen = ({ navigation }: any) => {
                 accessibilityLabel="Confirmar contraseña"
                 accessibilityHint="Repite tu contraseña"
                 error={!!confirmPasswordError}
-                left={<TextInput.Icon icon="lock-check" accessibilityLabel="Icono de verificación" />}
+                left={
+                  <TextInput.Icon
+                    icon="lock-check"
+                    accessibilityLabel="Icono de verificación"
+                  />
+                }
                 right={
                   <TextInput.Icon
-                    icon={confirmSecureTextEntry ? "eye" : "eye-off"}
-                    onPress={() => setConfirmSecureTextEntry(!confirmSecureTextEntry)}
-                    accessibilityLabel={confirmSecureTextEntry ? "Mostrar contraseña" : "Ocultar contraseña"}
+                    icon={confirmSecureTextEntry ? 'eye' : 'eye-off'}
+                    onPress={() =>
+                      setConfirmSecureTextEntry(!confirmSecureTextEntry)
+                    }
+                    accessibilityLabel={
+                      confirmSecureTextEntry
+                        ? 'Mostrar contraseña'
+                        : 'Ocultar contraseña'
+                    }
                   />
                 }
                 style={styles.input}
@@ -309,18 +359,31 @@ const RegisterScreen = ({ navigation }: any) => {
             </View>
 
             <View style={[styles.legal, { marginTop: theme.spacing.m }]}>
-              <Text variant="bodySmall" style={[themeStyles.legalText, styles.legalText]}>
+              <Text
+                variant="bodySmall"
+                style={[themeStyles.legalText, styles.legalText]}
+              >
                 Al continuar aceptas nuestras{' '}
                 <Text
                   style={[styles.linkText, { color: theme.colors.primary }]}
-                  onPress={() => openExternalUrl(AppConfig.PRIVACY_POLICY_URL, 'Políticas de privacidad')}
+                  onPress={() =>
+                    openExternalUrl(
+                      AppConfig.PRIVACY_POLICY_URL,
+                      'Políticas de privacidad',
+                    )
+                  }
                 >
                   Políticas de privacidad
                 </Text>
                 {' y '}
                 <Text
                   style={[styles.linkText, { color: theme.colors.primary }]}
-                  onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL, 'Términos y condiciones')}
+                  onPress={() =>
+                    openExternalUrl(
+                      AppConfig.TERMS_OF_USE_URL,
+                      'Términos y condiciones',
+                    )
+                  }
                 >
                   Términos y condiciones
                 </Text>

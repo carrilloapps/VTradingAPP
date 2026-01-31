@@ -10,7 +10,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
  * Must be placed inside ToastProvider
  */
 const NotificationController: React.FC = () => {
-  const showToast = useToastStore((state) => state.showToast);
+  const showToast = useToastStore(state => state.showToast);
 
   useEffect(() => {
     // Foreground listener
@@ -22,7 +22,7 @@ const NotificationController: React.FC = () => {
         showToast(remoteMessage.notification.body || 'Nueva notificación', {
           title: remoteMessage.notification.title || 'VTradingAPP',
           position: 'top',
-          type: 'info'
+          type: 'info',
         });
         return;
       }
@@ -38,7 +38,9 @@ const NotificationController: React.FC = () => {
 
         // Check local alerts
         const alerts = await storageService.getAlerts();
-        const activeAlerts = alerts.filter((a: any) => a.isActive && a.symbol === symbol);
+        const activeAlerts = alerts.filter(
+          (a: any) => a.isActive && a.symbol === symbol,
+        );
 
         activeAlerts.forEach((alert: any) => {
           const targetPrice = parseFloat(alert.target);
@@ -46,39 +48,44 @@ const NotificationController: React.FC = () => {
 
           if (alert.condition === 'above' && currentPrice >= targetPrice) {
             triggered = true;
-          } else if (alert.condition === 'below' && currentPrice <= targetPrice) {
+          } else if (
+            alert.condition === 'below' &&
+            currentPrice <= targetPrice
+          ) {
             triggered = true;
           }
 
           if (triggered) {
-             const isUp = alert.condition === 'above';
-             const actionVerb = isUp ? 'subió' : 'bajó';
-             // Format: COP/VES -> COP por VES
-             const readableSymbol = symbol.replace('/', ' por ');
-             
-             // Smart formatting: 2 decimals for standard values, preserve precision for small crypto
-             const formatPrice = (val: number) => val < 0.01 ? val : val.toFixed(2);
-             const displayCurrent = formatPrice(currentPrice);
-             const displayTarget = formatPrice(targetPrice);
+            const isUp = alert.condition === 'above';
+            const actionVerb = isUp ? 'subió' : 'bajó';
+            // Format: COP/VES -> COP por VES
+            const readableSymbol = symbol.replace('/', ' por ');
 
-             // Construct rich message with inline icon
-             const richMessage = (
-               <Text>
-                 El precio {actionVerb} a {displayCurrent} {readableSymbol}, según tu objetivo de{' '}
-                 <MaterialCommunityIcons 
-                    name={isUp ? 'trending-up' : 'trending-down'} 
-                    size={14} 
-                 />
-                 {' '}{displayTarget} {readableSymbol}
-               </Text>
-             );
-             
-             showToast(richMessage, {
-                 title: `${isUp ? 'Subida' : 'Bajada'} para ${symbol}`,
-                 type: isUp ? 'trendUp' : 'trendDown',
-                 position: 'top',
-                 duration: 6000
-             });
+            // Smart formatting: 2 decimals for standard values, preserve precision for small crypto
+            const formatPrice = (val: number) =>
+              val < 0.01 ? val : val.toFixed(2);
+            const displayCurrent = formatPrice(currentPrice);
+            const displayTarget = formatPrice(targetPrice);
+
+            // Construct rich message with inline icon
+            const richMessage = (
+              <Text>
+                El precio {actionVerb} a {displayCurrent} {readableSymbol},
+                según tu objetivo de{' '}
+                <MaterialCommunityIcons
+                  name={isUp ? 'trending-up' : 'trending-down'}
+                  size={14}
+                />{' '}
+                {displayTarget} {readableSymbol}
+              </Text>
+            );
+
+            showToast(richMessage, {
+              title: `${isUp ? 'Subida' : 'Bajada'} para ${symbol}`,
+              type: isUp ? 'trendUp' : 'trendDown',
+              position: 'top',
+              duration: 6000,
+            });
           }
         });
       }

@@ -27,7 +27,9 @@ const NoInternetModal = () => {
   if (!visible) return null;
 
   // Pre-calculate dynamic styles
-  const surfaceBackgroundColor = theme.dark ? 'rgba(30, 30, 30, 0.95)' : 'rgba(255, 255, 255, 0.95)';
+  const surfaceBackgroundColor = theme.dark
+    ? 'rgba(30, 30, 30, 0.95)'
+    : 'rgba(255, 255, 255, 0.95)';
   const glowOpacityValue = theme.dark ? 0.15 : 0.1;
   const iconWrapperBg = theme.colors.error + '15';
   const pulseCircleBorder = theme.colors.error + '30';
@@ -49,23 +51,29 @@ const NoInternetModal = () => {
             {
               backgroundColor: surfaceBackgroundColor,
               borderColor: theme.colors.outlineVariant,
-            }
+            },
           ]}
           elevation={5}
         >
           {/* Decorative Glow */}
-          <View style={[
-            styles.glowEffect,
-            styles.glowOpacity,
-            {
-              backgroundColor: theme.colors.error,
-              opacity: glowOpacityValue,
-            }
-          ]} />
+          <View
+            style={[
+              styles.glowEffect,
+              styles.glowOpacity,
+              {
+                backgroundColor: theme.colors.error,
+                opacity: glowOpacityValue,
+              },
+            ]}
+          />
 
           <View style={styles.content}>
-            <View style={[styles.iconWrapper, { backgroundColor: iconWrapperBg }]}>
-              <View style={[styles.pulseCircle, { borderColor: pulseCircleBorder }]} />
+            <View
+              style={[styles.iconWrapper, { backgroundColor: iconWrapperBg }]}
+            >
+              <View
+                style={[styles.pulseCircle, { borderColor: pulseCircleBorder }]}
+              />
               <MaterialCommunityIcons
                 name="wifi-off"
                 size={48}
@@ -73,12 +81,19 @@ const NoInternetModal = () => {
               />
             </View>
 
-            <Text variant="headlineSmall" style={[styles.title, { color: theme.colors.onSurface }]}>
+            <Text
+              variant="headlineSmall"
+              style={[styles.title, { color: theme.colors.onSurface }]}
+            >
               Sin conexión
             </Text>
 
-            <Text variant="bodyMedium" style={[styles.message, { color: theme.colors.onSurfaceVariant }]}>
-              Parece que tienes problemas con tu red. Verifica tu conexión para continuar operando en VTrading.
+            <Text
+              variant="bodyMedium"
+              style={[styles.message, { color: theme.colors.onSurfaceVariant }]}
+            >
+              Parece que tienes problemas con tu red. Verifica tu conexión para
+              continuar operando en VTrading.
             </Text>
 
             <View style={styles.footer}>
@@ -93,8 +108,15 @@ const NoInternetModal = () => {
               />
 
               <View style={styles.statusIndicator}>
-                <View style={[styles.statusDot, { backgroundColor: iconWrapperBg }]} />
-                <Text style={[styles.statusText, { color: theme.colors.onSurfaceVariant }]}>
+                <View
+                  style={[styles.statusDot, { backgroundColor: iconWrapperBg }]}
+                />
+                <Text
+                  style={[
+                    styles.statusText,
+                    { color: theme.colors.onSurfaceVariant },
+                  ]}
+                >
                   Servidores fuera de alcance
                 </Text>
               </View>
@@ -207,7 +229,7 @@ const styles = StyleSheet.create({
     right: 0,
     height: 80,
     zIndex: 0,
-  }
+  },
 });
 
 export default NoInternetModal;

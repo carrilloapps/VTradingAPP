@@ -4,29 +4,29 @@ import { useAppTheme } from '../../theme/theme';
 import ArticleSkeleton from './ArticleSkeleton';
 
 const ArticleDetailSkeleton = () => {
-    const theme = useAppTheme();
+  const theme = useAppTheme();
 
-    const containerStyle = [
-        styles.container,
-        { backgroundColor: theme.colors.background }
-    ];
+  const containerStyle = [
+    styles.container,
+    { backgroundColor: theme.colors.background },
+  ];
 
-    return (
-        <View style={containerStyle}>
-            <StatusBar 
-                barStyle={theme.dark ? 'light-content' : 'dark-content'} 
-                translucent 
-                backgroundColor="transparent" 
-            />
-            <ArticleSkeleton variant="detail" />
-        </View>
-    );
+  return (
+    <View style={containerStyle}>
+      <StatusBar
+        barStyle={theme.dark ? 'light-content' : 'dark-content'}
+        translucent
+        backgroundColor="transparent"
+      />
+      <ArticleSkeleton variant="detail" />
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
+  container: {
+    flex: 1,
+  },
 });
 
 export default ArticleDetailSkeleton;

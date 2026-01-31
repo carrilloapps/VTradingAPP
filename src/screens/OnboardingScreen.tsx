@@ -1,5 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, StatusBar, useWindowDimensions } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  StatusBar,
+  useWindowDimensions,
+} from 'react-native';
 import { Text, Icon } from 'react-native-paper';
 import PagerView from 'react-native-pager-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -7,21 +13,28 @@ import { useNavigation } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
 import { storageService } from '../services/StorageService';
 import { fcmService } from '../services/firebase/FCMService';
-import { analyticsService, ANALYTICS_EVENTS } from '../services/firebase/AnalyticsService';
+import {
+  analyticsService,
+  ANALYTICS_EVENTS,
+} from '../services/firebase/AnalyticsService';
 import { useAppTheme } from '../theme/theme';
 import { useToastStore } from '../stores/toastStore';
 import { observabilityService } from '../services/ObservabilityService';
 import CustomButton from '../components/ui/CustomButton';
 import SafeLogger from '../utils/safeLogger';
 
-
-
 interface OnboardingItem {
   key: string;
   title: string;
   description: string;
   icon: any;
-  colorType: 'primary' | 'secondary' | 'tertiary' | 'error' | 'warning' | 'info';
+  colorType:
+    | 'primary'
+    | 'secondary'
+    | 'tertiary'
+    | 'error'
+    | 'warning'
+    | 'info';
   hasAction?: boolean;
 }
 
@@ -32,7 +45,7 @@ interface OnboardingScreenProps {
 const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
   const theme = useAppTheme();
   const navigation = useNavigation();
-  const showToast = useToastStore((state) => state.showToast);
+  const showToast = useToastStore(state => state.showToast);
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
   const pagerRef = useRef<PagerView>(null);
@@ -44,46 +57,55 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
 
   const [currentPage, setCurrentPage] = useState(0);
 
-  const [notificationPermissionStatus, setNotificationPermissionStatus] = useState<boolean | null>(null);
+  const [notificationPermissionStatus, setNotificationPermissionStatus] =
+    useState<boolean | null>(null);
 
-  const ONBOARDING_DATA = React.useMemo<OnboardingItem[]>(() => [
-    {
-      key: 'welcome',
-      title: 'Bienvenido/a',
-      description: 'Tu herramienta definitiva para el seguimiento financiero en Venezuela. Cotizaciones, tasas y análisis en tiempo real.',
-      icon: require('../assets/images/logo.png'),
-      colorType: 'primary',
-    },
-    {
-      key: 'notifications',
-      title: 'Mantente Informado',
-      description: 'Recibe alertas instantáneas sobre cambios de tasas, noticias del mercado y actualizaciones importantes.',
-      icon: 'bell-ring',
-      colorType: 'tertiary',
-      hasAction: true,
-    },
-    {
-      key: 'bvc',
-      title: 'Bolsa de Valores de Caracas',
-      description: 'Sigue el pulso del mercado bursátil venezolano. Acciones, variaciones y tendencias de la BVC directamente en tu bolsillo.',
-      icon: 'domain',
-      colorType: 'primary',
-    },
-    {
-      key: 'bcv',
-      title: 'Banco Central de Venezuela',
-      description: 'Información oficial y actualizada. Monitorea las tasas oficiales del BCV y su histórico de comportamiento.',
-      icon: 'bank',
-      colorType: 'primary',
-    },
-    {
-      key: 'p2p',
-      title: 'Mercado P2P y Frontera',
-      description: 'Conoce el mercado, tasas de cambio en monedas fronterizas y arbitraje P2P en plataformas.',
-      icon: 'swap-horizontal-bold',
-      colorType: 'primary',
-    },
-  ], []);
+  const ONBOARDING_DATA = React.useMemo<OnboardingItem[]>(
+    () => [
+      {
+        key: 'welcome',
+        title: 'Bienvenido/a',
+        description:
+          'Tu herramienta definitiva para el seguimiento financiero en Venezuela. Cotizaciones, tasas y análisis en tiempo real.',
+        icon: require('../assets/images/logo.png'),
+        colorType: 'primary',
+      },
+      {
+        key: 'notifications',
+        title: 'Mantente Informado',
+        description:
+          'Recibe alertas instantáneas sobre cambios de tasas, noticias del mercado y actualizaciones importantes.',
+        icon: 'bell-ring',
+        colorType: 'tertiary',
+        hasAction: true,
+      },
+      {
+        key: 'bvc',
+        title: 'Bolsa de Valores de Caracas',
+        description:
+          'Sigue el pulso del mercado bursátil venezolano. Acciones, variaciones y tendencias de la BVC directamente en tu bolsillo.',
+        icon: 'domain',
+        colorType: 'primary',
+      },
+      {
+        key: 'bcv',
+        title: 'Banco Central de Venezuela',
+        description:
+          'Información oficial y actualizada. Monitorea las tasas oficiales del BCV y su histórico de comportamiento.',
+        icon: 'bank',
+        colorType: 'primary',
+      },
+      {
+        key: 'p2p',
+        title: 'Mercado P2P y Frontera',
+        description:
+          'Conoce el mercado, tasas de cambio en monedas fronterizas y arbitraje P2P en plataformas.',
+        icon: 'swap-horizontal-bold',
+        colorType: 'primary',
+      },
+    ],
+    [],
+  );
 
   const getPageColors = (_type: string) => {
     // Unify all under the primary financial green theme
@@ -103,7 +125,6 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
 
   // Modified Auto-advance logic
 
-
   // Check initial notification permission
   useEffect(() => {
     const checkStatus = async () => {
@@ -113,7 +134,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
       } catch (e) {
         observabilityService.captureError(e, {
           context: 'OnboardingScreen.checkStatus',
-          action: 'check_initial_permission'
+          action: 'check_initial_permission',
         });
         // Error checking permission
       }
@@ -126,7 +147,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
     setCurrentPage(position);
     analyticsService.logEvent(ANALYTICS_EVENTS.ONBOARDING_STEP_VIEW, {
       step_index: position,
-      step_name: ONBOARDING_DATA[position]?.key
+      step_name: ONBOARDING_DATA[position]?.key,
     });
   };
 
@@ -144,8 +165,6 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
     }
   };
 
-
-
   const handleSkipNotifications = () => {
     analyticsService.logEvent(ANALYTICS_EVENTS.NOTIFICATION_PERMISSION_SKIPPED);
     // Manually advance
@@ -159,14 +178,17 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
       const hasPermission = await fcmService.requestUserPermission();
       setNotificationPermissionStatus(hasPermission);
 
-      analyticsService.logEvent(ANALYTICS_EVENTS.NOTIFICATION_PERMISSION_RESULT, {
-        granted: hasPermission
-      });
+      analyticsService.logEvent(
+        ANALYTICS_EVENTS.NOTIFICATION_PERMISSION_RESULT,
+        {
+          granted: hasPermission,
+        },
+      );
 
       if (hasPermission) {
         await fcmService.getFCMToken();
         await fcmService.subscribeToDemographics(['all_users']);
-        // Auto-advance on success for better UX? Or let user click continue. 
+        // Auto-advance on success for better UX? Or let user click continue.
         // User said "until activate or omit". If activated, we can auto-advance or show "Continue".
         setTimeout(() => {
           pagerRef.current?.setPage(currentPage + 1);
@@ -175,13 +197,13 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'OnboardingScreen.handleRequestPermission',
-        action: 'request_notification_permission'
+        action: 'request_notification_permission',
       });
       await analyticsService.logError('onboarding_permission');
       showToast('Error al solicitar permiso', 'error');
     } finally {
       // Auto advance after decision? Optional.
-      // setTimeout(() => handleNext(), 1000); 
+      // setTimeout(() => handleNext(), 1000);
     }
   };
 
@@ -202,7 +224,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
 
   // Pre-calculate dynamic styles before rendering
   const containerBgColor = theme.colors.background;
-  const statusBarStyle = theme.dark ? "light-content" : "dark-content";
+  const statusBarStyle = theme.dark ? 'light-content' : 'dark-content';
 
   const renderProgressBar = () => {
     // Pre-calculate container top position
@@ -222,14 +244,20 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
           const barWidth = isPassed ? '100%' : isActive ? '100%' : '0%';
 
           return (
-            <View key={index} style={[styles.progressBarBackground, { backgroundColor: inactiveColor }]}>
+            <View
+              key={index}
+              style={[
+                styles.progressBarBackground,
+                { backgroundColor: inactiveColor },
+              ]}
+            >
               <View
                 style={[
                   styles.progressBarFill,
                   {
                     width: barWidth,
                     backgroundColor: activeColor,
-                  }
+                  },
                 ]}
               />
             </View>
@@ -265,7 +293,10 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
           const iconMarginBottom = verticalSpacing;
           const titleColor = theme.colors.onSurface;
           const descriptionColor = theme.colors.onSurfaceVariant;
-          const notificationBgColor = notificationPermissionStatus === true ? theme.colors.primary : pageColors.icon;
+          const notificationBgColor =
+            notificationPermissionStatus === true
+              ? theme.colors.primary
+              : pageColors.icon;
           const notificationLabelColor = theme.colors.onPrimary;
           const skipTextColor = theme.colors.onSurfaceVariant;
           const footerPaddingBottom = insets.bottom + 20;
@@ -298,58 +329,93 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
                   </View>
                 )}
 
-                <View style={[styles.contentContainer, { width: contentWidthStyle }]}>
+                <View
+                  style={[
+                    styles.contentContainer,
+                    { width: contentWidthStyle },
+                  ]}
+                >
                   <View style={styles.iconWrapper}>
                     {/* Halo Glow effect behind the icon */}
-                    <View style={[
-                      styles.haloEffect,
-                      {
-                        backgroundColor: theme.colors.primary,
-                        opacity: haloOpacityValue
-                      }
-                    ]} />
+                    <View
+                      style={[
+                        styles.haloEffect,
+                        {
+                          backgroundColor: theme.colors.primary,
+                          opacity: haloOpacityValue,
+                        },
+                      ]}
+                    />
 
-                    <View style={[
-                      styles.iconContainer,
-                      styles.iconContainerTransparent,
-                      { marginBottom: iconMarginBottom }
-                    ]}>
+                    <View
+                      style={[
+                        styles.iconContainer,
+                        styles.iconContainerTransparent,
+                        { marginBottom: iconMarginBottom },
+                      ]}
+                    >
                       <Icon
                         source={item.icon}
-                        size={item.key === 'welcome' ? iconSize * 1.5 : iconSize * 1.2}
+                        size={
+                          item.key === 'welcome'
+                            ? iconSize * 1.5
+                            : iconSize * 1.2
+                        }
                         color={pageColors.icon}
                       />
                     </View>
                   </View>
 
-                  <Text variant="headlineMedium" style={[styles.title, { color: titleColor }]}>
+                  <Text
+                    variant="headlineMedium"
+                    style={[styles.title, { color: titleColor }]}
+                  >
                     {item.title}
                   </Text>
 
-                  <Text variant="bodyLarge" style={[styles.description, { color: descriptionColor }]}>
+                  <Text
+                    variant="bodyLarge"
+                    style={[styles.description, { color: descriptionColor }]}
+                  >
                     {item.description}
                   </Text>
 
                   {item.key === 'notifications' && (
                     <View style={styles.notificationButtonRow}>
                       <CustomButton
-                        label={notificationPermissionStatus === true
-                          ? 'Notificaciones activas'
-                          : 'Activar notificaciones'}
-                        onPress={notificationPermissionStatus === true ? () => { } : requestNotificationPermission}
+                        label={
+                          notificationPermissionStatus === true
+                            ? 'Notificaciones activas'
+                            : 'Activar notificaciones'
+                        }
+                        onPress={
+                          notificationPermissionStatus === true
+                            ? () => {}
+                            : requestNotificationPermission
+                        }
                         variant="primary"
-                        icon={notificationPermissionStatus ? "check-circle" : "bell-ring"}
+                        icon={
+                          notificationPermissionStatus
+                            ? 'check-circle'
+                            : 'bell-ring'
+                        }
                         style={[
                           styles.actionButton,
                           styles.actionButtonMarginTop,
-                          { backgroundColor: notificationBgColor }
+                          { backgroundColor: notificationBgColor },
                         ]}
                         labelStyle={{ color: notificationLabelColor }}
                       />
 
                       {!notificationPermissionStatus && (
-                        <TouchableOpacity onPress={handleSkipNotifications} style={styles.skipButton}>
-                          <Text variant="labelLarge" style={{ color: skipTextColor }}>
+                        <TouchableOpacity
+                          onPress={handleSkipNotifications}
+                          style={styles.skipButton}
+                        >
+                          <Text
+                            variant="labelLarge"
+                            style={{ color: skipTextColor }}
+                          >
                             Ahora no
                           </Text>
                         </TouchableOpacity>
@@ -358,18 +424,28 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
                   )}
                 </View>
 
-                <View style={[styles.footer, { paddingBottom: footerPaddingBottom }]}>
+                <View
+                  style={[
+                    styles.footer,
+                    { paddingBottom: footerPaddingBottom },
+                  ]}
+                >
                   {index === ONBOARDING_DATA.length - 1 ? (
                     <CustomButton
                       label="Comenzar"
                       onPress={finishOnboarding}
                       variant="primary"
-                      style={[styles.startBtn, { backgroundColor: startBtnBgColor }]}
+                      style={[
+                        styles.startBtn,
+                        { backgroundColor: startBtnBgColor },
+                      ]}
                       labelStyle={{ color: startBtnLabelColor }}
                       fullWidth
                     />
                   ) : (
-                    <Text style={[styles.tapHint, { color: tapHintColor }]}>Toca para continuar</Text>
+                    <Text style={[styles.tapHint, { color: tapHintColor }]}>
+                      Toca para continuar
+                    </Text>
                   )}
                 </View>
               </LinearGradient>
@@ -440,7 +516,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     // Soft shadow for depth
-    shadowColor: "#000",
+    shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.12,
     shadowRadius: 12,

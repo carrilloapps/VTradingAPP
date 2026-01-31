@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Modal, StatusBar, Linking, Platform } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Modal,
+  StatusBar,
+  Linking,
+  Platform,
+} from 'react-native';
 import { Surface, Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
@@ -13,40 +20,47 @@ interface ForceUpdateModalProps {
   storeUrl?: string;
 }
 
-const ForceUpdateModal: React.FC<ForceUpdateModalProps> = ({ visible, storeUrl }) => {
+const ForceUpdateModal: React.FC<ForceUpdateModalProps> = ({
+  visible,
+  storeUrl,
+}) => {
   const theme = useAppTheme();
   const [loading, setLoading] = useState(false);
 
   const handleUpdate = async () => {
     setLoading(true);
-    const url = storeUrl || (Platform.OS === 'ios' 
-        ? 'https://apps.apple.com/app/idYOUR_APP_ID' 
+    const url =
+      storeUrl ||
+      (Platform.OS === 'ios'
+        ? 'https://apps.apple.com/app/idYOUR_APP_ID'
         : 'market://details?id=com.vtradingapp'); // Replace with actual package name
-    
+
     try {
-        const supported = await Linking.canOpenURL(url);
-        if (supported) {
-            await Linking.openURL(url);
-        } else {
-            // Fallback for emulator or weird states
-            SafeLogger.warn("Cannot open URL:", url);
-        }
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        // Fallback for emulator or weird states
+        SafeLogger.warn('Cannot open URL:', url);
+      }
     } catch (e) {
-        observabilityService.captureError(e, {
-            context: 'ForceUpdateModal.handleUpdatePress',
-            action: 'open_store_link',
-            url: url
-        });
-        SafeLogger.error("An error occurred", e);
+      observabilityService.captureError(e, {
+        context: 'ForceUpdateModal.handleUpdatePress',
+        action: 'open_store_link',
+        url: url,
+      });
+      SafeLogger.error('An error occurred', e);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 
   if (!visible) return null;
 
   // Pre-calculate dynamic styles
-  const surfaceBackgroundColor = theme.dark ? 'rgba(30, 30, 30, 0.98)' : 'rgba(255, 255, 255, 0.98)';
+  const surfaceBackgroundColor = theme.dark
+    ? 'rgba(30, 30, 30, 0.98)'
+    : 'rgba(255, 255, 255, 0.98)';
   const glowOpacityValue = theme.dark ? 0.2 : 0.1;
   const iconWrapperBg = theme.colors.primary + '15';
   const pulseCircleBorder = theme.colors.primary + '30';
@@ -60,51 +74,67 @@ const ForceUpdateModal: React.FC<ForceUpdateModalProps> = ({ visible, storeUrl }
     >
       <View style={styles.overlay}>
         <StatusBar backgroundColor="rgba(0,0,0,0.8)" barStyle="light-content" />
-        
-        <Surface 
-            style={[
-                styles.modalContainer,
-                styles.modalSurface,
-                { 
-                    backgroundColor: surfaceBackgroundColor,
-                    borderColor: theme.colors.outlineVariant,
-                }
-            ]} 
-            elevation={5}
+
+        <Surface
+          style={[
+            styles.modalContainer,
+            styles.modalSurface,
+            {
+              backgroundColor: surfaceBackgroundColor,
+              borderColor: theme.colors.outlineVariant,
+            },
+          ]}
+          elevation={5}
         >
           {/* Decorative Glow */}
-          <View style={[
-            styles.glowEffect,
-            styles.glowOpacity,
-            {
-              backgroundColor: theme.colors.primary,
-              opacity: glowOpacityValue,
-            }
-          ]} />
+          <View
+            style={[
+              styles.glowEffect,
+              styles.glowOpacity,
+              {
+                backgroundColor: theme.colors.primary,
+                opacity: glowOpacityValue,
+              },
+            ]}
+          />
 
           <View style={styles.content}>
-            <View style={[styles.iconWrapper, { backgroundColor: iconWrapperBg }]}>
-                <View style={[styles.pulseCircle, { borderColor: pulseCircleBorder }]} />
-                <MaterialCommunityIcons 
-                    name="rocket-launch" 
-                    size={48} 
-                    color={theme.colors.primary} 
-                />
+            <View
+              style={[styles.iconWrapper, { backgroundColor: iconWrapperBg }]}
+            >
+              <View
+                style={[styles.pulseCircle, { borderColor: pulseCircleBorder }]}
+              />
+              <MaterialCommunityIcons
+                name="rocket-launch"
+                size={48}
+                color={theme.colors.primary}
+              />
             </View>
 
-            <Text variant="headlineSmall" style={[styles.title, { color: theme.colors.onSurface }]}>
+            <Text
+              variant="headlineSmall"
+              style={[styles.title, { color: theme.colors.onSurface }]}
+            >
               Actualización Requerida
             </Text>
-            
-            <Text variant="bodyMedium" style={[styles.message, { color: theme.colors.onSurfaceVariant }]}>
-              ¡Hemos mejorado VTrading! Existe una nueva versión disponible con características importantes y mejoras de rendimiento.
+
+            <Text
+              variant="bodyMedium"
+              style={[styles.message, { color: theme.colors.onSurfaceVariant }]}
+            >
+              ¡Hemos mejorado VTrading! Existe una nueva versión disponible con
+              características importantes y mejoras de rendimiento.
             </Text>
-            <Text variant="bodySmall" style={[styles.subMessage, { color: theme.colors.outline }]}>
+            <Text
+              variant="bodySmall"
+              style={[styles.subMessage, { color: theme.colors.outline }]}
+            >
               Debes actualizar para continuar usando la aplicación.
             </Text>
 
             <View style={styles.footer}>
-              <CustomButton 
+              <CustomButton
                 variant="primary"
                 label="Actualizar Ahora"
                 onPress={handleUpdate}
@@ -118,8 +148,8 @@ const ForceUpdateModal: React.FC<ForceUpdateModalProps> = ({ visible, storeUrl }
           </View>
 
           {/* Bottom Gradient Accent */}
-          <LinearGradient 
-            colors={[theme.colors.primary + '00', theme.colors.primary + '20']} 
+          <LinearGradient
+            colors={[theme.colors.primary + '00', theme.colors.primary + '20']}
             style={styles.bottomAccent}
           />
         </Surface>
@@ -170,11 +200,11 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   pulseCircle: {
-      position: 'absolute',
-      width: 110,
-      height: 110,
-      borderRadius: 55,
-      borderWidth: 1,
+    position: 'absolute',
+    width: 110,
+    height: 110,
+    borderRadius: 55,
+    borderWidth: 1,
   },
   title: {
     fontWeight: '900',
@@ -198,20 +228,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   button: {
-      borderRadius: 16,
-      overflow: 'hidden',
+    borderRadius: 16,
+    overflow: 'hidden',
   },
   buttonContent: {
     height: 56,
   },
   bottomAccent: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      height: 80,
-      zIndex: 0,
-  }
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 80,
+    zIndex: 0,
+  },
 });
 
 export default ForceUpdateModal;

@@ -1,12 +1,22 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import { observabilityService } from '../services/ObservabilityService';
 import * as Sentry from '@sentry/react-native';
 import SafeLogger from '../utils/safeLogger';
 
 interface Props {
   children?: ReactNode;
-  fallback?: (error: Error, errorInfo: ErrorInfo, resetError: () => void) => ReactNode;
+  fallback?: (
+    error: Error,
+    errorInfo: ErrorInfo,
+    resetError: () => void,
+  ) => ReactNode;
 }
 
 interface State {
@@ -69,7 +79,7 @@ class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback(
           this.state.error,
           this.state.errorInfo,
-          this.resetError
+          this.resetError,
         );
       }
 
@@ -79,13 +89,18 @@ class ErrorBoundary extends Component<Props, State> {
           <ScrollView style={styles.scrollView}>
             <Text style={styles.title}>Oops! Algo salió mal</Text>
             <Text style={styles.message}>
-              La aplicación ha encontrado un error inesperado. Por favor, intenta nuevamente.
+              La aplicación ha encontrado un error inesperado. Por favor,
+              intenta nuevamente.
             </Text>
 
             {__DEV__ && this.state.error && (
               <View style={styles.errorDetails}>
-                <Text style={styles.errorTitle}>Detalles del Error (Dev Only):</Text>
-                <Text style={styles.errorText}>{this.state.error.toString()}</Text>
+                <Text style={styles.errorTitle}>
+                  Detalles del Error (Dev Only):
+                </Text>
+                <Text style={styles.errorText}>
+                  {this.state.error.toString()}
+                </Text>
                 {this.state.errorInfo && (
                   <Text style={styles.stackTrace}>
                     {this.state.errorInfo.componentStack}

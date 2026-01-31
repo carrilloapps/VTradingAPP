@@ -1,5 +1,11 @@
 import React from 'react';
-import { ScrollView, View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
+import {
+  ScrollView,
+  View,
+  StyleSheet,
+  StyleProp,
+  ViewStyle,
+} from 'react-native';
 import { Chip } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../theme/theme';
@@ -50,11 +56,13 @@ const FilterSection: React.FC<FilterSectionProps> = ({
     // If selected, use onPrimary. If unselected, use option.color or onSurfaceVariant.
     const contentColor = isSelected
       ? theme.colors.onPrimary
-      : (option.color || theme.colors.onSurfaceVariant);
+      : option.color || theme.colors.onSurfaceVariant;
 
     // Create icon renderer outside of JSX to avoid creating new component each render
     const iconRenderer = option.icon
-      ? () => <ChipIcon iconName={option.icon!} color={contentColor} size={18} />
+      ? () => (
+          <ChipIcon iconName={option.icon!} color={contentColor} size={18} />
+        )
       : undefined;
 
     return (
@@ -72,8 +80,11 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         style={[
           styles.chip,
           isSelected
-            ? [styles.chipSelected, { backgroundColor: option.color || theme.colors.primary }]
-            : [styles.chipUnselected, { borderColor: theme.colors.outline }]
+            ? [
+                styles.chipSelected,
+                { backgroundColor: option.color || theme.colors.primary },
+              ]
+            : [styles.chipUnselected, { borderColor: theme.colors.outline }],
         ]}
         textStyle={
           isSelected

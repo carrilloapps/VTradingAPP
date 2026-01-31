@@ -43,41 +43,43 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
   // Map legacy cancelMode to CustomButton variant
   const getCancelVariant = (): ButtonVariant => {
     switch (cancelMode) {
-      case 'outlined': return 'outlined';
-      case 'contained': return 'secondary'; // Map to secondary for contained cancel
-      default: return 'ghost';
+      case 'outlined':
+        return 'outlined';
+      case 'contained':
+        return 'secondary'; // Map to secondary for contained cancel
+      default:
+        return 'ghost';
     }
   };
 
   return (
     <Portal>
-      <Dialog 
-        visible={visible} 
-        onDismiss={onDismiss} 
+      <Dialog
+        visible={visible}
+        onDismiss={onDismiss}
         style={[
           styles.dialog,
-          { 
-            backgroundColor: theme.colors.elevation.level3, 
+          {
+            backgroundColor: theme.colors.elevation.level3,
             borderColor: theme.colors.outline,
-          }
+          },
         ]}
       >
-        <Dialog.Title style={[
-          styles.dialogTitle,
-          { color: theme.colors.onSurface }
-        ]}>
+        <Dialog.Title
+          style={[styles.dialogTitle, { color: theme.colors.onSurface }]}
+        >
           {title}
         </Dialog.Title>
         <Dialog.Content>
           {content ? (
-            <Text 
-              variant="bodyMedium" 
+            <Text
+              variant="bodyMedium"
               style={[
                 styles.dialogContent,
                 {
                   color: theme.colors.onSurfaceVariant,
                 },
-                children ? styles.contentWithChildren : undefined
+                children ? styles.contentWithChildren : undefined,
               ]}
             >
               {content}
@@ -85,14 +87,14 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
           ) : null}
           {children}
         </Dialog.Content>
-        <Dialog.Actions style={[
-          styles.dialogActions,
-          fullWidthActions 
-            ? styles.fullWidthActions
-            : styles.wrappedActions
-        ]}>  
+        <Dialog.Actions
+          style={[
+            styles.dialogActions,
+            fullWidthActions ? styles.fullWidthActions : styles.wrappedActions,
+          ]}
+        >
           {showCancel && (
-            <CustomButton 
+            <CustomButton
               variant={getCancelVariant()}
               label={cancelLabel}
               onPress={onDismiss}
@@ -100,7 +102,7 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
             />
           )}
           {actions}
-          <CustomButton 
+          <CustomButton
             variant={isDestructive ? 'destructive' : 'primary'}
             label={confirmLabel}
             onPress={onConfirm || (() => {})}
