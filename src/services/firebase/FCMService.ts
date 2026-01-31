@@ -79,11 +79,18 @@ class FCMService {
       const token = await this.messaging.getToken();
       SafeLogger.sensitive('FCM', token);
       return token;
-    } catch (e) {
-      observabilityService.captureError(e, {
-        context: 'FCMService.getFCMToken',
-        action: 'get_fcm_token'
-      });
+    } catch (e: any) {
+      const errorMsg = String(e?.message || e || '').toLowerCase();
+      const isRegistrationLimit = errorMsg.includes('too_many_registrations');
+
+      if (!isRegistrationLimit) {
+        observabilityService.captureError(e, {
+          context: 'FCMService.getFCMToken',
+          action: 'get_fcm_token'
+        });
+      } else {
+        SafeLogger.warn('[FCM] Registration limit reached (Safe Skip)');
+      }
       return null;
     }
   }

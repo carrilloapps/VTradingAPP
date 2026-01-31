@@ -138,8 +138,10 @@ class AuthService {
         const isIdTokenError = e.message?.includes('No ID token') ||
           e.message?.includes('No se pudo obtener el token');
 
-        if (!isIdTokenError) {
-          // Only report if not already reported above
+        const isInternalError = e.code === 'auth/internal-error' || e.message?.includes('INTERNAL_ERROR');
+
+        if (!isIdTokenError && !isInternalError) {
+          // Only report if not already reported above and not a common internal/cancellation noise
           observabilityService.captureError(e, {
             context: 'AuthService_signInWithGoogle',
             errorType: 'sign_in_failed',

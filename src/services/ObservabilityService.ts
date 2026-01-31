@@ -22,14 +22,20 @@ class ObservabilityService {
 
     // Filtro para ignorar errores de conectividad o plataforma (ya manejados o irrelevantes)
     const errorMsg = String(error?.message || error || '').toLowerCase();
-    const isIgnoredError = errorMsg.includes('network request failed') ||
+    const isIgnoredError =
+      errorMsg.includes('network request failed') ||
       errorMsg.includes('connection error') ||
       errorMsg.includes('service_not_available') ||
       errorMsg.includes('app distribution') ||
       errorMsg.includes('not supported') ||
       errorMsg.includes('app check') ||
       errorMsg.includes('app not registered') ||
-      errorMsg.includes('token-error');
+      errorMsg.includes('token-error') ||
+      errorMsg.includes('fetch() operation') || // Remote Config noise
+      errorMsg.includes('internal_error') || // GMS/Firebase base noise
+      errorMsg.includes('too_many_registrations') || // FCM registration limit
+      errorMsg.includes('google sign-in was cancelled') || // Auth cancellation
+      errorMsg.includes('sign_in_cancelled');
 
     if (isIgnoredError) {
       if (__DEV__) SafeLogger.log('[Observability] Non-critical error ignored for reporting:', errorMsg);
