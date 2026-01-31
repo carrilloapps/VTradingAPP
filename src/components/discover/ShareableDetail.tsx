@@ -9,11 +9,11 @@ import { Text, Surface } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import ViewShot from 'react-native-view-shot';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import FastImage from 'react-native-fast-image';
 
 import { useAppTheme } from '../../theme/theme';
 import XIcon from '../common/XIcon';
 import FacebookIcon from '../common/FacebookIcon';
-import FastImage from 'react-native-fast-image';
 
 // Helper to convert hex to rgba
 const hexToRgba = (hex: string, alpha: number) => {
@@ -394,8 +394,23 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
     const storeGap = isVertical ? 24 : 16;
 
     return (
-      <View style={styles.hiddenTemplate} pointerEvents="none">
-        <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 1.0 }}>
+      <View
+        style={[
+          styles.hiddenTemplate,
+          { height: isVertical ? 600 * (16 / 9) : 600 },
+        ]}
+        pointerEvents="none"
+        collapsable={false}
+      >
+        <ViewShot
+          ref={viewShotRef}
+          options={{
+            format: 'jpg',
+            quality: 1.0,
+            width: 1080,
+            height: isVertical ? 1920 : 1080,
+          }}
+        >
           <View style={containerStyle}>
             {/* Top Image Section (45% for Vertical, 55% for Square) */}
             <View style={topImageWrapperStyle}>
@@ -791,8 +806,23 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
   const storeIconSize = isVertical ? 90 : 80;
 
   return (
-    <View style={styles.hiddenTemplate} pointerEvents="none">
-      <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 1.0 }}>
+    <View
+      style={[
+        styles.hiddenTemplate,
+        { height: isVertical ? 600 * (16 / 9) : 600 },
+      ]}
+      pointerEvents="none"
+      collapsable={false}
+    >
+      <ViewShot
+        ref={viewShotRef}
+        options={{
+          format: 'jpg',
+          quality: 1.0,
+          width: 1080,
+          height: isVertical ? 1920 : 1080,
+        }}
+      >
         <View style={containerStyle}>
           {/* Background Layer - Abstract Dark */}
           <LinearGradient
@@ -984,7 +1014,7 @@ const styles = StyleSheet.create({
     left: -4000,
     top: 0,
     zIndex: -1,
-    opacity: 0,
+    opacity: 1,
   },
   backgroundImage: {
     ...StyleSheet.absoluteFillObject,

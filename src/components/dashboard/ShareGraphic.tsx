@@ -1,10 +1,10 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Image } from 'react-native';
 import { Text, Icon, Surface, useTheme } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import ViewShot from 'react-native-view-shot';
+
 import { ExchangeCardProps } from './ExchangeCard';
-import FastImage from 'react-native-fast-image';
 
 interface ShareGraphicProps {
   viewShotRef: React.RefObject<any>;
@@ -127,8 +127,23 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
   }, [featuredRates, onReady]);
 
   return (
-    <View style={styles.hiddenTemplate} pointerEvents="none">
-      <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 0.9 }}>
+    <View
+      style={[
+        styles.hiddenTemplate,
+        { height: isVertical ? 600 * (16 / 9) : 600 },
+      ]}
+      pointerEvents="none"
+      collapsable={false}
+    >
+      <ViewShot
+        ref={viewShotRef}
+        options={{
+          format: 'jpg',
+          quality: 0.9,
+          width: 1080,
+          height: isVertical ? 1920 : 1080,
+        }}
+      >
         <LinearGradient
           colors={theme.dark ? ['#051911', '#0A0A0A'] : ['#F0FDF4', '#FFFFFF']}
           style={templateStyle}
@@ -159,10 +174,10 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
 
           <View style={styles.templateHeader}>
             <View style={styles.logoAndBadgeRow}>
-              <FastImage
+              <Image
                 source={require('../../assets/images/logotipo.png')}
                 style={logoStyle}
-                resizeMode={FastImage.resizeMode.contain}
+                resizeMode="contain"
               />
               {!isPremium && (
                 <Surface style={freeBadgeStyle} elevation={2}>
@@ -391,7 +406,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
 const styles = StyleSheet.create({
   hiddenTemplate: {
     position: 'absolute',
-    left: -2000,
+    left: -4000,
     width: 600,
     zIndex: -1,
   },
@@ -411,7 +426,7 @@ const styles = StyleSheet.create({
   },
   shareTemplateVertical: {
     width: 600,
-    height: 1066,
+    height: 600 * (16 / 9),
     paddingVertical: 100,
     paddingHorizontal: 40,
     justifyContent: 'space-around', // Better distribution

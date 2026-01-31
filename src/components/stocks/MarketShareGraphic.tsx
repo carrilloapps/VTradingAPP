@@ -3,9 +3,10 @@ import { View, StyleSheet } from 'react-native';
 import { Text, Icon, Surface, useTheme } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import ViewShot from 'react-native-view-shot';
+import FastImage from 'react-native-fast-image';
+
 import { StockData } from '../../services/StocksService';
 import { getTrend, getTrendColor, getTrendIcon } from '../../utils/trendUtils';
-import FastImage from 'react-native-fast-image';
 
 interface MarketShareGraphicProps {
   viewShotRef: React.RefObject<any>;
@@ -60,8 +61,23 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
   const trendIcon = getTrendIcon(idxTrend);
 
   return (
-    <View style={styles.hiddenTemplate} pointerEvents="none">
-      <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 1.0 }}>
+    <View
+      style={[
+        styles.hiddenTemplate,
+        { height: isVertical ? 600 * (16 / 9) : 600 },
+      ]}
+      pointerEvents="none"
+      collapsable={false}
+    >
+      <ViewShot
+        ref={viewShotRef}
+        options={{
+          format: 'jpg',
+          quality: 0.9,
+          width: 1080,
+          height: isVertical ? 1920 : 1080,
+        }}
+      >
         <LinearGradient
           colors={theme.dark ? ['#051911', '#0A0A0A'] : ['#F0FDF4', '#FFFFFF']}
           style={[

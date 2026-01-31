@@ -17,14 +17,9 @@ import { observabilityService } from '../services/ObservabilityService';
 import { analyticsService } from '../services/firebase/AnalyticsService';
 import { StocksService } from '../services/StocksService';
 
-/* type CurrencyDetailRouteProp = RouteProp<RootStackParamList, 'CurrencyDetail'>; */
-
 const CurrencyDetailScreen = ({ route, navigation }: any) => {
-  // Changed component signature
   const theme = useAppTheme();
-  // const navigation = useNavigation(); // Removed
-  // const route = useRoute<CurrencyDetailRouteProp>(); // Removed
-  const { currencyId, rate } = route.params; // Added currencyId, kept rate for now as it's used extensively
+  const { currencyId, rate } = route.params;
 
   useEffect(() => {
     analyticsService.logScreenView('CurrencyDetail', currencyId);
@@ -172,47 +167,6 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
       return () => task.cancel();
     }
   }, [sharing, captureShareImage]);
-
-  /*
-    const captureShareImage = async () => {
-      try {
-        if (!viewShotRef.current) return;
-  
-        const uri = await captureRef(viewShotRef.current, {
-          format: 'jpg',
-          quality: 1.0,
-          result: 'tmpfile',
-          width: 1080,
-          height: shareFormat === '1:1' ? 1080 : 1920,
-        });
-  
-        if (!uri) throw new Error("Capture failed");
-  
-        const sharePath = uri.startsWith('file://') ? uri : `file://${uri}`;
-  
-        await Share.open({
-          url: sharePath,
-          type: 'image/jpeg',
-          message: `Tasa de cambio: ${rate.code}/VES (${rate.name}) - VTrading`,
-        });
-  
-        analyticsService.logShare('currency', rate.code, shareFormat === '1:1' ? 'image_square' : 'image_story');
-      } catch (e) {
-        if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
-          observabilityService.captureError(e, {
-            context: 'CurrencyDetailScreen.handleShareImage',
-            action: 'share_currency_image',
-            currencyCode: rate.code,
-            format: shareFormat,
-            errorMessage: (e as any).message
-          });
-          showToast('No se pudo compartir la imagen', 'error');
-        }
-      } finally {
-        setSharing(false);
-      }
-    };
-  */
 
   const generateShareImage = (format: '1:1' | '16:9') => {
     setShareDialogVisible(false);

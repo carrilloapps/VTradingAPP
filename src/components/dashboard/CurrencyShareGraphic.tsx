@@ -3,9 +3,10 @@ import { View, StyleSheet } from 'react-native';
 import { Text, Icon, Surface, useTheme } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import ViewShot from 'react-native-view-shot';
+import FastImage from 'react-native-fast-image';
+
 import { CurrencyRate } from '../../services/CurrencyService';
 import { BolivarIcon } from '../ui/BolivarIcon';
-import FastImage from 'react-native-fast-image';
 
 interface CurrencyShareGraphicProps {
   viewShotRef: React.RefObject<any>;
@@ -191,8 +192,23 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
   ];
 
   return (
-    <View style={styles.hiddenTemplate} pointerEvents="none">
-      <ViewShot ref={viewShotRef} options={{ format: 'jpg', quality: 1.0 }}>
+    <View
+      style={[
+        styles.hiddenTemplate,
+        { height: isVertical ? 600 * (16 / 9) : 600 },
+      ]}
+      pointerEvents="none"
+      collapsable={false}
+    >
+      <ViewShot
+        ref={viewShotRef}
+        options={{
+          format: 'jpg',
+          quality: 1.0,
+          width: 1080,
+          height: isVertical ? 1920 : 1080,
+        }}
+      >
         <LinearGradient
           colors={theme.dark ? ['#051911', '#0A0A0A'] : ['#F0FDF4', '#FFFFFF']}
           style={templateStyle}
@@ -229,7 +245,7 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
               <FastImage
                 source={require('../../assets/images/logotipo.png')}
                 style={logoStyle}
-                resizeMode={FastImage.resizeMode.contain}
+                resizeMode={FastImage.resizeMode.cover}
               />
               {!isPremium && (
                 <Surface style={freeBadgeStyle} elevation={2}>
@@ -397,7 +413,7 @@ const styles = StyleSheet.create({
   },
   shareTemplateVertical: {
     width: 600,
-    height: 1066,
+    height: 600 * (16 / 9),
     paddingVertical: 100,
     paddingHorizontal: 40,
     justifyContent: 'space-around',
