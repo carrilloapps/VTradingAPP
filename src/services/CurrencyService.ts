@@ -168,6 +168,9 @@ export class CurrencyService {
 
       const rates: CurrencyRate[] = [];
 
+      // Optimize: Instantiate date once for the batch
+      const nowISO = new Date().toISOString();
+
       // 1. Process FIAT Rates
       if (response.rates) {
         response.rates.forEach((apiRate, index) => {
@@ -200,7 +203,7 @@ export class CurrencyService {
             changePercent: CurrencyService.parsePercentage(apiRate.change?.average?.percent || apiRate.change?.percent),
             type: 'fiat',
             iconName: iconName,
-            lastUpdated: apiRate.date || new Date().toISOString(),
+            lastUpdated: apiRate.date || nowISO,
             source: sourceLabel,
             buyValue: CurrencyService.parseRate(apiRate.rate?.buy),
             sellValue: CurrencyService.parseRate(apiRate.rate?.sell),
@@ -271,7 +274,7 @@ export class CurrencyService {
             changePercent: changePercent,
             type: 'border',
             iconName: iconName,
-            lastUpdated: apiRate.date || new Date().toISOString(),
+            lastUpdated: apiRate.date || nowISO,
             source: sourceLabel,
             buyValue: finalBuy,
             sellValue: finalSell,
@@ -326,7 +329,7 @@ export class CurrencyService {
             changePercent: CurrencyService.parsePercentage(avgChange),
             type: 'crypto',
             iconName: iconName,
-            lastUpdated: cryptoItem.date || new Date().toISOString(),
+            lastUpdated: cryptoItem.date || nowISO,
             source: sourceLabel,
             buyValue: CurrencyService.parseRate(cryptoItem.rate?.buy),
             sellValue: CurrencyService.parseRate(cryptoItem.rate?.sell),
@@ -447,6 +450,16 @@ export class CurrencyService {
   static convert(amount: number, rateValue: number): number {
     if (amount < 0) throw new Error("Amount cannot be negative");
     return amount * rateValue;
+  }
+
+  /**
+   * Safe cross-rate conversion: (Amount * FromRate) / ToRate
+   * Reduces floating point errors by multiplying before dividing.
+   */
+  static convertCrossRate(amount: number, fromRate: number, toRate: number): number {
+    if (amount < 0) return 0;
+    if (toRate === 0) return 0;
+    return (amount * fromRate) / toRate;
   }
 
   /**

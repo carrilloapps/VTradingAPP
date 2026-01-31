@@ -1,9 +1,10 @@
-import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { View, StyleSheet, StatusBar, RefreshControl, ActivityIndicator } from 'react-native';
+import React, { useState, useMemo, useEffect, useCallback, useDeferredValue } from 'react';
+import { View, StyleSheet, StatusBar, RefreshControl, ActivityIndicator, AccessibilityInfo } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { Text, useTheme } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MarketStatus from '../components/ui/MarketStatus';
@@ -15,6 +16,7 @@ import { useFilterStore } from '../stores/filterStore';
 import { StocksService, StockData } from '../services/StocksService';
 import { useToastStore } from '../stores/toastStore';
 import StocksSkeleton from '../components/stocks/StocksSkeleton';
+import ErrorState from '../components/ui/ErrorState';
 import { observabilityService } from '../services/ObservabilityService';
 import { analyticsService, ANALYTICS_EVENTS } from '../services/firebase/AnalyticsService';
 import { useAuthStore } from '../stores/authStore';
@@ -40,35 +42,27 @@ interface MarketIndexData {
   updateDate?: string;
 }
 
-const FlashListTyped = FlashList as any;
+const FlashListTyped = FlashList as React.ComponentType<any>;
 
-const StocksScreen = ({ navigation }: any) => {
+type StocksScreenProps = {
+  navigation: NativeStackNavigationProp<any>;
+};
+
+const StocksScreen = ({ navigation }: StocksScreenProps) => {
   const theme = useTheme();
   const { stockFilters, setStockFilters } = useFilterStore();
   const { query: searchQuery, category: activeFilter } = stockFilters;
+  const deferredQuery = useDeferredValue(searchQuery);
   const showToast = useToastStore((state) => state.showToast);
   const isFocused = useIsFocused();
-
-  useEffect(() => {
-    if (isFocused) {
-      analyticsService.logScreenView('Stocks');
-    }
-  }, [isFocused]);
 
   // Zustand store selector
   const user = useAuthStore((state) => state.user);
 
-  const handleStockPress = useCallback((stock: StockData) => {
-    navigation.navigate('StockDetail', { stock });
-  }, [navigation]);
-
-  const renderStockItem = useCallback(({ item }: { item: StockData }) => (
-    <StockItem {...item} onPress={() => handleStockPress(item)} />
-  ), [handleStockPress]);
-
   const [stocks, setStocks] = useState<StockData[]>([]);
   const [categories, setCategories] = useState<string[]>(['Todos']);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [indexData, setIndexData] = useState<MarketIndexData | null>(null);
   const [loadingMore, setLoadingMore] = useState(false);
@@ -82,8 +76,35 @@ const StocksScreen = ({ navigation }: any) => {
   const isPremium = !!(user && !user.isAnonymous);
 
   useEffect(() => {
+    if (isFocused) {
+      analyticsService.logScreenView('Stocks');
+    }
+  }, [isFocused]);
+
+  const loadInitialData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(false);
+      await StocksService.getStocks();
+      const idx = await StocksService.getMarketIndex();
+      setIndexData(idx);
+      setIsMarketOpen(StocksService.isMarketOpen());
+    } catch (e) {
+      observabilityService.captureError(e, {
+        context: 'StocksScreen.loadData',
+        action: 'load_market_data'
+      });
+      await analyticsService.logError('stocks_load_data');
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
     const unsubscribe = StocksService.subscribe((data) => {
       setStocks(data);
+      if (data.length > 0) setError(false);
 
       // Extract unique categories from data
       const uniqueCats = Array.from(new Set(data.map(s => s.category))).filter(Boolean).sort();
@@ -93,36 +114,22 @@ const StocksScreen = ({ navigation }: any) => {
       setLoading(false);
     });
 
-    const loadData = async () => {
-      try {
-        await StocksService.getStocks();
-        const idx = await StocksService.getMarketIndex();
-        setIndexData(idx);
-        setIsMarketOpen(StocksService.isMarketOpen());
-      } catch (error) {
-        observabilityService.captureError(error, {
-          context: 'StocksScreen.loadData',
-          action: 'load_market_data'
-        });
-        await analyticsService.logError('stocks_load_data');
-        showToast('Error cargando datos del mercado', 'error');
-        setLoading(false);
-      }
-    };
-
-    loadData();
+    loadInitialData();
 
     return () => unsubscribe();
-  }, [showToast]);
+  }, [loadInitialData]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
+    setError(false);
     try {
       await StocksService.getStocks(true);
       const idx = await StocksService.getMarketIndex();
       setIndexData(idx);
       setIsMarketOpen(StocksService.isMarketOpen());
       showToast('Mercado actualizado', 'success');
+      // Accessibility announcement for refresh completion
+      AccessibilityInfo.announceForAccessibility('Mercado actualizado correctamente');
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'StocksScreen.onRefresh',
@@ -130,6 +137,7 @@ const StocksScreen = ({ navigation }: any) => {
       });
       await analyticsService.logError('stocks_refresh');
       showToast('Error actualizando mercado', 'error');
+      AccessibilityInfo.announceForAccessibility('Error al actualizar el mercado');
     } finally {
       setRefreshing(false);
     }
@@ -142,31 +150,48 @@ const StocksScreen = ({ navigation }: any) => {
     setLoadingMore(false);
   };
 
-  // Filter Logic
+  // Filter Logic - deferred
   const filteredStocks = useMemo(() => {
     return stocks.filter(stock => {
-      const matchesSearch = stock.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        stock.symbol.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesSearch = stock.name.toLowerCase().includes(deferredQuery.toLowerCase()) ||
+        stock.symbol.toLowerCase().includes(deferredQuery.toLowerCase());
 
       const matchesCategory = activeFilter === 'Todos' || stock.category === activeFilter;
 
       return matchesSearch && matchesCategory;
     });
-  }, [stocks, searchQuery, activeFilter]);
+  }, [stocks, deferredQuery, activeFilter]);
+
+  // Accessibility Announcement on Filter/Search - Placed AFTER filteredStocks definition
+  useEffect(() => {
+    if (isFocused && filteredStocks.length > 0) {
+      const message = activeFilter === 'Todos' && !deferredQuery
+        ? `Mostrando ${filteredStocks.length} acciones`
+        : `Mostrando ${filteredStocks.length} resultados filtrados`;
+      AccessibilityInfo.announceForAccessibility(message);
+    }
+  }, [filteredStocks.length, activeFilter, deferredQuery, isFocused]);
 
   const suggestions = useMemo(() => {
-    if (!searchQuery || searchQuery.length < 2) return [];
-    const lower = searchQuery.toLowerCase();
+    if (!deferredQuery || deferredQuery.length < 2) return [];
+    const lower = deferredQuery.toLowerCase();
     return stocks
       .filter(s => s.name.toLowerCase().includes(lower) || s.symbol.toLowerCase().includes(lower))
       .slice(0, 3)
       .map(s => s.symbol);
-  }, [stocks, searchQuery]);
+  }, [stocks, deferredQuery]);
 
   const handleSearch = (text: string) => setStockFilters({ query: text });
   const handleSuggestionPress = (suggestion: string) => setStockFilters({ query: suggestion });
 
+  const handleStockPress = useCallback((stock: StockData) => {
+    navigation.navigate('StockDetail', { stock });
+  }, [navigation]);
 
+  const renderStockItem = useCallback(({ item }: { item: StockData }) => (
+    // Casting handleStockPress to any to avoid strict variance check between Service/Component interfaces
+    <StockItem {...item} onPress={handleStockPress as any} />
+  ), [handleStockPress]);
 
   const handleShare = () => {
     setShareDialogVisible(true);
@@ -250,7 +275,8 @@ const StocksScreen = ({ navigation }: any) => {
     }
   };
 
-  const renderHeader = () => (
+  // MEMOIZED HEADER
+  const HeaderComponent = useMemo(() => (
     <View style={styles.headerContainer}>
       {/* Market Status */}
       <MarketStatus
@@ -266,7 +292,7 @@ const StocksScreen = ({ navigation }: any) => {
         const hasValidStats = stats &&
           stats.titlesUp !== 0 &&
           stats.titlesDown !== 0 &&
-          stats.titlesUnchanged !== 0; // "todos son diferentes a cero"
+          stats.titlesUnchanged !== 0;
 
         let labelOverride;
         let fallbackValue;
@@ -275,14 +301,10 @@ const StocksScreen = ({ navigation }: any) => {
         if (hasValidStats) {
           statsToPass = stats;
         } else {
-          // Fallback logic
           if (indexData.statusState && indexData.statusState !== 'ABIERTO') {
-            // "otro valor que tengas desde la api" (e.g. State if not OPEN/implied running)
-            // Or generally just whatever status is.
             labelOverride = 'ESTADO DEL MERCADO';
             fallbackValue = indexData.statusState;
           } else {
-            // "de lo contrario, solo muestra la fecha"
             labelOverride = 'FECHA';
             fallbackValue = indexData.updateDate;
           }
@@ -315,16 +337,17 @@ const StocksScreen = ({ navigation }: any) => {
         <Text style={[styles.listHeaderTitle, { color: theme.colors.onSurfaceVariant }]}>PRECIO & VARIACIÓN</Text>
       </View>
     </View>
-  );
+  ), [isMarketOpen, indexData, categories, activeFilter, theme.colors.onSurfaceVariant, onRefresh, setStockFilters]);
 
-  const renderFooter = () => {
+  // MEMOIZED FOOTER
+  const FooterComponent = useMemo(() => {
     if (!loadingMore) return <View style={styles.footerSpacer} />;
     return (
       <View style={styles.loaderFooter}>
         <ActivityIndicator size="small" color={theme.colors.primary} />
       </View>
     );
-  };
+  }, [loadingMore, theme.colors.primary]);
 
   if (loading && !refreshing && stocks.length === 0) {
     return (
@@ -339,7 +362,21 @@ const StocksScreen = ({ navigation }: any) => {
     );
   }
 
-
+  if (error && stocks.length === 0) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <UnifiedHeader
+          variant="section"
+          title="Mercados"
+          subtitle="Error de conexión"
+        />
+        <ErrorState
+          message="No se pudieron cargar los datos del mercado. Por favor verifica tu conexión."
+          onRetry={loadInitialData}
+        />
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -349,7 +386,6 @@ const StocksScreen = ({ navigation }: any) => {
         barStyle={theme.dark ? 'light-content' : 'dark-content'}
       />
 
-      {/* Header */}
       <View style={[styles.headerContainer, { backgroundColor: theme.colors.background }]}>
         <UnifiedHeader
           variant="section"
@@ -382,8 +418,8 @@ const StocksScreen = ({ navigation }: any) => {
         keyExtractor={(item: StockData) => item.id}
         renderItem={renderStockItem}
         estimatedItemSize={80}
-        ListHeaderComponent={renderHeader}
-        ListFooterComponent={renderFooter}
+        ListHeaderComponent={HeaderComponent}
+        ListFooterComponent={FooterComponent}
         contentContainerStyle={styles.flashListContent}
         showsVerticalScrollIndicator={false}
         refreshControl={

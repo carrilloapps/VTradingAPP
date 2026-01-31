@@ -11,20 +11,20 @@ const Calculator: React.FC = () => {
 
   const themeStyles = React.useMemo(() => ({
     container: {
-        backgroundColor: theme.colors.elevation.level1, 
-        borderColor: theme.colors.outline,
-        borderRadius: theme.roundness * 6
+      backgroundColor: theme.colors.elevation.level1,
+      borderColor: theme.colors.outline,
+      borderRadius: theme.roundness * 6
     },
     title: {
-        fontWeight: 'bold' as const, 
-        color: theme.colors.onSurface
+      fontWeight: 'bold' as const,
+      color: theme.colors.onSurface
     },
     icon: {
-        marginRight: 4
+      marginRight: 4
     },
     expandText: {
-        color: theme.colors.primary, 
-        fontWeight: 'bold' as const
+      color: theme.colors.primary,
+      fontWeight: 'bold' as const
     }
   }), [theme]);
 
@@ -32,15 +32,15 @@ const Calculator: React.FC = () => {
     <View style={[styles.container, themeStyles.container]}>
       <View style={styles.header}>
         <Text variant="titleMedium" style={themeStyles.title}>
-            Calculadora Rápida
+          Calculadora Rápida
         </Text>
-        <TouchableOpacity 
-            onPress={() => navigation.navigate('AdvancedCalculator' as never)}
-            style={styles.expandButton}
-            hitSlop={{top: 10, bottom: 10, left: 10, right: 10}}
+        <TouchableOpacity
+          onPress={() => navigation.navigate('AdvancedCalculator' as never)}
+          style={styles.expandButton}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-            <MaterialCommunityIcons name="arrow-expand-all" size={18} color={theme.colors.primary} style={themeStyles.icon} />
-            <Text variant="labelLarge" style={themeStyles.expandText}>Ampliar</Text>
+          <MaterialCommunityIcons name="arrow-expand-all" size={24} color={theme.colors.primary} style={themeStyles.icon} />
+          <Text variant="labelLarge" style={themeStyles.expandText}>Ampliar</Text>
         </TouchableOpacity>
       </View>
       <CurrencyConverter />
@@ -56,15 +56,15 @@ const styles = StyleSheet.create({
     marginBottom: 80,
   },
   header: {
-      flexDirection: 'row', 
-      justifyContent: 'space-between', 
-      alignItems: 'center', 
-      marginBottom: 16
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 16
   },
   expandButton: {
-      flexDirection: 'row', 
-      alignItems: 'center',
-      padding: 4
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 4
   }
 });
 

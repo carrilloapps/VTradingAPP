@@ -1,6 +1,7 @@
 import messaging from '@react-native-firebase/messaging';
 import { PermissionsAndroid, Platform } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
+import notifee, { AndroidImportance } from '@notifee/react-native';
 import SafeLogger from '../../utils/safeLogger';
 import { observabilityService } from '../ObservabilityService';
 import { analyticsService, ANALYTICS_EVENTS } from './AnalyticsService';
@@ -10,6 +11,27 @@ class FCMService {
 
   constructor() {
     this.messaging = messaging();
+    this.createDefaultChannels();
+  }
+
+  private async createDefaultChannels() {
+    if (Platform.OS === 'android') {
+      try {
+        await notifee.createChannel({
+          id: 'default',
+          name: 'General Notifications',
+          importance: AndroidImportance.HIGH,
+        });
+        await notifee.createChannel({
+          id: 'price_alerts',
+          name: 'Price Alerts',
+          importance: AndroidImportance.HIGH,
+          sound: 'default',
+        });
+      } catch (e) {
+        SafeLogger.warn('[FCM] Failed to create notification channels', { error: e });
+      }
+    }
   }
 
   /**

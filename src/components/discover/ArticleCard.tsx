@@ -11,7 +11,7 @@ interface ArticleCardProps {
 
 const ArticleCard = React.memo(({ article, onPress, variant = 'compact' }: ArticleCardProps) => {
     const theme = useTheme();
-    const scale = React.useRef(new Animated.Value(1)).current;
+    // const scale = React.useRef(new Animated.Value(1)).current; // Removed for performance
 
     const isFeatured = variant === 'featured';
     const fadeAnim = React.useRef(new Animated.Value(0)).current;
@@ -32,26 +32,15 @@ const ArticleCard = React.memo(({ article, onPress, variant = 'compact' }: Artic
         ]).start();
     }, [fadeAnim, isFeatured, slideAnim]);
 
-    const handlePressIn = () => {
-        Animated.spring(scale, {
-            toValue: 0.98,
-            useNativeDriver: true,
-        }).start();
-    };
-
-    const handlePressOut = () => {
-        Animated.spring(scale, {
-            toValue: 1,
-            useNativeDriver: true,
-        }).start();
-    };
+    // Simplified touch handling (removed redundant scale animation)
+    const handlePressIn = () => { };
+    const handlePressOut = () => { };
 
     const animatedContainerStyle = [
         styles.animatedContainer,
         {
             opacity: fadeAnim,
             transform: [
-                { scale },
                 { translateY: slideAnim }
             ]
         }

@@ -3,6 +3,7 @@ import { View, StyleSheet, useWindowDimensions, Image, NativeSyntheticEvent, Nat
 import { FlashList, FlashListRef } from '@shopify/flash-list';
 import { Text, Surface, TouchableRipple, useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import LinearGradient from 'react-native-linear-gradient';
 import { FormattedPost } from '../../services/WordPressService';
 
@@ -12,62 +13,59 @@ interface FeaturedCarouselProps {
 
 const FeaturedCarousel = ({ items }: FeaturedCarouselProps) => {
     const theme = useTheme();
-    const navigation = useNavigation<any>();
+    const navigation = useNavigation<NativeStackNavigationProp<any>>();
     const { width, height } = useWindowDimensions();
     const [currentIndex, setCurrentIndex] = useState(0);
     const flatListRef = useRef<FlashListRef<FormattedPost>>(null);
+    const [isAutoScrolling, setIsAutoScrolling] = useState(true);
 
     // Immersive height (approx 45% of screen or min 400)
     const CAROUSEL_HEIGHT = Math.max(height * 0.45, 400);
 
     // Auto-scroll
     useEffect(() => {
-        if (items.length <= 1) return;
+        if (items.length <= 1 || !isAutoScrolling) return;
+
         const interval = setInterval(() => {
+            if (!flatListRef.current) return;
+
             const nextIndex = (currentIndex + 1) % items.length;
-            flatListRef.current?.scrollToIndex({ index: nextIndex, animated: true });
-            setCurrentIndex(nextIndex);
+            try {
+                flatListRef.current.scrollToIndex({ index: nextIndex, animated: true });
+                setCurrentIndex(nextIndex);
+            } catch (e) {
+                // Ignore scroll errors if list unmounted or not ready
+            }
         }, 8000);
+
         return () => clearInterval(interval);
-    }, [currentIndex, items.length]);
+    }, [currentIndex, items.length, isAutoScrolling]);
+
+    const handleScrollBegin = () => setIsAutoScrolling(false);
+    const handleScrollEnd = () => setIsAutoScrolling(true);
 
     const renderItem = ({ item }: { item: FormattedPost }) => {
         const rippleStyle = [
             styles.ripple,
-            { width, height: CAROUSEL_HEIGHT }
+            { width, height: CAROUSEL_HEIGHT } // Optimized: width/height inline
         ];
 
-        const badgeStyle = [
-            styles.badge,
-            { backgroundColor: theme.colors.primary }
-        ];
-
-        const badgeTextStyle = [
-            styles.badgeText,
-            { color: theme.colors.onPrimary }
-        ];
-
-        const titleStyle = [
-            styles.title,
-            { color: theme.colors.onBackground }
-        ];
-
-        const metaTextStyle = [
-            styles.metaText,
-            { color: theme.colors.onSurfaceVariant }
-        ];
+        // Memoized static styles could help but inline is fine for this complexity
 
         return (
             <TouchableRipple
                 onPress={() => navigation.navigate('ArticleDetail', { article: item })}
                 style={rippleStyle}
                 borderless
+                accessibilityLabel={`Artículo destacado: ${item.title}. Autor: ${item.author?.name || 'VTrading'}`}
+                accessibilityRole="button"
             >
                 <View style={styles.slide}>
                     <Image
                         source={{ uri: item.image }}
                         style={styles.image}
                         resizeMode="cover"
+                        accessibilityIgnoresInvertColors
                     />
                     <LinearGradient
                         colors={['transparent', theme.dark ? 'rgba(0,0,0,0.7)' : 'rgba(255,255,255,0.7)', theme.colors.background]}
@@ -76,17 +74,27 @@ const FeaturedCarousel = ({ items }: FeaturedCarouselProps) => {
                     >
                         <View style={styles.content}>
                             {item.categories && item.categories.length > 0 && (
-                                <Surface style={badgeStyle} elevation={2}>
-                                    <Text style={badgeTextStyle}>{item.categories[0].name.toUpperCase()}</Text>
+                                <Surface style={[styles.badge, { backgroundColor: theme.colors.primary }]} elevation={2}>
+                                    <Text style={[styles.badgeText, { color: theme.colors.onPrimary }]}>
+                                        {item.categories[0].name.toUpperCase()}
+                                    </Text>
                                 </Surface>
                             )}
-                            <Text variant="headlineMedium" style={titleStyle} numberOfLines={3}>
+                            <Text
+                                variant="headlineMedium"
+                                style={[styles.title, { color: theme.colors.onBackground }]}
+                                numberOfLines={3}
+                            >
                                 {item.title}
                             </Text>
                             <View style={styles.metaRow}>
-                                <Text style={metaTextStyle}>{item.author?.name || 'VTrading'}</Text>
-                                <Text style={metaTextStyle}>•</Text>
-                                <Text style={metaTextStyle}>{item.time}</Text>
+                                <Text style={[styles.metaText, { color: theme.colors.onSurfaceVariant }]}>
+                                    {item.author?.name || 'VTrading'}
+                                </Text>
+                                <Text style={[styles.metaText, { color: theme.colors.onSurfaceVariant }]}>•</Text>
+                                <Text style={[styles.metaText, { color: theme.colors.onSurfaceVariant }]}>
+                                    {item.time}
+                                </Text>
                             </View>
                         </View>
                     </LinearGradient>
@@ -97,8 +105,16 @@ const FeaturedCarousel = ({ items }: FeaturedCarouselProps) => {
 
     const onScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
         const index = Math.round(event.nativeEvent.contentOffset.x / width);
-        setCurrentIndex(index);
+        if (index !== currentIndex) {
+            setCurrentIndex(index);
+        }
     };
+
+    // Memoize active dot style to avoid inline style warning
+    const activeDotStyle = React.useMemo(() => ({
+        backgroundColor: theme.colors.primary,
+        width: 24
+    }), [theme.colors.primary]);
 
     if (!items.length) return null;
 
@@ -113,22 +129,21 @@ const FeaturedCarousel = ({ items }: FeaturedCarouselProps) => {
                 pagingEnabled
                 showsHorizontalScrollIndicator={false}
                 onMomentumScrollEnd={onScroll}
+                onScrollBeginDrag={handleScrollBegin}
+                onScrollEndDrag={handleScrollEnd}
                 scrollEventThrottle={16}
             />
             {/* Pagination Lines */}
-            <View style={styles.pagination}>
+            <View style={styles.pagination} accessibilityRole="adjustable" accessibilityLabel={`Página ${currentIndex + 1} de ${items.length}`}>
                 {items.map((_, index) => {
-                    const dotStyle = [
-                        styles.dot,
-                        {
-                            backgroundColor: index === currentIndex ? theme.colors.primary : 'rgba(255,255,255,0.3)',
-                            width: index === currentIndex ? 24 : 12
-                        }
-                    ];
+                    const isActive = index === currentIndex;
                     return (
                         <View
                             key={index}
-                            style={dotStyle}
+                            style={[
+                                styles.dot,
+                                isActive ? activeDotStyle : styles.inactiveDot
+                            ]}
                         />
                     );
                 })}
@@ -139,6 +154,7 @@ const FeaturedCarousel = ({ items }: FeaturedCarouselProps) => {
 
 const styles = StyleSheet.create({
     ripple: {
+        // dynamic dimensions applied inline
     },
     container: {
         marginBottom: 0,
@@ -204,6 +220,10 @@ const styles = StyleSheet.create({
     dot: {
         height: 4,
         borderRadius: 2,
+    },
+    inactiveDot: {
+        width: 12,
+        backgroundColor: 'rgba(255,255,255,0.3)',
     },
 });
 

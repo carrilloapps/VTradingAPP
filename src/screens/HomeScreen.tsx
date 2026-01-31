@@ -3,6 +3,7 @@ import { View, StyleSheet, ScrollView, StatusBar, RefreshControl, KeyboardAvoidi
 import Share from 'react-native-share';
 import { captureRef } from 'react-native-view-shot';
 import { useTheme, Text } from 'react-native-paper';
+
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import MarketStatus from '../components/ui/MarketStatus';
 import Calculator from '../components/dashboard/Calculator';
@@ -80,15 +81,19 @@ const HomeScreen = ({ navigation }: any) => {
     }
   };
 
-  const handleShareText = async () => {
+  const handleShareText = useCallback(async () => {
     setShareDialogVisible(false);
     try {
       const bcv = rates.find(r => r.code === 'USD');
       const p2p = rates.find(r => r.code === 'USDT');
 
+      // Safe access to values to prevent crashes if rates are missing
+      const bcvVal = bcv?.value ? Number(bcv.value).toFixed(2) : 'N/A';
+      const p2pVal = p2p?.value ? Number(p2p.value).toFixed(2) : 'N/A';
+
       const message = `📊 *VTrading - Reporte Diario*\n\n` +
-        (bcv ? `💵 *USD BCV:* ${Number(bcv.value).toFixed(2)} Bs\n` : '') +
-        (p2p ? `🔶 *USDT P2P:* ${Number(p2p.value).toFixed(2)} Bs\n` : '') +
+        (bcv ? `💵 *USD BCV:* ${bcvVal} Bs\n` : '') +
+        (p2p ? `🔶 *USDT P2P:* ${p2pVal} Bs\n` : '') +
         (spread ? `⚖️ *Spread:* ${spread.toFixed(2)}%\n` : '') +
         `⏱️ _Act: ${lastUpdated}_\n\n` +
         `🌐 vtrading.app`;
@@ -100,7 +105,7 @@ const HomeScreen = ({ navigation }: any) => {
         showToast('Error al compartir texto', 'error');
       }
     }
-  };
+  }, [rates, spread, lastUpdated, showToast]);
 
   const handleShareImage = useCallback(() => {
     setShareDialogVisible(true);

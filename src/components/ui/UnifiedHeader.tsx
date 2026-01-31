@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, TouchableOpacity, ViewStyle, Platform } from 'react-native';
-import { Text, useTheme, TouchableRipple, Avatar } from 'react-native-paper';
+import React from 'react';
+import { View, StyleSheet, ViewStyle, Platform } from 'react-native';
+import { Text, useTheme, TouchableRipple } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import NotificationButton from './NotificationButton';
-import { md5 } from '../../utils/md5';
 import { AppConfig } from '../../constants/AppConfig';
 import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 import { useAuthStore } from '../../stores/authStore';
+import ProfileInfo from './header/ProfileInfo';
+import HeaderActions from './header/HeaderActions';
 
 export type HeaderVariant = 'profile' | 'section' | 'simple';
 
@@ -59,51 +59,19 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   style,
 }) => {
   const theme = useTheme();
-  const colors = theme.colors as any;
   const insets = useSafeAreaInsets();
   const user = useAuthStore((state) => state.user);
   const resolvedIsPremium = typeof isPremium === 'boolean' ? isPremium : !!(user && !user.isAnonymous);
   const adUnitId = Platform.OS === 'ios' ? AppConfig.ADMOB_BANNER_ID_IOS : AppConfig.ADMOB_BANNER_ID_ANDROID;
+  // Use TestIds.BANNER in dev, or real ID in prod (if configured)
   const bannerId = __DEV__ ? TestIds.BANNER : adUnitId;
   const shouldShowAd = showAd && !resolvedIsPremium && !!bannerId;
-
-  const [imageError, setImageError] = useState(false);
-
-  // Reset error state when identity changes
-  useEffect(() => {
-    setImageError(false);
-  }, [avatarUrl, email]);
-
-  // Custom theme colors fallback
-  const accentGreen = colors.success;
-  const accentRed = colors.error;
-
-  const buttonBgColor = theme.colors.elevation.level1;
 
   const themeStyles = React.useMemo(() => ({
     container: {
       backgroundColor: theme.colors.background,
       borderBottomColor: theme.colors.outline,
       borderBottomWidth: hideDivider ? 0 : 1,
-    },
-    avatar: {
-      borderColor: theme.colors.outline,
-      backgroundColor: 'transparent',
-    },
-    statusDot: {
-      backgroundColor: accentGreen,
-      borderColor: theme.colors.background,
-    },
-    subtitlePremium: {
-      color: colors.warning,
-      fontWeight: 'bold' as const,
-    },
-    subtitleDefault: {
-      color: theme.colors.onSurfaceVariant,
-      fontWeight: 'normal' as const,
-    },
-    greeting: {
-      color: theme.colors.onSurface,
     },
     sectionTitle: {
       color: theme.colors.onSurface,
@@ -115,7 +83,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
       color: theme.colors.onSurface,
     },
     iconButton: {
-      backgroundColor: buttonBgColor,
+      backgroundColor: theme.colors.elevation.level1,
       borderWidth: 1,
       borderColor: theme.dark ? 'transparent' : theme.colors.outline,
     },
@@ -123,86 +91,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
       backgroundColor: theme.colors.background,
       borderBottomColor: theme.colors.outline,
     },
-    badge: {
-      backgroundColor: accentRed,
-      borderColor: theme.colors.background,
-    }
-  }), [theme, accentGreen, accentRed, buttonBgColor, hideDivider, colors.warning]);
-
-  const getInitials = (name: string) => {
-    return name
-      .trim()
-      .split(/\s+/)
-      .map((n) => n[0])
-      .join('')
-      .substring(0, 2)
-      .toUpperCase();
-  };
-
-  const renderAvatar = () => {
-    // 1. If user has a photoURL (e.g. Google Sign In), use it.
-    if (avatarUrl) {
-      return (
-        <Avatar.Image
-          size={44}
-          source={{ uri: avatarUrl }}
-          accessibilityLabel={`Foto de perfil de ${userName || 'Usuario'}`}
-          style={[styles.avatar as ViewStyle, themeStyles.avatar]}
-        />
-      );
-    }
-
-    // 2. If user has email, try Gravatar (unless it errored previously)
-    if (email && !imageError) {
-      const hash = md5(email.trim().toLowerCase());
-      const gravatarUrl = `https://www.gravatar.com/avatar/${hash}?d=404`;
-      return (
-        <Avatar.Image
-          size={44}
-          source={{ uri: gravatarUrl }}
-          onError={() => setImageError(true)}
-          accessibilityLabel={`Foto de perfil de ${userName || 'Usuario'}`}
-          style={[styles.avatar as ViewStyle, themeStyles.avatar]}
-        />
-      );
-    }
-
-    // 3. Fallback: Initials
-    return (
-      <Avatar.Text
-        size={44}
-        label={getInitials(userName || 'User')}
-        style={[styles.avatarText, { backgroundColor: theme.colors.primaryContainer, borderColor: theme.colors.outline }]}
-        color={theme.colors.onPrimaryContainer}
-        accessibilityLabel={`Iniciales de perfil de ${userName || 'Usuario'}`}
-      />
-    );
-  };
-
-  const renderProfileContent = () => (
-    <TouchableOpacity
-      onPress={onProfilePress}
-      style={styles.userInfo}
-      activeOpacity={0.7}
-      accessibilityRole="button"
-      accessibilityLabel={`Perfil de ${userName || 'Usuario'}. ${resolvedIsPremium ? 'Plan Premium' : 'Plan Gratuito'}`}
-      accessibilityHint="Navegar al perfil de usuario"
-    >
-      <View style={styles.avatarContainer}>
-        {renderAvatar()}
-        <View style={[styles.statusDot, themeStyles.statusDot]} />
-      </View>
-
-      <View style={styles.textContainer}>
-        <Text style={[styles.subtitle, resolvedIsPremium ? themeStyles.subtitlePremium : themeStyles.subtitleDefault]}>
-          {resolvedIsPremium ? 'PLAN PREMIUM' : 'PLAN GRATUITO'}
-        </Text>
-        <Text variant="titleMedium" style={[styles.greeting, themeStyles.greeting]}>
-          Hola, {userName}
-        </Text>
-      </View>
-    </TouchableOpacity>
-  );
+  }), [theme, hideDivider]);
 
   const renderSectionContent = () => (
     <View style={styles.textContainer} accessibilityRole="header">
@@ -245,65 +134,30 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
               <MaterialCommunityIcons name="arrow-left" size={22} color={theme.colors.onSurface} />
             </TouchableRipple>
           )}
-          {variant === 'profile' && renderProfileContent()}
+
+          {variant === 'profile' && (
+            <ProfileInfo
+              onProfilePress={onProfilePress}
+              userName={userName}
+              avatarUrl={avatarUrl}
+              email={email}
+              isPremium={resolvedIsPremium}
+            />
+          )}
           {variant === 'section' && renderSectionContent()}
           {variant === 'simple' && renderSimpleContent()}
         </View>
 
         {(variant !== 'simple' || onActionPress || showNotification) && (
-          <View style={styles.rightContent}>
-            {onActionPress && (
-              <TouchableRipple
-                onPress={onActionPress}
-                style={[styles.iconButton, themeStyles.iconButton]}
-                borderless
-                rippleColor="rgba(0, 0, 0, .1)"
-                accessibilityRole="button"
-                accessibilityLabel={rightActionIcon === 'refresh' ? "Actualizar datos" : "Más opciones"}
-                accessibilityHint={rightActionIcon === 'refresh' ? "Refrescar el contenido de la pantalla" : "Mostrar menú de acciones adicionales"}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                {rightActionIcon ? (
-                  <MaterialCommunityIcons
-                    name={rightActionIcon}
-                    size={24}
-                    color={theme.colors.onSurface}
-                  />
-                ) : (
-                  <MaterialCommunityIcons
-                    name="dots-vertical"
-                    size={24}
-                    color={theme.colors.onSurfaceVariant}
-                  />
-                )}
-              </TouchableRipple>
-            )}
-
-            {showSecondaryAction && onSecondaryActionPress && (
-              <TouchableRipple
-                onPress={onSecondaryActionPress}
-                style={[styles.iconButton, themeStyles.iconButton]}
-                borderless
-                rippleColor="rgba(0, 0, 0, .1)"
-                accessibilityRole="button"
-                accessibilityLabel={secondaryActionIcon === 'share-variant' ? "Compartir" : "Acción secundaria"}
-                accessibilityHint={secondaryActionIcon === 'share-variant' ? "Compartir este contenido" : ""}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-              >
-                <MaterialCommunityIcons
-                  name={secondaryActionIcon}
-                  size={24}
-                  color={theme.colors.onSurface}
-                />
-              </TouchableRipple>
-            )}
-
-            {showNotification && (
-              <NotificationButton
-                icon={notificationIcon}
-              />
-            )}
-          </View>
+          <HeaderActions
+            onActionPress={onActionPress}
+            onSecondaryActionPress={onSecondaryActionPress}
+            rightActionIcon={rightActionIcon}
+            secondaryActionIcon={secondaryActionIcon}
+            notificationIcon={notificationIcon}
+            showNotification={showNotification}
+            showSecondaryAction={showSecondaryAction}
+          />
         )}
       </View>
       {shouldShowAd && (
@@ -338,49 +192,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  rightContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  userInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  avatarContainer: {
-    position: 'relative',
-  },
-  avatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 2,
-  },
-  avatarText: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 2,
-  },
-  statusDot: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    borderWidth: 2,
-  },
   textContainer: {
     flexDirection: 'column',
-  },
-  subtitle: {
-    fontSize: 10,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-    marginBottom: 2,
   },
   iconButton: {
     width: 40,
@@ -392,18 +205,6 @@ const styles = StyleSheet.create({
   },
   backButton: {
     marginRight: 8,
-  },
-  badge: {
-    position: 'absolute',
-    top: -2,
-    right: -2,
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    borderWidth: 1,
-  },
-  greeting: {
-    fontWeight: 'bold',
   },
   sectionTitle: {
     fontWeight: '800',
@@ -427,4 +228,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default UnifiedHeader;
+export default React.memo(UnifiedHeader);

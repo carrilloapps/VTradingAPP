@@ -335,7 +335,16 @@ class AuthService {
     } else if (error.message) {
       message = error.message;
     }
-    return new Error(message);
+    return new AuthError(message, { cause: error });
+  }
+}
+
+class AuthError extends Error {
+  cause?: any;
+  constructor(message: string, options?: { cause?: any }) {
+    super(message);
+    this.name = 'AuthError';
+    this.cause = options?.cause;
   }
 }
 

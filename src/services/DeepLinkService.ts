@@ -35,6 +35,8 @@ class DeepLinkService {
         return `${this.BASE_URL}/tag/${slug}`;
     }
 
+    private subscription: { remove: () => void } | null = null;
+
     /**
      * Parse a URL into a structured DeepLinkRoute
      */
@@ -53,6 +55,13 @@ class DeepLinkService {
 
             // Cleanup path (remove leading/trailing slashes)
             path = path.replace(/^\/+|\/+$/g, '');
+
+            // Validate path contains only safe characters (alphanumeric, hyphens, slashes)
+            // This prevents specialized injection attacks if slugs are used in unsafe contexts later
+            if (!/^[a-zA-Z0-9-/_]+$/.test(path)) {
+                observabilityService.captureError(new Error('Invalid DeepLink characters'), { context: 'DeepLinkService.parseDeepLink', url });
+                return null;
+            }
 
             if (!path || path === 'discover') {
                 return { type: 'discover', originalUrl: url };
@@ -141,6 +150,11 @@ class DeepLinkService {
      * Initialize deep link handling
      */
     init() {
+        if (this.subscription) {
+            console.warn('DeepLinkService already initialized');
+            return () => { }; // No-op if already initialized
+        }
+
         // Handle initial URL
         Linking.getInitialURL().then((url) => {
             if (url) {
@@ -149,11 +163,18 @@ class DeepLinkService {
         });
 
         // Listen for URL changes
-        const subscription = Linking.addEventListener('url', ({ url }) => {
+        this.subscription = Linking.addEventListener('url', ({ url }) => {
             this.handleDeepLink(url);
         });
 
-        return () => subscription.remove();
+        return () => this.destroy();
+    }
+
+    destroy() {
+        if (this.subscription) {
+            this.subscription.remove();
+            this.subscription = null;
+        }
     }
 }
 

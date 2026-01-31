@@ -18,6 +18,7 @@ export interface StockData {
   change?: string; // Optional pre-formatted change for dashboard compatibility
   isPositive?: boolean; // Optional for dashboard compatibility
   iconName?: string; // Optional for dashboard compatibility
+  category?: string; // Added for compatibility with StocksService
   onPress?: (stock: StockData) => void; // Optional press handler
 }
 
@@ -29,7 +30,7 @@ const colorMap: Record<string, { bg: string; text: string; darkBg: string; darkT
   indigo: { bg: '#EEF2FF', text: '#4338CA', darkBg: 'rgba(99, 102, 241, 0.1)', darkText: '#818CF8' },
 };
 
-const StockItem: React.FC<StockData> = ({
+const StockItem = React.memo(({
   id,
   symbol,
   name,
@@ -42,7 +43,7 @@ const StockItem: React.FC<StockData> = ({
   change,
   isPositive: propIsPositive,
   onPress,
-}) => {
+}: StockData) => {
   const theme = useAppTheme();
   const colors = colorMap[color || 'emerald'] || colorMap.emerald;
 
@@ -155,7 +156,7 @@ const StockItem: React.FC<StockData> = ({
       </TouchableOpacity>
     </Animated.View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

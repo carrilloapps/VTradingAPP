@@ -19,11 +19,11 @@ const NotificationContext = createContext<NotificationContextType>({
   notifications: [],
   unreadCount: 0,
   isLoading: true,
-  addNotification: () => {},
-  markAsRead: () => {},
-  markAllAsRead: () => {},
-  archiveNotification: () => {},
-  deleteNotification: () => {},
+  addNotification: () => { },
+  markAsRead: () => { },
+  markAllAsRead: () => { },
+  archiveNotification: () => { },
+  deleteNotification: () => { },
 });
 
 export const useNotifications = () => useContext(NotificationContext);
@@ -40,16 +40,16 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         // If empty, use mock data? Or just empty. Let's use empty to be clean.
         // Or if we want to preserve the mock data from NotificationsScreen for demo purposes:
         if (stored.length === 0) {
-            // Optional: Inject mock data if desired, but better to start clean or migrate mocks here.
-            // For this task, I'll stick to what's in storage or empty.
-            setNotifications([]); 
+          // Optional: Inject mock data if desired, but better to start clean or migrate mocks here.
+          // For this task, I'll stick to what's in storage or empty.
+          setNotifications([]);
         } else {
-            setNotifications(stored);
+          setNotifications(stored);
         }
       } catch (e) {
         observabilityService.captureError(e, {
-            context: 'NotificationContext.loadNotifications',
-            action: 'load_stored_notifications'
+          context: 'NotificationContext.loadNotifications',
+          action: 'load_stored_notifications'
         });
         // Error loading notifications
       } finally {
@@ -97,41 +97,44 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
         // Notification caused app to open from quit state
         // Process and add to notifications list
         processRemoteMessage(remoteMessage, 'quit');
-        
+
         // Navigate to Notifications Screen
-        setTimeout(() => {
-             if (navigationRef.isReady()) {
-                 try {
-                     navigationRef.navigate('Notifications');
-                 } catch (e) {
-                     observabilityService.captureError(e, {
-                         context: 'NotificationContext.quitStateNavigation',
-                         action: 'navigate_notifications'
-                     });
-                     // Navigation failed
-                 }
-             }
-        }, 1000);
+        // Navigate to Notifications Screen with robust check
+        const attemptNavigation = (attempts = 0) => {
+          if (navigationRef.isReady()) {
+            try {
+              navigationRef.navigate('Notifications');
+            } catch (e) {
+              observabilityService.captureError(e, {
+                context: 'NotificationContext.quitStateNavigation',
+                action: 'navigate_notifications'
+              });
+            }
+          } else if (attempts < 20) { // Try for ~2 seconds (20 * 100ms)
+            setTimeout(() => attemptNavigation(attempts + 1), 100);
+          }
+        };
+        attemptNavigation();
       }
     });
 
     // 2. Background State
     const unsubscribeOpened = fcmService.onNotificationOpenedApp((remoteMessage) => {
-       // Process and add to notifications list
-       processRemoteMessage(remoteMessage, 'background');
-       
-       // Navigate to Notifications Screen
-       if (navigationRef.isReady()) {
-           try {
-               navigationRef.navigate('Notifications');
-           } catch (e) {
-               observabilityService.captureError(e, {
-                   context: 'NotificationContext.backgroundStateNavigation',
-                   action: 'navigate_notifications'
-               });
-               // Navigation to Notifications failed
-           }
-       }
+      // Process and add to notifications list
+      processRemoteMessage(remoteMessage, 'background');
+
+      // Navigate to Notifications Screen
+      if (navigationRef.isReady()) {
+        try {
+          navigationRef.navigate('Notifications');
+        } catch (e) {
+          observabilityService.captureError(e, {
+            context: 'NotificationContext.backgroundStateNavigation',
+            action: 'navigate_notifications'
+          });
+          // Navigation to Notifications failed
+        }
+      }
     });
 
     // 3. Foreground State
@@ -145,121 +148,121 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
       try {
         // Add to list
         if (remoteMessage.notification || remoteMessage.data) {
-        // Extract content with fallbacks
-        const dataTitle = (remoteMessage.data?.title as string);
-        const notifTitle = (remoteMessage.notification?.title as string);
-        const dataBody = (remoteMessage.data?.message as string) || (remoteMessage.data?.body as string);
-        const notifBody = (remoteMessage.notification?.body as string);
+          // Extract content with fallbacks
+          const dataTitle = (remoteMessage.data?.title as string);
+          const notifTitle = (remoteMessage.notification?.title as string);
+          const dataBody = (remoteMessage.data?.message as string) || (remoteMessage.data?.body as string);
+          const notifBody = (remoteMessage.notification?.body as string);
 
-        // Prioritize data title if notification title is generic "Notificación" or missing
-        let finalTitle = notifTitle || dataTitle || 'Notificación';
-        let finalBody = notifBody || dataBody || '';
+          // Prioritize data title if notification title is generic "Notificación" or missing
+          let finalTitle = notifTitle || dataTitle || 'Notificación';
+          let finalBody = notifBody || dataBody || '';
 
-        // Special handling for Price Alerts (symbol + price in data)
-        let highlightedVal;
-        let trendVal: 'up' | 'down' | undefined;
-        let shouldAdd = true; // Default to true for standard messages
+          // Special handling for Price Alerts (symbol + price in data)
+          let highlightedVal;
+          let trendVal: 'up' | 'down' | undefined;
+          let shouldAdd = true; // Default to true for standard messages
 
-        if (remoteMessage.data?.symbol && remoteMessage.data?.price) {
-           const symbol = remoteMessage.data.symbol as string;
-           const price = parseFloat(remoteMessage.data.price as string);
-           
-           const formatPrice = (val: number) => val < 0.01 ? val : val.toFixed(2);
-           highlightedVal = `${formatPrice(price)}`; 
+          if (remoteMessage.data?.symbol && remoteMessage.data?.price) {
+            const symbol = remoteMessage.data.symbol as string;
+            const price = parseFloat(remoteMessage.data.price as string);
 
-           if (!isNaN(price)) {
-               // Check if this price matches any active alert
-               // We need to fetch alerts to know if this is UP or DOWN
-               try {
-                   const alerts = await storageService.getAlerts();
-                   const matchingAlerts = alerts.filter(a => 
-                       a.isActive && 
-                       a.symbol === symbol &&
-                       (
-                           (a.condition === 'above' && price >= parseFloat(a.target)) ||
-                           (a.condition === 'below' && price <= parseFloat(a.target))
-                       )
-                   );
+            const formatPrice = (val: number) => val < 0.01 ? val : val.toFixed(2);
+            highlightedVal = `${formatPrice(price)}`;
 
-                   if (matchingAlerts.length > 0) {
-                       // Use the first matching alert to define the message context
-                       const alert = matchingAlerts[0];
-                       const isUp = alert.condition === 'above';
-                       
-                       trendVal = isUp ? 'up' : 'down';
-                       const directionText = isUp ? 'Subida' : 'Bajada';
-                       const actionVerb = isUp ? 'subió' : 'bajó';
-                       const targetPrice = parseFloat(alert.target);
-                       const formatTargetPrice = (val: number) => val < 0.01 ? val : val.toFixed(2);
-                       const currentPriceFormatted = formatTargetPrice(price);
-                       const targetPriceFormatted = formatTargetPrice(targetPrice);
-                       
-                       // Unified title and body
-                       finalTitle = `${directionText}: ${symbol} a ${currentPriceFormatted}`;
-                       finalBody = `El precio ${actionVerb} de los ${targetPriceFormatted}`;
-                   } else {
-                       // Price update received but no alert condition met -> Ignore it
-                       shouldAdd = false;
-                   }
-               } catch (e) {
-                   observabilityService.captureError(e, {
-                       context: 'NotificationContext.processRemoteMessage',
-                       action: 'check_matching_alerts',
-                       symbol: remoteMessage.data?.symbol
-                   });
-                   // Error checking alerts in NotificationContext
-                   // Fallback: If error checking alerts, add it anyway but try to infer trend
-                   // (Keep existing fallback logic if needed, or better safe to not spam?)
-                   // Let's keep it but with neutral text if possible.
-               }
-           }
-        }
+            if (!isNaN(price)) {
+              // Check if this price matches any active alert
+              // We need to fetch alerts to know if this is UP or DOWN
+              try {
+                const alerts = await storageService.getAlerts();
+                const matchingAlerts = alerts.filter(a =>
+                  a.isActive &&
+                  a.symbol === symbol &&
+                  (
+                    (a.condition === 'above' && price >= parseFloat(a.target)) ||
+                    (a.condition === 'below' && price <= parseFloat(a.target))
+                  )
+                );
 
-        if (shouldAdd) {
+                if (matchingAlerts.length > 0) {
+                  // Use the first matching alert to define the message context
+                  const alert = matchingAlerts[0];
+                  const isUp = alert.condition === 'above';
+
+                  trendVal = isUp ? 'up' : 'down';
+                  const directionText = isUp ? 'Subida' : 'Bajada';
+                  const actionVerb = isUp ? 'subió' : 'bajó';
+                  const targetPrice = parseFloat(alert.target);
+                  const formatTargetPrice = (val: number) => val < 0.01 ? val : val.toFixed(2);
+                  const currentPriceFormatted = formatTargetPrice(price);
+                  const targetPriceFormatted = formatTargetPrice(targetPrice);
+
+                  // Unified title and body
+                  finalTitle = `${directionText}: ${symbol} a ${currentPriceFormatted}`;
+                  finalBody = `El precio ${actionVerb} de los ${targetPriceFormatted}`;
+                } else {
+                  // Price update received but no alert condition met -> Ignore it
+                  shouldAdd = false;
+                }
+              } catch (e) {
+                observabilityService.captureError(e, {
+                  context: 'NotificationContext.processRemoteMessage',
+                  action: 'check_matching_alerts',
+                  symbol: remoteMessage.data?.symbol
+                });
+                // Error checking alerts in NotificationContext
+                // Fallback: If error checking alerts, add it anyway but try to infer trend
+                // (Keep existing fallback logic if needed, or better safe to not spam?)
+                // Let's keep it but with neutral text if possible.
+              }
+            }
+          }
+
+          if (shouldAdd) {
             const newNotif: StoredNotification = {
-            id: remoteMessage.messageId || Date.now().toString(),
-            type: (remoteMessage.data?.type as any) || (remoteMessage.data?.symbol ? 'price_alert' : 'system'),
-            title: finalTitle,
-            message: finalBody,
-            timestamp: new Date().toISOString(),
-            isRead: false,
-            trend: trendVal,
-            highlightedValue: highlightedVal,
-            data: remoteMessage.data,
+              id: remoteMessage.messageId || Date.now().toString(),
+              type: (remoteMessage.data?.type as any) || (remoteMessage.data?.symbol ? 'price_alert' : 'system'),
+              title: finalTitle,
+              message: finalBody,
+              timestamp: new Date().toISOString(),
+              isRead: false,
+              trend: trendVal,
+              highlightedValue: highlightedVal,
+              data: remoteMessage.data,
             };
-            
+
             // Add notification to context
             addNotification(newNotif);
-            
+
             // Explicitly persist to storage immediately
             try {
               const currentNotifications = await storageService.getNotifications();
               await storageService.saveNotifications([newNotif, ...currentNotifications]);
             } catch (e) {
               observabilityService.captureError(e, {
-                  context: 'NotificationContext.processRemoteMessage',
-                  action: 'persist_notification',
-                  notificationId: newNotif.id
+                context: 'NotificationContext.processRemoteMessage',
+                action: 'persist_notification',
+                notificationId: newNotif.id
               });
               // Failed to persist notification
             }
+          }
         }
-      }
-    } catch (error) {
-      observabilityService.captureError(error, {
+      } catch (error) {
+        observabilityService.captureError(error, {
           context: 'NotificationContext.processRemoteMessage',
           action: 'process_remote_message',
           messageId: remoteMessage.messageId
-      });
-          // Error processing remote message
-        }
-      };
+        });
+        // Error processing remote message
+      }
+    };
 
-      return () => {
-        unsubscribeOpened();
-        unsubscribeMessage();
-      };
-    }, [addNotification]);
+    return () => {
+      unsubscribeOpened();
+      unsubscribeMessage();
+    };
+  }, [addNotification]);
 
   return (
     <NotificationContext.Provider value={{

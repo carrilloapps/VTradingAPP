@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
 import { Text, TextInput, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -18,7 +18,7 @@ import AuthLogo from '../../components/ui/AuthLogo';
 const LoginScreen = ({ navigation }: any) => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
-  const { signIn, googleSignIn, signInAnonymously,isLoading } = useAuthStore();
+  const { signIn, googleSignIn, signInAnonymously, isLoading } = useAuthStore();
   const showToast = useToastStore((state) => state.showToast);
 
   useEffect(() => {
@@ -69,6 +69,7 @@ const LoginScreen = ({ navigation }: any) => {
     },
   }), [theme]);
 
+  const passwordRef = useRef<any>(null); // Ref for password input
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [secureTextEntry, setSecureTextEntry] = useState(true);
@@ -83,22 +84,28 @@ const LoginScreen = ({ navigation }: any) => {
     navigation.navigate('WebView', { url, title: title || 'Navegador' });
   };
 
-  const validate = () => {
-    let isValid = true;
-    if (!email || !email.includes('@')) {
+  const validateEmail = (val: string) => {
+    if (!val || !val.includes('@')) {
       setEmailError('Ingresa un correo válido');
-      isValid = false;
-    } else {
-      setEmailError('');
+      return false;
     }
+    setEmailError('');
+    return true;
+  };
 
-    if (!password) {
+  const validatePassword = (val: string) => {
+    if (!val) {
       setPasswordError('Ingresa tu contraseña');
-      isValid = false;
-    } else {
-      setPasswordError('');
+      return false;
     }
-    return isValid;
+    setPasswordError('');
+    return true;
+  };
+
+  const validate = () => {
+    const isEmailValid = validateEmail(email);
+    const isPasswordValid = validatePassword(password);
+    return isEmailValid && isPasswordValid;
   };
 
   const handleLogin = async () => {
@@ -107,15 +114,19 @@ const LoginScreen = ({ navigation }: any) => {
       try {
         await analyticsService.logEvent(ANALYTICS_EVENTS.LOGIN_ATTEMPT, { method: 'password' });
         await signIn(email, password, showToast);
-        // Login exitoso ya se trackea en authStore con logLogin
-      } catch (e) {
+      } catch (e: any) {
+        // Obfuscate error for security
+        if (!e.message?.includes('CANCELLED')) { // Don't show generic error for cancellation or handled errors
+          // Let authStore handle the toast, but ensure we don't leak user existence
+          // The authStore uses firebase error mapping which is safe enough, but we can override toast here if needed.
+          // For now we rely on authStore but catch unexpected ones.
+        }
+
         observabilityService.captureError(e, {
           context: 'LoginScreen.handleLogin',
           method: 'password',
-          email
+          email // Consider hashing email in prod logs for PII compliance
         });
-        // Error ya se trackea en authStore con logError
-        // Error handled in authStore
       } finally {
         setIsSubmitting(false);
       }
@@ -127,13 +138,13 @@ const LoginScreen = ({ navigation }: any) => {
     try {
       await analyticsService.logEvent(ANALYTICS_EVENTS.LOGIN_ATTEMPT, { method: 'google' });
       await googleSignIn(showToast);
-      // Login exitoso ya se trackea en authStore
-    } catch (e) {
-      observabilityService.captureError(e, {
-        context: 'LoginScreen.handleGoogleLogin',
-        method: 'google'
-      });
-      // Error ya se trackea en authStore
+    } catch (e: any) {
+      if (e.message !== 'SIGN_IN_CANCELLED' && e.code !== 'SIGN_IN_CANCELLED' && !e.message?.includes('cancelled')) {
+        observabilityService.captureError(e, {
+          context: 'LoginScreen.handleGoogleLogin',
+          method: 'google'
+        });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -162,12 +173,12 @@ const LoginScreen = ({ navigation }: any) => {
 
   return (
     <View style={[styles.screen, themeStyles.container]}>
-      <StatusBar 
-        backgroundColor="transparent" 
-        translucent 
-        barStyle={theme.dark ? 'light-content' : 'dark-content'} 
+      <StatusBar
+        backgroundColor="transparent"
+        translucent
+        barStyle={theme.dark ? 'light-content' : 'dark-content'}
       />
-      <UnifiedHeader 
+      <UnifiedHeader
         variant="section"
         title=""
         rightActionIcon="information-outline"
@@ -177,15 +188,15 @@ const LoginScreen = ({ navigation }: any) => {
         hideDivider
         style={{ backgroundColor: theme.colors.background }}
       />
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.flex1}
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={[
-            styles.container, 
+            styles.container,
             themeStyles.container,
-            { 
+            {
               paddingTop: theme.spacing.m,
               paddingBottom: insets.bottom + theme.spacing.xl,
               paddingHorizontal: theme.spacing.xl
@@ -195,9 +206,9 @@ const LoginScreen = ({ navigation }: any) => {
           showsVerticalScrollIndicator={false}
         >
           <View style={[styles.header, { marginBottom: theme.spacing.xl }]}>
-            <AuthLogo 
-              size={80} 
-              containerStyle={{ marginBottom: theme.spacing.s }} 
+            <AuthLogo
+              size={80}
+              containerStyle={{ marginBottom: theme.spacing.s }}
             />
             <View style={[styles.titleRow, themeStyles.titleRow]}>
               <Text variant="headlineMedium" style={themeStyles.title}>
@@ -215,12 +226,16 @@ const LoginScreen = ({ navigation }: any) => {
                 label="Correo electrónico"
                 value={email}
                 onChangeText={setEmail}
+                onBlur={() => validateEmail(email)}
                 mode="outlined"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoCorrect={false}
                 autoComplete="email"
                 textContentType="emailAddress"
+                returnKeyType="next"
+                onSubmitEditing={() => passwordRef.current?.focus()}
+                blurOnSubmit={false}
                 accessibilityLabel="Correo electrónico"
                 accessibilityHint="Ingresa tu correo para iniciar sesión"
                 error={!!emailError}
@@ -228,25 +243,29 @@ const LoginScreen = ({ navigation }: any) => {
                 style={styles.input}
                 disabled={isBusy}
               />
-              <HelperText type="error" visible={!!emailError} style={{ marginBottom: -theme.spacing.xs }}>
+              <HelperText type="error" visible={!!emailError} style={{ marginBottom: -theme.spacing.xs }} accessibilityLiveRegion="polite">
                 {emailError}
               </HelperText>
             </View>
 
             <View>
               <TextInput
+                ref={passwordRef}
                 label="Contraseña"
                 value={password}
                 onChangeText={setPassword}
+                onBlur={() => validatePassword(password)}
                 mode="outlined"
                 secureTextEntry={secureTextEntry}
+                returnKeyType="done"
+                onSubmitEditing={handleLogin}
                 accessibilityLabel="Contraseña"
                 accessibilityHint="Ingresa tu contraseña"
                 error={!!passwordError}
                 left={<TextInput.Icon icon="lock" accessibilityLabel="Icono de candado" />}
                 right={
-                  <TextInput.Icon 
-                    icon={secureTextEntry ? "eye" : "eye-off"} 
+                  <TextInput.Icon
+                    icon={secureTextEntry ? "eye" : "eye-off"}
                     onPress={() => setSecureTextEntry(!secureTextEntry)}
                     accessibilityLabel={secureTextEntry ? "Mostrar contraseña" : "Ocultar contraseña"}
                   />
@@ -254,7 +273,7 @@ const LoginScreen = ({ navigation }: any) => {
                 style={styles.input}
                 disabled={isBusy}
               />
-              <HelperText type="error" visible={!!passwordError} style={{ marginBottom: -theme.spacing.xs }}>
+              <HelperText type="error" visible={!!passwordError} style={{ marginBottom: -theme.spacing.xs }} accessibilityLiveRegion="polite">
                 {passwordError}
               </HelperText>
             </View>
@@ -313,7 +332,7 @@ const LoginScreen = ({ navigation }: any) => {
                 onPress={() => navigation.navigate('Register')}
               />
             </View>
-            
+
             <View style={[styles.legal, { marginTop: theme.spacing.m }]}>
               <Text variant="bodySmall" style={[themeStyles.legalText, styles.legalText]}>
                 Al continuar aceptas nuestras{' '}
@@ -335,9 +354,9 @@ const LoginScreen = ({ navigation }: any) => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-      <AboutDialog 
-        visible={aboutVisible} 
-        onDismiss={() => setAboutVisible(false)} 
+      <AboutDialog
+        visible={aboutVisible}
+        onDismiss={() => setAboutVisible(false)}
       />
     </View>
   );

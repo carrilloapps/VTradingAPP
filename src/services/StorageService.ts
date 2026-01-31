@@ -60,11 +60,19 @@ export interface UserAlert {
 
 class StorageService {
 
+  private cache: Map<string, any> = new Map();
+
   // Helper methods for MMKV JSON operations
   private getJSON<T>(key: string, defaultValue: T): T {
+    if (this.cache.has(key)) {
+      return this.cache.get(key) as T;
+    }
+
     try {
       const data = storage.getString(key);
-      return data ? JSON.parse(data) : defaultValue;
+      const parsed = data ? JSON.parse(data) : defaultValue;
+      this.cache.set(key, parsed);
+      return parsed;
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'StorageService.getJSON',
@@ -77,6 +85,7 @@ class StorageService {
 
   private setJSON<T>(key: string, value: T): void {
     try {
+      this.cache.set(key, value);
       storage.set(key, JSON.stringify(value));
     } catch (e) {
       observabilityService.captureError(e, {
@@ -160,6 +169,7 @@ class StorageService {
   // Utility methods
   clearAll(): void {
     try {
+      this.cache.clear();
       storage.clearAll();
     } catch (e) {
       observabilityService.captureError(e, {
@@ -174,6 +184,7 @@ class StorageService {
   }
 
   delete(key: string): void {
+    this.cache.delete(key);
     storage.remove(key);
   }
 }

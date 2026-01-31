@@ -1,6 +1,6 @@
 import { Platform } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { mmkvStorage } from './StorageService';
 import { fcmService } from './firebase/FCMService';
 import { authService } from './firebase/AuthService';
 
@@ -97,13 +97,13 @@ class FeatureFlagService {
     private async getRolloutId(): Promise<number> {
         if (this.rolloutId !== null) return this.rolloutId;
 
-        const stored = await AsyncStorage.getItem('vtrading_rollout_id');
+        const stored = mmkvStorage.getString('vtrading_rollout_id');
         if (stored) {
             this.rolloutId = parseInt(stored, 10);
         } else {
             // Generate persistent random ID between 0 and 99
             this.rolloutId = Math.floor(Math.random() * 100);
-            await AsyncStorage.setItem('vtrading_rollout_id', this.rolloutId.toString());
+            mmkvStorage.set('vtrading_rollout_id', this.rolloutId.toString());
         }
         return this.rolloutId;
     }

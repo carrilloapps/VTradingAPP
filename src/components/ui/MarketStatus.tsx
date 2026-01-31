@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, TouchableOpacity, Animated } from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Animated, StyleProp, ViewStyle } from 'react-native';
 import { Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../theme/theme';
@@ -9,7 +9,7 @@ export interface MarketStatusProps {
   updatedAt: string;
   onRefresh?: () => void;
   showBadge?: boolean;
-  style?: any;
+  style?: StyleProp<ViewStyle>;
 }
 
 const MarketStatus: React.FC<MarketStatusProps> = ({ isOpen, updatedAt, onRefresh, showBadge = true, style }) => {
@@ -33,7 +33,7 @@ const MarketStatus: React.FC<MarketStatusProps> = ({ isOpen, updatedAt, onRefres
         ])
       ).start();
     } else {
-        fadeAnim.setValue(0.4); // Reset if closed
+      fadeAnim.setValue(0.4); // Reset if closed
     }
   }, [isOpen, fadeAnim]);
 
@@ -60,44 +60,44 @@ const MarketStatus: React.FC<MarketStatusProps> = ({ isOpen, updatedAt, onRefres
     <View style={[styles.container, style, !showBadge && styles.justifyEnd]}>
       {showBadge && (
         <View style={[styles.statusBadge, themeStyles.statusBadge]}>
-            <View style={styles.indicatorContainer}>
-                {isOpen && (
-                    <Animated.View
-                    style={[
-                        styles.ping,
-                        {
-                        backgroundColor: theme.colors.trendUp,
-                        opacity: fadeAnim,
-                        },
-                    ]}
-                    />
-                )}
-                <View style={[styles.dot, themeStyles.dot]} />
-            </View>
+          <View style={styles.indicatorContainer}>
+            {isOpen && (
+              <Animated.View
+                style={[
+                  styles.ping,
+                  {
+                    backgroundColor: theme.colors.trendUp,
+                    opacity: fadeAnim,
+                  },
+                ]}
+              />
+            )}
+            <View style={[styles.dot, themeStyles.dot]} />
+          </View>
           <Text style={[styles.statusText, themeStyles.statusText]}>
             {isOpen ? 'MERCADO ABIERTO' : 'MERCADO CERRADO'}
           </Text>
         </View>
       )}
-      
+
       <View style={styles.rightContent}>
-        <TouchableOpacity 
-            onPress={onRefresh} 
-            disabled={!onRefresh}
-            style={styles.refreshContainer}
-            activeOpacity={0.6}
+        <TouchableOpacity
+          onPress={onRefresh}
+          disabled={!onRefresh}
+          style={styles.refreshContainer}
+          activeOpacity={0.6}
         >
-            <Text style={[styles.timeText, themeStyles.timeText]}>
+          <Text style={[styles.timeText, themeStyles.timeText]}>
             Actualizado: {updatedAt}
-            </Text>
-            {onRefresh && (
-            <MaterialCommunityIcons 
-                name="refresh" 
-                size={14} 
-                color={theme.colors.onSurfaceVariant} 
-                style={themeStyles.refreshIcon}
+          </Text>
+          {onRefresh && (
+            <MaterialCommunityIcons
+              name="refresh"
+              size={14}
+              color={theme.colors.onSurfaceVariant}
+              style={themeStyles.refreshIcon}
             />
-            )}
+          )}
         </TouchableOpacity>
       </View>
     </View>
@@ -160,4 +160,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MarketStatus;
+export default React.memo(MarketStatus);

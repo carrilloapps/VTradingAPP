@@ -202,6 +202,19 @@ export interface PaginatedResponse<T> {
     currentPage: number;
 }
 
+export interface WordPressQueryParams {
+    page?: number;
+    per_page?: number;
+    search?: string;
+    categories?: number | number[];
+    tags?: number | number[];
+    slug?: string;
+    exclude?: number | number[];
+    _embed?: boolean;
+    orderby?: 'date' | 'relevance' | 'id' | 'include' | 'title' | 'slug';
+    order?: 'asc' | 'desc';
+    [key: string]: any; // Allow custom params
+}
 
 class WordPressService {
     private client: ApiClient;
@@ -230,7 +243,7 @@ class WordPressService {
         bypassCache = false
     ): Promise<FormattedPost[]> {
         try {
-            const params: any = {
+            const params: WordPressQueryParams = {
                 page,
                 per_page: perPage,
                 _embed: true, // Fetch embedded media/author data
@@ -276,7 +289,7 @@ class WordPressService {
         bypassCache = false
     ): Promise<PaginatedResponse<FormattedPost>> {
         try {
-            const params: any = {
+            const params: WordPressQueryParams = {
                 page,
                 per_page: perPage,
                 _embed: true,

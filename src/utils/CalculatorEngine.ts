@@ -76,7 +76,7 @@ export class CalculatorEngine {
       }
       // Prevent overflow (simple length check, can be improved)
       if (currentValue.length > 15) return;
-      
+
       this.state.currentValue = currentValue === '0' && digit !== '.' ? digit : currentValue + digit;
     }
     this.notify();
@@ -127,6 +127,12 @@ export class CalculatorEngine {
     // Check for Infinity/NaN
     if (!isFinite(result) || isNaN(result)) {
       this.setError('Error Matemático');
+      return;
+    }
+
+    // Check for Overflow
+    if (Math.abs(result) > Number.MAX_SAFE_INTEGER) {
+      this.setError('Número demasiado grande');
       return;
     }
 

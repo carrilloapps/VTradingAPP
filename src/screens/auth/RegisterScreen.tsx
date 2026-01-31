@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView, StatusBar, KeyboardAvoidingView, Platform } from 'react-native';
 import { Text, TextInput, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { useAuthStore } from '../../stores/authStore';
 import { useToastStore } from '../../stores/toastStore';
 import { analyticsService, ANALYTICS_EVENTS } from '../../services/firebase/AnalyticsService';
@@ -57,7 +58,7 @@ const RegisterScreen = ({ navigation }: any) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  
+
   const [secureTextEntry, setSecureTextEntry] = useState(true);
   const [confirmSecureTextEntry, setConfirmSecureTextEntry] = useState(true);
 
@@ -73,7 +74,7 @@ const RegisterScreen = ({ navigation }: any) => {
 
   const validate = () => {
     let isValid = true;
-    
+
     // Email Validation
     if (!email || !email.includes('@')) {
       setEmailError('Ingresa un correo válido');
@@ -150,12 +151,12 @@ const RegisterScreen = ({ navigation }: any) => {
 
   return (
     <View style={[styles.screen, themeStyles.container]}>
-      <StatusBar 
-        backgroundColor="transparent" 
-        translucent 
-        barStyle={theme.dark ? 'light-content' : 'dark-content'} 
+      <StatusBar
+        backgroundColor="transparent"
+        translucent
+        barStyle={theme.dark ? 'light-content' : 'dark-content'}
       />
-      <UnifiedHeader 
+      <UnifiedHeader
         variant="section"
         onBackPress={() => navigation.goBack()}
         style={{ backgroundColor: theme.colors.background }}
@@ -163,15 +164,15 @@ const RegisterScreen = ({ navigation }: any) => {
         showAd={false}
         hideDivider
       />
-      <KeyboardAvoidingView 
+      <KeyboardAvoidingView
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.flex1}
       >
-        <ScrollView 
+        <ScrollView
           contentContainerStyle={[
-            styles.container, 
+            styles.container,
             themeStyles.container,
-            { 
+            {
               paddingTop: theme.spacing.m,
               paddingBottom: insets.bottom + theme.spacing.xl,
               paddingHorizontal: theme.spacing.xl
@@ -181,9 +182,9 @@ const RegisterScreen = ({ navigation }: any) => {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.headerContent}>
-            <AuthLogo 
-              size={60} 
-              containerStyle={{ marginBottom: theme.spacing.s }} 
+            <AuthLogo
+              size={60}
+              containerStyle={{ marginBottom: theme.spacing.s }}
             />
             <View style={themeStyles.titleRow}>
               <Text variant="headlineSmall" style={themeStyles.title}>
@@ -231,8 +232,8 @@ const RegisterScreen = ({ navigation }: any) => {
                 error={!!passwordError}
                 left={<TextInput.Icon icon="lock" accessibilityLabel="Icono de candado" />}
                 right={
-                  <TextInput.Icon 
-                    icon={secureTextEntry ? "eye" : "eye-off"} 
+                  <TextInput.Icon
+                    icon={secureTextEntry ? "eye" : "eye-off"}
                     onPress={() => setSecureTextEntry(!secureTextEntry)}
                     accessibilityLabel={secureTextEntry ? "Mostrar contraseña" : "Ocultar contraseña"}
                   />
@@ -257,8 +258,8 @@ const RegisterScreen = ({ navigation }: any) => {
                 error={!!confirmPasswordError}
                 left={<TextInput.Icon icon="lock-check" accessibilityLabel="Icono de verificación" />}
                 right={
-                  <TextInput.Icon 
-                    icon={confirmSecureTextEntry ? "eye" : "eye-off"} 
+                  <TextInput.Icon
+                    icon={confirmSecureTextEntry ? "eye" : "eye-off"}
                     onPress={() => setConfirmSecureTextEntry(!confirmSecureTextEntry)}
                     accessibilityLabel={confirmSecureTextEntry ? "Mostrar contraseña" : "Ocultar contraseña"}
                   />
@@ -306,7 +307,7 @@ const RegisterScreen = ({ navigation }: any) => {
                 onPress={() => navigation.goBack()}
               />
             </View>
-            
+
             <View style={[styles.legal, { marginTop: theme.spacing.m }]}>
               <Text variant="bodySmall" style={[themeStyles.legalText, styles.legalText]}>
                 Al continuar aceptas nuestras{' '}

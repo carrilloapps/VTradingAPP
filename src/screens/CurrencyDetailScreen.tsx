@@ -1,9 +1,10 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
+import { View, StyleSheet, ScrollView, InteractionManager } from 'react-native';
 import Share from 'react-native-share';
 import { Surface, Text, Icon } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { captureRef } from 'react-native-view-shot';
+
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import { useAppTheme } from '../theme/theme';
 import { BolivarIcon } from '../components/ui/BolivarIcon';
@@ -33,7 +34,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
 
   const [isShareDialogVisible, setShareDialogVisible] = useState(false);
   const [shareFormat, setShareFormat] = useState<'1:1' | '16:9'>('1:1');
-  const [, setSharing] = useState(false);
+  const [sharing, setSharing] = useState(false);
   const viewShotRef = useRef<any>(null);
 
   const isPremium = !!(user && !user.isAnonymous);
@@ -53,43 +54,88 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
       ? 'trending-down'
       : 'minus';
 
-  const generateShareImage = async (format: '1:1' | '16:9') => {
-    setShareDialogVisible(false);
-    setShareFormat(format);
-    setSharing(true);
+  // Trigger share when sharing state changes and we have a ref
+  const captureShareImage = useCallback(async () => {
+    try {
+      if (!viewShotRef.current) return;
 
-    // Wait for layout update
-    showToast('Generando imagen para compartir...', 'info');
-    await new Promise(resolve => setTimeout(() => resolve(null), 300));
+      const uri = await captureRef(viewShotRef.current, {
+        format: 'jpg',
+        quality: 1.0,
+        result: 'tmpfile',
+        width: 1080,
+        height: shareFormat === '1:1' ? 1080 : 1920,
+      });
 
-    if (viewShotRef.current) {
+      if (!uri) throw new Error("Capture failed");
+
+      const sharePath = uri.startsWith('file://') ? uri : `file://${uri}`;
+
+      await Share.open({
+        url: sharePath,
+        type: 'image/jpeg',
+        message: `Tasa de cambio: ${rate.code}/VES (${rate.name}) - VTrading`,
+      });
+
+      analyticsService.logShare('currency', rate.code, shareFormat === '1:1' ? 'image_square' : 'image_story');
+    } catch (e) {
+      if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
+        observabilityService.captureError(e, {
+          context: 'CurrencyDetailScreen.handleShareImage',
+          action: 'share_currency_image',
+          currencyCode: rate.code,
+          format: shareFormat,
+          errorMessage: (e as any).message
+        });
+        showToast('No se pudo compartir la imagen', 'error');
+      }
+    } finally {
+      setSharing(false);
+    }
+  }, [rate, shareFormat, showToast]);
+
+  // Trigger share when sharing state changes and we have a ref
+  useEffect(() => {
+    if (sharing && viewShotRef.current) {
+      // Wait for next frame/interaction to ensure layout is updated
+      const task = InteractionManager.runAfterInteractions(() => {
+        captureShareImage();
+      });
+      return () => task.cancel();
+    }
+  }, [sharing, captureShareImage]);
+
+  /*
+    const captureShareImage = async () => {
       try {
+        if (!viewShotRef.current) return;
+  
         const uri = await captureRef(viewShotRef.current, {
           format: 'jpg',
           quality: 1.0,
           result: 'tmpfile',
           width: 1080,
-          height: format === '1:1' ? 1080 : 1920,
+          height: shareFormat === '1:1' ? 1080 : 1920,
         });
-
+  
         if (!uri) throw new Error("Capture failed");
-
+  
         const sharePath = uri.startsWith('file://') ? uri : `file://${uri}`;
-
+  
         await Share.open({
           url: sharePath,
           type: 'image/jpeg',
           message: `Tasa de cambio: ${rate.code}/VES (${rate.name}) - VTrading`,
         });
-
-        analyticsService.logShare('currency', rate.code, format === '1:1' ? 'image_square' : 'image_story');
+  
+        analyticsService.logShare('currency', rate.code, shareFormat === '1:1' ? 'image_square' : 'image_story');
       } catch (e) {
         if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
           observabilityService.captureError(e, {
             context: 'CurrencyDetailScreen.handleShareImage',
             action: 'share_currency_image',
             currencyCode: rate.code,
-            format,
+            format: shareFormat,
             errorMessage: (e as any).message
           });
           showToast('No se pudo compartir la imagen', 'error');
@@ -97,7 +143,14 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
       } finally {
         setSharing(false);
       }
-    }
+    };
+  */
+
+  const generateShareImage = (format: '1:1' | '16:9') => {
+    setShareDialogVisible(false);
+    setShareFormat(format);
+    setSharing(true);
+    showToast('Generando imagen para compartir...', 'info');
   };
 
   const handleShareText = async () => {
@@ -153,6 +206,10 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
   const chartPlaceholderTextColor = theme.colors.onSurfaceVariant;
   const shareDialogTextColor = theme.colors.onSurfaceVariant;
 
+  const a11yPriceLabel = `Tasa actual: ${rate.value.toLocaleString('es-VE')} Bolívares. ` +
+    `Variación: ${rate.changePercent ? rate.changePercent.toFixed(2) : 0} por ciento. ` +
+    (spread ? `Spread estimado del ${spread.toFixed(2)} por ciento.` : '');
+
   return (
     <View style={[styles.container, { backgroundColor: containerBgColor }]}>
       <UnifiedHeader
@@ -164,7 +221,12 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
 
       <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Header Section - Immersive Design */}
-        <View style={styles.immersiveHeader}>
+        <View
+          style={styles.immersiveHeader}
+          accessible={true}
+          accessibilityLabel={`${rate.name}. ${a11yPriceLabel}`}
+          accessibilityHint="Muestra el detalle del precio actual y su variación"
+        >
           <View style={styles.iconWrapper}>
             {/* Halo Glow effect behind the icon */}
             <View style={[
@@ -224,7 +286,10 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
         </View>
 
         <View style={styles.statsGrid}>
-          <Surface style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]} elevation={0}>
+          <Surface style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]} elevation={0}
+            accessible={true}
+            accessibilityLabel={`Precio de compra: ${rate.buyValue || 'No disponible'}`}
+          >
             <View style={styles.statHeader}>
               <MaterialCommunityIcons name="arrow-down-circle-outline" size={18} color={theme.colors.primary} />
               <Text variant="labelSmall" style={[styles.statLabelBold, { color: statLabelColor }]}>COMPRA</Text>
@@ -237,7 +302,10 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
             </View>
           </Surface>
 
-          <Surface style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]} elevation={0}>
+          <Surface style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]} elevation={0}
+            accessible={true}
+            accessibilityLabel={`Precio de venta: ${rate.sellValue || 'No disponible'}`}
+          >
             <View style={styles.statHeader}>
               <MaterialCommunityIcons name="arrow-up-circle-outline" size={18} color={theme.colors.primary} />
               <Text variant="labelSmall" style={[styles.statLabelBold, { color: statLabelColor }]}>VENTA</Text>
@@ -252,7 +320,10 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
         </View>
 
         <View style={styles.statsGrid}>
-          <Surface style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]} elevation={0}>
+          <Surface style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]} elevation={0}
+            accessible={true}
+            accessibilityLabel={`Spread: ${spread ? spread.toFixed(2) + '%' : 'No disponible'}`}
+          >
             <View style={styles.statHeader}>
               <MaterialCommunityIcons name="swap-horizontal" size={18} color={theme.colors.primary} />
               <Text variant="labelSmall" style={[styles.statLabelBold, { color: statLabelColor }]}>BRECHA / SPREAD</Text>
@@ -262,7 +333,10 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => { // Changed compon
             </Text>
           </Surface>
 
-          <Surface style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]} elevation={0}>
+          <Surface style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]} elevation={0}
+            accessible={true}
+            accessibilityLabel={`Última actualización: ${new Date(rate.lastUpdated).toLocaleTimeString()}`}
+          >
             <View style={styles.statHeader}>
               <MaterialCommunityIcons name="clock-outline" size={18} color={theme.colors.primary} />
               <Text variant="labelSmall" style={[styles.statLabelBold, { color: statLabelColor }]}>ÚLT. ACT.</Text>

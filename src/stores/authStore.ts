@@ -204,7 +204,7 @@ export const useAuthStore = create<AuthState>()(
                 }
             },
         }),
-        { name: 'AuthStore' }
+        { name: 'AuthStore', enabled: __DEV__ }
     )
 );
 
