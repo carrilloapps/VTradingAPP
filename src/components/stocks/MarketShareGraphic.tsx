@@ -32,25 +32,26 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
   const isVertical = aspectRatio === '16:9';
 
   // Dynamic sizes based on aspect ratio
-  const platformIconSize = isVertical ? 18 : 14;
-  const platformTextSize = isVertical ? 11 : 9;
-  const logoWidth = isVertical ? 180 : 140;
-  const logoHeight = isVertical ? 47 : 36;
-  const freeBadgeTextSize = isVertical ? 9 : 7;
-  const urlTextSize = isVertical ? 16 : 12;
-  const dateIconSize = isVertical ? 18 : 14;
-  const dateTextSize = isVertical ? 13 : 10;
-  const sectionLabelSize = isVertical ? 12 : 10;
-  const indexValueSize = isVertical ? 60 : 48;
-  const indexTrendIconSize = isVertical ? 22 : 18;
-  const indexTrendTextSize = isVertical ? 20 : 16;
-  const volumeTextSize = isVertical ? 15 : 12;
-  const stockSymbolSize = isVertical ? 20 : 16;
-  const stockNameSize = isVertical ? 13 : 11;
-  const stockPriceSize = isVertical ? 19 : 15;
-  const stockTrendSize = isVertical ? 13 : 11;
-  const footerIconSize = isVertical ? 20 : 16;
-  const footerTextSize = isVertical ? 11 : 9;
+  const platformIconSize = 24;
+  const platformTextSize = 12;
+  const logoWidth = isVertical ? 210 : 150;
+  const logoHeight = isVertical ? 54 : 40;
+  const freeBadgeTextSize = isVertical ? 10 : 7;
+  const urlTextSize = isVertical ? 18 : 12;
+  const dateIconSize = 18;
+  const dateTextSize = 14;
+  const sectionLabelSize = isVertical ? 14 : 10;
+  const indexValueSize = isVertical ? 72 : 48;
+  const indexTrendIconSize = isVertical ? 24 : 18;
+  const indexTrendTextSize = isVertical ? 22 : 16;
+  const volumeTextSize = isVertical ? 16 : 12;
+  const stockSymbolSize = isVertical ? 22 : 16;
+  const stockNameSize = isVertical ? 14 : 11;
+  const stockPriceSize = isVertical ? 22 : 15;
+  const stockTrendSize = isVertical ? 15 : 11;
+  const stockLogoSize = isVertical ? 42 : 36;
+  const footerIconSize = 22;
+  const footerTextSize = 12;
 
   // Standardized Index Trend
   const idxTrend = getTrend(indexData.changePercent);
@@ -71,15 +72,17 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
           <View style={[styles.templateGlow, { backgroundColor: theme.colors.primary }]} />
 
           {/* Platform Badges */}
-          <Surface style={[styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }]} elevation={1}>
-            <Icon source="google-play" size={platformIconSize} color={theme.colors.onSurfaceVariant} />
-            <Text style={[styles.platformText, { color: theme.colors.onSurfaceVariant, fontSize: platformTextSize }]}>Android</Text>
-          </Surface>
-          <View style={styles.flex1} />
-          <Surface style={[styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }]} elevation={1}>
-            <Icon source="apple" size={platformIconSize} color={theme.colors.onSurfaceVariant} />
-            <Text style={[styles.platformText, { color: theme.colors.onSurfaceVariant, fontSize: platformTextSize }]}>iOS</Text>
-          </Surface>
+          <View style={styles.platformBadgesContainer}>
+            <Surface style={[styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }]} elevation={1}>
+              <Icon source="google-play" size={platformIconSize} color={theme.colors.onSurfaceVariant} />
+              <Text style={[styles.platformText, { color: theme.colors.onSurfaceVariant, fontSize: platformTextSize }]}>Android</Text>
+            </Surface>
+            <View style={styles.flex1} />
+            <Surface style={[styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }]} elevation={1}>
+              <Icon source="apple" size={platformIconSize} color={theme.colors.onSurfaceVariant} />
+              <Text style={[styles.platformText, { color: theme.colors.onSurfaceVariant, fontSize: platformTextSize }]}>iOS</Text>
+            </Surface>
+          </View>
 
           {/* Header */}
           <View style={styles.templateHeader}>
@@ -127,26 +130,67 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
           </View>
 
           {/* Stocks List Content */}
-          <View style={[styles.templateContent, isVertical && styles.flex1Gap16]}>
+          <View style={[styles.templateContent, isVertical && ({ gap: 12 } as const)]}>
             <Text style={[styles.sectionLabel, { color: theme.colors.onSurfaceVariant, fontSize: sectionLabelSize }, styles.mb4]}>ACCIONES DESTACADAS</Text>
-            {topStocks.slice(0, isVertical ? 6 : 3).map((stock, idx) => {
-              const sTrend = getTrend(stock.changePercent);
-              const sColor = getTrendColor(sTrend, theme);
+            {(() => {
+              const displayCount = isVertical ? 6 : 3;
+              const itemsToShow = topStocks.slice(0, displayCount);
+              const remainingCount = Math.max(0, topStocks.length - displayCount);
+
               return (
-                <Surface key={idx} style={[styles.stockCard, theme.dark ? styles.stockCardDark : styles.stockCardLight, { borderColor: theme.colors.outlineVariant }]} elevation={0}>
-                  <View style={styles.stockInfo}>
-                    <Text style={[styles.stockSymbol, { color: theme.colors.onSurface, fontSize: stockSymbolSize }]}>{stock.symbol}</Text>
-                    <Text style={[styles.stockName, { color: theme.colors.onSurfaceVariant, fontSize: stockNameSize }]} numberOfLines={1}>{stock.name}</Text>
-                  </View>
-                  <View style={styles.stockPriceInfo}>
-                    <Text style={[styles.stockPrice, { color: theme.colors.onSurface, fontSize: stockPriceSize }]}>{stock.price.toLocaleString('es-VE', { minimumFractionDigits: 2 })}</Text>
-                    <Text style={[styles.stockTrend, { color: sColor, fontSize: stockTrendSize }]}>
-                      {stock.changePercent > 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
+                <>
+                  {itemsToShow.map((stock, idx) => {
+                    const sTrend = getTrend(stock.changePercent);
+                    const sColor = getTrendColor(sTrend, theme);
+                    return (
+                      <Surface key={idx} style={[
+                        styles.stockCard,
+                        theme.dark ? styles.stockCardDark : styles.stockCardLight,
+                        { borderColor: theme.colors.outlineVariant },
+                        isVertical && styles.stockCardVertical
+                      ]} elevation={0}>
+                        <View style={styles.stockLogoContainer}>
+                          {stock.iconUrl ? (
+                            <Image
+                              source={{ uri: stock.iconUrl }}
+                              style={{ width: stockLogoSize, height: stockLogoSize, borderRadius: stockLogoSize / 2 }}
+                              resizeMode="contain"
+                            />
+                          ) : (
+                            <View style={[
+                              styles.stockLogoFallback,
+                              {
+                                width: stockLogoSize,
+                                height: stockLogoSize,
+                                borderRadius: stockLogoSize / 2,
+                                backgroundColor: (theme.colors as any)[stock.color] || theme.colors.primaryContainer
+                              }
+                            ]}>
+                              <Text style={[styles.stockInitials, { fontSize: stockLogoSize * 0.4 }]}>{stock.initials}</Text>
+                            </View>
+                          )}
+                        </View>
+                        <View style={styles.stockInfo}>
+                          <Text style={[styles.stockSymbol, { color: theme.colors.onSurface, fontSize: stockSymbolSize }]}>{stock.symbol}</Text>
+                          <Text style={[styles.stockName, { color: theme.colors.onSurfaceVariant, fontSize: stockNameSize }]} numberOfLines={1}>{stock.name}</Text>
+                        </View>
+                        <View style={styles.stockPriceInfo}>
+                          <Text style={[styles.stockPrice, { color: theme.colors.onSurface, fontSize: stockPriceSize }]}>{stock.price.toLocaleString('es-VE', { minimumFractionDigits: 2 })}</Text>
+                          <Text style={[styles.stockTrend, { color: sColor, fontSize: stockTrendSize }]}>
+                            {stock.changePercent > 0 ? '+' : ''}{stock.changePercent.toFixed(2)}%
+                          </Text>
+                        </View>
+                      </Surface>
+                    );
+                  })}
+                  {remainingCount > 0 && (
+                    <Text style={[styles.remainingCountText, { color: theme.colors.primary, fontSize: sectionLabelSize }]}>
+                      + {remainingCount} ACCIONES MÁS DISPONIBLES EN LA APP
                     </Text>
-                  </View>
-                </Surface>
-              )
-            })}
+                  )}
+                </>
+              );
+            })()}
           </View>
 
           {/* Footer */}
@@ -178,6 +222,7 @@ const styles = StyleSheet.create({
   },
   shareTemplate: {
     padding: 32,
+    paddingBottom: 38,
     justifyContent: 'space-between',
     alignItems: 'center',
     position: 'relative',
@@ -186,12 +231,15 @@ const styles = StyleSheet.create({
   shareTemplateSquare: {
     width: 600,
     height: 600,
+    paddingTop: 24, // Tighter top padding for square
   },
   shareTemplateVertical: {
     width: 600,
     height: 1066,
-    paddingVertical: 80,
+    paddingTop: 70,
+    paddingBottom: 50,
     paddingHorizontal: 40,
+    justifyContent: 'flex-start',
   },
   templateGlow: {
     position: 'absolute',
@@ -212,6 +260,7 @@ const styles = StyleSheet.create({
   templateHeader: {
     alignItems: 'center',
     width: '100%',
+    marginBottom: 15,
   },
   platformBadgesContainer: {
     position: 'absolute',
@@ -225,9 +274,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: 'rgba(128,128,128,0.1)',
   },
@@ -271,8 +320,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     backgroundColor: 'rgba(128,128,128,0.05)',
-    paddingHorizontal: 12,
-    paddingVertical: 4,
+    marginBottom: 10,
+    paddingVertical: 6,
     borderRadius: 100,
     marginTop: 4,
   },
@@ -284,6 +333,7 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     marginVertical: 16,
+    marginTop: 0, // Remove default top margin
   },
   sectionLabel: {
     fontWeight: '900',
@@ -329,6 +379,7 @@ const styles = StyleSheet.create({
   },
   stockInfo: {
     flex: 1,
+    marginLeft: 12,
   },
   stockSymbol: {
     fontWeight: '900',
@@ -373,7 +424,29 @@ const styles = StyleSheet.create({
   },
   stockCardLight: {
     backgroundColor: 'rgba(0,0,0,0.02)',
-  }
+  },
+  stockCardVertical: {
+    paddingVertical: 10,
+    marginBottom: 4,
+  },
+  stockLogoContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  stockLogoFallback: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  stockInitials: {
+    fontWeight: '900',
+    color: 'white',
+  },
+  remainingCountText: {
+    textAlign: 'center',
+    fontWeight: '900',
+    marginTop: 8,
+    opacity: 0.8,
+  },
 });
 
 export default MarketShareGraphic;

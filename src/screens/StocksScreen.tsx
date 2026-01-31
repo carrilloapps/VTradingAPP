@@ -231,10 +231,30 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
 
         const sharePath = uri.startsWith('file://') ? uri : `file://${uri}`;
 
+        const displayCount = format === '16:9' ? 6 : 3;
+        const featuredStocks = stocks.slice(0, displayCount);
+        const remainingCount = stocks.length - displayCount;
+
+        const stocksDetails = featuredStocks.map(s => {
+          const trendIcon = s.changePercent > 0 ? '📈' : (s.changePercent < 0 ? '📉' : '➖');
+          return `${trendIcon} *${s.symbol}:* ${s.price.toLocaleString('es-VE', { minimumFractionDigits: 2 })} (${s.changePercent > 0 ? '+' : ''}${s.changePercent.toFixed(2)}%)`;
+        }).join('\n');
+
+        const changeValue = indexData?.changePercent ? parseFloat(indexData.changePercent.replace(',', '.')) : 0;
+        const indexIcon = changeValue > 0 ? '📈' : (changeValue < 0 ? '📉' : '➖');
+
+        const message = `📊 *VTrading - Resumen de Mercado*\n\n` +
+          `${indexIcon} *Índice IBC:* ${indexData?.value || 'N/A'} (${indexData?.changePercent || '0%'})\n` +
+          `💰 *Volumen:* ${indexData?.volume || '0'} Bs.\n\n` +
+          `🚀 *Acciones Destacadas:*\n${stocksDetails}\n` +
+          (remainingCount > 0 ? `\n➕ *y ${remainingCount} acciones más* disponibles en el app\n` : '\n') +
+          `⏱️ _Act: ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}_\n` +
+          `🌐 vtrading.app`;
+
         await Share.open({
           url: sharePath,
           type: 'image/jpeg',
-          message: `Resumen del Mercado Bursátil - VTradingAPP`,
+          message,
         });
 
         await analyticsService.logShare('market_summary', 'all', format === '1:1' ? 'image_square' : 'image_story');
@@ -446,7 +466,7 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
       <MarketShareGraphic
         viewShotRef={viewShotRef}
         indexData={indexData || { value: '0.00', changePercent: '0.00%', isPositive: true, volume: '0.00' }}
-        topStocks={stocks.slice(0, 6)}
+        topStocks={stocks}
         lastUpdated={new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         isPremium={isPremium}
         aspectRatio={shareFormat}
