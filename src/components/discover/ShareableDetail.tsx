@@ -4,6 +4,7 @@ import { Text, Surface } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import ViewShot from 'react-native-view-shot';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
 import { useAppTheme } from '../../theme/theme';
 import XIcon from '../common/XIcon';
 import FacebookIcon from '../common/FacebookIcon';
@@ -15,6 +16,10 @@ const hexToRgba = (hex: string, alpha: number) => {
     const b = parseInt(hex.slice(5, 7), 16);
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 };
+
+// Configuration constants for easy fine-tuning
+const BACKGROUND_BLUR = 15;
+const BACKGROUND_OPACITY = 0.6;
 
 export interface ShareableItem {
     title: string;
@@ -114,6 +119,21 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
     // Determine dimensions based on aspect ratio
     const width = 1080;
     const height = aspectRatio === '16:9' ? 1920 : 1080;
+    const isVertical = aspectRatio === '16:9';
+
+    // Dynamic sizing based on aspect ratio (Synchronized with ShareGraphic)
+    const platformIconSize = 24 * 2; // Scaled for 1080px base
+    const platformTextSize = 12 * 2;
+    const logoWidth = isVertical ? 450 : 350;
+    const logoHeight = isVertical ? 120 : 90;
+    const pillIconSize = isVertical ? 38 : 32;
+    const pillFontSize = isVertical ? 32 : 26;
+    const mainTitleSize = isVertical ? 100 : 70; // FIXED: Prominent title size
+    const mainTitleLineHeight = isVertical ? 110 : 80;
+    const categoryBadgeFontSize = isVertical ? 32 : 26;
+    const footerIconSize = 48;
+    const footerTextSize = 32;
+    const urlTextSize = 36;
 
     // Styles that depend on theme and dimensions
     const containerStyle = [
@@ -215,9 +235,8 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
     // Removal of unused _isDark from line 64
     // Modern Article Layout
     if (type === 'ARTICLE') {
-        const isVertical = aspectRatio === '16:9';
 
-        const topImageWrapperStyle = [styles.topImageWrapper, { height: (isVertical ? '45%' : '50%') as DimensionValue }];
+        const topImageWrapperStyle = [styles.topImageWrapper, { height: (isVertical ? '40%' : '50%') as DimensionValue }];
         const placeholderWrapperStyle = [styles.placeholderWrapper, { backgroundColor: theme.colors.elevation.level1 }];
         const topGradientOverlayStyle = [styles.topGradientOverlay, { height: isVertical ? 240 : 160 }];
         const topBarOverlayStyle = [styles.topBarOverlay, { marginTop: isVertical ? 60 : 40, paddingHorizontal: 64 }];
@@ -227,19 +246,24 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
             paddingHorizontal: isVertical ? 40 : 32,
             paddingVertical: isVertical ? 20 : 16,
         }];
-        const pillTextStyle = [styles.pillText, { color: theme.colors.onBackground, fontSize: isVertical ? 32 : 24 }];
-        const brandLogoStyle = [styles.brandLogo, { tintColor: theme.colors.onBackground, width: isVertical ? 450 : 300, height: isVertical ? 120 : 80 }];
-        const categoryBadgeStyle = [styles.categoryBadge, { backgroundColor: theme.colors.primaryContainer, paddingHorizontal: isVertical ? 24 : 20, paddingVertical: isVertical ? 12 : 10 }];
-        const categoryBadgeTextStyle = [styles.categoryBadgeText, { color: theme.colors.onPrimaryContainer, fontSize: isVertical ? 26 : 22 }];
-        const modernTitleStyle = [styles.modernTitle, { color: theme.colors.onBackground, fontSize: isVertical ? 80 : 56, lineHeight: isVertical ? 88 : 64 }];
-        const descriptionStyle = [styles.modernDescription, { color: hexToRgba(theme.colors.onBackground, 0.85), fontSize: isVertical ? 42 : 30, lineHeight: isVertical ? 60 : 42 }];
+        const pillTextStyle = [styles.pillText, { color: theme.colors.onBackground, fontSize: pillFontSize }];
+        const brandLogoStyle = [styles.brandLogo, { tintColor: theme.colors.onBackground, width: logoWidth, height: logoHeight }];
+        const categoryBadgeStyle = [styles.categoryBadge, { backgroundColor: theme.colors.primaryContainer, paddingHorizontal: isVertical ? 40 : 32, paddingVertical: isVertical ? 20 : 16 }];
+        const categoryBadgeTextStyle = [styles.categoryBadgeText, { color: theme.colors.onPrimaryContainer, fontSize: categoryBadgeFontSize }];
+        const modernTitleStyle = [
+            styles.modernTitle,
+            { color: theme.colors.onBackground, fontSize: isVertical ? 90 : 65, lineHeight: isVertical ? 100 : 75 },
+            (title.length > 40) && { fontSize: isVertical ? 75 : 55, lineHeight: (isVertical ? 85 : 65) as number },
+            (title.length > 80) && { fontSize: isVertical ? 65 : 45, lineHeight: (isVertical ? 75 : 55) as number }
+        ];
+        const descriptionStyle = [styles.modernDescription, { color: hexToRgba(theme.colors.onBackground, 0.85), fontSize: isVertical ? 38 : 28, lineHeight: isVertical ? 54 : 40 }];
         const storeIconsStyle = (gap: number) => [styles.storeIcons, { gap }];
         const storeIconCircleStyle = (size: number) => [styles.storeIconCircle, { backgroundColor: theme.colors.onBackground, width: size, height: size, borderRadius: size / 2 }];
-        const downloadTextStyle = [styles.downloadText, { color: theme.colors.onBackground, fontSize: isVertical ? 40 : 28 }];
+        const downloadTextStyle = [styles.downloadText, { color: theme.colors.onBackground, fontSize: footerTextSize }];
         const urlBadgeStyle = [styles.urlBadge, { backgroundColor: hexToRgba(theme.colors.onBackground, 0.1), paddingHorizontal: isVertical ? 40 : 32, paddingVertical: isVertical ? 20 : 16 }];
-        const urlTextStyle = [styles.urlText, { color: theme.colors.onBackground, fontSize: isVertical ? 36 : 26 }];
+        const urlTextStyle = [styles.urlText, { color: theme.colors.onBackground, fontSize: urlTextSize }];
 
-        const storeIconSize = isVertical ? 90 : 64;
+        const storeIconSize = isVertical ? 90 : 80;
         const storeGap = isVertical ? 24 : 16;
 
         return (
@@ -271,7 +295,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                             {/* Top Bar Overlay */}
                             <View style={topBarOverlayStyle}>
                                 <View style={pillBadgeStyle}>
-                                    <MaterialCommunityIcons name={getIcon()} size={isVertical ? 32 : 24} color={theme.colors.onBackground} />
+                                    <MaterialCommunityIcons name={getIcon()} size={pillIconSize} color={theme.colors.onBackground} />
                                     <Text style={pillTextStyle}>{getLabel()}</Text>
                                 </View>
 
@@ -306,7 +330,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
 
                                 {/* Description */}
                                 {description && aspectRatio === '16:9' && (
-                                    <Text style={descriptionStyle} numberOfLines={4}>
+                                    <Text style={descriptionStyle} numberOfLines={7}>
                                         {cleanText(description)}
                                     </Text>
                                 )}
@@ -317,7 +341,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                                 <View style={styles.footerLeft}>
                                     <View style={storeIconsStyle(storeGap)}>
                                         <View style={storeIconCircleStyle(storeIconSize)}>
-                                            <MaterialCommunityIcons name="apple" size={isVertical ? 48 : 32} color={theme.colors.background} />
+                                            <MaterialCommunityIcons name="apple" size={48} color={theme.colors.background} />
                                         </View>
                                         <View style={storeIconCircleStyle(storeIconSize)}>
                                             <MaterialCommunityIcons name="google-play" size={isVertical ? 40 : 28} color={theme.colors.background} />
@@ -448,7 +472,6 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
     };
 
     // Old Layout for Category/Tag
-    const isVertical = aspectRatio === '16:9';
 
     const backgroundGradientColors = [theme.colors.background, theme.colors.background];
     const topPillBadgeStyle = [styles.pillBadge, {
@@ -457,22 +480,23 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
         paddingHorizontal: isVertical ? 40 : 32,
         paddingVertical: isVertical ? 20 : 16,
     }];
-    const topPillTextStyle = [styles.pillText, { color: theme.colors.onBackground, fontSize: isVertical ? 32 : 24 }];
-    const topBrandLogoStyle = [styles.brandLogo, { tintColor: theme.colors.onBackground, width: isVertical ? 450 : 300, height: isVertical ? 120 : 80 }];
-    const mainTitleStyle = [
+    const topPillTextStyle = [styles.pillText, { color: theme.colors.onBackground, fontSize: pillFontSize }];
+    const topBrandLogoStyle = [styles.brandLogo, { tintColor: theme.colors.onBackground, width: logoWidth, height: logoHeight }];
+    const mainTitleStyleScaled = [
         styles.mainTitle,
-        { color: theme.colors.onBackground },
-        (title.length > 40) && { fontSize: isVertical ? 80 : 64, lineHeight: (isVertical ? 88 : 72) as number },
-        (title.length > 80) && { fontSize: isVertical ? 72 : 56, lineHeight: (isVertical ? 80 : 64) as number }
+        { color: theme.colors.onBackground, fontSize: mainTitleSize, lineHeight: mainTitleLineHeight },
+        (title.length > 40) && { fontSize: isVertical ? 85 : 60, lineHeight: (isVertical ? 95 : 68) as number },
+        (title.length > 80) && { fontSize: isVertical ? 75 : 50, lineHeight: (isVertical ? 85 : 58) as number }
     ];
-    const oldDescriptionStyle = [styles.description, { color: hexToRgba(theme.colors.onBackground, 0.8), fontSize: 42, lineHeight: 60 }];
+
+    const oldDescriptionStyle = [styles.description, { color: hexToRgba(theme.colors.onBackground, 0.8), fontSize: isVertical ? 42 : 32, lineHeight: isVertical ? 60 : 44 }];
     const oldStoreIconsStyle = [styles.storeIcons, { gap: isVertical ? 24 : 16 }];
     const oldStoreIconCircleStyle = (size: number) => [styles.storeIconCircle, { backgroundColor: theme.colors.onBackground, width: size, height: size, borderRadius: size / 2 }];
-    const oldDownloadTextStyle = [styles.downloadText, { color: theme.colors.onBackground, fontSize: isVertical ? 40 : 28 }];
+    const oldDownloadTextStyle = [styles.downloadText, { color: theme.colors.onBackground, fontSize: footerTextSize }];
     const oldUrlBadgeStyle = [styles.urlBadge, { backgroundColor: hexToRgba(theme.colors.onBackground, 0.15), paddingHorizontal: isVertical ? 40 : 32, paddingVertical: isVertical ? 20 : 16 }];
-    const oldUrlTextStyle = [styles.urlText, { color: theme.colors.onBackground, fontSize: isVertical ? 36 : 26 }];
+    const oldUrlTextStyle = [styles.urlText, { color: theme.colors.onBackground, fontSize: urlTextSize }];
 
-    const storeIconSize = isVertical ? 90 : 64;
+    const storeIconSize = isVertical ? 90 : 80;
 
     return (
         <View style={styles.hiddenTemplate} pointerEvents="none">
@@ -488,12 +512,18 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                     <ImageBackground
                         source={image ? { uri: image } : require('../../assets/images/logotipo.png')}
                         style={styles.backgroundImage}
-                        blurRadius={60}
+                        blurRadius={BACKGROUND_BLUR}
                     />
 
-                    {/* Gradient Overlay for Consistency */}
+                    {/* Gradient Overlay for Consistency - Richer depth */}
                     <LinearGradient
-                        colors={[hexToRgba(theme.colors.background, 0.3), theme.colors.background]}
+                        colors={[
+                            'transparent',
+                            hexToRgba(theme.colors.background, 0.5),
+                            hexToRgba(theme.colors.background, 0.9),
+                            theme.colors.background
+                        ]}
+                        locations={[0, 0.3, 0.6, 1.0]}
                         style={StyleSheet.absoluteFill}
                     />
 
@@ -501,7 +531,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                         {/* Top Bar */}
                         <View style={styles.topBar}>
                             <View style={topPillBadgeStyle}>
-                                <MaterialCommunityIcons name={getIcon()} size={isVertical ? 32 : 24} color={theme.colors.onBackground} />
+                                <MaterialCommunityIcons name={getIcon()} size={pillIconSize} color={theme.colors.onBackground} />
                                 <Text style={topPillTextStyle}>{getLabel()}</Text>
                             </View>
 
@@ -516,10 +546,10 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                         </View>
 
                         {/* Main Content Area */}
-                        <View style={styles.mainWrapper}>
+                        <View style={[styles.mainWrapper, isVertical && { gap: 60 }]}>
                             {/* Header Section */}
                             <View style={styles.headerSection}>
-                                <Text style={mainTitleStyle}>
+                                <Text style={mainTitleStyleScaled}>
                                     {title}
                                 </Text>
 
@@ -545,10 +575,10 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                                 <View style={oldStoreIconsStyle}>
                                     {/* Larger Store Icons */}
                                     <View style={oldStoreIconCircleStyle(storeIconSize)}>
-                                        <MaterialCommunityIcons name="apple" size={isVertical ? 48 : 32} color={theme.colors.background} />
+                                        <MaterialCommunityIcons name="apple" size={48} color={theme.colors.background} />
                                     </View>
                                     <View style={oldStoreIconCircleStyle(storeIconSize)}>
-                                        <MaterialCommunityIcons name="google-play" size={isVertical ? 40 : 28} color={theme.colors.background} />
+                                        <MaterialCommunityIcons name="google-play" size={48} color={theme.colors.background} />
                                     </View>
                                 </View>
                                 <Text style={oldDownloadTextStyle}>Descarga gratis</Text>
@@ -643,7 +673,7 @@ const styles = StyleSheet.create({
     },
     backgroundImage: {
         ...StyleSheet.absoluteFillObject,
-        opacity: 0.4,
+        opacity: BACKGROUND_OPACITY,
     },
     contentContainer: {
         flex: 1,
