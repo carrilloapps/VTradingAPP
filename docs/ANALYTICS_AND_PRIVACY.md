@@ -1,10 +1,10 @@
 # Analytics y Privacidad - VTrading
 
-Este documento detalla la infraestructura de observabilidad, análisis de datos y políticas de privacidad implementadas en VTradingAPP, consolidando la información de paquetes, implementación y uso de datos.
+Este documento detalla la infraestructura de observabilidad, análisis de datos y políticas de privacidad implementadas en VTrading, consolidando la información de paquetes, implementación y uso de datos.
 
 ## 1. Stack Tecnológico
-
-VTradingAPP utiliza un enfoque multi-nivel para asegurar la calidad del servicio y entender el comportamiento del usuario respetando su privacidad.
+    
+VTrading utiliza un enfoque multi-nivel para asegurar la calidad del servicio y entender el comportamiento del usuario respetando su privacidad.
 
 ### 1.1 Paquetes de Análisis y Observabilidad
 | Paquete | Versión | Propósito | Implementación |
