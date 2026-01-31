@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Text, Icon, Surface, useTheme } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import ViewShot from 'react-native-view-shot';
 import { StockData } from '../../services/StocksService';
 import { getTrend, getTrendColor, getTrendIcon } from '../../utils/trendUtils';
+import FastImage from 'react-native-fast-image';
 
 interface MarketShareGraphicProps {
   viewShotRef: React.RefObject<any>;
@@ -87,7 +88,7 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
           {/* Header */}
           <View style={styles.templateHeader}>
             <View style={styles.logoAndBadgeRow}>
-              <Image
+              <FastImage
                 source={require('../../assets/images/logotipo.png')}
                 style={[
                   styles.templateMainLogo,
@@ -95,9 +96,9 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
                     tintColor: theme.dark ? undefined : theme.colors.primary,
                     width: logoWidth,
                     height: logoHeight
-                  }
+                  } as any
                 ]}
-                resizeMode="contain"
+                resizeMode={FastImage.resizeMode.contain}
               />
               {!isPremium && (
                 <Surface style={[styles.freeBadge, { backgroundColor: (theme.colors as any).error || '#FF5252' }]} elevation={2}>
@@ -151,10 +152,10 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
                       ]} elevation={0}>
                         <View style={styles.stockLogoContainer}>
                           {stock.iconUrl ? (
-                            <Image
+                            <FastImage
                               source={{ uri: stock.iconUrl }}
                               style={{ width: stockLogoSize, height: stockLogoSize, borderRadius: stockLogoSize / 2 }}
-                              resizeMode="contain"
+                              resizeMode={FastImage.resizeMode.contain}
                             />
                           ) : (
                             <View style={[

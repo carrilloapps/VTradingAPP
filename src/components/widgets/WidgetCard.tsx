@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
 import { WidgetItem } from './WidgetPreview';
 import { useAppTheme } from '../../theme/theme';
+import FastImage from 'react-native-fast-image';
 
 interface WidgetCardProps {
   items: WidgetItem[];
@@ -29,14 +30,14 @@ const WidgetCard: React.FC<WidgetCardProps> = ({
   const getGradientColors = () => {
     if (isTransparent) {
       // Transparency logic: adapt to wallpaper brightness
-      return isWallpaperDark 
-        ? ['rgba(33, 33, 33, 0.8)', 'rgba(45, 45, 45, 0.8)', 'rgba(33, 33, 33, 0.8)'] 
+      return isWallpaperDark
+        ? ['rgba(33, 33, 33, 0.8)', 'rgba(45, 45, 45, 0.8)', 'rgba(33, 33, 33, 0.8)']
         : ['rgba(255, 255, 255, 0.85)', 'rgba(242, 244, 246, 0.85)', 'rgba(255, 255, 255, 0.85)'];
     }
-    
+
     // Opaque logic - Grayscale for Dark (#212121 base), Modern Gradient for Light (#FFFFFF base)
-    return isWidgetDarkMode 
-      ? ['#212121', '#2C2C2C', '#212121'] 
+    return isWidgetDarkMode
+      ? ['#212121', '#2C2C2C', '#212121']
       : ['#FFFFFF', '#F2F4F6', '#FFFFFF'];
   };
 
@@ -70,11 +71,11 @@ const WidgetCard: React.FC<WidgetCardProps> = ({
       {/* Widget Header */}
       <View style={styles.widgetHeader}>
         <View style={styles.widgetTitleRow}>
-          <Image
+          <FastImage
             source={require('../../assets/images/logo.png')}
             style={[
               styles.widgetIcon,
-              { tintColor: widgetIconTint },
+              { tintColor: widgetIconTint } as any,
             ]}
           />
           <Text
@@ -94,77 +95,81 @@ const WidgetCard: React.FC<WidgetCardProps> = ({
       </View>
 
       {/* Dynamic Rows */}
-      {items.slice(0, 4).map((item, index) => {
-        const isLast = index === items.length - 1;
-        const rowBorderStyle = !isLast ? { borderBottomColor: borderBottomColorValue } : undefined;
-        return (
-          <View
-            key={item.id}
-            style={[
-              isLast ? styles.rateRowNoBorder : styles.rateRow,
-              rowBorderStyle,
-            ]}
-          >
-            <View>
-              <Text
-                style={[
-                  styles.currencyLabel,
-                  { color: currencyLabelColor },
-                ]}
-              >
-                {item.label}
-              </Text>
-              <Text
-                style={[
-                  styles.rateValue,
-                  { color: rateValueColor },
-                ]}
-              >
-                {item.value}{' '}
+      {
+        items.slice(0, 4).map((item, index) => {
+          const isLast = index === items.length - 1;
+          const rowBorderStyle = !isLast ? { borderBottomColor: borderBottomColorValue } : undefined;
+          return (
+            <View
+              key={item.id}
+              style={[
+                isLast ? styles.rateRowNoBorder : styles.rateRow,
+                rowBorderStyle,
+              ]}
+            >
+              <View>
                 <Text
                   style={[
-                    styles.rateCurrency,
-                    { color: rateCurrencyColor }
+                    styles.currencyLabel,
+                    { color: currencyLabelColor },
                   ]}
                 >
-                  {item.currency}
+                  {item.label}
                 </Text>
-              </Text>
-            </View>
-            <View style={[styles.trendBadge, { backgroundColor: item.trendBg }]}>
-              <MaterialCommunityIcons
-                name={
-                  item.trend === 'up'
-                    ? 'trending-up'
-                    : item.trend === 'down'
-                    ? 'trending-down'
-                    : 'trending-neutral'
-                }
-                size={14}
-                color={item.trendColor}
-              />
-              {showGraph && (
-                <Text style={[styles.trendText, { color: item.trendColor }]}>
-                  {item.trendValue}
+                <Text
+                  style={[
+                    styles.rateValue,
+                    { color: rateValueColor },
+                  ]}
+                >
+                  {item.value}{' '}
+                  <Text
+                    style={[
+                      styles.rateCurrency,
+                      { color: rateCurrencyColor }
+                    ]}
+                  >
+                    {item.currency}
+                  </Text>
                 </Text>
-              )}
+              </View>
+              <View style={[styles.trendBadge, { backgroundColor: item.trendBg }]}>
+                <MaterialCommunityIcons
+                  name={
+                    item.trend === 'up'
+                      ? 'trending-up'
+                      : item.trend === 'down'
+                        ? 'trending-down'
+                        : 'trending-neutral'
+                  }
+                  size={14}
+                  color={item.trendColor}
+                />
+                {showGraph && (
+                  <Text style={[styles.trendText, { color: item.trendColor }]}>
+                    {item.trendValue}
+                  </Text>
+                )}
+              </View>
             </View>
-          </View>
-        );
-      })}
+          );
+        })
+      }
 
       {/* Widget Footer (if graph is hidden, maybe show updated time or provider) */}
-      {!showGraph && (
-        <View style={styles.widgetFooter}>
-          <Text style={[styles.footerText, { color: footerTextColor }]}>
-            Actualizado hace 5 min
-          </Text>
-          <Text style={[styles.footerTextBold, { color: footerTextColor }]}>
-            BCV • Binance
-          </Text>
-        </View>
-      )}
-    </LinearGradient>
+      {
+        !showGraph && (
+          <View style={styles.widgetFooter}>
+            <Text style={[styles.footerText, { color: footerTextColor }]}>
+              Actualizado hace 5 min
+            </Text>
+            <Text style={[styles.footerTextBold, { color: footerTextColor }]}>
+              BCV • Binance
+            </Text>
+          </View>
+        )
+      }
+    </LinearGradient >
   );
 };
 

@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, StyleSheet, Image, ViewStyle, ImageStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle, ImageStyle } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useAppTheme } from '../../theme/theme';
+import FastImage from 'react-native-fast-image';
 
 interface AuthLogoProps {
   size?: number;
@@ -21,12 +22,12 @@ const AuthLogo: React.FC<AuthLogoProps> = ({
 
   return (
     <View style={[styles.logoRow, containerStyle]}>
-      <Image
+      <FastImage
         source={require('../../assets/images/logo.png')}
         style={[
           styles.logo,
-          { width: size, height: size, tintColor: resolvedTintColor || undefined }
-        ] as ImageStyle[]}
+          { width: size, height: size, tintColor: resolvedTintColor || undefined } as any
+        ]}
       />
       {showBadge && (
         <View

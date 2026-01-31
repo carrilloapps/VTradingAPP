@@ -1,8 +1,9 @@
 import React, { useCallback } from 'react';
-import { View, StyleSheet, Linking, Image } from 'react-native';
+import { View, StyleSheet, Linking } from 'react-native';
 import { Text, useTheme, Surface, TouchableRipple } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { SvgUri } from 'react-native-svg';
+import FastImage from 'react-native-fast-image';
 
 export interface RecommendedApp {
   id: string;
@@ -41,10 +42,10 @@ const AppCard: React.FC<AppCardProps> = ({ app, onPress }) => {
       }
 
       return (
-        <Image
+        <FastImage
           source={{ uri: app.logoUri }}
-          style={[styles.remoteLogo, app.useTint && { tintColor: accentColor }]}
-          resizeMode="contain"
+          style={[styles.remoteLogo, app.useTint && { tintColor: accentColor } as any]}
+          resizeMode={FastImage.resizeMode.contain}
         />
       );
     }

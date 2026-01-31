@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { Text, TouchableRipple, useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { FormattedPost } from '../../services/WordPressService';
+import FastImage from 'react-native-fast-image';
 
 interface TrendingRailProps {
     items: FormattedPost[];
@@ -47,7 +48,7 @@ const TrendingRail = ({ items, title = 'Tendencias' }: TrendingRailProps) => {
                 borderless
             >
                 <View>
-                    <Image source={{ uri: item.image }} style={imageStyle} />
+                    <FastImage source={{ uri: item.image }} style={imageStyle} />
                     <View style={styles.cardContent}>
                         {item.categories && item.categories.length > 0 && (
                             <Text style={categoryStyle}>

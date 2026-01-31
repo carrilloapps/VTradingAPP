@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Image, ImageBackground, DimensionValue } from 'react-native';
+import { View, StyleSheet, ImageBackground, DimensionValue } from 'react-native';
 import { Text, Surface } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import ViewShot from 'react-native-view-shot';
@@ -8,6 +8,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { useAppTheme } from '../../theme/theme';
 import XIcon from '../common/XIcon';
 import FacebookIcon from '../common/FacebookIcon';
+import FastImage from 'react-native-fast-image';
 
 // Helper to convert hex to rgba
 const hexToRgba = (hex: string, alpha: number) => {
@@ -202,7 +203,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
         return (
             <View style={styles.authorRow}>
                 {author.avatar ? (
-                    <Image source={{ uri: author.avatar }} style={authorBlockStyle(avatarSize)} />
+                    <FastImage source={{ uri: author.avatar }} style={authorBlockStyle(avatarSize)} />
                 ) : (
                     <View style={avatarPlaceholderStyle(avatarSize)}>
                         <Text style={avatarLetterStyle(isVertical)}>{author.name[0]}</Text>
@@ -243,7 +244,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
             paddingVertical: isVertical ? 20 : 16,
         }];
         const pillTextStyle = [styles.pillText, { color: theme.colors.onBackground, fontSize: pillFontSize }];
-        const brandLogoStyle = [styles.brandLogo, { tintColor: theme.colors.onBackground, width: logoWidth, height: logoHeight }];
+        const brandLogoStyle = [styles.brandLogo, { tintColor: theme.colors.onBackground, width: logoWidth, height: logoHeight } as any];
         const categoryBadgeStyle = [styles.categoryBadge, { backgroundColor: theme.colors.primaryContainer, paddingHorizontal: isVertical ? 40 : 32, paddingVertical: isVertical ? 20 : 16 }];
         const categoryBadgeTextStyle = [styles.categoryBadgeText, { color: theme.colors.onPrimaryContainer, fontSize: categoryBadgeFontSize }];
         const modernTitleStyle = [
@@ -269,7 +270,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                         {/* Top Image Section (45% for Vertical, 55% for Square) */}
                         <View style={topImageWrapperStyle}>
                             {image ? (
-                                <Image source={{ uri: image }} style={styles.fullImage} resizeMode="cover" />
+                                <FastImage source={{ uri: image }} style={styles.fullImage} resizeMode={FastImage.resizeMode.cover} />
                             ) : (
                                 <View style={placeholderWrapperStyle}>
                                     <MaterialCommunityIcons name="image-off-outline" size={isVertical ? 150 : 100} color={theme.colors.onSurfaceVariant} />
@@ -296,10 +297,10 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                                 </View>
 
                                 <View style={styles.brandContainer}>
-                                    <Image
+                                    <FastImage
                                         source={require('../../assets/images/logotipo.png')}
                                         style={brandLogoStyle}
-                                        resizeMode="contain"
+                                        resizeMode={FastImage.resizeMode.contain}
                                     />
                                 </View>
                             </View>
@@ -401,7 +402,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                 {/* Hero Card */}
                 <Surface style={heroCardStyle} elevation={5}>
                     {heroItem.image ? (
-                        <Image source={{ uri: heroItem.image }} style={styles.heroImage} resizeMode="cover" />
+                        <FastImage source={{ uri: heroItem.image }} style={styles.heroImage} resizeMode={FastImage.resizeMode.cover} />
                     ) : (
                         <View style={heroImagePlaceholderStyle}>
                             <MaterialCommunityIcons name="image-off-outline" size={isVertical ? 80 : 60} color={theme.colors.onSurfaceVariant} />
@@ -430,14 +431,14 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                         {listItems.map((item, index) => (
                             <View key={index} style={compactCardStyle(compactItemHeight)}>
                                 {item.image && (
-                                    <Image source={{ uri: item.image }} style={compactCardImageStyle(compactItemImageSize)} resizeMode="cover" />
+                                    <FastImage source={{ uri: item.image }} style={compactCardImageStyle(compactItemImageSize)} resizeMode={FastImage.resizeMode.cover} />
                                 )}
                                 <View style={styles.cardContent}>
                                     <Text style={compactCardTitleStyle} numberOfLines={2}>{item.title}</Text>
                                     <View style={styles.listItemMeta}>
                                         {/* Author Avatar */}
                                         {item.authorAvatar ? (
-                                            <Image source={{ uri: item.authorAvatar }} style={listItemAvatarStyle(avatarSize)} />
+                                            <FastImage source={{ uri: item.authorAvatar }} style={listItemAvatarStyle(avatarSize)} />
                                         ) : (
                                             <View style={listItemAvatarPlaceholderStyle(avatarSize)}>
                                                 <Text style={listItemAvatarLetterStyle(avatarFontSize)}>{(item.author || 'V')[0]}</Text>
@@ -476,7 +477,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
         paddingVertical: isVertical ? 20 : 16,
     }];
     const topPillTextStyle = [styles.pillText, { color: theme.colors.onBackground, fontSize: pillFontSize }];
-    const topBrandLogoStyle = [styles.brandLogo, { tintColor: theme.colors.onBackground, width: logoWidth, height: logoHeight }];
+    const topBrandLogoStyle = [styles.brandLogo, { tintColor: theme.colors.onBackground, width: logoWidth, height: logoHeight } as any];
     const mainTitleStyleScaled = [
         styles.mainTitle,
         { color: theme.colors.onBackground, fontSize: mainTitleSize, lineHeight: mainTitleLineHeight },
@@ -532,10 +533,10 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
 
                             {/* Brand Logo - Using Asset */}
                             <View style={styles.brandContainer}>
-                                <Image
+                                <FastImage
                                     source={require('../../assets/images/logotipo.png')}
                                     style={topBrandLogoStyle}
-                                    resizeMode="contain"
+                                    resizeMode={FastImage.resizeMode.contain}
                                 />
                             </View>
                         </View>

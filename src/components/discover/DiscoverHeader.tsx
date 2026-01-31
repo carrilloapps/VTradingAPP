@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, StyleSheet, Image, Animated, StatusBar, useWindowDimensions, Keyboard } from 'react-native';
+import { View, StyleSheet, Animated, StatusBar, useWindowDimensions, Keyboard } from 'react-native';
 import { Text, useTheme, TouchableRipple } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import SearchBar from '../ui/SearchBar';
+import FastImage from 'react-native-fast-image';
 
 export type DiscoverHeaderVariant = 'main' | 'detail' | 'tag' | 'category' | 'search';
 
@@ -244,10 +245,10 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
                         </TouchableRipple>
                     ) : (
                         <Animated.View style={logoWrapperStyle}>
-                            <Image
+                            <FastImage
                                 source={require('../../assets/images/logotipo.png')}
-                                style={logoImageStyle}
-                                resizeMode="contain"
+                                style={logoImageStyle as any}
+                                resizeMode={FastImage.resizeMode.contain}
                             />
                         </Animated.View>
                     )}
@@ -272,10 +273,10 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
                     <View style={centerContainerStyle}>
                         {isFadingVariant && (
                             <Animated.View style={detailLogoWrapperStyle}>
-                                <Image
+                                <FastImage
                                     source={require('../../assets/images/logotipo.png')}
-                                    style={logoImageStyle}
-                                    resizeMode="contain"
+                                    style={logoImageStyle as any}
+                                    resizeMode={FastImage.resizeMode.contain}
                                 />
                             </Animated.View>
                         )}

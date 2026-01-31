@@ -1,9 +1,10 @@
 import React, { useRef } from 'react';
-import { StyleSheet, Animated, Image, View } from 'react-native';
+import { StyleSheet, Animated, View } from 'react-native';
 import { Text, Surface, TouchableRipple } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../theme/theme';
 import { getCategoryIcon } from '../../utils/categoryIcons';
+import FastImage from 'react-native-fast-image';
 
 interface CategoryTabProps {
     name: string;
@@ -63,10 +64,10 @@ const CategoryTab = ({ name, image, selected, onPress }: CategoryTabProps) => {
                     <View style={styles.content}>
                         {/* Icon Container */}
                         {image ? (
-                            <Image
+                            <FastImage
                                 source={{ uri: image }}
                                 style={styles.iconImage}
-                                resizeMode="cover"
+                                resizeMode={FastImage.resizeMode.cover}
                             />
                         ) : (
                             <View style={[

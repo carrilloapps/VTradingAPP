@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, StyleSheet, ImageBackground, TouchableOpacity, Image } from 'react-native';
+import { View, StyleSheet, ImageBackground, TouchableOpacity } from 'react-native';
 import { Text, Surface } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { useAppTheme } from '../../theme/theme';
 import { FormattedPost } from '../../services/WordPressService';
+import FastImage from 'react-native-fast-image';
 
 interface FeaturedHeroProps {
     item: FormattedPost;
@@ -53,7 +54,7 @@ const FeaturedHero = ({ item }: FeaturedHeroProps) => {
 
                                 <View style={styles.heroFooter}>
                                     {item.author?.avatar && (
-                                        <Image source={{ uri: item.author.avatar }} style={styles.authorAvatar} />
+                                        <FastImage source={{ uri: item.author.avatar }} style={styles.authorAvatar} />
                                     )}
                                     <Text style={styles.heroMeta}>{item.author?.name || item.source}</Text>
                                     <View style={styles.dotSeparator} />

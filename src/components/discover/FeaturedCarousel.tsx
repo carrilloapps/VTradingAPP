@@ -1,11 +1,12 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { View, StyleSheet, useWindowDimensions, Image, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import { View, StyleSheet, useWindowDimensions, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
 import { FlashList, FlashListRef } from '@shopify/flash-list';
 import { Text, Surface, TouchableRipple, useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import LinearGradient from 'react-native-linear-gradient';
 import { FormattedPost } from '../../services/WordPressService';
+import FastImage from 'react-native-fast-image';
 
 interface FeaturedCarouselProps {
     items: FormattedPost[];
@@ -61,10 +62,10 @@ const FeaturedCarousel = ({ items }: FeaturedCarouselProps) => {
                 accessibilityRole="button"
             >
                 <View style={styles.slide}>
-                    <Image
+                    <FastImage
                         source={{ uri: item.image }}
                         style={styles.image}
-                        resizeMode="cover"
+                        resizeMode={FastImage.resizeMode.cover}
                         accessibilityIgnoresInvertColors
                     />
                     <LinearGradient

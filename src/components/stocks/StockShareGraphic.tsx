@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Text, Icon, Surface, useTheme } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import ViewShot from 'react-native-view-shot';
 import { StockData } from '../../services/StocksService';
 import { getTrend, getTrendColor, getTrendIcon } from '../../utils/trendUtils';
+import FastImage from 'react-native-fast-image';
 
 interface StockShareGraphicProps {
   viewShotRef: React.RefObject<any>;
@@ -102,10 +103,10 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
           {/* Header */}
           <View style={styles.templateHeader}>
             <View style={styles.logoAndBadgeRow}>
-              <Image
+              <FastImage
                 source={require('../../assets/images/logotipo.png')}
-                style={[styles.templateMainLogo, { tintColor: theme.dark ? undefined : theme.colors.primary, width: logoWidth, height: logoHeight }]}
-                resizeMode="contain"
+                style={[styles.templateMainLogo, { tintColor: theme.dark ? undefined : theme.colors.primary, width: logoWidth, height: logoHeight } as any]}
+                resizeMode={FastImage.resizeMode.contain}
               />
               {!isPremium && (
                 <Surface style={[styles.freeBadge, { backgroundColor: (theme.colors as any).error || '#FF5252' }]} elevation={2}>
@@ -131,10 +132,10 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
               <View style={styles.stockIdentityRow}>
                 <View style={[styles.stockIconContainer, { width: iconContainerSize, height: iconContainerSize }, stock.iconUrl ? styles.bgWhite : { backgroundColor: trendColor + '20' }]}>
                   {stock.iconUrl ? (
-                    <Image
+                    <FastImage
                       source={{ uri: stock.iconUrl }}
                       style={styles.stockIconImage}
-                      resizeMode="contain"
+                      resizeMode={FastImage.resizeMode.contain}
                     />
                   ) : stock.initials ? (
                     <Text style={[styles.stockInitialsText, { color: trendColor, fontSize: initialsTextSize }]}>{stock.initials}</Text>

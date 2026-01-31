@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Image, Animated, StatusBar, RefreshControl, ActivityIndicator, TouchableOpacity, Linking } from 'react-native';
+import { View, StyleSheet, Animated, StatusBar, RefreshControl, ActivityIndicator, TouchableOpacity, Linking } from 'react-native';
 import {
   Text,
   IconButton,
@@ -36,6 +36,7 @@ import FacebookIcon from '../../components/common/FacebookIcon';
 import { shareTextContent } from '../../utils/ShareUtils';
 import DiscoverHeader from '../../components/discover/DiscoverHeader';
 import SafeLogger from '../../utils/safeLogger';
+import FastImage from 'react-native-fast-image';
 
 const BlockParagraph = ({ text, theme }: any) => {
   const paragraphStyle = [styles.paragraph, { color: theme.colors.onSurface }];
@@ -80,7 +81,7 @@ const BlockImage = ({ url, caption, theme }: any) => {
 
   return (
     <View style={styles.imageBlock}>
-      <Image
+      <FastImage
         source={{ uri: url }}
         style={contentImageStyle}
         accessibilityRole="image"
@@ -566,7 +567,7 @@ const ArticleDetailScreen = () => {
         {/* Hero Image with Theme-Aware Gradient */}
         {article.image ? (
           <View style={styles.heroContainer}>
-            <Image source={{ uri: article.image }} style={styles.heroImage} />
+            <FastImage source={{ uri: article.image }} style={styles.heroImage} />
             <LinearGradient
               colors={[
                 'transparent',

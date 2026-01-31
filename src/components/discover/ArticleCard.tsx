@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, StyleSheet, Image, Animated } from 'react-native';
+import { View, StyleSheet, Animated } from 'react-native';
 import { Text, Surface, TouchableRipple, useTheme } from 'react-native-paper';
 import { FormattedPost } from '../../services/WordPressService';
+import FastImage from 'react-native-fast-image';
 
 interface ArticleCardProps {
     article: FormattedPost;
@@ -135,10 +136,10 @@ const ArticleCard = React.memo(({ article, onPress, variant = 'compact' }: Artic
 
                     {isFeatured && (
                         <View style={styles.imageWrapper}>
-                            <Image
+                            <FastImage
                                 source={{ uri: article.image }}
                                 style={featuredImageStyle}
-                                resizeMode="cover"
+                                resizeMode={FastImage.resizeMode.cover}
                             />
                             {article.categories && article.categories.length > 0 && (
                                 <Surface style={floatingCategoryStyle} elevation={2}>
@@ -195,7 +196,7 @@ const ArticleCard = React.memo(({ article, onPress, variant = 'compact' }: Artic
                         <View style={styles.footer}>
                             <View style={styles.authorSection}>
                                 {article.author?.avatar && (
-                                    <Image source={{ uri: article.author.avatar }} style={styles.authorAvatar} />
+                                    <FastImage source={{ uri: article.author.avatar }} style={styles.authorAvatar} />
                                 )}
                                 <Text variant="labelSmall" style={styles.authorText}>
                                     {article.author?.name || article.source}
@@ -215,7 +216,7 @@ const ArticleCard = React.memo(({ article, onPress, variant = 'compact' }: Artic
                     </View>
 
                     {!isFeatured && (
-                        <Image source={{ uri: article.image }} style={compactImageStyle} />
+                        <FastImage source={{ uri: article.image }} style={compactImageStyle} />
                     )}
                 </Surface>
             </TouchableRipple>

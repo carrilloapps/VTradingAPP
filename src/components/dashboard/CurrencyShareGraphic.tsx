@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Text, Icon, Surface, useTheme } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import ViewShot from 'react-native-view-shot';
 import { CurrencyRate } from '../../services/CurrencyService';
 import { BolivarIcon } from '../ui/BolivarIcon';
+import FastImage from 'react-native-fast-image';
 
 interface CurrencyShareGraphicProps {
   viewShotRef: React.RefObject<any>;
@@ -167,10 +168,10 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
           {/* Header */}
           <View style={styles.templateHeader}>
             <View style={styles.logoAndBadgeRow}>
-              <Image
+              <FastImage
                 source={require('../../assets/images/logotipo.png')}
                 style={logoStyle}
-                resizeMode="contain"
+                resizeMode={FastImage.resizeMode.contain}
               />
               {!isPremium && (
                 <Surface style={freeBadgeStyle} elevation={2}>

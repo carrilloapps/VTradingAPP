@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useAppTheme } from '../../theme/theme';
+import FastImage from 'react-native-fast-image';
 
 export interface StockData {
   id: string;
@@ -117,10 +118,10 @@ const StockItem = React.memo(({
         <View style={styles.leftContent}>
           <View style={styles.iconBox}>
             {iconUrl ? (
-              <Image
+              <FastImage
                 source={{ uri: iconUrl }}
                 style={styles.iconImage}
-                resizeMode="cover"
+                resizeMode={FastImage.resizeMode.cover}
               />
             ) : (
               <Text style={[styles.initials, { color: theme.dark ? colors.darkText : colors.text }]}>

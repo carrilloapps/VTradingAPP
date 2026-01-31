@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Image, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, useWindowDimensions } from 'react-native';
 import { Text, TouchableRipple } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Svg, { Path } from 'react-native-svg';
@@ -7,6 +7,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import Animated, { FadeInRight } from 'react-native-reanimated';
 import { useAppTheme } from '../../theme/theme';
 import { BolivarIcon } from '../ui/BolivarIcon';
+import FastImage from 'react-native-fast-image';
 
 export interface ExchangeCardProps {
   title: string;
@@ -120,7 +121,7 @@ const ExchangeCard: React.FC<ExchangeCardProps> = ({
                 {customIcon ? (
                   customIcon
                 ) : iconUrl ? (
-                  <Image source={{ uri: iconUrl }} style={styles.iconImage} />
+                  <FastImage source={{ uri: iconUrl }} style={styles.iconImage} />
                 ) : iconName ? (
                   <View style={symbolIconStyle}>
                     {iconName === 'Bs' ? (

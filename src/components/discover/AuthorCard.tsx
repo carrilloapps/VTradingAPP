@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, StyleSheet, Linking } from 'react-native';
-import { Text, Surface, IconButton, Avatar } from 'react-native-paper';
+import { Text, Surface, IconButton } from 'react-native-paper';
+import FastImage from 'react-native-fast-image';
 import { useAppTheme } from '../../theme/theme';
 import { observabilityService } from '../../services/ObservabilityService';
 import XIcon from '../common/XIcon';
@@ -49,7 +50,7 @@ const AuthorCard = ({ author }: AuthorCardProps) => {
     return (
         <Surface style={surfaceStyle} elevation={0}>
             <View style={styles.authorHeader}>
-                <Avatar.Image size={64} source={{ uri: author.avatar }} />
+                <FastImage style={{ width: 64, height: 64, borderRadius: 32 }} source={{ uri: author.avatar }} />
                 <View style={styles.authorInfo}>
                     <Text variant="titleLarge" style={styles.authorName}>{author.name}</Text>
                     {author.role && (

@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useAppTheme } from '../../theme/theme';
 import WidgetCard from './WidgetCard';
 import { WidgetItem } from '../../widget/types';
+import FastImage from 'react-native-fast-image';
 
 export type { WidgetItem };
 
@@ -122,13 +123,13 @@ const WidgetPreview: React.FC<WidgetPreviewProps> = ({
               styles.vtradingAppIcon,
               { backgroundColor: vtradingAppBg }
             ]}>
-              <Image
+              <FastImage
                 source={require('../../assets/images/logo.png')}
                 style={[
                   styles.vtradingLogo,
-                  { tintColor: vtradingLogoTint }
+                  { tintColor: vtradingLogoTint } as any
                 ]}
-                resizeMode="contain"
+                resizeMode={FastImage.resizeMode.contain}
               />
             </View>
             {/* Active Indicator dot */}

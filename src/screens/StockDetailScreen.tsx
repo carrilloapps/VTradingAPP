@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Image } from 'react-native';
+import { View, StyleSheet, ScrollView } from 'react-native';
 import Share from 'react-native-share';
 import { Surface, Text, Chip } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -14,6 +14,7 @@ import CustomButton from '../components/ui/CustomButton';
 import StockShareGraphic from '../components/stocks/StockShareGraphic';
 import { observabilityService } from '../services/ObservabilityService';
 import { analyticsService } from '../services/firebase/AnalyticsService';
+import FastImage from 'react-native-fast-image';
 
 const StockDetailScreen = ({ route, navigation }: any) => {
   const theme = useAppTheme();
@@ -201,10 +202,10 @@ const StockDetailScreen = ({ route, navigation }: any) => {
               }
             ]}>
               {stock.iconUrl ? (
-                <Image
+                <FastImage
                   source={{ uri: stock.iconUrl }}
                   style={styles.logoImage}
-                  resizeMode="contain"
+                  resizeMode={FastImage.resizeMode.contain}
                 />
               ) : (
                 <Text style={[styles.initials, { color: initialsColor }]}>{stock.initials || stock.symbol.substring(0, 2)}</Text>
