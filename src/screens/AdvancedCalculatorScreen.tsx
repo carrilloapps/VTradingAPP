@@ -371,7 +371,7 @@ const AdvancedCalculatorScreen = () => {
       onPress={() => { 
         setPickerMode('add'); 
         setPickerVisible(true); 
-        analyticsService.logEvent('calculator_add_currency_pressed');
+        analyticsService.logEvent(ANALYTICS_EVENTS.CALCULATOR_ADD_CURRENCY_PRESSED);
       }}
     >
       <View style={[styles.addIcon, themeStyles.addIcon]}>
@@ -422,7 +422,7 @@ const AdvancedCalculatorScreen = () => {
                       setBaseAmount('1');
                       setTargetCodes([]);
                       showToast('Calculadora reiniciada', 'info');
-                      analyticsService.logEvent('calculator_clear');
+                      analyticsService.logEvent(ANALYTICS_EVENTS.CALCULATOR_CLEAR);
                   }}>
                       <Text variant="labelMedium" style={[styles.clearText, { color: theme.colors.error }]}>
                           LIMPIAR

@@ -97,7 +97,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
 
   // Track Start
   useEffect(() => {
-    analyticsService.logEvent('onboarding_start');
+    analyticsService.logEvent(ANALYTICS_EVENTS.ONBOARDING_START);
   }, []);
 
   // Modified Auto-advance logic
@@ -162,7 +162,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
   const handlePausePressOut = () => setIsPaused(false);
 
   const handleSkipNotifications = () => {
-      analyticsService.logEvent('notification_permission_skipped');
+      analyticsService.logEvent(ANALYTICS_EVENTS.NOTIFICATION_PERMISSION_SKIPPED);
       // Manually advance
       pagerRef.current?.setPage(currentPage + 1);
   };
@@ -203,7 +203,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
 
   const finishOnboarding = async () => {
     console.log('[Onboarding] Finishing onboarding...');
-    analyticsService.logEvent('onboarding_complete');
+    analyticsService.logEvent(ANALYTICS_EVENTS.ONBOARDING_COMPLETE);
     await storageService.setHasSeenOnboarding(true);
     if (onFinish) {
       onFinish();

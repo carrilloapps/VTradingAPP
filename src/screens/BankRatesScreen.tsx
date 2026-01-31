@@ -14,7 +14,7 @@ import { useToastStore } from '../stores/toastStore';
 import { AppTheme } from '../theme/theme';
 import { useNavigation } from '@react-navigation/native';
 import { observabilityService } from '../services/ObservabilityService';
-import { analyticsService } from '../services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '../services/firebase/AnalyticsService';
 import { BolivarIcon } from '../components/ui/BolivarIcon';
 
 const isFabricEnabled = !!(globalThis as any).nativeFabricUIManager;
@@ -92,7 +92,7 @@ const BankRatesScreen = () => {
   const onRefresh = useCallback(() => {
       setRefreshing(true);
       fetchRates(true, { page: 1 });
-      analyticsService.logEvent('bank_rates_refresh');
+      analyticsService.logEvent(ANALYTICS_EVENTS.BANK_RATES_REFRESH);
   }, [fetchRates]);
 
   const loadMore = useCallback(() => {

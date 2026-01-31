@@ -40,7 +40,7 @@ const ProfileEditDialog: React.FC<ProfileEditDialogProps> = ({
         action: 'save_profile_name',
         nameLength: name.length
       });
-      await analyticsService.logEvent('error_save_profile');
+      await analyticsService.logError('save_profile');
       showToast('Error al guardar perfil', 'error');
     } finally {
       setLoading(false);

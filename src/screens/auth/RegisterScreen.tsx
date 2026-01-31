@@ -4,7 +4,7 @@ import { Text, TextInput, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../stores/authStore';
 import { useToastStore } from '../../stores/toastStore';
-import { analyticsService } from '../../services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '../../services/firebase/AnalyticsService';
 import { AppConfig } from '../../constants/AppConfig';
 import AuthLoading from '../../components/auth/AuthLoading';
 import CustomButton from '../../components/ui/CustomButton';
@@ -110,7 +110,7 @@ const RegisterScreen = ({ navigation }: any) => {
     if (validate()) {
       setIsSubmitting(true);
       try {
-        await analyticsService.logEvent('sign_up_attempt', { method: 'password' });
+        await analyticsService.logEvent(ANALYTICS_EVENTS.SIGN_UP_ATTEMPT, { method: 'password' });
         await signUp(email, password, showToast);
         // Sign up exitoso ya se trackea en authStore con logLogin
       } catch (e) {
@@ -130,7 +130,7 @@ const RegisterScreen = ({ navigation }: any) => {
   const handleGoogleRegister = async () => {
     setIsSubmitting(true);
     try {
-      await analyticsService.logEvent('sign_up_attempt', { method: 'google' });
+      await analyticsService.logEvent(ANALYTICS_EVENTS.SIGN_UP_ATTEMPT, { method: 'google' });
       await googleSignIn(showToast);
       // Sign up exitoso ya se trackea en authStore
     } catch (e) {

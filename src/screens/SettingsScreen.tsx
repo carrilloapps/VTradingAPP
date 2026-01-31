@@ -92,7 +92,7 @@ const SettingsScreen = () => {
             context: 'SettingsScreen.loadData',
             screen: 'SettingsScreen'
           });
-          await analyticsService.logEvent('error_load_settings');
+          await analyticsService.logError('load_settings');
           showToast('Error cargando configuración', 'error');
           if (isActive) {
             setLoading(false);
@@ -127,7 +127,7 @@ const SettingsScreen = () => {
             context: 'SettingsScreen.confirmLogout',
             action: 'logout'
         });
-        await analyticsService.logEvent('error_logout');
+        await analyticsService.logError('logout');
         handleAction("Error al cerrar sesión");
     }
   };
@@ -146,7 +146,7 @@ const SettingsScreen = () => {
         context: 'SettingsScreen.confirmDeleteAccount',
         action: 'delete_account'
       });
-      await analyticsService.logEvent('error_delete_account');
+      await analyticsService.logError('delete_account');
       handleAction('Error al eliminar la cuenta');
     } finally {
       setDeleteAccountLoading(false);
@@ -155,19 +155,19 @@ const SettingsScreen = () => {
 
   const handleEditProfile = () => {
     setShowEditProfileDialog(true);
-    analyticsService.logEvent('edit_profile_click');
+    analyticsService.logEvent(ANALYTICS_EVENTS.EDIT_PROFILE_CLICK);
   };
 
   const saveProfileName = async (newName: string) => {
     try {
       await updateProfileName(newName, showToast);
-      await analyticsService.logEvent('update_profile_name');
+      await analyticsService.logEvent(ANALYTICS_EVENTS.UPDATE_PROFILE_NAME);
     } catch (error) {
       observabilityService.captureError(error, {
         context: 'SettingsScreen.saveProfileName',
         newNameLength: newName?.length
       });
-      await analyticsService.logEvent('error_update_profile_name');
+      await analyticsService.logError('update_profile_name');
       handleAction("Error al actualizar el perfil");
       showToast('Error al actualizar el perfil', 'error');
     }
@@ -369,7 +369,7 @@ const SettingsScreen = () => {
          return;
       }
       (navigation as any).navigate('AddAlert');
-      analyticsService.logEvent('create_alert_click');
+      analyticsService.logEvent(ANALYTICS_EVENTS.CREATE_ALERT_CLICK);
   };
 
   if (loading) {

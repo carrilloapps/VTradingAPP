@@ -5,7 +5,7 @@ import { authService } from '../services/firebase/AuthService';
 import { getCrashlytics, setUserId, setAttributes } from '@react-native-firebase/crashlytics';
 import * as Clarity from '@microsoft/react-native-clarity';
 import { observabilityService } from '../services/ObservabilityService';
-import { analyticsService } from '../services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '../services/firebase/AnalyticsService';
 import { ToastType } from './toastStore';
 
 interface AuthState {
@@ -99,7 +99,7 @@ export const useAuthStore = create<AuthState>()(
             signOut: async (showToast) => {
                 try {
                     await authService.signOut();
-                    await analyticsService.logEvent('logout');
+                    await analyticsService.logEvent(ANALYTICS_EVENTS.LOGOUT);
                     showToast('Sesión cerrada', 'info');
                 } catch (e: any) {
                     observabilityService.captureError(e, {
@@ -115,7 +115,7 @@ export const useAuthStore = create<AuthState>()(
             deleteAccount: async (showToast) => {
                 try {
                     await authService.deleteAccount();
-                    await analyticsService.logEvent('delete_account');
+                    await analyticsService.logEvent(ANALYTICS_EVENTS.DELETE_ACCOUNT);
                     showToast('Cuenta eliminada', 'success');
                 } catch (e: any) {
                     observabilityService.captureError(e, {
@@ -153,7 +153,7 @@ export const useAuthStore = create<AuthState>()(
             resetPassword: async (email, showToast) => {
                 try {
                     await authService.sendPasswordResetEmail(email);
-                    await analyticsService.logEvent('reset_password_request');
+                    await analyticsService.logEvent(ANALYTICS_EVENTS.RESET_PASSWORD_REQUEST);
                     showToast('Correo de recuperación enviado', 'success');
                 } catch (e: any) {
                     observabilityService.captureError(e, {
@@ -189,7 +189,7 @@ export const useAuthStore = create<AuthState>()(
                 try {
                     const updatedUser = await authService.updateProfileName(newName);
                     set({ user: updatedUser });
-                    await analyticsService.logEvent('update_profile_name');
+                    await analyticsService.logEvent(ANALYTICS_EVENTS.UPDATE_PROFILE_NAME);
                     showToast('Perfil actualizado correctamente', 'success');
                 } catch (e: any) {
                     observabilityService.captureError(e, {

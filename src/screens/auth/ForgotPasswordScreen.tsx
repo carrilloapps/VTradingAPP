@@ -4,7 +4,7 @@ import { Text, TextInput, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAuthStore } from '../../stores/authStore';
 import { useToastStore } from '../../stores/toastStore';
-import { analyticsService } from '../../services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '../../services/firebase/AnalyticsService';
 import AuthLoading from '../../components/auth/AuthLoading';
 import CustomButton from '../../components/ui/CustomButton';
 import UnifiedHeader from '../../components/ui/UnifiedHeader';
@@ -72,7 +72,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
       setIsSubmitting(true);
       setSuccessMessage('');
       try {
-        await analyticsService.logEvent('password_reset_attempt');
+        await analyticsService.logEvent(ANALYTICS_EVENTS.PASSWORD_RESET_ATTEMPT);
         await resetPassword(email, showToast);
         setSuccessMessage('Se ha enviado un correo para restablecer tu contraseña.');
         // Reset exitoso ya se trackea en authStore

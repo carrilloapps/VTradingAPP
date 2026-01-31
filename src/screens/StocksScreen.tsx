@@ -101,7 +101,7 @@ const StocksScreen = ({ navigation, route: _route }: any) => {
         context: 'StocksScreen.onRefresh',
         action: 'refresh_market_data'
       });
-      await analyticsService.logEvent('error_stocks_refresh');
+      await analyticsService.logError('stocks_refresh');
       showToast('Error actualizando mercado', 'error');
     } finally {
       setRefreshing(false);

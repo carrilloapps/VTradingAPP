@@ -144,7 +144,7 @@ const AppRecommendations: React.FC<AppRecommendationsProps> = ({ apps: providedA
             action: 'load_app_recommendations',
             providedApps: !!providedApps
           });
-          await analyticsService.logEvent('error_load_app_recommendations');
+          await analyticsService.logError('load_app_recommendations');
 
           await Promise.resolve();
 
