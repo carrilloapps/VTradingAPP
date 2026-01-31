@@ -3,7 +3,8 @@ import DeviceInfo from 'react-native-device-info';
 import { mmkvStorage } from './StorageService';
 import { fcmService } from './firebase/FCMService';
 import { authService } from './firebase/AuthService';
-import compare from 'semver-compare';
+
+import SafeLogger from '../utils/safeLogger';
 
 /**
  * @description FeatureFlagService
@@ -115,15 +116,27 @@ class FeatureFlagService {
     }
 
     /**
-     * Compare semantic versions
+     * Compare semantic versions manually to avoid external deps
      * Returns true if v1 >= v2
      */
     private isVersionAtLeast(v1: string, v2: string): boolean {
-        // semver-compare returns:
-        //  0 if v1 == v2
-        //  1 if v1 > v2
-        // -1 if v1 < v2
-        return compare(v1, v2) >= 0;
+        if (!v1 || !v2) return false;
+        
+        const v1Parts = v1.split('.').map(p => parseInt(p, 10) || 0);
+        const v2Parts = v2.split('.').map(p => parseInt(p, 10) || 0);
+        
+        const maxLength = Math.max(v1Parts.length, v2Parts.length);
+        
+        for (let i = 0; i < maxLength; i++) {
+            const p1 = v1Parts[i] || 0;
+            const p2 = v2Parts[i] || 0;
+            
+            if (p1 > p2) return true;
+            if (p1 < p2) return false;
+        }
+        
+        // Equal
+        return true;
     }
 
     /**
@@ -132,21 +145,32 @@ class FeatureFlagService {
     private async evaluateConditions(conditions: FeatureCondition): Promise<boolean> {
         // 1. Platform
         if (conditions.platform && conditions.platform !== Platform.OS) {
+            SafeLogger.log(`[FeatureFlag] Denied by platform: Current=${Platform.OS} != Target=${conditions.platform}`);
             return false;
         }
 
         // 2. Build Number
         const currentBuild = parseInt(DeviceInfo.getBuildNumber(), 10);
-        if (conditions.minBuild !== undefined && currentBuild < conditions.minBuild) {
-            return false;
+        if (conditions.minBuild !== undefined) {
+            if (currentBuild < conditions.minBuild) {
+                SafeLogger.log(`[FeatureFlag] Denied by minBuild: Current=${currentBuild} < Min=${conditions.minBuild}`);
+                return false;
+            }
         }
-        if (conditions.maxBuild !== undefined && currentBuild > conditions.maxBuild) {
-            return false;
+        if (conditions.maxBuild !== undefined) {
+            if (currentBuild > conditions.maxBuild) {
+                SafeLogger.log(`[FeatureFlag] Denied by maxBuild: Current=${currentBuild} > Max=${conditions.maxBuild}`);
+                return false;
+            }
         }
 
         // 3. App Version
-        if (conditions.minVersion && !this.isVersionAtLeast(DeviceInfo.getVersion(), conditions.minVersion)) {
-            return false;
+        if (conditions.minVersion) {
+            const currentVersion = DeviceInfo.getVersion();
+            if (!this.isVersionAtLeast(currentVersion, conditions.minVersion)) {
+                SafeLogger.log(`[FeatureFlag] Denied by minVersion: Current=${currentVersion} < Min=${conditions.minVersion}`);
+                return false;
+            }
         }
 
         // 4. Device Model
@@ -208,8 +232,16 @@ class FeatureFlagService {
             return defaultValue;
         }
 
-        let isEnabled = feature.enabled;
+        // 1. Master Kill Switch
+        // "enabled" acts as a definitive switch. If false, feature is dead.
+        if (!feature.enabled) {
+            SafeLogger.log(`[FeatureFlag] ${featureName} disabled globally (Master Switch)`);
+            return false;
+        }
 
+        // 2. Rules Evaluation (Whitelist Mode)
+        // If enabled is true AND rules exist, we default to FALSE (Implicit Deny),
+        // and only return TRUE if a matching rule explicitly enables it.
         if (feature.rules && feature.rules.length > 0) {
             // Sort rules by priority (descending)
             const rules = [...feature.rules].sort((a, b) => (b.priority || 0) - (a.priority || 0));
@@ -218,18 +250,24 @@ class FeatureFlagService {
                 if (rule.conditions) {
                     const match = await this.evaluateConditions(rule.conditions);
                     if (match) {
-                        isEnabled = rule.action === 'enable';
-                        break; // First match wins strategy
+                        SafeLogger.log(`[FeatureFlag] Rule Match for ${featureName}: Action=${rule.action}`);
+                        return rule.action === 'enable';
                     }
                 } else {
-                    // Rule without conditions applies immediately
-                    isEnabled = rule.action === 'enable';
-                    break;
+                    // Rule without conditions applies immediately (Catch-all)
+                    SafeLogger.log(`[FeatureFlag] Rule Force for ${featureName}: Action=${rule.action}`);
+                    return rule.action === 'enable';
                 }
             }
+
+            // If rules exist but none matched -> Disable (Implicit Deny / Whitelist Mode)
+            SafeLogger.log(`[FeatureFlag] ${featureName} has rules but none matched -> Denying`);
+            return false;
         }
 
-        return isEnabled;
+        // 3. Global Enable (No rules)
+        // If enabled is true and no rules are defined, it's enabled for everyone.
+        return true;
     }
 }
 

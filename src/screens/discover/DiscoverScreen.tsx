@@ -4,6 +4,8 @@ import { FlashList, FlashListRef } from '@shopify/flash-list';
 import { Text, Surface, ProgressBar } from 'react-native-paper';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import CustomButton from '../../components/ui/CustomButton';
 
 import DiscoverHeader from '../../components/discover/DiscoverHeader';
 import DiscoverConstructionSkeleton from '../../components/discover/DiscoverSkeleton';
@@ -18,6 +20,9 @@ import { useToastStore } from '../../stores/toastStore';
 import { observabilityService } from '../../services/ObservabilityService';
 import { remoteConfigService } from '../../services/firebase/RemoteConfigService';
 import { wordPressService, FormattedPost, WordPressCategory } from '../../services/WordPressService';
+import { fcmService } from '../../services/firebase/FCMService';
+import { storageService } from '../../services/StorageService';
+import { analyticsService } from '../../services/firebase/AnalyticsService';
 import { getCategoryImage } from '../../utils/WordPressUtils';
 import SafeLogger from '../../utils/safeLogger';
 import { useAppTheme } from '../../theme/theme';
@@ -51,6 +56,7 @@ const DiscoverScreen = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [featureEnabled, setFeatureEnabled] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
 
   // Ads/Promoted
   const [, setAdsIndex] = useState(0);
@@ -152,6 +158,21 @@ const DiscoverScreen = () => {
   useEffect(() => {
     fetchInitialData();
   }, [fetchInitialData]);
+
+  // Check subscription status on mount
+  useEffect(() => {
+    const checkSubscription = async () => {
+      try {
+        const settings = await storageService.getSettings();
+        if (settings.newsSubscription) {
+          setIsSubscribed(true);
+        }
+      } catch (e) {
+        // Ignore error
+      }
+    };
+    checkSubscription();
+  }, []);
 
   useEffect(() => {
     if (!featureEnabled || ads.length === 0) return;
@@ -319,16 +340,45 @@ const DiscoverScreen = () => {
 
   const screenContainerStyle = [styles.container, { backgroundColor: theme.colors.background }];
 
+  const handleWaitlistSubscription = async () => {
+    try {
+      const hasPermission = await fcmService.requestUserPermission();
+      if (!hasPermission) {
+        showToast('Se requieren permisos de notificación', 'info');
+        return;
+      }
+
+      await fcmService.subscribeToTopic('news_waitlist');
+      
+      const settings = await storageService.getSettings();
+      await storageService.saveSettings({
+        ...settings,
+        newsSubscription: true
+      });
+      
+      setIsSubscribed(true);
+      showToast('¡Te avisaremos cuando esté listo!', 'success');
+      
+      // Analytics
+      analyticsService.logEvent('waitlist_signup', { feature: 'news_v2' });
+    } catch (e) {
+      showToast('Error al suscribirse. Intenta nuevamente.', 'error');
+      SafeLogger.error('Waitlist subscription failed', e);
+    }
+  };
+
   if (!featureEnabled) {
-    // ... (Keep existing construction view logic - omitted for brevity but should be preserved if I am replacing whole file? 
-    // I am replacing from line 56 to 535? No, I am replacing the component body.
-    // Wait, the construction view block is large. I should preserve it.
-    // I will assume I need to copy it back in if I replace the whole component.
-    // To be safe, I should probably TARGET only the logic up to render, OR include the construction view code.
-    // Given the complexity, I'll include the construction view code in standard form as it was.)
-    const heroContentStyle = [styles.constructionHero, { marginTop: windowWidth * 0.1 }];
-    const titleStyle = [styles.title, { color: theme.colors.onBackground }];
-    const descriptionStyle = [styles.description, { color: theme.colors.onSurfaceVariant }];
+    const renderFeatureItem = (icon: string, title: string, desc: string) => (
+      <Surface style={[styles.featureItem, { backgroundColor: theme.colors.elevation.level1 }]} elevation={0} key={title}>
+        <View style={[styles.featureIcon, { backgroundColor: theme.colors.secondaryContainer }]}>
+          <MaterialCommunityIcons name={icon} size={24} color={theme.colors.onSecondaryContainer} />
+        </View>
+        <View style={styles.featureDetails}>
+          <Text variant="titleMedium" style={{ color: theme.colors.onSurface, fontWeight: 'bold' }}>{title}</Text>
+          <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>{desc}</Text>
+        </View>
+      </Surface>
+    );
 
     return (
       <View style={screenContainerStyle}>
@@ -341,10 +391,40 @@ const DiscoverScreen = () => {
           contentContainerStyle={styles.constructionContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* Construction Content */}
-          <View style={heroContentStyle}>
-            <Text variant="displaySmall" style={titleStyle}>News V2.0</Text>
-            <Text variant="bodyLarge" style={descriptionStyle}>Estamos construyendo una experiencia de trading inteligente.</Text>
+          <View style={[styles.constructionHero, { marginTop: windowWidth * 0.1 }]}>
+            <Surface style={[styles.iconContainer, { backgroundColor: theme.colors.elevation.level2 }]} elevation={0}>
+               <MaterialCommunityIcons name="rocket-launch" size={56} color={theme.colors.primary} />
+            </Surface>
+            
+            <Text variant="headlineMedium" style={[styles.title, { color: theme.colors.onBackground }]}>
+              Próximamente
+            </Text>
+            <Text variant="bodyLarge" style={[styles.description, { color: theme.colors.onSurfaceVariant }]}>
+              Estamos preparando una experiencia de noticias completamente nueva para ti.
+            </Text>
+          </View>
+
+          <View style={styles.featuresPreview}>
+             <Text variant="titleMedium" style={[styles.sectionTitle, { color: theme.colors.onSurface }]}>
+               Lo que se viene
+             </Text>
+             {renderFeatureItem('chart-timeline-variant', 'Análisis de Mercado', 'Noticias que impactan tus activos en tiempo real.')}
+             {renderFeatureItem('brain', 'Insights con IA', 'Resúmenes inteligentes para tomar decisiones rápidas.')}
+             {renderFeatureItem('bell-ring-outline', 'Alertas Personalizadas', 'Sé el primero en saber cuándo el mercado se mueve.')}
+          </View>
+
+          <View style={styles.ctaContainer}>
+            <CustomButton 
+              variant={isSubscribed ? "secondary" : "primary"}
+              label={isSubscribed ? "En lista de espera" : "Notificarme cuando esté listo"}
+              onPress={isSubscribed ? () => showToast('Ya estás en la lista de espera', 'info') : handleWaitlistSubscription}
+              icon={isSubscribed ? "check-circle" : "bell-plus"}
+              style={styles.mainButton}
+              disabled={isSubscribed}
+            />
+            <Text variant="bodySmall" style={[styles.ctaSubtitle, { color: theme.colors.onSurfaceVariant }]}>
+              VTrading {new Date().getFullYear()} - Todos los derechos reservados
+            </Text>
           </View>
         </ScrollView>
       </View>
