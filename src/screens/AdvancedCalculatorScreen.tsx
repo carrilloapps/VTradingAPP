@@ -109,7 +109,7 @@ const AdvancedCalculatorScreen = () => {
 
     // Base Currency State
     const [baseCurrencyCode, setBaseCurrencyCode] = useState('USD');
-    const [baseAmount, setBaseAmount] = useState('1');
+    const [baseAmount, setBaseAmount] = useState('0');
 
     // Target Currencies List (Codes)
     const [targetCodes, setTargetCodes] = useState<string[]>(['VES', 'USDT']);
@@ -420,7 +420,7 @@ const AdvancedCalculatorScreen = () => {
                         </View>
 
                         <TouchableOpacity onPress={() => {
-                            setBaseAmount('1');
+                            setBaseAmount('0');
                             setTargetCodes([]);
                             showToast('Calculadora reiniciada', 'info');
                             analyticsService.logEvent(ANALYTICS_EVENTS.CALCULATOR_CLEAR);
