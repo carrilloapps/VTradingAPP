@@ -3,6 +3,7 @@ import { storageService } from './StorageService';
 import SafeLogger from '../utils/safeLogger';
 import { observabilityService } from './ObservabilityService';
 import { analyticsService, ANALYTICS_EVENTS } from './firebase/AnalyticsService';
+import notifee, { AndroidImportance } from '@notifee/react-native';
 
 /**
  * Servicio para inicializar el sistema de notificaciones
@@ -10,6 +11,30 @@ import { analyticsService, ANALYTICS_EVENTS } from './firebase/AnalyticsService'
  */
 class NotificationInitService {
   private isInitialized = false;
+
+  /**
+   * Initialize notification channels once at startup
+   */
+  private async createChannels(): Promise<void> {
+    try {
+      await notifee.createChannel({
+        id: 'price_alerts',
+        name: 'Alertas de Precio',
+        importance: AndroidImportance.HIGH,
+        sound: 'default',
+      });
+
+      await notifee.createChannel({
+        id: 'general',
+        name: 'General',
+        importance: AndroidImportance.DEFAULT,
+      });
+      
+      SafeLogger.log('[NotificationInit] Notification channels created');
+    } catch (e) {
+      observabilityService.captureError(e, { context: 'NotificationInitService.createChannels' });
+    }
+  }
 
   /**
    * Inicializa el sistema completo de notificaciones
@@ -26,6 +51,9 @@ class NotificationInitService {
 
     try {
       SafeLogger.log('[NotificationInit] Starting initialization...');
+
+      // 0. Crear canales de notificación (Android)
+      await this.createChannels();
 
       // 1. Verificar si ya tiene permiso
       const hasPermission = await fcmService.checkPermission();

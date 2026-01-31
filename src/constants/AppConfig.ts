@@ -1,7 +1,7 @@
 import Config from 'react-native-config';
 
 export const AppConfig = {
-  API_BASE_URL: Config.API_BASE_URL || 'https://api.example.com',
+  API_BASE_URL: Config.API_BASE_URL || 'https://api.vtrading.app',
   API_KEY: Config.API_KEY || 'default-api-key',
   SENTRY_DSN: Config.SENTRY_DSN || '',
   CLARITY_PROJECT_ID: Config.CLARITY_PROJECT_ID || '',
@@ -19,4 +19,6 @@ export const AppConfig = {
   COOKIES_URL: Config.COOKIES_URL || 'https://vtrading.app/cookies',
   IS_DEV: __DEV__,
   IS_PROD: !__DEV__,
+  DEEP_LINK_SCHEME: Config.DEEP_LINK_SCHEME || 'vtrading://',
+  DEEP_LINK_HOST: Config.DEEP_LINK_HOST || 'discover.vtrading.app',
 } as const;

@@ -3,11 +3,18 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { useTheme, Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import CurrencyConverter from './CurrencyConverter';
+import { RootStackParamList } from '../../navigation/AppNavigator';
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
+
+// Memoized CurrencyConverter to prevent unnecessary re-renders
+const MemoizedCurrencyConverter = React.memo(CurrencyConverter);
 
 const Calculator: React.FC = () => {
   const theme = useTheme();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp>();
 
   const themeStyles = React.useMemo(() => ({
     container: {
@@ -23,8 +30,14 @@ const Calculator: React.FC = () => {
       marginRight: 4
     },
     expandText: {
-      color: theme.colors.primary,
+      color: theme.colors.onPrimaryContainer,
       fontWeight: 'bold' as const
+    },
+    button: {
+        backgroundColor: theme.colors.primaryContainer,
+        borderRadius: theme.roundness * 2,
+        paddingHorizontal: 12,
+        paddingVertical: 6,
     }
   }), [theme]);
 
@@ -35,15 +48,17 @@ const Calculator: React.FC = () => {
           Calculadora Rápida
         </Text>
         <TouchableOpacity
-          onPress={() => navigation.navigate('AdvancedCalculator' as never)}
-          style={styles.expandButton}
+          onPress={() => navigation.navigate('AdvancedCalculator')}
+          style={[styles.expandButton, themeStyles.button]}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          accessibilityLabel="Abrir calculadora avanzada"
+          accessibilityRole="button"
         >
-          <MaterialCommunityIcons name="arrow-expand-all" size={24} color={theme.colors.primary} style={themeStyles.icon} />
-          <Text variant="labelLarge" style={themeStyles.expandText}>Ampliar</Text>
+          <MaterialCommunityIcons name="calculator-variant" size={20} color={theme.colors.onPrimaryContainer} style={themeStyles.icon} />
+          <Text variant="labelMedium" style={themeStyles.expandText}>Ampliar</Text>
         </TouchableOpacity>
       </View>
-      <CurrencyConverter />
+      <MemoizedCurrencyConverter />
     </View>
   );
 };

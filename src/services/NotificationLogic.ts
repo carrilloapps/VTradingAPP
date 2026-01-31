@@ -1,4 +1,4 @@
-import notifee, { AndroidImportance } from '@notifee/react-native';
+import notifee from '@notifee/react-native';
 import { storageService } from './StorageService';
 import { observabilityService } from './ObservabilityService';
 
@@ -39,13 +39,6 @@ export const handleBackgroundMessage = async (remoteMessage: any) => {
         );
 
         if (activeAlerts.length > 0) {
-            await notifee.createChannel({
-                id: 'price_alerts',
-                name: 'Alertas de Precio',
-                importance: AndroidImportance.HIGH,
-                sound: 'default',
-            });
-
             // Trigger widget update to show latest data
             const { requestWidgetUpdate } = require('react-native-android-widget');
             const { buildWidgetElement } = require('../widget/widgetTaskHandler');
@@ -84,33 +77,41 @@ export const handleBackgroundMessage = async (remoteMessage: any) => {
                     title: finalTitle,
                     body: finalBody,
                     android: {
-                        channelId: 'price_alerts',
+                        channelId: 'price_alerts', // Channel created in NotificationInitService
                         ...ANDROID_NOTIFICATION_DEFAULTS,
                     },
                 });
 
-                // Persist notification for the UI
-                try {
-                    const stored = await storageService.getNotifications();
-                    const newNotif = {
-                        id: notificationId,
-                        type: 'price_alert' as const,
-                        title: finalTitle,
-                        message: finalBody,
-                        timestamp: new Date().toISOString(),
-                        isRead: false,
-                        trend: (isUp ? 'up' : 'down') as 'up' | 'down',
-                        highlightedValue: currentPriceFormatted.toString(),
-                        data: { symbol, price: currentPrice }
-                    };
-                    await storageService.saveNotifications([newNotif, ...stored]);
-                } catch (e) {
-                    observabilityService.captureError(e, {
-                        context: 'NotificationLogic.handlePriceAlert',
-                        symbol: symbol,
-                        currentPrice: currentPrice
-                    });
-                    // Fail silently
+                // Persist notification for the UI with retry logic
+                let persisted = false;
+                let attempts = 0;
+                while (!persisted && attempts < 2) {
+                    try {
+                        const stored = await storageService.getNotifications();
+                        const newNotif = {
+                            id: notificationId,
+                            type: 'price_alert' as const,
+                            title: finalTitle,
+                            message: finalBody,
+                            timestamp: new Date().toISOString(),
+                            isRead: false,
+                            trend: (isUp ? 'up' : 'down') as 'up' | 'down',
+                            highlightedValue: currentPriceFormatted.toString(),
+                            data: { symbol, price: currentPrice }
+                        };
+                        await storageService.saveNotifications([newNotif, ...stored]);
+                        persisted = true;
+                    } catch (e) {
+                        attempts++;
+                        if (attempts >= 2) {
+                            observabilityService.captureError(e, {
+                                context: 'NotificationLogic.handlePriceAlert',
+                                symbol: symbol,
+                                currentPrice: currentPrice,
+                                action: 'persist_retry_failed'
+                            });
+                        }
+                    }
                 }
             }
         }
@@ -121,12 +122,6 @@ export const handleBackgroundMessage = async (remoteMessage: any) => {
     // CASO 2: Notificación General (Payload: { title, body })
     // ---------------------------------------------------------
     if (title && body) {
-        await notifee.createChannel({
-            id: 'general',
-            name: 'General',
-            importance: AndroidImportance.DEFAULT,
-        });
-
         const notificationId = `gen_${Date.now()}`;
 
         await notifee.displayNotification({
@@ -134,30 +129,38 @@ export const handleBackgroundMessage = async (remoteMessage: any) => {
             title,
             body,
             android: {
-                channelId: 'general',
+                channelId: 'general', // Channel created in NotificationInitService
                 ...ANDROID_NOTIFICATION_DEFAULTS,
             },
         });
 
-        // Persist notification for the UI
-        try {
-            const stored = await storageService.getNotifications();
-            const newNotif = {
-                id: notificationId,
-                type: (remoteMessage.data?.type as any) || 'system',
-                title,
-                message: body,
-                timestamp: new Date().toISOString(),
-                isRead: false,
-                data: remoteMessage.data
-            };
-            await storageService.saveNotifications([newNotif, ...stored]);
-        } catch (e) {
-            observabilityService.captureError(e, {
-                context: 'NotificationLogic.handleGeneralNotification',
-                hasData: !!remoteMessage.data
-            });
-            // Fail silently
+        // Persist notification for the UI with retry logic
+        let persisted = false;
+        let attempts = 0;
+        while (!persisted && attempts < 2) {
+            try {
+                const stored = await storageService.getNotifications();
+                const newNotif = {
+                    id: notificationId,
+                    type: (remoteMessage.data?.type as any) || 'system',
+                    title,
+                    message: body,
+                    timestamp: new Date().toISOString(),
+                    isRead: false,
+                    data: remoteMessage.data
+                };
+                await storageService.saveNotifications([newNotif, ...stored]);
+                persisted = true;
+            } catch (e) {
+                attempts++;
+                if (attempts >= 2) {
+                    observabilityService.captureError(e, {
+                        context: 'NotificationLogic.handleGeneralNotification',
+                        hasData: !!remoteMessage.data,
+                        action: 'persist_retry_failed'
+                    });
+                }
+            }
         }
     }
 };

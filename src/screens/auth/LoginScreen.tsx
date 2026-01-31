@@ -15,6 +15,8 @@ import UnifiedHeader from '../../components/ui/UnifiedHeader';
 import AboutDialog from '../../components/ui/AboutDialog';
 import AuthLogo from '../../components/ui/AuthLogo';
 
+import { hashPII } from '../../utils/security';
+
 const LoginScreen = ({ navigation }: any) => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
@@ -85,7 +87,9 @@ const LoginScreen = ({ navigation }: any) => {
   };
 
   const validateEmail = (val: string) => {
-    if (!val || !val.includes('@')) {
+    // Regex for basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!val || !emailRegex.test(val)) {
       setEmailError('Ingresa un correo válido');
       return false;
     }
@@ -125,7 +129,7 @@ const LoginScreen = ({ navigation }: any) => {
         observabilityService.captureError(e, {
           context: 'LoginScreen.handleLogin',
           method: 'password',
-          email // Consider hashing email in prod logs for PII compliance
+          emailHash: hashPII(email) // Hash PII before logging
         });
       } finally {
         setIsSubmitting(false);

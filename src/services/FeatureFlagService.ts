@@ -3,6 +3,7 @@ import DeviceInfo from 'react-native-device-info';
 import { mmkvStorage } from './StorageService';
 import { fcmService } from './firebase/FCMService';
 import { authService } from './firebase/AuthService';
+import compare from 'semver-compare';
 
 /**
  * @description FeatureFlagService
@@ -99,8 +100,13 @@ class FeatureFlagService {
 
         const stored = mmkvStorage.getString('vtrading_rollout_id');
         if (stored) {
-            this.rolloutId = parseInt(stored, 10);
-        } else {
+            const parsed = parseInt(stored, 10);
+            if (!isNaN(parsed) && parsed >= 0 && parsed <= 99) {
+                this.rolloutId = parsed;
+            }
+        }
+        
+        if (this.rolloutId === null) {
             // Generate persistent random ID between 0 and 99
             this.rolloutId = Math.floor(Math.random() * 100);
             mmkvStorage.set('vtrading_rollout_id', this.rolloutId.toString());
@@ -109,20 +115,15 @@ class FeatureFlagService {
     }
 
     /**
-     * Compare semantic versions (simple implementation)
+     * Compare semantic versions
      * Returns true if v1 >= v2
      */
     private isVersionAtLeast(v1: string, v2: string): boolean {
-        const v1Parts = v1.split('.').map(Number);
-        const v2Parts = v2.split('.').map(Number);
-
-        for (let i = 0; i < Math.max(v1Parts.length, v2Parts.length); i++) {
-            const p1 = v1Parts[i] || 0;
-            const p2 = v2Parts[i] || 0;
-            if (p1 > p2) return true;
-            if (p1 < p2) return false;
-        }
-        return true; // Equal
+        // semver-compare returns:
+        //  0 if v1 == v2
+        //  1 if v1 > v2
+        // -1 if v1 < v2
+        return compare(v1, v2) >= 0;
     }
 
     /**
@@ -198,14 +199,13 @@ class FeatureFlagService {
     /**
      * Evaluate a feature against the config and local context
      */
-    async evaluate(featureName: string, config: RemoteConfigSchema | null): Promise<boolean> {
-        if (!config || !config.features) return false;
+    async evaluate(featureName: string, config: RemoteConfigSchema | null, defaultValue = false): Promise<boolean> {
+        if (!config || !config.features) return defaultValue;
 
         const feature = config.features.find(f => f.name === featureName);
         if (!feature) {
-            // Feature not defined in config, default to false (safe) or maybe true if we want?
-            // Given we are controlling access, safe default is usually false.
-            return false;
+            // Feature not defined in config, use default
+            return defaultValue;
         }
 
         let isEnabled = feature.enabled;

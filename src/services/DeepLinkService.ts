@@ -3,6 +3,8 @@ import { navigationRef } from '../navigation/NavigationRef';
 import { observabilityService } from './ObservabilityService';
 import { analyticsService, ANALYTICS_EVENTS } from './firebase/AnalyticsService';
 
+import { AppConfig } from '../constants/AppConfig';
+
 export interface DeepLinkRoute {
     type: 'discover' | 'article' | 'category' | 'tag';
     slug?: string;
@@ -10,8 +12,9 @@ export interface DeepLinkRoute {
 }
 
 class DeepLinkService {
-    private readonly SCHEME = 'vtrading://';
-    private readonly HOST = 'discover.vtrading.app';
+    // Configurable schemes and hosts
+    private readonly SCHEME = AppConfig.DEEP_LINK_SCHEME || 'vtrading://';
+    private readonly HOST = AppConfig.DEEP_LINK_HOST || 'discover.vtrading.app';
     private readonly BASE_URL = `https://${this.HOST}`;
 
     /**
@@ -56,11 +59,18 @@ class DeepLinkService {
             // Cleanup path (remove leading/trailing slashes)
             path = path.replace(/^\/+|\/+$/g, '');
 
-            // Validate path contains only safe characters (alphanumeric, hyphens, slashes)
-            // This prevents specialized injection attacks if slugs are used in unsafe contexts later
-            if (!/^[a-zA-Z0-9-/_]+$/.test(path)) {
-                observabilityService.captureError(new Error('Invalid DeepLink characters'), { context: 'DeepLinkService.parseDeepLink', url });
+            // Strict validation: Only allow alphanumeric, hyphens, and slashes for basic routing
+            // Prevents complex injections, parent directory traversal (..), and special chars
+            // Allow alphanumeric, -, _, /
+            if (!/^[a-zA-Z0-9\-_/]+$/.test(path)) {
+                // Suspicious path detected
+                observabilityService.captureError(new Error('Invalid DeepLink characters'), { context: 'DeepLinkService.parseDeepLink', url, path });
                 return null;
+            }
+
+            // Prevent path traversal attempts explicitly (though regex covers it, double check)
+            if (path.includes('..') || path.includes('//')) {
+                 return null;
             }
 
             if (!path || path === 'discover') {
@@ -116,7 +126,14 @@ class DeepLinkService {
         });
 
         if (!navigationRef.isReady()) {
-            // Wait for navigation to be ready or handle via initialRoute
+            // Queue navigation if not ready
+            // Retry logic (simple one-off retry after delay, or better: a proper queue system)
+            // For now, a simple retry is sufficient for startup scenarios
+            setTimeout(() => {
+                if (navigationRef.isReady()) {
+                    this.handleDeepLink(url);
+                }
+            }, 1000);
             return false;
         }
 
