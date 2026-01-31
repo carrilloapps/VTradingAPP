@@ -1,6 +1,7 @@
 import { ApiClient } from './ApiClient';
 import { observabilityService } from './ObservabilityService';
 import Config from 'react-native-config';
+import SafeLogger from '../utils/safeLogger';
 
 // WordPress API Interfaces
 export interface WordPressCategory {
@@ -537,7 +538,7 @@ class WordPressService {
 
             return posts.map((post) => this.formatPost(post));
         } catch (error) {
-            console.error('[WordPressService] getPostsByTag ERROR:', error);
+            SafeLogger.error('[WordPressService] getPostsByTag ERROR:', error);
             observabilityService.captureError(error, {
                 context: 'WordPressService.getPostsByTag',
                 method: 'GET',
@@ -571,7 +572,7 @@ class WordPressService {
 
             return posts.map((post) => this.formatPost(post));
         } catch (error) {
-            console.error('[WordPressService] getPostsByCategory ERROR:', error);
+            SafeLogger.error('[WordPressService] getPostsByCategory ERROR:', error);
             observabilityService.captureError(error, {
                 context: 'WordPressService.getPostsByCategory',
                 method: 'GET',

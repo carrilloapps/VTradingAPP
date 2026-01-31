@@ -12,6 +12,7 @@ import { useAppTheme } from '../theme/theme';
 import { useToastStore } from '../stores/toastStore';
 import { observabilityService } from '../services/ObservabilityService';
 import CustomButton from '../components/ui/CustomButton';
+import SafeLogger from '../utils/safeLogger';
 
 
 
@@ -152,7 +153,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
   };
 
   const requestNotificationPermission = async () => {
-    console.log('[Onboarding] Requesting notification permission...');
+    SafeLogger.log('[Onboarding] Requesting notification permission...');
 
     try {
       const hasPermission = await fcmService.requestUserPermission();
@@ -185,7 +186,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
   };
 
   const finishOnboarding = async () => {
-    console.log('[Onboarding] Finishing onboarding...');
+    SafeLogger.log('[Onboarding] Finishing onboarding...');
     analyticsService.logEvent(ANALYTICS_EVENTS.ONBOARDING_COMPLETE);
     await storageService.setHasSeenOnboarding(true);
     if (onFinish) {

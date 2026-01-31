@@ -131,7 +131,7 @@ class AppCheckService {
       if (isExpectedError) {
         if (__DEV__) {
           // Use debug instead of log to keep console clean
-          console.debug('[AppCheck] Suppressed:', message);
+          SafeLogger.log('[AppCheck] Suppressed:', message);
         }
         return undefined;
       }

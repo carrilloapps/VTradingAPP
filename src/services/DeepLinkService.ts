@@ -2,6 +2,7 @@ import { Linking } from 'react-native';
 import { navigationRef } from '../navigation/NavigationRef';
 import { observabilityService } from './ObservabilityService';
 import { analyticsService, ANALYTICS_EVENTS } from './firebase/AnalyticsService';
+import SafeLogger from '../utils/safeLogger';
 
 import { AppConfig } from '../constants/AppConfig';
 
@@ -168,7 +169,7 @@ class DeepLinkService {
      */
     init() {
         if (this.subscription) {
-            console.warn('DeepLinkService already initialized');
+            SafeLogger.warn('DeepLinkService already initialized');
             return () => { }; // No-op if already initialized
         }
 

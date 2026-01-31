@@ -19,6 +19,7 @@ import { observabilityService } from '../../services/ObservabilityService';
 import { remoteConfigService } from '../../services/firebase/RemoteConfigService';
 import { wordPressService, FormattedPost, WordPressCategory } from '../../services/WordPressService';
 import { getCategoryImage } from '../../utils/WordPressUtils';
+import SafeLogger from '../../utils/safeLogger';
 import { useAppTheme } from '../../theme/theme';
 
 const FlashListTyped = FlashList as React.ComponentType<any>;
@@ -140,7 +141,7 @@ const DiscoverScreen = () => {
       }
 
     } catch (err) {
-      console.error('Failed to load data', err);
+      SafeLogger.error('Failed to load data', err);
       observabilityService.captureError(err, { context: 'DiscoverScreen.loadData' });
       setError('Error al cargar contenido.');
     } finally {

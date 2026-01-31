@@ -9,10 +9,6 @@
 
 type LogLevel = 'log' | 'warn' | 'error' | 'info';
 
-interface LogMetadata {
-    [key: string]: any;
-}
-
 class SafeLogger {
     private static readonly SENSITIVE_KEYS = [
         //'token',
@@ -77,29 +73,29 @@ class SafeLogger {
     /**
      * Log with automatic sanitization
      */
-    static log(message: string, metadata?: LogMetadata): void {
-        this.write('log', message, metadata);
+    static log(message: string, ...args: any[]): void {
+        this.write('log', message, ...args);
     }
 
     /**
      * Info log
      */
-    static info(message: string, metadata?: LogMetadata): void {
-        this.write('info', message, metadata);
+    static info(message: string, ...args: any[]): void {
+        this.write('info', message, ...args);
     }
 
     /**
      * Warning log
      */
-    static warn(message: string, metadata?: LogMetadata): void {
-        this.write('warn', message, metadata);
+    static warn(message: string, ...args: any[]): void {
+        this.write('warn', message, ...args);
     }
 
     /**
      * Error log
      */
-    static error(message: string, metadata?: LogMetadata): void {
-        this.write('error', message, metadata);
+    static error(message: string, ...args: any[]): void {
+        this.write('error', message, ...args);
     }
 
     /**
@@ -119,16 +115,16 @@ class SafeLogger {
     /**
      * Internal write method
      */
-    private static write(level: LogLevel, message: string, metadata?: LogMetadata): void {
+    private static write(level: LogLevel, message: string, ...args: any[]): void {
         if (!__DEV__ && level === 'log') {
             // Skip regular logs in production
             return;
         }
 
-        const sanitizedMetadata = metadata ? this.sanitize(metadata) : undefined;
+        const sanitizedArgs = args.map(arg => this.sanitize(arg));
 
-        if (sanitizedMetadata) {
-            console[level](message, sanitizedMetadata);
+        if (sanitizedArgs.length > 0) {
+            console[level](message, ...sanitizedArgs);
         } else {
             console[level](message);
         }

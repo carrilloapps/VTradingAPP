@@ -2,6 +2,7 @@ import { createMMKV, MMKV } from 'react-native-mmkv';
 import { observabilityService } from './ObservabilityService';
 import { InteractionManager } from 'react-native';
 import { KeyService } from './KeyService';
+import SafeLogger from '../utils/safeLogger';
 
 // Lazy initialized MMKV instance
 let _storage: MMKV | undefined;
@@ -25,7 +26,7 @@ export const initializeStorage = async (): Promise<void> => {
     // we might need to fallback to non-encrypted or recreate.
     // WARNING: This deletes data if key is lost.
     observabilityService.captureError(e, { context: 'StorageService.initialize', action: 'createMMKV_failed' });
-    console.error('Failed to create MMKV with encryption, falling back to clear storage', e);
+    SafeLogger.error('Failed to create MMKV with encryption, falling back to clear storage', e);
     
     // Fallback: Try creating without encryption (if key was removed) or re-create
     _storage = createMMKV({

@@ -3,6 +3,7 @@ import { Platform } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import { observabilityService } from '../ObservabilityService';
 import { AppConfig } from '../../constants/AppConfig';
+import SafeLogger from '../../utils/safeLogger';
 
 class AppDistributionService {
   /**
@@ -54,7 +55,7 @@ class AppDistributionService {
         message.includes('framework');
 
       if (isExpectedError) {
-        console.log('[AppDistribution] Service not available on this device/environment (Safe Skip)');
+        SafeLogger.log('[AppDistribution] Service not available on this device/environment (Safe Skip)');
         return;
       }
 

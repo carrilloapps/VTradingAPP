@@ -6,6 +6,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { useAppTheme } from '../../theme/theme';
 import { observabilityService } from '../../services/ObservabilityService';
 import CustomButton from './CustomButton';
+import SafeLogger from '../../utils/safeLogger';
 
 interface ForceUpdateModalProps {
   visible: boolean;
@@ -28,7 +29,7 @@ const ForceUpdateModal: React.FC<ForceUpdateModalProps> = ({ visible, storeUrl }
             await Linking.openURL(url);
         } else {
             // Fallback for emulator or weird states
-            console.warn("Cannot open URL:", url);
+            SafeLogger.warn("Cannot open URL:", url);
         }
     } catch (err) {
         observabilityService.captureError(err, {
@@ -36,7 +37,7 @@ const ForceUpdateModal: React.FC<ForceUpdateModalProps> = ({ visible, storeUrl }
             action: 'open_store_link',
             url: url
         });
-        console.error("An error occurred", err);
+        SafeLogger.error("An error occurred", err);
     } finally {
         setLoading(false);
     }

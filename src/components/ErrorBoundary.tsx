@@ -2,6 +2,7 @@ import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { observabilityService } from '../services/ObservabilityService';
 import * as Sentry from '@sentry/react-native';
+import SafeLogger from '../utils/safeLogger';
 
 interface Props {
   children?: ReactNode;
@@ -49,7 +50,7 @@ class ErrorBoundary extends Component<Props, State> {
 
     // Log to console in development
     if (__DEV__) {
-      console.error('Error Boundary caught an error:', error, errorInfo);
+      SafeLogger.error('Error Boundary caught an error:', error, errorInfo);
     }
   }
 

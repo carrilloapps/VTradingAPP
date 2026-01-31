@@ -7,9 +7,10 @@ import { WidgetItem } from './types';
 import { observabilityService } from '../services/ObservabilityService';
 import { getTrend } from '../utils/trendUtils';
 import { analyticsService, ANALYTICS_EVENTS } from '../services/firebase/AnalyticsService';
+import SafeLogger from '../utils/safeLogger';
 
 export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false) {
-  console.log('[Widget] buildWidgetElement called', { 
+  SafeLogger.log('[Widget] buildWidgetElement called', { 
     hasInfo: !!info, 
     forceRefresh,
     widgetId: info?.widgetId 
@@ -83,7 +84,7 @@ export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false
       return val.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     } catch (e) {
       // Fallback to manual formatting if locale not supported
-      console.warn('[Widget] toLocaleString failed, using fallback');
+      SafeLogger.warn('[Widget] toLocaleString failed, using fallback');
       observabilityService.captureError(e, {
         context: 'widgetTaskHandler.formatCurrency',
         value: val
@@ -177,17 +178,17 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
   const { widgetInfo, widgetAction, clickAction } = props;
   
   try {
-    console.log('[Widget] widgetTaskHandler called', { widgetAction, clickAction });
+    SafeLogger.log('[Widget] widgetTaskHandler called', { widgetAction, clickAction });
 
     if (widgetAction === 'WIDGET_ADDED') {
-      console.log('[Widget] Widget added, initializing refresh metadata');
+      SafeLogger.log('[Widget] Widget added, initializing refresh metadata');
       await storageService.saveWidgetRefreshMeta({ lastRefreshAt: Date.now() });
       await analyticsService.logEvent(ANALYTICS_EVENTS.WIDGET_ADDED, { widgetId: widgetInfo?.widgetId });
       await analyticsService.setUserProperty('has_widget', 'true');
     }
 
     if (widgetAction === 'WIDGET_DELETED') {
-      console.log('[Widget] Widget deleted, clearing metadata');
+      SafeLogger.log('[Widget] Widget deleted, clearing metadata');
       await storageService.saveWidgetRefreshMeta({ lastRefreshAt: 0 });
       await analyticsService.logEvent(ANALYTICS_EVENTS.WIDGET_DELETED, { widgetId: widgetInfo?.widgetId });
       await analyticsService.setUserProperty('has_widget', 'false');
@@ -195,7 +196,7 @@ export async function widgetTaskHandler(props: WidgetTaskHandlerProps) {
     }
 
     if (widgetAction === 'WIDGET_CLICK' && clickAction === 'REFRESH_WIDGET') {
-      console.log('[Widget] Manual refresh triggered');
+      SafeLogger.log('[Widget] Manual refresh triggered');
       await analyticsService.logEvent(ANALYTICS_EVENTS.WIDGET_REFRESH, { widgetId: widgetInfo?.widgetId });
       // Updating widget
       const element = await buildWidgetElement(widgetInfo, true);

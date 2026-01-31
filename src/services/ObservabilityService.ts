@@ -32,12 +32,12 @@ class ObservabilityService {
       errorMsg.includes('token-error');
 
     if (isIgnoredError) {
-      if (__DEV__) console.log('[Observability] Non-critical error ignored for reporting:', errorMsg);
+      if (__DEV__) SafeLogger.log('[Observability] Non-critical error ignored for reporting:', errorMsg);
       return;
     }
 
     if (context) {
-      console.log('[Observability] Context:', context);
+      SafeLogger.log('[Observability] Context:', context);
     }
 
     try {
@@ -57,7 +57,7 @@ class ObservabilityService {
       }
     } catch (serviceError) {
       // Evitar que un fallo en el servicio de observabilidad rompa la app
-      console.error('[Observability] Failed to report error:', {
+      SafeLogger.error('[Observability] Failed to report error:', {
         originalError: error instanceof Error ? error.message : String(error),
         serviceError: serviceError instanceof Error ? serviceError.message : String(serviceError),
         context
@@ -71,14 +71,14 @@ class ObservabilityService {
    */
   log(message: string) {
     if (__DEV__) {
-      console.log('[Observability] Log:', message);
+      SafeLogger.log('[Observability] Log:', message);
     }
 
     try {
       Sentry.captureMessage(message);
       getCrashlytics().log(message);
     } catch (e) {
-      console.error('[Observability] Failed to log message:', {
+      SafeLogger.error('[Observability] Failed to log message:', {
         message,
         error: e instanceof Error ? e.message : String(e)
       });
@@ -108,7 +108,7 @@ class ObservabilityService {
       return null;
     } catch (e) {
       if (__DEV__) {
-        console.warn('[Observability] Failed to start transaction:', {
+        SafeLogger.warn('[Observability] Failed to start transaction:', {
           name,
           op,
           error: e instanceof Error ? e.message : String(e)
@@ -142,7 +142,7 @@ class ObservabilityService {
       }
     } catch (e) {
       if (__DEV__) {
-        console.warn('[Observability] Failed to finish transaction:', {
+        SafeLogger.warn('[Observability] Failed to finish transaction:', {
           status,
           error: e instanceof Error ? e.message : String(e)
         });
@@ -179,7 +179,7 @@ class ObservabilityService {
       }
     } catch (e) {
       if (__DEV__) {
-        console.warn('[Observability] Failed to set transaction attribute:', {
+        SafeLogger.warn('[Observability] Failed to set transaction attribute:', {
           key,
           value,
           error: e instanceof Error ? e.message : String(e)

@@ -35,6 +35,7 @@ import XIcon from '../../components/common/XIcon';
 import FacebookIcon from '../../components/common/FacebookIcon';
 import { shareTextContent } from '../../utils/ShareUtils';
 import DiscoverHeader from '../../components/discover/DiscoverHeader';
+import SafeLogger from '../../utils/safeLogger';
 
 const BlockParagraph = ({ text, theme }: any) => {
   const paragraphStyle = [styles.paragraph, { color: theme.colors.onSurface }];
@@ -215,7 +216,7 @@ const ArticleDetailScreen = () => {
           );
           setRelatedPosts(fetchedRelated);
         } catch (err) {
-          console.error('Error fetching related posts:', err);
+          SafeLogger.error('Error fetching related posts:', err);
         } finally {
           setLoadingRelated(false);
         }

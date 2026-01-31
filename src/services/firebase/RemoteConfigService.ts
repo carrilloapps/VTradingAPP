@@ -2,6 +2,7 @@ import { getRemoteConfig, setDefaults, fetchAndActivate, getValue } from '@react
 import { observabilityService } from '../ObservabilityService';
 import { featureFlagService, RemoteConfigSchema } from '../FeatureFlagService';
 import { analyticsService } from './AnalyticsService';
+import SafeLogger from '../../utils/safeLogger';
 
 class RemoteConfigService {
   private remoteConfig = getRemoteConfig();
@@ -67,7 +68,7 @@ class RemoteConfigService {
       // Retry on network errors
       if (isNetworkError && retryCount < MAX_RETRIES) {
         const delay = Math.pow(2, retryCount) * 1000; // Exponential backoff: 1s, 2s, 4s
-        console.warn(
+        SafeLogger.warn(
           `[RemoteConfig] Fetch failed, retrying in ${delay}ms (attempt ${retryCount + 1}/${MAX_RETRIES})`,
           errorMessage
         );
@@ -85,7 +86,7 @@ class RemoteConfigService {
         });
       }
 
-      console.error('[RemoteConfig] Fetch failed after retries:', errorMessage);
+      SafeLogger.error('[RemoteConfig] Fetch failed after retries:', { errorMessage });
 
       // Return false instead of throwing to prevent app crash
       // App will use default values

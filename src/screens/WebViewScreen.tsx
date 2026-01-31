@@ -5,6 +5,7 @@ import { WebView } from 'react-native-webview';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import UnifiedHeader from '../components/ui/UnifiedHeader';
 import { analyticsService } from '../services/firebase/AnalyticsService';
+import SafeLogger from '../utils/safeLogger';
 
 type RootStackParamList = {
   WebView: { url: string; title?: string };
@@ -23,6 +24,12 @@ const WebViewScreen = () => {
     analyticsService.logScreenView('WebView', 'WebViewScreen');
     analyticsService.logFeatureUsage('webview', { url, title });
   }, [url, title]);
+
+  if (!url) {
+    SafeLogger.warn('WebViewScreen: No URL provided');
+    navigation.goBack();
+    return null;
+  }
 
   // Script para ocultar header, footer y breadcrumbs en vtrading.app
   const hideElementsScript = `

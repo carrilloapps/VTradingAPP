@@ -3,8 +3,10 @@ import { View, StyleSheet, ActivityIndicator, StatusBar, Keyboard, ScrollView, R
 import { FlashList } from '@shopify/flash-list';
 import { Text, Button } from 'react-native-paper';
 import { useNavigation, useRoute } from '@react-navigation/native';
+
 import { wordPressService, FormattedPost, WordPressCategory, WordPressTag } from '../../services/WordPressService';
 import { observabilityService } from '../../services/ObservabilityService';
+import SafeLogger from '../../utils/safeLogger';
 import ArticleCard from '../../components/discover/ArticleCard';
 import ArticleSkeleton from '../../components/discover/ArticleSkeleton';
 import DiscoverEmptyView from '../../components/discover/DiscoverEmptyView';
@@ -97,7 +99,7 @@ const SearchResultsScreen = () => {
         setTrendingTags(tags.slice(0, 10)); // Top 10 tags
       } catch (err) {
         observabilityService.captureError(err, { context: 'SearchResultsScreen.fetchDiscoveryContent' });
-        console.error('[SearchResults] Failed to load discovery content:', err);
+        SafeLogger.error('[SearchResults] Failed to load discovery content:', err);
       } finally {
         setLoadingCategories(false);
         setLoadingTags(false);
@@ -208,7 +210,7 @@ const SearchResultsScreen = () => {
       setTrendingTags(tags.slice(0, 10));
     } catch (err) {
       observabilityService.captureError(err, { context: 'SearchResultsScreen.handleRefresh' });
-      console.error('[SearchResults] Refresh error:', err);
+      SafeLogger.error('[SearchResults] Refresh error:', err);
     } finally {
       setRefreshing(false);
     }
@@ -232,7 +234,7 @@ const SearchResultsScreen = () => {
       setPage(1);
       setSearchState('success');
     } catch (err: any) {
-      console.error('[SearchResults] Category filter error:', err);
+      SafeLogger.error('[SearchResults] Category filter error:', err);
       setSearchState('error');
       setErrorMessage('Error al buscar en esta categoría');
       observabilityService.captureError(err, { context: 'SearchResultsScreen.handleCategoryPress' });
@@ -246,7 +248,7 @@ const SearchResultsScreen = () => {
     const tagObj = trendingTags.find(t => t.name === tagName.replace('#', ''));
 
     if (!tagObj) {
-      console.error('[SearchResults] Tag not found in trendingTags:', {
+      SafeLogger.error('[SearchResults] Tag not found in trendingTags:', {
         searchedFor: tagName.replace('#', ''),
         availableTags: trendingTags.map(t => t.name)
       });
@@ -268,7 +270,7 @@ const SearchResultsScreen = () => {
       setPage(1);
       setSearchState('success');
     } catch (err: any) {
-      console.error('[SearchResults] Tag filter error:', err);
+      SafeLogger.error('[SearchResults] Tag filter error:', err);
       setSearchState('error');
       setErrorMessage('Error al buscar con este tag');
       observabilityService.captureError(err, { context: 'SearchResultsScreen.handleTagPress' });

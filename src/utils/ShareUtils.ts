@@ -1,5 +1,6 @@
 import Share from 'react-native-share';
 import { observabilityService } from '../services/ObservabilityService';
+import SafeLogger from './safeLogger';
 
 interface ShareTextOptions {
     title: string;
@@ -73,7 +74,7 @@ export const shareTextContent = async (options: ShareTextOptions) => {
                 hasUrl: !!options.url,
                 errorMessage: error.message
             });
-            console.error('Share error:', error);
+            SafeLogger.error('Share error:', error);
             return false;
         }
         return null; // Cancelled
