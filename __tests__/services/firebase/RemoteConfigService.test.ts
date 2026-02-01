@@ -6,6 +6,8 @@ const mockGetValue = jest.fn();
 const mockFetchAndActivate = jest.fn();
 const mockSetDefaults = jest.fn();
 
+declare const global: any;
+
 jest.mock('@react-native-firebase/remote-config', () => ({
   getRemoteConfig: jest.fn(() => mockRemoteConfig),
   setDefaults: (...args: unknown[]) => mockSetDefaults(...args),
@@ -39,8 +41,20 @@ jest.mock('@/utils/safeLogger', () => ({
   },
 }));
 
+const { remoteConfigService } = require('../../../src/services/firebase/RemoteConfigService') as {
+  remoteConfigService: {
+    initialize: () => Promise<void>;
+    fetchAndActivate: (retryCount?: number) => Promise<boolean>;
+    getString: (key: string) => string;
+    getNumber: (key: string) => number;
+    getBoolean: (key: string) => boolean;
+    getJson: <T>(key: string) => T | null;
+    getFeature: (featureName: string) => Promise<boolean>;
+  };
+};
+
 describe('RemoteConfigService', () => {
-  let timeoutSpy: jest.SpyInstance<ReturnType<typeof setTimeout>, Parameters<typeof setTimeout>>;
+  let timeoutSpy: jest.SpyInstance;
   const observabilityService = jest.requireMock('@/services/ObservabilityService')
     .observabilityService as { captureError: jest.Mock };
   const analyticsService = jest.requireMock('@/services/firebase/AnalyticsService')
@@ -52,40 +66,25 @@ describe('RemoteConfigService', () => {
     error: jest.Mock;
   };
 
-  const loadService = () => {
-    let remoteConfigService: {
-      initialize: () => Promise<void>;
-      fetchAndActivate: (retryCount?: number) => Promise<boolean>;
-      getString: (key: string) => string;
-      getNumber: (key: string) => number;
-      getBoolean: (key: string) => boolean;
-      getJson: <T>(key: string) => T | null;
-      getFeature: (featureName: string) => Promise<boolean>;
-    };
-
-    jest.isolateModules(() => {
-      ({ remoteConfigService } = require('../../../src/services/firebase/RemoteConfigService'));
-    });
-
-    return remoteConfigService;
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
     mockFetchAndActivate.mockReset();
     mockRemoteConfig.setConfigSettings.mockResolvedValue(undefined);
     mockFetchAndActivate.mockResolvedValue(true);
     mockSetDefaults.mockResolvedValue(undefined);
-    timeoutSpy = jest
-      .spyOn(global, 'setTimeout')
-      .mockImplementation(
-        (callback: (...args: unknown[]) => void, delay?: number, ...args: unknown[]) => {
-          if (delay && delay < 10000) {
-            callback(...args);
-          }
-          return 0 as unknown as NodeJS.Timeout;
-        },
-      );
+    timeoutSpy = jest.spyOn(global, 'setTimeout').mockImplementation((...args: unknown[]) => {
+      const [callback, delay, ...rest] = args as [
+        (...callbackArgs: unknown[]) => void,
+        number | undefined,
+        ...unknown[],
+      ];
+
+      if (delay && delay < 10000) {
+        callback(...rest);
+      }
+
+      return 0 as unknown as number;
+    });
   });
 
   afterEach(() => {
@@ -94,7 +93,6 @@ describe('RemoteConfigService', () => {
 
   it('initializes with dev config and defaults', async () => {
     (globalThis as { __DEV__?: boolean }).__DEV__ = true;
-    const remoteConfigService = loadService();
 
     jest.spyOn(remoteConfigService, 'fetchAndActivate').mockResolvedValue(true);
 
@@ -110,7 +108,6 @@ describe('RemoteConfigService', () => {
   it('reports initialization errors', async () => {
     (globalThis as { __DEV__?: boolean }).__DEV__ = false;
     mockRemoteConfig.setConfigSettings.mockRejectedValueOnce(new Error('fail'));
-    const remoteConfigService = loadService();
 
     await remoteConfigService.initialize();
 
@@ -119,8 +116,6 @@ describe('RemoteConfigService', () => {
   });
 
   it('fetches and activates successfully', async () => {
-    const remoteConfigService = loadService();
-
     const result = await remoteConfigService.fetchAndActivate();
 
     expect(result).toBe(true);
@@ -128,8 +123,6 @@ describe('RemoteConfigService', () => {
   });
 
   it('retries on network errors and returns true when recovered', async () => {
-    const remoteConfigService = loadService();
-
     mockFetchAndActivate
       .mockRejectedValueOnce(new Error('network failed'))
       .mockResolvedValueOnce(true);
@@ -141,7 +134,6 @@ describe('RemoteConfigService', () => {
   });
 
   it('captures non-network errors and returns false', async () => {
-    const remoteConfigService = loadService();
     mockFetchAndActivate.mockRejectedValueOnce(new Error('server error'));
 
     const result = await remoteConfigService.fetchAndActivate();
@@ -154,8 +146,19 @@ describe('RemoteConfigService', () => {
     expect(safeLogger.error).toHaveBeenCalled();
   });
 
+  it('captures errors when retry count is already maxed', async () => {
+    mockFetchAndActivate.mockRejectedValueOnce(new Error('server error'));
+
+    const result = await remoteConfigService.fetchAndActivate(3);
+
+    expect(result).toBe(false);
+    expect(observabilityService.captureError).toHaveBeenCalledWith(
+      expect.any(Error),
+      expect.objectContaining({ retryCount: 3 }),
+    );
+  });
+
   it('wraps non-error rejections into Error instances', async () => {
-    const remoteConfigService = loadService();
     mockFetchAndActivate.mockRejectedValueOnce('boom');
 
     const result = await remoteConfigService.fetchAndActivate();
@@ -168,7 +171,6 @@ describe('RemoteConfigService', () => {
   });
 
   it('reports network errors after max retries', async () => {
-    const remoteConfigService = loadService();
     mockFetchAndActivate.mockRejectedValueOnce(new Error('timeout')); // network error
 
     const result = await remoteConfigService.fetchAndActivate(3);
@@ -182,7 +184,6 @@ describe('RemoteConfigService', () => {
   });
 
   it('reads primitive values', () => {
-    const remoteConfigService = loadService();
     mockGetValue.mockReturnValue({
       asString: () => 'hello',
       asNumber: () => 42,
@@ -195,7 +196,6 @@ describe('RemoteConfigService', () => {
   });
 
   it('parses JSON values and handles errors', () => {
-    const remoteConfigService = loadService();
     mockGetValue.mockReturnValueOnce({
       asString: () => '{"flag":true}',
     });
@@ -216,7 +216,6 @@ describe('RemoteConfigService', () => {
   });
 
   it('returns null when JSON value is empty', () => {
-    const remoteConfigService = loadService();
     mockGetValue.mockReturnValueOnce({
       asString: () => '',
     });
@@ -227,7 +226,6 @@ describe('RemoteConfigService', () => {
   });
 
   it('evaluates feature flags', async () => {
-    const remoteConfigService = loadService();
     jest.spyOn(remoteConfigService, 'getJson').mockReturnValue({ version: 1 } as never);
     featureFlagService.evaluate.mockResolvedValue(true);
 
@@ -238,7 +236,6 @@ describe('RemoteConfigService', () => {
   });
 
   it('returns false when feature evaluation fails', async () => {
-    const remoteConfigService = loadService();
     jest.spyOn(remoteConfigService, 'getJson').mockImplementation(() => {
       throw new Error('bad');
     });

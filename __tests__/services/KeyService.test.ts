@@ -3,7 +3,7 @@ describe('KeyService', () => {
     isProd: boolean;
     keychain: { getGenericPassword: jest.Mock; setGenericPassword: jest.Mock };
     logger: { log: jest.Mock; error: jest.Mock };
-  }) => {
+  }): { getEncryptionKey: () => Promise<string | undefined> } => {
     let KeyService: { getEncryptionKey: () => Promise<string | undefined> } | null = null;
 
     jest.resetModules();
@@ -26,7 +26,7 @@ describe('KeyService', () => {
       throw new Error('KeyService not loaded');
     }
 
-    return KeyService;
+    return KeyService as { getEncryptionKey: () => Promise<string | undefined> };
   };
 
   beforeEach(() => {

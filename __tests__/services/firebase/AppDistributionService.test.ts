@@ -48,7 +48,7 @@ const loadService = (options: {
     default: safeLogger,
   }));
 
-  let appDistributionService: { checkForUpdate: () => Promise<void> };
+  let appDistributionService!: { checkForUpdate: () => Promise<void> };
   jest.isolateModules(() => {
     ({ appDistributionService } = require('../../../src/services/firebase/AppDistributionService'));
   });

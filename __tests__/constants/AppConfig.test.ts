@@ -1,4 +1,6 @@
-import type { AppConfig as AppConfigType } from '../../src/constants/AppConfig';
+import { AppConfig } from '../../src/constants/AppConfig';
+
+type AppConfigType = typeof AppConfig;
 
 type ConfigValues = Record<string, string | undefined>;
 

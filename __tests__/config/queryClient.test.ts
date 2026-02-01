@@ -19,9 +19,10 @@ describe('queryClient config', () => {
 
     expect(typeof retryDelay).toBe('function');
     if (typeof retryDelay === 'function') {
-      expect(retryDelay(0)).toBe(1000);
-      expect(retryDelay(4)).toBe(16000);
-      expect(retryDelay(6)).toBe(30000);
+      const error = new Error('retry');
+      expect(retryDelay(0, error)).toBe(1000);
+      expect(retryDelay(4, error)).toBe(16000);
+      expect(retryDelay(6, error)).toBe(30000);
     }
   });
 
