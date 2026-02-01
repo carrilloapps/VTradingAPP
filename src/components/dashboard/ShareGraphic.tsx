@@ -57,7 +57,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
   // Computed Styles
   const templateStyle = [
     styles.shareTemplate,
-    aspectRatio === '16:9' ? styles.shareTemplateVertical : styles.shareTemplateSquare,
+    isVertical ? styles.shareTemplateVertical : styles.shareTemplateSquare,
     { backgroundColor: theme.dark ? '#051911' : '#F0FDF4' },
   ];
 
@@ -98,7 +98,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
     { color: theme.colors.onSurfaceVariant, fontSize: dateTextSize },
   ];
 
-  const contentStyle = [styles.templateContent, aspectRatio === '16:9' && ({ gap: 40 } as const)];
+  const contentStyle = [styles.templateContent, isVertical && ({ gap: 40 } as const)];
 
   const footerTextStyle = [
     styles.templateFooterText,
@@ -163,7 +163,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
                 }
                 style={logoStyle}
                 tintColor={isDark ? '#FFFFFF' : '#212121'}
-                resizeMode={FastImage.resizeMode.cover}
+                resizeMode={FastImage.resizeMode.contain}
               />
               {!isPremium && (
                 <Surface style={freeBadgeStyle} elevation={2}>
