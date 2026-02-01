@@ -72,6 +72,10 @@ yarn-error.log
 # testing
 /coverage
 
+# Temporary/test files
+*_raw.json
+*.tmp
+
 # Yarn
 .yarn/*
 !.yarn/patches
