@@ -618,6 +618,7 @@ class WordPressService {
             orderby: 'count',
             order: 'desc',
             _embed: true, // Try to embed additional info
+            hide_empty: true,
           },
           useCache: true,
           bypassCache,
@@ -625,7 +626,7 @@ class WordPressService {
         },
       );
 
-      return categories;
+      return categories.filter(c => c.count > 0);
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'WordPressService.getCategories',
@@ -697,8 +698,9 @@ class WordPressService {
 
   /**
    * Fetch all tags
+   * @param bypassCache Force bypass cache and fetch fresh data
    */
-  async getTags(): Promise<WordPressTag[]> {
+  async getTags(bypassCache = false): Promise<WordPressTag[]> {
     try {
       const tags = await this.client.get<WordPressTag[]>('tags', {
         params: {
@@ -707,6 +709,7 @@ class WordPressService {
           order: 'desc',
         },
         useCache: true,
+        bypassCache,
         cacheTTL: 30 * 60 * 1000, // Cache for 30 minutes
       });
 

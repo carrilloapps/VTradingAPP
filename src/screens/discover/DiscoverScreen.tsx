@@ -95,7 +95,7 @@ const DiscoverScreen = () => {
     }));
   }, [promotedPosts, theme.colors]);
 
-  const fetchInitialData = useCallback(async () => {
+  const fetchInitialData = useCallback(async (bypassCache = false) => {
     try {
       await remoteConfigService.fetchAndActivate();
 
@@ -134,6 +134,7 @@ const DiscoverScreen = () => {
         10,
         catId,
         filterTagId,
+        bypassCache,
       );
 
       // 3. Render critical content as soon as possible
@@ -144,7 +145,7 @@ const DiscoverScreen = () => {
       setCurrentPage(1);
 
       // 4. Secondary Content (Categories, Trending, Promoted) - Non-blocking for initial feed
-      wordPressService.getCategories().then(cats => {
+      wordPressService.getCategories(bypassCache).then(cats => {
         setCategories(cats);
         if (categorySlug) {
           const category = cats.find(c => c.slug === categorySlug);
@@ -160,13 +161,13 @@ const DiscoverScreen = () => {
 
       if (trendingTag) {
         wordPressService
-          .getPosts(1, 4, undefined, trendingTag.id)
+          .getPosts(1, 4, undefined, trendingTag.id, bypassCache)
           .then(setTrendingPosts);
       }
 
       if (promotedTag) {
         wordPressService
-          .getPosts(1, 5, undefined, promotedTag.id)
+          .getPosts(1, 5, undefined, promotedTag.id, bypassCache)
           .then(setPromotedPosts);
       }
     } catch (e) {
@@ -213,7 +214,7 @@ const DiscoverScreen = () => {
 
   const handleRefresh = async () => {
     setRefreshing(true);
-    await fetchInitialData();
+    await fetchInitialData(true);
     setRefreshing(false);
     showToast('Actualizado', 'success');
   };

@@ -11,6 +11,7 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import { LightTheme, DarkTheme } from './theme';
 import { mmkvStorage } from '@/services/StorageService';
 import { observabilityService } from '@/services/ObservabilityService';
+import SafeLogger from 'src/utils/safeLogger';
 
 export type ThemeType = 'light' | 'dark' | 'system';
 
@@ -78,8 +79,8 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
       // Persist the change
       try {
         mmkvStorage.set(THEME_KEY, next);
-      } catch {
-        // Log silently
+      } catch (e) {
+        SafeLogger.error('Failed to persist theme preference', e);
       }
       return next;
     });

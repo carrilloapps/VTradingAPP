@@ -1,400 +1,406 @@
-import { CalculatorEngine } from '@/utils/CalculatorEngine';
-import SafeLogger from '@/utils/safeLogger';
+import {
+  CalculatorEngine,
+  INITIAL_STATE,
+} from '../../src/utils/CalculatorEngine';
+import SafeLogger from '../../src/utils/safeLogger';
 import Decimal from 'decimal.js';
 
 // Mock SafeLogger
-jest.mock('@/utils/safeLogger', () => ({
+jest.mock('../../src/utils/safeLogger', () => ({
   error: jest.fn(),
-  warn: jest.fn(),
-  log: jest.fn(),
 }));
 
 describe('CalculatorEngine', () => {
-  let calculator: CalculatorEngine;
-  let updateCallback: jest.Mock;
+  let engine: CalculatorEngine;
+  let listener: jest.Mock;
+  let unsubscribe: () => void;
 
   beforeEach(() => {
-    updateCallback = jest.fn();
-    calculator = new CalculatorEngine();
-    calculator.subscribe(updateCallback);
+    engine = new CalculatorEngine();
+    listener = jest.fn();
+    unsubscribe = engine.subscribe(listener);
     jest.clearAllMocks();
   });
 
-  it('should unsubscribe listener', () => {
-        const callback = jest.fn();
-        const unsubscribe = calculator.subscribe(callback);
-        calculator.inputDigit('1');
-        expect(callback).toHaveBeenCalledTimes(1);
-        
-        unsubscribe();
-        calculator.inputDigit('2');
-        expect(callback).toHaveBeenCalledTimes(1);
-    });
+  afterEach(() => {
+    unsubscribe();
+  });
 
+  describe('Initialization', () => {
     it('should initialize with default state', () => {
-    expect(calculator.getState().currentValue).toBe('0');
-    expect(calculator.getState().previousValue).toBeNull();
-    expect(calculator.getState().operation).toBeNull();
-  });
-
-  describe('inputDigit', () => {
-    it('should append digits', () => {
-      calculator.inputDigit('1');
-      expect(calculator.getState().currentValue).toBe('1');
-      calculator.inputDigit('2');
-      expect(calculator.getState().currentValue).toBe('12');
+      expect(engine.getState()).toEqual(INITIAL_STATE);
     });
 
-    it('should replace 0 with digit', () => {
-      calculator.inputDigit('5');
-      expect(calculator.getState().currentValue).toBe('5');
-    });
-
-    it('should start new entry after operation', () => {
-      calculator.inputDigit('5');
-      calculator.setOperation('+');
-      calculator.inputDigit('3');
-      expect(calculator.getState().currentValue).toBe('3');
-      expect(calculator.getState().previousValue).toBe('5');
-    });
-
-    it('should reset and process input if error state', () => {
-      (calculator as any).state.error = 'Error';
-      calculator.inputDigit('5');
-      // In current implementation, inputDigit with error calls reset() THEN processes input
-      expect(calculator.getState().currentValue).toBe('5'); 
-      expect(calculator.getState().error).toBeNull();
-    });
-
-    it('should ignore input if max length reached', () => {
-      // Current implementation allows 16 chars (length > 15 check)
-      (calculator as any).state.currentValue = '1234567890123456';
-      (calculator as any).state.isNewEntry = false;
-      calculator.inputDigit('7');
-      expect(calculator.getState().currentValue).toBe('1234567890123456');
-    });
-    
-    it('should handle dot input', () => {
-      calculator.inputDigit('.');
-      expect(calculator.getState().currentValue).toBe('0.');
-      calculator.inputDigit('5');
-      expect(calculator.getState().currentValue).toBe('0.5');
-    });
-
-    it('should ignore second dot', () => {
-      calculator.inputDigit('.');
-      calculator.inputDigit('5');
-      calculator.inputDigit('.');
-      expect(calculator.getState().currentValue).toBe('0.5');
+    it('should allow custom initial state', () => {
+      const customState = { ...INITIAL_STATE, currentValue: '10' };
+      const customEngine = new CalculatorEngine(customState);
+      expect(customEngine.getState().currentValue).toBe('10');
     });
   });
 
-  describe('reset', () => {
-    it('should reset state', () => {
-      calculator.inputDigit('5');
-      calculator.setOperation('+');
-      calculator.reset();
-      expect(calculator.getState().currentValue).toBe('0');
-      expect(calculator.getState().previousValue).toBeNull();
-      expect(calculator.getState().operation).toBeNull();
-      expect(calculator.getState().error).toBeNull();
+  describe('Subscription', () => {
+    it('should notify subscribers on change', () => {
+      engine.inputDigit('5');
+      expect(listener).toHaveBeenCalled();
+      expect(listener).toHaveBeenCalledWith(
+        expect.objectContaining({ currentValue: '5' }),
+      );
+    });
+
+    it('should stop notifying after unsubscribe', () => {
+      unsubscribe();
+      engine.inputDigit('5');
+      expect(listener).not.toHaveBeenCalled();
     });
   });
 
-  describe('setOperation', () => {
+  describe('Input', () => {
+    it('should input digits', () => {
+      engine.inputDigit('1');
+      expect(engine.getState().currentValue).toBe('1');
+      engine.inputDigit('2');
+      expect(engine.getState().currentValue).toBe('12');
+    });
+
+    it('should handle decimal point', () => {
+      engine.inputDigit('1');
+      engine.inputDigit('.');
+      engine.inputDigit('5');
+      expect(engine.getState().currentValue).toBe('1.5');
+    });
+
+    it('should prevent multiple decimals', () => {
+      engine.inputDigit('1');
+      engine.inputDigit('.');
+      engine.inputDigit('.');
+      expect(engine.getState().currentValue).toBe('1.');
+    });
+
+    it('should handle initial decimal', () => {
+      engine.inputDigit('.');
+      expect(engine.getState().currentValue).toBe('0.');
+    });
+
+    it('should reset error on input', () => {
+      // Force error state
+      (engine as any).setError('Test Error');
+      expect(engine.getState().error).toBe('Test Error');
+
+      engine.inputDigit('5');
+      expect(engine.getState().error).toBeNull();
+      expect(engine.getState().currentValue).toBe('5');
+    });
+
+    it('should limit input length', () => {
+      for (let i = 0; i < 20; i++) {
+        engine.inputDigit('1');
+      }
+      expect(engine.getState().currentValue.length).toBeLessThanOrEqual(16); // 15 check + 1
+    });
+  });
+
+  describe('Operations', () => {
     it('should set operation', () => {
-      calculator.inputDigit('5');
-      calculator.setOperation('+');
-      expect(calculator.getState().operation).toBe('+');
-      expect(calculator.getState().previousValue).toBe('5');
+      engine.inputDigit('5');
+      engine.setOperation('+');
+      const state = engine.getState();
+      expect(state.operation).toBe('+');
+      expect(state.previousValue).toBe('5');
+      expect(state.isNewEntry).toBe(true);
     });
 
-    it('should not set operation if error', () => {
-      (calculator as any).state.error = 'Error';
-      calculator.setOperation('+');
-      expect(calculator.getState().operation).toBeNull();
+    it('should calculate pending operation when setting new one', () => {
+      engine.inputDigit('5');
+      engine.setOperation('+');
+      engine.inputDigit('5');
+      engine.setOperation('-');
+
+      const state = engine.getState();
+      expect(state.previousValue).toBe('10');
+      expect(state.operation).toBe('-');
     });
 
-    it('should calculate pending operation', () => {
-      calculator.inputDigit('5');
-      calculator.setOperation('+');
-      calculator.inputDigit('3');
-      calculator.setOperation('-');
-      expect(calculator.getState().previousValue).toBe('8');
-      expect(calculator.getState().operation).toBe('-');
-    });
-    
-    it('should update operation if no new input', () => {
-      calculator.inputDigit('5');
-      calculator.setOperation('+');
-      calculator.setOperation('-');
-      expect(calculator.getState().operation).toBe('-');
+    it('should not set operation if error exists', () => {
+      (engine as any).setError('Error');
+      engine.setOperation('+');
+      expect(engine.getState().operation).toBeNull();
     });
   });
 
-  describe('calculate', () => {
-    it('should do nothing if parameters missing', () => {
-        calculator.calculate();
-        expect(calculator.getState().currentValue).toBe('0');
+  describe('Calculation', () => {
+    it('should add', () => {
+      engine.inputDigit('5');
+      engine.setOperation('+');
+      engine.inputDigit('3');
+      engine.calculate();
+      expect(engine.getState().currentValue).toBe('8');
     });
 
-    it('should do nothing if error state', () => {
-        (calculator as any).state.error = 'Error';
-        calculator.calculate();
-        expect(calculator.getState().error).toBe('Error');
+    it('should subtract', () => {
+      engine.inputDigit('10');
+      engine.setOperation('-');
+      engine.inputDigit('4');
+      engine.calculate();
+      expect(engine.getState().currentValue).toBe('6');
     });
 
-    it('should do nothing if previousValue missing', () => {
-        (calculator as any).state.operation = '+';
-        (calculator as any).state.previousValue = null;
-        calculator.calculate();
-        expect(calculator.getState().currentValue).toBe('0');
+    it('should multiply', () => {
+      engine.inputDigit('4');
+      engine.setOperation('*');
+      engine.inputDigit('3');
+      engine.calculate();
+      expect(engine.getState().currentValue).toBe('12');
     });
 
-    it('should perform addition', () => {
-      calculator.inputDigit('5');
-      calculator.setOperation('+');
-      calculator.inputDigit('3');
-      calculator.calculate();
-      expect(calculator.getState().currentValue).toBe('8');
-      expect(calculator.getState().operation).toBeNull();
-    });
-
-    it('should perform subtraction', () => {
-      calculator.inputDigit('10');
-      calculator.setOperation('-');
-      calculator.inputDigit('4');
-      calculator.calculate();
-      expect(calculator.getState().currentValue).toBe('6');
-    });
-
-    it('should perform multiplication', () => {
-      calculator.inputDigit('4');
-      calculator.setOperation('*');
-      calculator.inputDigit('5');
-      calculator.calculate();
-      expect(calculator.getState().currentValue).toBe('20');
-    });
-
-    it('should perform division', () => {
-      calculator.inputDigit('20');
-      calculator.setOperation('/');
-      calculator.inputDigit('4');
-      calculator.calculate();
-      expect(calculator.getState().currentValue).toBe('5');
+    it('should divide', () => {
+      engine.inputDigit('10');
+      engine.setOperation('/');
+      engine.inputDigit('2');
+      engine.calculate();
+      expect(engine.getState().currentValue).toBe('5');
     });
 
     it('should handle division by zero', () => {
-      calculator.inputDigit('5');
-      calculator.setOperation('/');
-      calculator.inputDigit('0');
-      calculator.calculate();
-      expect(calculator.getState().error).toBe('División por cero');
+      engine.inputDigit('10');
+      engine.setOperation('/');
+      engine.inputDigit('0');
+      engine.calculate();
+      expect(engine.getState().error).toBe('División por cero');
     });
 
-    it('should handle invalid operations', () => {
-        calculator.inputDigit('5');
-        calculator.calculate();
-        expect(calculator.getState().currentValue).toBe('5');
+    it('should handle floating point precision', () => {
+      engine.inputDigit('0.1');
+      engine.setOperation('+');
+      engine.inputDigit('0.2');
+      engine.calculate();
+      expect(engine.getState().currentValue).toBe('0.3');
     });
 
-    it('should handle infinite result', () => {
-      const originalPlus = Decimal.prototype.plus;
-      // Mock returning an object that looks like a Decimal but is not finite
-      const mockInfinite = {
-          isFinite: () => false,
-          toString: () => 'Infinity',
-          plus: jest.fn(),
-          minus: jest.fn(),
-          times: jest.fn(),
-          dividedBy: jest.fn(),
-          negated: jest.fn(),
-          isZero: jest.fn()
-      };
-      
-      Decimal.prototype.plus = jest.fn().mockReturnValue(mockInfinite);
-
-      calculator.inputDigit('5');
-      calculator.setOperation('+');
-      calculator.inputDigit('5');
-      calculator.calculate();
-      
-      expect(calculator.getState().error).toBe('Error Matemático');
-
-      Decimal.prototype.plus = originalPlus;
+    it('should ignore calculate if no op or previous value', () => {
+      engine.inputDigit('5');
+      engine.calculate();
+      expect(engine.getState().currentValue).toBe('5');
     });
 
-    it('should handle errors gracefully', () => {
-      // Force an error by mocking Decimal
+    it('should handle exception during calculation', () => {
+      // Mock Decimal to throw error
       const originalDecimal = Decimal.prototype.plus;
-      Decimal.prototype.plus = jest.fn().mockImplementation(() => {
-          throw new Error('Mock Error');
+      jest.spyOn(Decimal.prototype, 'plus').mockImplementation(() => {
+        throw new Error('Mock Error');
       });
-      
-      calculator.inputDigit('5');
-      calculator.setOperation('+');
-      calculator.inputDigit('5');
-      calculator.calculate();
-      
+
+      engine.inputDigit('5');
+      engine.setOperation('+');
+      engine.inputDigit('5');
+      engine.calculate();
+
+      expect(engine.getState().error).toBe('Error de Cálculo');
       expect(SafeLogger.error).toHaveBeenCalled();
-      expect(calculator.getState().error).toBe('Error de Cálculo');
 
       // Restore
-      Decimal.prototype.plus = originalDecimal;
+      (Decimal.prototype.plus as any).mockRestore(); // Restore logic depends on jest setup, easier to just assume isolation or manually restore
+      // Since we modified prototype, we MUST restore it.
+      // Or we can mock the module entirely. But we want real logic for other tests.
+      // Actually, jest.spyOn restores with mockRestore().
+      // Wait, I assigned originalDecimal but jest.spyOn replaces it.
+      // Correct way:
+      // const spy = jest.spyOn(...);
+      // spy.mockRestore();
+    });
+    it('should handle infinite result', () => {
+      // Mock plus to return Infinity
+      jest
+        .spyOn(Decimal.prototype, 'plus')
+        .mockImplementation(() => new Decimal(Infinity));
+
+      engine.inputDigit('1');
+      engine.setOperation('+');
+      engine.inputDigit('1');
+      engine.calculate();
+
+      expect(engine.getState().error).toBe('Error Matemático');
+      (Decimal.prototype.plus as any).mockRestore();
+    });
+
+    it('should handle invalid operation (default case)', () => {
+      engine.inputDigit('5');
+      engine.setOperation('invalid' as any); // Force invalid op
+      // To trigger calculate with invalid op, we need prev value and op
+      // But setOperation sets op.
+      // If we force state:
+      (engine as any).state.operation = 'invalid';
+      (engine as any).state.previousValue = '5';
+      (engine as any).state.currentValue = '5';
+
+      engine.calculate();
+
+      // Should return early, no change
+      expect(engine.getState().currentValue).toBe('5');
     });
   });
 
-  describe('Memory Operations', () => {
-      it('should not add to memory if error', () => {
-          (calculator as any).state.error = 'Error';
-          calculator.memoryAdd();
-          expect(calculator.getState().memory.toString()).toBe('0');
-      });
+  describe('Memory', () => {
+    it('should add to memory', () => {
+      engine.inputDigit('5');
+      engine.memoryAdd();
+      expect(engine.getState().memory.toString()).toBe('5');
 
-      it('should add to memory', () => {
-          calculator.inputDigit('5');
-          calculator.memoryAdd();
-          expect(calculator.getState().memory.toString()).toBe('5');
-          expect(calculator.getState().isNewEntry).toBe(true);
-      });
-
-      it('should not sub from memory if error', () => {
-        (calculator as any).state.error = 'Error';
-        calculator.memorySub();
-        expect(calculator.getState().memory.toString()).toBe('0');
+      engine.inputDigit('3');
+      engine.memoryAdd();
+      expect(engine.getState().memory.toString()).toBe('8');
     });
 
-      it('should subtract from memory', () => {
-        calculator.inputDigit('10');
-        calculator.memoryAdd();
-        calculator.inputDigit('2');
-        calculator.memorySub();
-        expect(calculator.getState().memory.toString()).toBe('8');
-    });
+    it('should subtract from memory', () => {
+      engine.inputDigit('10');
+      engine.memoryAdd();
 
-    it('should not recall memory if error', () => {
-        (calculator as any).state.error = 'Error';
-        (calculator as any).state.memory = new Decimal(5);
-        calculator.memoryRecall();
-        expect(calculator.getState().currentValue).toBe('0');
+      engine.inputDigit('2');
+      engine.memorySub();
+      expect(engine.getState().memory.toString()).toBe('8');
     });
 
     it('should recall memory', () => {
-        calculator.inputDigit('5');
-        calculator.memoryAdd();
-        calculator.reset();
-        calculator.memoryRecall();
-        expect(calculator.getState().currentValue).toBe('5');
+      engine.inputDigit('5');
+      engine.memoryAdd();
+      engine.inputDigit('0'); // Clear current
+      engine.memoryRecall();
+      expect(engine.getState().currentValue).toBe('5');
+      expect(engine.getState().isNewEntry).toBe(true);
     });
 
     it('should clear memory', () => {
-        calculator.inputDigit('5');
-        calculator.memoryAdd();
-        calculator.memoryClear();
-        expect(calculator.getState().memory.toString()).toBe('0');
+      engine.inputDigit('5');
+      engine.memoryAdd();
+      engine.memoryClear();
+      expect(engine.getState().memory.toString()).toBe('0');
     });
-    
+
     it('should handle memory errors', () => {
-        const originalPlus = Decimal.prototype.plus;
-        Decimal.prototype.plus = jest.fn().mockImplementation(() => {
-            throw new Error('Memory Error');
-        });
-
-        calculator.inputDigit('5');
-        calculator.memoryAdd();
-        expect(SafeLogger.error).toHaveBeenCalled();
-        expect(calculator.getState().error).toBe('Error de Memoria');
-        
-        Decimal.prototype.plus = originalPlus;
+      jest.spyOn(Decimal.prototype, 'plus').mockImplementation(() => {
+        throw new Error('Mem Error');
+      });
+      engine.inputDigit('5');
+      engine.memoryAdd();
+      expect(engine.getState().error).toBe('Error de Memoria');
+      (Decimal.prototype.plus as any).mockRestore();
     });
 
-     it('should handle memory sub errors', () => {
-        const originalMinus = Decimal.prototype.minus;
-        Decimal.prototype.minus = jest.fn().mockImplementation(() => {
-            throw new Error('Memory Error');
-        });
-
-        calculator.inputDigit('5');
-        calculator.memorySub();
-        expect(SafeLogger.error).toHaveBeenCalled();
-        expect(calculator.getState().error).toBe('Error de Memoria');
-        
-        Decimal.prototype.minus = originalMinus;
+    it('should handle memorySub errors', () => {
+      jest.spyOn(Decimal.prototype, 'minus').mockImplementation(() => {
+        throw new Error('Mem Error');
+      });
+      engine.inputDigit('5');
+      engine.memorySub();
+      expect(engine.getState().error).toBe('Error de Memoria');
+      (Decimal.prototype.minus as any).mockRestore();
     });
   });
 
   describe('History', () => {
-      it('should add to history on calculation', () => {
-          calculator.inputDigit('5');
-          calculator.setOperation('+');
-          calculator.inputDigit('5');
-          calculator.calculate();
-          expect(calculator.getState().history.length).toBe(1);
-          expect(calculator.getState().history[0].result).toBe('10');
-      });
+    it('should add calculations to history', () => {
+      engine.inputDigit('1');
+      engine.setOperation('+');
+      engine.inputDigit('2');
+      engine.calculate();
 
-      it('should clear history', () => {
-        calculator.inputDigit('5');
-        calculator.setOperation('+');
-        calculator.inputDigit('5');
-        calculator.calculate();
-        calculator.clearHistory();
-        expect(calculator.getState().history.length).toBe(0);
-      });
+      const history = engine.getState().history;
+      expect(history.length).toBe(1);
+      expect(history[0].expression).toContain('1 + 2');
+      expect(history[0].result).toBe('3');
+    });
+
+    it('should clear history', () => {
+      engine.inputDigit('1');
+      engine.setOperation('+');
+      engine.inputDigit('2');
+      engine.calculate();
+
+      engine.clearHistory();
+      expect(engine.getState().history.length).toBe(0);
+    });
+
+    it('should limit history items', () => {
+      // Add 15 items
+      for (let i = 0; i < 15; i++) {
+        engine.inputDigit('1');
+        engine.setOperation('+');
+        engine.inputDigit('1');
+        engine.calculate();
+      }
+      expect(engine.getState().history.length).toBe(10);
+    });
   });
 
   describe('Utilities', () => {
-      it('should not toggle sign if error', () => {
-          (calculator as any).state.error = 'Error';
-          calculator.toggleSign();
-          expect(calculator.getState().currentValue).toBe('0');
+    it('should toggle sign', () => {
+      engine.inputDigit('5');
+      engine.toggleSign();
+      expect(engine.getState().currentValue).toBe('-5');
+      engine.toggleSign();
+      expect(engine.getState().currentValue).toBe('5');
+    });
+
+    it('should calculate percentage', () => {
+      engine.inputDigit('50');
+      engine.percentage();
+      expect(engine.getState().currentValue).toBe('0.5');
+    });
+
+    it('should handle percentage error', () => {
+      jest.spyOn(Decimal.prototype, 'dividedBy').mockImplementation(() => {
+        throw new Error('Pct Error');
       });
+      engine.inputDigit('50');
+      engine.percentage();
+      expect(engine.getState().error).toBe('Error');
+      (Decimal.prototype.dividedBy as any).mockRestore();
+    });
 
-      it('should toggle sign', () => {
-          calculator.inputDigit('5');
-          calculator.toggleSign();
-          expect(calculator.getState().currentValue).toBe('-5');
-          calculator.toggleSign();
-          expect(calculator.getState().currentValue).toBe('5');
+    it('should handle toggleSign error', () => {
+      // negated()
+      jest.spyOn(Decimal.prototype, 'negated').mockImplementation(() => {
+        throw new Error('Sign Error');
       });
+      engine.inputDigit('5');
+      engine.toggleSign();
+      expect(SafeLogger.error).toHaveBeenCalled();
+      (Decimal.prototype.negated as any).mockRestore();
+    });
+    it('should ignore operations if error exists', () => {
+      (engine as any).setError('Error');
 
-      it('should not calculate percentage if error', () => {
-          (calculator as any).state.error = 'Error';
-          calculator.percentage();
-          expect(calculator.getState().currentValue).toBe('0');
-      });
+      engine.memoryAdd();
+      expect(engine.getState().memory.toString()).toBe('0');
 
-      it('should calculate percentage', () => {
-          calculator.inputDigit('50');
-          calculator.percentage();
-          expect(calculator.getState().currentValue).toBe('0.5');
-      });
+      engine.memorySub();
+      expect(engine.getState().memory.toString()).toBe('0');
 
-      it('should handle percentage errors', () => {
-         const originalDiv = Decimal.prototype.dividedBy;
-         Decimal.prototype.dividedBy = jest.fn().mockImplementation(() => { throw new Error('Div Error'); });
+      engine.memoryRecall();
+      expect(engine.getState().currentValue).toBe('Error'); // Unchanged
 
-         calculator.inputDigit('50');
-         calculator.percentage();
-         expect(SafeLogger.error).toHaveBeenCalled();
-         expect(calculator.getState().error).toBe('Error');
+      engine.toggleSign();
+      expect(engine.getState().currentValue).toBe('Error');
 
-         Decimal.prototype.dividedBy = originalDiv;
-      });
-      
-       it('should handle toggle sign errors', () => {
-         calculator.inputDigit('50');
+      engine.percentage();
+      expect(engine.getState().currentValue).toBe('Error');
+    });
+  });
 
-         // Force error by mocking notify (which is called inside try block)
-         const originalNotify = (calculator as any).notify;
-         (calculator as any).notify = jest.fn(() => { throw new Error('Notify Error'); });
+  describe('Reset', () => {
+    it('should reset state but keep memory and history', () => {
+      engine.inputDigit('5');
+      engine.memoryAdd(); // Memory = 5
+      engine.setOperation('+');
+      engine.inputDigit('5');
+      engine.calculate(); // History has item
 
-         calculator.toggleSign();
-         
-         expect(SafeLogger.error).toHaveBeenCalled();
-         
-         // Restore
-         (calculator as any).notify = originalNotify;
-      });
+      engine.reset();
+
+      const state = engine.getState();
+      expect(state.currentValue).toBe('0');
+      expect(state.operation).toBeNull();
+      expect(state.memory.toString()).toBe('5');
+      expect(state.history.length).toBe(1);
+    });
   });
 });

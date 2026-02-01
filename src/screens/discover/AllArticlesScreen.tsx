@@ -1,14 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ActivityIndicator, StatusBar } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import {
+  View,
+  StyleSheet,
+  ActivityIndicator,
+  StatusBar,
+  Animated,
+} from 'react-native';
 import { FlashList } from '@shopify/flash-list';
-import { Text, useTheme, Appbar } from 'react-native-paper';
+import { Text } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 
 import { wordPressService, FormattedPost } from '@/services/WordPressService';
 import { observabilityService } from '@/services/ObservabilityService';
+import { useAppTheme } from '@/theme';
 import ArticleCard from '@/components/discover/ArticleCard';
-import ArticleSkeleton from '@/components/discover/ArticleSkeleton';
+import CategoryTagSkeleton from '@/components/discover/CategoryTagSkeleton';
 import DiscoverEmptyView from '@/components/discover/DiscoverEmptyView';
+import DiscoverHeader from '@/components/discover/DiscoverHeader';
+import DetailHeroHeader from '@/components/discover/DetailHeroHeader';
+
+const AnimatedFlashList = Animated.createAnimatedComponent(FlashList) as any;
 
 const ListFooter = ({
   hasMore,
@@ -29,18 +40,24 @@ const ListFooter = ({
   }
   if (postsLength > 0) {
     return (
-      <Text style={[styles.footerText, { color: theme.colors.onSurface }]}>
-        Has llegado al final
-      </Text>
+      <View style={styles.endContainer}>
+        <View
+          style={[
+            styles.endDash,
+            { backgroundColor: theme.colors.outlineVariant },
+          ]}
+        />
+        <Text variant="labelLarge" style={styles.endText}>
+          HAS LLEGADO AL FINAL
+        </Text>
+      </View>
     );
   }
   return null;
 };
 
-const FlashListTyped = FlashList as any;
-
 const AllArticlesScreen = () => {
-  const theme = useTheme();
+  const theme = useAppTheme();
   const navigation = useNavigation<any>();
 
   const [posts, setPosts] = useState<FormattedPost[]>([]);
@@ -48,6 +65,7 @@ const AllArticlesScreen = () => {
   const [refreshing, setRefreshing] = useState(false);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const scrollY = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     fetchPosts();
@@ -96,45 +114,72 @@ const AllArticlesScreen = () => {
     { backgroundColor: theme.colors.background },
   ];
 
-  const renderSkeleton = () => <ArticleSkeleton />;
-  const renderItem = ({ item }: { item: FormattedPost }) => (
+  const renderItem = ({ item, index }: { item: FormattedPost; index: number }) => (
     <ArticleCard
       article={item}
       onPress={() => navigation.navigate('ArticleDetail', { article: item })}
+      variant={index === 0 ? 'featured' : 'compact'}
     />
   );
+
   const renderFooter = () => (
     <ListFooter hasMore={hasMore} postsLength={posts.length} theme={theme} />
   );
+
   const renderEmpty = () =>
     !loading ? (
       <DiscoverEmptyView message="No se encontraron artículos" />
     ) : null;
 
+  const renderHeader = () => {
+    const firstPostImage = posts.length > 0 ? posts[0].image : null;
+    const lastUpdateDate = posts.length > 0 ? posts[0].date : undefined;
+
+    return (
+      <DetailHeroHeader
+        image={firstPostImage}
+        categoryName="EXPLORAR"
+        title="Todos los Artículos"
+        description="Mantente informado con las últimas noticias, análisis y actualizaciones del mercado financiero."
+        lastUpdateDate={lastUpdateDate}
+        articleCount={posts.length}
+        sectionTitle="LO MÁS RECIENTE"
+        type="CATEGORY"
+      />
+    );
+  };
+
   return (
     <View style={containerStyle}>
-      <StatusBar barStyle={theme.dark ? 'light-content' : 'dark-content'} />
-      <Appbar.Header elevated>
-        <Appbar.BackAction onPress={() => navigation.goBack()} />
-        <Appbar.Content title="Todos los Artículos" />
-      </Appbar.Header>
+      <StatusBar
+        barStyle={theme.dark ? 'light-content' : 'dark-content'}
+        backgroundColor="transparent"
+        translucent
+      />
 
-      {loading && page === 1 ? (
-        <FlashListTyped
-          data={[1, 2, 3, 4, 5, 6]}
-          keyExtractor={(item: any) => item.toString()}
-          renderItem={renderSkeleton}
-          estimatedItemSize={100}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-        />
+      <DiscoverHeader
+        variant="category"
+        title="Todos los Artículos"
+        onBackPress={() => navigation.goBack()}
+        scrollY={scrollY}
+      />
+
+      {loading && posts.length === 0 ? (
+        <CategoryTagSkeleton />
       ) : (
-        <FlashListTyped
+        <AnimatedFlashList
           data={posts}
           keyExtractor={(item: FormattedPost) => item.id.toString()}
+          scrollEventThrottle={16}
+          onScroll={Animated.event(
+            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
+            { useNativeDriver: true },
+          )}
           renderItem={renderItem}
-          estimatedItemSize={100}
+          estimatedItemSize={250}
           showsVerticalScrollIndicator={false}
+          ListHeaderComponent={renderHeader}
+          contentContainerStyle={styles.listContent}
           onRefresh={handleRefresh}
           refreshing={refreshing}
           onEndReached={loadMore}
@@ -151,22 +196,27 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  centered: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 20,
-  },
   listContent: {
     paddingBottom: 40,
   },
-  footerLoader: {
-    marginVertical: 20,
+  endContainer: {
+    alignItems: 'center',
+    paddingVertical: 60,
   },
-  footerText: {
-    textAlign: 'center',
+  endDash: {
+    width: 40,
+    height: 3,
+    borderRadius: 2,
+    marginBottom: 20,
+    opacity: 0.2,
+  },
+  endText: {
+    opacity: 0.3,
+    letterSpacing: 2,
+    fontWeight: '900',
+  },
+  footerLoader: {
     marginVertical: 32,
-    opacity: 0.5,
   },
 });
 

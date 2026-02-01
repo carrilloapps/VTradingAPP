@@ -258,8 +258,8 @@ const SearchResultsScreen = () => {
     setRefreshing(true);
     try {
       const [cats, tags] = await Promise.all([
-        wordPressService.getCategories(),
-        wordPressService.getTags(),
+        wordPressService.getCategories(true),
+        wordPressService.getTags(true),
       ]);
       setCategories(cats.slice(0, 5));
       setTrendingTags(tags.slice(0, 10));
