@@ -7,6 +7,8 @@ import {
   initializePerformance,
 } from '@react-native-firebase/perf';
 
+declare const global: any;
+
 // Mock dependencies
 jest.mock('../../src/services/StorageService', () => ({
   mmkvStorage: {
@@ -48,7 +50,7 @@ describe('ApiClient', () => {
         dataCollectionEnabled: true,
         app: {},
       });
-      const client = new ApiClient(baseUrl);
+      expect(new ApiClient(baseUrl)).toBeDefined();
       expect(initializePerformance).not.toHaveBeenCalled();
     });
 

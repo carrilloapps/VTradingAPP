@@ -101,6 +101,7 @@ describe('validation', () => {
     });
 
     it('should remove javascript: protocol', () => {
+      // eslint-disable-next-line no-script-url
       expect(sanitizeInput('javascript:alert(1)')).toBe('alert(1)');
     });
 

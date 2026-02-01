@@ -124,7 +124,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
         colorType: 'primary',
       },
     ],
-    [],
+    [isDark],
   );
 
   const getPageColors = (_type: string) => {

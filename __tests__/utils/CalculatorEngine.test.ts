@@ -184,7 +184,6 @@ describe('CalculatorEngine', () => {
 
     it('should handle exception during calculation', () => {
       // Mock Decimal to throw error
-      const originalDecimal = Decimal.prototype.plus;
       jest.spyOn(Decimal.prototype, 'plus').mockImplementation(() => {
         throw new Error('Mock Error');
       });

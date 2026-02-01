@@ -16,7 +16,6 @@ import { wordPressService, FormattedPost } from '@/services/WordPressService';
 import { observabilityService } from '@/services/ObservabilityService';
 import { useAppTheme } from '@/theme';
 import ArticleCard from '@/components/discover/ArticleCard';
-import CategoryTagSkeleton from '@/components/discover/CategoryTagSkeleton';
 import AllArticlesSkeleton from '@/components/discover/AllArticlesSkeleton';
 import DiscoverEmptyView from '@/components/discover/DiscoverEmptyView';
 import DiscoverHeader from '@/components/discover/DiscoverHeader';
