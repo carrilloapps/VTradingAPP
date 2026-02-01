@@ -1,4 +1,5 @@
 import Decimal from 'decimal.js';
+import SafeLogger from '@/utils/safeLogger';
 
 export type Operation = '+' | '-' | '*' | '/' | null;
 
@@ -149,6 +150,7 @@ export class CalculatorEngine {
       this.state.isNewEntry = true;
       this.notify();
     } catch (e) {
+      SafeLogger.error('CalculatorEngine.calculate error', e);
       this.setError('Error de Cálculo');
     }
   }
@@ -162,6 +164,7 @@ export class CalculatorEngine {
       this.state.isNewEntry = true;
       this.notify();
     } catch (e) {
+      SafeLogger.error('CalculatorEngine.memoryAdd error', e);
       this.setError('Error de Memoria');
     }
   }
@@ -174,6 +177,7 @@ export class CalculatorEngine {
       this.state.isNewEntry = true;
       this.notify();
     } catch (e) {
+      SafeLogger.error('CalculatorEngine.memorySub error', e);
       this.setError('Error de Memoria');
     }
   }
@@ -213,7 +217,7 @@ export class CalculatorEngine {
       this.state.currentValue = val.negated().toString();
       this.notify();
     } catch (e) {
-      // Ignore invalid values
+      SafeLogger.error('CalculatorEngine.memoryAdd error', e);
     }
   }
 
@@ -225,6 +229,7 @@ export class CalculatorEngine {
       this.state.isNewEntry = true;
       this.notify();
     } catch (e) {
+      SafeLogger.error('CalculatorEngine.percentage error', e);
       this.setError('Error');
     }
   }

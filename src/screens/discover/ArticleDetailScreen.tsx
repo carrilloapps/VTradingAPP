@@ -407,8 +407,8 @@ const ArticleDetailScreen = () => {
         try {
           shareExactDeepLink =
             await remoteConfigService.getFeature('discover_web');
-        } catch (_) {
-          // Fallback to true if config fails
+        } catch (e) {
+          SafeLogger.warn('ArticleDetailScreen: Remote config fetch failed', e);
           shareExactDeepLink = false;
         }
 

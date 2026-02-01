@@ -44,6 +44,7 @@ const config = {
             type: 'sourceFile',
           };
         } catch (e) {
+          console.log('Firebase module resolve error:', e);
           // Fallback to default resolution if anything goes wrong
         }
       }

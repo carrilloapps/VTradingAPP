@@ -145,10 +145,10 @@ export class ApiClient {
 
       sentryTransaction = observabilityService.startTransaction(
         `GET ${endpoint}`,
-        'http.client',
+        `http.client`,
       );
     } catch (e) {
-      // Ignore perf setup errors
+      SafeLogger.warn('ApiClient: Perf metric setup failed', e);
     }
 
     try {
@@ -277,7 +277,7 @@ export class ApiClient {
           }
         }
       } catch (e) {
-        // Cache miss/error, proceed to fetch
+        SafeLogger.warn('ApiClient: Cache read failed', e);
       }
     }
 
@@ -293,7 +293,7 @@ export class ApiClient {
           };
           mmkvStorage.set(cacheKey, JSON.stringify(cacheItem));
         } catch (e) {
-          // Ignore cache write error
+          SafeLogger.error('CalculatorEngine.memoryAdd error', e);
         }
       }
 
@@ -351,7 +351,7 @@ export class ApiClient {
           };
           mmkvStorage.set(cacheKey, JSON.stringify(cacheItem));
         } catch (e) {
-          // Ignore cache write error
+          SafeLogger.error('CalculatorEngine.memoryAdd error', e);
         }
       }
 

@@ -36,6 +36,7 @@ import {
   ANALYTICS_EVENTS,
 } from '@/services/firebase/AnalyticsService';
 import { BolivarIcon } from '@/components/ui/BolivarIcon';
+import SafeLogger from '@/utils/safeLogger';
 
 const isFabricEnabled = !!(globalThis as any).nativeFabricUIManager;
 
@@ -87,7 +88,7 @@ const BankRatesScreen = () => {
             );
             if (bcv) setOfficialRate(bcv);
           } catch (e) {
-            // Failed to fetch BCV rate silently
+            SafeLogger.warn('BankRatesScreen: BCV rate fetch failed', e);
           }
 
           setBankRates(rates);

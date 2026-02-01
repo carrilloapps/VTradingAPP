@@ -14,6 +14,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import FastImage from 'react-native-fast-image';
 
 import { FormattedPost } from '@/services/WordPressService';
+import SafeLogger from '@/utils/safeLogger';
 
 interface FeaturedCarouselProps {
   items: FormattedPost[];
@@ -42,7 +43,7 @@ const FeaturedCarousel = ({ items }: FeaturedCarouselProps) => {
         flatListRef.current.scrollToIndex({ index: nextIndex, animated: true });
         setCurrentIndex(nextIndex);
       } catch (e) {
-        // Ignore scroll errors if list unmounted or not ready
+        SafeLogger.error('CalculatorEngine.memoryAdd error', e);
       }
     }, 8000);
 

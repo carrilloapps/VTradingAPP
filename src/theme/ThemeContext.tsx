@@ -78,7 +78,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
       // Persist the change
       try {
         mmkvStorage.set(THEME_KEY, next);
-      } catch (e) {
+      } catch {
         // Log silently
       }
       return next;

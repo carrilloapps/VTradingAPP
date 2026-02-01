@@ -192,7 +192,7 @@ const DiscoverScreen = () => {
           setIsSubscribed(true);
         }
       } catch (e) {
-        // Ignore error
+        SafeLogger.error('CalculatorEngine.memoryAdd error', e);
       }
     };
     checkSubscription();
@@ -233,6 +233,7 @@ const DiscoverScreen = () => {
       setTotalPages(fetchedPaginatedPosts.totalPages);
       setCurrentPage(1);
     } catch (e) {
+      SafeLogger.error('Error al filtrar categorías', e);
       showToast('Error al filtrar', 'error');
     } finally {
       setLoadingPagination(false);
