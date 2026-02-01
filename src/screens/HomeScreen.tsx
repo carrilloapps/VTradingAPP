@@ -12,21 +12,21 @@ import Share from 'react-native-share';
 import { captureRef } from 'react-native-view-shot';
 import { useTheme, Text } from 'react-native-paper';
 
-import UnifiedHeader from '../components/ui/UnifiedHeader';
-import MarketStatus from '../components/ui/MarketStatus';
-import Calculator from '../components/dashboard/Calculator';
-import DashboardSkeleton from '../components/dashboard/DashboardSkeleton';
-import { useToastStore } from '../stores/toastStore';
-import { observabilityService } from '../services/ObservabilityService';
-import { analyticsService } from '../services/firebase/AnalyticsService';
-import ShareGraphic from '../components/dashboard/ShareGraphic';
-import CustomDialog from '../components/ui/CustomDialog';
-import CustomButton from '../components/ui/CustomButton';
-import { useAuthStore } from '../stores/authStore';
-import { useHomeScreenData } from '../hooks/useHomeScreenData';
-import RatesSection from '../components/dashboard/RatesSection';
-import MarketsSection from '../components/dashboard/MarketsSection';
-import AdvancedCalculatorCTA from '../components/dashboard/AdvancedCalculatorCTA';
+import UnifiedHeader from '@/components/ui/UnifiedHeader';
+import MarketStatus from '@/components/ui/MarketStatus';
+import Calculator from '@/components/dashboard/Calculator';
+import DashboardSkeleton from '@/components/dashboard/DashboardSkeleton';
+import { useToastStore } from '@/stores/toastStore';
+import { observabilityService } from '@/services/ObservabilityService';
+import { analyticsService } from '@/services/firebase/AnalyticsService';
+import ShareGraphic from '@/components/dashboard/ShareGraphic';
+import CustomDialog from '@/components/ui/CustomDialog';
+import CustomButton from '@/components/ui/CustomButton';
+import { useAuthStore } from '@/stores/authStore';
+import { useHomeScreenData } from '@/hooks/useHomeScreenData';
+import RatesSection from '@/components/dashboard/RatesSection';
+import MarketsSection from '@/components/dashboard/MarketsSection';
+import AdvancedCalculatorCTA from '@/components/dashboard/AdvancedCalculatorCTA';
 
 const HomeScreen = ({ navigation }: any) => {
   const theme = useTheme();
