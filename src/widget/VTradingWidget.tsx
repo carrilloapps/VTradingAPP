@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  FlexWidget,
-  ImageWidget,
-  TextWidget,
-} from 'react-native-android-widget';
+import { FlexWidget, ImageWidget, TextWidget } from 'react-native-android-widget';
 import { WidgetItem } from './types';
 
 interface VTradingWidgetProps {
@@ -35,18 +31,10 @@ export default function VTradingWidget({
   const gradientTo = isWidgetDarkMode ? '#2C2C2C' : '#F2F4F6';
 
   const textColor = isWidgetDarkMode ? '#FFFFFF' : '#1A2C3E';
-  const subTextColor = isWidgetDarkMode
-    ? 'rgba(255, 255, 255, 0.7)'
-    : '#64748B';
-  const dividerColor = isWidgetDarkMode
-    ? 'rgba(255, 255, 255, 0.1)'
-    : 'rgba(0, 0, 0, 0.05)';
-  const refreshColor = isWidgetDarkMode
-    ? 'rgba(255, 255, 255, 0.6)'
-    : 'rgba(0, 0, 0, 0.4)';
-  const borderColor = isWidgetDarkMode
-    ? 'rgba(255, 255, 255, 0.12)'
-    : 'rgba(0, 0, 0, 0.1)';
+  const subTextColor = isWidgetDarkMode ? 'rgba(255, 255, 255, 0.7)' : '#64748B';
+  const dividerColor = isWidgetDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)';
+  const refreshColor = isWidgetDarkMode ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.4)';
+  const borderColor = isWidgetDarkMode ? 'rgba(255, 255, 255, 0.12)' : 'rgba(0, 0, 0, 0.1)';
 
   const limitedItems = items.slice(0, 4);
   const logoImage = isWidgetDarkMode
@@ -86,9 +74,7 @@ export default function VTradingWidget({
           width: 'match_parent',
         }}
       >
-        <FlexWidget
-          style={{ flexDirection: 'row', alignItems: 'flex-start', flexGap: 8 }}
-        >
+        <FlexWidget style={{ flexDirection: 'row', alignItems: 'flex-start', flexGap: 8 }}>
           <ImageWidget image={logoImage} imageWidth={30} imageHeight={15} />
           <TextWidget
             text={widgetTitle}
@@ -115,13 +101,8 @@ export default function VTradingWidget({
       </FlexWidget>
 
       {limitedItems.length === 0 ? (
-        <FlexWidget
-          style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}
-        >
-          <TextWidget
-            text="Sin datos"
-            style={{ fontSize: 12, color: subTextColor }}
-          />
+        <FlexWidget style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <TextWidget text="Sin datos" style={{ fontSize: 12, color: subTextColor }} />
         </FlexWidget>
       ) : (
         <FlexWidget
@@ -145,9 +126,7 @@ export default function VTradingWidget({
                 width: 'match_parent',
               }}
             >
-              <FlexWidget
-                style={{ flexDirection: 'column', flex: 1, paddingRight: 8 }}
-              >
+              <FlexWidget style={{ flexDirection: 'column', flex: 1, paddingRight: 8 }}>
                 <TextWidget
                   text={item.label}
                   style={{
@@ -226,11 +205,7 @@ export default function VTradingWidget({
         }}
       >
         <TextWidget
-          text={
-            lastUpdated
-              ? 'Actualizado: ' + lastUpdated
-              : 'Actualizado: hace poco'
-          }
+          text={lastUpdated ? 'Actualizado: ' + lastUpdated : 'Actualizado: hace poco'}
           style={{ fontSize: 10, color: subTextColor }}
         />
       </FlexWidget>

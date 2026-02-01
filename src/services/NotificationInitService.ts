@@ -3,10 +3,7 @@ import notifee, { AndroidImportance } from '@notifee/react-native';
 import { fcmService } from '@/services/firebase/FCMService';
 import { storageService } from '@/services/StorageService';
 import { observabilityService } from '@/services/ObservabilityService';
-import {
-  analyticsService,
-  ANALYTICS_EVENTS,
-} from '@/services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '@/services/firebase/AnalyticsService';
 import SafeLogger from '@/utils/safeLogger';
 
 /**
@@ -66,28 +63,18 @@ class NotificationInitService {
       SafeLogger.log('[NotificationInit] Has permission:', { hasPermission });
 
       if (!hasPermission) {
-        SafeLogger.log(
-          '[NotificationInit] No permission yet, will request on user interaction',
-        );
+        SafeLogger.log('[NotificationInit] No permission yet, will request on user interaction');
         // No solicitamos automáticamente, esperamos a que el usuario interactúe
         // Pero registramos que no tiene permisos
-        await analyticsService.setUserProperty(
-          'notification_permission',
-          'denied',
-        );
+        await analyticsService.setUserProperty('notification_permission', 'denied');
         return;
       }
 
       // 2. Verificar preferencia del usuario (pushEnabled)
       const settings = await storageService.getSettings();
       if (!settings.pushEnabled) {
-        SafeLogger.log(
-          '[NotificationInit] Notifications disabled by user preference',
-        );
-        await analyticsService.setUserProperty(
-          'notification_preference',
-          'disabled',
-        );
+        SafeLogger.log('[NotificationInit] Notifications disabled by user preference');
+        await analyticsService.setUserProperty('notification_preference', 'disabled');
         return;
       }
 
@@ -96,10 +83,7 @@ class NotificationInitService {
       if (token) {
         SafeLogger.log('[NotificationInit] FCM Token obtained');
         await analyticsService.setUserProperty('fcm_token_status', 'active');
-        await analyticsService.setUserProperty(
-          'notification_preference',
-          'enabled',
-        );
+        await analyticsService.setUserProperty('notification_preference', 'enabled');
       } else {
         SafeLogger.log('[NotificationInit] Failed to obtain FCM token');
         await analyticsService.setUserProperty('fcm_token_status', 'failed');
@@ -115,9 +99,7 @@ class NotificationInitService {
 
       // 6. Marcar como inicializado
       this.isInitialized = true;
-      await analyticsService.logEvent(
-        ANALYTICS_EVENTS.NOTIFICATION_SYSTEM_INITIALIZED,
-      );
+      await analyticsService.logEvent(ANALYTICS_EVENTS.NOTIFICATION_SYSTEM_INITIALIZED);
       SafeLogger.log('[NotificationInit] Initialization complete');
     } catch (e) {
       observabilityService.captureError(e, {
@@ -139,12 +121,9 @@ class NotificationInitService {
     try {
       const granted = await fcmService.requestUserPermission();
 
-      await analyticsService.logEvent(
-        ANALYTICS_EVENTS.NOTIFICATION_PERMISSION_REQUESTED,
-        {
-          granted,
-        },
-      );
+      await analyticsService.logEvent(ANALYTICS_EVENTS.NOTIFICATION_PERMISSION_REQUESTED, {
+        granted,
+      });
 
       await analyticsService.setUserProperty(
         'notification_permission',
@@ -196,12 +175,9 @@ class NotificationInitService {
         count: uniqueSymbols.length,
       });
 
-      await analyticsService.logEvent(
-        ANALYTICS_EVENTS.NOTIFICATION_ALERTS_RESUBSCRIBED,
-        {
-          count: uniqueSymbols.length,
-        },
-      );
+      await analyticsService.logEvent(ANALYTICS_EVENTS.NOTIFICATION_ALERTS_RESUBSCRIBED, {
+        count: uniqueSymbols.length,
+      });
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'NotificationInitService.resubscribeToAlerts',

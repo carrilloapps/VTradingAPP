@@ -49,11 +49,7 @@ import CategoryDetailScreen from '@/screens/discover/CategoryDetailScreen';
 import TagDetailScreen from '@/screens/discover/TagDetailScreen';
 import AllArticlesScreen from '@/screens/discover/AllArticlesScreen';
 import SearchResultsScreen from '@/screens/discover/SearchResultsScreen';
-import {
-  WordPressCategory,
-  WordPressTag,
-  FormattedPost,
-} from '@/services/WordPressService';
+import { WordPressCategory, WordPressTag, FormattedPost } from '@/services/WordPressService';
 
 export type RootStackParamList = {
   Onboarding: undefined;
@@ -109,10 +105,7 @@ function AuthNavigator() {
     <AuthStack.Navigator screenOptions={{ headerShown: false }}>
       <AuthStack.Screen name="Login" component={LoginScreen} />
       <AuthStack.Screen name="Register" component={RegisterScreen} />
-      <AuthStack.Screen
-        name="ForgotPassword"
-        component={ForgotPasswordScreen}
-      />
+      <AuthStack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
       <AuthStack.Screen name="WebView" component={WebViewScreen} />
     </AuthStack.Navigator>
   );
@@ -316,9 +309,7 @@ const AppNavigator = () => {
         // Timeout wrapper to prevent blocking app start
         await Promise.race([
           remoteConfigService.fetchAndActivate(),
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('Timeout')), 3000),
-          ),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 3000)),
         ]);
 
         interface RemoteConfigStrings {
@@ -328,8 +319,7 @@ const AppNavigator = () => {
           };
         }
 
-        const config =
-          remoteConfigService.getJson<RemoteConfigStrings>('strings');
+        const config = remoteConfigService.getJson<RemoteConfigStrings>('strings');
 
         if (config && config.forceUpdate) {
           const currentBuild = parseInt(DeviceInfo.getBuildNumber(), 10);
@@ -371,11 +361,7 @@ const AppNavigator = () => {
   if (showForceUpdate) {
     return (
       <React.Fragment>
-        <StatusBar
-          backgroundColor="transparent"
-          translucent
-          barStyle="light-content"
-        />
+        <StatusBar backgroundColor="transparent" translucent barStyle="light-content" />
         <ForceUpdateModal visible={true} />
       </React.Fragment>
     );
@@ -396,10 +382,7 @@ const AppNavigator = () => {
           const currentRouteName = currentRoute?.name;
 
           if (previousRouteName !== currentRouteName && currentRouteName) {
-            await analyticsService.logScreenView(
-              currentRouteName,
-              currentRouteName,
-            );
+            await analyticsService.logScreenView(currentRouteName, currentRouteName);
           }
           routeNameRef.current = currentRouteName;
         }}
@@ -407,12 +390,7 @@ const AppNavigator = () => {
         <RootStack.Navigator screenOptions={{ headerShown: false }}>
           {showOnboarding ? (
             <RootStack.Screen name="Onboarding">
-              {props => (
-                <OnboardingScreen
-                  {...props}
-                  onFinish={() => setShowOnboarding(false)}
-                />
-              )}
+              {props => <OnboardingScreen {...props} onFinish={() => setShowOnboarding(false)} />}
             </RootStack.Screen>
           ) : user ? (
             <>

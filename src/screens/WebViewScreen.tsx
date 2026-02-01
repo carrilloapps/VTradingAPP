@@ -67,9 +67,7 @@ const WebViewScreen = () => {
   `;
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-    >
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar
         backgroundColor="transparent"
         translucent
@@ -95,17 +93,8 @@ const WebViewScreen = () => {
         />
 
         {isLoading && (
-          <View
-            style={[
-              styles.loadingContainer,
-              { backgroundColor: theme.colors.backdrop },
-            ]}
-          >
-            <ActivityIndicator
-              animating={true}
-              size="large"
-              color={theme.colors.primary}
-            />
+          <View style={[styles.loadingContainer, { backgroundColor: theme.colors.backdrop }]}>
+            <ActivityIndicator animating={true} size="large" color={theme.colors.primary} />
           </View>
         )}
       </View>

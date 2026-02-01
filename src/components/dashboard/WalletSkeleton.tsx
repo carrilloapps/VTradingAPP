@@ -13,10 +13,7 @@ const WalletSkeleton = ({ itemCount = 3 }: WalletSkeletonProps) => {
   const theme = useTheme();
   const insets = useSafeAreaInsets();
 
-  const containerStyle = [
-    styles.container,
-    { backgroundColor: theme.colors.background },
-  ];
+  const containerStyle = [styles.container, { backgroundColor: theme.colors.background }];
   const headerStyle = [styles.header, { paddingTop: insets.top + 12 }];
   const featureItemStyle = [
     styles.featureItem,
@@ -33,22 +30,14 @@ const WalletSkeleton = ({ itemCount = 3 }: WalletSkeletonProps) => {
         <Skeleton width={150} height={32} />
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Hero Section */}
         <View style={styles.heroSection}>
           <View style={styles.iconContainer}>
             <Skeleton width={120} height={120} borderRadius={60} />
           </View>
 
-          <Skeleton
-            width={140}
-            height={32}
-            borderRadius={20}
-            style={styles.badge}
-          />
+          <Skeleton width={140} height={32} borderRadius={20} style={styles.badge} />
 
           <Skeleton width={200} height={36} style={styles.title} />
           <Skeleton width="90%" height={20} style={styles.description} />
@@ -72,16 +61,8 @@ const WalletSkeleton = ({ itemCount = 3 }: WalletSkeletonProps) => {
             <View key={index} style={featureItemStyle}>
               <Skeleton width={48} height={48} borderRadius={12} />
               <View style={styles.featureText}>
-                <Skeleton
-                  width={150}
-                  height={20}
-                  style={styles.featureTitleSkeleton}
-                />
-                <Skeleton
-                  width="100%"
-                  height={14}
-                  style={styles.featureDescSkeleton}
-                />
+                <Skeleton width={150} height={20} style={styles.featureTitleSkeleton} />
+                <Skeleton width="100%" height={14} style={styles.featureDescSkeleton} />
               </View>
             </View>
           ))}

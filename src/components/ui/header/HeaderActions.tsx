@@ -42,9 +42,7 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
           borderless
           rippleColor="rgba(0, 0, 0, .1)"
           accessibilityRole="button"
-          accessibilityLabel={
-            rightActionIcon === 'refresh' ? 'Actualizar datos' : 'Más opciones'
-          }
+          accessibilityLabel={rightActionIcon === 'refresh' ? 'Actualizar datos' : 'Más opciones'}
           accessibilityHint={
             rightActionIcon === 'refresh'
               ? 'Refrescar el contenido de la pantalla'
@@ -76,14 +74,10 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
           rippleColor="rgba(0, 0, 0, .1)"
           accessibilityRole="button"
           accessibilityLabel={
-            secondaryActionIcon === 'share-variant'
-              ? 'Compartir'
-              : 'Acción secundaria'
+            secondaryActionIcon === 'share-variant' ? 'Compartir' : 'Acción secundaria'
           }
           accessibilityHint={
-            secondaryActionIcon === 'share-variant'
-              ? 'Compartir este contenido'
-              : ''
+            secondaryActionIcon === 'share-variant' ? 'Compartir este contenido' : ''
           }
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >

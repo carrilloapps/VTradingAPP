@@ -1,22 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  View,
-  StyleSheet,
-  ActivityIndicator,
-  StatusBar,
-  Animated,
-} from 'react-native';
+import { View, StyleSheet, ActivityIndicator, StatusBar, Animated } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
 import Share from 'react-native-share';
 import { captureRef } from 'react-native-view-shot';
 
-import {
-  wordPressService,
-  FormattedPost,
-  WordPressCategory,
-} from '@/services/WordPressService';
+import { wordPressService, FormattedPost, WordPressCategory } from '@/services/WordPressService';
 import { observabilityService } from '@/services/ObservabilityService';
 import { useAppTheme } from '@/theme';
 import ArticleCard from '@/components/discover/ArticleCard';
@@ -43,22 +33,12 @@ const ListFooter = ({
   theme: any;
 }) => {
   if (hasMore) {
-    return (
-      <ActivityIndicator
-        style={styles.footerLoader}
-        color={theme.colors.primary}
-      />
-    );
+    return <ActivityIndicator style={styles.footerLoader} color={theme.colors.primary} />;
   }
   if (postsLength > 0) {
     return (
       <View style={styles.endContainer}>
-        <View
-          style={[
-            styles.endLine,
-            { backgroundColor: theme.colors.outlineVariant },
-          ]}
-        />
+        <View style={[styles.endLine, { backgroundColor: theme.colors.outlineVariant }]} />
         <Text variant="labelLarge" style={styles.endText}>
           HAS LLEGADO AL FINAL
         </Text>
@@ -74,9 +54,7 @@ const CategoryDetailScreen = () => {
   const navigation = useNavigation<any>();
   const { category: initialCategory, slug } = (route.params as any) || {};
 
-  const [category, setCategory] = useState<WordPressCategory | null>(
-    initialCategory || null,
-  );
+  const [category, setCategory] = useState<WordPressCategory | null>(initialCategory || null);
   const [posts, setPosts] = useState<FormattedPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -103,19 +81,13 @@ const CategoryDetailScreen = () => {
 
         if (currentCategory) {
           // Refetch to get latest count
-          const freshCategory = await wordPressService.getCategoryById(
-            currentCategory.id,
-          );
+          const freshCategory = await wordPressService.getCategoryById(currentCategory.id);
           if (freshCategory) {
             setCategory(freshCategory);
             currentCategory = freshCategory;
           }
 
-          const fetchedPosts = await wordPressService.getPosts(
-            1,
-            10,
-            currentCategory.id,
-          );
+          const fetchedPosts = await wordPressService.getPosts(1, 10, currentCategory.id);
           setPosts(fetchedPosts);
           setHasMore(fetchedPosts.length === 10);
         }
@@ -136,13 +108,7 @@ const CategoryDetailScreen = () => {
     if (!category) return;
     setRefreshing(true);
     try {
-      const fetchedPosts = await wordPressService.getPosts(
-        1,
-        10,
-        category.id,
-        undefined,
-        true,
-      );
+      const fetchedPosts = await wordPressService.getPosts(1, 10, category.id, undefined, true);
       setPosts(fetchedPosts);
       setPage(1);
       setRefreshing(false);
@@ -159,11 +125,7 @@ const CategoryDetailScreen = () => {
     if (!category || !hasMore || refreshing || loading) return;
     try {
       const nextPage = page + 1;
-      const morePosts = await wordPressService.getPosts(
-        nextPage,
-        10,
-        category.id,
-      );
+      const morePosts = await wordPressService.getPosts(nextPage, 10, category.id);
       if (morePosts.length > 0) {
         setPosts([...posts, ...morePosts]);
         setPage(nextPage);
@@ -236,10 +198,7 @@ const CategoryDetailScreen = () => {
         );
       } catch (e) {
         const err = e as any;
-        if (
-          err.message !== 'User did not share' &&
-          err.message !== 'CANCELLED'
-        ) {
+        if (err.message !== 'User did not share' && err.message !== 'CANCELLED') {
           observabilityService.captureError(e, {
             context: 'CategoryDetailScreen.shareImage',
           });
@@ -260,29 +219,16 @@ const CategoryDetailScreen = () => {
       type: 'CATEGORY',
       count: category?.count,
     });
-    analyticsService.logShare(
-      'category_detail',
-      category?.id.toString() || 'unknown',
-      'text',
-    );
+    analyticsService.logShare('category_detail', category?.id.toString() || 'unknown', 'text');
   };
 
-  const containerStyle = [
-    styles.container,
-    { backgroundColor: theme.colors.background },
-  ];
+  const containerStyle = [styles.container, { backgroundColor: theme.colors.background }];
   const dialogDescriptionStyle = [
     styles.dialogDescription,
     { color: theme.colors.onSurfaceVariant },
   ];
 
-  const renderArticle = ({
-    item,
-    index,
-  }: {
-    item: FormattedPost;
-    index: number;
-  }) => (
+  const renderArticle = ({ item, index }: { item: FormattedPost; index: number }) => (
     <ArticleCard
       article={item}
       onPress={() => navigation.navigate('ArticleDetail', { article: item })}
@@ -295,9 +241,7 @@ const CategoryDetailScreen = () => {
   );
 
   const renderEmpty = () =>
-    !loading ? (
-      <DiscoverEmptyView message="No hay artículos en esta categoría" />
-    ) : null;
+    !loading ? <DiscoverEmptyView message="No hay artículos en esta categoría" /> : null;
 
   return (
     <View style={containerStyle}>
@@ -342,10 +286,9 @@ const CategoryDetailScreen = () => {
           data={posts}
           keyExtractor={(item: any) => item.id.toString()}
           scrollEventThrottle={16}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { useNativeDriver: true },
-          )}
+          onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+            useNativeDriver: true,
+          })}
           renderItem={renderArticle as any}
           estimatedItemSize={250}
           showsVerticalScrollIndicator={false}

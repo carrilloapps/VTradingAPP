@@ -1,7 +1,4 @@
-import {
-  CalculatorEngine,
-  INITIAL_STATE,
-} from '../../src/utils/CalculatorEngine';
+import { CalculatorEngine, INITIAL_STATE } from '../../src/utils/CalculatorEngine';
 import SafeLogger from '../../src/utils/safeLogger';
 import Decimal from 'decimal.js';
 
@@ -42,9 +39,7 @@ describe('CalculatorEngine', () => {
     it('should notify subscribers on change', () => {
       engine.inputDigit('5');
       expect(listener).toHaveBeenCalled();
-      expect(listener).toHaveBeenCalledWith(
-        expect.objectContaining({ currentValue: '5' }),
-      );
+      expect(listener).toHaveBeenCalledWith(expect.objectContaining({ currentValue: '5' }));
     });
 
     it('should stop notifying after unsubscribe', () => {
@@ -208,9 +203,7 @@ describe('CalculatorEngine', () => {
     });
     it('should handle infinite result', () => {
       // Mock plus to return Infinity
-      jest
-        .spyOn(Decimal.prototype, 'plus')
-        .mockImplementation(() => new Decimal(Infinity));
+      jest.spyOn(Decimal.prototype, 'plus').mockImplementation(() => new Decimal(Infinity));
 
       engine.inputDigit('1');
       engine.setOperation('+');

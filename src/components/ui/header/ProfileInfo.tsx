@@ -57,10 +57,7 @@ const ProfileInfo: React.FC<ProfileInfoProps> = ({
         >
           {isPremium ? 'PLAN PREMIUM' : 'PLAN GRATUITO'}
         </Text>
-        <Text
-          variant="titleMedium"
-          style={[styles.greeting, { color: theme.colors.onSurface }]}
-        >
+        <Text variant="titleMedium" style={[styles.greeting, { color: theme.colors.onSurface }]}>
           Hola, {userName}
         </Text>
       </View>

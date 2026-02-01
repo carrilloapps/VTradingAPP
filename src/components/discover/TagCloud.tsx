@@ -25,10 +25,7 @@ const TagCloud: React.FC<TagCloudProps> = ({ tags, onTagPress }) => {
             pressed && { backgroundColor: theme.colors.elevation.level3 },
           ]}
         >
-          <Text
-            variant="bodyMedium"
-            style={[styles.tagText, { color: theme.colors.onSurface }]}
-          >
+          <Text variant="bodyMedium" style={[styles.tagText, { color: theme.colors.onSurface }]}>
             {tag}
           </Text>
         </Pressable>

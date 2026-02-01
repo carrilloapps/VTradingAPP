@@ -19,18 +19,14 @@ describe('NotificationInitService', () => {
   it('should initialize notification system when permission is granted', async () => {
     (fcmService.checkPermission as jest.Mock).mockResolvedValue(true);
     (fcmService.getFCMToken as jest.Mock).mockResolvedValue('test-token');
-    (fcmService.subscribeToDemographics as jest.Mock).mockResolvedValue(
-      undefined,
-    );
+    (fcmService.subscribeToDemographics as jest.Mock).mockResolvedValue(undefined);
     (storageService.getAlerts as jest.Mock).mockResolvedValue([]);
 
     await notificationInitService.initialize();
 
     expect(fcmService.checkPermission).toHaveBeenCalled();
     expect(fcmService.getFCMToken).toHaveBeenCalled();
-    expect(fcmService.subscribeToDemographics).toHaveBeenCalledWith([
-      'all_users',
-    ]);
+    expect(fcmService.subscribeToDemographics).toHaveBeenCalledWith(['all_users']);
   });
 
   it('should not initialize when permission is denied', async () => {
@@ -45,9 +41,7 @@ describe('NotificationInitService', () => {
   it('should resubscribe to active alerts', async () => {
     (fcmService.checkPermission as jest.Mock).mockResolvedValue(true);
     (fcmService.getFCMToken as jest.Mock).mockResolvedValue('test-token');
-    (fcmService.subscribeToDemographics as jest.Mock).mockResolvedValue(
-      undefined,
-    );
+    (fcmService.subscribeToDemographics as jest.Mock).mockResolvedValue(undefined);
     (fcmService.subscribeToTopic as jest.Mock).mockResolvedValue(undefined);
     (storageService.getAlerts as jest.Mock).mockResolvedValue([
       {
@@ -85,9 +79,7 @@ describe('NotificationInitService', () => {
     (fcmService.requestUserPermission as jest.Mock).mockResolvedValue(true);
     (fcmService.checkPermission as jest.Mock).mockResolvedValue(true);
     (fcmService.getFCMToken as jest.Mock).mockResolvedValue('test-token');
-    (fcmService.subscribeToDemographics as jest.Mock).mockResolvedValue(
-      undefined,
-    );
+    (fcmService.subscribeToDemographics as jest.Mock).mockResolvedValue(undefined);
     (storageService.getAlerts as jest.Mock).mockResolvedValue([]);
 
     const granted = await notificationInitService.requestPermission();

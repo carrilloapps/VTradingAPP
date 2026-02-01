@@ -38,11 +38,7 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
       ? (theme.colors as any).error || '#F87171'
       : theme.colors.onSurfaceVariant;
 
-  const trendIcon = isPositive
-    ? 'trending-up'
-    : isNegative
-      ? 'trending-down'
-      : 'minus';
+  const trendIcon = isPositive ? 'trending-up' : isNegative ? 'trending-down' : 'minus';
 
   const isVertical = aspectRatio === '16:9';
 
@@ -81,14 +77,8 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
     { backgroundColor: theme.dark ? '#051911' : '#F0FDF4' },
   ];
 
-  const glowStyle = [
-    styles.templateGlow,
-    { backgroundColor: theme.colors.primary, opacity: 0.05 },
-  ];
-  const badgeStyle = [
-    styles.platformBadge,
-    { backgroundColor: theme.colors.surfaceVariant },
-  ];
+  const glowStyle = [styles.templateGlow, { backgroundColor: theme.colors.primary, opacity: 0.05 }];
+  const badgeStyle = [styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }];
 
   const logoStyle = [
     styles.templateMainLogo,
@@ -103,10 +93,7 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
     styles.freeBadge,
     { backgroundColor: (theme.colors as any).error || '#FF5252' },
   ];
-  const freeBadgeTextStyle = [
-    styles.freeBadgeText,
-    { fontSize: freeBadgeTextSize },
-  ];
+  const freeBadgeTextStyle = [styles.freeBadgeText, { fontSize: freeBadgeTextSize }];
 
   const urlBadgeStyle = [
     styles.templateUrlBadge,
@@ -122,18 +109,13 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
     { color: theme.colors.onSurfaceVariant, fontSize: dateTextSize },
   ];
 
-  const contentStyle = [
-    styles.templateContent,
-    isVertical && ({ gap: 40 } as const),
-  ];
+  const contentStyle = [styles.templateContent, isVertical && ({ gap: 40 } as const)];
 
   const cardStyle = [
     styles.mainCard,
     isVertical && styles.mainCardVertical,
     {
-      backgroundColor: theme.dark
-        ? 'rgba(255,255,255,0.03)'
-        : 'rgba(0,0,0,0.02)',
+      backgroundColor: theme.dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
       borderColor: theme.colors.outlineVariant,
     },
   ];
@@ -166,10 +148,7 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
     { color: theme.colors.onSurfaceVariant, fontSize: currencySize },
   ];
 
-  const trendBadgeStyle = [
-    styles.trendBadge,
-    { backgroundColor: trendColor + '15' },
-  ];
+  const trendBadgeStyle = [styles.trendBadge, { backgroundColor: trendColor + '15' }];
   const trendPercentTextStyle = [
     styles.trendPercentText,
     { color: trendColor, fontSize: trendTextSize },
@@ -177,10 +156,7 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
 
   const statLabelStyle = [styles.statLabel, { fontSize: statLabelSize }];
   const statValueStyle = [styles.statValue, { fontSize: statValueSize }];
-  const statCurrencyStyle = [
-    styles.statCurrency,
-    { fontSize: statCurrencySize },
-  ];
+  const statCurrencyStyle = [styles.statCurrency, { fontSize: statCurrencySize }];
 
   const footerTextStyle = [
     styles.templateFooterText,
@@ -194,10 +170,7 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
 
   return (
     <View
-      style={[
-        styles.hiddenTemplate,
-        { height: isVertical ? 600 * (16 / 9) : 600 },
-      ]}
+      style={[styles.hiddenTemplate, { height: isVertical ? 600 * (16 / 9) : 600 }]}
       pointerEvents="none"
       collapsable={false}
     >
@@ -225,17 +198,11 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
                 size={platformIconSize}
                 color={theme.colors.onSurfaceVariant}
               />
-              <Text style={platformTextHeaderStyle(platformTextSize)}>
-                Android
-              </Text>
+              <Text style={platformTextHeaderStyle(platformTextSize)}>Android</Text>
             </Surface>
             <View style={styles.flex1} />
             <Surface style={badgeStyle} elevation={1}>
-              <Icon
-                source="apple"
-                size={platformIconSize}
-                color={theme.colors.onSurfaceVariant}
-              />
+              <Icon source="apple" size={platformIconSize} color={theme.colors.onSurfaceVariant} />
               <Text style={platformTextHeaderStyle(platformTextSize)}>iOS</Text>
             </Surface>
           </View>
@@ -313,11 +280,7 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
                   <View style={labelColumnStyle}>
                     <Text style={currencyTextStyle}>Bs.</Text>
                     <View style={trendBadgeStyle}>
-                      <Icon
-                        source={trendIcon}
-                        size={trendIconSize}
-                        color={trendColor}
-                      />
+                      <Icon source={trendIcon} size={trendIconSize} color={trendColor} />
                       <Text style={trendPercentTextStyle}>
                         {isNeutral ? '' : isPositive ? '+' : ''}
                         {(rate.changePercent || 0).toFixed(2)}%
@@ -385,9 +348,7 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
                 size={footerIconSize}
                 color={theme.colors.primary}
               />
-              <Text style={footerTextStyle}>
-                MONITOREO FINANCIERO{isPremium ? ' PREMIUM' : ''}
-              </Text>
+              <Text style={footerTextStyle}>MONITOREO FINANCIERO{isPremium ? ' PREMIUM' : ''}</Text>
             </View>
           </View>
         </LinearGradient>

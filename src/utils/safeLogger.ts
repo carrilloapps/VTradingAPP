@@ -48,8 +48,7 @@ class SafeLogger {
       if (isSensitive && typeof value === 'string') {
         // Show only first 4 and last 4 characters
         if (value.length > 8) {
-          sanitized[key] =
-            `${value.substring(0, 4)}...${value.substring(value.length - 4)}`;
+          sanitized[key] = `${value.substring(0, 4)}...${value.substring(value.length - 4)}`;
         } else {
           sanitized[key] = '****';
         }
@@ -105,14 +104,11 @@ class SafeLogger {
   static sensitive(context: string, data: any): void {
     if (__DEV__) {
       // In development, show masked version
-      const masked =
-        typeof data === 'string' ? this.maskString(data) : this.sanitize(data);
+      const masked = typeof data === 'string' ? this.maskString(data) : this.sanitize(data);
       console.log(`[${context}] (SENSITIVE - DEV ONLY):`, masked);
     } else {
       // In production, just log that we received sensitive data
-      console.log(
-        `[${context}] Sensitive data received (hidden in production)`,
-      );
+      console.log(`[${context}] Sensitive data received (hidden in production)`);
     }
   }
 

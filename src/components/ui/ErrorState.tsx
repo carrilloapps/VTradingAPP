@@ -26,17 +26,10 @@ const ErrorState: React.FC<ErrorStateProps> = ({
         color={theme.colors.error}
         style={styles.icon}
       />
-      <Text style={[styles.text, { color: theme.colors.onSurfaceVariant }]}>
-        {message}
-      </Text>
+      <Text style={[styles.text, { color: theme.colors.onSurfaceVariant }]}>{message}</Text>
       {onRetry && (
         <View style={styles.buttonContainer}>
-          <CustomButton
-            variant="primary"
-            label="Reintentar"
-            onPress={onRetry}
-            icon="reload"
-          />
+          <CustomButton variant="primary" label="Reintentar" onPress={onRetry} icon="reload" />
         </View>
       )}
     </View>

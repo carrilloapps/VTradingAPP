@@ -10,10 +10,7 @@ const DiscoverFeedSkeleton = () => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
 
-  const containerStyle = [
-    styles.container,
-    { backgroundColor: theme.colors.background },
-  ];
+  const containerStyle = [styles.container, { backgroundColor: theme.colors.background }];
 
   const headerStyle = [styles.header, { paddingTop: insets.top + 12 }];
 
@@ -24,10 +21,7 @@ const DiscoverFeedSkeleton = () => {
         <Skeleton width={180} height={32} />
       </View>
 
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.content}
-      >
+      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {/* Categories Grid placeholder */}
         <View style={styles.categoriesGrid}>
           {[1, 2, 3, 4, 5, 6, 7, 8].map(item => (
@@ -47,12 +41,7 @@ const DiscoverFeedSkeleton = () => {
           <Skeleton width={60} height={16} />
         </View>
         <View style={styles.trendingRow}>
-          <Skeleton
-            width={280}
-            height={160}
-            borderRadius={16}
-            style={styles.trendingItem}
-          />
+          <Skeleton width={280} height={160} borderRadius={16} style={styles.trendingItem} />
           <Skeleton width={280} height={160} borderRadius={16} />
         </View>
 

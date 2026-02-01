@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useState,
-  useCallback,
-  useMemo,
-  useContext,
-} from 'react';
+import React, { createContext, useState, useCallback, useMemo, useContext } from 'react';
 import { useColorScheme } from 'react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
 
@@ -31,9 +25,7 @@ const ThemeContext = createContext<ThemeContextType>({
 
 const THEME_KEY = 'user_theme_preference';
 
-export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const systemScheme = useColorScheme();
 
   // Initialize synchronously with MMKV to prevent theme flicker
@@ -88,9 +80,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Determine effective theme
   const isDark = useMemo(() => {
-    return themeMode === 'system'
-      ? systemScheme === 'dark'
-      : themeMode === 'dark';
+    return themeMode === 'system' ? systemScheme === 'dark' : themeMode === 'dark';
   }, [themeMode, systemScheme]);
 
   const theme = useMemo(() => (isDark ? DarkTheme : LightTheme), [isDark]);

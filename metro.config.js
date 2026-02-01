@@ -29,10 +29,7 @@ const config = {
         try {
           // We map the requested path to the physical location in dist/module with .js extension
           // This bypasses the broken "exports" mapping in the package.json
-          const relativePath = moduleName.replace(
-            '@react-native-firebase/app/lib/',
-            '',
-          );
+          const relativePath = moduleName.replace('@react-native-firebase/app/lib/', '');
           const filePath = path.resolve(
             __dirname,
             'node_modules/@react-native-firebase/app/dist/module',

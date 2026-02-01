@@ -3,9 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 import { FlashList } from '@shopify/flash-list';
 
-import ExchangeCard, {
-  ExchangeCardProps,
-} from '@/components/dashboard/ExchangeCard';
+import ExchangeCard, { ExchangeCardProps } from '@/components/dashboard/ExchangeCard';
 import { CurrencyRate } from '@/services/CurrencyService';
 import { AppConfig } from '@/constants/AppConfig';
 import { TetherIcon } from '@/components/ui/TetherIcon';
@@ -48,13 +46,10 @@ const RatesSection: React.FC<RatesSectionProps> = ({ rates, navigation }) => {
       let displayValue = '0,00';
       try {
         if (rate.value && !isNaN(Number(rate.value))) {
-          displayValue = Number(rate.value).toLocaleString(
-            AppConfig.DEFAULT_LOCALE,
-            {
-              minimumFractionDigits: AppConfig.DECIMAL_PLACES,
-              maximumFractionDigits: AppConfig.DECIMAL_PLACES,
-            },
-          );
+          displayValue = Number(rate.value).toLocaleString(AppConfig.DEFAULT_LOCALE, {
+            minimumFractionDigits: AppConfig.DECIMAL_PLACES,
+            maximumFractionDigits: AppConfig.DECIMAL_PLACES,
+          });
         }
       } catch (e) {
         observabilityService.captureError(e, {
@@ -67,28 +62,20 @@ const RatesSection: React.FC<RatesSectionProps> = ({ rates, navigation }) => {
       let displaySellValue;
 
       if (rate.buyValue !== undefined && !isNaN(Number(rate.buyValue))) {
-        displayBuyValue = Number(rate.buyValue).toLocaleString(
-          AppConfig.DEFAULT_LOCALE,
-          {
-            minimumFractionDigits: AppConfig.DECIMAL_PLACES,
-            maximumFractionDigits: AppConfig.DECIMAL_PLACES,
-          },
-        );
+        displayBuyValue = Number(rate.buyValue).toLocaleString(AppConfig.DEFAULT_LOCALE, {
+          minimumFractionDigits: AppConfig.DECIMAL_PLACES,
+          maximumFractionDigits: AppConfig.DECIMAL_PLACES,
+        });
       }
 
       if (rate.sellValue !== undefined && !isNaN(Number(rate.sellValue))) {
-        displaySellValue = Number(rate.sellValue).toLocaleString(
-          AppConfig.DEFAULT_LOCALE,
-          {
-            minimumFractionDigits: AppConfig.DECIMAL_PLACES,
-            maximumFractionDigits: AppConfig.DECIMAL_PLACES,
-          },
-        );
+        displaySellValue = Number(rate.sellValue).toLocaleString(AppConfig.DEFAULT_LOCALE, {
+          minimumFractionDigits: AppConfig.DECIMAL_PLACES,
+          maximumFractionDigits: AppConfig.DECIMAL_PLACES,
+        });
       }
 
-      const iconBackground = theme.dark
-        ? theme.colors.primary
-        : theme.colors.inversePrimary;
+      const iconBackground = theme.dark ? theme.colors.primary : theme.colors.inversePrimary;
       let customIcon;
       let iconName = rate.iconName;
       let iconColor;
@@ -99,9 +86,7 @@ const RatesSection: React.FC<RatesSectionProps> = ({ rates, navigation }) => {
         iconColor = iconBackground;
         iconTintColor = '#212121';
       } else if (rate.code === 'USDT') {
-        customIcon = (
-          <TetherIcon backgroundColor={iconBackground} contentColor="#212121" />
-        );
+        customIcon = <TetherIcon backgroundColor={iconBackground} contentColor="#212121" />;
       }
 
       const getDescriptiveSubtitle = (r: CurrencyRate) => {
@@ -116,12 +101,8 @@ const RatesSection: React.FC<RatesSectionProps> = ({ rates, navigation }) => {
         subtitle: getDescriptiveSubtitle(rate),
         value: displayValue,
         currency: 'Bs',
-        changePercent:
-          rate.changePercent !== null
-            ? `${rate.changePercent.toFixed(2)}%`
-            : '0.00%',
-        isPositive:
-          rate.changePercent !== null ? rate.changePercent >= 0 : true,
+        changePercent: rate.changePercent !== null ? `${rate.changePercent.toFixed(2)}%` : '0.00%',
+        isPositive: rate.changePercent !== null ? rate.changePercent >= 0 : true,
         chartPath: getPath(rate.changePercent),
         iconName: iconName,
         iconColor: iconColor,

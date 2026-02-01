@@ -11,240 +11,209 @@ interface ArticleCardProps {
   variant?: 'compact' | 'featured';
 }
 
-const ArticleCard = React.memo(
-  ({ article, onPress, variant = 'compact' }: ArticleCardProps) => {
-    const theme = useTheme();
-    // const scale = React.useRef(new Animated.Value(1)).current; // Removed for performance
+const ArticleCard = React.memo(({ article, onPress, variant = 'compact' }: ArticleCardProps) => {
+  const theme = useTheme();
+  // const scale = React.useRef(new Animated.Value(1)).current; // Removed for performance
 
-    const isFeatured = variant === 'featured';
-    const fadeAnim = React.useRef(new Animated.Value(0)).current;
-    const slideAnim = React.useRef(new Animated.Value(20)).current;
+  const isFeatured = variant === 'featured';
+  const fadeAnim = React.useRef(new Animated.Value(0)).current;
+  const slideAnim = React.useRef(new Animated.Value(20)).current;
 
-    React.useEffect(() => {
-      Animated.parallel([
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: 500,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }, [fadeAnim, isFeatured, slideAnim]);
+  React.useEffect(() => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 500,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [fadeAnim, isFeatured, slideAnim]);
 
-    // Simplified touch handling (removed redundant scale animation)
-    const handlePressIn = () => {};
-    const handlePressOut = () => {};
+  // Simplified touch handling (removed redundant scale animation)
+  const handlePressIn = () => {};
+  const handlePressOut = () => {};
 
-    const animatedContainerStyle = [
-      styles.animatedContainer,
-      {
-        opacity: fadeAnim,
-        transform: [{ translateY: slideAnim }],
-      },
-    ];
+  const animatedContainerStyle = [
+    styles.animatedContainer,
+    {
+      opacity: fadeAnim,
+      transform: [{ translateY: slideAnim }],
+    },
+  ];
 
-    const touchableStyle = [
-      styles.touchable,
-      { borderRadius: theme.roundness * 5 },
-      isFeatured ? styles.featuredTouchable : styles.compactTouchable,
-    ];
+  const touchableStyle = [
+    styles.touchable,
+    { borderRadius: theme.roundness * 5 },
+    isFeatured ? styles.featuredTouchable : styles.compactTouchable,
+  ];
 
-    const surfaceStyle = [
-      styles.container,
-      isFeatured ? styles.featuredContainer : styles.compactContainer,
-      {
-        elevation: isFeatured ? 3 : 1,
-        backgroundColor: theme.colors.surface,
-      },
-    ];
+  const surfaceStyle = [
+    styles.container,
+    isFeatured ? styles.featuredContainer : styles.compactContainer,
+    {
+      elevation: isFeatured ? 3 : 1,
+      backgroundColor: theme.colors.surface,
+    },
+  ];
 
-    const featuredImageStyle = [
-      styles.featuredImage,
-      { backgroundColor: theme.colors.surfaceVariant },
-    ];
+  const featuredImageStyle = [
+    styles.featuredImage,
+    { backgroundColor: theme.colors.surfaceVariant },
+  ];
 
-    const floatingCategoryStyle = [
-      styles.floatingCategory,
-      {
-        backgroundColor: theme.colors.primary,
-        borderRadius: theme.roundness * 1.5,
-      },
-    ];
+  const floatingCategoryStyle = [
+    styles.floatingCategory,
+    {
+      backgroundColor: theme.colors.primary,
+      borderRadius: theme.roundness * 1.5,
+    },
+  ];
 
-    const floatingCategoryTextStyle = [
-      styles.floatingCategoryText,
-      { color: theme.colors.onPrimary },
-    ];
+  const floatingCategoryTextStyle = [
+    styles.floatingCategoryText,
+    { color: theme.colors.onPrimary },
+  ];
 
-    const categoryTextStyle = [
-      styles.category,
-      { color: theme.colors.primary },
-    ];
+  const categoryTextStyle = [styles.category, { color: theme.colors.primary }];
 
-    const timeTextStyle = [
-      styles.time,
-      { color: theme.colors.onSurfaceVariant },
-    ];
+  const timeTextStyle = [styles.time, { color: theme.colors.onSurfaceVariant }];
 
-    const badgeStyle = [
-      styles.badge,
-      {
-        backgroundColor: article.isPromo
-          ? theme.colors.primary
-          : theme.colors.error,
-        borderRadius: theme.roundness,
-      },
-    ];
+  const badgeStyle = [
+    styles.badge,
+    {
+      backgroundColor: article.isPromo ? theme.colors.primary : theme.colors.error,
+      borderRadius: theme.roundness,
+    },
+  ];
 
-    const badgeTextStyle = [
-      styles.badgeText,
-      {
-        color: article.isPromo ? theme.colors.onPrimary : theme.colors.onError,
-      },
-    ];
+  const badgeTextStyle = [
+    styles.badgeText,
+    {
+      color: article.isPromo ? theme.colors.onPrimary : theme.colors.onError,
+    },
+  ];
 
-    const titleStyle = [
-      styles.title,
-      { color: theme.colors.onSurface },
-      isFeatured ? styles.featuredTitle : styles.compactTitle,
-    ];
+  const titleStyle = [
+    styles.title,
+    { color: theme.colors.onSurface },
+    isFeatured ? styles.featuredTitle : styles.compactTitle,
+  ];
 
-    const excerptStyle = [
-      styles.excerpt,
-      { color: theme.colors.onSurfaceVariant },
-    ];
+  const excerptStyle = [styles.excerpt, { color: theme.colors.onSurfaceVariant }];
 
-    const featuredTimeTextStyle = { color: theme.colors.onSurfaceVariant };
+  const featuredTimeTextStyle = { color: theme.colors.onSurfaceVariant };
 
-    const compactImageStyle = [
-      styles.compactImage,
-      { borderRadius: theme.roundness * 3 },
-    ];
+  const compactImageStyle = [styles.compactImage, { borderRadius: theme.roundness * 3 }];
 
-    return (
-      <Animated.View style={animatedContainerStyle}>
-        <TouchableRipple
-          onPress={onPress}
-          onPressIn={handlePressIn}
-          onPressOut={handlePressOut}
-          style={touchableStyle}
-          borderless
-        >
-          <Surface style={surfaceStyle} elevation={0}>
-            {isFeatured && (
-              <View style={styles.imageWrapper}>
-                <FastImage
-                  source={{ uri: article.image }}
-                  style={featuredImageStyle}
-                  resizeMode={FastImage.resizeMode.cover}
-                />
+  return (
+    <Animated.View style={animatedContainerStyle}>
+      <TouchableRipple
+        onPress={onPress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={touchableStyle}
+        borderless
+      >
+        <Surface style={surfaceStyle} elevation={0}>
+          {isFeatured && (
+            <View style={styles.imageWrapper}>
+              <FastImage
+                source={{ uri: article.image }}
+                style={featuredImageStyle}
+                resizeMode={FastImage.resizeMode.cover}
+              />
+              {article.categories && article.categories.length > 0 && (
+                <Surface style={floatingCategoryStyle} elevation={2}>
+                  <Text style={floatingCategoryTextStyle}>
+                    {article.categories[0].name.toUpperCase()}
+                  </Text>
+                </Surface>
+              )}
+            </View>
+          )}
+
+          <View
+            style={[styles.content, isFeatured ? styles.featuredContent : styles.compactContent]}
+          >
+            {!isFeatured && (
+              <View style={styles.compactHeader}>
                 {article.categories && article.categories.length > 0 && (
-                  <Surface style={floatingCategoryStyle} elevation={2}>
-                    <Text style={floatingCategoryTextStyle}>
-                      {article.categories[0].name.toUpperCase()}
-                    </Text>
-                  </Surface>
+                  <Text variant="labelSmall" style={categoryTextStyle}>
+                    {article.categories[0].name.toUpperCase()}
+                  </Text>
                 )}
+                <Text variant="bodySmall" style={timeTextStyle}>
+                  {article.time}
+                </Text>
               </View>
             )}
 
-            <View
-              style={[
-                styles.content,
-                isFeatured ? styles.featuredContent : styles.compactContent,
-              ]}
-            >
-              {!isFeatured && (
-                <View style={styles.compactHeader}>
-                  {article.categories && article.categories.length > 0 && (
-                    <Text variant="labelSmall" style={categoryTextStyle}>
-                      {article.categories[0].name.toUpperCase()}
-                    </Text>
-                  )}
-                  <Text variant="bodySmall" style={timeTextStyle}>
+            <View style={styles.titleContainer}>
+              {(article.isTrending ||
+                article.tags?.some(t => t.slug === 'breaking') ||
+                article.isPromo) && (
+                <View style={badgeStyle}>
+                  <Text style={badgeTextStyle}>
+                    {article.tags?.some(t => t.slug === 'breaking')
+                      ? 'BREAKING'
+                      : article.isTrending
+                        ? 'TRENDING'
+                        : 'PROMO'}
+                  </Text>
+                </View>
+              )}
+              <Text
+                variant={isFeatured ? 'headlineSmall' : 'titleMedium'}
+                style={titleStyle}
+                numberOfLines={isFeatured ? 3 : 2}
+              >
+                {article.title}
+              </Text>
+            </View>
+
+            {isFeatured && article.excerpt && (
+              <Text variant="bodyMedium" style={excerptStyle} numberOfLines={3}>
+                {article.excerpt.replace(/<[^>]*>?/gm, '').trim()}
+              </Text>
+            )}
+
+            <View style={styles.footer}>
+              <View style={styles.authorSection}>
+                {article.author?.avatar && (
+                  <FastImage source={{ uri: article.author.avatar }} style={styles.authorAvatar} />
+                )}
+                <Text variant="labelSmall" style={styles.authorText}>
+                  {article.author?.name || article.source}
+                </Text>
+                <Text variant="labelSmall" style={styles.dotSeparator}>
+                  •
+                </Text>
+                <Text variant="labelSmall" style={styles.readTimeText}>
+                  {article.readTime}
+                </Text>
+              </View>
+
+              {isFeatured && (
+                <View style={styles.featuredTime}>
+                  <Text variant="labelSmall" style={featuredTimeTextStyle}>
                     {article.time}
                   </Text>
                 </View>
               )}
-
-              <View style={styles.titleContainer}>
-                {(article.isTrending ||
-                  article.tags?.some(t => t.slug === 'breaking') ||
-                  article.isPromo) && (
-                  <View style={badgeStyle}>
-                    <Text style={badgeTextStyle}>
-                      {article.tags?.some(t => t.slug === 'breaking')
-                        ? 'BREAKING'
-                        : article.isTrending
-                          ? 'TRENDING'
-                          : 'PROMO'}
-                    </Text>
-                  </View>
-                )}
-                <Text
-                  variant={isFeatured ? 'headlineSmall' : 'titleMedium'}
-                  style={titleStyle}
-                  numberOfLines={isFeatured ? 3 : 2}
-                >
-                  {article.title}
-                </Text>
-              </View>
-
-              {isFeatured && article.excerpt && (
-                <Text
-                  variant="bodyMedium"
-                  style={excerptStyle}
-                  numberOfLines={3}
-                >
-                  {article.excerpt.replace(/<[^>]*>?/gm, '').trim()}
-                </Text>
-              )}
-
-              <View style={styles.footer}>
-                <View style={styles.authorSection}>
-                  {article.author?.avatar && (
-                    <FastImage
-                      source={{ uri: article.author.avatar }}
-                      style={styles.authorAvatar}
-                    />
-                  )}
-                  <Text variant="labelSmall" style={styles.authorText}>
-                    {article.author?.name || article.source}
-                  </Text>
-                  <Text variant="labelSmall" style={styles.dotSeparator}>
-                    •
-                  </Text>
-                  <Text variant="labelSmall" style={styles.readTimeText}>
-                    {article.readTime}
-                  </Text>
-                </View>
-
-                {isFeatured && (
-                  <View style={styles.featuredTime}>
-                    <Text variant="labelSmall" style={featuredTimeTextStyle}>
-                      {article.time}
-                    </Text>
-                  </View>
-                )}
-              </View>
             </View>
+          </View>
 
-            {!isFeatured && (
-              <FastImage
-                source={{ uri: article.image }}
-                style={compactImageStyle}
-              />
-            )}
-          </Surface>
-        </TouchableRipple>
-      </Animated.View>
-    );
-  },
-);
+          {!isFeatured && <FastImage source={{ uri: article.image }} style={compactImageStyle} />}
+        </Surface>
+      </TouchableRipple>
+    </Animated.View>
+  );
+});
 
 const styles = StyleSheet.create({
   touchable: {

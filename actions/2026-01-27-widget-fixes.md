@@ -61,10 +61,7 @@ En `VTradingWidget.tsx` línea 114, el valor y la moneda se concatenan dentro de
 **Código actual:**
 
 ```tsx
-<TextWidget
-  text={`${item.value} ${item.currency}`}
-  style={{ fontSize: 14, fontWeight: '700', color: textColor }}
-/>
+<TextWidget text={`${item.value} ${item.currency}`} style={{ fontSize: 14, fontWeight: '700', color: textColor }} />
 ```
 
 **Problema:** El template string puede no evaluarse correctamente en el contexto del widget nativo, resultando en texto vacío o solo mostrando parte de la información.
@@ -72,10 +69,7 @@ En `VTradingWidget.tsx` línea 114, el valor y la moneda se concatenan dentro de
 **Solución propuesta:**
 
 ```tsx
-<TextWidget
-  text={item.value + ' ' + item.currency}
-  style={{ fontSize: 14, fontWeight: '700', color: textColor }}
-/>
+<TextWidget text={item.value + ' ' + item.currency} style={{ fontSize: 14, fontWeight: '700', color: textColor }} />
 ```
 
 **Impacto esperado:** Mostrar correctamente el valor y la moneda (ej: "45.50 Bs").
@@ -94,10 +88,7 @@ Similar al problema #2, en la línea 122 se usa sintaxis compleja con template s
 **Código actual:**
 
 ```tsx
-<TextWidget
-  text={`${item.trend === 'up' ? '▲' : item.trend === 'down' ? '▼' : '−'}${showGraph ? ` ${item.trendValue}` : ''}`}
-  style={{ fontSize: 11, fontWeight: '700', color: item.trendColor }}
-/>
+<TextWidget text={`${item.trend === 'up' ? '▲' : item.trend === 'down' ? '▼' : '−'}${showGraph ? ` ${item.trendValue}` : ''}`} style={{ fontSize: 11, fontWeight: '700', color: item.trendColor }} />
 ```
 
 **Problema:** Esta expresión es demasiado compleja y puede fallar en renderizado nativo.
@@ -111,22 +102,13 @@ Similar al problema #2, en la línea 122 se usa sintaxis compleja con template s
 const trendIcon = item.trend === 'up' ? '▲' : item.trend === 'down' ? '▼' : '−';
 const trendText = showGraph ? trendIcon + ' ' + item.trendValue : trendIcon;
 
-<TextWidget
-  text={trendText}
-  style={{ fontSize: 11, fontWeight: '700', color: item.trendColor }}
-/>;
+<TextWidget text={trendText} style={{ fontSize: 11, fontWeight: '700', color: item.trendColor }} />;
 ```
 
 Pero dado que no podemos declarar variables dentro del JSX map, la mejor solución es:
 
 ```tsx
-<TextWidget
-  text={
-    (item.trend === 'up' ? '▲' : item.trend === 'down' ? '▼' : '−') +
-    (showGraph ? ' ' + item.trendValue : '')
-  }
-  style={{ fontSize: 11, fontWeight: '700', color: item.trendColor }}
-/>
+<TextWidget text={(item.trend === 'up' ? '▲' : item.trend === 'down' ? '▼' : '−') + (showGraph ? ' ' + item.trendValue : '')} style={{ fontSize: 11, fontWeight: '700', color: item.trendColor }} />
 ```
 
 **Impacto esperado:** Mostrar correctamente la flecha de tendencia y el porcentaje (ej: "▲ +2.5%").

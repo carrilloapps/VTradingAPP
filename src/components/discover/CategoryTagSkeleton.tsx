@@ -27,10 +27,7 @@ const CategoryTagSkeleton = () => {
     </View>
   );
 
-  const containerStyle = [
-    styles.container,
-    { backgroundColor: theme.colors.background },
-  ];
+  const containerStyle = [styles.container, { backgroundColor: theme.colors.background }];
 
   return (
     <View style={containerStyle}>

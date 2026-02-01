@@ -120,16 +120,7 @@ export class StocksService {
 
   /* eslint-disable no-bitwise */
   private static getColorForStock(symbol: string): string {
-    const colors = [
-      'emerald',
-      'blue',
-      'orange',
-      'amber',
-      'indigo',
-      'rose',
-      'cyan',
-      'violet',
-    ];
+    const colors = ['emerald', 'blue', 'orange', 'amber', 'indigo', 'rose', 'cyan', 'violet'];
     let hash = 0;
     for (let i = 0; i < symbol.length; i++) {
       hash = symbol.charCodeAt(i) + ((hash << 5) - hash);
@@ -142,8 +133,7 @@ export class StocksService {
     if (val === null || val === undefined) return 0;
     if (typeof val === 'number') {
       // Range check
-      if (!Number.isFinite(val) || Math.abs(val) > Number.MAX_SAFE_INTEGER)
-        return 0;
+      if (!Number.isFinite(val) || Math.abs(val) > Number.MAX_SAFE_INTEGER) return 0;
       return val;
     }
     if (typeof val === 'string') {
@@ -151,12 +141,7 @@ export class StocksService {
       const normalized = val.replace(',', '.');
       const num = Number(normalized);
       // Range check and NaN check
-      if (
-        isNaN(num) ||
-        !Number.isFinite(num) ||
-        Math.abs(num) > Number.MAX_SAFE_INTEGER
-      )
-        return 0;
+      if (isNaN(num) || !Number.isFinite(num) || Math.abs(num) > Number.MAX_SAFE_INTEGER) return 0;
       return num;
     }
     return 0;
@@ -236,13 +221,10 @@ export class StocksService {
    */
   static async getAllStocks(): Promise<StockData[]> {
     try {
-      const response = await apiClient.get<ApiStocksResponse>(
-        'api/bvc/market',
-        {
-          params: { page: 1, limit: 500 },
-          useCache: false,
-        },
-      );
+      const response = await apiClient.get<ApiStocksResponse>('api/bvc/market', {
+        params: { page: 1, limit: 500 },
+        useCache: false,
+      });
       const rawList = response.data || response.stocks || [];
       return rawList.map(item => this.mapStock(item));
     } catch (e) {
@@ -284,14 +266,11 @@ export class StocksService {
     const trace = await performanceService.startTrace('get_stocks_service');
     try {
       // API Call with Pagination
-      const response = await apiClient.get<ApiStocksResponse>(
-        'api/bvc/market',
-        {
-          params: { page, limit: 20 },
-          useCache: !forceRefresh && page === 1,
-          updateCache: forceRefresh && page === 1,
-        },
-      );
+      const response = await apiClient.get<ApiStocksResponse>('api/bvc/market', {
+        params: { page, limit: 20 },
+        useCache: !forceRefresh && page === 1,
+        updateCache: forceRefresh && page === 1,
+      });
 
       // Handle both "data" (standard) and "stocks" (legacy/fallback) fields
       const rawList = response.data || response.stocks || [];
@@ -309,9 +288,7 @@ export class StocksService {
         this.currentPage = response.pagination.page;
       }
 
-      const newStocks: StockData[] = rawList.map((item, _index) =>
-        this.mapStock(item),
-      );
+      const newStocks: StockData[] = rawList.map((item, _index) => this.mapStock(item));
 
       if (page === 1) {
         this.currentStocks = newStocks;
@@ -363,13 +340,10 @@ export class StocksService {
   static async getMarketIndex(): Promise<any> {
     try {
       // Fetch real market data
-      const response = await apiClient.get<ApiStocksResponse>(
-        'api/bvc/market',
-        {
-          useCache: true, // Use cache for index as well
-          params: { limit: 1 }, // We just need metadata if possible, but endpoint might return all
-        },
-      );
+      const response = await apiClient.get<ApiStocksResponse>('api/bvc/market', {
+        useCache: true, // Use cache for index as well
+        params: { limit: 1 }, // We just need metadata if possible, but endpoint might return all
+      });
 
       const ibcData = response.indices?.find(i => i.symbol === 'IBC');
       const stats = response.stats;
@@ -404,8 +378,7 @@ export class StocksService {
           volume: volumeStr, // Displaying Total Amount in VES as "Volume" in Hero
           stats: marketStats,
           statusState: response.status?.state,
-          updateDate:
-            response.status?.date || new Date().toLocaleDateString('es-VE'),
+          updateDate: response.status?.date || new Date().toLocaleDateString('es-VE'),
         };
       }
 

@@ -106,27 +106,13 @@ export const BottomSheetModal: React.FC<BottomSheetModalProps> = ({
   const contentStyle = height === 'auto' ? {} : { flex: 1 };
 
   return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
       <View style={styles.overlay}>
         {/* Backdrop - Tap to close */}
-        <TouchableOpacity
-          style={StyleSheet.absoluteFill}
-          onPress={onClose}
-          activeOpacity={1}
-        />
+        <TouchableOpacity style={StyleSheet.absoluteFill} onPress={onClose} activeOpacity={1} />
 
         {/* Modal Content - Animated Wrapper */}
-        <Animated.View
-          style={[
-            styles.containerWrapper,
-            { transform: [{ translateY: panY }] },
-          ]}
-        >
+        <Animated.View style={[styles.containerWrapper, { transform: [{ translateY: panY }] }]}>
           <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             style={[styles.container, themeStyles.container, style]}

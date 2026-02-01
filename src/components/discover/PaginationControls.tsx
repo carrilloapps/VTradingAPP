@@ -1,11 +1,6 @@
 import React from 'react';
 import { StyleSheet, View } from 'react-native';
-import {
-  Text,
-  IconButton,
-  Surface,
-  ActivityIndicator,
-} from 'react-native-paper';
+import { Text, IconButton, Surface, ActivityIndicator } from 'react-native-paper';
 
 import { useAppTheme } from '@/theme';
 
@@ -28,10 +23,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
 
   if (totalPages <= 1) return null;
 
-  const containerStyle = [
-    styles.container,
-    { backgroundColor: theme.colors.elevation.level1 },
-  ];
+  const containerStyle = [styles.container, { backgroundColor: theme.colors.elevation.level1 }];
 
   const currentPageTextStyle = [
     styles.text,
@@ -54,8 +46,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
             <ActivityIndicator size="small" color={theme.colors.primary} />
           ) : (
             <Text variant="labelLarge" style={styles.text}>
-              Página <Text style={currentPageTextStyle}>{currentPage}</Text> de{' '}
-              {totalPages}
+              Página <Text style={currentPageTextStyle}>{currentPage}</Text> de {totalPages}
             </Text>
           )}
         </View>

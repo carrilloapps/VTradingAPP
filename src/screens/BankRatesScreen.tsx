@@ -31,10 +31,7 @@ import { useToastStore } from '@/stores/toastStore';
 import { AppTheme } from '@/theme';
 import { useNavigation } from '@react-navigation/native';
 import { observabilityService } from '@/services/ObservabilityService';
-import {
-  analyticsService,
-  ANALYTICS_EVENTS,
-} from '@/services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '@/services/firebase/AnalyticsService';
 import { BolivarIcon } from '@/components/ui/BolivarIcon';
 import SafeLogger from '@/utils/safeLogger';
 
@@ -72,19 +69,14 @@ const BankRatesScreen = () => {
         if (!isRefresh && nextInfo.page > 1) setLoadingMore(true);
 
         // Fetch Bank Rates - Limit 20 for better infinite scroll experience
-        const { rates, pagination } = await CurrencyService.getBankRates(
-          nextInfo.page,
-          20,
-        );
+        const { rates, pagination } = await CurrencyService.getBankRates(nextInfo.page, 20);
 
         // Fetch Official BCV Rate (only on first load or refresh)
         if (isRefresh || nextInfo.page === 1) {
           try {
             const allRates = await CurrencyService.getRates(isRefresh);
             const bcv = allRates.find(
-              r =>
-                r.code === 'USD' &&
-                (r.source === 'BCV' || r.name.includes('BCV')),
+              r => r.code === 'USD' && (r.source === 'BCV' || r.name.includes('BCV')),
             );
             if (bcv) setOfficialRate(bcv);
           } catch (e) {
@@ -180,10 +172,7 @@ const BankRatesScreen = () => {
 
   // Find BCV rate if available (assuming it might be in the list or we mock it for the UI)
   const bcvRate = useMemo(() => {
-    return (
-      officialRate ||
-      bankRates.find(r => r.name.includes('BCV') || r.source?.includes('BCV'))
-    );
+    return officialRate || bankRates.find(r => r.name.includes('BCV') || r.source?.includes('BCV'));
   }, [bankRates, officialRate]);
 
   const renderItem = useCallback(
@@ -219,10 +208,7 @@ const BankRatesScreen = () => {
           buyPercentage={buyPercentage}
           sellPercentage={sellPercentage}
           onPress={() => {
-            analyticsService.logSelectContent(
-              'bank_rate',
-              `${item.code}_${item.name}`,
-            );
+            analyticsService.logSelectContent('bank_rate', `${item.code}_${item.name}`);
             (navigation as any).navigate('CurrencyDetail', {
               rate: item,
               currencyId: item.id,
@@ -239,9 +225,7 @@ const BankRatesScreen = () => {
     return (
       <View style={styles.footerLoader}>
         <ActivityIndicator size="small" color={theme.colors.primary} />
-        <Text style={[styles.footerText, { color: footerTextColor }]}>
-          Cargando más bancos...
-        </Text>
+        <Text style={[styles.footerText, { color: footerTextColor }]}>Cargando más bancos...</Text>
       </View>
     );
   };
@@ -261,13 +245,9 @@ const BankRatesScreen = () => {
       {/* BCV Section */}
       <View style={styles.bcvSection}>
         <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>
-            VALORES SEGÚN BCV
-          </Text>
+          <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>VALORES SEGÚN BCV</Text>
           <View style={[styles.liveBadge, { backgroundColor: liveBadgeBg }]}>
-            <Text style={[styles.liveText, { color: liveTextColor }]}>
-              TIEMPO REAL
-            </Text>
+            <Text style={[styles.liveText, { color: liveTextColor }]}>TIEMPO REAL</Text>
           </View>
         </View>
 
@@ -285,20 +265,12 @@ const BankRatesScreen = () => {
                   { backgroundColor: bcvIconBg, borderColor: bcvIconBorder },
                 ]}
               >
-                <MaterialCommunityIcons
-                  name="bank"
-                  size={24}
-                  color={bcvTextColor}
-                />
+                <MaterialCommunityIcons name="bank" size={24} color={bcvTextColor} />
               </View>
               <View>
-                <Text style={[styles.bcvTitle, { color: bcvTextColor }]}>
-                  Tasa General (BCV)
-                </Text>
+                <Text style={[styles.bcvTitle, { color: bcvTextColor }]}>Tasa General (BCV)</Text>
                 <View style={styles.bcvSubtitleRow}>
-                  <View
-                    style={[styles.statusDot, { backgroundColor: statusDotBg }]}
-                  />
+                  <View style={[styles.statusDot, { backgroundColor: statusDotBg }]} />
                   <Text style={[styles.bcvSubtitle, { color: bcvTextColor }]}>
                     {bcvRate?.lastUpdated
                       ? `A ${new Date(bcvRate.lastUpdated).toLocaleString('es-VE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
@@ -319,11 +291,7 @@ const BankRatesScreen = () => {
                     })
                   : '--,--'}
               </Text>
-              <Text
-                style={[styles.bcvCurrency, { color: theme.colors.onPrimary }]}
-              >
-                Bs/$
-              </Text>
+              <Text style={[styles.bcvCurrency, { color: theme.colors.onPrimary }]}>Bs/$</Text>
             </View>
           </View>
 
@@ -339,20 +307,10 @@ const BankRatesScreen = () => {
       </View>
 
       <View style={styles.listHeader}>
-        <Text
-          style={[
-            styles.sectionTitle,
-            { color: theme.colors.onSurfaceVariant },
-          ]}
-        >
+        <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>
           COTIZACIONES BANCARIAS
         </Text>
-        <View
-          style={[
-            styles.listHeaderBadge,
-            { backgroundColor: theme.colors.primaryContainer },
-          ]}
-        >
+        <View style={[styles.listHeaderBadge, { backgroundColor: theme.colors.primaryContainer }]}>
           <Text
             style={[
               styles.sectionSubtitle,
@@ -396,9 +354,7 @@ const BankRatesScreen = () => {
   );
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-    >
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar
         backgroundColor="transparent"
         translucent
@@ -416,12 +372,7 @@ const BankRatesScreen = () => {
       />
 
       {/* Fixed Search Bar Area */}
-      <View
-        style={[
-          styles.searchArea,
-          { backgroundColor: theme.colors.background },
-        ]}
-      >
+      <View style={[styles.searchArea, { backgroundColor: theme.colors.background }]}>
         <SearchBar
           placeholder="Buscar banco..."
           value={searchQuery}
@@ -454,9 +405,7 @@ const BankRatesScreen = () => {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={styles.centerContainer}>
-              <Text style={{ color: theme.colors.onSurfaceVariant }}>
-                No hay tasas disponibles
-              </Text>
+              <Text style={{ color: theme.colors.onSurfaceVariant }}>No hay tasas disponibles</Text>
             </View>
           }
         />

@@ -138,11 +138,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
         style,
       ]}
       contentStyle={contentStyle}
-      labelStyle={[
-        styles.label,
-        variant === 'link' && styles.linkLabel,
-        labelStyle,
-      ]}
+      labelStyle={[styles.label, variant === 'link' && styles.linkLabel, labelStyle]}
       testID={testID}
     >
       {label}

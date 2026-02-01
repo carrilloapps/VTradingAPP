@@ -55,9 +55,7 @@ const CategoryTab = ({ name, image, selected, onPress }: CategoryTabProps) => {
               backgroundColor: selected
                 ? theme.colors.primaryContainer
                 : theme.colors.elevation.level1,
-              borderColor: selected
-                ? theme.colors.primary
-                : theme.colors.outline,
+              borderColor: selected ? theme.colors.primary : theme.colors.outline,
             },
           ]}
           elevation={0}
@@ -75,9 +73,7 @@ const CategoryTab = ({ name, image, selected, onPress }: CategoryTabProps) => {
                 style={[
                   styles.iconContainer,
                   {
-                    backgroundColor: selected
-                      ? theme.colors.primary
-                      : theme.colors.surfaceVariant,
+                    backgroundColor: selected ? theme.colors.primary : theme.colors.surfaceVariant,
                     borderRadius: theme.roundness * 3,
                   },
                 ]}
@@ -85,11 +81,7 @@ const CategoryTab = ({ name, image, selected, onPress }: CategoryTabProps) => {
                 <MaterialCommunityIcons
                   name={getCategoryIcon(name)}
                   size={18}
-                  color={
-                    selected
-                      ? theme.colors.onPrimary
-                      : theme.colors.onSurfaceVariant
-                  }
+                  color={selected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant}
                 />
               </View>
             )}
@@ -100,9 +92,7 @@ const CategoryTab = ({ name, image, selected, onPress }: CategoryTabProps) => {
               style={[
                 styles.label,
                 {
-                  color: selected
-                    ? theme.colors.onPrimaryContainer
-                    : theme.colors.onSurface,
+                  color: selected ? theme.colors.onPrimaryContainer : theme.colors.onSurface,
                 },
               ]}
               numberOfLines={1}

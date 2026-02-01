@@ -25,30 +25,16 @@ const SectionHeader = ({
 }: SectionHeaderProps) => {
   const theme = useAppTheme();
 
-  const containerStyle = [
-    styles.listHeader,
-    { paddingHorizontal },
-    center && styles.justifyCenter,
-  ];
+  const containerStyle = [styles.listHeader, { paddingHorizontal }, center && styles.justifyCenter];
 
-  const accentStyle = [
-    styles.accent,
-    { backgroundColor: theme.colors.primary },
-  ];
+  const accentStyle = [styles.accent, { backgroundColor: theme.colors.primary }];
 
   const titleStyle = [
     styles.sectionTitle,
     variant === 'primary' ? styles.primaryText : styles.secondaryText,
     {
-      color:
-        variant === 'primary'
-          ? theme.colors.onSurface
-          : theme.colors.onSurfaceVariant,
-      textAlign: (center ? 'center' : 'left') as
-        | 'center'
-        | 'left'
-        | 'right'
-        | 'justify',
+      color: variant === 'primary' ? theme.colors.onSurface : theme.colors.onSurfaceVariant,
+      textAlign: (center ? 'center' : 'left') as 'center' | 'left' | 'right' | 'justify',
     },
     center && styles.flex1,
   ];
@@ -58,13 +44,8 @@ const SectionHeader = ({
   return (
     <View style={containerStyle}>
       <View style={styles.titleWrapper}>
-        {variant === 'primary' && !center && !hideAccent && (
-          <View style={accentStyle} />
-        )}
-        <Text
-          variant={variant === 'primary' ? 'headlineSmall' : 'labelMedium'}
-          style={titleStyle}
-        >
+        {variant === 'primary' && !center && !hideAccent && <View style={accentStyle} />}
+        <Text variant={variant === 'primary' ? 'headlineSmall' : 'labelMedium'} style={titleStyle}>
           {title}
         </Text>
       </View>
@@ -75,11 +56,7 @@ const SectionHeader = ({
             <Text variant="labelLarge" style={actionTextStyle}>
               Ver todo
             </Text>
-            <Icon
-              source="chevron-right"
-              size={20}
-              color={theme.colors.primary}
-            />
+            <Icon source="chevron-right" size={20} color={theme.colors.primary} />
           </View>
         </TouchableRipple>
       )}

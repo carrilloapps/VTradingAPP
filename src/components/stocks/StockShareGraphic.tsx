@@ -60,9 +60,7 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
 
   const previousClose = stock.price - (stock.changeAmount || 0);
   const averagePrice =
-    stock.volumeAmount && stock.volumeShares
-      ? stock.volumeAmount / stock.volumeShares
-      : 0;
+    stock.volumeAmount && stock.volumeShares ? stock.volumeAmount / stock.volumeShares : 0;
 
   const formatCompactNumber = (num: number, isCurrency: boolean = false) => {
     if (num >= 1000000) {
@@ -73,10 +71,7 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
           }) + 'b'
         );
       }
-      return (
-        (num / 1000000).toLocaleString('es-VE', { maximumFractionDigits: 2 }) +
-        'm'
-      );
+      return (num / 1000000).toLocaleString('es-VE', { maximumFractionDigits: 2 }) + 'm';
     }
     return num.toLocaleString('es-VE', {
       minimumFractionDigits: isCurrency ? 2 : 0,
@@ -86,10 +81,7 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
 
   return (
     <View
-      style={[
-        styles.hiddenTemplate,
-        { height: isVertical ? 600 * (16 / 9) : 600 },
-      ]}
+      style={[styles.hiddenTemplate, { height: isVertical ? 600 * (16 / 9) : 600 }]}
       pointerEvents="none"
       collapsable={false}
     >
@@ -106,26 +98,16 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
           colors={theme.dark ? ['#051911', '#0A0A0A'] : ['#F0FDF4', '#FFFFFF']}
           style={[
             styles.shareTemplate,
-            isVertical
-              ? styles.shareTemplateVertical
-              : styles.shareTemplateSquare,
+            isVertical ? styles.shareTemplateVertical : styles.shareTemplateSquare,
           ]}
         >
           {/* Decorative Elements */}
-          <View
-            style={[
-              styles.templateGlow,
-              { backgroundColor: theme.colors.primary },
-            ]}
-          />
+          <View style={[styles.templateGlow, { backgroundColor: theme.colors.primary }]} />
 
           {/* Platform Badges */}
           <View style={styles.platformBadgesContainer}>
             <Surface
-              style={[
-                styles.platformBadge,
-                { backgroundColor: theme.colors.surfaceVariant },
-              ]}
+              style={[styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }]}
               elevation={1}
             >
               <Icon
@@ -147,17 +129,10 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
             </Surface>
             <View style={styles.flex1} />
             <Surface
-              style={[
-                styles.platformBadge,
-                { backgroundColor: theme.colors.surfaceVariant },
-              ]}
+              style={[styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }]}
               elevation={1}
             >
-              <Icon
-                source="apple"
-                size={platformIconSize}
-                color={theme.colors.onSurfaceVariant}
-              />
+              <Icon source="apple" size={platformIconSize} color={theme.colors.onSurfaceVariant} />
               <Text
                 style={[
                   styles.platformText,
@@ -202,22 +177,12 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
                   ]}
                   elevation={2}
                 >
-                  <Text
-                    style={[
-                      styles.freeBadgeText,
-                      { fontSize: freeBadgeTextSize },
-                    ]}
-                  >
-                    FREE
-                  </Text>
+                  <Text style={[styles.freeBadgeText, { fontSize: freeBadgeTextSize }]}>FREE</Text>
                 </Surface>
               )}
             </View>
             <View
-              style={[
-                styles.templateUrlBadge,
-                { backgroundColor: theme.colors.primary + '15' },
-              ]}
+              style={[styles.templateUrlBadge, { backgroundColor: theme.colors.primary + '15' }]}
             >
               <Text
                 style={[
@@ -255,9 +220,7 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
           </View>
 
           {/* Content */}
-          <View
-            style={[styles.templateContent, isVertical && styles.flex1Gap32]}
-          >
+          <View style={[styles.templateContent, isVertical && styles.flex1Gap32]}>
             <Surface
               style={[
                 styles.mainCard,
@@ -273,9 +236,7 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
                   style={[
                     styles.stockIconContainer,
                     { width: iconContainerSize, height: iconContainerSize },
-                    stock.iconUrl
-                      ? styles.bgWhite
-                      : { backgroundColor: trendColor + '20' },
+                    stock.iconUrl ? styles.bgWhite : { backgroundColor: trendColor + '20' },
                   ]}
                 >
                   {stock.iconUrl ? (
@@ -294,11 +255,7 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
                       {stock.initials}
                     </Text>
                   ) : (
-                    <Icon
-                      source="chart-box-outline"
-                      size={iconSize}
-                      color={trendColor}
-                    />
+                    <Icon source="chart-box-outline" size={iconSize} color={trendColor} />
                   )}
                 </View>
                 <View>
@@ -355,17 +312,8 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
                     >
                       Bs.
                     </Text>
-                    <View
-                      style={[
-                        styles.trendBadge,
-                        { backgroundColor: trendColor + '15' },
-                      ]}
-                    >
-                      <Icon
-                        source={trendIcon}
-                        size={trendIconSize}
-                        color={trendColor}
-                      />
+                    <View style={[styles.trendBadge, { backgroundColor: trendColor + '15' }]}>
+                      <Icon source={trendIcon} size={trendIconSize} color={trendColor} />
                       <Text
                         style={[
                           styles.trendPercentText,
@@ -398,85 +346,46 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
               {isVertical && (
                 <View style={styles.statsGrid}>
                   <View style={styles.statItem}>
-                    <Text
-                      style={[styles.statLabel, { fontSize: statLabelSize }]}
-                    >
+                    <Text style={[styles.statLabel, { fontSize: statLabelSize }]}>
                       CIERRE ANTERIOR
                     </Text>
-                    <Text
-                      style={[styles.statValue, { fontSize: statValueSize }]}
-                    >
+                    <Text style={[styles.statValue, { fontSize: statValueSize }]}>
                       {previousClose.toLocaleString('es-VE', {
                         minimumFractionDigits: 2,
                       })}{' '}
-                      <Text
-                        style={[
-                          styles.statCurrency,
-                          { fontSize: statCurrencySize },
-                        ]}
-                      >
-                        Bs.
-                      </Text>
+                      <Text style={[styles.statCurrency, { fontSize: statCurrencySize }]}>Bs.</Text>
                     </Text>
                   </View>
                   <View style={styles.statItem}>
-                    <Text
-                      style={[styles.statLabel, { fontSize: statLabelSize }]}
-                    >
+                    <Text style={[styles.statLabel, { fontSize: statLabelSize }]}>
                       PRECIO PROMEDIO
                     </Text>
-                    <Text
-                      style={[styles.statValue, { fontSize: statValueSize }]}
-                    >
+                    <Text style={[styles.statValue, { fontSize: statValueSize }]}>
                       {averagePrice
                         ? averagePrice.toLocaleString('es-VE', {
                             minimumFractionDigits: 2,
                           })
                         : '--'}{' '}
-                      <Text
-                        style={[
-                          styles.statCurrency,
-                          { fontSize: statCurrencySize },
-                        ]}
-                      >
-                        Bs.
-                      </Text>
+                      <Text style={[styles.statCurrency, { fontSize: statCurrencySize }]}>Bs.</Text>
                     </Text>
                   </View>
                   <View style={styles.statItem}>
-                    <Text
-                      style={[styles.statLabel, { fontSize: statLabelSize }]}
-                    >
+                    <Text style={[styles.statLabel, { fontSize: statLabelSize }]}>
                       VOLUMEN TÍTULOS
                     </Text>
-                    <Text
-                      style={[styles.statValue, { fontSize: statValueSize }]}
-                    >
+                    <Text style={[styles.statValue, { fontSize: statValueSize }]}>
                       {stock.volumeShares
                         ? formatCompactNumber(stock.volumeShares)
                         : stock.volume || '--'}
                     </Text>
                   </View>
                   <View style={styles.statItem}>
-                    <Text
-                      style={[styles.statLabel, { fontSize: statLabelSize }]}
-                    >
+                    <Text style={[styles.statLabel, { fontSize: statLabelSize }]}>
                       VOLUMEN EFECTIVO
                     </Text>
-                    <Text
-                      style={[styles.statValue, { fontSize: statValueSize }]}
-                    >
-                      {stock.volumeAmount
-                        ? formatCompactNumber(stock.volumeAmount, true)
-                        : '--'}{' '}
-                      <Text
-                        style={[
-                          styles.statCurrency,
-                          { fontSize: statCurrencySize },
-                        ]}
-                      >
-                        Bs.
-                      </Text>
+                    <Text style={[styles.statValue, { fontSize: statValueSize }]}>
+                      {stock.volumeAmount ? formatCompactNumber(stock.volumeAmount, true) : '--'}{' '}
+                      <Text style={[styles.statCurrency, { fontSize: statCurrencySize }]}>Bs.</Text>
                     </Text>
                   </View>
                 </View>

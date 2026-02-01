@@ -13,10 +13,7 @@ interface MarketsSectionProps {
   navigation: any;
 }
 
-const MarketsSection: React.FC<MarketsSectionProps> = ({
-  stocks,
-  navigation,
-}) => {
+const MarketsSection: React.FC<MarketsSectionProps> = ({ stocks, navigation }) => {
   const theme = useTheme();
 
   const renderItem = ({ item: stock }: { item: StockData }) => (
@@ -46,10 +43,7 @@ const MarketsSection: React.FC<MarketsSectionProps> = ({
           accessibilityLabel="Ver todo el mercado bursátil"
           accessibilityRole="button"
         >
-          <Text
-            variant="labelLarge"
-            style={[styles.seeAllText, { color: theme.colors.primary }]}
-          >
+          <Text variant="labelLarge" style={[styles.seeAllText, { color: theme.colors.primary }]}>
             VER TODO
           </Text>
         </TouchableOpacity>
@@ -64,9 +58,7 @@ const MarketsSection: React.FC<MarketsSectionProps> = ({
           />
         </View>
       ) : (
-        <Text style={styles.emptyText}>
-          No hay datos del mercado disponibles
-        </Text>
+        <Text style={styles.emptyText}>No hay datos del mercado disponibles</Text>
       )}
     </View>
   );

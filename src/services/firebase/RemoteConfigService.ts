@@ -6,10 +6,7 @@ import {
 } from '@react-native-firebase/remote-config';
 
 import { observabilityService } from '@/services/ObservabilityService';
-import {
-  featureFlagService,
-  RemoteConfigSchema,
-} from '@/services/FeatureFlagService';
+import { featureFlagService, RemoteConfigSchema } from '@/services/FeatureFlagService';
 import { analyticsService } from '@/services/firebase/AnalyticsService';
 import SafeLogger from '@/utils/safeLogger';
 
@@ -56,18 +53,12 @@ class RemoteConfigService {
     try {
       // Create a timeout promise
       const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(
-          () => reject(new Error('Remote Config fetch timeout')),
-          TIMEOUT_MS,
-        ),
+        setTimeout(() => reject(new Error('Remote Config fetch timeout')), TIMEOUT_MS),
       );
 
       // Race between fetch and timeout
       const fetchPromise = fetchAndActivate(this.remoteConfig);
-      const fetched = (await Promise.race([
-        fetchPromise,
-        timeoutPromise,
-      ])) as boolean;
+      const fetched = (await Promise.race([fetchPromise, timeoutPromise])) as boolean;
 
       return fetched;
     } catch (e) {

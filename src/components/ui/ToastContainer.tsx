@@ -70,8 +70,7 @@ const ToastContainer = () => {
               {
                 backgroundColor,
                 // Lifted to 90 to clear TabBar (approx 80px)
-                bottom:
-                  toast.position === 'bottom' ? 100 + index * 70 : undefined,
+                bottom: toast.position === 'bottom' ? 100 + index * 70 : undefined,
                 top: toast.position === 'top' ? 56 + index * 70 : undefined,
                 borderColor: typeColor, // Dynamic border color = TYPE variation
                 // Info type does not need a border as per user request, others do
@@ -111,9 +110,7 @@ const ToastContainer = () => {
                     accessible={true}
                     accessibilityRole="header"
                   >
-                    {typeof toast.title === 'string'
-                      ? toast.title
-                      : toast.title}
+                    {typeof toast.title === 'string' ? toast.title : toast.title}
                   </Text>
                 )}
                 <Text
@@ -121,9 +118,7 @@ const ToastContainer = () => {
                   numberOfLines={2}
                   accessible={true}
                 >
-                  {typeof toast.message === 'string'
-                    ? toast.message
-                    : toast.message}
+                  {typeof toast.message === 'string' ? toast.message : toast.message}
                 </Text>
               </View>
               {!toast.action && (

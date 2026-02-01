@@ -24,8 +24,7 @@ jest.mock('react-native-safe-area-context', () => {
   };
   return {
     SafeAreaProvider: ({ children }: any) => children,
-    SafeAreaConsumer: ({ children }: any) =>
-      children(MOCK_INITIAL_METRICS.insets),
+    SafeAreaConsumer: ({ children }: any) => children(MOCK_INITIAL_METRICS.insets),
     SafeAreaInsetsContext: ReactMock.createContext(MOCK_INITIAL_METRICS.insets),
     useSafeAreaInsets: () => MOCK_INITIAL_METRICS.insets,
     useSafeAreaFrame: () => MOCK_INITIAL_METRICS.frame,
@@ -76,14 +75,19 @@ jest.mock('../src/services/CurrencyService', () => ({
     }),
     getRates: jest.fn(() => Promise.resolve(mockRates)),
     getAvailableTargetRates: jest.fn((source, rates) => rates), // Simple mock returning all rates
+    convertCrossRate: jest.fn(
+      (amount, baseValue, targetValue) => (amount * baseValue) / targetValue,
+    ),
   },
 }));
 
-// Mock Toast
+// Mock Toast Store
 const mockShowToast = jest.fn();
-jest.mock('../src/context/ToastContext', () => ({
-  useToast: () => ({
+jest.mock('../src/stores/toastStore', () => ({
+  useToastStore: () => ({
     showToast: mockShowToast,
+    toasts: [],
+    hideToast: jest.fn(),
   }),
 }));
 
@@ -197,7 +201,7 @@ describe('AdvancedCalculatorScreen', () => {
     const { getByText, getByTestId } = renderScreen();
 
     // Open picker
-    fireEvent.press(getByText('AÑADIR OTRA DIVISA'));
+    fireEvent.press(getByText('Agregar divisa'));
 
     await waitFor(() => {
       expect(getByTestId('bottom-sheet-modal')).toBeTruthy();

@@ -12,10 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuthStore } from '@/stores/authStore';
 import { useToastStore } from '@/stores/toastStore';
-import {
-  analyticsService,
-  ANALYTICS_EVENTS,
-} from '@/services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '@/services/firebase/AnalyticsService';
 import AuthLoading from '@/components/auth/AuthLoading';
 import CustomButton from '@/components/ui/CustomButton';
 import UnifiedHeader from '@/components/ui/UnifiedHeader';
@@ -86,13 +83,9 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
       setIsSubmitting(true);
       setSuccessMessage('');
       try {
-        await analyticsService.logEvent(
-          ANALYTICS_EVENTS.PASSWORD_RESET_ATTEMPT,
-        );
+        await analyticsService.logEvent(ANALYTICS_EVENTS.PASSWORD_RESET_ATTEMPT);
         await resetPassword(email, showToast);
-        setSuccessMessage(
-          'Se ha enviado un correo para restablecer tu contraseña.',
-        );
+        setSuccessMessage('Se ha enviado un correo para restablecer tu contraseña.');
         // Reset exitoso ya se trackea en authStore
       } catch (e) {
         observabilityService.captureError(e, {
@@ -145,18 +138,15 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.headerContent}>
-            <AuthLogo
-              size={80}
-              containerStyle={{ marginBottom: theme.spacing.s }}
-            />
+            <AuthLogo size={80} containerStyle={{ marginBottom: theme.spacing.s }} />
             <View style={themeStyles.titleRow}>
               <Text variant="headlineSmall" style={themeStyles.title}>
                 Recuperar contraseña
               </Text>
             </View>
             <Text variant="bodyMedium" style={themeStyles.description}>
-              Ingresa tu correo electrónico y te enviaremos un enlace para que
-              puedas crear una nueva contraseña.
+              Ingresa tu correo electrónico y te enviaremos un enlace para que puedas crear una
+              nueva contraseña.
             </Text>
           </View>
 
@@ -178,12 +168,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
                 accessibilityLabel="Correo electrónico"
                 accessibilityHint="Ingresa el correo asociado a tu cuenta"
                 error={!!emailError}
-                left={
-                  <TextInput.Icon
-                    icon="email"
-                    accessibilityLabel="Icono de correo"
-                  />
-                }
+                left={<TextInput.Icon icon="email" accessibilityLabel="Icono de correo" />}
                 style={styles.input}
                 disabled={isBusy}
               />

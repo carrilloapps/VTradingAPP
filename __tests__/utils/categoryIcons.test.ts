@@ -88,9 +88,7 @@ describe('categoryIcons', () => {
       const results = searchCategories('Banca');
       expect(results).toContain('Banca');
       expect(results).toContain('Banca Digital');
-      expect(results.every(cat => cat.toLowerCase().includes('banca'))).toBe(
-        true,
-      );
+      expect(results.every(cat => cat.toLowerCase().includes('banca'))).toBe(true);
     });
 
     it('should be case insensitive', () => {

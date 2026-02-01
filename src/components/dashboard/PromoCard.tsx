@@ -13,10 +13,7 @@ const PromoCard: React.FC = () => {
     },
   ];
 
-  const titleStyle = [
-    styles.titleText,
-    { color: theme.colors.onPrimaryContainer },
-  ];
+  const titleStyle = [styles.titleText, { color: theme.colors.onPrimaryContainer }];
   const descriptionStyle = [
     styles.descriptionText,
     styles.descriptionTextWithOpacity,
@@ -29,10 +26,7 @@ const PromoCard: React.FC = () => {
       borderColor: theme.colors.outline,
     },
   ];
-  const buttonTextStyle = [
-    styles.buttonText,
-    { color: theme.colors.onPrimary },
-  ];
+  const buttonTextStyle = [styles.buttonText, { color: theme.colors.onPrimary }];
 
   return (
     <View style={containerStyle}>

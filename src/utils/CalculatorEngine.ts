@@ -103,8 +103,7 @@ export class CalculatorEngine {
   }
 
   calculate() {
-    if (this.state.error || !this.state.operation || !this.state.previousValue)
-      return;
+    if (this.state.error || !this.state.operation || !this.state.previousValue) return;
 
     try {
       const prev = new Decimal(this.state.previousValue);
@@ -139,10 +138,7 @@ export class CalculatorEngine {
       }
 
       const resultStr = result.toString();
-      this.addToHistory(
-        `${prev} ${this.state.operation} ${current} = ${resultStr}`,
-        resultStr,
-      );
+      this.addToHistory(`${prev} ${this.state.operation} ${current} = ${resultStr}`, resultStr);
 
       this.state.currentValue = resultStr;
       this.state.previousValue = null;

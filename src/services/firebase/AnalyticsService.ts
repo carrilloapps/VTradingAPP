@@ -220,11 +220,7 @@ class AnalyticsService {
   /**
    * Log share event
    */
-  async logShare(
-    contentType: string,
-    itemId: string,
-    method: string,
-  ): Promise<void> {
+  async logShare(contentType: string, itemId: string, method: string): Promise<void> {
     return this.logEvent(ANALYTICS_EVENTS.SHARE, {
       content_type: contentType,
       item_id: itemId,
@@ -259,10 +255,7 @@ class AnalyticsService {
   /**
    * Log feature usage
    */
-  async logFeatureUsage(
-    featureName: string,
-    params?: AnalyticsEventParams,
-  ): Promise<void> {
+  async logFeatureUsage(featureName: string, params?: AnalyticsEventParams): Promise<void> {
     return this.logEvent(ANALYTICS_EVENTS.FEATURE_USED, {
       feature_name: featureName,
       ...params,
@@ -272,10 +265,7 @@ class AnalyticsService {
   /**
    * Log error event with standardized format
    */
-  async logError(
-    errorType: string,
-    params?: AnalyticsEventParams,
-  ): Promise<void> {
+  async logError(errorType: string, params?: AnalyticsEventParams): Promise<void> {
     return this.logEvent(`${ANALYTICS_EVENTS.ERROR}_${errorType}`, params);
   }
 
@@ -341,10 +331,7 @@ class AnalyticsService {
   /**
    * Log when user engages with content
    */
-  async logEngagement(
-    contentType: string,
-    engagementTime: number,
-  ): Promise<void> {
+  async logEngagement(contentType: string, engagementTime: number): Promise<void> {
     return this.logEvent(ANALYTICS_EVENTS.USER_ENGAGEMENT, {
       content_type: contentType,
       engagement_time_ms: engagementTime,

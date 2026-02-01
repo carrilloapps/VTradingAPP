@@ -95,9 +95,7 @@ describe('validation', () => {
   describe('sanitizeInput', () => {
     it('should remove HTML tags brackets', () => {
       // Current implementation removes < and > but leaves content
-      expect(sanitizeInput('<script>alert(1)</script>')).toBe(
-        'scriptalert(1)/script',
-      );
+      expect(sanitizeInput('<script>alert(1)</script>')).toBe('scriptalert(1)/script');
     });
 
     it('should remove javascript: protocol', () => {
@@ -257,9 +255,7 @@ describe('validation', () => {
       };
       const result = validateRegistrationForm(data);
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain(
-        'El nombre debe tener al menos 2 caracteres',
-      );
+      expect(result.errors).toContain('El nombre debe tener al menos 2 caracteres');
     });
 
     it('should validate display name max length', () => {
@@ -271,9 +267,7 @@ describe('validation', () => {
       };
       const result = validateRegistrationForm(data);
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain(
-        'El nombre no puede exceder 50 caracteres',
-      );
+      expect(result.errors).toContain('El nombre no puede exceder 50 caracteres');
     });
   });
 
@@ -292,9 +286,7 @@ describe('validation', () => {
         condition: 'above',
       });
       expect(result.isValid).toBe(false);
-      expect(result.errors).toContain(
-        'El precio objetivo debe ser un número positivo válido',
-      );
+      expect(result.errors).toContain('El precio objetivo debe ser un número positivo válido');
     });
 
     it('should detect invalid condition', () => {

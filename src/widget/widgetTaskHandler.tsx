@@ -1,25 +1,16 @@
 import React from 'react';
-import {
-  WidgetInfo,
-  WidgetTaskHandlerProps,
-} from 'react-native-android-widget';
+import { WidgetInfo, WidgetTaskHandlerProps } from 'react-native-android-widget';
 
 import VTradingWidget from './VTradingWidget';
 import { WidgetItem } from './types';
 import { observabilityService } from '@/services/ObservabilityService';
 import { getTrend } from '@/utils/trendUtils';
-import {
-  analyticsService,
-  ANALYTICS_EVENTS,
-} from '@/services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '@/services/firebase/AnalyticsService';
 import SafeLogger from '@/utils/safeLogger';
 import { storageService } from '@/services/StorageService';
 import { CurrencyService, CurrencyRate } from '@/services/CurrencyService';
 
-export async function buildWidgetElement(
-  info?: WidgetInfo,
-  forceRefresh = false,
-) {
+export async function buildWidgetElement(info?: WidgetInfo, forceRefresh = false) {
   SafeLogger.log('[Widget] buildWidgetElement called', {
     hasInfo: !!info,
     forceRefresh,
@@ -76,10 +67,10 @@ export async function buildWidgetElement(
         minute: '2-digit',
       });
     } else if (rates.length > 0 && rates[0].lastUpdated) {
-      lastUpdatedLabel = new Date(rates[0].lastUpdated).toLocaleTimeString(
-        'es-VE',
-        { hour: '2-digit', minute: '2-digit' },
-      );
+      lastUpdatedLabel = new Date(rates[0].lastUpdated).toLocaleTimeString('es-VE', {
+        hour: '2-digit',
+        minute: '2-digit',
+      });
     }
   } catch (e) {
     observabilityService.captureError(e, {
@@ -146,12 +137,7 @@ export async function buildWidgetElement(
               : trend === 'down'
                 ? 'rgba(248, 113, 113, 0.15)'
                 : 'rgba(255, 255, 255, 0.1)',
-          trendColor:
-            trend === 'up'
-              ? '#6EE7B7'
-              : trend === 'down'
-                ? '#F87171'
-                : '#D1D5DB',
+          trendColor: trend === 'up' ? '#6EE7B7' : trend === 'down' ? '#F87171' : '#D1D5DB',
         });
       }
     }
@@ -176,12 +162,7 @@ export async function buildWidgetElement(
               : trend === 'down'
                 ? 'rgba(248, 113, 113, 0.15)'
                 : 'rgba(255, 255, 255, 0.1)',
-          trendColor:
-            trend === 'up'
-              ? '#6EE7B7'
-              : trend === 'down'
-                ? '#F87171'
-                : '#D1D5DB',
+          trendColor: trend === 'up' ? '#6EE7B7' : trend === 'down' ? '#F87171' : '#D1D5DB',
         });
       });
     }

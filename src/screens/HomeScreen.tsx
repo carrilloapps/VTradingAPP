@@ -155,11 +155,7 @@ const HomeScreen = ({ navigation }: any) => {
       await Share.open({ message });
       analyticsService.logShare('dashboard_report', 'all', 'text');
     } catch (e) {
-      if (
-        e &&
-        (e as any).message !== 'User did not share' &&
-        (e as any).message !== 'CANCELLED'
-      ) {
+      if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
         showToast('Error al compartir texto', 'error');
       }
     }
@@ -182,9 +178,7 @@ const HomeScreen = ({ navigation }: any) => {
 
   if (loading) {
     return (
-      <View
-        style={[styles.container, { backgroundColor: theme.colors.background }]}
-      >
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <StatusBar
           backgroundColor="transparent"
           translucent
@@ -196,9 +190,7 @@ const HomeScreen = ({ navigation }: any) => {
   }
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-    >
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar
         backgroundColor="transparent"
         translucent

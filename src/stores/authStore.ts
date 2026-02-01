@@ -1,19 +1,12 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import { FirebaseAuthTypes } from '@react-native-firebase/auth';
-import {
-  getCrashlytics,
-  setUserId,
-  setAttributes,
-} from '@react-native-firebase/crashlytics';
+import { getCrashlytics, setUserId, setAttributes } from '@react-native-firebase/crashlytics';
 import * as Clarity from '@microsoft/react-native-clarity';
 
 import { authService } from '@/services/firebase/AuthService';
 import { observabilityService } from '@/services/ObservabilityService';
-import {
-  analyticsService,
-  ANALYTICS_EVENTS,
-} from '@/services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '@/services/firebase/AnalyticsService';
 import { ToastType } from './toastStore';
 
 interface AuthState {
@@ -35,19 +28,13 @@ interface AuthState {
     showToast: (msg: string, type: ToastType) => void,
   ) => Promise<void>;
   signOut: (showToast: (msg: string, type: ToastType) => void) => Promise<void>;
-  deleteAccount: (
-    showToast: (msg: string, type: ToastType) => void,
-  ) => Promise<void>;
-  googleSignIn: (
-    showToast: (msg: string, type: ToastType) => void,
-  ) => Promise<void>;
+  deleteAccount: (showToast: (msg: string, type: ToastType) => void) => Promise<void>;
+  googleSignIn: (showToast: (msg: string, type: ToastType) => void) => Promise<void>;
   resetPassword: (
     email: string,
     showToast: (msg: string, type: ToastType) => void,
   ) => Promise<void>;
-  signInAnonymously: (
-    showToast: (msg: string, type: ToastType) => void,
-  ) => Promise<void>;
+  signInAnonymously: (showToast: (msg: string, type: ToastType) => void) => Promise<void>;
   updateProfileName: (
     newName: string,
     showToast: (msg: string, type: ToastType) => void,
@@ -189,9 +176,7 @@ export const useAuthStore = create<AuthState>()(
       resetPassword: async (email, showToast) => {
         try {
           await authService.sendPasswordResetEmail(email);
-          await analyticsService.logEvent(
-            ANALYTICS_EVENTS.RESET_PASSWORD_REQUEST,
-          );
+          await analyticsService.logEvent(ANALYTICS_EVENTS.RESET_PASSWORD_REQUEST);
           showToast('Correo de recuperación enviado', 'success');
         } catch (e) {
           const err = e as any;

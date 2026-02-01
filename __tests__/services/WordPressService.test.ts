@@ -301,9 +301,7 @@ describe('WordPressService', () => {
       const error = new Error('API Error');
       mockApiClient.get.mockRejectedValue(error);
 
-      await expect(wordPressService.searchPosts('test')).rejects.toThrow(
-        'API Error',
-      );
+      await expect(wordPressService.searchPosts('test')).rejects.toThrow('API Error');
     });
   });
 

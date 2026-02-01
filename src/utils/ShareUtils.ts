@@ -68,11 +68,7 @@ export const shareTextContent = async (options: ShareTextOptions) => {
     });
     return true;
   } catch (error: any) {
-    if (
-      error &&
-      error.message !== 'User did not share' &&
-      error.message !== 'CANCELLED'
-    ) {
+    if (error && error.message !== 'User did not share' && error.message !== 'CANCELLED') {
       observabilityService.captureError(error, {
         context: 'ShareUtils.shareContent',
         title: options.title,

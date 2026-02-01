@@ -1,12 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
-import {
-  Text,
-  useTheme,
-  TextInput,
-  Button,
-  IconButton,
-} from 'react-native-paper';
+import { Text, useTheme, TextInput, Button, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 
 import CurrencyPickerModal from './CurrencyPickerModal';
@@ -159,9 +153,7 @@ const CurrencyConverter: React.FC = () => {
       const isValid = availableToRates.find(r => r.code === toCurrency.code);
       if (!isValid) {
         // Reset to VES if available, otherwise first available
-        const ves = availableToRates.find(
-          r => r.code === 'VES' || r.code === 'Bs',
-        );
+        const ves = availableToRates.find(r => r.code === 'VES' || r.code === 'Bs');
         setToCurrency(ves || availableToRates[0]);
       }
     }
@@ -228,10 +220,7 @@ const CurrencyConverter: React.FC = () => {
           style={[styles.input, { color: theme.colors.onSurface }]}
           underlineColor={theme.colors.onSurfaceVariant}
           activeUnderlineColor={theme.colors.primary}
-          contentStyle={[
-            styles.inputContent,
-            { color: theme.colors.onSurface },
-          ]}
+          contentStyle={[styles.inputContent, { color: theme.colors.onSurface }]}
           placeholder="0"
           placeholderTextColor={theme.colors.onSurfaceVariant}
           accessibilityLabel="Cantidad a convertir"
@@ -247,9 +236,7 @@ const CurrencyConverter: React.FC = () => {
             style={[styles.rateLabel, { color: theme.colors.onSurfaceVariant }]}
           >
             1 {fromCurrency?.code} ≈{' '}
-            <Text style={[styles.rateText, { color: theme.colors.onSurface }]}>
-              {exchangeRate}
-            </Text>{' '}
+            <Text style={[styles.rateText, { color: theme.colors.onSurface }]}>{exchangeRate}</Text>{' '}
             {toCurrency?.code}
           </Text>
         </View>

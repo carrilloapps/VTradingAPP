@@ -11,9 +11,7 @@ class ObservabilityService {
    */
   captureError(error: any, context?: Record<string, any>) {
     // Log en consola siempre para desarrollo y depuración local
-    const sanitizedContext = context
-      ? (SafeLogger as any).sanitize(context)
-      : undefined;
+    const sanitizedContext = context ? (SafeLogger as any).sanitize(context) : undefined;
 
     if (__DEV__) {
       SafeLogger.error('[Observability] Error caught:', error);
@@ -42,10 +40,7 @@ class ObservabilityService {
 
     if (isIgnoredError) {
       if (__DEV__)
-        SafeLogger.log(
-          '[Observability] Non-critical error ignored for reporting:',
-          errorMsg,
-        );
+        SafeLogger.log('[Observability] Non-critical error ignored for reporting:', errorMsg);
       return;
     }
 
@@ -61,9 +56,7 @@ class ObservabilityService {
 
       // Enviar a Crashlytics
       const crashlytics = getCrashlytics();
-      crashlytics.recordError(
-        error instanceof Error ? error : new Error(String(error)),
-      );
+      crashlytics.recordError(error instanceof Error ? error : new Error(String(error)));
 
       if (sanitizedContext) {
         Object.entries(sanitizedContext).forEach(([key, value]) => {
@@ -74,10 +67,7 @@ class ObservabilityService {
       // Evitar que un fallo en el servicio de observabilidad rompa la app
       SafeLogger.error('[Observability] Failed to report error:', {
         originalError: error instanceof Error ? error.message : String(error),
-        serviceError:
-          serviceError instanceof Error
-            ? serviceError.message
-            : String(serviceError),
+        serviceError: serviceError instanceof Error ? serviceError.message : String(serviceError),
         context,
       });
     }
@@ -174,11 +164,7 @@ class ObservabilityService {
    * @param key La clave del atributo.
    * @param value El valor del atributo.
    */
-  setTransactionAttribute(
-    transaction: any,
-    key: string,
-    value: string | number | boolean,
-  ) {
+  setTransactionAttribute(transaction: any, key: string, value: string | number | boolean) {
     if (!transaction) return;
     try {
       // Modern Sentry / OpenTelemetry Span
@@ -201,14 +187,11 @@ class ObservabilityService {
       }
     } catch (e) {
       if (__DEV__) {
-        SafeLogger.warn(
-          '[Observability] Failed to set transaction attribute:',
-          {
-            key,
-            value,
-            error: e instanceof Error ? e.message : String(e),
-          },
-        );
+        SafeLogger.warn('[Observability] Failed to set transaction attribute:', {
+          key,
+          value,
+          error: e instanceof Error ? e.message : String(e),
+        });
       }
     }
   }

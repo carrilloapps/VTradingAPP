@@ -143,9 +143,7 @@ class FeatureFlagService {
   /**
    * Evaluate a single condition set against current context
    */
-  private async evaluateConditions(
-    conditions: FeatureCondition,
-  ): Promise<boolean> {
+  private async evaluateConditions(conditions: FeatureCondition): Promise<boolean> {
     // 1. Platform
     if (conditions.platform && conditions.platform !== Platform.OS) {
       SafeLogger.log(
@@ -250,9 +248,7 @@ class FeatureFlagService {
     // 1. Master Kill Switch
     // "enabled" acts as a definitive switch. If false, feature is dead.
     if (!feature.enabled) {
-      SafeLogger.log(
-        `[FeatureFlag] ${featureName} disabled globally (Master Switch)`,
-      );
+      SafeLogger.log(`[FeatureFlag] ${featureName} disabled globally (Master Switch)`);
       return false;
     }
 
@@ -261,32 +257,24 @@ class FeatureFlagService {
     // and only return TRUE if a matching rule explicitly enables it.
     if (feature.rules && feature.rules.length > 0) {
       // Sort rules by priority (descending)
-      const rules = [...feature.rules].sort(
-        (a, b) => (b.priority || 0) - (a.priority || 0),
-      );
+      const rules = [...feature.rules].sort((a, b) => (b.priority || 0) - (a.priority || 0));
 
       for (const rule of rules) {
         if (rule.conditions) {
           const match = await this.evaluateConditions(rule.conditions);
           if (match) {
-            SafeLogger.log(
-              `[FeatureFlag] Rule Match for ${featureName}: Action=${rule.action}`,
-            );
+            SafeLogger.log(`[FeatureFlag] Rule Match for ${featureName}: Action=${rule.action}`);
             return rule.action === 'enable';
           }
         } else {
           // Rule without conditions applies immediately (Catch-all)
-          SafeLogger.log(
-            `[FeatureFlag] Rule Force for ${featureName}: Action=${rule.action}`,
-          );
+          SafeLogger.log(`[FeatureFlag] Rule Force for ${featureName}: Action=${rule.action}`);
           return rule.action === 'enable';
         }
       }
 
       // If rules exist but none matched -> Disable (Implicit Deny / Whitelist Mode)
-      SafeLogger.log(
-        `[FeatureFlag] ${featureName} has rules but none matched -> Denying`,
-      );
+      SafeLogger.log(`[FeatureFlag] ${featureName} has rules but none matched -> Denying`);
       return false;
     }
 

@@ -220,15 +220,11 @@ export interface WordPressQueryParams {
 
 class WordPressService {
   private client: ApiClient;
-  private formattedPostCache = new Map<
-    number,
-    { modified: string; formatted: FormattedPost }
-  >();
+  private formattedPostCache = new Map<number, { modified: string; formatted: FormattedPost }>();
   private serverTimeOffset = 0;
 
   constructor() {
-    const baseUrl =
-      Config.WORDPRESS_BASE_URL || 'https://discover.vtrading.app';
+    const baseUrl = Config.WORDPRESS_BASE_URL || 'https://discover.vtrading.app';
     this.client = new ApiClient(`${baseUrl}/wp-json/wp/v2`, {
       apiKey: undefined, // No API Key needed for public WP API
       useAppCheck: false, // No App Check needed for public WP API
@@ -306,9 +302,7 @@ class WordPressService {
       if (categoryId) params.categories = categoryId;
       if (tagId) params.tags = tagId;
 
-      const { data, headers } = await this.client.getWithFullResponse<
-        WordPressPost[]
-      >('posts', {
+      const { data, headers } = await this.client.getWithFullResponse<WordPressPost[]>('posts', {
         params,
         useCache: !bypassCache,
         bypassCache,
@@ -367,11 +361,7 @@ class WordPressService {
    * @param categoryId Category ID to filter by
    * @param limit Number of posts to fetch
    */
-  async getRelatedPosts(
-    postId: number,
-    categoryId: number,
-    limit = 4,
-  ): Promise<FormattedPost[]> {
+  async getRelatedPosts(postId: number, categoryId: number, limit = 4): Promise<FormattedPost[]> {
     try {
       const posts = await this.client.get<WordPressPost[]>('posts', {
         params: {
@@ -403,10 +393,7 @@ class WordPressService {
    * @param id Post ID
    * @param bypassCache Force bypass cache
    */
-  async getPostById(
-    id: number,
-    bypassCache = false,
-  ): Promise<FormattedPost | null> {
+  async getPostById(id: number, bypassCache = false): Promise<FormattedPost | null> {
     try {
       const post = await this.client.get<WordPressPost>(`posts/${id}`, {
         params: {
@@ -489,11 +476,7 @@ class WordPressService {
    * @param page Page number
    * @param perPage Posts per page
    */
-  async searchPosts(
-    query: string,
-    page = 1,
-    perPage = 10,
-  ): Promise<FormattedPost[]> {
+  async searchPosts(query: string, page = 1, perPage = 10): Promise<FormattedPost[]> {
     // Sanitize the search query
     const sanitizedQuery = this.sanitizeSearchQuery(query);
 
@@ -536,11 +519,7 @@ class WordPressService {
    * @param page Page number
    * @param perPage Posts per page
    */
-  async getPostsByTag(
-    tagId: number,
-    page = 1,
-    perPage = 10,
-  ): Promise<FormattedPost[]> {
+  async getPostsByTag(tagId: number, page = 1, perPage = 10): Promise<FormattedPost[]> {
     try {
       const posts = await this.client.get<WordPressPost[]>('posts', {
         params: {
@@ -574,11 +553,7 @@ class WordPressService {
    * @param page Page number
    * @param perPage Posts per page
    */
-  async getPostsByCategory(
-    categoryId: number,
-    page = 1,
-    perPage = 10,
-  ): Promise<FormattedPost[]> {
+  async getPostsByCategory(categoryId: number, page = 1, perPage = 10): Promise<FormattedPost[]> {
     try {
       const posts = await this.client.get<WordPressPost[]>('posts', {
         params: {
@@ -612,21 +587,18 @@ class WordPressService {
    */
   async getCategories(bypassCache = false): Promise<WordPressCategory[]> {
     try {
-      const categories = await this.client.get<WordPressCategory[]>(
-        'categories',
-        {
-          params: {
-            per_page: 100, // Fetch all categories
-            orderby: 'count',
-            order: 'desc',
-            _embed: true, // Try to embed additional info
-            hide_empty: true,
-          },
-          useCache: true,
-          bypassCache,
-          cacheTTL: 30 * 60 * 1000,
+      const categories = await this.client.get<WordPressCategory[]>('categories', {
+        params: {
+          per_page: 100, // Fetch all categories
+          orderby: 'count',
+          order: 'desc',
+          _embed: true, // Try to embed additional info
+          hide_empty: true,
         },
-      );
+        useCache: true,
+        bypassCache,
+        cacheTTL: 30 * 60 * 1000,
+      });
 
       return categories.filter(c => c.count > 0);
     } catch (e) {
@@ -646,13 +618,10 @@ class WordPressService {
    */
   async getCategoryById(id: number): Promise<WordPressCategory | null> {
     try {
-      const category = await this.client.get<WordPressCategory>(
-        `categories/${id}`,
-        {
-          useCache: true,
-          cacheTTL: 30 * 60 * 1000,
-        },
-      );
+      const category = await this.client.get<WordPressCategory>(`categories/${id}`, {
+        useCache: true,
+        cacheTTL: 30 * 60 * 1000,
+      });
 
       return category;
     } catch (e) {
@@ -672,16 +641,13 @@ class WordPressService {
    */
   async getCategoryBySlug(slug: string): Promise<WordPressCategory | null> {
     try {
-      const categories = await this.client.get<WordPressCategory[]>(
-        'categories',
-        {
-          params: {
-            slug,
-          },
-          useCache: true,
-          cacheTTL: 30 * 60 * 1000,
+      const categories = await this.client.get<WordPressCategory[]>('categories', {
+        params: {
+          slug,
         },
-      );
+        useCache: true,
+        cacheTTL: 30 * 60 * 1000,
+      });
 
       if (categories && categories.length > 0) {
         return categories[0];
@@ -756,13 +722,10 @@ class WordPressService {
   /**
    * Format a WP user/author to app format
    */
-  private formatAuthor(
-    wpAuthor: WordPressAuthor,
-  ): NonNullable<FormattedPost['author']> {
+  private formatAuthor(wpAuthor: WordPressAuthor): NonNullable<FormattedPost['author']> {
     // Extract a short role or use a default if description is too long
     // If the description starts with the same text, it's probably not a "role" but a bio
-    const rawDescription =
-      wpAuthor.description || wpAuthor.yoast_head_json?.description || '';
+    const rawDescription = wpAuthor.description || wpAuthor.yoast_head_json?.description || '';
 
     let role;
     if (wpAuthor.roles && wpAuthor.roles.length > 0) {
@@ -788,8 +751,7 @@ class WordPressService {
     return {
       id: wpAuthor.id,
       name: wpAuthor.name,
-      avatar:
-        wpAuthor.avatar_urls?.['96'] || wpAuthor.avatar_urls?.['48'] || '',
+      avatar: wpAuthor.avatar_urls?.['96'] || wpAuthor.avatar_urls?.['48'] || '',
       role,
       description: rawDescription,
       slug: wpAuthor.slug,
@@ -803,9 +765,7 @@ class WordPressService {
   /**
    * Helper to extract social links from various possible WP structures
    */
-  private discoverSocialLinks(
-    obj: WordPressAuthor | Record<string, any>,
-  ): Record<string, string> {
+  private discoverSocialLinks(obj: WordPressAuthor | Record<string, any>): Record<string, string> {
     if (!obj) return {};
     const social: Record<string, string> = {};
     const platforms = [
@@ -845,15 +805,8 @@ class WordPressService {
 
                   // Sanitize accidental double URLs (common WP plugin glitch)
                   if (finalUrl.includes('https://x.com/https://x.com/')) {
-                    finalUrl = finalUrl.replace(
-                      'https://x.com/https://x.com/',
-                      'https://x.com/',
-                    );
-                  } else if (
-                    finalUrl.includes(
-                      'https://twitter.com/https://twitter.com/',
-                    )
-                  ) {
+                    finalUrl = finalUrl.replace('https://x.com/https://x.com/', 'https://x.com/');
+                  } else if (finalUrl.includes('https://twitter.com/https://twitter.com/')) {
                     finalUrl = finalUrl.replace(
                       'https://twitter.com/https://twitter.com/',
                       'https://twitter.com/',
@@ -871,9 +824,7 @@ class WordPressService {
 
     // 2. Check top level, meta, acf, and common variations
     const anyObj = obj as any;
-    const sources = [obj, anyObj.meta, anyObj.social_links, anyObj.acf].filter(
-      Boolean,
-    );
+    const sources = [obj, anyObj.meta, anyObj.social_links, anyObj.acf].filter(Boolean);
 
     platforms.forEach(p => {
       for (const source of sources) {
@@ -885,24 +836,13 @@ class WordPressService {
           source[`author_${p}`] ||
           source[`wp_${p}`];
 
-        if (
-          value &&
-          typeof value === 'string' &&
-          value.trim() !== '' &&
-          value.trim() !== '#'
-        ) {
+        if (value && typeof value === 'string' && value.trim() !== '' && value.trim() !== '#') {
           let finalValue = value.trim();
 
           // Handle-to-URL conversion for X/Twitter
-          if (
-            (p === 'x' || p === 'twitter') &&
-            !finalValue.startsWith('http')
-          ) {
+          if ((p === 'x' || p === 'twitter') && !finalValue.startsWith('http')) {
             finalValue = `https://x.com/${finalValue.replace('@', '')}`;
-          } else if (
-            !finalValue.startsWith('http') &&
-            finalValue.startsWith('www.')
-          ) {
+          } else if (!finalValue.startsWith('http') && finalValue.startsWith('www.')) {
             finalValue = `https://${finalValue}`;
           }
 
@@ -921,11 +861,7 @@ class WordPressService {
     // Special fallback for website/url
     if (!social.website && (obj.url || anyObj.user_url || obj.link)) {
       const site = obj.url || anyObj.user_url || obj.link;
-      if (
-        site &&
-        site.includes('http') &&
-        !site.includes('discover.vtrading.app')
-      ) {
+      if (site && site.includes('http') && !site.includes('discover.vtrading.app')) {
         social.website = site;
       }
     }
@@ -1009,8 +945,7 @@ class WordPressService {
     };
 
     // Utility to strip HTML tags
-    const stripHtml = (html: string) =>
-      decodeHtml(html.replace(/<[^>]*>?/gm, ''));
+    const stripHtml = (html: string) => decodeHtml(html.replace(/<[^>]*>?/gm, ''));
 
     // Estimate read time (avg 200 words per minute)
     const wordCount = post.content.rendered.split(/\s+/).length;
@@ -1018,9 +953,7 @@ class WordPressService {
 
     // Calculate relative time (Spanish format) using GMT to avoid timezone issues
     // WP GMT dates often don't include the 'Z' suffix, so we append it
-    const date = new Date(
-      post.date_gmt.endsWith('Z') ? post.date_gmt : `${post.date_gmt}Z`,
-    );
+    const date = new Date(post.date_gmt.endsWith('Z') ? post.date_gmt : `${post.date_gmt}Z`);
     const now = new Date(Date.now() + this.serverTimeOffset);
     const diffMs = now.getTime() - date.getTime();
     const diffMins = Math.floor(diffMs / 60000);
@@ -1040,9 +973,7 @@ class WordPressService {
 
     // Calculate relative modified time
     const mDate = new Date(
-      post.modified_gmt.endsWith('Z')
-        ? post.modified_gmt
-        : `${post.modified_gmt}Z`,
+      post.modified_gmt.endsWith('Z') ? post.modified_gmt : `${post.modified_gmt}Z`,
     );
     const mDiffMs = now.getTime() - mDate.getTime();
     const mDiffMins = Math.floor(mDiffMs / 60000);
@@ -1052,8 +983,7 @@ class WordPressService {
     let modifiedString = 'Recién';
     if (mDiffMins < 1) modifiedString = 'Recién';
     else if (mDiffMins < 60) modifiedString = `hace ${Math.max(1, mDiffMins)}m`;
-    else if (mDiffHours < 24)
-      modifiedString = `hace ${Math.max(1, mDiffHours)}h`;
+    else if (mDiffHours < 24) modifiedString = `hace ${Math.max(1, mDiffHours)}h`;
     else if (mDiffDays < 7) modifiedString = `hace ${Math.max(1, mDiffDays)}d`;
     else
       modifiedString = mDate.toLocaleDateString('es-ES', {
@@ -1062,8 +992,7 @@ class WordPressService {
       });
 
     // Extract featured image from embedded data or fallback
-    let featuredImage =
-      post.jetpack_featured_media_url || 'https://via.placeholder.com/150';
+    let featuredImage = post.jetpack_featured_media_url || 'https://via.placeholder.com/150';
     if (post._embedded?.['wp:featuredmedia']?.[0]?.source_url) {
       featuredImage = post._embedded['wp:featuredmedia'][0].source_url;
     }
@@ -1102,14 +1031,7 @@ class WordPressService {
     }
 
     // Detect Promo/Sponsored content from tags
-    const PROMO_SLUGS = [
-      'promoted',
-      'promocionado',
-      'sponsored',
-      'patrocinado',
-      'anuncio',
-      'ad',
-    ];
+    const PROMO_SLUGS = ['promoted', 'promocionado', 'sponsored', 'patrocinado', 'anuncio', 'ad'];
     const isPromo =
       tags?.some(
         tag =>

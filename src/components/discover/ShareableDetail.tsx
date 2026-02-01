@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-  ImageBackground,
-  DimensionValue,
-} from 'react-native';
+import { View, StyleSheet, ImageBackground, DimensionValue } from 'react-native';
 import { Text, Surface } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import ViewShot from 'react-native-view-shot';
@@ -199,19 +194,14 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
     { fontSize: roleSize, color: hexToRgba(theme.colors.onBackground, 0.6) },
   ];
 
-  const socialIconsStyle = (socialGap: number) => [
-    styles.socialIcons,
-    { gap: socialGap },
-  ];
+  const socialIconsStyle = (socialGap: number) => [styles.socialIcons, { gap: socialGap }];
 
   // Helper to render author block
   const renderAuthorBlock = () => {
     if (!author) return null;
 
     const socials =
-      typeof author.socials === 'object' && author.socials !== null
-        ? author.socials
-        : ({} as any);
+      typeof author.socials === 'object' && author.socials !== null ? author.socials : ({} as any);
     const showSocials = !!author.socials;
 
     // Dynamic Sizes for Vertical Mode
@@ -226,10 +216,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
     return (
       <View style={styles.authorRow}>
         {author.avatar ? (
-          <FastImage
-            source={{ uri: author.avatar }}
-            style={authorBlockStyle(avatarSize)}
-          />
+          <FastImage source={{ uri: author.avatar }} style={authorBlockStyle(avatarSize)} />
         ) : (
           <View style={avatarPlaceholderStyle(avatarSize)}>
             <Text style={avatarLetterStyle(isVertical)}>{author.name[0]}</Text>
@@ -238,17 +225,11 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
         <View style={styles.authorInfo}>
           <Text style={authorNameStyle(nameSize)}>{author.name}</Text>
           <View style={authorMetaRowStyle(isVertical)}>
-            {author.role && (
-              <Text style={authorLabelStyle(roleSize)}>{author.role}</Text>
-            )}
+            {author.role && <Text style={authorLabelStyle(roleSize)}>{author.role}</Text>}
             {showSocials && (
               <View style={socialIconsStyle(socialGap)}>
-                {socials.twitter && (
-                  <XIcon size={socialIconSize} color={iconColor} />
-                )}
-                {socials.facebook && (
-                  <FacebookIcon size={socialIconSize} color={iconColor} />
-                )}
+                {socials.twitter && <XIcon size={socialIconSize} color={iconColor} />}
+                {socials.facebook && <FacebookIcon size={socialIconSize} color={iconColor} />}
                 {socials.instagram && (
                   <MaterialCommunityIcons
                     name="instagram"
@@ -257,18 +238,10 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                   />
                 )}
                 {socials.linkedin && (
-                  <MaterialCommunityIcons
-                    name="linkedin"
-                    size={socialIconSize}
-                    color={iconColor}
-                  />
+                  <MaterialCommunityIcons name="linkedin" size={socialIconSize} color={iconColor} />
                 )}
                 {socials.youtube && (
-                  <MaterialCommunityIcons
-                    name="youtube"
-                    size={socialIconSize}
-                    color={iconColor}
-                  />
+                  <MaterialCommunityIcons name="youtube" size={socialIconSize} color={iconColor} />
                 )}
                 {socials.tiktok && (
                   <MaterialCommunityIcons
@@ -296,10 +269,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
       styles.placeholderWrapper,
       { backgroundColor: theme.colors.elevation.level1 },
     ];
-    const topGradientOverlayStyle = [
-      styles.topGradientOverlay,
-      { height: isVertical ? 240 : 160 },
-    ];
+    const topGradientOverlayStyle = [styles.topGradientOverlay, { height: isVertical ? 240 : 160 }];
     const topBarOverlayStyle = [
       styles.topBarOverlay,
       { marginTop: isVertical ? 60 : 40, paddingHorizontal: 64 },
@@ -396,10 +366,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
 
     return (
       <View
-        style={[
-          styles.hiddenTemplate,
-          { height: isVertical ? 600 * (16 / 9) : 600 },
-        ]}
+        style={[styles.hiddenTemplate, { height: isVertical ? 600 * (16 / 9) : 600 }]}
         pointerEvents="none"
         collapsable={false}
       >
@@ -433,10 +400,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
 
               {/* Top Gradient Overlay for Logo Visibility */}
               <LinearGradient
-                colors={[
-                  hexToRgba(theme.colors.background, 0.8),
-                  'transparent',
-                ]}
+                colors={[hexToRgba(theme.colors.background, 0.8), 'transparent']}
                 style={topGradientOverlayStyle}
               />
 
@@ -561,10 +525,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
       styles.heroImage,
       { backgroundColor: theme.colors.surfaceVariant },
     ];
-    const heroBadgeStyle = [
-      styles.heroBadge,
-      { backgroundColor: getAccentColor() },
-    ];
+    const heroBadgeStyle = [styles.heroBadge, { backgroundColor: getAccentColor() }];
     const heroBadgeTextStyle = [
       styles.heroBadgeText,
       { color: theme.colors.onPrimary, fontSize: isVertical ? 24 : 20 },
@@ -573,10 +534,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
       styles.heroTitle,
       { fontSize: isVertical ? 56 : 44, lineHeight: isVertical ? 64 : 52 },
     ];
-    const cardMetaTextStyle = [
-      styles.cardMetaText,
-      { fontSize: isVertical ? 30 : 24 },
-    ];
+    const cardMetaTextStyle = [styles.cardMetaText, { fontSize: isVertical ? 30 : 24 }];
 
     const compactCardStyle = (cardHeight: number) => [
       styles.card,
@@ -668,9 +626,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
               {heroItem.title}
             </Text>
             <View style={styles.cardMeta}>
-              {heroItem.author && (
-                <Text style={cardMetaTextStyle}>Por {heroItem.author}</Text>
-              )}
+              {heroItem.author && <Text style={cardMetaTextStyle}>Por {heroItem.author}</Text>}
             </View>
           </View>
         </Surface>
@@ -717,9 +673,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
                     />
 
                     {/* Date */}
-                    <Text style={cardDateTextStyle}>
-                      {item.date || 'Reciente'}
-                    </Text>
+                    <Text style={cardDateTextStyle}>{item.date || 'Reciente'}</Text>
                   </View>
                 </View>
               </View>
@@ -732,10 +686,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
 
   // Old Layout for Category/Tag
 
-  const backgroundGradientColors = [
-    theme.colors.background,
-    theme.colors.background,
-  ];
+  const backgroundGradientColors = [theme.colors.background, theme.colors.background];
   const topPillBadgeStyle = [
     styles.pillBadge,
     {
@@ -813,10 +764,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
 
   return (
     <View
-      style={[
-        styles.hiddenTemplate,
-        { height: isVertical ? 600 * (16 / 9) : 600 },
-      ]}
+      style={[styles.hiddenTemplate, { height: isVertical ? 600 * (16 / 9) : 600 }]}
       pointerEvents="none"
       collapsable={false}
     >
@@ -831,10 +779,7 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
       >
         <View style={containerStyle}>
           {/* Background Layer - Abstract Dark */}
-          <LinearGradient
-            colors={backgroundGradientColors}
-            style={StyleSheet.absoluteFill}
-          />
+          <LinearGradient colors={backgroundGradientColors} style={StyleSheet.absoluteFill} />
 
           {/* Background Image Blended */}
           <ImageBackground
@@ -889,20 +834,13 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
             </View>
 
             {/* Main Content Area */}
-            <View
-              style={[
-                styles.mainWrapper,
-                isVertical && styles.mainWrapperVertical,
-              ]}
-            >
+            <View style={[styles.mainWrapper, isVertical && styles.mainWrapperVertical]}>
               {/* Header Section */}
               <View style={styles.headerSection}>
                 <Text style={mainTitleStyleScaled}>{title}</Text>
 
                 {/* Author Block (Outside Card) - Should not be needed for Category/Tag usually but kept for safety */}
-                {(type as string) === 'ARTICLE' &&
-                  author &&
-                  renderAuthorBlock()}
+                {(type as string) === 'ARTICLE' && author && renderAuthorBlock()}
 
                 {description && !items && aspectRatio === '16:9' && (
                   <Text style={oldDescriptionStyle} numberOfLines={4}>

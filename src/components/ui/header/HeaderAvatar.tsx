@@ -9,11 +9,7 @@ interface HeaderAvatarProps {
   userName?: string;
 }
 
-const HeaderAvatar: React.FC<HeaderAvatarProps> = ({
-  avatarUrl,
-  email,
-  userName,
-}) => {
+const HeaderAvatar: React.FC<HeaderAvatarProps> = ({ avatarUrl, email, userName }) => {
   const theme = useTheme();
   const [imageError, setImageError] = useState(false);
 

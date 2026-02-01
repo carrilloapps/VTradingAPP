@@ -23,11 +23,7 @@ const StocksSkeleton = () => {
           <View style={styles.headerTop}>
             <View style={styles.headerLeft}>
               <Skeleton width={150} height={28} />
-              <Skeleton
-                width={120}
-                height={14}
-                style={styles.headerSubtitleSkeleton}
-              />
+              <Skeleton width={120} height={14} style={styles.headerSubtitleSkeleton} />
             </View>
             <View style={styles.headerRight}>
               <Skeleton width={40} height={40} borderRadius={20} />
@@ -90,11 +86,7 @@ const StocksSkeleton = () => {
                 <Skeleton width={48} height={48} borderRadius={r * 4} />
                 <View style={styles.stockContent}>
                   <Skeleton width={100} height={16} />
-                  <Skeleton
-                    width={40}
-                    height={12}
-                    style={styles.stockSubtitleSkeleton}
-                  />
+                  <Skeleton width={40} height={12} style={styles.stockSubtitleSkeleton} />
                 </View>
               </View>
               <View style={styles.stockRight}>

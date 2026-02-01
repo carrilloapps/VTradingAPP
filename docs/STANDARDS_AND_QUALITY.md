@@ -23,11 +23,7 @@ Es obligatorio que todos los elementos interactivos sigan estos patrones:
 ### Ejemplo de Header Accesible
 
 ```tsx
-<IconButton
-  icon="arrow-left"
-  accessibilityLabel="Regresar"
-  onPress={handleBack}
-/>
+<IconButton icon="arrow-left" accessibilityLabel="Regresar" onPress={handleBack} />
 ```
 
 ---

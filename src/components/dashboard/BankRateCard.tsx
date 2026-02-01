@@ -58,9 +58,7 @@ const BankRateCard: React.FC<BankRateCardProps> = ({
     const badgeStyle = [
       styles.percentBadge,
       {
-        backgroundColor: theme.dark
-          ? 'rgba(255,255,255,0.1)'
-          : 'rgba(0,0,0,0.05)',
+        backgroundColor: theme.dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)',
       },
     ];
     const labelStyle = [styles.percentLabel, { color: color }];
@@ -69,9 +67,7 @@ const BankRateCard: React.FC<BankRateCardProps> = ({
       <Tooltip title="Variación respecto a tasa BCV">
         <TouchableOpacity
           activeOpacity={0.7}
-          onPress={() =>
-            showToast('Variación porcentual respecto a la tasa del BCV', 'info')
-          }
+          onPress={() => showToast('Variación porcentual respecto a la tasa del BCV', 'info')}
         >
           <View style={badgeStyle}>
             <Text variant="labelSmall" style={labelStyle}>
@@ -92,9 +88,7 @@ const BankRateCard: React.FC<BankRateCardProps> = ({
 
   const getTrendIconName = (percent?: number) => {
     if (percent === undefined || percent === 0) return 'minus-circle-outline';
-    return percent > 0
-      ? 'arrow-up-circle-outline'
-      : 'arrow-down-circle-outline';
+    return percent > 0 ? 'arrow-up-circle-outline' : 'arrow-down-circle-outline';
   };
 
   const rippleStyle = [styles.ripple, { borderRadius: theme.roundness * 6 }];
@@ -109,24 +103,17 @@ const BankRateCard: React.FC<BankRateCardProps> = ({
   const iconContainerStyle = [
     styles.iconContainer,
     {
-      backgroundColor: theme.dark
-        ? 'rgba(80, 200, 120, 0.1)'
-        : theme.colors.secondaryContainer,
+      backgroundColor: theme.dark ? 'rgba(80, 200, 120, 0.1)' : theme.colors.secondaryContainer,
     },
   ];
   const ratesContainerStyle = [
     styles.ratesContainer,
     {
-      backgroundColor: theme.dark
-        ? 'rgba(255,255,255,0.02)'
-        : 'rgba(0,0,0,0.02)',
+      backgroundColor: theme.dark ? 'rgba(255,255,255,0.02)' : 'rgba(0,0,0,0.02)',
       borderColor: theme.colors.outlineVariant,
     },
   ];
-  const dividerStyle = [
-    styles.verticalDivider,
-    { backgroundColor: theme.colors.outlineVariant },
-  ];
+  const dividerStyle = [styles.verticalDivider, { backgroundColor: theme.colors.outlineVariant }];
 
   return (
     <TouchableRipple onPress={onPress} style={rippleStyle} borderless>
@@ -152,12 +139,7 @@ const BankRateCard: React.FC<BankRateCardProps> = ({
           </View>
 
           {lastUpdated && (
-            <View
-              style={[
-                styles.dateBadge,
-                { backgroundColor: theme.colors.elevation.level2 },
-              ]}
-            >
+            <View style={[styles.dateBadge, { backgroundColor: theme.colors.elevation.level2 }]}>
               <MaterialCommunityIcons
                 name="clock-outline"
                 size={12}
@@ -166,10 +148,7 @@ const BankRateCard: React.FC<BankRateCardProps> = ({
               />
               <Text
                 variant="labelSmall"
-                style={[
-                  styles.dateLabel,
-                  { color: theme.colors.onSurfaceVariant },
-                ]}
+                style={[styles.dateLabel, { color: theme.colors.onSurfaceVariant }]}
               >
                 {formatDate(lastUpdated)}
               </Text>
@@ -202,11 +181,7 @@ const BankRateCard: React.FC<BankRateCardProps> = ({
               >
                 {buyValue.replace(' Bs', '')}
               </Text>
-              <BolivarIcon
-                size={16}
-                color={theme.colors.onSurface}
-                style={styles.currencyIcon}
-              />
+              <BolivarIcon size={16} color={theme.colors.onSurface} style={styles.currencyIcon} />
             </View>
           </View>
 
@@ -236,11 +211,7 @@ const BankRateCard: React.FC<BankRateCardProps> = ({
               >
                 {sellValue.replace(' Bs', '')}
               </Text>
-              <BolivarIcon
-                size={16}
-                color={theme.colors.onSurface}
-                style={styles.currencyIcon}
-              />
+              <BolivarIcon size={16} color={theme.colors.onSurface} style={styles.currencyIcon} />
             </View>
           </View>
         </View>

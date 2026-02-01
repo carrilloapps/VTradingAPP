@@ -6,11 +6,7 @@ interface FacebookIconProps extends SvgProps {
   color?: string;
 }
 
-const FacebookIcon: React.FC<FacebookIconProps> = ({
-  size = 24,
-  color = '#1877F2',
-  ...props
-}) => {
+const FacebookIcon: React.FC<FacebookIconProps> = ({ size = 24, color = '#1877F2', ...props }) => {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...props}>
       <Path

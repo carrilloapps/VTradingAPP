@@ -57,9 +57,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
   // Computed Styles
   const templateStyle = [
     styles.shareTemplate,
-    aspectRatio === '16:9'
-      ? styles.shareTemplateVertical
-      : styles.shareTemplateSquare,
+    aspectRatio === '16:9' ? styles.shareTemplateVertical : styles.shareTemplateSquare,
     { backgroundColor: theme.dark ? '#051911' : '#F0FDF4' },
   ];
 
@@ -68,10 +66,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
     styles.templateGlowOpacity,
     { backgroundColor: theme.colors.primary },
   ];
-  const badgeStyle = [
-    styles.platformBadge,
-    { backgroundColor: theme.colors.surfaceVariant },
-  ];
+  const badgeStyle = [styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }];
   const badgeTextStyle = (size: number) => [
     styles.platformText,
     { color: theme.colors.onSurfaceVariant, fontSize: size },
@@ -86,14 +81,8 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
     },
   ];
 
-  const freeBadgeStyle = [
-    styles.freeBadge,
-    { backgroundColor: theme.colors.error },
-  ];
-  const freeBadgeTextStyle = [
-    styles.freeBadgeText,
-    { fontSize: freeBadgeTextSize },
-  ];
+  const freeBadgeStyle = [styles.freeBadge, { backgroundColor: theme.colors.error }];
+  const freeBadgeTextStyle = [styles.freeBadgeText, { fontSize: freeBadgeTextSize }];
 
   const urlBadgeStyle = [
     styles.templateUrlBadge,
@@ -109,10 +98,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
     { color: theme.colors.onSurfaceVariant, fontSize: dateTextSize },
   ];
 
-  const contentStyle = [
-    styles.templateContent,
-    aspectRatio === '16:9' && ({ gap: 40 } as const),
-  ];
+  const contentStyle = [styles.templateContent, aspectRatio === '16:9' && ({ gap: 40 } as const)];
 
   const footerTextStyle = [
     styles.templateFooterText,
@@ -130,10 +116,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
 
   return (
     <View
-      style={[
-        styles.hiddenTemplate,
-        { height: isVertical ? 600 * (16 / 9) : 600 },
-      ]}
+      style={[styles.hiddenTemplate, { height: isVertical ? 600 * (16 / 9) : 600 }]}
       pointerEvents="none"
       collapsable={false}
     >
@@ -165,11 +148,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
             </Surface>
             <View style={styles.flex1} />
             <Surface style={badgeStyle} elevation={1}>
-              <Icon
-                source="apple"
-                size={platformIconSize}
-                color={theme.colors.onSurfaceVariant}
-              />
+              <Icon source="apple" size={platformIconSize} color={theme.colors.onSurfaceVariant} />
               <Text style={badgeTextStyle(platformTextSize)}>iOS</Text>
             </Surface>
           </View>
@@ -231,9 +210,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
                 styles.templateCard,
                 isVertical && styles.templateCardVertical,
                 {
-                  backgroundColor: theme.dark
-                    ? 'rgba(255,255,255,0.03)'
-                    : 'rgba(0,0,0,0.02)',
+                  backgroundColor: theme.dark ? 'rgba(255,255,255,0.03)' : 'rgba(0,0,0,0.02)',
                   borderColor: theme.colors.outlineVariant,
                 },
               ];
@@ -276,10 +253,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
                 { color: trendColor, fontSize: trendTextSize },
               ];
 
-              const detailLabelStyle = [
-                styles.templateDetailLabel,
-                { fontSize: detailLabelSize },
-              ];
+              const detailLabelStyle = [styles.templateDetailLabel, { fontSize: detailLabelSize }];
               const detailValueTextStyle = [
                 styles.templateDetailValue,
                 { fontSize: detailValueSize },
@@ -291,12 +265,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
 
               return (
                 <Surface key={idx} style={cardStyle} elevation={0}>
-                  <View
-                    style={[
-                      styles.templateCardHeader,
-                      isVertical && styles.marginBottom12,
-                    ]}
-                  >
+                  <View style={[styles.templateCardHeader, isVertical && styles.marginBottom12]}>
                     <View style={cardIconContainerStyle}>
                       <Icon
                         source={
@@ -316,37 +285,29 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
                     <View style={valueLabelColumnStyle}>
                       <Text style={currencyTextStyle}>Bs.</Text>
                       <View style={trendBoxStyle}>
-                        <Icon
-                          source={trendIcon}
-                          size={trendIconSize}
-                          color={trendColor}
-                        />
+                        <Icon source={trendIcon} size={trendIconSize} color={trendColor} />
                         <Text style={trendTextStyle}>{rate.changePercent}</Text>
                       </View>
                     </View>
                   </View>
 
-                  {isVertical &&
-                    (rate.buyValue !== undefined ||
-                      rate.sellValue !== undefined) && (
-                      <View style={styles.templateVerticalDetails}>
-                        <View style={styles.templateDetailItem}>
-                          <Text style={detailLabelStyle}>COMPRA</Text>
-                          <Text style={detailValueTextStyle}>
-                            {rate.buyValue || '--'}{' '}
-                            <Text style={detailCurrencyTextStyle}>Bs.</Text>
-                          </Text>
-                        </View>
-                        <View style={styles.templateVerticalDivider} />
-                        <View style={styles.templateDetailItem}>
-                          <Text style={detailLabelStyle}>VENTA</Text>
-                          <Text style={detailValueTextStyle}>
-                            {rate.sellValue || '--'}{' '}
-                            <Text style={detailCurrencyTextStyle}>Bs.</Text>
-                          </Text>
-                        </View>
+                  {isVertical && (rate.buyValue !== undefined || rate.sellValue !== undefined) && (
+                    <View style={styles.templateVerticalDetails}>
+                      <View style={styles.templateDetailItem}>
+                        <Text style={detailLabelStyle}>COMPRA</Text>
+                        <Text style={detailValueTextStyle}>
+                          {rate.buyValue || '--'} <Text style={detailCurrencyTextStyle}>Bs.</Text>
+                        </Text>
                       </View>
-                    )}
+                      <View style={styles.templateVerticalDivider} />
+                      <View style={styles.templateDetailItem}>
+                        <Text style={detailLabelStyle}>VENTA</Text>
+                        <Text style={detailValueTextStyle}>
+                          {rate.sellValue || '--'} <Text style={detailCurrencyTextStyle}>Bs.</Text>
+                        </Text>
+                      </View>
+                    </View>
+                  )}
                 </Surface>
               );
             })}
@@ -368,11 +329,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
 
                 return (
                   <View style={spreadBoxStyle}>
-                    <Icon
-                      source="swap-horizontal"
-                      size={spreadIconSize}
-                      color={warningColor}
-                    />
+                    <Icon source="swap-horizontal" size={spreadIconSize} color={warningColor} />
                     <Text style={spreadTextStyle}>
                       SPREAD (Diferencia USD vs USDT):{' '}
                       <Text style={styles.bold900}>{spread.toFixed(2)}%</Text>
@@ -399,9 +356,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
                 size={footerIconSize}
                 color={theme.colors.primary}
               />
-              <Text style={footerTextStyle}>
-                MONITOREO FINANCIERO{isPremium ? ' PREMIUM' : ''}
-              </Text>
+              <Text style={footerTextStyle}>MONITOREO FINANCIERO{isPremium ? ' PREMIUM' : ''}</Text>
             </View>
           </View>
         </LinearGradient>

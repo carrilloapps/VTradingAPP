@@ -7,11 +7,7 @@ interface BolivarIconProps {
   style?: any;
 }
 
-export const BolivarIcon: React.FC<BolivarIconProps> = ({
-  size = 24,
-  color,
-  style,
-}) => {
+export const BolivarIcon: React.FC<BolivarIconProps> = ({ size = 24, color, style }) => {
   return (
     <View
       style={[

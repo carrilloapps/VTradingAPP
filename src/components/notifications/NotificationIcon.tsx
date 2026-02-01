@@ -11,24 +11,16 @@ interface NotificationIconProps {
   size?: number;
 }
 
-export const getNotificationIconConfig = (
-  notification: NotificationData,
-  theme: any,
-) => {
+export const getNotificationIconConfig = (notification: NotificationData, theme: any) => {
   const effectiveType = notification.type || 'system';
 
   switch (effectiveType) {
     case 'price_alert':
       return {
         name: 'cash-multiple',
-        color:
-          notification.trend === 'up'
-            ? theme.colors.success
-            : theme.colors.error,
+        color: notification.trend === 'up' ? theme.colors.success : theme.colors.error,
         bgColor:
-          notification.trend === 'up'
-            ? theme.colors.successContainer
-            : theme.colors.errorContainer,
+          notification.trend === 'up' ? theme.colors.successContainer : theme.colors.errorContainer,
         badge: notification.trend === 'up' ? 'trending-up' : 'trending-down',
         fallbackTitle: 'Alerta de precio',
       };
@@ -74,10 +66,7 @@ export const getNotificationIconConfig = (
   }
 };
 
-const NotificationIcon: React.FC<NotificationIconProps> = ({
-  notification,
-  size = 24,
-}) => {
+const NotificationIcon: React.FC<NotificationIconProps> = ({ notification, size = 24 }) => {
   const theme = useAppTheme();
   const iconConfig = getNotificationIconConfig(notification, theme);
 
@@ -95,11 +84,7 @@ const NotificationIcon: React.FC<NotificationIconProps> = ({
       {iconConfig.name === 'Bs' ? (
         <BolivarIcon color={iconConfig.color} size={size} />
       ) : (
-        <MaterialCommunityIcons
-          name={iconConfig.name}
-          size={size}
-          color={iconConfig.color}
-        />
+        <MaterialCommunityIcons name={iconConfig.name} size={size} color={iconConfig.color} />
       )}
       {iconConfig.badge && (
         <View

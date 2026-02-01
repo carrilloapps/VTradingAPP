@@ -60,9 +60,7 @@ const ExchangeRatesScreen = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [allRates, setAllRates] = useState<CurrencyRate[]>([]);
   const [error, setError] = useState<string | null>(null);
-  const [isMarketOpen, setIsMarketOpen] = useState(
-    StocksService.isMarketOpen(),
-  );
+  const [isMarketOpen, setIsMarketOpen] = useState(StocksService.isMarketOpen());
 
   const handleSearch = (text: string) => {
     setExchangeRateFilters({ query: text });
@@ -80,9 +78,7 @@ const ExchangeRatesScreen = () => {
     if (searchQuery) {
       const lowerQuery = searchQuery.toLowerCase();
       result = result.filter(
-        r =>
-          r.code.toLowerCase().includes(lowerQuery) ||
-          r.name.toLowerCase().includes(lowerQuery),
+        r => r.code.toLowerCase().includes(lowerQuery) || r.name.toLowerCase().includes(lowerQuery),
       );
     }
 
@@ -93,9 +89,7 @@ const ExchangeRatesScreen = () => {
   useEffect(() => {
     const unsubscribe = CurrencyService.subscribe(data => {
       // Filter out VES (Base Currency) as showing VES/VES = 1 is redundant
-      const displayRates = data.filter(
-        r => r.code !== 'VES' && r.code !== 'Bs',
-      );
+      const displayRates = data.filter(r => r.code !== 'VES' && r.code !== 'Bs');
       setAllRates(displayRates);
       setLoading(false);
       setError(null);
@@ -130,10 +124,7 @@ const ExchangeRatesScreen = () => {
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await Promise.all([
-        CurrencyService.getRates(true),
-        StocksService.getStocks(true),
-      ]);
+      await Promise.all([CurrencyService.getRates(true), StocksService.getStocks(true)]);
       setIsMarketOpen(StocksService.isMarketOpen());
     } catch (e) {
       observabilityService.captureError(e, {
@@ -161,10 +152,8 @@ const ExchangeRatesScreen = () => {
   // Flatten Data for FlashList
   const listData = useMemo<ListItem[]>(() => {
     if (loading && !refreshing && allRates.length === 0) return [];
-    if (error && filteredRates.length === 0)
-      return [{ type: 'empty', id: 'error-state' }];
-    if (filteredRates.length === 0)
-      return [{ type: 'empty', id: 'empty-state' }];
+    if (error && filteredRates.length === 0) return [{ type: 'empty', id: 'error-state' }];
+    if (filteredRates.length === 0) return [{ type: 'empty', id: 'empty-state' }];
 
     const items: ListItem[] = [];
 
@@ -222,12 +211,7 @@ const ExchangeRatesScreen = () => {
       if (item.type === 'header') {
         return (
           <View style={styles.sectionHeader}>
-            <Text
-              style={[
-                styles.sectionTitle,
-                { color: theme.colors.onSurfaceVariant },
-              ]}
-            >
+            <Text style={[styles.sectionTitle, { color: theme.colors.onSurfaceVariant }]}>
               {item.title}
             </Text>
             {item.action && (
@@ -240,12 +224,7 @@ const ExchangeRatesScreen = () => {
                   { backgroundColor: theme.colors.primaryContainer },
                 ]}
               >
-                <Text
-                  style={[
-                    styles.tagText,
-                    { color: theme.colors.onPrimaryContainer },
-                  ]}
-                >
+                <Text style={[styles.tagText, { color: theme.colors.onPrimaryContainer }]}>
                   {item.action.label}
                 </Text>
                 <MaterialCommunityIcons
@@ -274,17 +253,11 @@ const ExchangeRatesScreen = () => {
             subtitle={getDescriptiveSubtitle(rate)}
             value={`${rate.value.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`}
             changePercent={
-              rate.changePercent !== null
-                ? `${Math.abs(rate.changePercent).toFixed(2)}%`
-                : ''
+              rate.changePercent !== null ? `${Math.abs(rate.changePercent).toFixed(2)}%` : ''
             }
-            isPositive={
-              rate.changePercent !== null ? rate.changePercent >= 0 : true
-            }
+            isPositive={rate.changePercent !== null ? rate.changePercent >= 0 : true}
             iconName={rate.iconName || 'currency-usd'}
-            iconBgColor={
-              rate.type === 'crypto' ? undefined : theme.colors.infoContainer
-            }
+            iconBgColor={rate.type === 'crypto' ? undefined : theme.colors.infoContainer}
             iconColor={rate.type === 'crypto' ? undefined : theme.colors.info}
             onPress={() => navigation.navigate('CurrencyDetail', { rate })}
           />
@@ -300,20 +273,9 @@ const ExchangeRatesScreen = () => {
                 size={40}
                 color={theme.colors.error}
               />
-              <Text
-                style={[styles.messageText, { color: theme.colors.onSurface }]}
-              >
-                {error}
-              </Text>
-              <TouchableOpacity
-                onPress={() => loadRates()}
-                style={styles.retryButton}
-              >
-                <Text
-                  style={[styles.retryText, { color: theme.colors.primary }]}
-                >
-                  Reintentar
-                </Text>
+              <Text style={[styles.messageText, { color: theme.colors.onSurface }]}>{error}</Text>
+              <TouchableOpacity onPress={() => loadRates()} style={styles.retryButton}>
+                <Text style={[styles.retryText, { color: theme.colors.primary }]}>Reintentar</Text>
               </TouchableOpacity>
             </View>
           );
@@ -325,12 +287,7 @@ const ExchangeRatesScreen = () => {
               size={40}
               color={theme.colors.onSurfaceVariant}
             />
-            <Text
-              style={[
-                styles.messageText,
-                { color: theme.colors.onSurfaceVariant },
-              ]}
-            >
+            <Text style={[styles.messageText, { color: theme.colors.onSurfaceVariant }]}>
               {filterType !== 'all'
                 ? `No hay resultados para "${filterType}"`
                 : 'No se encontraron resultados'}
@@ -367,9 +324,7 @@ const ExchangeRatesScreen = () => {
 
   if (loading && !refreshing && allRates.length === 0) {
     return (
-      <View
-        style={[styles.container, { backgroundColor: theme.colors.background }]}
-      >
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <StatusBar
           backgroundColor="transparent"
           translucent
@@ -381,9 +336,7 @@ const ExchangeRatesScreen = () => {
   }
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-    >
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar
         backgroundColor="transparent"
         translucent
@@ -391,26 +344,15 @@ const ExchangeRatesScreen = () => {
       />
 
       {/* Header */}
-      <View
-        style={[
-          styles.headerContainer,
-          { backgroundColor: theme.colors.background },
-        ]}
-      >
+      <View style={[styles.headerContainer, { backgroundColor: theme.colors.background }]}>
         <UnifiedHeader
           variant="section"
           title="Tasas de Cambio"
           subtitle={
-            isMarketOpen
-              ? 'Mercado abierto (Tiempo real)'
-              : 'Mercado BCV cerrado • P2P activo'
+            isMarketOpen ? 'Mercado abierto (Tiempo real)' : 'Mercado BCV cerrado • P2P activo'
           }
-          subtitleIcon={
-            isMarketOpen ? 'clock-check-outline' : 'clock-alert-outline'
-          }
-          subtitleIconColor={
-            isMarketOpen ? theme.colors.success : theme.colors.warning
-          }
+          subtitleIcon={isMarketOpen ? 'clock-check-outline' : 'clock-alert-outline'}
+          subtitleIconColor={isMarketOpen ? theme.colors.success : theme.colors.warning}
           onActionPress={() => loadRates()}
           rightActionIcon="refresh"
           onNotificationPress={() => {}}
@@ -424,9 +366,7 @@ const ExchangeRatesScreen = () => {
             onChangeText={handleSearch}
             placeholder="Buscar moneda o token..."
             onFilterPress={() => {
-              LayoutAnimation.configureNext(
-                LayoutAnimation.Presets.easeInEaseOut,
-              );
+              LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
               setShowFilters(!showFilters);
             }}
           />

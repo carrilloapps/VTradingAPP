@@ -29,16 +29,8 @@ const NotificationsSkeleton = () => {
                   <Skeleton width={100} height={16} />
                   <Skeleton width={60} height={12} />
                 </View>
-                <Skeleton
-                  width="90%"
-                  height={14}
-                  style={styles.skeletonSpacer}
-                />
-                <Skeleton
-                  width="60%"
-                  height={14}
-                  style={styles.skeletonSpacerSmall}
-                />
+                <Skeleton width="90%" height={14} style={styles.skeletonSpacer} />
+                <Skeleton width="60%" height={14} style={styles.skeletonSpacerSmall} />
               </View>
             </View>
           </View>

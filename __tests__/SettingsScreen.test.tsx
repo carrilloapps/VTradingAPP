@@ -145,8 +145,7 @@ jest.mock('react-native-safe-area-context', () => {
   };
   return {
     SafeAreaProvider: ({ children }: any) => children,
-    SafeAreaConsumer: ({ children }: any) =>
-      children(MOCK_INITIAL_METRICS.insets),
+    SafeAreaConsumer: ({ children }: any) => children(MOCK_INITIAL_METRICS.insets),
     SafeAreaInsetsContext: ReactMock.createContext(MOCK_INITIAL_METRICS.insets),
     useSafeAreaInsets: () => MOCK_INITIAL_METRICS.insets,
     useSafeAreaFrame: () => MOCK_INITIAL_METRICS.frame,
@@ -202,15 +201,11 @@ jest.mock('../src/services/ObservabilityService', () => ({
 
 describe('SettingsScreen', () => {
   const renderWithProvider = (component: React.ReactElement) => {
-    return render(
-      <PaperProvider theme={LightTheme}>{component}</PaperProvider>,
-    );
+    return render(<PaperProvider theme={LightTheme}>{component}</PaperProvider>);
   };
 
   it('renders correctly', async () => {
-    const { findByText, queryByTestId } = renderWithProvider(
-      <SettingsScreen />,
-    );
+    const { findByText, queryByTestId } = renderWithProvider(<SettingsScreen />);
 
     // Wait for skeleton to disappear
     await waitFor(() => {

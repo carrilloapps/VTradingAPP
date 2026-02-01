@@ -40,9 +40,7 @@ export const useHomeScreenData = () => {
   });
 
   const calculateSpread = useCallback((data: CurrencyRate[]): number | null => {
-    const usdRates = data.filter(
-      r => (r.code === 'USD' || r.code === 'USDT') && r.value > 0,
-    );
+    const usdRates = data.filter(r => (r.code === 'USD' || r.code === 'USDT') && r.value > 0);
 
     if (usdRates.length >= 2) {
       const values = usdRates.map(r => r.value);
@@ -68,13 +66,10 @@ export const useHomeScreenData = () => {
     return homeRates.map(rate => {
       let displayValue = '0,00';
       if (rate.value && !isNaN(Number(rate.value))) {
-        displayValue = Number(rate.value).toLocaleString(
-          AppConfig.DEFAULT_LOCALE,
-          {
-            minimumFractionDigits: AppConfig.DECIMAL_PLACES,
-            maximumFractionDigits: AppConfig.DECIMAL_PLACES,
-          },
-        );
+        displayValue = Number(rate.value).toLocaleString(AppConfig.DEFAULT_LOCALE, {
+          minimumFractionDigits: AppConfig.DECIMAL_PLACES,
+          maximumFractionDigits: AppConfig.DECIMAL_PLACES,
+        });
       }
 
       return {
@@ -83,12 +78,8 @@ export const useHomeScreenData = () => {
         subtitle: getDescriptiveSubtitle(rate),
         value: displayValue,
         currency: 'Bs',
-        changePercent:
-          rate.changePercent !== null
-            ? `${rate.changePercent.toFixed(2)}%`
-            : '0.00%',
-        isPositive:
-          rate.changePercent !== null ? rate.changePercent >= 0 : true,
+        changePercent: rate.changePercent !== null ? `${rate.changePercent.toFixed(2)}%` : '0.00%',
+        isPositive: rate.changePercent !== null ? rate.changePercent >= 0 : true,
         chartPath: getPath(rate.changePercent),
         buyValue: rate.buyValue
           ? Number(rate.buyValue).toLocaleString(AppConfig.DEFAULT_LOCALE, {

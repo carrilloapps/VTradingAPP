@@ -10,8 +10,7 @@ jest.mock('react-native-vector-icons/MaterialCommunityIcons', () => 'Icon');
 jest.mock('react-native-svg', () => {
   const MockReact = require('react');
   return {
-    SvgUri: ({ uri }: { uri: string }) =>
-      MockReact.createElement('svg-uri', { uri }),
+    SvgUri: ({ uri }: { uri: string }) => MockReact.createElement('svg-uri', { uri }),
   };
 });
 
@@ -28,13 +27,12 @@ jest.mock('../src/services/ObservabilityService', () => ({
   },
 }));
 
-const { remoteConfigService } =
-  require('../src/services/firebase/RemoteConfigService') as {
-    remoteConfigService: {
-      getJson: jest.Mock;
-      fetchAndActivate: jest.Mock;
-    };
+const { remoteConfigService } = require('../src/services/firebase/RemoteConfigService') as {
+  remoteConfigService: {
+    getJson: jest.Mock;
+    fetchAndActivate: jest.Mock;
   };
+};
 
 const renderComponent = () =>
   render(

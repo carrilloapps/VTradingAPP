@@ -16,13 +16,9 @@ const XIconRender = ({ size, color }: { size: number; color: string }) => (
   <XIcon size={size} color={color} />
 );
 
-const FacebookIconRender = ({
-  size,
-  color,
-}: {
-  size: number;
-  color: string;
-}) => <FacebookIcon size={size} color={color} />;
+const FacebookIconRender = ({ size, color }: { size: number; color: string }) => (
+  <FacebookIcon size={size} color={color} />
+);
 
 const AuthorCard = ({ author }: AuthorCardProps) => {
   const theme = useAppTheme();

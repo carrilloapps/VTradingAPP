@@ -17,10 +17,7 @@ const ArticleSkeleton = ({ variant = 'compact' }: ArticleSkeletonProps) => {
   if (isDetail) {
     return (
       <ScrollView
-        style={[
-          styles.detailContainer,
-          { backgroundColor: theme.colors.background },
-        ]}
+        style={[styles.detailContainer, { backgroundColor: theme.colors.background }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Hero Image */}
@@ -29,12 +26,7 @@ const ArticleSkeleton = ({ variant = 'compact' }: ArticleSkeletonProps) => {
         {/* Content Container */}
         <View style={styles.contentContainer}>
           {/* Category Badge */}
-          <Skeleton
-            width={80}
-            height={24}
-            borderRadius={12}
-            style={styles.categoryBadge}
-          />
+          <Skeleton width={80} height={24} borderRadius={12} style={styles.categoryBadge} />
 
           {/* Title */}
           <Skeleton width="95%" height={32} style={styles.titleLine1} />
@@ -45,11 +37,7 @@ const ArticleSkeleton = ({ variant = 'compact' }: ArticleSkeletonProps) => {
             <Skeleton width={32} height={32} borderRadius={16} />
             <View style={styles.metadataText}>
               <Skeleton width={120} height={14} style={styles.metadataItem} />
-              <Skeleton
-                width={180}
-                height={12}
-                style={styles.metadataSubItem}
-              />
+              <Skeleton width={180} height={12} style={styles.metadataSubItem} />
             </View>
           </View>
 
@@ -80,42 +68,17 @@ const ArticleSkeleton = ({ variant = 'compact' }: ArticleSkeletonProps) => {
             <Skeleton width="89%" height={16} style={styles.contentLine} />
           </View>
 
-          <Divider
-            style={[
-              styles.divider,
-              { backgroundColor: theme.colors.outlineVariant },
-            ]}
-          />
+          <Divider style={[styles.divider, { backgroundColor: theme.colors.outlineVariant }]} />
 
           {/* Tags Section */}
           <Skeleton width={60} height={20} style={styles.sectionTitle} />
           <View style={styles.tagsContainer}>
-            <Skeleton
-              width={70}
-              height={32}
-              borderRadius={16}
-              style={styles.tag}
-            />
-            <Skeleton
-              width={90}
-              height={32}
-              borderRadius={16}
-              style={styles.tag}
-            />
-            <Skeleton
-              width={80}
-              height={32}
-              borderRadius={16}
-              style={styles.tag}
-            />
+            <Skeleton width={70} height={32} borderRadius={16} style={styles.tag} />
+            <Skeleton width={90} height={32} borderRadius={16} style={styles.tag} />
+            <Skeleton width={80} height={32} borderRadius={16} style={styles.tag} />
           </View>
 
-          <Divider
-            style={[
-              styles.divider,
-              { backgroundColor: theme.colors.outlineVariant },
-            ]}
-          />
+          <Divider style={[styles.divider, { backgroundColor: theme.colors.outlineVariant }]} />
 
           {/* Author Card */}
           <Surface
@@ -139,33 +102,13 @@ const ArticleSkeleton = ({ variant = 'compact' }: ArticleSkeletonProps) => {
             <Skeleton width="95%" height={14} style={styles.authorBioLine} />
             <Skeleton width="60%" height={14} />
             <View style={styles.socialRow}>
-              <Skeleton
-                width={36}
-                height={36}
-                borderRadius={18}
-                style={styles.socialIcon}
-              />
-              <Skeleton
-                width={36}
-                height={36}
-                borderRadius={18}
-                style={styles.socialIcon}
-              />
-              <Skeleton
-                width={36}
-                height={36}
-                borderRadius={18}
-                style={styles.socialIcon}
-              />
+              <Skeleton width={36} height={36} borderRadius={18} style={styles.socialIcon} />
+              <Skeleton width={36} height={36} borderRadius={18} style={styles.socialIcon} />
+              <Skeleton width={36} height={36} borderRadius={18} style={styles.socialIcon} />
             </View>
           </Surface>
 
-          <Divider
-            style={[
-              styles.divider,
-              { backgroundColor: theme.colors.outlineVariant },
-            ]}
-          />
+          <Divider style={[styles.divider, { backgroundColor: theme.colors.outlineVariant }]} />
 
           {/* Related Posts Section */}
           <Skeleton width={180} height={24} style={styles.sectionTitle} />
@@ -193,24 +136,14 @@ const ArticleSkeleton = ({ variant = 'compact' }: ArticleSkeletonProps) => {
       <Surface style={surfaceStyle} elevation={0}>
         {isFeatured && <Skeleton width="100%" height={200} borderRadius={0} />}
 
-        <View
-          style={[
-            styles.content,
-            isFeatured ? styles.featuredContent : styles.compactContent,
-          ]}
-        >
+        <View style={[styles.content, isFeatured ? styles.featuredContent : styles.compactContent]}>
           <Skeleton width="30%" height={10} style={styles.skeletonCategory} />
           <Skeleton width="90%" height={18} style={styles.skeletonTitle} />
           <Skeleton width="70%" height={18} style={styles.skeletonSubtitle} />
 
           <View style={styles.footer}>
             <View style={styles.authorSection}>
-              <Skeleton
-                width={20}
-                height={20}
-                borderRadius={10}
-                style={styles.skeletonAvatar}
-              />
+              <Skeleton width={20} height={20} borderRadius={10} style={styles.skeletonAvatar} />
               <Skeleton width={60} height={10} />
             </View>
             <Skeleton width={40} height={10} />

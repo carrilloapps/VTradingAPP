@@ -12,10 +12,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useAuthStore } from '@/stores/authStore';
 import { useToastStore } from '@/stores/toastStore';
-import {
-  analyticsService,
-  ANALYTICS_EVENTS,
-} from '@/services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '@/services/firebase/AnalyticsService';
 import { AppConfig } from '@/constants/AppConfig';
 import AuthLoading from '@/components/auth/AuthLoading';
 import CustomButton from '@/components/ui/CustomButton';
@@ -199,10 +196,7 @@ const RegisterScreen = ({ navigation }: any) => {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.headerContent}>
-            <AuthLogo
-              size={60}
-              containerStyle={{ marginBottom: theme.spacing.s }}
-            />
+            <AuthLogo size={60} containerStyle={{ marginBottom: theme.spacing.s }} />
             <View style={themeStyles.titleRow}>
               <Text variant="headlineSmall" style={themeStyles.title}>
                 Crear cuenta
@@ -228,12 +222,7 @@ const RegisterScreen = ({ navigation }: any) => {
                 accessibilityLabel="Correo electrónico"
                 accessibilityHint="Ingresa tu correo para registrarte"
                 error={!!emailError}
-                left={
-                  <TextInput.Icon
-                    icon="email"
-                    accessibilityLabel="Icono de correo"
-                  />
-                }
+                left={<TextInput.Icon icon="email" accessibilityLabel="Icono de correo" />}
                 style={styles.input}
                 disabled={isBusy}
               />
@@ -256,20 +245,13 @@ const RegisterScreen = ({ navigation }: any) => {
                 accessibilityLabel="Contraseña"
                 accessibilityHint="Crea una contraseña segura"
                 error={!!passwordError}
-                left={
-                  <TextInput.Icon
-                    icon="lock"
-                    accessibilityLabel="Icono de candado"
-                  />
-                }
+                left={<TextInput.Icon icon="lock" accessibilityLabel="Icono de candado" />}
                 right={
                   <TextInput.Icon
                     icon={secureTextEntry ? 'eye' : 'eye-off'}
                     onPress={() => setSecureTextEntry(!secureTextEntry)}
                     accessibilityLabel={
-                      secureTextEntry
-                        ? 'Mostrar contraseña'
-                        : 'Ocultar contraseña'
+                      secureTextEntry ? 'Mostrar contraseña' : 'Ocultar contraseña'
                     }
                   />
                 }
@@ -296,21 +278,14 @@ const RegisterScreen = ({ navigation }: any) => {
                 accessibilityHint="Repite tu contraseña"
                 error={!!confirmPasswordError}
                 left={
-                  <TextInput.Icon
-                    icon="lock-check"
-                    accessibilityLabel="Icono de verificación"
-                  />
+                  <TextInput.Icon icon="lock-check" accessibilityLabel="Icono de verificación" />
                 }
                 right={
                   <TextInput.Icon
                     icon={confirmSecureTextEntry ? 'eye' : 'eye-off'}
-                    onPress={() =>
-                      setConfirmSecureTextEntry(!confirmSecureTextEntry)
-                    }
+                    onPress={() => setConfirmSecureTextEntry(!confirmSecureTextEntry)}
                     accessibilityLabel={
-                      confirmSecureTextEntry
-                        ? 'Mostrar contraseña'
-                        : 'Ocultar contraseña'
+                      confirmSecureTextEntry ? 'Mostrar contraseña' : 'Ocultar contraseña'
                     }
                   />
                 }
@@ -359,18 +334,12 @@ const RegisterScreen = ({ navigation }: any) => {
             </View>
 
             <View style={[styles.legal, { marginTop: theme.spacing.m }]}>
-              <Text
-                variant="bodySmall"
-                style={[themeStyles.legalText, styles.legalText]}
-              >
+              <Text variant="bodySmall" style={[themeStyles.legalText, styles.legalText]}>
                 Al continuar aceptas nuestras{' '}
                 <Text
                   style={[styles.linkText, { color: theme.colors.primary }]}
                   onPress={() =>
-                    openExternalUrl(
-                      AppConfig.PRIVACY_POLICY_URL,
-                      'Políticas de privacidad',
-                    )
+                    openExternalUrl(AppConfig.PRIVACY_POLICY_URL, 'Políticas de privacidad')
                   }
                 >
                   Políticas de privacidad
@@ -379,10 +348,7 @@ const RegisterScreen = ({ navigation }: any) => {
                 <Text
                   style={[styles.linkText, { color: theme.colors.primary }]}
                   onPress={() =>
-                    openExternalUrl(
-                      AppConfig.TERMS_OF_USE_URL,
-                      'Términos y condiciones',
-                    )
+                    openExternalUrl(AppConfig.TERMS_OF_USE_URL, 'Términos y condiciones')
                   }
                 >
                   Términos y condiciones

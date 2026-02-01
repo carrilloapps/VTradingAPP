@@ -51,9 +51,7 @@ describe('CurrencyService', () => {
     expect(rates[2].value).toBe(36.58);
     expect(rates[2].name).toBe('USD/VES • BCV');
 
-    expect(performanceService.startTrace).toHaveBeenCalledWith(
-      'get_currency_rates_service',
-    );
+    expect(performanceService.startTrace).toHaveBeenCalledWith('get_currency_rates_service');
     expect(performanceService.stopTrace).toHaveBeenCalledWith(traceMock);
   });
 

@@ -31,9 +31,7 @@ interface NotificationCardProps {
 
 import { formatTimeAgo } from '../../utils/dateUtils';
 
-import NotificationIcon, {
-  getNotificationIconConfig,
-} from './NotificationIcon';
+import NotificationIcon, { getNotificationIconConfig } from './NotificationIcon';
 
 const NotificationCard: React.FC<NotificationCardProps> = ({
   notification,
@@ -49,9 +47,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
 
   // Use fallback title if current title is generic "Notificación"
   const displayTitle =
-    notification.title === 'Notificación'
-      ? iconConfig.fallbackTitle
-      : notification.title;
+    notification.title === 'Notificación' ? iconConfig.fallbackTitle : notification.title;
 
   const renderRightActions = (
     _: Animated.AnimatedInterpolation<number>,
@@ -64,12 +60,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
     });
 
     return (
-      <View
-        style={[
-          styles.rightAction,
-          { backgroundColor: theme.colors.primaryContainer },
-        ]}
-      >
+      <View style={[styles.rightAction, { backgroundColor: theme.colors.primaryContainer }]}>
         <Animated.View style={[styles.actionIcon, { transform: [{ scale }] }]}>
           <MaterialCommunityIcons
             name="archive"
@@ -92,12 +83,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
     });
 
     return (
-      <View
-        style={[
-          styles.leftAction,
-          { backgroundColor: theme.colors.errorContainer },
-        ]}
-      >
+      <View style={[styles.leftAction, { backgroundColor: theme.colors.errorContainer }]}>
         <Animated.View style={[styles.actionIcon, { transform: [{ scale }] }]}>
           <MaterialCommunityIcons
             name="trash-can"
@@ -125,17 +111,11 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
         if (!isNaN(numericVal)) {
           const formattedNumber = numericVal.toFixed(2);
           // Replace only the number part in highlight
-          const formattedHighlight = highlight.replace(
-            originalNumberStr,
-            formattedNumber,
-          );
+          const formattedHighlight = highlight.replace(originalNumberStr, formattedNumber);
 
           // Replace the highlight in the full message
           if (displayMessage.includes(highlight)) {
-            displayMessage = displayMessage.replace(
-              highlight,
-              formattedHighlight,
-            );
+            displayMessage = displayMessage.replace(highlight, formattedHighlight);
             highlight = formattedHighlight;
           }
         }
@@ -177,12 +157,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
           <React.Fragment key={index}>
             {part}
             {index < parts.length - 1 && (
-              <Text
-                style={[
-                  styles.messageHighlight,
-                  { color: theme.colors.onSurface },
-                ]}
-              >
+              <Text style={[styles.messageHighlight, { color: theme.colors.onSurface }]}>
                 {highlight}
               </Text>
             )}
@@ -246,10 +221,7 @@ const NotificationCard: React.FC<NotificationCardProps> = ({
                 />
                 <Text
                   variant="labelSmall"
-                  style={[
-                    styles.swipeHintText,
-                    { color: theme.colors.onSurfaceVariant },
-                  ]}
+                  style={[styles.swipeHintText, { color: theme.colors.onSurfaceVariant }]}
                 >
                   DESLIZA: ARCHIVAR / BORRAR
                 </Text>

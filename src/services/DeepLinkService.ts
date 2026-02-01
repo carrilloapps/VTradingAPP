@@ -2,10 +2,7 @@ import { Linking } from 'react-native';
 
 import { navigationRef } from '@/navigation/NavigationRef';
 import { observabilityService } from '@/services/ObservabilityService';
-import {
-  analyticsService,
-  ANALYTICS_EVENTS,
-} from '@/services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '@/services/firebase/AnalyticsService';
 import SafeLogger from '@/utils/safeLogger';
 import { AppConfig } from '@/constants/AppConfig';
 
@@ -68,10 +65,11 @@ class DeepLinkService {
       // Allow alphanumeric, -, _, /
       if (!/^[a-zA-Z0-9\-_/]+$/.test(path)) {
         // Suspicious path detected
-        observabilityService.captureError(
-          new Error('Invalid DeepLink characters'),
-          { context: 'DeepLinkService.parseDeepLink', url, path },
-        );
+        observabilityService.captureError(new Error('Invalid DeepLink characters'), {
+          context: 'DeepLinkService.parseDeepLink',
+          url,
+          path,
+        });
         return null;
       }
 

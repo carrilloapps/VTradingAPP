@@ -28,11 +28,7 @@ import {
   setCrashlyticsCollectionEnabled,
   log,
 } from '@react-native-firebase/crashlytics';
-import {
-  getPerformance,
-  trace,
-  initializePerformance,
-} from '@react-native-firebase/perf';
+import { getPerformance, trace, initializePerformance } from '@react-native-firebase/perf';
 import * as Sentry from '@sentry/react-native';
 import { AppConfig } from './src/constants/AppConfig';
 import { deepLinkService } from './src/services/DeepLinkService';
@@ -65,10 +61,7 @@ Sentry.init({
   replaysSessionSampleRate: isProd ? 0.0 : 0.1,
   replaysOnErrorSampleRate: isProd ? 0.1 : 1,
   tracesSampleRate: isProd ? 0.1 : 1,
-  integrations: [
-    Sentry.mobileReplayIntegration(),
-    Sentry.feedbackIntegration(),
-  ],
+  integrations: [Sentry.mobileReplayIntegration(), Sentry.feedbackIntegration()],
 
   // uncomment the line below to enable Spotlight (https://spotlightjs.com)
   // spotlight: __DEV__,

@@ -17,10 +17,7 @@ const TrendingRail = ({ items, title = 'Tendencias' }: TrendingRailProps) => {
   const navigation = useNavigation<any>();
 
   const renderItem = ({ item }: { item: FormattedPost }) => {
-    const cardStyle = [
-      styles.card,
-      { borderRadius: theme.roundness * 2, marginRight: 12 },
-    ];
+    const cardStyle = [styles.card, { borderRadius: theme.roundness * 2, marginRight: 12 }];
 
     const imageStyle = [styles.image, { borderRadius: theme.roundness * 2 }];
 
@@ -40,9 +37,7 @@ const TrendingRail = ({ items, title = 'Tendencias' }: TrendingRailProps) => {
           <FastImage source={{ uri: item.image }} style={imageStyle} />
           <View style={styles.cardContent}>
             {item.categories && item.categories.length > 0 && (
-              <Text style={categoryStyle}>
-                {item.categories[0].name.toUpperCase()}
-              </Text>
+              <Text style={categoryStyle}>{item.categories[0].name.toUpperCase()}</Text>
             )}
             <Text variant="titleSmall" style={titleStyle} numberOfLines={2}>
               {item.title}
@@ -58,10 +53,7 @@ const TrendingRail = ({ items, title = 'Tendencias' }: TrendingRailProps) => {
 
   if (!items.length) return null;
 
-  const headerTitleStyle = [
-    styles.headerTitle,
-    { color: theme.colors.onSurface },
-  ];
+  const headerTitleStyle = [styles.headerTitle, { color: theme.colors.onSurface }];
 
   return (
     <View style={styles.container}>

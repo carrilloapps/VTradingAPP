@@ -2,13 +2,7 @@ import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
 import React from 'react';
 
-export type ToastType =
-  | 'success'
-  | 'error'
-  | 'info'
-  | 'warning'
-  | 'trendUp'
-  | 'trendDown';
+export type ToastType = 'success' | 'error' | 'info' | 'warning' | 'trendUp' | 'trendDown';
 
 export interface ToastAction {
   label: string;

@@ -36,12 +36,7 @@ const NoInternetModal = () => {
   const pulseCircleBorder = theme.colors.error + '30';
 
   return (
-    <Modal
-      transparent
-      visible={visible}
-      animationType="fade"
-      statusBarTranslucent
-    >
+    <Modal transparent visible={visible} animationType="fade" statusBarTranslucent>
       <View style={styles.overlay}>
         <StatusBar backgroundColor="rgba(0,0,0,0.5)" barStyle="light-content" />
 
@@ -69,23 +64,12 @@ const NoInternetModal = () => {
           />
 
           <View style={styles.content}>
-            <View
-              style={[styles.iconWrapper, { backgroundColor: iconWrapperBg }]}
-            >
-              <View
-                style={[styles.pulseCircle, { borderColor: pulseCircleBorder }]}
-              />
-              <MaterialCommunityIcons
-                name="wifi-off"
-                size={48}
-                color={theme.colors.error}
-              />
+            <View style={[styles.iconWrapper, { backgroundColor: iconWrapperBg }]}>
+              <View style={[styles.pulseCircle, { borderColor: pulseCircleBorder }]} />
+              <MaterialCommunityIcons name="wifi-off" size={48} color={theme.colors.error} />
             </View>
 
-            <Text
-              variant="headlineSmall"
-              style={[styles.title, { color: theme.colors.onSurface }]}
-            >
+            <Text variant="headlineSmall" style={[styles.title, { color: theme.colors.onSurface }]}>
               Sin conexión
             </Text>
 
@@ -93,8 +77,8 @@ const NoInternetModal = () => {
               variant="bodyMedium"
               style={[styles.message, { color: theme.colors.onSurfaceVariant }]}
             >
-              Parece que tienes problemas con tu red. Verifica tu conexión para
-              continuar operando en VTrading.
+              Parece que tienes problemas con tu red. Verifica tu conexión para continuar operando
+              en VTrading.
             </Text>
 
             <View style={styles.footer}>
@@ -109,15 +93,8 @@ const NoInternetModal = () => {
               />
 
               <View style={styles.statusIndicator}>
-                <View
-                  style={[styles.statusDot, { backgroundColor: iconWrapperBg }]}
-                />
-                <Text
-                  style={[
-                    styles.statusText,
-                    { color: theme.colors.onSurfaceVariant },
-                  ]}
-                >
+                <View style={[styles.statusDot, { backgroundColor: iconWrapperBg }]} />
+                <Text style={[styles.statusText, { color: theme.colors.onSurfaceVariant }]}>
                   Servidores fuera de alcance
                 </Text>
               </View>

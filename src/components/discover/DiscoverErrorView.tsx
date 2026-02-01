@@ -17,23 +17,11 @@ const DiscoverErrorView = ({
   const theme = useAppTheme();
   return (
     <View style={styles.container}>
-      <MaterialCommunityIcons
-        name="alert-circle-outline"
-        size={64}
-        color={theme.colors.error}
-      />
-      <Text
-        variant="titleMedium"
-        style={[styles.text, { color: theme.colors.onSurfaceVariant }]}
-      >
+      <MaterialCommunityIcons name="alert-circle-outline" size={64} color={theme.colors.error} />
+      <Text variant="titleMedium" style={[styles.text, { color: theme.colors.onSurfaceVariant }]}>
         {message}
       </Text>
-      <Button
-        mode="contained-tonal"
-        onPress={onRetry}
-        icon="refresh"
-        style={styles.button}
-      >
+      <Button mode="contained-tonal" onPress={onRetry} icon="refresh" style={styles.button}>
         Reintentar
       </Button>
     </View>

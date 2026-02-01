@@ -1,8 +1,4 @@
-import {
-  initializeAppCheck,
-  getToken,
-  AppCheck,
-} from '@react-native-firebase/app-check';
+import { initializeAppCheck, getToken, AppCheck } from '@react-native-firebase/app-check';
 import { getApp } from '@react-native-firebase/app';
 
 import { observabilityService } from '@/services/ObservabilityService';
@@ -21,8 +17,7 @@ class AppCheckService {
       // Manually construct the provider object to match ReactNativeFirebaseAppCheckProvider structure
       // since the class is not exported as a value in the modular API.
       const provider = {
-        getToken: () =>
-          Promise.reject(new Error('Native provider handled internally')),
+        getToken: () => Promise.reject(new Error('Native provider handled internally')),
         providerOptions: {
           android: {
             provider: __DEV__ ? 'debug' : 'playIntegrity',
@@ -75,15 +70,9 @@ class AppCheckService {
 
       // Prevent rapid retries if we are hitting "Too many attempts"
       // Exponential backoff: 1min, 2min, 4min, etc. capped at 1 hour
-      const backoffTime = Math.min(
-        60000 * Math.pow(2, this.errorCount - 3),
-        3600000,
-      );
+      const backoffTime = Math.min(60000 * Math.pow(2, this.errorCount - 3), 3600000);
 
-      if (
-        this.errorCount > 3 &&
-        Date.now() - this.lastErrorTime < backoffTime
-      ) {
+      if (this.errorCount > 3 && Date.now() - this.lastErrorTime < backoffTime) {
         return undefined;
       }
 
@@ -97,21 +86,16 @@ class AppCheckService {
       // Check for "App not registered" error - this is a configuration issue
       if (
         message.includes('App not registered') ||
-        (message.includes('code: 400') &&
-          message.includes('App not registered'))
+        (message.includes('code: 400') && message.includes('App not registered'))
       ) {
         SafeLogger.error('[AppCheck] App not registered in Firebase Console');
-        SafeLogger.error(
-          '[AppCheck] Please verify the Android/iOS app is registered in Firebase',
-        );
+        SafeLogger.error('[AppCheck] Please verify the Android/iOS app is registered in Firebase');
         SafeLogger.error('[AppCheck] Error details:', { message });
 
         // Only report this configuration error once to avoid spam
         if (this.errorCount === 0) {
           observabilityService.captureError(
-            new Error(
-              `AppCheck configuration error: App not registered in Firebase Console`,
-            ),
+            new Error(`AppCheck configuration error: App not registered in Firebase Console`),
             {
               context: 'AppCheck_getToken',
               errorDetails: message,

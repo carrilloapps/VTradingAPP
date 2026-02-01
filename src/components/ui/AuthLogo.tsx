@@ -12,11 +12,7 @@ interface AuthLogoProps {
   containerStyle?: ViewStyle;
 }
 
-const AuthLogo: React.FC<AuthLogoProps> = ({
-  size = 80,
-  showBadge = true,
-  containerStyle,
-}) => {
+const AuthLogo: React.FC<AuthLogoProps> = ({ size = 80, showBadge = true, containerStyle }) => {
   const theme = useAppTheme();
   const isDark = theme.dark;
 
@@ -50,10 +46,7 @@ const AuthLogo: React.FC<AuthLogoProps> = ({
           ]}
           accessibilityLabel="BETA"
         >
-          <Text
-            variant="labelSmall"
-            style={[styles.badgeText, { color: theme.colors.warning }]}
-          >
+          <Text variant="labelSmall" style={[styles.badgeText, { color: theme.colors.warning }]}>
             BETA
           </Text>
         </View>

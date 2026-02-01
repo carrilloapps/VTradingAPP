@@ -49,30 +49,35 @@ const mockTheme = {
   dark: false,
 };
 
-// Mock AuthContext
-jest.mock('../src/context/AuthContext', () => ({
-  useAuth: () => ({
-    user: {
-      displayName: 'Carlos',
-      email: 'carlos@test.com',
-      isAnonymous: false,
-    },
-  }),
-}));
+// Mock Auth Store (respect selector signature to keep referential stability)
+jest.mock('../src/stores/authStore', () => {
+  const user = {
+    displayName: 'Carlos',
+    email: 'carlos@test.com',
+    isAnonymous: false,
+  };
+  return {
+    useAuthStore: (selector?: (state: any) => any) => (selector ? selector({ user }) : { user }),
+  };
+});
 
-// Mock ToastContext
+// Mock Toast Store (respect selector and return stable functions)
 const mockShowToast = jest.fn();
-jest.mock('../src/context/ToastContext', () => ({
-  useToast: () => ({
+const mockHideToast = jest.fn();
+jest.mock('../src/stores/toastStore', () => {
+  const state = {
     showToast: mockShowToast,
-  }),
-}));
+    toasts: [],
+    hideToast: mockHideToast,
+  };
+  return {
+    useToastStore: (selector?: (state: typeof state) => any) =>
+      selector ? selector(state) : state,
+  };
+});
 
 // Mock CurrencyService
-jest.mock(
-  '../src/components/dashboard/DashboardSkeleton',
-  () => 'DashboardSkeleton',
-);
+jest.mock('../src/components/dashboard/DashboardSkeleton', () => 'DashboardSkeleton');
 
 jest.mock('../src/services/StocksService', () => ({
   StocksService: {

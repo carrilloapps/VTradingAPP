@@ -1,17 +1,5 @@
-import React, {
-  useEffect,
-  useState,
-  useRef,
-  useMemo,
-  useCallback,
-} from 'react';
-import {
-  View,
-  StyleSheet,
-  RefreshControl,
-  ScrollView,
-  useWindowDimensions,
-} from 'react-native';
+import React, { useEffect, useState, useRef, useMemo, useCallback } from 'react';
+import { View, StyleSheet, RefreshControl, ScrollView, useWindowDimensions } from 'react-native';
 import { FlashList, FlashListRef } from '@shopify/flash-list';
 import { Text, Surface, ProgressBar } from 'react-native-paper';
 import { useNavigation, useRoute } from '@react-navigation/native';
@@ -32,11 +20,7 @@ import PartnersSection from '@/components/discover/PartnersSection';
 import { useToastStore } from '@/stores/toastStore';
 import { observabilityService } from '@/services/ObservabilityService';
 import { remoteConfigService } from '@/services/firebase/RemoteConfigService';
-import {
-  wordPressService,
-  FormattedPost,
-  WordPressCategory,
-} from '@/services/WordPressService';
+import { wordPressService, FormattedPost, WordPressCategory } from '@/services/WordPressService';
 import { fcmService } from '@/services/firebase/FCMService';
 import { storageService } from '@/services/StorageService';
 import { analyticsService } from '@/services/firebase/AnalyticsService';
@@ -59,9 +43,7 @@ const DiscoverScreen = () => {
   const [trendingPosts, setTrendingPosts] = useState<FormattedPost[]>([]);
   const [promotedPosts, setPromotedPosts] = useState<FormattedPost[]>([]);
   const [categories, setCategories] = useState<WordPressCategory[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<number | undefined>(
-    undefined,
-  );
+  const [selectedCategory, setSelectedCategory] = useState<number | undefined>(undefined);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -113,13 +95,12 @@ const DiscoverScreen = () => {
         let filterTagId: number | undefined;
 
         // 1. Fetch Tags first to build queries
-        const [trendingTagEn, trendingTagEs, promotedTagEn, promotedTagEs] =
-          await Promise.all([
-            wordPressService.getTagBySlug('trending'),
-            wordPressService.getTagBySlug('tendencias'),
-            wordPressService.getTagBySlug('promoted'),
-            wordPressService.getTagBySlug('promocionado'),
-          ]);
+        const [trendingTagEn, trendingTagEs, promotedTagEn, promotedTagEs] = await Promise.all([
+          wordPressService.getTagBySlug('trending'),
+          wordPressService.getTagBySlug('tendencias'),
+          wordPressService.getTagBySlug('promoted'),
+          wordPressService.getTagBySlug('promocionado'),
+        ]);
 
         const trendingTag = trendingTagEn || trendingTagEs;
         const promotedTag = promotedTagEn || promotedTagEs;
@@ -224,16 +205,11 @@ const DiscoverScreen = () => {
 
   const handleCategorySelect = async (categoryId: number | undefined) => {
     try {
-      const newCategoryId =
-        categoryId === selectedCategory ? undefined : categoryId;
+      const newCategoryId = categoryId === selectedCategory ? undefined : categoryId;
       setSelectedCategory(newCategoryId);
 
       setLoadingPagination(true);
-      const fetchedPaginatedPosts = await wordPressService.getPostsPaginated(
-        1,
-        10,
-        newCategoryId,
-      );
+      const fetchedPaginatedPosts = await wordPressService.getPostsPaginated(1, 10, newCategoryId);
       setPosts(fetchedPaginatedPosts.data);
       setTotalPages(fetchedPaginatedPosts.totalPages);
       setCurrentPage(1);
@@ -273,20 +249,11 @@ const DiscoverScreen = () => {
   // --- DATA PREPARATION ---
 
   // 1. Trending Data (Header)
-  const trendingHeroItems = useMemo(
-    () => trendingPosts.slice(0, 4),
-    [trendingPosts],
-  );
-  const trendingIds = useMemo(
-    () => new Set(trendingHeroItems.map(h => h.id)),
-    [trendingHeroItems],
-  );
+  const trendingHeroItems = useMemo(() => trendingPosts.slice(0, 4), [trendingPosts]);
+  const trendingIds = useMemo(() => new Set(trendingHeroItems.map(h => h.id)), [trendingHeroItems]);
 
   // 2. Filter posts
-  const promotedIds = useMemo(
-    () => new Set(promotedPosts.map(p => p.id)),
-    [promotedPosts],
-  );
+  const promotedIds = useMemo(() => new Set(promotedPosts.map(p => p.id)), [promotedPosts]);
 
   const filteredPosts = useMemo(() => {
     return posts.filter(p => !trendingIds.has(p.id) && !promotedIds.has(p.id));
@@ -331,9 +298,7 @@ const DiscoverScreen = () => {
     return (
       <View>
         {/* Trending Section */}
-        {trendingHeroItems.length > 0 && (
-          <FeaturedCarousel items={trendingHeroItems} />
-        )}
+        {trendingHeroItems.length > 0 && <FeaturedCarousel items={trendingHeroItems} />}
 
         {/* Categories */}
         <Surface style={stickyBarStyles} elevation={0}>
@@ -378,9 +343,7 @@ const DiscoverScreen = () => {
         <ArticleCard
           article={item.data}
           variant={'compact'}
-          onPress={() =>
-            navigation.navigate('ArticleDetail', { article: item.data })
-          }
+          onPress={() => navigation.navigate('ArticleDetail', { article: item.data })}
         />
       );
     },
@@ -404,17 +367,10 @@ const DiscoverScreen = () => {
   );
 
   if (isLoading) {
-    return featureEnabled ? (
-      <DiscoverFeedSkeleton />
-    ) : (
-      <DiscoverConstructionSkeleton />
-    );
+    return featureEnabled ? <DiscoverFeedSkeleton /> : <DiscoverConstructionSkeleton />;
   }
 
-  const screenContainerStyle = [
-    styles.container,
-    { backgroundColor: theme.colors.background },
-  ];
+  const screenContainerStyle = [styles.container, { backgroundColor: theme.colors.background }];
 
   const handleWaitlistSubscription = async () => {
     try {
@@ -446,33 +402,18 @@ const DiscoverScreen = () => {
   if (!featureEnabled) {
     const renderFeatureItem = (icon: string, title: string, desc: string) => (
       <Surface
-        style={[
-          styles.featureItem,
-          { backgroundColor: theme.colors.elevation.level1 },
-        ]}
+        style={[styles.featureItem, { backgroundColor: theme.colors.elevation.level1 }]}
         elevation={0}
         key={title}
       >
-        <View
-          style={[
-            styles.featureIcon,
-            { backgroundColor: theme.colors.secondaryContainer },
-          ]}
-        >
-          <MaterialCommunityIcons
-            name={icon}
-            size={24}
-            color={theme.colors.onSecondaryContainer}
-          />
+        <View style={[styles.featureIcon, { backgroundColor: theme.colors.secondaryContainer }]}>
+          <MaterialCommunityIcons name={icon} size={24} color={theme.colors.onSecondaryContainer} />
         </View>
         <View style={styles.featureDetails}>
           <Text variant="titleMedium" style={styles.featureTitleStyle}>
             {title}
           </Text>
-          <Text
-            variant="bodyMedium"
-            style={{ color: theme.colors.onSurfaceVariant }}
-          >
+          <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
             {desc}
           </Text>
         </View>
@@ -490,21 +431,12 @@ const DiscoverScreen = () => {
           contentContainerStyle={styles.constructionContent}
           showsVerticalScrollIndicator={false}
         >
-          <View
-            style={[styles.constructionHero, { marginTop: windowWidth * 0.1 }]}
-          >
+          <View style={[styles.constructionHero, { marginTop: windowWidth * 0.1 }]}>
             <Surface
-              style={[
-                styles.iconContainer,
-                { backgroundColor: theme.colors.elevation.level2 },
-              ]}
+              style={[styles.iconContainer, { backgroundColor: theme.colors.elevation.level2 }]}
               elevation={0}
             >
-              <MaterialCommunityIcons
-                name="rocket-launch"
-                size={56}
-                color={theme.colors.primary}
-              />
+              <MaterialCommunityIcons name="rocket-launch" size={56} color={theme.colors.primary} />
             </Surface>
 
             <Text
@@ -515,13 +447,9 @@ const DiscoverScreen = () => {
             </Text>
             <Text
               variant="bodyLarge"
-              style={[
-                styles.description,
-                { color: theme.colors.onSurfaceVariant },
-              ]}
+              style={[styles.description, { color: theme.colors.onSurfaceVariant }]}
             >
-              Estamos preparando una experiencia de noticias completamente nueva
-              para ti.
+              Estamos preparando una experiencia de noticias completamente nueva para ti.
             </Text>
           </View>
 
@@ -552,11 +480,7 @@ const DiscoverScreen = () => {
           <View style={styles.ctaContainer}>
             <CustomButton
               variant={isSubscribed ? 'secondary' : 'primary'}
-              label={
-                isSubscribed
-                  ? 'En lista de espera'
-                  : 'Notificarme cuando esté listo'
-              }
+              label={isSubscribed ? 'En lista de espera' : 'Notificarme cuando esté listo'}
               onPress={
                 isSubscribed
                   ? () => showToast('Ya estás en la lista de espera', 'info')
@@ -568,10 +492,7 @@ const DiscoverScreen = () => {
             />
             <Text
               variant="bodySmall"
-              style={[
-                styles.ctaSubtitle,
-                { color: theme.colors.onSurfaceVariant },
-              ]}
+              style={[styles.ctaSubtitle, { color: theme.colors.onSurfaceVariant }]}
             >
               VTrading {new Date().getFullYear()}
             </Text>
@@ -584,9 +505,7 @@ const DiscoverScreen = () => {
   if (error) {
     // ... Keep error view
     return (
-      <View
-        style={[styles.container, { backgroundColor: theme.colors.background }]}
-      >
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <DiscoverErrorView
           message={error}
           onRetry={() => {

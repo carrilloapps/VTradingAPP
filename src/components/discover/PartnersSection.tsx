@@ -20,12 +20,7 @@ const PartnersSection = () => {
       <AppRecommendations />
 
       <View style={styles.dividerContainer}>
-        <Divider
-          style={[
-            styles.divider,
-            { backgroundColor: theme.colors.outlineVariant },
-          ]}
-        />
+        <Divider style={[styles.divider, { backgroundColor: theme.colors.outlineVariant }]} />
       </View>
 
       <View style={styles.partnersTitleContainer}>
@@ -33,13 +28,7 @@ const PartnersSection = () => {
       </View>
       <View style={styles.partnersRow}>
         {PARTNERS.map(p => (
-          <Text
-            key={p.id}
-            style={[
-              styles.partnerName,
-              { color: theme.colors.onSurfaceVariant },
-            ]}
-          >
+          <Text key={p.id} style={[styles.partnerName, { color: theme.colors.onSurfaceVariant }]}>
             {p.name}
           </Text>
         ))}

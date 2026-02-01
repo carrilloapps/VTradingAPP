@@ -63,10 +63,7 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
 
   return (
     <View
-      style={[
-        styles.hiddenTemplate,
-        { height: isVertical ? 600 * (16 / 9) : 600 },
-      ]}
+      style={[styles.hiddenTemplate, { height: isVertical ? 600 * (16 / 9) : 600 }]}
       pointerEvents="none"
       collapsable={false}
     >
@@ -83,26 +80,16 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
           colors={theme.dark ? ['#051911', '#0A0A0A'] : ['#F0FDF4', '#FFFFFF']}
           style={[
             styles.shareTemplate,
-            isVertical
-              ? styles.shareTemplateVertical
-              : styles.shareTemplateSquare,
+            isVertical ? styles.shareTemplateVertical : styles.shareTemplateSquare,
           ]}
         >
           {/* Decorative Elements */}
-          <View
-            style={[
-              styles.templateGlow,
-              { backgroundColor: theme.colors.primary },
-            ]}
-          />
+          <View style={[styles.templateGlow, { backgroundColor: theme.colors.primary }]} />
 
           {/* Platform Badges */}
           <View style={styles.platformBadgesContainer}>
             <Surface
-              style={[
-                styles.platformBadge,
-                { backgroundColor: theme.colors.surfaceVariant },
-              ]}
+              style={[styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }]}
               elevation={1}
             >
               <Icon
@@ -124,17 +111,10 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
             </Surface>
             <View style={styles.flex1} />
             <Surface
-              style={[
-                styles.platformBadge,
-                { backgroundColor: theme.colors.surfaceVariant },
-              ]}
+              style={[styles.platformBadge, { backgroundColor: theme.colors.surfaceVariant }]}
               elevation={1}
             >
-              <Icon
-                source="apple"
-                size={platformIconSize}
-                color={theme.colors.onSurfaceVariant}
-              />
+              <Icon source="apple" size={platformIconSize} color={theme.colors.onSurfaceVariant} />
               <Text
                 style={[
                   styles.platformText,
@@ -178,22 +158,12 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
                   ]}
                   elevation={2}
                 >
-                  <Text
-                    style={[
-                      styles.freeBadgeText,
-                      { fontSize: freeBadgeTextSize },
-                    ]}
-                  >
-                    FREE
-                  </Text>
+                  <Text style={[styles.freeBadgeText, { fontSize: freeBadgeTextSize }]}>FREE</Text>
                 </Surface>
               )}
             </View>
             <View
-              style={[
-                styles.templateUrlBadge,
-                { backgroundColor: theme.colors.primary + '15' },
-              ]}
+              style={[styles.templateUrlBadge, { backgroundColor: theme.colors.primary + '15' }]}
             >
               <Text
                 style={[
@@ -252,17 +222,8 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
               >
                 {indexData.value}
               </Text>
-              <View
-                style={[
-                  styles.indexTrendBadge,
-                  { backgroundColor: trendColor + '15' },
-                ]}
-              >
-                <Icon
-                  source={trendIcon}
-                  size={indexTrendIconSize}
-                  color={trendColor}
-                />
+              <View style={[styles.indexTrendBadge, { backgroundColor: trendColor + '15' }]}>
+                <Icon source={trendIcon} size={indexTrendIconSize} color={trendColor} />
                 <Text
                   style={[
                     styles.indexTrendText,
@@ -287,12 +248,7 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
           </View>
 
           {/* Stocks List Content */}
-          <View
-            style={[
-              styles.templateContent,
-              isVertical && ({ gap: 12 } as const),
-            ]}
-          >
+          <View style={[styles.templateContent, isVertical && ({ gap: 12 } as const)]}>
             <Text
               style={[
                 styles.sectionLabel,
@@ -308,10 +264,7 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
             {(() => {
               const displayCount = isVertical ? 6 : 3;
               const itemsToShow = topStocks.slice(0, displayCount);
-              const remainingCount = Math.max(
-                0,
-                topStocks.length - displayCount,
-              );
+              const remainingCount = Math.max(0, topStocks.length - displayCount);
 
               return (
                 <>
@@ -323,9 +276,7 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
                         key={idx}
                         style={[
                           styles.stockCard,
-                          theme.dark
-                            ? styles.stockCardDark
-                            : styles.stockCardLight,
+                          theme.dark ? styles.stockCardDark : styles.stockCardLight,
                           { borderColor: theme.colors.outlineVariant },
                           isVertical && styles.stockCardVertical,
                         ]}
@@ -357,10 +308,7 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
                               ]}
                             >
                               <Text
-                                style={[
-                                  styles.stockInitials,
-                                  { fontSize: stockLogoSize * 0.4 },
-                                ]}
+                                style={[styles.stockInitials, { fontSize: stockLogoSize * 0.4 }]}
                               >
                                 {stock.initials}
                               </Text>
@@ -407,10 +355,7 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
                             })}
                           </Text>
                           <Text
-                            style={[
-                              styles.stockTrend,
-                              { color: sColor, fontSize: stockTrendSize },
-                            ]}
+                            style={[styles.stockTrend, { color: sColor, fontSize: stockTrendSize }]}
                           >
                             {stock.changePercent > 0 ? '+' : ''}
                             {stock.changePercent.toFixed(2)}%

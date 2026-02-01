@@ -64,10 +64,7 @@ const DetailHeroHeader: React.FC<DetailHeroHeaderProps> = ({
     }
   };
 
-  const heroContainerStyle = [
-    styles.heroBackground,
-    { backgroundColor: theme.colors.surface },
-  ];
+  const heroContainerStyle = [styles.heroBackground, { backgroundColor: theme.colors.surface }];
 
   const heroImageStyle = {
     opacity: theme.dark ? 0.5 : 0.35,
@@ -85,15 +82,9 @@ const DetailHeroHeader: React.FC<DetailHeroHeaderProps> = ({
 
   const titleStyle = [styles.title, { color: theme.colors.primary }];
 
-  const descriptionStyle = [
-    styles.description,
-    { color: theme.colors.onSurfaceVariant },
-  ];
+  const descriptionStyle = [styles.description, { color: theme.colors.onSurfaceVariant }];
 
-  const metaLabelStyle = [
-    styles.metaLabel,
-    { color: theme.colors.onSurfaceVariant, opacity: 0.7 },
-  ];
+  const metaLabelStyle = [styles.metaLabel, { color: theme.colors.onSurfaceVariant, opacity: 0.7 }];
 
   const metaValueStyle = [styles.metaValue, { color: theme.colors.onSurface }];
 
@@ -125,11 +116,7 @@ const DetailHeroHeader: React.FC<DetailHeroHeaderProps> = ({
           >
             <View style={styles.heroContent}>
               <View style={categoryBadgeStyle}>
-                <MaterialCommunityIcons
-                  name={getBadgeIcon()}
-                  size={16}
-                  color={getBadgeColor()}
-                />
+                <MaterialCommunityIcons name={getBadgeIcon()} size={16} color={getBadgeColor()} />
                 <Text variant="labelLarge" style={badgeTextStyle}>
                   {categoryName}
                 </Text>
@@ -140,11 +127,7 @@ const DetailHeroHeader: React.FC<DetailHeroHeaderProps> = ({
               </Text>
 
               {description ? (
-                <Text
-                  variant="bodyMedium"
-                  style={descriptionStyle}
-                  numberOfLines={3}
-                >
+                <Text variant="bodyMedium" style={descriptionStyle} numberOfLines={3}>
                   {description}
                 </Text>
               ) : null}
@@ -154,11 +137,7 @@ const DetailHeroHeader: React.FC<DetailHeroHeaderProps> = ({
                   <Text variant="labelSmall" style={metaLabelStyle}>
                     ÚLTIMA ACTUALIZACIÓN
                   </Text>
-                  <Text
-                    variant="bodyMedium"
-                    style={metaValueStyle}
-                    numberOfLines={1}
-                  >
+                  <Text variant="bodyMedium" style={metaValueStyle} numberOfLines={1}>
                     {formatDate(lastUpdateDate)}
                   </Text>
                 </View>

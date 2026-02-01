@@ -8,26 +8,14 @@ interface AuthLoadingProps {
   testID?: string;
 }
 
-const AuthLoading: React.FC<AuthLoadingProps> = ({
-  testID = 'auth-loading',
-}) => {
+const AuthLoading: React.FC<AuthLoadingProps> = ({ testID = 'auth-loading' }) => {
   const theme = useAppTheme();
 
   return (
-    <View
-      testID={testID}
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-    >
+    <View testID={testID} style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <View style={styles.content}>
-        <ActivityIndicator
-          animating={true}
-          color={theme.colors.primary}
-          size="large"
-        />
-        <Text
-          variant="bodyMedium"
-          style={[styles.text, { color: theme.colors.onSurfaceVariant }]}
-        >
+        <ActivityIndicator animating={true} color={theme.colors.primary} size="large" />
+        <Text variant="bodyMedium" style={[styles.text, { color: theme.colors.onSurfaceVariant }]}>
           Cargando...
         </Text>
       </View>

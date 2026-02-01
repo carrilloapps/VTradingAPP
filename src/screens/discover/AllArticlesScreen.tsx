@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  View,
-  StyleSheet,
-  ActivityIndicator,
-  StatusBar,
-  Animated,
-} from 'react-native';
+import { View, StyleSheet, ActivityIndicator, StatusBar, Animated } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { Text } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
@@ -39,22 +33,12 @@ const ListFooter = ({
   theme: any;
 }) => {
   if (hasMore) {
-    return (
-      <ActivityIndicator
-        style={styles.footerLoader}
-        color={theme.colors.primary}
-      />
-    );
+    return <ActivityIndicator style={styles.footerLoader} color={theme.colors.primary} />;
   }
   if (postsLength > 0) {
     return (
       <View style={styles.endContainer}>
-        <View
-          style={[
-            styles.endDash,
-            { backgroundColor: theme.colors.outlineVariant },
-          ]}
-        />
+        <View style={[styles.endDash, { backgroundColor: theme.colors.outlineVariant }]} />
         <Text variant="labelLarge" style={styles.endText}>
           HAS LLEGADO AL FINAL
         </Text>
@@ -161,10 +145,7 @@ const AllArticlesScreen = () => {
         );
       } catch (e) {
         const err = e as any;
-        if (
-          err.message !== 'User did not share' &&
-          err.message !== 'CANCELLED'
-        ) {
+        if (err.message !== 'User did not share' && err.message !== 'CANCELLED') {
           observabilityService.captureError(e, {
             context: 'AllArticlesScreen.shareImage',
           });
@@ -189,23 +170,14 @@ const AllArticlesScreen = () => {
     analyticsService.logShare('all_articles', 'all', 'text');
   };
 
-  const containerStyle = [
-    styles.container,
-    { backgroundColor: theme.colors.background },
-  ];
+  const containerStyle = [styles.container, { backgroundColor: theme.colors.background }];
 
   const dialogDescriptionStyle = [
     styles.dialogDescription,
     { color: theme.colors.onSurfaceVariant },
   ];
 
-  const renderItem = ({
-    item,
-    index,
-  }: {
-    item: FormattedPost;
-    index: number;
-  }) => (
+  const renderItem = ({ item, index }: { item: FormattedPost; index: number }) => (
     <ArticleCard
       article={item}
       onPress={() => navigation.navigate('ArticleDetail', { article: item })}
@@ -218,9 +190,7 @@ const AllArticlesScreen = () => {
   );
 
   const renderEmpty = () =>
-    !loading ? (
-      <DiscoverEmptyView message="No se encontraron artículos" />
-    ) : null;
+    !loading ? <DiscoverEmptyView message="No se encontraron artículos" /> : null;
 
   const renderHeader = () => {
     const firstPostImage = posts.length > 0 ? posts[0].image : null;
@@ -284,10 +254,9 @@ const AllArticlesScreen = () => {
           data={posts}
           keyExtractor={(item: FormattedPost) => item.id.toString()}
           scrollEventThrottle={16}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { useNativeDriver: true },
-          )}
+          onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+            useNativeDriver: true,
+          })}
           renderItem={renderItem}
           estimatedItemSize={250}
           showsVerticalScrollIndicator={false}

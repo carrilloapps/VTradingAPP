@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  StyleProp,
-  ViewStyle,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, StyleProp, ViewStyle } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -57,18 +51,11 @@ const CurrencySelectorButton: React.FC<CurrencySelectorButtonProps> = ({
         {iconName === 'Bs' || currencyCode === 'VES' ? (
           <BolivarIcon color={theme.colors.onSurface} size={18} />
         ) : (
-          <MaterialCommunityIcons
-            name={iconName}
-            size={18}
-            color={theme.colors.onSurface}
-          />
+          <MaterialCommunityIcons name={iconName} size={18} color={theme.colors.onSurface} />
         )}
       </View>
 
-      <Text
-        variant="titleMedium"
-        style={[styles.boldText, themeStyles.textPrimary]}
-      >
+      <Text variant="titleMedium" style={[styles.boldText, themeStyles.textPrimary]}>
         {currencyCode}
       </Text>
 

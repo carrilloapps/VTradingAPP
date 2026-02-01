@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useMemo,
-  useEffect,
-  useCallback,
-  useDeferredValue,
-} from 'react';
+import React, { useState, useMemo, useEffect, useCallback, useDeferredValue } from 'react';
 import {
   View,
   StyleSheet,
@@ -33,10 +27,7 @@ import { useToastStore } from '@/stores/toastStore';
 import StocksSkeleton from '@/components/stocks/StocksSkeleton';
 import ErrorState from '@/components/ui/ErrorState';
 import { observabilityService } from '@/services/ObservabilityService';
-import {
-  analyticsService,
-  ANALYTICS_EVENTS,
-} from '@/services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '@/services/firebase/AnalyticsService';
 import { useAuthStore } from '@/stores/authStore';
 import CustomDialog from '@/components/ui/CustomDialog';
 import CustomButton from '@/components/ui/CustomButton';
@@ -148,9 +139,7 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
       setIsMarketOpen(StocksService.isMarketOpen());
       showToast('Mercado actualizado', 'success');
       // Accessibility announcement for refresh completion
-      AccessibilityInfo.announceForAccessibility(
-        'Mercado actualizado correctamente',
-      );
+      AccessibilityInfo.announceForAccessibility('Mercado actualizado correctamente');
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'StocksScreen.onRefresh',
@@ -158,9 +147,7 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
       });
       await analyticsService.logError('stocks_refresh');
       showToast('Error actualizando mercado', 'error');
-      AccessibilityInfo.announceForAccessibility(
-        'Error al actualizar el mercado',
-      );
+      AccessibilityInfo.announceForAccessibility('Error al actualizar el mercado');
     } finally {
       setRefreshing(false);
     }
@@ -180,8 +167,7 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
         stock.name.toLowerCase().includes(deferredQuery.toLowerCase()) ||
         stock.symbol.toLowerCase().includes(deferredQuery.toLowerCase());
 
-      const matchesCategory =
-        activeFilter === 'Todos' || stock.category === activeFilter;
+      const matchesCategory = activeFilter === 'Todos' || stock.category === activeFilter;
 
       return matchesSearch && matchesCategory;
     });
@@ -202,18 +188,13 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
     if (!deferredQuery || deferredQuery.length < 2) return [];
     const lower = deferredQuery.toLowerCase();
     return stocks
-      .filter(
-        s =>
-          s.name.toLowerCase().includes(lower) ||
-          s.symbol.toLowerCase().includes(lower),
-      )
+      .filter(s => s.name.toLowerCase().includes(lower) || s.symbol.toLowerCase().includes(lower))
       .slice(0, 3)
       .map(s => s.symbol);
   }, [stocks, deferredQuery]);
 
   const handleSearch = (text: string) => setStockFilters({ query: text });
-  const handleSuggestionPress = (suggestion: string) =>
-    setStockFilters({ query: suggestion });
+  const handleSuggestionPress = (suggestion: string) => setStockFilters({ query: suggestion });
 
   const handleStockPress = useCallback(
     (stock: StockData) => {
@@ -276,8 +257,7 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
 
         const stocksDetails = featuredStocks
           .map(s => {
-            const trendIcon =
-              s.changePercent > 0 ? '📈' : s.changePercent < 0 ? '📉' : '➖';
+            const trendIcon = s.changePercent > 0 ? '📈' : s.changePercent < 0 ? '📉' : '➖';
             return `${trendIcon} *${s.symbol}:* ${s.price.toLocaleString('es-VE', { minimumFractionDigits: 2 })} (${s.changePercent > 0 ? '+' : ''}${s.changePercent.toFixed(2)}%)`;
           })
           .join('\n');
@@ -285,8 +265,7 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
         const changeValue = indexData?.changePercent
           ? parseFloat(indexData.changePercent.replace(',', '.'))
           : 0;
-        const indexIcon =
-          changeValue > 0 ? '📈' : changeValue < 0 ? '📉' : '➖';
+        const indexIcon = changeValue > 0 ? '📈' : changeValue < 0 ? '📉' : '➖';
 
         const message =
           `📊 *VTrading - Resumen de Mercado*\n\n` +
@@ -335,9 +314,7 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
     try {
       const message =
         `📊 *VTrading - Mercado de Valores*\n\n` +
-        (indexData
-          ? `📉 *Índice IBC:* ${indexData.value} (${indexData.changePercent})\n`
-          : '') +
+        (indexData ? `📉 *Índice IBC:* ${indexData.value} (${indexData.changePercent})\n` : '') +
         (stocks.length > 0
           ? `🚀 *Top Stock:* ${stocks[0].symbol} @ ${stocks[0].price.toFixed(2)} Bs\n`
           : '') +
@@ -346,11 +323,7 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
       await Share.open({ message });
       await analyticsService.logShare('market_summary', 'all', 'text');
     } catch (e) {
-      if (
-        e &&
-        (e as any).message !== 'User did not share' &&
-        (e as any).message !== 'CANCELLED'
-      ) {
+      if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
         observabilityService.captureError(e, {
           context: 'StocksScreen.handleShareText',
           action: 'share_market_text',
@@ -392,10 +365,7 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
             if (hasValidStats) {
               statsToPass = stats;
             } else {
-              if (
-                indexData.statusState &&
-                indexData.statusState !== 'ABIERTO'
-              ) {
+              if (indexData.statusState && indexData.statusState !== 'ABIERTO') {
                 labelOverride = 'ESTADO DEL MERCADO';
                 fallbackValue = indexData.statusState;
               } else {
@@ -427,20 +397,10 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
 
         {/* Stock List Header */}
         <View style={styles.listHeader}>
-          <Text
-            style={[
-              styles.listHeaderTitle,
-              { color: theme.colors.onSurfaceVariant },
-            ]}
-          >
+          <Text style={[styles.listHeaderTitle, { color: theme.colors.onSurfaceVariant }]}>
             EMPRESA / TICKER
           </Text>
-          <Text
-            style={[
-              styles.listHeaderTitle,
-              { color: theme.colors.onSurfaceVariant },
-            ]}
-          >
+          <Text style={[styles.listHeaderTitle, { color: theme.colors.onSurfaceVariant }]}>
             PRECIO & VARIACIÓN
           </Text>
         </View>
@@ -469,9 +429,7 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
 
   if (loading && !refreshing && stocks.length === 0) {
     return (
-      <View
-        style={[styles.container, { backgroundColor: theme.colors.background }]}
-      >
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <StatusBar
           backgroundColor="transparent"
           translucent
@@ -484,14 +442,8 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
 
   if (error && stocks.length === 0) {
     return (
-      <View
-        style={[styles.container, { backgroundColor: theme.colors.background }]}
-      >
-        <UnifiedHeader
-          variant="section"
-          title="Mercados"
-          subtitle="Error de conexión"
-        />
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <UnifiedHeader variant="section" title="Mercados" subtitle="Error de conexión" />
         <ErrorState
           message="No se pudieron cargar los datos del mercado. Por favor verifica tu conexión."
           onRetry={loadInitialData}
@@ -501,21 +453,14 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
   }
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-    >
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <StatusBar
         backgroundColor="transparent"
         translucent
         barStyle={theme.dark ? 'light-content' : 'dark-content'}
       />
 
-      <View
-        style={[
-          styles.headerContainer,
-          { backgroundColor: theme.colors.background },
-        ]}
-      >
+      <View style={[styles.headerContainer, { backgroundColor: theme.colors.background }]}>
         <UnifiedHeader
           variant="section"
           title="Mercados"
@@ -571,12 +516,7 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
               color={theme.colors.onSurfaceVariant}
               style={styles.emptyIcon}
             />
-            <Text
-              style={[
-                styles.emptyText,
-                { color: theme.colors.onSurfaceVariant },
-              ]}
-            >
+            <Text style={[styles.emptyText, { color: theme.colors.onSurfaceVariant }]}>
               No se encontraron acciones para "{activeFilter}"
             </Text>
           </View>

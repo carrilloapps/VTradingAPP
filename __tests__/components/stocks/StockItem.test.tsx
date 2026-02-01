@@ -4,10 +4,7 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import StockItem from '../../../src/components/stocks/StockItem';
 
 // Mock MaterialCommunityIcons to avoid rendering issues
-jest.mock(
-  'react-native-vector-icons/MaterialCommunityIcons',
-  () => 'MaterialCommunityIcons',
-);
+jest.mock('react-native-vector-icons/MaterialCommunityIcons', () => 'MaterialCommunityIcons');
 
 describe('StockItem', () => {
   const mockStock = {

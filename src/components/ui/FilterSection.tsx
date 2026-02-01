@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  ScrollView,
-  View,
-  StyleSheet,
-  StyleProp,
-  ViewStyle,
-} from 'react-native';
+import { ScrollView, View, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 import { Chip } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -61,9 +55,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
 
     // Create icon renderer outside of JSX to avoid creating new component each render
     const iconRenderer = option.icon
-      ? () => (
-          <ChipIcon iconName={option.icon!} color={contentColor} size={18} />
-        )
+      ? () => <ChipIcon iconName={option.icon!} color={contentColor} size={18} />
       : undefined;
 
     return (
@@ -81,10 +73,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
         style={[
           styles.chip,
           isSelected
-            ? [
-                styles.chipSelected,
-                { backgroundColor: option.color || theme.colors.primary },
-              ]
+            ? [styles.chipSelected, { backgroundColor: option.color || theme.colors.primary }]
             : [styles.chipUnselected, { borderColor: theme.colors.outline }],
         ]}
         textStyle={
@@ -121,9 +110,7 @@ const FilterSection: React.FC<FilterSectionProps> = ({
   }
 
   return (
-    <View style={[styles.wrapContainer, { marginTop: theme.spacing.m }, style]}>
-      {content}
-    </View>
+    <View style={[styles.wrapContainer, { marginTop: theme.spacing.m }, style]}>{content}</View>
   );
 };
 

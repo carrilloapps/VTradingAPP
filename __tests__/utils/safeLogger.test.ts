@@ -25,13 +25,7 @@ describe('SafeLogger', () => {
       // Access private method via any casting or testing public side effects
       // We'll test side effects via log to verify sanitization
       SafeLogger.log('test', 123, 'normal string', null, undefined);
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        'test',
-        123,
-        'normal string',
-        null,
-        undefined,
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith('test', 123, 'normal string', null, undefined);
     });
 
     it('should mask sensitive keys in objects', () => {
@@ -69,10 +63,7 @@ describe('SafeLogger', () => {
     it('should sanitize arrays', () => {
       const sensitiveArray = [{ password: 'secretpassword' }, 'normal'];
       SafeLogger.log('array', sensitiveArray);
-      expect(consoleLogSpy).toHaveBeenCalledWith('array', [
-        { password: 'secr...word' },
-        'normal',
-      ]);
+      expect(consoleLogSpy).toHaveBeenCalledWith('array', [{ password: 'secr...word' }, 'normal']);
     });
   });
 
@@ -127,10 +118,7 @@ describe('SafeLogger', () => {
 
     it('should mask short string in DEV', () => {
       SafeLogger.sensitive('Context', 'short');
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        '[Context] (SENSITIVE - DEV ONLY):',
-        '****',
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith('[Context] (SENSITIVE - DEV ONLY):', '****');
     });
 
     it('should mask object in DEV', () => {
@@ -138,10 +126,10 @@ describe('SafeLogger', () => {
         key: 'value',
         password: 'secretpassword',
       });
-      expect(consoleLogSpy).toHaveBeenCalledWith(
-        '[Context] (SENSITIVE - DEV ONLY):',
-        { key: 'value', password: 'secr...word' },
-      );
+      expect(consoleLogSpy).toHaveBeenCalledWith('[Context] (SENSITIVE - DEV ONLY):', {
+        key: 'value',
+        password: 'secr...word',
+      });
     });
 
     it('should hide completely in PROD', () => {
@@ -156,9 +144,7 @@ describe('SafeLogger', () => {
   describe('looksLikeToken', () => {
     it('should identify tokens', () => {
       expect(SafeLogger.looksLikeToken('Bearer abcdef123456')).toBe(true);
-      expect(
-        SafeLogger.looksLikeToken('abcdef1234567890abcdef1234567890'),
-      ).toBe(true); // 32 chars
+      expect(SafeLogger.looksLikeToken('abcdef1234567890abcdef1234567890')).toBe(true); // 32 chars
       expect(SafeLogger.looksLikeToken('ya29.abcdefg')).toBe(true);
       expect(SafeLogger.looksLikeToken('short')).toBe(false);
     });

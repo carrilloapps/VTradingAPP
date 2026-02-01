@@ -1,12 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import {
-  View,
-  StyleSheet,
-  ImageBackground,
-  Dimensions,
-  Animated,
-  Easing,
-} from 'react-native';
+import { View, StyleSheet, ImageBackground, Dimensions, Animated, Easing } from 'react-native';
 import { Text, Surface, Icon, TouchableRipple } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 
@@ -80,26 +73,13 @@ const AdCard = ({ item, onPress }: AdCardProps) => {
           >
             {/* Diagonal Ribbon */}
             <View style={styles.ribbonContainer}>
-              <View
-                style={[
-                  styles.ribbon,
-                  { backgroundColor: theme.colors.warning },
-                ]}
-              >
-                <Text
-                  style={[styles.ribbonText, { color: theme.colors.onPrimary }]}
-                >
-                  PROMO
-                </Text>
+              <View style={[styles.ribbon, { backgroundColor: theme.colors.warning }]}>
+                <Text style={[styles.ribbonText, { color: theme.colors.onPrimary }]}>PROMO</Text>
               </View>
             </View>
 
             <View style={styles.adContent}>
-              <Text
-                variant="headlineSmall"
-                style={styles.adTitle}
-                numberOfLines={2}
-              >
+              <Text variant="headlineSmall" style={styles.adTitle} numberOfLines={2}>
                 {item.title}
               </Text>
 
@@ -113,11 +93,7 @@ const AdCard = ({ item, onPress }: AdCardProps) => {
                   },
                 ]}
               >
-                <Icon
-                  source="arrow-right"
-                  size={24}
-                  color={theme.colors.onPrimary}
-                />
+                <Icon source="arrow-right" size={24} color={theme.colors.onPrimary} />
               </Animated.View>
             </View>
           </LinearGradient>

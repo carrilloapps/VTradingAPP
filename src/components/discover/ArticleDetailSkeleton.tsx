@@ -7,10 +7,7 @@ import ArticleSkeleton from '@/components/discover/ArticleSkeleton';
 const ArticleDetailSkeleton = () => {
   const theme = useAppTheme();
 
-  const containerStyle = [
-    styles.container,
-    { backgroundColor: theme.colors.background },
-  ];
+  const containerStyle = [styles.container, { backgroundColor: theme.colors.background }];
 
   return (
     <View style={containerStyle}>

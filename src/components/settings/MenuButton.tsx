@@ -42,13 +42,7 @@ const MenuButton: React.FC<MenuButtonProps> = ({
       ]}
     >
       <MaterialCommunityIcons name={icon} size={24} color={iconColor} />
-      <Text
-        style={[
-          styles.label,
-          { color: textColor },
-          isDanger && styles.boldLabel,
-        ]}
-      >
+      <Text style={[styles.label, { color: textColor }, isDanger && styles.boldLabel]}>
         {label}
       </Text>
       {showChevron && !isDanger && (

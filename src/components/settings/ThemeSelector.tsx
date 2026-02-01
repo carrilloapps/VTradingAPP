@@ -52,29 +52,19 @@ const ThemeOption: React.FC<ThemeOptionProps> = ({
         style={[
           styles.label,
           {
-            color: isSelected
-              ? theme.colors.primary
-              : theme.colors.onSurfaceVariant,
+            color: isSelected ? theme.colors.primary : theme.colors.onSurfaceVariant,
           },
           isSelected && styles.selectedLabel,
         ]}
       >
         {label}
       </Text>
-      {isSelected && (
-        <View
-          style={[styles.checkDot, { backgroundColor: theme.colors.primary }]}
-        />
-      )}
+      {isSelected && <View style={[styles.checkDot, { backgroundColor: theme.colors.primary }]} />}
     </TouchableOpacity>
   );
 };
 
-const ThemeSelector: React.FC<ThemeSelectorProps> = ({
-  currentTheme,
-  onSelect,
-  disabled,
-}) => {
+const ThemeSelector: React.FC<ThemeSelectorProps> = ({ currentTheme, onSelect, disabled }) => {
   const theme = useAppTheme();
 
   return (
@@ -116,11 +106,7 @@ const ThemeSelector: React.FC<ThemeSelectorProps> = ({
         disabled={disabled}
         renderPreview={() => (
           <View
-            style={[
-              styles.previewBox,
-              styles.systemPreview,
-              { borderColor: theme.colors.outline },
-            ]}
+            style={[styles.previewBox, styles.systemPreview, { borderColor: theme.colors.outline }]}
           >
             <View style={styles.systemLeft} />
             <View style={styles.systemRight} />

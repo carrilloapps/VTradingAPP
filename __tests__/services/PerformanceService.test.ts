@@ -24,14 +24,7 @@ describe('PerformanceService', () => {
     const url = 'https://api.test.com';
     const method = 'GET';
 
-    await performanceService.trackApiCall(
-      url,
-      method,
-      200,
-      'application/json',
-      500,
-      1000,
-    );
+    await performanceService.trackApiCall(url, method, 200, 'application/json', 500, 1000);
 
     expect(getPerformance).toHaveBeenCalled();
     expect(httpMetric).toHaveBeenCalledWith(expect.anything(), url, method);

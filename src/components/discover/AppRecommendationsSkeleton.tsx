@@ -15,10 +15,7 @@ const AppRecommendationsSkeleton: React.FC<AppRecommendationsSkeletonProps> = ({
   columns = MIN_PLACEHOLDERS,
 }) => {
   const theme = useAppTheme();
-  const effectiveColumns = useMemo(
-    () => Math.max(1, Math.floor(columns)),
-    [columns],
-  );
+  const effectiveColumns = useMemo(() => Math.max(1, Math.floor(columns)), [columns]);
   const columnWidth = useMemo<DimensionValue>(
     () => `${100 / effectiveColumns}%` as DimensionValue,
     [effectiveColumns],
@@ -46,12 +43,7 @@ const AppRecommendationsSkeleton: React.FC<AppRecommendationsSkeletonProps> = ({
               },
             ]}
           >
-            <View
-              style={[
-                styles.iconContainer,
-                { borderRadius: theme.roundness * 3 },
-              ]}
-            >
+            <View style={[styles.iconContainer, { borderRadius: theme.roundness * 3 }]}>
               <Skeleton width={32} height={32} borderRadius={16} />
             </View>
             <Skeleton width="80%" height={10} style={styles.titleSkeleton} />

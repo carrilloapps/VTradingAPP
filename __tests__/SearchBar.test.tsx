@@ -7,30 +7,21 @@ jest.mock('react-native-vector-icons/MaterialCommunityIcons', () => 'Icon');
 
 describe('SearchBar', () => {
   it('renders correctly with placeholder', () => {
-    const { getByPlaceholderText } = render(
-      <SearchBar placeholder="Test placeholder" />,
-    );
+    const { getByPlaceholderText } = render(<SearchBar placeholder="Test placeholder" />);
     expect(getByPlaceholderText('Test placeholder')).toBeTruthy();
   });
 
   it('calls onChangeText when text changes', () => {
     const mockOnChange = jest.fn();
-    const { getByPlaceholderText } = render(
-      <SearchBar onChangeText={mockOnChange} />,
-    );
+    const { getByPlaceholderText } = render(<SearchBar onChangeText={mockOnChange} />);
 
-    fireEvent.changeText(
-      getByPlaceholderText('Buscar moneda o token...'),
-      'test',
-    );
+    fireEvent.changeText(getByPlaceholderText('Buscar moneda o token...'), 'test');
     expect(mockOnChange).toHaveBeenCalledWith('test');
   });
 
   it('calls onFilterPress when filter button is pressed', () => {
     const mockOnFilter = jest.fn();
-    const { getByLabelText } = render(
-      <SearchBar onFilterPress={mockOnFilter} />,
-    );
+    const { getByLabelText } = render(<SearchBar onFilterPress={mockOnFilter} />);
 
     fireEvent.press(getByLabelText('Filtros'));
     expect(mockOnFilter).toHaveBeenCalled();
@@ -40,11 +31,7 @@ describe('SearchBar', () => {
     const suggestions = ['Suggestion 1', 'Suggestion 2'];
     const mockOnSuggestionPress = jest.fn();
     const { getByPlaceholderText, getByText } = render(
-      <SearchBar
-        value="Sug"
-        suggestions={suggestions}
-        onSuggestionPress={mockOnSuggestionPress}
-      />,
+      <SearchBar value="Sug" suggestions={suggestions} onSuggestionPress={mockOnSuggestionPress} />,
     );
 
     // Focus input to show suggestions
@@ -58,11 +45,7 @@ describe('SearchBar', () => {
     const suggestions = ['Suggestion 1'];
     const mockOnSuggestionPress = jest.fn();
     const { getByPlaceholderText, getByText } = render(
-      <SearchBar
-        value="Sug"
-        suggestions={suggestions}
-        onSuggestionPress={mockOnSuggestionPress}
-      />,
+      <SearchBar value="Sug" suggestions={suggestions} onSuggestionPress={mockOnSuggestionPress} />,
     );
 
     fireEvent(getByPlaceholderText('Buscar moneda o token...'), 'focus');
@@ -73,9 +56,7 @@ describe('SearchBar', () => {
 
   it('shows clear button when value is present', () => {
     const mockOnChange = jest.fn();
-    const { getByLabelText } = render(
-      <SearchBar value="test" onChangeText={mockOnChange} />,
-    );
+    const { getByLabelText } = render(<SearchBar value="test" onChangeText={mockOnChange} />);
 
     const clearButton = getByLabelText('Limpiar búsqueda');
     expect(clearButton).toBeTruthy();
@@ -83,9 +64,7 @@ describe('SearchBar', () => {
 
   it('calls onChangeText with empty string when clear button is pressed', () => {
     const mockOnChange = jest.fn();
-    const { getByLabelText } = render(
-      <SearchBar value="test" onChangeText={mockOnChange} />,
-    );
+    const { getByLabelText } = render(<SearchBar value="test" onChangeText={mockOnChange} />);
 
     fireEvent.press(getByLabelText('Limpiar búsqueda'));
     expect(mockOnChange).toHaveBeenCalledWith('');

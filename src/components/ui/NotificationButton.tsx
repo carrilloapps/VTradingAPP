@@ -93,9 +93,7 @@ const NotificationButton: React.FC<NotificationButtonProps> = ({
               // Optional: Show number if needed, but the design often uses just a dot or small number
               // The UnifiedHeader used a simple dot. The prompt asks for "indicador visual (badge) que muestre el número".
               // So I should show the number.
-              <Text style={[styles.badgeText, { color: theme.colors.onError }]}>
-                {unreadCount}
-              </Text>
+              <Text style={[styles.badgeText, { color: theme.colors.onError }]}>{unreadCount}</Text>
             )}
           </Animated.View>
         )}

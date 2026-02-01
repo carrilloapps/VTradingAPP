@@ -16,9 +16,7 @@ const AddAlertSkeleton = ({ variant = 'list' }: Props) => {
 
   if (variant === 'form') {
     return (
-      <View
-        style={[styles.container, { backgroundColor: theme.colors.background }]}
-      >
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         {/* Header Skeleton matches UnifiedHeader default */}
         <View style={[styles.headerSimple, { paddingTop: insets.top + 12 }]}>
           <View style={styles.headerInner}>
@@ -30,12 +28,7 @@ const AddAlertSkeleton = ({ variant = 'list' }: Props) => {
         <ScrollView contentContainerStyle={styles.formScrollContent}>
           {/* Symbol Header Section */}
           <View style={styles.centeredColumn}>
-            <Skeleton
-              width={80}
-              height={80}
-              borderRadius={40}
-              style={styles.mb16}
-            />
+            <Skeleton width={80} height={80} borderRadius={40} style={styles.mb16} />
             <View style={styles.centeredGap}>
               <Skeleton width={140} height={32} />
               <Skeleton width={180} height={20} />
@@ -44,10 +37,7 @@ const AddAlertSkeleton = ({ variant = 'list' }: Props) => {
 
           {/* Price Card */}
           <View
-            style={[
-              styles.priceCardSkeleton,
-              { backgroundColor: theme.colors.elevation.level1 },
-            ]}
+            style={[styles.priceCardSkeleton, { backgroundColor: theme.colors.elevation.level1 }]}
           >
             <Skeleton width={100} height={12} style={styles.mb12} />
             <Skeleton width={150} height={48} style={styles.mb12} />
@@ -77,9 +67,7 @@ const AddAlertSkeleton = ({ variant = 'list' }: Props) => {
   }
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-    >
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* Header Skeleton */}
       <View style={[styles.headerSimple, { paddingTop: insets.top + 12 }]}>
         <View style={styles.headerInner}>

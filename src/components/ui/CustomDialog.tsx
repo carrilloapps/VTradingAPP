@@ -66,9 +66,7 @@ const CustomDialog: React.FC<CustomDialogProps> = ({
           },
         ]}
       >
-        <Dialog.Title
-          style={[styles.dialogTitle, { color: theme.colors.onSurface }]}
-        >
+        <Dialog.Title style={[styles.dialogTitle, { color: theme.colors.onSurface }]}>
           {title}
         </Dialog.Title>
         <Dialog.Content>

@@ -13,18 +13,12 @@ interface UserProfileCardProps {
   onRegister?: () => void;
 }
 
-const UserProfileCard = ({
-  user,
-  onEdit,
-  onRegister,
-}: UserProfileCardProps) => {
+const UserProfileCard = ({ user, onEdit, onRegister }: UserProfileCardProps) => {
   const theme = useAppTheme();
   const [imageError, setImageError] = useState(false);
 
-  const displayName =
-    user?.displayName || (user?.isAnonymous ? 'Invitado' : 'Usuario');
-  const email =
-    user?.email || (user?.isAnonymous ? 'Sesión anónima' : 'Sin correo');
+  const displayName = user?.displayName || (user?.isAnonymous ? 'Invitado' : 'Usuario');
+  const email = user?.email || (user?.isAnonymous ? 'Sesión anónima' : 'Sin correo');
   const isPro = !!user && !user.isAnonymous;
 
   // Reset error state when user changes
@@ -46,11 +40,7 @@ const UserProfileCard = ({
     // 1. If user has a photoURL (e.g. Google Sign In), use it.
     if (user?.photoURL) {
       return (
-        <Avatar.Image
-          size={64}
-          source={{ uri: user.photoURL }}
-          style={styles.transparentBg}
-        />
+        <Avatar.Image size={64} source={{ uri: user.photoURL }} style={styles.transparentBg} />
       );
     }
 
@@ -73,10 +63,7 @@ const UserProfileCard = ({
       <Avatar.Text
         size={64}
         label={getInitials(displayName)}
-        style={[
-          styles.avatarText,
-          { backgroundColor: theme.colors.primaryContainer },
-        ]}
+        style={[styles.avatarText, { backgroundColor: theme.colors.primaryContainer }]}
         color={theme.colors.onPrimaryContainer}
       />
     );
@@ -94,21 +81,14 @@ const UserProfileCard = ({
         ]}
       >
         <View style={styles.avatarContainer}>
-          <View
-            style={[
-              styles.avatarWrapper,
-              { borderColor: theme.colors.primary + '33' },
-            ]}
-          >
+          <View style={[styles.avatarWrapper, { borderColor: theme.colors.primary + '33' }]}>
             {renderAvatar()}
           </View>
           <View
             style={[
               styles.badge,
               {
-                backgroundColor: isPro
-                  ? theme.colors.warning
-                  : theme.colors.surfaceVariant,
+                backgroundColor: isPro ? theme.colors.warning : theme.colors.surfaceVariant,
                 borderColor: theme.colors.elevation.level1,
               },
             ]}
@@ -131,10 +111,7 @@ const UserProfileCard = ({
         </View>
 
         <View style={styles.infoContainer}>
-          <Text
-            variant="titleMedium"
-            style={[styles.userName, { color: theme.colors.onSurface }]}
-          >
+          <Text variant="titleMedium" style={[styles.userName, { color: theme.colors.onSurface }]}>
             {displayName}
           </Text>
           <Text
@@ -147,11 +124,7 @@ const UserProfileCard = ({
 
         {isPro && (
           <TouchableOpacity style={styles.editButton} onPress={onEdit}>
-            <MaterialCommunityIcons
-              name="pencil"
-              size={20}
-              color={theme.colors.onSurfaceVariant}
-            />
+            <MaterialCommunityIcons name="pencil" size={20} color={theme.colors.onSurfaceVariant} />
           </TouchableOpacity>
         )}
       </View>
@@ -174,32 +147,23 @@ const UserProfileCard = ({
             <View style={styles.premiumTextContainer}>
               <Text
                 variant="titleSmall"
-                style={[
-                  styles.premiumTitle,
-                  { color: theme.colors.onPrimaryContainer },
-                ]}
+                style={[styles.premiumTitle, { color: theme.colors.onPrimaryContainer }]}
               >
                 PÁSATE AL PLAN PREMIUM
               </Text>
               <Text
                 variant="bodySmall"
-                style={[
-                  styles.premiumSubtitle,
-                  { color: theme.colors.onPrimaryContainer },
-                ]}
+                style={[styles.premiumSubtitle, { color: theme.colors.onPrimaryContainer }]}
               >
-                Gratis durante el periodo de pruebas. Solo necesitas registrarte
-                presionando el boton "Registrarse gratis".
+                Gratis durante el periodo de pruebas. Solo necesitas registrarte presionando el
+                boton "Registrarse gratis".
               </Text>
             </View>
           </View>
           <Button
             mode="contained"
             onPress={onRegister}
-            style={[
-              styles.registerButton,
-              { backgroundColor: theme.colors.primary },
-            ]}
+            style={[styles.registerButton, { backgroundColor: theme.colors.primary }]}
             textColor={theme.colors.onPrimary}
           >
             Registrarse gratis

@@ -17,15 +17,8 @@ const DiscoverEmptyView = ({
   const theme = useAppTheme();
   return (
     <View style={styles.container}>
-      <MaterialCommunityIcons
-        name={icon}
-        size={64}
-        color={theme.colors.outline}
-      />
-      <Text
-        variant="titleMedium"
-        style={[styles.text, { color: theme.colors.outline }]}
-      >
+      <MaterialCommunityIcons name={icon} size={64} color={theme.colors.outline} />
+      <Text variant="titleMedium" style={[styles.text, { color: theme.colors.outline }]}>
         {message}
       </Text>
     </View>

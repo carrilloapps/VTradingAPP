@@ -13,10 +13,7 @@ import DeviceInfo from 'react-native-device-info';
 
 import { useAuthStore } from '@/stores/authStore';
 import { useToastStore } from '@/stores/toastStore';
-import {
-  analyticsService,
-  ANALYTICS_EVENTS,
-} from '@/services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '@/services/firebase/AnalyticsService';
 import { observabilityService } from '@/services/ObservabilityService';
 import { useAppTheme } from '@/theme';
 import { AppConfig } from '@/constants/AppConfig';
@@ -234,10 +231,7 @@ const LoginScreen = ({ navigation }: any) => {
           showsVerticalScrollIndicator={false}
         >
           <View style={[styles.header, { marginBottom: theme.spacing.xl }]}>
-            <AuthLogo
-              size={80}
-              containerStyle={{ marginBottom: theme.spacing.s }}
-            />
+            <AuthLogo size={80} containerStyle={{ marginBottom: theme.spacing.s }} />
             <View style={[styles.titleRow, themeStyles.titleRow]}>
               <Text variant="headlineMedium" style={themeStyles.title}>
                 {appName}
@@ -267,12 +261,7 @@ const LoginScreen = ({ navigation }: any) => {
                 accessibilityLabel="Correo electrónico"
                 accessibilityHint="Ingresa tu correo para iniciar sesión"
                 error={!!emailError}
-                left={
-                  <TextInput.Icon
-                    icon="email"
-                    accessibilityLabel="Icono de correo"
-                  />
-                }
+                left={<TextInput.Icon icon="email" accessibilityLabel="Icono de correo" />}
                 style={styles.input}
                 disabled={isBusy}
               />
@@ -300,20 +289,13 @@ const LoginScreen = ({ navigation }: any) => {
                 accessibilityLabel="Contraseña"
                 accessibilityHint="Ingresa tu contraseña"
                 error={!!passwordError}
-                left={
-                  <TextInput.Icon
-                    icon="lock"
-                    accessibilityLabel="Icono de candado"
-                  />
-                }
+                left={<TextInput.Icon icon="lock" accessibilityLabel="Icono de candado" />}
                 right={
                   <TextInput.Icon
                     icon={secureTextEntry ? 'eye' : 'eye-off'}
                     onPress={() => setSecureTextEntry(!secureTextEntry)}
                     accessibilityLabel={
-                      secureTextEntry
-                        ? 'Mostrar contraseña'
-                        : 'Ocultar contraseña'
+                      secureTextEntry ? 'Mostrar contraseña' : 'Ocultar contraseña'
                     }
                   />
                 }
@@ -392,18 +374,12 @@ const LoginScreen = ({ navigation }: any) => {
             </View>
 
             <View style={[styles.legal, { marginTop: theme.spacing.m }]}>
-              <Text
-                variant="bodySmall"
-                style={[themeStyles.legalText, styles.legalText]}
-              >
+              <Text variant="bodySmall" style={[themeStyles.legalText, styles.legalText]}>
                 Al continuar aceptas nuestras{' '}
                 <Text
                   style={[styles.linkText, { color: theme.colors.primary }]}
                   onPress={() =>
-                    openExternalUrl(
-                      AppConfig.PRIVACY_POLICY_URL,
-                      'Políticas de privacidad',
-                    )
+                    openExternalUrl(AppConfig.PRIVACY_POLICY_URL, 'Políticas de privacidad')
                   }
                 >
                   Políticas de privacidad
@@ -412,10 +388,7 @@ const LoginScreen = ({ navigation }: any) => {
                 <Text
                   style={[styles.linkText, { color: theme.colors.primary }]}
                   onPress={() =>
-                    openExternalUrl(
-                      AppConfig.TERMS_OF_USE_URL,
-                      'Términos y condiciones',
-                    )
+                    openExternalUrl(AppConfig.TERMS_OF_USE_URL, 'Términos y condiciones')
                   }
                 >
                   Términos y condiciones
@@ -425,10 +398,7 @@ const LoginScreen = ({ navigation }: any) => {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
-      <AboutDialog
-        visible={aboutVisible}
-        onDismiss={() => setAboutVisible(false)}
-      />
+      <AboutDialog visible={aboutVisible} onDismiss={() => setAboutVisible(false)} />
     </View>
   );
 };

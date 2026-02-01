@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useMemo,
-  useRef,
-  useCallback,
-  useEffect,
-} from 'react';
+import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
 import {
   View,
   StyleSheet,
@@ -25,9 +19,7 @@ import UnifiedHeader from '@/components/ui/UnifiedHeader';
 import { useAppTheme } from '@/theme';
 import SearchBar from '@/components/ui/SearchBar';
 import FilterSection, { FilterOption } from '@/components/ui/FilterSection';
-import NotificationCard, {
-  NotificationData,
-} from '@/components/notifications/NotificationCard';
+import NotificationCard, { NotificationData } from '@/components/notifications/NotificationCard';
 import NotificationDetailModal from '@/components/notifications/NotificationDetailModal';
 import NotificationsSkeleton from '@/components/notifications/NotificationsSkeleton';
 import { useNotifications } from '@/context/NotificationContext';
@@ -81,14 +73,11 @@ const NotificationsScreen: React.FC = () => {
   ];
 
   // State
-  const [activeTab, setActiveTab] = useState<'unread' | 'read' | 'archived'>(
-    'unread',
-  );
+  const [activeTab, setActiveTab] = useState<'unread' | 'read' | 'archived'>('unread');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
-  const [selectedNotification, setSelectedNotification] =
-    useState<NotificationData | null>(null);
+  const [selectedNotification, setSelectedNotification] = useState<NotificationData | null>(null);
   const [hasPermissions, setHasPermissions] = useState<boolean | null>(null);
   const [pushEnabled, setPushEnabled] = useState(true);
 
@@ -97,8 +86,7 @@ const NotificationsScreen: React.FC = () => {
     (items: NotificationData[]) => {
       return items.filter(n => {
         // Category Filter
-        const matchesCategory =
-          activeFilter === 'all' || n.type === activeFilter;
+        const matchesCategory = activeFilter === 'all' || n.type === activeFilter;
         // Search Filter
         const matchesSearch =
           n.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -110,16 +98,12 @@ const NotificationsScreen: React.FC = () => {
   );
 
   const unreadNotifications = useMemo(
-    () =>
-      filterNotifications(
-        notifications.filter(n => !n.isRead && !n.isArchived),
-      ),
+    () => filterNotifications(notifications.filter(n => !n.isRead && !n.isArchived)),
     [notifications, filterNotifications],
   );
 
   const readNotifications = useMemo(
-    () =>
-      filterNotifications(notifications.filter(n => n.isRead && !n.isArchived)),
+    () => filterNotifications(notifications.filter(n => n.isRead && !n.isArchived)),
     [notifications, filterNotifications],
   );
 
@@ -128,9 +112,7 @@ const NotificationsScreen: React.FC = () => {
     [notifications, filterNotifications],
   );
 
-  const unreadCount = notifications.filter(
-    n => !n.isRead && !n.isArchived,
-  ).length;
+  const unreadCount = notifications.filter(n => !n.isRead && !n.isArchived).length;
 
   // Check permissions on mount and focus
   useEffect(() => {
@@ -198,26 +180,16 @@ const NotificationsScreen: React.FC = () => {
   const renderEmptyState = (title: string, subtitle: string) => (
     <View style={styles.emptyContainer}>
       <Icon source="bell-off-outline" size={80} color={emptyIconColor} />
-      <Text
-        variant="titleMedium"
-        style={[styles.emptyTitle, { color: emptyTitleColor }]}
-      >
+      <Text variant="titleMedium" style={[styles.emptyTitle, { color: emptyTitleColor }]}>
         {title}
       </Text>
-      <Text
-        variant="bodyMedium"
-        style={[styles.emptySubtitle, { color: emptySubtitleColor }]}
-      >
+      <Text variant="bodyMedium" style={[styles.emptySubtitle, { color: emptySubtitleColor }]}>
         {subtitle}
       </Text>
     </View>
   );
 
-  const renderList = (
-    data: NotificationData[],
-    emptyTitle: string,
-    emptySubtitle: string,
-  ) => (
+  const renderList = (data: NotificationData[], emptyTitle: string, emptySubtitle: string) => (
     <FlashList
       data={data}
       keyExtractor={item => item.id}
@@ -230,10 +202,7 @@ const NotificationsScreen: React.FC = () => {
           showSwipeHint={index === 0}
         />
       )}
-      contentContainerStyle={[
-        styles.listContent,
-        { paddingBottom: insets.bottom + 20 },
-      ]}
+      contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 20 }]}
       ListEmptyComponent={renderEmptyState(emptyTitle, emptySubtitle)}
       showsVerticalScrollIndicator={false}
     />
@@ -247,24 +216,15 @@ const NotificationsScreen: React.FC = () => {
   const emptySubtitleColor = theme.colors.onSurfaceVariant;
   const emptyIconColor = theme.colors.onSurfaceVariant;
   const segmentedContainerBg = theme.colors.elevation.level1;
-  const unreadTabBg =
-    activeTab === 'unread' ? theme.colors.secondaryContainer : undefined;
+  const unreadTabBg = activeTab === 'unread' ? theme.colors.secondaryContainer : undefined;
   const unreadTabColor =
-    activeTab === 'unread'
-      ? theme.colors.onSecondaryContainer
-      : theme.colors.onSurfaceVariant;
-  const readTabBg =
-    activeTab === 'read' ? theme.colors.secondaryContainer : undefined;
+    activeTab === 'unread' ? theme.colors.onSecondaryContainer : theme.colors.onSurfaceVariant;
+  const readTabBg = activeTab === 'read' ? theme.colors.secondaryContainer : undefined;
   const readTabColor =
-    activeTab === 'read'
-      ? theme.colors.onSecondaryContainer
-      : theme.colors.onSurfaceVariant;
-  const archivedTabBg =
-    activeTab === 'archived' ? theme.colors.secondaryContainer : undefined;
+    activeTab === 'read' ? theme.colors.onSecondaryContainer : theme.colors.onSurfaceVariant;
+  const archivedTabBg = activeTab === 'archived' ? theme.colors.secondaryContainer : undefined;
   const archivedTabColor =
-    activeTab === 'archived'
-      ? theme.colors.onSecondaryContainer
-      : theme.colors.onSurfaceVariant;
+    activeTab === 'archived' ? theme.colors.onSecondaryContainer : theme.colors.onSurfaceVariant;
 
   // Si está cargando permisos, mostrar skeleton
   if (hasPermissions === null || isLoading) {
@@ -275,11 +235,7 @@ const NotificationsScreen: React.FC = () => {
   if (!hasPermissions || !pushEnabled) {
     return (
       <View style={[styles.container, { backgroundColor: containerBgColor }]}>
-        <StatusBar
-          backgroundColor="transparent"
-          translucent
-          barStyle={statusBarStyle}
-        />
+        <StatusBar backgroundColor="transparent" translucent barStyle={statusBarStyle} />
 
         <UnifiedHeader variant="section" title="Notificaciones" />
 
@@ -299,22 +255,14 @@ const NotificationsScreen: React.FC = () => {
 
           <Text
             variant="headlineSmall"
-            style={[
-              styles.noPermissionsTitle,
-              { color: theme.colors.onSurface },
-            ]}
+            style={[styles.noPermissionsTitle, { color: theme.colors.onSurface }]}
           >
-            {!hasPermissions
-              ? 'Notificaciones desactivadas'
-              : 'Notificaciones pausadas'}
+            {!hasPermissions ? 'Notificaciones desactivadas' : 'Notificaciones pausadas'}
           </Text>
 
           <Text
             variant="bodyLarge"
-            style={[
-              styles.noPermissionsDescription,
-              { color: theme.colors.onSurfaceVariant },
-            ]}
+            style={[styles.noPermissionsDescription, { color: theme.colors.onSurfaceVariant }]}
           >
             {!hasPermissions
               ? 'Para recibir alertas de precios y actualizaciones importantes, necesitas activar las notificaciones.'
@@ -323,9 +271,7 @@ const NotificationsScreen: React.FC = () => {
 
           <Button
             mode="contained"
-            onPress={
-              !hasPermissions ? handleEnableNotifications : handleGoToSettings
-            }
+            onPress={!hasPermissions ? handleEnableNotifications : handleGoToSettings}
             style={styles.noPermissionsButton}
             icon={!hasPermissions ? 'bell-ring' : 'cog'}
           >
@@ -338,24 +284,16 @@ const NotificationsScreen: React.FC = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: containerBgColor }]}>
-      <StatusBar
-        backgroundColor="transparent"
-        translucent
-        barStyle={statusBarStyle}
-      />
+      <StatusBar backgroundColor="transparent" translucent barStyle={statusBarStyle} />
 
       {/* Unified Header + Search */}
-      <View
-        style={[styles.headerContainer, { backgroundColor: headerContainerBg }]}
-      >
+      <View style={[styles.headerContainer, { backgroundColor: headerContainerBg }]}>
         <UnifiedHeader
           variant="section"
           title="Notificaciones"
           subtitle="Tus alertas y avisos recientes"
           onBackPress={() => navigation.goBack()}
-          onActionPress={() =>
-            (navigation.navigate as any)('Main', { screen: 'Settings' })
-          }
+          onActionPress={() => (navigation.navigate as any)('Main', { screen: 'Settings' })}
           rightActionIcon="cog"
           showNotification={false}
           style={styles.headerStyle}
@@ -367,9 +305,7 @@ const NotificationsScreen: React.FC = () => {
             onChangeText={setSearchQuery}
             placeholder="Buscar notificaciones..."
             onFilterPress={() => {
-              LayoutAnimation.configureNext(
-                LayoutAnimation.Presets.easeInEaseOut,
-              );
+              LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
               setShowFilters(!showFilters);
             }}
           />
@@ -385,9 +321,7 @@ const NotificationsScreen: React.FC = () => {
               options={FILTER_OPTIONS}
               selectedValue={activeFilter}
               onSelect={val => {
-                LayoutAnimation.configureNext(
-                  LayoutAnimation.Presets.easeInEaseOut,
-                );
+                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
                 setActiveFilter(val);
               }}
               style={styles.filterSectionMargin}
@@ -395,21 +329,11 @@ const NotificationsScreen: React.FC = () => {
           )}
 
           {/* Segmented Tabs (Read/Unread/Archived) */}
-          <View
-            style={[
-              styles.segmentedContainer,
-              { backgroundColor: segmentedContainerBg },
-            ]}
-          >
+          <View style={[styles.segmentedContainer, { backgroundColor: segmentedContainerBg }]}>
             <TouchableOpacity
-              style={[
-                styles.segment,
-                activeTab === 'unread' && { backgroundColor: unreadTabBg },
-              ]}
+              style={[styles.segment, activeTab === 'unread' && { backgroundColor: unreadTabBg }]}
               onPress={() => {
-                LayoutAnimation.configureNext(
-                  LayoutAnimation.Presets.easeInEaseOut,
-                );
+                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
                 setActiveTab('unread');
                 pagerRef.current?.setPage(0);
               }}
@@ -421,22 +345,15 @@ const NotificationsScreen: React.FC = () => {
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[
-                styles.segment,
-                activeTab === 'read' && { backgroundColor: readTabBg },
-              ]}
+              style={[styles.segment, activeTab === 'read' && { backgroundColor: readTabBg }]}
               onPress={() => {
-                LayoutAnimation.configureNext(
-                  LayoutAnimation.Presets.easeInEaseOut,
-                );
+                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
                 setActiveTab('read');
                 pagerRef.current?.setPage(1);
               }}
               activeOpacity={0.7}
             >
-              <Text style={[styles.segmentText, { color: readTabColor }]}>
-                Leídas
-              </Text>
+              <Text style={[styles.segmentText, { color: readTabColor }]}>Leídas</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -445,17 +362,13 @@ const NotificationsScreen: React.FC = () => {
                 activeTab === 'archived' && { backgroundColor: archivedTabBg },
               ]}
               onPress={() => {
-                LayoutAnimation.configureNext(
-                  LayoutAnimation.Presets.easeInEaseOut,
-                );
+                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
                 setActiveTab('archived');
                 pagerRef.current?.setPage(2);
               }}
               activeOpacity={0.7}
             >
-              <Text style={[styles.segmentText, { color: archivedTabColor }]}>
-                Archivadas
-              </Text>
+              <Text style={[styles.segmentText, { color: archivedTabColor }]}>Archivadas</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -463,17 +376,9 @@ const NotificationsScreen: React.FC = () => {
         {/* Action Row */}
         {activeTab === 'unread' && unreadCount > 0 && (
           <View style={styles.actionRow}>
-            <TouchableOpacity
-              onPress={handleMarkAllRead}
-              style={styles.markReadButton}
-            >
+            <TouchableOpacity onPress={handleMarkAllRead} style={styles.markReadButton}>
               <Icon source="check-all" size={16} color={theme.colors.primary} />
-              <Text
-                style={[
-                  styles.markReadButtonText,
-                  { color: theme.colors.primary },
-                ]}
-              >
+              <Text style={[styles.markReadButtonText, { color: theme.colors.primary }]}>
                 Marcar todo como leído
               </Text>
             </TouchableOpacity>

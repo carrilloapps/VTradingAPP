@@ -1,7 +1,4 @@
-import {
-  getAppDistribution,
-  checkForUpdate,
-} from '@react-native-firebase/app-distribution';
+import { getAppDistribution, checkForUpdate } from '@react-native-firebase/app-distribution';
 import { Platform } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 

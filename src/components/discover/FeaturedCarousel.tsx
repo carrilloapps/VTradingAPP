@@ -88,18 +88,10 @@ const FeaturedCarousel = ({ items }: FeaturedCarouselProps) => {
             <View style={styles.content}>
               {item.categories && item.categories.length > 0 && (
                 <Surface
-                  style={[
-                    styles.badge,
-                    { backgroundColor: theme.colors.primary },
-                  ]}
+                  style={[styles.badge, { backgroundColor: theme.colors.primary }]}
                   elevation={2}
                 >
-                  <Text
-                    style={[
-                      styles.badgeText,
-                      { color: theme.colors.onPrimary },
-                    ]}
-                  >
+                  <Text style={[styles.badgeText, { color: theme.colors.onPrimary }]}>
                     {item.categories[0].name.toUpperCase()}
                   </Text>
                 </Surface>
@@ -112,28 +104,11 @@ const FeaturedCarousel = ({ items }: FeaturedCarouselProps) => {
                 {item.title}
               </Text>
               <View style={styles.metaRow}>
-                <Text
-                  style={[
-                    styles.metaText,
-                    { color: theme.colors.onSurfaceVariant },
-                  ]}
-                >
+                <Text style={[styles.metaText, { color: theme.colors.onSurfaceVariant }]}>
                   {item.author?.name || 'VTrading'}
                 </Text>
-                <Text
-                  style={[
-                    styles.metaText,
-                    { color: theme.colors.onSurfaceVariant },
-                  ]}
-                >
-                  •
-                </Text>
-                <Text
-                  style={[
-                    styles.metaText,
-                    { color: theme.colors.onSurfaceVariant },
-                  ]}
-                >
+                <Text style={[styles.metaText, { color: theme.colors.onSurfaceVariant }]}>•</Text>
+                <Text style={[styles.metaText, { color: theme.colors.onSurfaceVariant }]}>
                   {item.time}
                 </Text>
               </View>
@@ -188,10 +163,7 @@ const FeaturedCarousel = ({ items }: FeaturedCarouselProps) => {
           return (
             <View
               key={index}
-              style={[
-                styles.dot,
-                isActive ? activeDotStyle : styles.inactiveDot,
-              ]}
+              style={[styles.dot, isActive ? activeDotStyle : styles.inactiveDot]}
             />
           );
         })}

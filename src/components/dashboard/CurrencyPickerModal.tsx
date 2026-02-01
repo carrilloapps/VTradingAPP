@@ -40,11 +40,7 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
   const theme = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const isMaxReached = !!(
-    multiSelect &&
-    maxSelected &&
-    selectedIds.length >= maxSelected
-  );
+  const isMaxReached = !!(multiSelect && maxSelected && selectedIds.length >= maxSelected);
 
   const handleItemPress = (item: CurrencyRate) => {
     if (multiSelect && onToggle) {
@@ -102,9 +98,7 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
         borderRadius: theme.roundness * 3,
         borderColor: theme.colors.outline,
         borderWidth: 1,
-        backgroundColor: theme.dark
-          ? theme.colors.elevation.level2
-          : theme.colors.surface,
+        backgroundColor: theme.dark ? theme.colors.elevation.level2 : theme.colors.surface,
       },
       priceText: {
         color: theme.colors.onSurface,
@@ -119,8 +113,7 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
     // First filter by search query and excluded codes
     const filtered = rates.filter(
       r =>
-        (r.code.toLowerCase().includes(lowerQuery) ||
-          r.name.toLowerCase().includes(lowerQuery)) &&
+        (r.code.toLowerCase().includes(lowerQuery) || r.name.toLowerCase().includes(lowerQuery)) &&
         !excludedCodes.includes(r.code),
     );
 
@@ -129,8 +122,7 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
 
     const result = [];
     if (main.length > 0) result.push({ title: 'PRINCIPALES', data: main });
-    if (others.length > 0)
-      result.push({ title: 'OTRAS MONEDAS', data: others });
+    if (others.length > 0) result.push({ title: 'OTRAS MONEDAS', data: others });
 
     return result;
   }, [rates, searchQuery, favorites, excludedCodes]);
@@ -178,11 +170,7 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
               >
                 {item.code === 'VES' || item.iconName === 'Bs' ? (
                   <BolivarIcon
-                    color={
-                      isSelected
-                        ? theme.colors.onPrimary
-                        : theme.colors.onSurfaceVariant
-                    }
+                    color={isSelected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant}
                     size={24}
                   />
                 ) : (
@@ -193,11 +181,7 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
                         : 'currency-usd'
                     }
                     size={24}
-                    color={
-                      isSelected
-                        ? theme.colors.onPrimary
-                        : theme.colors.onSurfaceVariant
-                    }
+                    color={isSelected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant}
                   />
                 )}
               </View>
@@ -211,19 +195,12 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
                 >
                   {item.code}
                 </Text>
-                <Text
-                  variant="bodySmall"
-                  style={themeStyles.textSecondary}
-                  numberOfLines={1}
-                >
+                <Text variant="bodySmall" style={themeStyles.textSecondary} numberOfLines={1}>
                   {item.name}
                 </Text>
               </View>
               <View style={styles.rightContainer}>
-                <Text
-                  variant="titleMedium"
-                  style={[styles.priceText, themeStyles.priceText]}
-                >
+                <Text variant="titleMedium" style={[styles.priceText, themeStyles.priceText]}>
                   {item.value.toLocaleString(AppConfig.DEFAULT_LOCALE, {
                     minimumFractionDigits: 2,
                     maximumFractionDigits: 2,
@@ -244,9 +221,7 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
           );
         }}
         renderSectionHeader={({ section: { title: sectionTitle } }) => (
-          <Text style={[styles.sectionHeader, themeStyles.sectionHeader]}>
-            {sectionTitle}
-          </Text>
+          <Text style={[styles.sectionHeader, themeStyles.sectionHeader]}>{sectionTitle}</Text>
         )}
         stickySectionHeadersEnabled={false}
         contentContainerStyle={themeStyles.listContent}

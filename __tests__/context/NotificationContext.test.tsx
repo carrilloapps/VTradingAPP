@@ -1,8 +1,5 @@
 import { renderHook, act, waitFor } from '@testing-library/react-native';
-import {
-  NotificationProvider,
-  useNotifications,
-} from '../../src/context/NotificationContext';
+import { NotificationProvider, useNotifications } from '../../src/context/NotificationContext';
 import { StoredNotification } from '../../src/services/StorageService';
 
 // Mock Services

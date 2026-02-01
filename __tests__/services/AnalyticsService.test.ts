@@ -1,7 +1,4 @@
-import {
-  analyticsService,
-  ANALYTICS_EVENTS,
-} from '../../src/services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '../../src/services/firebase/AnalyticsService';
 import {
   logEvent,
   setUserProperty,
@@ -34,14 +31,10 @@ describe('AnalyticsService', () => {
         param1: 'value1',
       });
 
-      expect(logEvent).toHaveBeenCalledWith(
-        expect.anything(),
-        'custom_event_name_',
-        { param1: 'value1' },
-      );
-      expect(Clarity.sendCustomEvent).toHaveBeenCalledWith(
-        'custom_event_name_',
-      );
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), 'custom_event_name_', {
+        param1: 'value1',
+      });
+      expect(Clarity.sendCustomEvent).toHaveBeenCalledWith('custom_event_name_');
       expect(Sentry.addBreadcrumb).toHaveBeenCalled();
     });
 
@@ -49,10 +42,7 @@ describe('AnalyticsService', () => {
       await analyticsService.logEvent('test_event', {
         screen_name: 'HomeScreen',
       });
-      expect(Clarity.setCustomTag).toHaveBeenCalledWith(
-        'last_event_screen',
-        'HomeScreen',
-      );
+      expect(Clarity.setCustomTag).toHaveBeenCalledWith('last_event_screen', 'HomeScreen');
     });
 
     it('handles errors gracefully', async () => {
@@ -65,78 +55,59 @@ describe('AnalyticsService', () => {
   describe('logScreenView', () => {
     it('logs screen view event', async () => {
       await analyticsService.logScreenView('HomeScreen', 'HomeClass');
-      expect(logEvent).toHaveBeenCalledWith(
-        expect.anything(),
-        ANALYTICS_EVENTS.SCREEN_VIEW,
-        { screen_name: 'HomeScreen', screen_class: 'HomeClass' },
-      );
-      expect(Clarity.setCustomTag).toHaveBeenCalledWith(
-        'screen_view',
-        'HomeScreen',
-      );
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), ANALYTICS_EVENTS.SCREEN_VIEW, {
+        screen_name: 'HomeScreen',
+        screen_class: 'HomeClass',
+      });
+      expect(Clarity.setCustomTag).toHaveBeenCalledWith('screen_view', 'HomeScreen');
     });
 
     it('defaults screen_class to screenName', async () => {
       await analyticsService.logScreenView('SettingsScreen');
-      expect(logEvent).toHaveBeenCalledWith(
-        expect.anything(),
-        ANALYTICS_EVENTS.SCREEN_VIEW,
-        { screen_name: 'SettingsScreen', screen_class: 'SettingsScreen' },
-      );
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), ANALYTICS_EVENTS.SCREEN_VIEW, {
+        screen_name: 'SettingsScreen',
+        screen_class: 'SettingsScreen',
+      });
     });
   });
 
   describe('Helper methods', () => {
     it('logs search', async () => {
       await analyticsService.logSearch('query');
-      expect(logEvent).toHaveBeenCalledWith(
-        expect.anything(),
-        ANALYTICS_EVENTS.SEARCH,
-        { search_term: 'query' },
-      );
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), ANALYTICS_EVENTS.SEARCH, {
+        search_term: 'query',
+      });
     });
 
     it('logs select content', async () => {
       await analyticsService.logSelectContent('stock', 'AAPL');
-      expect(logEvent).toHaveBeenCalledWith(
-        expect.anything(),
-        ANALYTICS_EVENTS.SELECT_CONTENT,
-        {
-          content_type: 'stock',
-          item_id: 'AAPL',
-        },
-      );
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), ANALYTICS_EVENTS.SELECT_CONTENT, {
+        content_type: 'stock',
+        item_id: 'AAPL',
+      });
     });
 
     it('logs share', async () => {
       await analyticsService.logShare('article', '123', 'whatsapp');
-      expect(logEvent).toHaveBeenCalledWith(
-        expect.anything(),
-        ANALYTICS_EVENTS.SHARE,
-        {
-          content_type: 'article',
-          item_id: '123',
-          method: 'whatsapp',
-        },
-      );
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), ANALYTICS_EVENTS.SHARE, {
+        content_type: 'article',
+        item_id: '123',
+        method: 'whatsapp',
+      });
     });
 
     it('logs login', async () => {
       await analyticsService.logLogin('google');
-      expect(logEvent).toHaveBeenCalledWith(
-        expect.anything(),
-        ANALYTICS_EVENTS.LOGIN,
-        { method: 'google' },
-      );
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), ANALYTICS_EVENTS.LOGIN, {
+        method: 'google',
+      });
     });
 
     it('logs signUp', async () => {
       await analyticsService.logSignUp('email');
-      expect(logEvent).toHaveBeenCalledWith(
-        expect.anything(),
-        ANALYTICS_EVENTS.SIGN_UP,
-        { method: 'email' },
-      );
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), ANALYTICS_EVENTS.SIGN_UP, {
+        method: 'email',
+      });
     });
 
     it('logs interaction', async () => {
@@ -152,14 +123,10 @@ describe('AnalyticsService', () => {
       await analyticsService.logFeatureUsage('calculator', {
         mode: 'advanced',
       });
-      expect(logEvent).toHaveBeenCalledWith(
-        expect.anything(),
-        ANALYTICS_EVENTS.FEATURE_USED,
-        {
-          feature_name: 'calculator',
-          mode: 'advanced',
-        },
-      );
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), ANALYTICS_EVENTS.FEATURE_USED, {
+        feature_name: 'calculator',
+        mode: 'advanced',
+      });
     });
 
     it('logs error', async () => {
@@ -173,28 +140,20 @@ describe('AnalyticsService', () => {
 
     it('logs api call', async () => {
       await analyticsService.logApiCall('/users', 'GET', true, 100);
-      expect(logEvent).toHaveBeenCalledWith(
-        expect.anything(),
-        ANALYTICS_EVENTS.API_CALL,
-        {
-          endpoint: '/users',
-          method: 'GET',
-          success: 'true',
-          duration_ms: 100,
-        },
-      );
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), ANALYTICS_EVENTS.API_CALL, {
+        endpoint: '/users',
+        method: 'GET',
+        success: 'true',
+        duration_ms: 100,
+      });
     });
 
     it('logs data refresh', async () => {
       await analyticsService.logDataRefresh('stocks', false);
-      expect(logEvent).toHaveBeenCalledWith(
-        expect.anything(),
-        ANALYTICS_EVENTS.DATA_REFRESH,
-        {
-          data_type: 'stocks',
-          success: 'false',
-        },
-      );
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), ANALYTICS_EVENTS.DATA_REFRESH, {
+        data_type: 'stocks',
+        success: 'false',
+      });
     });
 
     it('tracks operation timing', async () => {
@@ -217,41 +176,26 @@ describe('AnalyticsService', () => {
       );
 
       await analyticsService.logSessionEnd(120000);
-      expect(logEvent).toHaveBeenCalledWith(
-        expect.anything(),
-        ANALYTICS_EVENTS.V_SESSION_END,
-        {
-          duration_ms: 120000,
-          duration_minutes: 2,
-        },
-      );
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), ANALYTICS_EVENTS.V_SESSION_END, {
+        duration_ms: 120000,
+        duration_minutes: 2,
+      });
     });
 
     it('logs engagement', async () => {
       await analyticsService.logEngagement('article', 5000);
-      expect(logEvent).toHaveBeenCalledWith(
-        expect.anything(),
-        ANALYTICS_EVENTS.USER_ENGAGEMENT,
-        {
-          content_type: 'article',
-          engagement_time_ms: 5000,
-        },
-      );
+      expect(logEvent).toHaveBeenCalledWith(expect.anything(), ANALYTICS_EVENTS.USER_ENGAGEMENT, {
+        content_type: 'article',
+        engagement_time_ms: 5000,
+      });
     });
   });
 
   describe('User identification', () => {
     it('sets user property', async () => {
       await analyticsService.setUserProperty('Custom Property', 'value');
-      expect(setUserProperty).toHaveBeenCalledWith(
-        expect.anything(),
-        'custom_property',
-        'value',
-      );
-      expect(Clarity.setCustomTag).toHaveBeenCalledWith(
-        'custom_property',
-        'value',
-      );
+      expect(setUserProperty).toHaveBeenCalledWith(expect.anything(), 'custom_property', 'value');
+      expect(Clarity.setCustomTag).toHaveBeenCalledWith('custom_property', 'value');
     });
 
     it('sets multiple user properties', async () => {

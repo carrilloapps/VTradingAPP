@@ -1,12 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  Animated,
-  StyleProp,
-  ViewStyle,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Animated, StyleProp, ViewStyle } from 'react-native';
 import { Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
@@ -54,9 +47,7 @@ const MarketStatus: React.FC<MarketStatusProps> = ({
   const themeStyles = React.useMemo(
     () => ({
       statusBadge: {
-        backgroundColor: isOpen
-          ? 'rgba(16, 185, 129, 0.1)'
-          : 'rgba(239, 68, 68, 0.1)', // Keep opacity manual or use util
+        backgroundColor: isOpen ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', // Keep opacity manual or use util
         borderColor: isOpen ? theme.colors.trendUp : theme.colors.trendDown,
       },
       dot: {
@@ -106,9 +97,7 @@ const MarketStatus: React.FC<MarketStatusProps> = ({
           style={styles.refreshContainer}
           activeOpacity={0.6}
         >
-          <Text style={[styles.timeText, themeStyles.timeText]}>
-            Actualizado: {updatedAt}
-          </Text>
+          <Text style={[styles.timeText, themeStyles.timeText]}>Actualizado: {updatedAt}</Text>
           {onRefresh && (
             <MaterialCommunityIcons
               name="refresh"

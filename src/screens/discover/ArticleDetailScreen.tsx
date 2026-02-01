@@ -9,15 +9,7 @@ import {
   TouchableOpacity,
   Linking,
 } from 'react-native';
-import {
-  Text,
-  IconButton,
-  Chip,
-  Button,
-  Divider,
-  Avatar,
-  Surface,
-} from 'react-native-paper';
+import { Text, IconButton, Chip, Button, Divider, Avatar, Surface } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -33,15 +25,8 @@ import ShareableDetail from '@/components/discover/ShareableDetail';
 import { deepLinkService } from '@/services/DeepLinkService';
 import { useToastStore } from '@/stores/toastStore';
 import { useAppTheme } from '@/theme';
-import {
-  analyticsService,
-  ANALYTICS_EVENTS,
-} from '@/services/firebase/AnalyticsService';
-import {
-  wordPressService,
-  FormattedComment,
-  FormattedPost,
-} from '@/services/WordPressService';
+import { analyticsService, ANALYTICS_EVENTS } from '@/services/firebase/AnalyticsService';
+import { wordPressService, FormattedComment, FormattedPost } from '@/services/WordPressService';
 import { remoteConfigService } from '@/services/firebase/RemoteConfigService';
 import { observabilityService } from '@/services/ObservabilityService';
 import { CommentsList } from '@/components/discover/CommentsList';
@@ -83,10 +68,7 @@ const BlockQuote = ({ text, author, theme }: any) => {
     },
   ];
   const quoteTextStyle = [styles.quoteText, { color: theme.colors.onSurface }];
-  const quoteAuthorStyle = [
-    styles.quoteAuthor,
-    { color: theme.colors.outline },
-  ];
+  const quoteAuthorStyle = [styles.quoteAuthor, { color: theme.colors.outline }];
 
   return (
     <View style={quoteContainerStyle}>
@@ -114,10 +96,7 @@ const BlockImage = ({ url, caption, theme }: any) => {
       backgroundColor: theme.colors.surfaceVariant,
     },
   ];
-  const imageCaptionStyle = [
-    styles.imageCaption,
-    { color: theme.colors.outline },
-  ];
+  const imageCaptionStyle = [styles.imageCaption, { color: theme.colors.outline }];
 
   return (
     <View style={styles.imageBlock}>
@@ -137,14 +116,8 @@ const BlockImage = ({ url, caption, theme }: any) => {
 };
 
 const BlockList = ({ items, theme }: any) => {
-  const bulletStyle = [
-    styles.bullet,
-    { backgroundColor: theme.colors.primary },
-  ];
-  const listItemTextStyle = [
-    styles.listItemText,
-    { color: theme.colors.onSurface },
-  ];
+  const bulletStyle = [styles.bullet, { backgroundColor: theme.colors.primary }];
+  const listItemTextStyle = [styles.listItemText, { color: theme.colors.onSurface }];
 
   return (
     <View style={styles.listBlock}>
@@ -172,9 +145,7 @@ const ArticleDetailScreen = () => {
   const [refreshing, setRefreshing] = React.useState(false);
 
   // New states for deep linking
-  const [articleData, setArticleData] = React.useState<FormattedPost | null>(
-    null,
-  );
+  const [articleData, setArticleData] = React.useState<FormattedPost | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
   const [relatedPosts, setRelatedPosts] = React.useState<FormattedPost[]>([]);
@@ -234,10 +205,7 @@ const ArticleDetailScreen = () => {
         try {
           const fetchedArticle = slug
             ? await wordPressService.getPostBySlug(slug)
-            : await wordPressService.getPostById(
-                Number(currentArticle?.id),
-                true,
-              ); // Force bypass cache for detail
+            : await wordPressService.getPostById(Number(currentArticle?.id), true); // Force bypass cache for detail
 
           if (fetchedArticle) {
             setArticleData(fetchedArticle);
@@ -263,17 +231,15 @@ const ArticleDetailScreen = () => {
         try {
           // Enrich author data if it was slim (social might be missing in embed)
           if (currentArticle.author?.id) {
-            wordPressService
-              .getUserById(currentArticle.author.id)
-              .then(fullAuthor => {
-                if (fullAuthor) {
-                  setArticleData((prev: any) => {
-                    const base = prev || params?.article;
-                    if (!base) return null;
-                    return { ...base, author: fullAuthor };
-                  });
-                }
-              });
+            wordPressService.getUserById(currentArticle.author.id).then(fullAuthor => {
+              if (fullAuthor) {
+                setArticleData((prev: any) => {
+                  const base = prev || params?.article;
+                  if (!base) return null;
+                  return { ...base, author: fullAuthor };
+                });
+              }
+            });
           }
 
           const fetchedRelated = await wordPressService.getRelatedPosts(
@@ -302,15 +268,12 @@ const ArticleDetailScreen = () => {
     const loadCommentsFeature = async () => {
       try {
         await remoteConfigService.fetchAndActivate();
-        const isCommentsActive =
-          await remoteConfigService.getFeature('comments');
+        const isCommentsActive = await remoteConfigService.getFeature('comments');
         setCommentsEnabled(isCommentsActive);
 
         if (isCommentsActive && article?.id) {
           setCommentsLoading(true);
-          const fetchedComments = await wordPressService.getComments(
-            Number(article.id),
-          );
+          const fetchedComments = await wordPressService.getComments(Number(article.id));
           setComments(fetchedComments);
           setCommentsLoading(false);
         }
@@ -327,21 +290,14 @@ const ArticleDetailScreen = () => {
 
   if (isLoading || !article) {
     return (
-      <View
-        style={[
-          styles.loadingContainer,
-          { backgroundColor: theme.colors.background },
-        ]}
-      >
+      <View style={[styles.loadingContainer, { backgroundColor: theme.colors.background }]}>
         <ArticleDetailSkeleton />
       </View>
     );
   }
 
   if (error) {
-    return (
-      <DiscoverErrorView message={error} onRetry={() => setArticleData(null)} />
-    );
+    return <DiscoverErrorView message={error} onRetry={() => setArticleData(null)} />;
   }
 
   const handleRefresh = async () => {
@@ -405,8 +361,7 @@ const ArticleDetailScreen = () => {
         // Controlled by 'discover_web' remote config
         let shareExactDeepLink = true;
         try {
-          shareExactDeepLink =
-            await remoteConfigService.getFeature('discover_web');
+          shareExactDeepLink = await remoteConfigService.getFeature('discover_web');
         } catch (e) {
           SafeLogger.warn('ArticleDetailScreen: Remote config fetch failed', e);
           shareExactDeepLink = false;
@@ -475,23 +430,9 @@ const ArticleDetailScreen = () => {
       case 'heading':
         return <BlockHeading key={index} text={block.text} theme={theme} />;
       case 'quote':
-        return (
-          <BlockQuote
-            key={index}
-            text={block.text}
-            author={block.author}
-            theme={theme}
-          />
-        );
+        return <BlockQuote key={index} text={block.text} author={block.author} theme={theme} />;
       case 'image':
-        return (
-          <BlockImage
-            key={index}
-            url={block.url}
-            caption={block.caption}
-            theme={theme}
-          />
-        );
+        return <BlockImage key={index} url={block.url} caption={block.caption} theme={theme} />;
       case 'list':
         return <BlockList key={index} items={block.items} theme={theme} />;
       default:
@@ -596,10 +537,7 @@ const ArticleDetailScreen = () => {
   }
 
   if (error || !article) {
-    const errorContainerStyle = [
-      styles.container,
-      { backgroundColor: theme.colors.background },
-    ];
+    const errorContainerStyle = [styles.container, { backgroundColor: theme.colors.background }];
     const errorSubContainerStyle = { flex: 1, paddingTop: insets.top };
     const errorHeaderStyle = {
       height: 56,
@@ -616,10 +554,7 @@ const ArticleDetailScreen = () => {
         />
         <View style={errorSubContainerStyle}>
           <View style={errorHeaderStyle}>
-            <IconButton
-              icon="chevron-left"
-              onPress={() => navigation.goBack()}
-            />
+            <IconButton icon="chevron-left" onPress={() => navigation.goBack()} />
           </View>
           <DiscoverErrorView
             message={error || 'Artículo no encontrado'}
@@ -630,10 +565,7 @@ const ArticleDetailScreen = () => {
     );
   }
 
-  const mainContainerStyle = [
-    styles.container,
-    { backgroundColor: theme.colors.background },
-  ];
+  const mainContainerStyle = [styles.container, { backgroundColor: theme.colors.background }];
   const scrollViewContentStyle = { paddingBottom: insets.bottom + 40 };
 
   const heroPlaceholderStyle = [
@@ -647,10 +579,7 @@ const ArticleDetailScreen = () => {
   };
   const heroPlaceholderIconStyle = { opacity: 0.3 };
 
-  const promoBadgeStyle = [
-    styles.promoBadge,
-    { backgroundColor: theme.colors.warning },
-  ];
+  const promoBadgeStyle = [styles.promoBadge, { backgroundColor: theme.colors.warning }];
   const trendingBadgeStyle = [
     styles.promoBadge,
     { backgroundColor: theme.colors.onPrimaryContainer },
@@ -674,10 +603,9 @@ const ArticleDetailScreen = () => {
       <Animated.ScrollView
         showsVerticalScrollIndicator={false}
         onContentSizeChange={(_, h) => setContentHeight(h)}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: true },
-        )}
+        onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+          useNativeDriver: true,
+        })}
         scrollEventThrottle={16}
         contentContainerStyle={scrollViewContentStyle}
         refreshControl={
@@ -693,10 +621,7 @@ const ArticleDetailScreen = () => {
         {/* Hero Image with Theme-Aware Gradient */}
         {article.image ? (
           <View style={styles.heroContainer}>
-            <FastImage
-              source={{ uri: article.image }}
-              style={styles.heroImage}
-            />
+            <FastImage source={{ uri: article.image }} style={styles.heroImage} />
             <LinearGradient
               colors={[
                 'transparent',
@@ -802,10 +727,7 @@ const ArticleDetailScreen = () => {
           )}
 
           {/* Title */}
-          <Text
-            variant="headlineLarge"
-            style={[styles.title, { color: theme.colors.onSurface }]}
-          >
+          <Text variant="headlineLarge" style={[styles.title, { color: theme.colors.onSurface }]}>
             {article.title}
           </Text>
 
@@ -832,10 +754,7 @@ const ArticleDetailScreen = () => {
                   <>
                     <Text
                       variant="bodySmall"
-                      style={[
-                        styles.metadataSeparator,
-                        { color: theme.colors.onSurfaceVariant },
-                      ]}
+                      style={[styles.metadataSeparator, { color: theme.colors.onSurfaceVariant }]}
                     >
                       •
                     </Text>
@@ -852,33 +771,21 @@ const ArticleDetailScreen = () => {
                   <View style={styles.socialRow}>
                     {article.author.social.twitter && (
                       <TouchableOpacity
-                        onPress={() =>
-                          Linking.openURL(article.author!.social!.twitter!)
-                        }
+                        onPress={() => Linking.openURL(article.author!.social!.twitter!)}
                       >
-                        <XIcon
-                          size={16}
-                          color={theme.colors.onSurfaceVariant}
-                        />
+                        <XIcon size={16} color={theme.colors.onSurfaceVariant} />
                       </TouchableOpacity>
                     )}
                     {article.author.social.facebook && (
                       <TouchableOpacity
-                        onPress={() =>
-                          Linking.openURL(article.author!.social!.facebook!)
-                        }
+                        onPress={() => Linking.openURL(article.author!.social!.facebook!)}
                       >
-                        <FacebookIcon
-                          size={16}
-                          color={theme.colors.onSurfaceVariant}
-                        />
+                        <FacebookIcon size={16} color={theme.colors.onSurfaceVariant} />
                       </TouchableOpacity>
                     )}
                     {article.author.social.instagram && (
                       <TouchableOpacity
-                        onPress={() =>
-                          Linking.openURL(article.author!.social!.instagram!)
-                        }
+                        onPress={() => Linking.openURL(article.author!.social!.instagram!)}
                       >
                         <MaterialCommunityIcons
                           name="instagram"
@@ -889,9 +796,7 @@ const ArticleDetailScreen = () => {
                     )}
                     {article.author.social.youtube && (
                       <TouchableOpacity
-                        onPress={() =>
-                          Linking.openURL(article.author!.social!.youtube!)
-                        }
+                        onPress={() => Linking.openURL(article.author!.social!.youtube!)}
                       >
                         <MaterialCommunityIcons
                           name="youtube"
@@ -902,9 +807,7 @@ const ArticleDetailScreen = () => {
                     )}
                     {article.author.social.linkedin && (
                       <TouchableOpacity
-                        onPress={() =>
-                          Linking.openURL(article.author!.social!.linkedin!)
-                        }
+                        onPress={() => Linking.openURL(article.author!.social!.linkedin!)}
                       >
                         <MaterialCommunityIcons
                           name="linkedin"
@@ -915,9 +818,7 @@ const ArticleDetailScreen = () => {
                     )}
                     {article.author.social.tiktok && (
                       <TouchableOpacity
-                        onPress={() =>
-                          Linking.openURL(article.author!.social!.tiktok!)
-                        }
+                        onPress={() => Linking.openURL(article.author!.social!.tiktok!)}
                       >
                         <MaterialCommunityIcons
                           name="music-note"
@@ -932,10 +833,7 @@ const ArticleDetailScreen = () => {
                   <>
                     <Text
                       variant="bodySmall"
-                      style={[
-                        styles.separator,
-                        { color: theme.colors.onSurfaceVariant },
-                      ]}
+                      style={[styles.separator, { color: theme.colors.onSurfaceVariant }]}
                     >
                       •
                     </Text>
@@ -968,10 +866,7 @@ const ArticleDetailScreen = () => {
                   />
                   <Text
                     variant="bodySmall"
-                    style={[
-                      styles.metadataTextMargin,
-                      { color: theme.colors.onSurfaceVariant },
-                    ]}
+                    style={[styles.metadataTextMargin, { color: theme.colors.onSurfaceVariant }]}
                   >
                     {article.time}
                   </Text>
@@ -979,10 +874,7 @@ const ArticleDetailScreen = () => {
 
                 <Text
                   variant="bodySmall"
-                  style={[
-                    styles.separator,
-                    { color: theme.colors.onSurfaceVariant },
-                  ]}
+                  style={[styles.separator, { color: theme.colors.onSurfaceVariant }]}
                 >
                   •
                 </Text>
@@ -990,20 +882,14 @@ const ArticleDetailScreen = () => {
                 <View style={styles.metadataItem}>
                   <Text
                     variant="bodySmall"
-                    style={[
-                      styles.readTimeText,
-                      { color: theme.colors.primary },
-                    ]}
+                    style={[styles.readTimeText, { color: theme.colors.primary }]}
                   >
                     {article.readTime}
                   </Text>
                   {article.wordCount && (
                     <Text
                       variant="bodySmall"
-                      style={[
-                        styles.wordCountText,
-                        { color: theme.colors.onSurfaceVariant },
-                      ]}
+                      style={[styles.wordCountText, { color: theme.colors.onSurfaceVariant }]}
                     >
                       ({article.wordCount} palabras)
                     </Text>
@@ -1018,9 +904,8 @@ const ArticleDetailScreen = () => {
             {typeof article.content === 'string'
               ? renderHtmlContent()
               : article.content
-                ? (article.content as ContentBlock[]).map(
-                    (block: ContentBlock, idx: number) =>
-                      renderBlock(block, idx),
+                ? (article.content as ContentBlock[]).map((block: ContentBlock, idx: number) =>
+                    renderBlock(block, idx),
                   )
                 : null}
           </View>
@@ -1048,20 +933,14 @@ const ArticleDetailScreen = () => {
               >
                 <Text
                   variant="labelSmall"
-                  style={[
-                    styles.summaryLabelText,
-                    { color: theme.colors.onPrimary },
-                  ]}
+                  style={[styles.summaryLabelText, { color: theme.colors.onPrimary }]}
                 >
                   IMPORTANTE
                 </Text>
               </View>
               <Text
                 variant="bodyMedium"
-                style={[
-                  styles.summaryText,
-                  { color: theme.colors.onSurfaceVariant },
-                ]}
+                style={[styles.summaryText, { color: theme.colors.onSurfaceVariant }]}
               >
                 {article.seoDescription}
               </Text>
@@ -1081,15 +960,10 @@ const ArticleDetailScreen = () => {
                 {article.tags.map((tag: any, idx: number) => (
                   <Chip
                     key={idx}
-                    style={[
-                      styles.tagChip,
-                      { borderRadius: theme.roundness * 2 },
-                    ]}
+                    style={[styles.tagChip, { borderRadius: theme.roundness * 2 }]}
                     textStyle={styles.tagChipText}
                     mode="outlined"
-                    onPress={() =>
-                      navigation.navigate('TagDetail', { tag, slug: tag.slug })
-                    }
+                    onPress={() => navigation.navigate('TagDetail', { tag, slug: tag.slug })}
                   >
                     {tag.name}
                   </Chip>
@@ -1101,12 +975,7 @@ const ArticleDetailScreen = () => {
           {/* Author Section */}
           {article.author && <AuthorCard author={article.author} />}
 
-          <Divider
-            style={[
-              styles.divider,
-              { backgroundColor: theme.colors.outlineVariant },
-            ]}
-          />
+          <Divider style={[styles.divider, { backgroundColor: theme.colors.outlineVariant }]} />
 
           {/* Recommended Articles Section */}
           <View style={styles.recommendedSection}>
@@ -1131,53 +1000,33 @@ const ArticleDetailScreen = () => {
             </View>
 
             {loadingRelated ? (
-              <ActivityIndicator
-                style={styles.loader}
-                color={theme.colors.primary}
-              />
+              <ActivityIndicator style={styles.loader} color={theme.colors.primary} />
             ) : relatedPosts.length > 0 ? (
               <View style={styles.relatedGrid}>
                 {relatedPosts.map(related => (
                   <ArticleCard
                     key={related.id}
                     article={related}
-                    onPress={() =>
-                      navigation.push('ArticleDetail', { article: related })
-                    }
+                    onPress={() => navigation.push('ArticleDetail', { article: related })}
                   />
                 ))}
               </View>
             ) : (
-              <Text style={styles.emptyText}>
-                No hay recomendaciones en este momento
-              </Text>
+              <Text style={styles.emptyText}>No hay recomendaciones en este momento</Text>
             )}
           </View>
 
-          <Divider
-            style={[
-              styles.divider,
-              { backgroundColor: theme.colors.outlineVariant },
-            ]}
-          />
+          <Divider style={[styles.divider, { backgroundColor: theme.colors.outlineVariant }]} />
 
           {/* Comments Section - WordPress Integration */}
           {commentsEnabled && (
             <>
-              <Divider
-                style={[
-                  styles.divider,
-                  { backgroundColor: theme.colors.outlineVariant },
-                ]}
-              />
+              <Divider style={[styles.divider, { backgroundColor: theme.colors.outlineVariant }]} />
 
               <View style={styles.commentsSection}>
                 <Text
                   variant="titleMedium"
-                  style={[
-                    styles.commentsTitle,
-                    { color: theme.colors.onSurface },
-                  ]}
+                  style={[styles.commentsTitle, { color: theme.colors.onSurface }]}
                 >
                   Comentarios ({comments.length})
                 </Text>
@@ -1228,9 +1077,7 @@ const ArticleDetailScreen = () => {
           {
             title: article?.title || 'Artículo',
             image: article?.image,
-            date: article?.date
-              ? new Date(article.date).toLocaleDateString()
-              : article?.time || '',
+            date: article?.date ? new Date(article.date).toLocaleDateString() : article?.time || '',
             author: article?.author?.name || 'VTrading',
           },
           // Related Items (List)
@@ -1254,10 +1101,7 @@ const ArticleDetailScreen = () => {
       >
         <Text
           variant="bodyMedium"
-          style={[
-            styles.dialogDescription,
-            { color: theme.colors.onSurfaceVariant },
-          ]}
+          style={[styles.dialogDescription, { color: theme.colors.onSurfaceVariant }]}
         >
           Selecciona el formato ideal para compartir en tus redes sociales
         </Text>

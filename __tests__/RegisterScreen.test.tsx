@@ -71,8 +71,7 @@ jest.mock('react-native-safe-area-context', () => {
   };
   return {
     SafeAreaProvider: ({ children }: any) => children,
-    SafeAreaConsumer: ({ children }: any) =>
-      children(MOCK_INITIAL_METRICS.insets),
+    SafeAreaConsumer: ({ children }: any) => children(MOCK_INITIAL_METRICS.insets),
     SafeAreaInsetsContext: ReactMock.createContext(MOCK_INITIAL_METRICS.insets),
     useSafeAreaInsets: () => MOCK_INITIAL_METRICS.insets,
     useSafeAreaFrame: () => MOCK_INITIAL_METRICS.frame,
@@ -84,20 +83,16 @@ describe('RegisterScreen', () => {
   const renderScreen = () =>
     render(
       <PaperProvider theme={mockTheme}>
-        <RegisterScreen
-          navigation={{ goBack: jest.fn(), navigate: jest.fn() }}
-        />
+        <RegisterScreen navigation={{ goBack: jest.fn(), navigate: jest.fn() }} />
       </PaperProvider>,
     );
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest
-      .spyOn(ToastStore, 'useToastStore')
-      .mockImplementation((selector: any) => {
-        const state = { showToast: jest.fn() };
-        return selector ? selector(state) : state;
-      });
+    jest.spyOn(ToastStore, 'useToastStore').mockImplementation((selector: any) => {
+      const state = { showToast: jest.fn() };
+      return selector ? selector(state) : state;
+    });
   });
 
   it('muestra loading durante el registro', async () => {
@@ -113,14 +108,10 @@ describe('RegisterScreen', () => {
       isLoading: false,
     } as any);
 
-    const { getByLabelText, getByText, getByTestId, queryByTestId } =
-      renderScreen();
+    const { getByLabelText, getByText, getByTestId, queryByTestId } = renderScreen();
 
     act(() => {
-      fireEvent.changeText(
-        getByLabelText('Correo electrónico'),
-        'test@example.com',
-      );
+      fireEvent.changeText(getByLabelText('Correo electrónico'), 'test@example.com');
       fireEvent.changeText(getByLabelText('Contraseña'), '123456');
       fireEvent.changeText(getByLabelText('Confirmar contraseña'), '123456');
     });

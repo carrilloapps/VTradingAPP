@@ -1,11 +1,7 @@
 import { ApiClient } from '../../src/services/ApiClient';
 import { mmkvStorage } from '../../src/services/StorageService';
 import { appCheckService } from '../../src/services/firebase/AppCheckService';
-import {
-  getPerformance,
-  httpMetric,
-  initializePerformance,
-} from '@react-native-firebase/perf';
+import { getPerformance, httpMetric, initializePerformance } from '@react-native-firebase/perf';
 
 declare const global: any;
 
@@ -59,9 +55,7 @@ describe('ApiClient', () => {
         dataCollectionEnabled: false,
         app: {},
       });
-      (initializePerformance as jest.Mock).mockRejectedValueOnce(
-        new Error('Perf Error'),
-      );
+      (initializePerformance as jest.Mock).mockRejectedValueOnce(new Error('Perf Error'));
 
       // Should not throw
       expect(() => new ApiClient(baseUrl)).not.toThrow();
@@ -76,9 +70,7 @@ describe('ApiClient', () => {
         throw new Error('URL Error');
       }) as any;
 
-      (global.fetch as jest.Mock).mockRejectedValueOnce(
-        new Error('Fetch Fail'),
-      );
+      (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Fetch Fail'));
 
       await expect(apiClient.get('/path')).rejects.toThrow('Fetch Fail');
 
@@ -98,9 +90,7 @@ describe('ApiClient', () => {
           'Content-Length': '100',
         }),
       });
-      (appCheckService.getToken as jest.Mock).mockResolvedValueOnce(
-        'mock-appcheck-token',
-      );
+      (appCheckService.getToken as jest.Mock).mockResolvedValueOnce('mock-appcheck-token');
 
       const data = await apiClient.get('/test-endpoint');
 
@@ -130,9 +120,7 @@ describe('ApiClient', () => {
         data: mockData,
         timestamp: Date.now(),
       };
-      (mmkvStorage.getString as jest.Mock).mockReturnValue(
-        JSON.stringify(cacheItem),
-      );
+      (mmkvStorage.getString as jest.Mock).mockReturnValue(JSON.stringify(cacheItem));
 
       const data = await apiClient.get('/cached-resource', { useCache: true });
 
@@ -171,9 +159,7 @@ describe('ApiClient', () => {
     });
 
     it('falls back to stale cache on network failure', async () => {
-      (global.fetch as jest.Mock).mockRejectedValueOnce(
-        new TypeError('Network request failed'),
-      );
+      (global.fetch as jest.Mock).mockRejectedValueOnce(new TypeError('Network request failed'));
       const staleData = { stale: true };
       (mmkvStorage.getString as jest.Mock).mockReturnValue(
         JSON.stringify({ data: staleData, timestamp: 0 }),
@@ -203,9 +189,7 @@ describe('ApiClient', () => {
         headers: new Headers(),
       });
 
-      await expect(apiClient.get('/bad-json')).rejects.toThrow(
-        'JSON Parse Error',
-      );
+      await expect(apiClient.get('/bad-json')).rejects.toThrow('JSON Parse Error');
     });
 
     it('handles performance setup failure in _request', async () => {
@@ -262,9 +246,7 @@ describe('ApiClient', () => {
     });
 
     it('falls back to stale full cache on network failure and handles read error', async () => {
-      (global.fetch as jest.Mock).mockRejectedValueOnce(
-        new TypeError('Network request failed'),
-      );
+      (global.fetch as jest.Mock).mockRejectedValueOnce(new TypeError('Network request failed'));
 
       // 1. Success fallback
       const staleData = { stale: true };
@@ -283,9 +265,7 @@ describe('ApiClient', () => {
       expect(response.data).toEqual(staleData);
 
       // 2. Read error in fallback
-      (global.fetch as jest.Mock).mockRejectedValueOnce(
-        new TypeError('Network request failed'),
-      );
+      (global.fetch as jest.Mock).mockRejectedValueOnce(new TypeError('Network request failed'));
       (mmkvStorage.getString as jest.Mock).mockImplementationOnce(() => {
         throw new Error('Read error');
       });
@@ -295,20 +275,14 @@ describe('ApiClient', () => {
     });
 
     it('rethrows error when cache fallback is not used', async () => {
-      (global.fetch as jest.Mock).mockRejectedValueOnce(
-        new Error('Fatal API Error'),
-      );
-      await expect(apiClient.getWithFullResponse('/no-cache')).rejects.toThrow(
-        'Fatal API Error',
-      );
+      (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Fatal API Error'));
+      await expect(apiClient.getWithFullResponse('/no-cache')).rejects.toThrow('Fatal API Error');
     });
   });
 
   describe('Performance Monitoring stop logic', () => {
     it('stops metric even on request failure', async () => {
-      (global.fetch as jest.Mock).mockRejectedValueOnce(
-        new Error('Fetch Fail'),
-      );
+      (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Fetch Fail'));
 
       await expect(apiClient.get('/error-stop')).rejects.toThrow('Fetch Fail');
 

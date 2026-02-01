@@ -5,8 +5,7 @@ export const AppConfig = {
   API_KEY: Config.API_KEY || 'default-api-key',
   SENTRY_DSN: Config.SENTRY_DSN || '',
   CLARITY_PROJECT_ID: Config.CLARITY_PROJECT_ID || '',
-  PRIVACY_POLICY_URL:
-    Config.PRIVACY_POLICY_URL || 'https://vtrading.app/privacy',
+  PRIVACY_POLICY_URL: Config.PRIVACY_POLICY_URL || 'https://vtrading.app/privacy',
   TERMS_OF_USE_URL: Config.TERMS_OF_USE_URL || 'https://vtrading.app/terms',
   DEFAULT_LOCALE: Config.DEFAULT_LOCALE || 'es-VE',
   DECIMAL_PLACES: parseInt(Config.DECIMAL_PLACES || '2', 10),

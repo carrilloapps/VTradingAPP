@@ -50,25 +50,15 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
       ? Math.abs(((rate.sellValue - rate.buyValue) / rate.buyValue) * 100)
       : null;
 
-  const trendIcon = isPositive
-    ? 'trending-up'
-    : isNegative
-      ? 'trending-down'
-      : 'minus';
+  const trendIcon = isPositive ? 'trending-up' : isNegative ? 'trending-down' : 'minus';
 
   const getDynamicShareMessage = useCallback(
     (format: '1:1' | '16:9' | 'text' = '1:1') => {
       const pair = rate.name.split(' • ')[0] || `${rate.code}/VES`;
       const changeSign =
-        (rate.changePercent || 0) > 0
-          ? '📈'
-          : (rate.changePercent || 0) < 0
-            ? '📉'
-            : '📊';
+        (rate.changePercent || 0) > 0 ? '📈' : (rate.changePercent || 0) < 0 ? '📉' : '📊';
       const changeText = rate.changePercent
-        ? (rate.changePercent > 0 ? '+' : '') +
-          rate.changePercent.toFixed(2) +
-          '%'
+        ? (rate.changePercent > 0 ? '+' : '') + rate.changePercent.toFixed(2) + '%'
         : '0.00%';
       const marketStatus = StocksService.isMarketOpen() ? 'ABIERTO' : 'CERRADO';
 
@@ -138,11 +128,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
         shareFormat === '1:1' ? 'image_square' : 'image_story',
       );
     } catch (e) {
-      if (
-        e &&
-        (e as any).message !== 'User did not share' &&
-        (e as any).message !== 'CANCELLED'
-      ) {
+      if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
         observabilityService.captureError(e, {
           context: 'CurrencyDetailScreen.handleShareImage',
           action: 'share_currency_image',
@@ -183,11 +169,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
       await Share.open({ message });
       analyticsService.logShare('currency', rate.code, 'text');
     } catch (e) {
-      if (
-        e &&
-        (e as any).message !== 'User did not share' &&
-        (e as any).message !== 'CANCELLED'
-      ) {
+      if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
         observabilityService.captureError(e, {
           context: 'CurrencyDetailScreen.handleShareText',
           action: 'share_currency_text',
@@ -239,10 +221,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
         onActionPress={handleShare}
       />
 
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Header Section - Immersive Design */}
         <View
           style={styles.immersiveHeader}
@@ -285,15 +264,10 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
           </View>
 
           <View style={styles.headerInfo}>
-            <Text
-              variant="headlineSmall"
-              style={[styles.name, { color: nameTextColor }]}
-            >
+            <Text variant="headlineSmall" style={[styles.name, { color: nameTextColor }]}>
               {rate.name}
             </Text>
-            <Surface
-              style={[styles.badgeContainer, { backgroundColor: badgeBgColor }]}
-            >
+            <Surface style={[styles.badgeContainer, { backgroundColor: badgeBgColor }]}>
               <Text style={[styles.badgeText, { color: badgeTextColor }]}>
                 {rate.type === 'fiat'
                   ? 'TASA BCV'
@@ -306,10 +280,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
 
           <View style={styles.priceContainer}>
             <View style={styles.currencyRow}>
-              <Text
-                variant="headlineLarge"
-                style={[styles.priceLarge, { color: priceLargeColor }]}
-              >
+              <Text variant="headlineLarge" style={[styles.priceLarge, { color: priceLargeColor }]}>
                 {rate.value.toLocaleString('es-VE', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
@@ -320,19 +291,11 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
               </View>
             </View>
 
-            <View
-              style={[styles.trendBadge, { backgroundColor: trendBgColor }]}
-            >
-              <MaterialCommunityIcons
-                name={trendIcon}
-                size={20}
-                color={trendColor}
-              />
+            <View style={[styles.trendBadge, { backgroundColor: trendBgColor }]}>
+              <MaterialCommunityIcons name={trendIcon} size={20} color={trendColor} />
               <Text style={[styles.trendText, { color: trendColor }]}>
                 {rate.changePercent
-                  ? (rate.changePercent > 0 ? '+' : '') +
-                    rate.changePercent.toFixed(2) +
-                    '%'
+                  ? (rate.changePercent > 0 ? '+' : '') + rate.changePercent.toFixed(2) + '%'
                   : '0.00%'}
               </Text>
             </View>
@@ -355,10 +318,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
 
         <View style={styles.statsGrid}>
           <Surface
-            style={[
-              styles.statCard,
-              { backgroundColor: statCardBg, borderColor: statCardBorder },
-            ]}
+            style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]}
             elevation={0}
             accessible={true}
             accessibilityLabel={`Precio de compra: ${rate.buyValue || 'No disponible'}`}
@@ -369,18 +329,12 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
                 size={18}
                 color={theme.colors.primary}
               />
-              <Text
-                variant="labelSmall"
-                style={[styles.statLabelBold, { color: statLabelColor }]}
-              >
+              <Text variant="labelSmall" style={[styles.statLabelBold, { color: statLabelColor }]}>
                 COMPRA
               </Text>
             </View>
             <View style={styles.statValueRow}>
-              <Text
-                variant="titleMedium"
-                style={[styles.statValueBold, { color: statValueColor }]}
-              >
+              <Text variant="titleMedium" style={[styles.statValueBold, { color: statValueColor }]}>
                 {rate.buyValue
                   ? rate.buyValue.toLocaleString('es-VE', {
                       minimumFractionDigits: 2,
@@ -392,10 +346,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
           </Surface>
 
           <Surface
-            style={[
-              styles.statCard,
-              { backgroundColor: statCardBg, borderColor: statCardBorder },
-            ]}
+            style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]}
             elevation={0}
             accessible={true}
             accessibilityLabel={`Precio de venta: ${rate.sellValue || 'No disponible'}`}
@@ -406,18 +357,12 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
                 size={18}
                 color={theme.colors.primary}
               />
-              <Text
-                variant="labelSmall"
-                style={[styles.statLabelBold, { color: statLabelColor }]}
-              >
+              <Text variant="labelSmall" style={[styles.statLabelBold, { color: statLabelColor }]}>
                 VENTA
               </Text>
             </View>
             <View style={styles.statValueRow}>
-              <Text
-                variant="titleMedium"
-                style={[styles.statValueBold, { color: statValueColor }]}
-              >
+              <Text variant="titleMedium" style={[styles.statValueBold, { color: statValueColor }]}>
                 {rate.sellValue
                   ? rate.sellValue.toLocaleString('es-VE', {
                       minimumFractionDigits: 2,
@@ -431,10 +376,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
 
         <View style={styles.statsGrid}>
           <Surface
-            style={[
-              styles.statCard,
-              { backgroundColor: statCardBg, borderColor: statCardBorder },
-            ]}
+            style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]}
             elevation={0}
             accessible={true}
             accessibilityLabel={`Spread: ${spread ? spread.toFixed(2) + '%' : 'No disponible'}`}
@@ -445,47 +387,28 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
                 size={18}
                 color={theme.colors.primary}
               />
-              <Text
-                variant="labelSmall"
-                style={[styles.statLabelBold, { color: statLabelColor }]}
-              >
+              <Text variant="labelSmall" style={[styles.statLabelBold, { color: statLabelColor }]}>
                 BRECHA / SPREAD
               </Text>
             </View>
-            <Text
-              variant="titleMedium"
-              style={[styles.statValueBold, { color: statValueColor }]}
-            >
+            <Text variant="titleMedium" style={[styles.statValueBold, { color: statValueColor }]}>
               {spread ? `${spread.toFixed(2)}%` : 'N/A'}
             </Text>
           </Surface>
 
           <Surface
-            style={[
-              styles.statCard,
-              { backgroundColor: statCardBg, borderColor: statCardBorder },
-            ]}
+            style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]}
             elevation={0}
             accessible={true}
             accessibilityLabel={`Última actualización: ${new Date(rate.lastUpdated).toLocaleTimeString()}`}
           >
             <View style={styles.statHeader}>
-              <MaterialCommunityIcons
-                name="clock-outline"
-                size={18}
-                color={theme.colors.primary}
-              />
-              <Text
-                variant="labelSmall"
-                style={[styles.statLabelBold, { color: statLabelColor }]}
-              >
+              <MaterialCommunityIcons name="clock-outline" size={18} color={theme.colors.primary} />
+              <Text variant="labelSmall" style={[styles.statLabelBold, { color: statLabelColor }]}>
                 ÚLT. ACT.
               </Text>
             </View>
-            <Text
-              variant="titleMedium"
-              style={[styles.statValueBold, { color: statValueColor }]}
-            >
+            <Text variant="titleMedium" style={[styles.statValueBold, { color: statValueColor }]}>
               {new Date(rate.lastUpdated).toLocaleTimeString([], {
                 hour: '2-digit',
                 minute: '2-digit',
@@ -524,10 +447,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
           />
           <Text
             variant="bodyMedium"
-            style={[
-              styles.chartPlaceholderText,
-              { color: chartPlaceholderTextColor },
-            ]}
+            style={[styles.chartPlaceholderText, { color: chartPlaceholderTextColor }]}
           >
             Gráfico detallado próximamente
           </Text>

@@ -158,9 +158,7 @@ export class CurrencyService {
     if (this.fetchPromise && !forceRefresh) return this.fetchPromise;
 
     this.fetchPromise = (async () => {
-      const trace = await performanceService.startTrace(
-        'get_currency_rates_service',
-      );
+      const trace = await performanceService.startTrace('get_currency_rates_service');
       try {
         // We use apiClient's cache as a fallback, but here we manage application state
         // Header 'X-API-Key' is now handled by ApiClient default
@@ -241,12 +239,8 @@ export class CurrencyService {
               source: sourceLabel,
               buyValue: CurrencyService.parseRate(apiRate.rate?.buy),
               sellValue: CurrencyService.parseRate(apiRate.rate?.sell),
-              buyChangePercent: CurrencyService.parsePercentage(
-                apiRate.change?.buy?.percent,
-              ),
-              sellChangePercent: CurrencyService.parsePercentage(
-                apiRate.change?.sell?.percent,
-              ),
+              buyChangePercent: CurrencyService.parsePercentage(apiRate.change?.buy?.percent),
+              sellChangePercent: CurrencyService.parsePercentage(apiRate.change?.sell?.percent),
             });
           });
         }
@@ -320,15 +314,11 @@ export class CurrencyService {
             // Calculate change percent
             let changePercent = 0;
             if (apiRate.change?.percent !== undefined) {
-              changePercent = CurrencyService.parsePercentage(
-                apiRate.change.percent,
-              );
+              changePercent = CurrencyService.parsePercentage(apiRate.change.percent);
             } else {
               const buyPercent = apiRate.change?.buy?.percent || 0;
               const sellPercent = apiRate.change?.sell?.percent || 0;
-              changePercent = CurrencyService.parsePercentage(
-                (buyPercent + sellPercent) / 2,
-              );
+              changePercent = CurrencyService.parsePercentage((buyPercent + sellPercent) / 2);
             }
 
             rates.push({
@@ -437,12 +427,8 @@ export class CurrencyService {
               source: sourceLabel,
               buyValue: CurrencyService.parseRate(cryptoItem.rate?.buy),
               sellValue: CurrencyService.parseRate(cryptoItem.rate?.sell),
-              buyChangePercent: CurrencyService.parsePercentage(
-                cryptoItem.change?.buy?.percent,
-              ),
-              sellChangePercent: CurrencyService.parsePercentage(
-                cryptoItem.change?.sell?.percent,
-              ),
+              buyChangePercent: CurrencyService.parsePercentage(cryptoItem.change?.buy?.percent),
+              sellChangePercent: CurrencyService.parsePercentage(cryptoItem.change?.sell?.percent),
             });
           });
         }
@@ -523,13 +509,10 @@ export class CurrencyService {
   }> {
     const trace = await performanceService.startTrace('get_bank_rates_service');
     try {
-      const response = await apiClient.get<ApiBankRatesResponse>(
-        'api/rates/banks',
-        {
-          params: { page, limit },
-          useCache: false,
-        },
-      );
+      const response = await apiClient.get<ApiBankRatesResponse>('api/rates/banks', {
+        params: { page, limit },
+        useCache: false,
+      });
 
       if (!response || !response.rates) {
         return {
@@ -582,11 +565,7 @@ export class CurrencyService {
    * Safe cross-rate conversion: (Amount * FromRate) / ToRate
    * Reduces floating point errors by multiplying before dividing.
    */
-  static convertCrossRate(
-    amount: number,
-    fromRate: number,
-    toRate: number,
-  ): number {
+  static convertCrossRate(amount: number, fromRate: number, toRate: number): number {
     if (amount < 0) return 0;
     if (toRate === 0) return 0;
     return (amount * fromRate) / toRate;
@@ -600,21 +579,14 @@ export class CurrencyService {
    * 3. Border -> VES/Bs OR Stablecoins (USDT, USDC, DAI, FDUSD) allowed.
    * 4. Crypto -> VES/Bs, Border OR Crypto allowed.
    */
-  static getAvailableTargetRates(
-    source: CurrencyRate,
-    allRates: CurrencyRate[],
-  ): CurrencyRate[] {
+  static getAvailableTargetRates(source: CurrencyRate, allRates: CurrencyRate[]): CurrencyRate[] {
     // Rule 1: VES -> All
     if (source.code === 'VES' || source.code === 'Bs') return allRates;
 
     // Rule 2: BCV (Fiat) -> VES, Crypto or Border
     if (source.type === 'fiat') {
       return allRates.filter(
-        r =>
-          r.code === 'VES' ||
-          r.code === 'Bs' ||
-          r.type === 'crypto' ||
-          r.type === 'border',
+        r => r.code === 'VES' || r.code === 'Bs' || r.type === 'crypto' || r.type === 'border',
       );
     }
 

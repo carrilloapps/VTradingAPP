@@ -44,20 +44,16 @@ describe('ForgotPasswordScreen', () => {
   const renderScreen = () =>
     render(
       <PaperProvider theme={mockTheme}>
-        <ForgotPasswordScreen
-          navigation={{ goBack: jest.fn(), navigate: jest.fn() }}
-        />
+        <ForgotPasswordScreen navigation={{ goBack: jest.fn(), navigate: jest.fn() }} />
       </PaperProvider>,
     );
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest
-      .spyOn(ToastStore, 'useToastStore')
-      .mockImplementation((selector: any) => {
-        const state = { showToast: jest.fn() };
-        return selector ? selector(state) : state;
-      });
+    jest.spyOn(ToastStore, 'useToastStore').mockImplementation((selector: any) => {
+      const state = { showToast: jest.fn() };
+      return selector ? selector(state) : state;
+    });
   });
 
   it('muestra loading durante la recuperación', async () => {
@@ -72,14 +68,10 @@ describe('ForgotPasswordScreen', () => {
       isLoading: false,
     } as any);
 
-    const { getByLabelText, getByTestId, queryByTestId, findByTestId } =
-      renderScreen();
+    const { getByLabelText, getByTestId, queryByTestId, findByTestId } = renderScreen();
 
     act(() => {
-      fireEvent.changeText(
-        getByLabelText('Correo electrónico'),
-        'test@example.com',
-      );
+      fireEvent.changeText(getByLabelText('Correo electrónico'), 'test@example.com');
     });
 
     fireEvent.press(getByTestId('forgot-password-submit'));

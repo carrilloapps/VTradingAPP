@@ -10,10 +10,7 @@ import {
   FirebaseAuthTypes,
   sendPasswordResetEmail,
 } from '@react-native-firebase/auth';
-import {
-  GoogleSignin,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 
 import { AppConfig } from '@/constants/AppConfig';
 import { observabilityService } from '@/services/ObservabilityService';
@@ -32,9 +29,7 @@ class AuthService {
   /**
    * Listen to auth state changes
    */
-  onAuthStateChanged(
-    callback: (user: FirebaseAuthTypes.User | null) => void,
-  ): () => void {
+  onAuthStateChanged(callback: (user: FirebaseAuthTypes.User | null) => void): () => void {
     return onAuthStateChanged(getAuth(), callback);
   }
 
@@ -100,9 +95,7 @@ class AuthService {
           hasResult: !!signInResult,
           hasData: !!signInResult?.data,
         });
-        throw new Error(
-          'Google Sign-In was cancelled or returned invalid data. Please try again.',
-        );
+        throw new Error('Google Sign-In was cancelled or returned invalid data. Please try again.');
       }
 
       const idToken = signInResult.data?.idToken;
@@ -116,15 +109,12 @@ class AuthService {
         });
 
         // Capture error with context for investigation
-        observabilityService.captureError(
-          new Error('No ID token found in Google Sign-In result'),
-          {
-            context: 'AuthService_signInWithGoogle',
-            errorType: 'missing_id_token',
-            hasSignInResult: !!signInResult,
-            hasData: !!signInResult?.data,
-          },
-        );
+        observabilityService.captureError(new Error('No ID token found in Google Sign-In result'), {
+          context: 'AuthService_signInWithGoogle',
+          errorType: 'missing_id_token',
+          hasSignInResult: !!signInResult,
+          hasData: !!signInResult?.data,
+        });
 
         throw new Error(
           'No se pudo obtener el token de autenticación de Google. Por favor, intenta nuevamente.',
@@ -150,18 +140,14 @@ class AuthService {
           context: 'AuthService_signInWithGoogle',
           errorType: 'play_services_unavailable',
         });
-        throw new Error(
-          'Google Play Services no está disponible o está desactualizado',
-        );
+        throw new Error('Google Play Services no está disponible o está desactualizado');
       } else {
         // Report unexpected errors with context
         const isIdTokenError =
-          e.message?.includes('No ID token') ||
-          e.message?.includes('No se pudo obtener el token');
+          e.message?.includes('No ID token') || e.message?.includes('No se pudo obtener el token');
 
         const isInternalError =
-          e.code === 'auth/internal-error' ||
-          e.message?.includes('INTERNAL_ERROR');
+          e.code === 'auth/internal-error' || e.message?.includes('INTERNAL_ERROR');
 
         if (!isIdTokenError && !isInternalError) {
           // Only report if not already reported above and not a common internal/cancellation noise
@@ -242,9 +228,7 @@ class AuthService {
     }
   }
 
-  async updateProfileName(
-    displayName: string,
-  ): Promise<FirebaseAuthTypes.User> {
+  async updateProfileName(displayName: string): Promise<FirebaseAuthTypes.User> {
     try {
       const trimmedName = displayName.trim();
       if (!trimmedName) {
@@ -292,8 +276,7 @@ class AuthService {
       switch (error.code) {
         // Registro y Email
         case 'auth/email-already-in-use':
-          message =
-            'Este correo electrónico ya está registrado. Intenta iniciar sesión.';
+          message = 'Este correo electrónico ya está registrado. Intenta iniciar sesión.';
           break;
         case 'auth/invalid-email':
           message = 'El formato del correo electrónico no es válido.';
@@ -302,8 +285,7 @@ class AuthService {
           message = 'El método de autenticación no está habilitado.';
           break;
         case 'auth/weak-password':
-          message =
-            'La contraseña es muy débil. Usa al menos 6 caracteres con letras y números.';
+          message = 'La contraseña es muy débil. Usa al menos 6 caracteres con letras y números.';
           break;
 
         // Inicio de Sesión
@@ -343,12 +325,10 @@ class AuthService {
 
         // Red y Errores Generales
         case 'auth/network-request-failed':
-          message =
-            'Error de conexión. Verifica tu conexión a internet e intenta de nuevo.';
+          message = 'Error de conexión. Verifica tu conexión a internet e intenta de nuevo.';
           break;
         case 'auth/internal-error':
-          message =
-            'Error interno del servidor. Intenta de nuevo en unos minutos.';
+          message = 'Error interno del servidor. Intenta de nuevo en unos minutos.';
           break;
         case 'auth/timeout':
           message = 'La operación ha tardado demasiado. Reintenta de nuevo.';
@@ -359,8 +339,7 @@ class AuthService {
           message = 'Inicio de sesión cancelado.';
           break;
         case 'PLAY_SERVICES_NOT_AVAILABLE':
-          message =
-            'Los servicios de Google Play no están disponibles o están desactualizados.';
+          message = 'Los servicios de Google Play no están disponibles o están desactualizados.';
           break;
 
         default:

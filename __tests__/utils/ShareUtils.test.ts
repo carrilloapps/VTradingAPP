@@ -1,7 +1,4 @@
-import {
-  generateShareMessage,
-  shareTextContent,
-} from '../../src/utils/ShareUtils';
+import { generateShareMessage, shareTextContent } from '../../src/utils/ShareUtils';
 import Share from 'react-native-share';
 import { observabilityService } from '@/services/ObservabilityService';
 import SafeLogger from '@/utils/safeLogger';
@@ -99,9 +96,7 @@ describe('ShareUtils', () => {
     });
 
     it('should return null on user cancel (User did not share)', async () => {
-      (Share.open as jest.Mock).mockRejectedValue(
-        new Error('User did not share'),
-      );
+      (Share.open as jest.Mock).mockRejectedValue(new Error('User did not share'));
       const result = await shareTextContent(options);
       expect(result).toBe(null);
       expect(observabilityService.captureError).not.toHaveBeenCalled();

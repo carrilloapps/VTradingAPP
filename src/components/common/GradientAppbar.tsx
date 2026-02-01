@@ -10,11 +10,7 @@ interface GradientAppbarProps {
   onShare?: () => void;
 }
 
-const GradientAppbar: React.FC<GradientAppbarProps> = ({
-  title,
-  onBack,
-  onShare,
-}) => {
+const GradientAppbar: React.FC<GradientAppbarProps> = ({ title, onBack, onShare }) => {
   const insets = useSafeAreaInsets();
   const HEADER_HEIGHT = 56;
 
@@ -23,17 +19,10 @@ const GradientAppbar: React.FC<GradientAppbarProps> = ({
       colors={['rgba(0,0,0,0.7)', 'transparent']}
       style={[styles.appbarGradient, { height: insets.top + HEADER_HEIGHT }]}
     >
-      <View
-        style={[
-          styles.contentContainer,
-          { marginTop: insets.top, height: HEADER_HEIGHT },
-        ]}
-      >
+      <View style={[styles.contentContainer, { marginTop: insets.top, height: HEADER_HEIGHT }]}>
         <Appbar.BackAction onPress={onBack} color="#FFF" />
         <Appbar.Content title={title || ''} titleStyle={styles.appbarTitle} />
-        {onShare && (
-          <Appbar.Action icon="share-variant" onPress={onShare} color="#FFF" />
-        )}
+        {onShare && <Appbar.Action icon="share-variant" onPress={onShare} color="#FFF" />}
       </View>
     </LinearGradient>
   );

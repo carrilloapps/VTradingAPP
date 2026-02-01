@@ -57,8 +57,7 @@ export class ApiClient {
         await initializePerformance(perf.app, { dataCollectionEnabled: true });
       }
     } catch (e) {
-      if (__DEV__)
-        SafeLogger.warn('[ApiClient] Perf init failed', { error: e });
+      if (__DEV__) SafeLogger.warn('[ApiClient] Perf init failed', { error: e });
     }
   }
 
@@ -112,23 +111,15 @@ export class ApiClient {
    * Core request method that handles Network, Headers, Metrics, and Response parsing.
    * Does NOT handle caching.
    */
-  private async _request<T>(
-    endpoint: string,
-    options: RequestOptions,
-  ): Promise<ApiResponse<T>> {
-    const cleanBaseUrl = this.baseUrl.endsWith('/')
-      ? this.baseUrl.slice(0, -1)
-      : this.baseUrl;
+  private async _request<T>(endpoint: string, options: RequestOptions): Promise<ApiResponse<T>> {
+    const cleanBaseUrl = this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl;
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
     let url = `${cleanBaseUrl}${cleanEndpoint}`;
 
     // Append query params if present
     if (options.params) {
       const queryString = Object.entries(options.params)
-        .map(
-          ([key, value]) =>
-            `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
-        )
+        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
         .join('&');
       url += (url.includes('?') ? '&' : '?') + queryString;
     }
@@ -143,10 +134,7 @@ export class ApiClient {
       metric.putAttribute('api_endpoint', endpoint);
       await metric.start();
 
-      sentryTransaction = observabilityService.startTransaction(
-        `GET ${endpoint}`,
-        `http.client`,
-      );
+      sentryTransaction = observabilityService.startTransaction(`GET ${endpoint}`, `http.client`);
     } catch (e) {
       SafeLogger.warn('ApiClient: Perf metric setup failed', e);
     }
@@ -168,8 +156,7 @@ export class ApiClient {
         const contentType = response.headers.get('Content-Type');
         if (contentType) metric.setResponseContentType(contentType);
         const contentLength = response.headers.get('Content-Length');
-        if (contentLength)
-          metric.setResponsePayloadSize(parseInt(contentLength, 10));
+        if (contentLength) metric.setResponsePayloadSize(parseInt(contentLength, 10));
         await metric.stop();
       }
 
@@ -196,11 +183,7 @@ export class ApiClient {
             details: text.substring(0, 100),
           };
         }
-        throw new Error(
-          errorData.message ||
-            errorData.error ||
-            `API Error: ${response.status}`,
-        );
+        throw new Error(errorData.message || errorData.error || `API Error: ${response.status}`);
       }
 
       const text = await response.text();
@@ -208,9 +191,7 @@ export class ApiClient {
       try {
         data = text ? JSON.parse(text) : ({} as T);
       } catch (e) {
-        throw new Error(
-          `JSON Parse Error: ${e instanceof Error ? e.message : String(e)}`,
-        );
+        throw new Error(`JSON Parse Error: ${e instanceof Error ? e.message : String(e)}`);
       }
 
       return { data, headers: response.headers, status: response.status };
@@ -222,16 +203,14 @@ export class ApiClient {
         } catch {}
       }
       if (sentryTransaction) {
-        const isNetworkError =
-          e instanceof TypeError && e.message === 'Network request failed';
+        const isNetworkError = e instanceof TypeError && e.message === 'Network request failed';
         observabilityService.finishTransaction(
           sentryTransaction,
           isNetworkError ? 'deadline_exceeded' : 'internal_error',
         );
       }
 
-      const isNetworkError =
-        e instanceof TypeError && e.message === 'Network request failed';
+      const isNetworkError = e instanceof TypeError && e.message === 'Network request failed';
       if (!isNetworkError) {
         observabilityService.captureError(e, {
           context: 'ApiClient._request',
@@ -245,9 +224,7 @@ export class ApiClient {
   }
 
   async get<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-    const cleanBaseUrl = this.baseUrl.endsWith('/')
-      ? this.baseUrl.slice(0, -1)
-      : this.baseUrl;
+    const cleanBaseUrl = this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl;
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
     // Re-construct URL just for cache key, or pass it?
     // Using simple approach: base + endpoint because query params might vary.
@@ -257,10 +234,7 @@ export class ApiClient {
     let cacheKey = `api_cache_${cleanBaseUrl}${cleanEndpoint}`;
     if (options.params) {
       const queryString = Object.entries(options.params)
-        .map(
-          ([key, value]) =>
-            `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
-        )
+        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
         .join('&');
       cacheKey += (cacheKey.includes('?') ? '&' : '?') + queryString;
     }
@@ -317,17 +291,12 @@ export class ApiClient {
     endpoint: string,
     options: RequestOptions = {},
   ): Promise<{ data: T; headers: Headers }> {
-    const cleanBaseUrl = this.baseUrl.endsWith('/')
-      ? this.baseUrl.slice(0, -1)
-      : this.baseUrl;
+    const cleanBaseUrl = this.baseUrl.endsWith('/') ? this.baseUrl.slice(0, -1) : this.baseUrl;
     const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
     let cacheKey = `api_cache_full_${cleanBaseUrl}${cleanEndpoint}`;
     if (options.params) {
       const queryString = Object.entries(options.params)
-        .map(
-          ([key, value]) =>
-            `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`,
-        )
+        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(String(value))}`)
         .join('&');
       cacheKey += (cacheKey.includes('?') ? '&' : '?') + queryString;
     }
@@ -362,16 +331,12 @@ export class ApiClient {
         try {
           const cached = mmkvStorage.getString(cacheKey);
           if (cached) {
-            const { data, headers: cachedHeaders } = JSON.parse(
-              cached,
-            ) as CacheItem<T>;
+            const { data, headers: cachedHeaders } = JSON.parse(cached) as CacheItem<T>;
 
             // Reconstruct Headers object
             const headers = new Headers();
             if (cachedHeaders) {
-              Object.entries(cachedHeaders).forEach(([k, v]) =>
-                headers.append(k, String(v)),
-              );
+              Object.entries(cachedHeaders).forEach(([k, v]) => headers.append(k, String(v)));
             }
 
             return { data, headers };

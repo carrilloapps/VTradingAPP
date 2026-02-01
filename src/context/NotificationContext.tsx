@@ -1,10 +1,4 @@
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useEffect,
-  useCallback,
-} from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 
 import { storageService, StoredNotification } from '@/services/StorageService';
 import { fcmService } from '@/services/firebase/FCMService';
@@ -35,9 +29,7 @@ const NotificationContext = createContext<NotificationContextType>({
 
 export const useNotifications = () => useContext(NotificationContext);
 
-export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<StoredNotification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -83,9 +75,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const markAsRead = useCallback((id: string) => {
-    setNotifications(prev =>
-      prev.map(n => (n.id === id ? { ...n, isRead: true } : n)),
-    );
+    setNotifications(prev => prev.map(n => (n.id === id ? { ...n, isRead: true } : n)));
   }, []);
 
   const markAllAsRead = useCallback(() => {
@@ -94,9 +84,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const archiveNotification = useCallback((id: string) => {
     setNotifications(prev =>
-      prev.map(n =>
-        n.id === id ? { ...n, isArchived: true, isRead: true } : n,
-      ),
+      prev.map(n => (n.id === id ? { ...n, isArchived: true, isRead: true } : n)),
     );
   }, []);
 
@@ -137,34 +125,32 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
     });
 
     // 2. Background State
-    const unsubscribeOpened = fcmService.onNotificationOpenedApp(
-      remoteMessage => {
-        // Process and add to notifications list
-        processRemoteMessage(remoteMessage, 'background');
+    const unsubscribeOpened = fcmService.onNotificationOpenedApp(remoteMessage => {
+      // Process and add to notifications list
+      processRemoteMessage(remoteMessage, 'background');
 
-        // Navigate to Notifications Screen
-        // Re-implement safe navigation locally or extract util if needed globally
-        // For now, repeating logic as local function safeNavigate is scoped to the quit handler
-        const safeNavigate = (screen: string) => {
-          if (navigationRef.isReady()) {
-            navigationRef.navigate(screen);
-          } else {
-            // Retry logic (max 5 attempts)
-            let attempts = 0;
-            const interval = setInterval(() => {
-              attempts++;
-              if (navigationRef.isReady()) {
-                navigationRef.navigate(screen);
-                clearInterval(interval);
-              } else if (attempts >= 5) {
-                clearInterval(interval);
-              }
-            }, 500);
-          }
-        };
-        safeNavigate('Notifications');
-      },
-    );
+      // Navigate to Notifications Screen
+      // Re-implement safe navigation locally or extract util if needed globally
+      // For now, repeating logic as local function safeNavigate is scoped to the quit handler
+      const safeNavigate = (screen: string) => {
+        if (navigationRef.isReady()) {
+          navigationRef.navigate(screen);
+        } else {
+          // Retry logic (max 5 attempts)
+          let attempts = 0;
+          const interval = setInterval(() => {
+            attempts++;
+            if (navigationRef.isReady()) {
+              navigationRef.navigate(screen);
+              clearInterval(interval);
+            } else if (attempts >= 5) {
+              clearInterval(interval);
+            }
+          }, 500);
+        }
+      };
+      safeNavigate('Notifications');
+    });
 
     // 3. Foreground State
     const unsubscribeMessage = fcmService.onMessage(async remoteMessage => {
@@ -184,8 +170,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
           const dataTitle = remoteMessage.data?.title as string;
           const notifTitle = remoteMessage.notification?.title as string;
           const dataBody =
-            (remoteMessage.data?.message as string) ||
-            (remoteMessage.data?.body as string);
+            (remoteMessage.data?.message as string) || (remoteMessage.data?.body as string);
           const notifBody = remoteMessage.notification?.body as string;
 
           // Prioritize data title if notification title is generic "Notificación" or missing
@@ -202,8 +187,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
             const price = parseFloat(remoteMessage.data.price as string);
 
             if (!isNaN(price)) {
-              const formatPrice = (val: number) =>
-                val < 0.01 ? val : val.toFixed(2);
+              const formatPrice = (val: number) => (val < 0.01 ? val : val.toFixed(2));
               highlightedVal = `${formatPrice(price)}`;
 
               // Check if this price matches any active alert
@@ -214,10 +198,8 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
                   a =>
                     a.isActive &&
                     a.symbol === symbol &&
-                    ((a.condition === 'above' &&
-                      price >= parseFloat(a.target)) ||
-                      (a.condition === 'below' &&
-                        price <= parseFloat(a.target))),
+                    ((a.condition === 'above' && price >= parseFloat(a.target)) ||
+                      (a.condition === 'below' && price <= parseFloat(a.target))),
                 );
 
                 if (matchingAlerts.length > 0) {
@@ -229,8 +211,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({
                   const directionText = isUp ? 'Subida' : 'Bajada';
                   const actionVerb = isUp ? 'subió' : 'bajó';
                   const targetPrice = parseFloat(alert.target);
-                  const formatTargetPrice = (val: number) =>
-                    val < 0.01 ? val : val.toFixed(2);
+                  const formatTargetPrice = (val: number) => (val < 0.01 ? val : val.toFixed(2));
                   const currentPriceFormatted = formatTargetPrice(price);
                   const targetPriceFormatted = formatTargetPrice(targetPrice);
 

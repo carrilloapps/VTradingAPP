@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-  ImageBackground,
-  TouchableOpacity,
-} from 'react-native';
+import { View, StyleSheet, ImageBackground, TouchableOpacity } from 'react-native';
 import { Text, Surface } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
@@ -51,10 +46,7 @@ const FeaturedHero = ({ item }: FeaturedHeroProps) => {
           <ImageBackground
             source={{ uri: item.image }}
             style={styles.heroBackground}
-            imageStyle={[
-              styles.heroImage,
-              { borderRadius: theme.roundness * 5 },
-            ]}
+            imageStyle={[styles.heroImage, { borderRadius: theme.roundness * 5 }]}
           >
             <LinearGradient
               colors={['transparent', 'rgba(0,0,0,0.3)', 'rgba(0,0,0,0.95)']}
@@ -62,10 +54,7 @@ const FeaturedHero = ({ item }: FeaturedHeroProps) => {
             >
               <View style={styles.heroContent}>
                 <Surface
-                  style={[
-                    styles.heroTag,
-                    { backgroundColor: theme.colors.primary },
-                  ]}
+                  style={[styles.heroTag, { backgroundColor: theme.colors.primary }]}
                   elevation={0}
                 >
                   <Text style={styles.heroTagText}>{displayTag}</Text>
@@ -77,23 +66,13 @@ const FeaturedHero = ({ item }: FeaturedHeroProps) => {
 
                 <View style={styles.heroFooter}>
                   {item.author?.avatar && (
-                    <FastImage
-                      source={{ uri: item.author.avatar }}
-                      style={styles.authorAvatar}
-                    />
+                    <FastImage source={{ uri: item.author.avatar }} style={styles.authorAvatar} />
                   )}
-                  <Text style={styles.heroMeta}>
-                    {item.author?.name || item.source}
-                  </Text>
+                  <Text style={styles.heroMeta}>{item.author?.name || item.source}</Text>
                   <View style={styles.dotSeparator} />
                   <Text style={styles.heroMeta}>{item.time}</Text>
                   <View style={styles.dotSeparator} />
-                  <Text
-                    style={[
-                      styles.readTime,
-                      { color: theme.colors.primaryContainer },
-                    ]}
-                  >
+                  <Text style={[styles.readTime, { color: theme.colors.primaryContainer }]}>
                     {item.readTime}
                   </Text>
                 </View>

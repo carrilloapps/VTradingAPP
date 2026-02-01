@@ -45,11 +45,7 @@ const RateCard: React.FC<RateCardProps> = ({
       ? colors.success
       : colors.error;
 
-  const trendIcon = isNeutral
-    ? 'minus'
-    : isPositive
-      ? 'trending-up'
-      : 'trending-down';
+  const trendIcon = isNeutral ? 'minus' : isPositive ? 'trending-up' : 'trending-down';
 
   // Default icon colors if not provided
   const finalIconBgColor = iconBgColor || colors.infoContainer;
@@ -63,10 +59,7 @@ const RateCard: React.FC<RateCardProps> = ({
       borderColor: theme.colors.outline,
     },
   ];
-  const iconContainerStyle = [
-    styles.iconContainer,
-    { backgroundColor: finalIconBgColor },
-  ];
+  const iconContainerStyle = [styles.iconContainer, { backgroundColor: finalIconBgColor }];
   const textPrimaryStyle = { color: theme.colors.onSurface };
 
   return (
@@ -84,26 +77,16 @@ const RateCard: React.FC<RateCardProps> = ({
             {iconName === 'Bs' ? (
               <BolivarIcon color={finalIconColor} size={24} />
             ) : (
-              <MaterialCommunityIcons
-                name={iconName}
-                size={24}
-                color={finalIconColor}
-              />
+              <MaterialCommunityIcons name={iconName} size={24} color={finalIconColor} />
             )}
           </View>
           <View>
-            <Text
-              variant="titleMedium"
-              style={[styles.titleText, textPrimaryStyle]}
-            >
+            <Text variant="titleMedium" style={[styles.titleText, textPrimaryStyle]}>
               {title}
             </Text>
             <Text
               variant="bodySmall"
-              style={[
-                styles.subtitleText,
-                { color: theme.colors.onSurfaceVariant },
-              ]}
+              style={[styles.subtitleText, { color: theme.colors.onSurfaceVariant }]}
             >
               {subtitle}
             </Text>
@@ -111,10 +94,7 @@ const RateCard: React.FC<RateCardProps> = ({
         </View>
 
         <View style={styles.rightContent}>
-          <Text
-            variant="headlineSmall"
-            style={[styles.valueText, textPrimaryStyle]}
-          >
+          <Text variant="headlineSmall" style={[styles.valueText, textPrimaryStyle]}>
             {value}
           </Text>
           <View style={styles.trendContainer}>
@@ -124,10 +104,7 @@ const RateCard: React.FC<RateCardProps> = ({
               color={trendColor}
               importantForAccessibility="no-hide-descendants"
             />
-            <Text
-              variant="labelMedium"
-              style={[styles.trendText, { color: trendColor }]}
-            >
+            <Text variant="labelMedium" style={[styles.trendText, { color: trendColor }]}>
               {isNeutral ? '' : isPositive ? '+' : ''}
               {changePercent}
             </Text>

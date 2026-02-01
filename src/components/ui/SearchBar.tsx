@@ -40,16 +40,13 @@ const SearchBar: React.FC<SearchBarProps> = ({
   const theme = useTheme();
   const [isFocused, setIsFocused] = useState(false);
 
-  const showSuggestions =
-    isFocused && suggestions.length > 0 && value && value.length > 0;
+  const showSuggestions = isFocused && suggestions.length > 0 && value && value.length > 0;
 
   const containerStyle = [
     styles.container,
     {
       backgroundColor: theme.colors.elevation.level2,
-      borderColor: isFocused
-        ? theme.colors.primary
-        : theme.colors.outlineVariant,
+      borderColor: isFocused ? theme.colors.primary : theme.colors.outlineVariant,
       borderWidth: 1,
     },
   ];
@@ -60,9 +57,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
         <MaterialCommunityIcons
           name="magnify"
           size={20}
-          color={
-            isFocused ? theme.colors.primary : theme.colors.onSurfaceVariant
-          }
+          color={isFocused ? theme.colors.primary : theme.colors.onSurfaceVariant}
         />
         <TextInput
           style={[styles.input, { color: theme.colors.onSurface }, inputStyle]}
@@ -99,11 +94,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             accessibilityLabel="Filtros"
             accessibilityRole="button"
           >
-            <MaterialCommunityIcons
-              name="tune"
-              size={20}
-              color={theme.colors.primary}
-            />
+            <MaterialCommunityIcons name="tune" size={20} color={theme.colors.primary} />
           </TouchableOpacity>
         )}
       </View>
@@ -124,10 +115,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
             keyboardShouldPersistTaps="handled"
             renderItem={({ item }) => (
               <TouchableOpacity
-                style={[
-                  styles.suggestionItem,
-                  { borderBottomColor: theme.colors.outlineVariant },
-                ]}
+                style={[styles.suggestionItem, { borderBottomColor: theme.colors.outlineVariant }]}
                 onPress={() => {
                   onSuggestionPress?.(item);
                   setIsFocused(false);
@@ -139,12 +127,7 @@ const SearchBar: React.FC<SearchBarProps> = ({
                   color={theme.colors.onSurfaceVariant}
                   style={styles.suggestionIcon}
                 />
-                <Text
-                  style={[
-                    styles.suggestionText,
-                    { color: theme.colors.onSurface },
-                  ]}
-                >
+                <Text style={[styles.suggestionText, { color: theme.colors.onSurface }]}>
                   {item}
                 </Text>
               </TouchableOpacity>

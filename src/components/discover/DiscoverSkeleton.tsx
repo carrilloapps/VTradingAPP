@@ -12,10 +12,7 @@ const DiscoverConstructionSkeleton = () => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
 
-  const containerStyle = [
-    styles.container,
-    { backgroundColor: theme.colors.background },
-  ];
+  const containerStyle = [styles.container, { backgroundColor: theme.colors.background }];
 
   const headerStyle = [styles.header, { paddingTop: insets.top + 12 }];
 
@@ -35,22 +32,14 @@ const DiscoverConstructionSkeleton = () => {
         <Skeleton width={150} height={32} />
       </View>
 
-      <ScrollView
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
         {/* Modern Hero Section */}
         <View style={styles.heroSection}>
           <View style={styles.iconContainer}>
             <Skeleton width={140} height={140} borderRadius={70} />
           </View>
 
-          <Skeleton
-            width={120}
-            height={28}
-            borderRadius={14}
-            style={styles.badge}
-          />
+          <Skeleton width={120} height={28} borderRadius={14} style={styles.badge} />
 
           <Skeleton width={240} height={40} style={styles.title} />
           <Skeleton width="85%" height={20} style={styles.description} />
@@ -74,16 +63,8 @@ const DiscoverConstructionSkeleton = () => {
             <View key={item} style={featureItemStyle}>
               <Skeleton width={44} height={44} borderRadius={12} />
               <View style={styles.featureText}>
-                <Skeleton
-                  width="60%"
-                  height={20}
-                  style={styles.featureTitleSkeleton}
-                />
-                <Skeleton
-                  width="90%"
-                  height={14}
-                  style={styles.featureDescSkeleton}
-                />
+                <Skeleton width="60%" height={20} style={styles.featureTitleSkeleton} />
+                <Skeleton width="90%" height={14} style={styles.featureDescSkeleton} />
               </View>
             </View>
           ))}

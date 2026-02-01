@@ -39,9 +39,7 @@ describe('WordPressUtils', () => {
           image: { url: 'https://example.com/acf-obj.jpg' },
         },
       } as unknown as WordPressCategory;
-      expect(getCategoryImage(category)).toBe(
-        'https://example.com/acf-obj.jpg',
-      );
+      expect(getCategoryImage(category)).toBe('https://example.com/acf-obj.jpg');
     });
 
     it('should return ACF icon URL (string) if Yoast and Image are missing', () => {
@@ -59,9 +57,7 @@ describe('WordPressUtils', () => {
           icon: { url: 'https://example.com/icon-obj.jpg' },
         },
       } as unknown as WordPressCategory;
-      expect(getCategoryImage(category)).toBe(
-        'https://example.com/icon-obj.jpg',
-      );
+      expect(getCategoryImage(category)).toBe('https://example.com/icon-obj.jpg');
     });
 
     it('should return undefined if no images are available', () => {

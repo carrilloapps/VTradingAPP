@@ -1,22 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  View,
-  StyleSheet,
-  ActivityIndicator,
-  StatusBar,
-  Animated,
-} from 'react-native';
+import { View, StyleSheet, ActivityIndicator, StatusBar, Animated } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
 import Share from 'react-native-share';
 import { captureRef } from 'react-native-view-shot';
 
-import {
-  wordPressService,
-  FormattedPost,
-  WordPressTag,
-} from '@/services/WordPressService';
+import { wordPressService, FormattedPost, WordPressTag } from '@/services/WordPressService';
 import { observabilityService } from '@/services/ObservabilityService';
 import { useAppTheme } from '@/theme';
 import ArticleCard from '@/components/discover/ArticleCard';
@@ -43,22 +33,12 @@ const ListFooter = ({
   theme: any;
 }) => {
   if (hasMore) {
-    return (
-      <ActivityIndicator
-        style={styles.footerLoader}
-        color={theme.colors.primary}
-      />
-    );
+    return <ActivityIndicator style={styles.footerLoader} color={theme.colors.primary} />;
   }
   if (postsLength > 0) {
     return (
       <View style={styles.endContainer}>
-        <View
-          style={[
-            styles.endDash,
-            { backgroundColor: theme.colors.outlineVariant },
-          ]}
-        />
+        <View style={[styles.endDash, { backgroundColor: theme.colors.outlineVariant }]} />
         <Text variant="labelLarge" style={styles.endText}>
           HAS LLEGADO AL FINAL
         </Text>
@@ -107,12 +87,7 @@ const TagDetailScreen = () => {
             currentTag = freshTag;
           }
 
-          const fetchedPosts = await wordPressService.getPosts(
-            1,
-            10,
-            undefined,
-            currentTag.id,
-          );
+          const fetchedPosts = await wordPressService.getPosts(1, 10, undefined, currentTag.id);
           setPosts(fetchedPosts);
           setHasMore(fetchedPosts.length === 10);
         }
@@ -133,13 +108,7 @@ const TagDetailScreen = () => {
     if (!tag) return;
     setRefreshing(true);
     try {
-      const fetchedPosts = await wordPressService.getPosts(
-        1,
-        10,
-        undefined,
-        tag.id,
-        true,
-      );
+      const fetchedPosts = await wordPressService.getPosts(1, 10, undefined, tag.id, true);
       setPosts(fetchedPosts);
       setPage(1);
       setHasMore(fetchedPosts.length === 10);
@@ -156,12 +125,7 @@ const TagDetailScreen = () => {
     if (!tag || !hasMore || refreshing || loading) return;
     try {
       const nextPage = page + 1;
-      const morePosts = await wordPressService.getPosts(
-        nextPage,
-        10,
-        undefined,
-        tag.id,
-      );
+      const morePosts = await wordPressService.getPosts(nextPage, 10, undefined, tag.id);
       if (morePosts.length > 0) {
         setPosts([...posts, ...morePosts]);
         setPage(nextPage);
@@ -212,10 +176,7 @@ const TagDetailScreen = () => {
         );
       } catch (e) {
         const err = e as any;
-        if (
-          err.message !== 'User did not share' &&
-          err.message !== 'CANCELLED'
-        ) {
+        if (err.message !== 'User did not share' && err.message !== 'CANCELLED') {
           observabilityService.captureError(e, {
             context: 'TagDetailScreen.shareImage',
           });
@@ -236,11 +197,7 @@ const TagDetailScreen = () => {
       type: 'TAG',
       count: tag?.count,
     });
-    analyticsService.logShare(
-      'tag_detail',
-      tag?.id.toString() || 'unknown',
-      'text',
-    );
+    analyticsService.logShare('tag_detail', tag?.id.toString() || 'unknown', 'text');
   };
 
   const renderHeader = () => {
@@ -261,22 +218,13 @@ const TagDetailScreen = () => {
     );
   };
 
-  const containerStyle = [
-    styles.container,
-    { backgroundColor: theme.colors.background },
-  ];
+  const containerStyle = [styles.container, { backgroundColor: theme.colors.background }];
   const dialogDescriptionStyle = [
     styles.dialogDescription,
     { color: theme.colors.onSurfaceVariant },
   ];
 
-  const renderArticle = ({
-    item,
-    index,
-  }: {
-    item: FormattedPost;
-    index: number;
-  }) => (
+  const renderArticle = ({ item, index }: { item: FormattedPost; index: number }) => (
     <ArticleCard
       article={item}
       onPress={() => navigation.navigate('ArticleDetail', { article: item })}
@@ -290,10 +238,7 @@ const TagDetailScreen = () => {
 
   const renderEmpty = () =>
     !loading ? (
-      <DiscoverEmptyView
-        message="No hay artículos con esta etiqueta"
-        icon="tag-off-outline"
-      />
+      <DiscoverEmptyView message="No hay artículos con esta etiqueta" icon="tag-off-outline" />
     ) : null;
 
   return (
@@ -339,10 +284,9 @@ const TagDetailScreen = () => {
           data={posts}
           keyExtractor={(item: any) => item.id.toString()}
           scrollEventThrottle={16}
-          onScroll={Animated.event(
-            [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-            { useNativeDriver: true },
-          )}
+          onScroll={Animated.event([{ nativeEvent: { contentOffset: { y: scrollY } } }], {
+            useNativeDriver: true,
+          })}
           renderItem={renderArticle as any}
           estimatedItemSize={250}
           showsVerticalScrollIndicator={false}

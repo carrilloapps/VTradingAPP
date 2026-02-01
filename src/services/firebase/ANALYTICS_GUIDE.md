@@ -13,11 +13,7 @@ VTradingAPP utiliza un sistema de analytics robusto que integra múltiples plata
 ### Importación
 
 ```typescript
-import {
-  analyticsService,
-  ANALYTICS_EVENTS,
-  AnalyticsEventParams,
-} from '@/services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS, AnalyticsEventParams } from '@/services/firebase/AnalyticsService';
 ```
 
 ### Eventos Estandarizados

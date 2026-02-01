@@ -1,12 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import {
-  View,
-  StyleSheet,
-  Animated,
-  ViewStyle,
-  DimensionValue,
-  StyleProp,
-} from 'react-native';
+import { View, StyleSheet, Animated, ViewStyle, DimensionValue, StyleProp } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useTheme } from 'react-native-paper';
 
@@ -60,9 +53,7 @@ const Skeleton: React.FC<SkeletonProps> = ({
         style,
       ]}
     >
-      <Animated.View
-        style={[styles.animatedView, { transform: [{ translateX }] }]}
-      >
+      <Animated.View style={[styles.animatedView, { transform: [{ translateX }] }]}>
         <LinearGradient
           colors={[baseColor, highlightColor, baseColor]}
           start={{ x: 0, y: 0 }}

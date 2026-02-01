@@ -98,10 +98,7 @@ const isFeatureActive = await remoteConfigService.getFeature('discover');
 
 if (isFeatureActive) {
   // Fetch WordPress content
-  const [categories, posts] = await Promise.all([
-    wordPressService.getCategories(),
-    wordPressService.getPosts(),
-  ]);
+  const [categories, posts] = await Promise.all([wordPressService.getCategories(), wordPressService.getPosts()]);
 }
 ```
 
@@ -184,9 +181,7 @@ yoast_head_json = {
     <Surface style={styles.seoBox}>
       <Text>RESUMEN SEO</Text>
       <Text>{article.seoDescription}</Text>
-      {article.yoastSEO?.canonical && (
-        <Text>Fuente: {article.yoastSEO.canonical}</Text>
-      )}
+      {article.yoastSEO?.canonical && <Text>Fuente: {article.yoastSEO.canonical}</Text>}
     </Surface>
   );
 }
@@ -397,9 +392,7 @@ const posts = await wordPressService.getPosts();
 console.log('Featured image:', posts[0]?.image);
 
 // Fallback to placeholder
-const image =
-  post._embedded?.['wp:featuredmedia']?.[0]?.source_url ||
-  'https://via.placeholder.com/150';
+const image = post._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'https://via.placeholder.com/150';
 ```
 
 ## Performance Considerations

@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  StyleSheet,
-  Modal,
-  StatusBar,
-  Linking,
-  Platform,
-} from 'react-native';
+import { View, StyleSheet, Modal, StatusBar, Linking, Platform } from 'react-native';
 import { Surface, Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
@@ -21,10 +14,7 @@ interface ForceUpdateModalProps {
   storeUrl?: string;
 }
 
-const ForceUpdateModal: React.FC<ForceUpdateModalProps> = ({
-  visible,
-  storeUrl,
-}) => {
+const ForceUpdateModal: React.FC<ForceUpdateModalProps> = ({ visible, storeUrl }) => {
   const theme = useAppTheme();
   const [loading, setLoading] = useState(false);
 
@@ -67,12 +57,7 @@ const ForceUpdateModal: React.FC<ForceUpdateModalProps> = ({
   const pulseCircleBorder = theme.colors.primary + '30';
 
   return (
-    <Modal
-      transparent
-      visible={visible}
-      animationType="fade"
-      statusBarTranslucent
-    >
+    <Modal transparent visible={visible} animationType="fade" statusBarTranslucent>
       <View style={styles.overlay}>
         <StatusBar backgroundColor="rgba(0,0,0,0.8)" barStyle="light-content" />
 
@@ -100,23 +85,12 @@ const ForceUpdateModal: React.FC<ForceUpdateModalProps> = ({
           />
 
           <View style={styles.content}>
-            <View
-              style={[styles.iconWrapper, { backgroundColor: iconWrapperBg }]}
-            >
-              <View
-                style={[styles.pulseCircle, { borderColor: pulseCircleBorder }]}
-              />
-              <MaterialCommunityIcons
-                name="rocket-launch"
-                size={48}
-                color={theme.colors.primary}
-              />
+            <View style={[styles.iconWrapper, { backgroundColor: iconWrapperBg }]}>
+              <View style={[styles.pulseCircle, { borderColor: pulseCircleBorder }]} />
+              <MaterialCommunityIcons name="rocket-launch" size={48} color={theme.colors.primary} />
             </View>
 
-            <Text
-              variant="headlineSmall"
-              style={[styles.title, { color: theme.colors.onSurface }]}
-            >
+            <Text variant="headlineSmall" style={[styles.title, { color: theme.colors.onSurface }]}>
               Actualización Requerida
             </Text>
 
@@ -124,13 +98,10 @@ const ForceUpdateModal: React.FC<ForceUpdateModalProps> = ({
               variant="bodyMedium"
               style={[styles.message, { color: theme.colors.onSurfaceVariant }]}
             >
-              ¡Hemos mejorado VTrading! Existe una nueva versión disponible con
-              características importantes y mejoras de rendimiento.
+              ¡Hemos mejorado VTrading! Existe una nueva versión disponible con características
+              importantes y mejoras de rendimiento.
             </Text>
-            <Text
-              variant="bodySmall"
-              style={[styles.subMessage, { color: theme.colors.outline }]}
-            >
+            <Text variant="bodySmall" style={[styles.subMessage, { color: theme.colors.outline }]}>
               Debes actualizar para continuar usando la aplicación.
             </Text>
 

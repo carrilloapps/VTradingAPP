@@ -180,24 +180,13 @@ const TopToast: React.FC<TopToastProps> = ({
         ]}
         elevation={4}
       >
-        <TouchableOpacity
-          style={styles.content}
-          onPress={hide}
-          activeOpacity={0.9}
-        >
+        <TouchableOpacity style={styles.content} onPress={hide} activeOpacity={0.9}>
           <View style={styles.iconContainer}>
-            <MaterialCommunityIcons
-              name={getIcon()}
-              size={28}
-              color={colors.icon}
-            />
+            <MaterialCommunityIcons name={getIcon()} size={28} color={colors.icon} />
           </View>
           <View style={styles.textContainer}>
             {title && (
-              <Text
-                variant="titleSmall"
-                style={[styles.title, { color: colors.text }]}
-              >
+              <Text variant="titleSmall" style={[styles.title, { color: colors.text }]}>
                 {title}
               </Text>
             )}

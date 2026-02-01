@@ -109,14 +109,89 @@ jest.mock('@react-native-firebase/messaging', () => messagingModule);
 
 require('react-native-gesture-handler/jestSetup');
 
+// Mock FlashList to avoid ESM parse issues in tests and still render headers/footers
+jest.mock('@shopify/flash-list', () => {
+  const React = require('react');
+  const { View } = require('react-native');
+
+  const renderOptionalComponent = Component => {
+    if (!Component) return null;
+    return typeof Component === 'function' ? <Component /> : Component;
+  };
+
+  const FlashList = React.forwardRef(
+    (
+      {
+        data = [],
+        renderItem,
+        ListHeaderComponent,
+        ListFooterComponent,
+        ListEmptyComponent,
+        ...rest
+      },
+      ref,
+    ) => (
+      <View ref={ref} {...rest}>
+        {renderOptionalComponent(ListHeaderComponent)}
+
+        {renderItem &&
+          data.map((item, index) => <View key={index}>{renderItem({ item, index })}</View>)}
+
+        {(!data || data.length === 0) && renderOptionalComponent(ListEmptyComponent)}
+        {renderOptionalComponent(ListFooterComponent)}
+      </View>
+    ),
+  );
+
+  return { FlashList };
+});
+
+// Mock react-native-worklets first
+jest.mock('react-native-worklets', () => ({
+  __esModule: true,
+  createSerializable: jest.fn(value => value),
+  createContext: jest.fn(),
+  createRunAsync: jest.fn(() => jest.fn()),
+  createRunInContextAsync: jest.fn(() => jest.fn()),
+  default: {
+    createContext: jest.fn(),
+    createRunAsync: jest.fn(() => jest.fn()),
+    createRunInContextAsync: jest.fn(() => jest.fn()),
+  },
+  useWorklet: jest.fn(fn => fn),
+}));
+
 jest.mock('react-native-reanimated', () => {
-  const Reanimated = require('react-native-reanimated/mock');
+  const { View } = require('react-native');
 
-  // The mock for `call` immediately calls the callback which is incorrect
-  // So we override it with a no-op
-  Reanimated.default.call = () => {};
+  const createAnimatedComponent = Component => Component;
+  const Animated = {
+    View,
+    createAnimatedComponent,
+    // Hooks
+    useSharedValue: jest.fn(initial => ({ value: initial })),
+    useAnimatedStyle: jest.fn(() => ({})),
+    useAnimatedScrollHandler: jest.fn(() => jest.fn()),
+    // Transitions/animations
+    withTiming: jest.fn(value => value),
+    withSpring: jest.fn(value => value),
+    interpolate: jest.fn(() => 0),
+    Extrapolate: { CLAMP: 'clamp' },
+    runOnJS: fn => fn,
+    runOnUI: fn => fn,
+  };
 
-  return Reanimated;
+  // Basic mock for FadeInDown animation chain
+  const chain = {
+    duration: jest.fn(() => chain),
+    delay: jest.fn(() => chain),
+  };
+
+  return {
+    __esModule: true,
+    default: Animated,
+    FadeInDown: chain,
+  };
 });
 
 jest.mock('@react-native-firebase/auth', () => {
@@ -153,8 +228,7 @@ jest.mock('react-native-webview', () => {
 
 jest.mock('@react-native-google-signin/google-signin', () => {
   // Use environment variable or generate dynamic mock token
-  const mockToken =
-    process.env.JEST_MOCK_GOOGLE_TOKEN || `mock-token-${Date.now()}`;
+  const mockToken = process.env.JEST_MOCK_GOOGLE_TOKEN || `mock-token-${Date.now()}`;
 
   return {
     GoogleSignin: {
@@ -261,9 +335,7 @@ jest.mock(
       setUserId: jest.fn((instance, id) => Promise.resolve()),
       setAttributes: jest.fn((instance, attrs) => Promise.resolve()),
       setAttribute: jest.fn((instance, key, val) => Promise.resolve()),
-      setCrashlyticsCollectionEnabled: jest.fn((instance, enabled) =>
-        Promise.resolve(),
-      ),
+      setCrashlyticsCollectionEnabled: jest.fn((instance, enabled) => Promise.resolve()),
       log: jest.fn((instance, msg) => Promise.resolve()),
       recordError: jest.fn((instance, error) => Promise.resolve()),
     };
@@ -272,8 +344,7 @@ jest.mock(
 );
 
 jest.mock('@react-native-firebase/app-check', () => {
-  const mockToken =
-    process.env.JEST_MOCK_APPCHECK_TOKEN || `mock-appcheck-${Date.now()}`;
+  const mockToken = process.env.JEST_MOCK_APPCHECK_TOKEN || `mock-appcheck-${Date.now()}`;
 
   return {
     initializeAppCheck: jest.fn(() => Promise.resolve({})),

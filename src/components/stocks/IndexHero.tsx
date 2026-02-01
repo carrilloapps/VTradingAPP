@@ -53,11 +53,7 @@ const IndexHero: React.FC<IndexHeroProps> = ({
               ÍNDICE BURSÁTIL CARACAS
             </Text>
             <View style={styles.iconContainer}>
-              <MaterialCommunityIcons
-                name="chart-line-variant"
-                size={18}
-                color="white"
-              />
+              <MaterialCommunityIcons name="chart-line-variant" size={18} color="white" />
             </View>
           </View>
 
@@ -80,9 +76,7 @@ const IndexHero: React.FC<IndexHeroProps> = ({
                 variant="labelLarge"
                 style={[
                   styles.changeText,
-                  trend === 'neutral'
-                    ? styles.trendNeutralText
-                    : styles.trendUpText,
+                  trend === 'neutral' ? styles.trendNeutralText : styles.trendUpText,
                 ]}
               >
                 {changePercent}
@@ -109,41 +103,20 @@ const IndexHero: React.FC<IndexHeroProps> = ({
               {stats ? (
                 <View style={styles.breadthRow}>
                   <View style={styles.breadthItem}>
-                    <MaterialCommunityIcons
-                      name="arrow-up-bold"
-                      size={14}
-                      color="#6EE7B7"
-                    />
-                    <Text
-                      variant="bodyMedium"
-                      style={[styles.whiteBold, styles.trendUpText]}
-                    >
+                    <MaterialCommunityIcons name="arrow-up-bold" size={14} color="#6EE7B7" />
+                    <Text variant="bodyMedium" style={[styles.whiteBold, styles.trendUpText]}>
                       {stats.titlesUp}
                     </Text>
                   </View>
                   <View style={styles.breadthItem}>
-                    <MaterialCommunityIcons
-                      name="arrow-down-bold"
-                      size={14}
-                      color="#F87171"
-                    />
-                    <Text
-                      variant="bodyMedium"
-                      style={[styles.whiteBold, styles.trendDownText]}
-                    >
+                    <MaterialCommunityIcons name="arrow-down-bold" size={14} color="#F87171" />
+                    <Text variant="bodyMedium" style={[styles.whiteBold, styles.trendDownText]}>
                       {stats.titlesDown}
                     </Text>
                   </View>
                   <View style={styles.breadthItem}>
-                    <MaterialCommunityIcons
-                      name="minus"
-                      size={14}
-                      color="#D1D5DB"
-                    />
-                    <Text
-                      variant="bodyMedium"
-                      style={[styles.whiteBold, styles.trendNeutralText]}
-                    >
+                    <MaterialCommunityIcons name="minus" size={14} color="#D1D5DB" />
+                    <Text variant="bodyMedium" style={[styles.whiteBold, styles.trendNeutralText]}>
                       {stats.titlesUnchanged}
                     </Text>
                   </View>

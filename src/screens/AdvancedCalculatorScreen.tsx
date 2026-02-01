@@ -22,10 +22,7 @@ import CurrencySelectorButton from '@/components/dashboard/CurrencySelectorButto
 import UnifiedHeader from '@/components/ui/UnifiedHeader';
 import MarketStatus from '@/components/ui/MarketStatus';
 import { AppConfig } from '@/constants/AppConfig';
-import {
-  analyticsService,
-  ANALYTICS_EVENTS,
-} from '@/services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '@/services/firebase/AnalyticsService';
 
 // --- Components ---
 const KeypadButton = ({
@@ -72,9 +69,7 @@ const KeypadButton = ({
     <TouchableRipple
       style={[styles.keypadButton, buttonStyle]}
       onPress={onPress}
-      rippleColor={
-        isDestructive ? theme.colors.error : theme.colors.onSurfaceVariant
-      }
+      rippleColor={isDestructive ? theme.colors.error : theme.colors.onSurfaceVariant}
       borderless={true}
       testID={testID}
     >
@@ -126,12 +121,7 @@ const Keypad = ({
       <View style={styles.keypadRow}>
         <KeypadButton label="," onPress={() => onKeyPress(',')} />
         <KeypadButton label="0" onPress={() => onKeyPress('0')} />
-        <KeypadButton
-          icon="backspace"
-          onPress={onDelete}
-          isDestructive
-          testID="btn-backspace"
-        />
+        <KeypadButton icon="backspace" onPress={onDelete} isDestructive testID="btn-backspace" />
       </View>
     </View>
   );
@@ -205,15 +195,13 @@ const AdvancedCalculatorScreen = () => {
 
   const getSourceLabel = (code: string) => {
     if (code === 'USDT') return 'Binance P2P';
-    if (['USD', 'EUR', 'CNY', 'RUB', 'TRY'].includes(code))
-      return 'Tasa oficial BCV';
+    if (['USD', 'EUR', 'CNY', 'RUB', 'TRY'].includes(code)) return 'Tasa oficial BCV';
     if (code === 'VES') return 'Banco Central de Venezuela';
     return 'Tasa de Mercado';
   };
 
   const targetRows = useMemo(() => {
-    const amountVal =
-      parseFloat(baseAmount.replace(/\./g, '').replace(',', '.')) || 0;
+    const amountVal = parseFloat(baseAmount.replace(/\./g, '').replace(',', '.')) || 0;
 
     return targetCodes
       .map(code => {
@@ -354,10 +342,7 @@ const AdvancedCalculatorScreen = () => {
     setBaseCurrencyCode(currency.code);
 
     // Calculate valid targets for new base
-    const validTargets = CurrencyService.getAvailableTargetRates(
-      currency,
-      rates,
-    );
+    const validTargets = CurrencyService.getAvailableTargetRates(currency, rates);
     const validCodes = validTargets.map(r => r.code);
 
     // Filter existing targets to remove invalid ones
@@ -447,17 +432,11 @@ const AdvancedCalculatorScreen = () => {
         onPress={() => {
           setPickerMode('add');
           setPickerVisible(true);
-          analyticsService.logEvent(
-            ANALYTICS_EVENTS.CALCULATOR_ADD_CURRENCY_PRESSED,
-          );
+          analyticsService.logEvent(ANALYTICS_EVENTS.CALCULATOR_ADD_CURRENCY_PRESSED);
         }}
       >
         <View style={[styles.addIcon, themeStyles.addIcon]}>
-          <MaterialCommunityIcons
-            name="plus"
-            size={20}
-            color={theme.colors.onSecondaryContainer}
-          />
+          <MaterialCommunityIcons name="plus" size={20} color={theme.colors.onSecondaryContainer} />
         </View>
         <Text variant="bodyMedium" style={themeStyles.textSecondary}>
           Agregar divisa
@@ -513,10 +492,7 @@ const AdvancedCalculatorScreen = () => {
                 analyticsService.logEvent(ANALYTICS_EVENTS.CALCULATOR_CLEAR);
               }}
             >
-              <Text
-                variant="labelMedium"
-                style={[styles.clearText, { color: theme.colors.error }]}
-              >
+              <Text variant="labelMedium" style={[styles.clearText, { color: theme.colors.error }]}>
                 LIMPIAR
               </Text>
             </TouchableOpacity>
@@ -594,11 +570,7 @@ const AdvancedCalculatorScreen = () => {
               {/* Left Side: Icon */}
               <View style={[styles.iconBox, themeStyles.iconBox]}>
                 {item.rateObj.iconName === 'Bs' ? (
-                  <Text
-                    style={[styles.bsIconText, { color: theme.colors.primary }]}
-                  >
-                    Bs
-                  </Text>
+                  <Text style={[styles.bsIconText, { color: theme.colors.primary }]}>Bs</Text>
                 ) : (
                   <MaterialCommunityIcons
                     name={item.rateObj.iconName || 'currency-usd'}
@@ -611,16 +583,11 @@ const AdvancedCalculatorScreen = () => {
               {/* Middle: Code & Name */}
               <View style={styles.middleCol}>
                 <View style={styles.codeRow}>
-                  <Text
-                    variant="titleMedium"
-                    style={[styles.codeText, themeStyles.textPrimary]}
-                  >
+                  <Text variant="titleMedium" style={[styles.codeText, themeStyles.textPrimary]}>
                     {item.code}
                   </Text>
                   <View style={[styles.nameBadge, themeStyles.nameBadge]}>
-                    <Text style={[styles.nameText, themeStyles.nameText]}>
-                      {item.name}
-                    </Text>
+                    <Text style={[styles.nameText, themeStyles.nameText]}>{item.name}</Text>
                   </View>
                 </View>
                 <Text variant="bodySmall" style={themeStyles.textSecondary}>
@@ -658,9 +625,7 @@ const AdvancedCalculatorScreen = () => {
                       : themeStyles.successText,
                   ]}
                 >
-                  {item.rateObj.type === 'crypto'
-                    ? 'Cripto activo'
-                    : 'Conversión directa'}
+                  {item.rateObj.type === 'crypto' ? 'Cripto activo' : 'Conversión directa'}
                 </Text>
               </View>
 
@@ -670,22 +635,14 @@ const AdvancedCalculatorScreen = () => {
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
                 style={[styles.closeButton, themeStyles.errorContainer]}
               >
-                <MaterialCommunityIcons
-                  name="close"
-                  size={14}
-                  color={theme.colors.error}
-                />
+                <MaterialCommunityIcons name="close" size={14} color={theme.colors.error} />
               </TouchableOpacity>
             </View>
           )}
           ListFooterComponent={renderListFooter}
         />
 
-        <Keypad
-          onKeyPress={handleKeyPress}
-          onDelete={handleDelete}
-          theme={theme}
-        />
+        <Keypad onKeyPress={handleKeyPress} onDelete={handleDelete} theme={theme} />
       </View>
 
       <CurrencyPickerModal
@@ -694,9 +651,7 @@ const AdvancedCalculatorScreen = () => {
         onSelect={pickerMode === 'base' ? handleSetBase : handleAddCurrency}
         selectedCurrencyCode={pickerMode === 'base' ? baseCurrencyCode : null}
         rates={availableRates}
-        title={
-          pickerMode === 'base' ? 'Seleccionar divisa' : 'Añadir a la lista'
-        }
+        title={pickerMode === 'base' ? 'Seleccionar divisa' : 'Añadir a la lista'}
         excludedCodes={getExcludedCodes}
       />
     </View>

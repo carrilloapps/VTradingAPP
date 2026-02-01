@@ -24,10 +24,7 @@ export interface StockData {
   onPress?: (stock: StockData) => void; // Optional press handler
 }
 
-const colorMap: Record<
-  string,
-  { bg: string; text: string; darkBg: string; darkText: string }
-> = {
+const colorMap: Record<string, { bg: string; text: string; darkBg: string; darkText: string }> = {
   emerald: {
     bg: '#ECFDF5',
     text: '#047857',
@@ -78,10 +75,8 @@ const StockItem = React.memo(
     const theme = useAppTheme();
     const colors = colorMap[color || 'emerald'] || colorMap.emerald;
 
-    const isPositive =
-      propIsPositive !== undefined ? propIsPositive : changePercent > 0;
-    const isNegative =
-      propIsPositive !== undefined ? !propIsPositive : changePercent < 0;
+    const isPositive = propIsPositive !== undefined ? propIsPositive : changePercent > 0;
+    const isNegative = propIsPositive !== undefined ? !propIsPositive : changePercent < 0;
     const isNeutral = !isPositive && !isNegative;
 
     // Format price - Use prop 'value' if available (dashboard), otherwise format 'price'
@@ -94,8 +89,7 @@ const StockItem = React.memo(
       if (isNeutral) {
         formattedChange = '= ' + Math.abs(changePercent).toFixed(2) + '%';
       } else {
-        formattedChange =
-          (isPositive ? '+' : '') + changePercent.toFixed(2) + '%';
+        formattedChange = (isPositive ? '+' : '') + changePercent.toFixed(2) + '%';
       }
     } else if (isNeutral && !change?.startsWith('=')) {
       // Ensure dashboard formatted string has = if neutral
@@ -123,11 +117,7 @@ const StockItem = React.memo(
         : theme.colors.onSurfaceVariant;
 
     const badgeBackgroundColor =
-      !isPositive && !isNegative
-        ? theme.dark
-          ? 'rgba(255,255,255,0.05)'
-          : '#F3F4F6'
-        : undefined;
+      !isPositive && !isNegative ? (theme.dark ? 'rgba(255,255,255,0.05)' : '#F3F4F6') : undefined;
 
     const handlePress = () => {
       if (onPress) {
@@ -167,10 +157,7 @@ const StockItem = React.memo(
                 />
               ) : (
                 <Text
-                  style={[
-                    styles.initials,
-                    { color: theme.dark ? colors.darkText : colors.text },
-                  ]}
+                  style={[styles.initials, { color: theme.dark ? colors.darkText : colors.text }]}
                 >
                   {initials || symbol.substring(0, 3)}
                 </Text>
@@ -184,10 +171,7 @@ const StockItem = React.memo(
                 {symbol}
               </Text>
               <Text
-                style={[
-                  styles.secondaryText,
-                  { color: theme.colors.onSurfaceVariant },
-                ]}
+                style={[styles.secondaryText, { color: theme.colors.onSurfaceVariant }]}
                 numberOfLines={1}
               >
                 {name}
@@ -196,9 +180,7 @@ const StockItem = React.memo(
           </View>
 
           <View style={styles.rightContent}>
-            <Text style={[styles.price, { color: theme.colors.onSurface }]}>
-              {formattedPrice}
-            </Text>
+            <Text style={[styles.price, { color: theme.colors.onSurface }]}>{formattedPrice}</Text>
             <View
               style={[
                 styles.changeBadge,
@@ -207,11 +189,7 @@ const StockItem = React.memo(
               ]}
             >
               {isPositive ? (
-                <MaterialCommunityIcons
-                  name="trending-up"
-                  size={12}
-                  color={theme.colors.trendUp}
-                />
+                <MaterialCommunityIcons name="trending-up" size={12} color={theme.colors.trendUp} />
               ) : isNegative ? (
                 <MaterialCommunityIcons
                   name="trending-down"
@@ -219,9 +197,7 @@ const StockItem = React.memo(
                   color={theme.colors.trendDown}
                 />
               ) : null}
-              <Text style={[styles.changeText, { color: changeColor }]}>
-                {formattedChange}
-              </Text>
+              <Text style={[styles.changeText, { color: changeColor }]}>{formattedChange}</Text>
             </View>
           </View>
         </TouchableOpacity>

@@ -51,10 +51,7 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
           tintColor={theme.colors.primary}
           containerStyle={styles.logoContainer}
         />
-        <Text
-          variant="headlineSmall"
-          style={[styles.title, { color: theme.colors.onSurface }]}
-        >
+        <Text variant="headlineSmall" style={[styles.title, { color: theme.colors.onSurface }]}>
           {appName || 'VTrading'}
         </Text>
         <Text
@@ -84,37 +81,25 @@ const AboutDialog: React.FC<AboutDialogProps> = ({
               icon="shield-account"
               label="Políticas de privacidad"
               onPress={() =>
-                openExternalUrl(
-                  AppConfig.PRIVACY_POLICY_URL,
-                  'Políticas de privacidad',
-                )
+                openExternalUrl(AppConfig.PRIVACY_POLICY_URL, 'Políticas de privacidad')
               }
             />
             <MenuButton
               icon="gavel"
               label="Términos y condiciones"
-              onPress={() =>
-                openExternalUrl(
-                  AppConfig.TERMS_OF_USE_URL,
-                  'Términos y condiciones',
-                )
-              }
+              onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL, 'Términos y condiciones')}
               hasTopBorder
             />
             <MenuButton
               icon="clipboard-text"
               label="Licencias de uso"
-              onPress={() =>
-                openExternalUrl(AppConfig.LICENSES_URL, 'Licencias de uso')
-              }
+              onPress={() => openExternalUrl(AppConfig.LICENSES_URL, 'Licencias de uso')}
               hasTopBorder
             />
             <MenuButton
               icon="web"
               label="Uso de Cookies"
-              onPress={() =>
-                openExternalUrl(AppConfig.COOKIES_URL, 'Uso de Cookies')
-              }
+              onPress={() => openExternalUrl(AppConfig.COOKIES_URL, 'Uso de Cookies')}
               hasTopBorder
             />
             {showDeleteAccount && onDeleteAccount && (

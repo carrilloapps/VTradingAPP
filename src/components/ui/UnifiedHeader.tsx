@@ -3,11 +3,7 @@ import { View, StyleSheet, ViewStyle, Platform } from 'react-native';
 import { Text, useTheme, TouchableRipple } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import {
-  BannerAd,
-  BannerAdSize,
-  TestIds,
-} from 'react-native-google-mobile-ads';
+import { BannerAd, BannerAdSize, TestIds } from 'react-native-google-mobile-ads';
 
 import ProfileInfo from './header/ProfileInfo';
 import HeaderActions from './header/HeaderActions';
@@ -73,9 +69,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   const resolvedIsPremium =
     typeof isPremium === 'boolean' ? isPremium : !!(user && !user.isAnonymous);
   const adUnitId =
-    Platform.OS === 'ios'
-      ? AppConfig.ADMOB_BANNER_ID_IOS
-      : AppConfig.ADMOB_BANNER_ID_ANDROID;
+    Platform.OS === 'ios' ? AppConfig.ADMOB_BANNER_ID_IOS : AppConfig.ADMOB_BANNER_ID_ANDROID;
   // Use TestIds.BANNER in dev, or real ID in prod (if configured)
   const bannerId = __DEV__ ? TestIds.BANNER : adUnitId;
   const shouldShowAd = showAd && !resolvedIsPremium && !!bannerId;
@@ -111,10 +105,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
 
   const renderSectionContent = () => (
     <View style={styles.textContainer} accessibilityRole="header">
-      <Text
-        variant="headlineSmall"
-        style={[styles.sectionTitle, themeStyles.sectionTitle]}
-      >
+      <Text variant="headlineSmall" style={[styles.sectionTitle, themeStyles.sectionTitle]}>
         {title}
       </Text>
       {subtitle && (
@@ -142,14 +133,8 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   );
 
   const renderSimpleContent = () => (
-    <View
-      style={[styles.textContainer, styles.simpleHeaderContainer]}
-      accessibilityRole="header"
-    >
-      <Text
-        variant="titleLarge"
-        style={[styles.simpleTitle, themeStyles.simpleTitle]}
-      >
+    <View style={[styles.textContainer, styles.simpleHeaderContainer]} accessibilityRole="header">
+      <Text variant="titleLarge" style={[styles.simpleTitle, themeStyles.simpleTitle]}>
         {title}
       </Text>
     </View>
@@ -162,8 +147,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
           styles.container,
           themeStyles.container,
           {
-            paddingTop:
-              insets.top + (styles.headerPadding.paddingTop as number),
+            paddingTop: insets.top + (styles.headerPadding.paddingTop as number),
           },
         ]}
       >
@@ -171,11 +155,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
           {onBackPress && (
             <TouchableRipple
               onPress={onBackPress}
-              style={[
-                styles.iconButton,
-                themeStyles.iconButton,
-                styles.backButton,
-              ]}
+              style={[styles.iconButton, themeStyles.iconButton, styles.backButton]}
               borderless
               rippleColor="rgba(0, 0, 0, .1)"
               accessibilityRole="button"
@@ -183,11 +163,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
               accessibilityHint="Volver a la pantalla anterior"
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
             >
-              <MaterialCommunityIcons
-                name="arrow-left"
-                size={22}
-                color={theme.colors.onSurface}
-              />
+              <MaterialCommunityIcons name="arrow-left" size={22} color={theme.colors.onSurface} />
             </TouchableRipple>
           )}
 

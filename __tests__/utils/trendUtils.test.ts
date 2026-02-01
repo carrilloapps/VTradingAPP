@@ -1,8 +1,4 @@
-import {
-  getTrend,
-  getTrendColor,
-  getTrendIcon,
-} from '../../src/utils/trendUtils';
+import { getTrend, getTrendColor, getTrendIcon } from '../../src/utils/trendUtils';
 import { MD3Theme } from 'react-native-paper';
 
 describe('trendUtils', () => {

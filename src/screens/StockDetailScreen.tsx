@@ -45,11 +45,7 @@ const StockDetailScreen = ({ route, navigation }: any) => {
       ? theme.colors.trendDown
       : theme.colors.neutral;
 
-  const trendIcon = isPositive
-    ? 'trending-up'
-    : isNegative
-      ? 'trending-down'
-      : 'minus';
+  const trendIcon = isPositive ? 'trending-up' : isNegative ? 'trending-down' : 'minus';
 
   const generateShareImage = async (format: '1:1' | '16:9') => {
     setShareDialogVisible(false);
@@ -122,11 +118,7 @@ const StockDetailScreen = ({ route, navigation }: any) => {
       await Share.open({ message });
       analyticsService.logShare('stock', stock.symbol, 'text');
     } catch (e) {
-      if (
-        e &&
-        (e as any).message !== 'User did not share' &&
-        (e as any).message !== 'CANCELLED'
-      ) {
+      if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
         observabilityService.captureError(e, {
           context: 'StockDetailScreen.handleShareText',
           action: 'share_stock_text',
@@ -142,9 +134,7 @@ const StockDetailScreen = ({ route, navigation }: any) => {
   };
 
   const averagePrice =
-    stock.volumeAmount && stock.volumeShares
-      ? stock.volumeAmount / stock.volumeShares
-      : 0;
+    stock.volumeAmount && stock.volumeShares ? stock.volumeAmount / stock.volumeShares : 0;
 
   const previousClose = stock.price - (stock.changeAmount || 0);
 
@@ -163,10 +153,7 @@ const StockDetailScreen = ({ route, navigation }: any) => {
           }) + 'b'
         );
       }
-      return (
-        (num / 1000000).toLocaleString('es-VE', { maximumFractionDigits: 2 }) +
-        'm'
-      );
+      return (num / 1000000).toLocaleString('es-VE', { maximumFractionDigits: 2 }) + 'm';
     }
     // Menos de 1 millón -> mostrar completo
     // Si es moneda, usar 2 decimales fijos. Si es volumen (acciones), usar 0 decimales (enteros) o 2 si es necesario.
@@ -184,9 +171,7 @@ const StockDetailScreen = ({ route, navigation }: any) => {
     : theme.dark
       ? 'rgba(255,255,255,0.05)'
       : 'rgba(0,0,0,0.03)';
-  const iconContainerBorderColor = theme.dark
-    ? 'rgba(255,255,255,0.1)'
-    : 'rgba(0,0,0,0.05)';
+  const iconContainerBorderColor = theme.dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)';
   const initialsColor = trendColor;
   const stockNameColor = theme.colors.onSurface;
   const chipBgColor = theme.colors.elevation.level2;
@@ -214,10 +199,7 @@ const StockDetailScreen = ({ route, navigation }: any) => {
         onActionPress={handleShare}
       />
 
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         {/* Header Section - Immersive Design */}
         <View style={styles.immersiveHeader}>
           <View style={styles.iconWrapper}>
@@ -254,10 +236,7 @@ const StockDetailScreen = ({ route, navigation }: any) => {
           </View>
 
           <View style={styles.headerInfo}>
-            <Text
-              variant="headlineSmall"
-              style={[styles.stockName, { color: stockNameColor }]}
-            >
+            <Text variant="headlineSmall" style={[styles.stockName, { color: stockNameColor }]}>
               {stock.name}
             </Text>
             <Chip
@@ -270,10 +249,7 @@ const StockDetailScreen = ({ route, navigation }: any) => {
 
           <View style={styles.priceContainer}>
             <View style={styles.currencyRow}>
-              <Text
-                variant="headlineLarge"
-                style={[styles.priceLarge, { color: priceTextColor }]}
-              >
+              <Text variant="headlineLarge" style={[styles.priceLarge, { color: priceTextColor }]}>
                 {stock.price.toLocaleString('es-VE', {
                   minimumFractionDigits: 2,
                   maximumFractionDigits: 2,
@@ -284,14 +260,8 @@ const StockDetailScreen = ({ route, navigation }: any) => {
               </View>
             </View>
 
-            <View
-              style={[styles.trendBadge, { backgroundColor: trendBgColor }]}
-            >
-              <MaterialCommunityIcons
-                name={trendIcon}
-                size={18}
-                color={trendColor}
-              />
+            <View style={[styles.trendBadge, { backgroundColor: trendBgColor }]}>
+              <MaterialCommunityIcons name={trendIcon} size={18} color={trendColor} />
               <Text style={[styles.trendText, { color: trendColor }]}>
                 {isPositive ? '+' : ''}
                 {stock.changePercent.toLocaleString('es-VE', {
@@ -302,10 +272,7 @@ const StockDetailScreen = ({ route, navigation }: any) => {
               </Text>
               {stock.changeAmount !== undefined && stock.changeAmount !== 0 && (
                 <Text
-                  style={[
-                    styles.trendAmount,
-                    { color: trendColor, opacity: trendAmountOpacity },
-                  ]}
+                  style={[styles.trendAmount, { color: trendColor, opacity: trendAmountOpacity }]}
                 >
                   ({isPositive ? '+' : ''}
                   {stock.changeAmount.toLocaleString('es-VE', {
@@ -334,34 +301,23 @@ const StockDetailScreen = ({ route, navigation }: any) => {
 
         <View style={styles.statsGrid}>
           <Surface
-            style={[
-              styles.statCard,
-              { backgroundColor: statCardBg, borderColor: statCardBorder },
-            ]}
+            style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]}
             elevation={0}
           >
             <View style={styles.statHeader}>
-              <View
-                style={[styles.statIconBox, { backgroundColor: statIconBoxBg }]}
-              >
+              <View style={[styles.statIconBox, { backgroundColor: statIconBoxBg }]}>
                 <MaterialCommunityIcons
                   name={primaryStatIcon}
                   size={18}
                   color={theme.colors.primary}
                 />
               </View>
-              <Text
-                variant="labelSmall"
-                style={[styles.statLabelBold, { color: statLabelColor }]}
-              >
+              <Text variant="labelSmall" style={[styles.statLabelBold, { color: statLabelColor }]}>
                 {primaryStatLabel.toUpperCase()}
               </Text>
             </View>
             <View style={styles.statValueRow}>
-              <Text
-                variant="titleMedium"
-                style={[styles.statValueBold, { color: statValueColor }]}
-              >
+              <Text variant="titleMedium" style={[styles.statValueBold, { color: statValueColor }]}>
                 {primaryStatValue
                   ? primaryStatValue.toLocaleString('es-VE', {
                       minimumFractionDigits: 2,
@@ -374,34 +330,19 @@ const StockDetailScreen = ({ route, navigation }: any) => {
           </Surface>
 
           <Surface
-            style={[
-              styles.statCard,
-              { backgroundColor: statCardBg, borderColor: statCardBorder },
-            ]}
+            style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]}
             elevation={0}
           >
             <View style={styles.statHeader}>
-              <View
-                style={[styles.statIconBox, { backgroundColor: statIconBoxBg }]}
-              >
-                <MaterialCommunityIcons
-                  name="history"
-                  size={18}
-                  color={theme.colors.primary}
-                />
+              <View style={[styles.statIconBox, { backgroundColor: statIconBoxBg }]}>
+                <MaterialCommunityIcons name="history" size={18} color={theme.colors.primary} />
               </View>
-              <Text
-                variant="labelSmall"
-                style={[styles.statLabelBold, { color: statLabelColor }]}
-              >
+              <Text variant="labelSmall" style={[styles.statLabelBold, { color: statLabelColor }]}>
                 CIERRE ANT.
               </Text>
             </View>
             <View style={styles.statValueRow}>
-              <Text
-                variant="titleMedium"
-                style={[styles.statValueBold, { color: statValueColor }]}
-              >
+              <Text variant="titleMedium" style={[styles.statValueBold, { color: statValueColor }]}>
                 {previousClose.toLocaleString('es-VE', {
                   minimumFractionDigits: 2,
                 })}
@@ -413,71 +354,41 @@ const StockDetailScreen = ({ route, navigation }: any) => {
 
         <View style={styles.statsGrid}>
           <Surface
-            style={[
-              styles.statCard,
-              { backgroundColor: statCardBg, borderColor: statCardBorder },
-            ]}
+            style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]}
             elevation={0}
           >
             <View style={styles.statHeader}>
-              <View
-                style={[styles.statIconBox, { backgroundColor: statIconBoxBg }]}
-              >
-                <MaterialCommunityIcons
-                  name="chart-bar"
-                  size={18}
-                  color={theme.colors.primary}
-                />
+              <View style={[styles.statIconBox, { backgroundColor: statIconBoxBg }]}>
+                <MaterialCommunityIcons name="chart-bar" size={18} color={theme.colors.primary} />
               </View>
-              <Text
-                variant="labelSmall"
-                style={[styles.statLabelBold, { color: statLabelColor }]}
-              >
+              <Text variant="labelSmall" style={[styles.statLabelBold, { color: statLabelColor }]}>
                 VOL. TÍTULOS
               </Text>
             </View>
-            <Text
-              variant="titleMedium"
-              style={[styles.statValueBold, { color: statValueColor }]}
-            >
-              {stock.volumeShares
-                ? formatCompactNumber(stock.volumeShares)
-                : stock.volume || '-'}
+            <Text variant="titleMedium" style={[styles.statValueBold, { color: statValueColor }]}>
+              {stock.volumeShares ? formatCompactNumber(stock.volumeShares) : stock.volume || '-'}
             </Text>
           </Surface>
 
           <Surface
-            style={[
-              styles.statCard,
-              { backgroundColor: statCardBg, borderColor: statCardBorder },
-            ]}
+            style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]}
             elevation={0}
           >
             <View style={styles.statHeader}>
-              <View
-                style={[styles.statIconBox, { backgroundColor: statIconBoxBg }]}
-              >
+              <View style={[styles.statIconBox, { backgroundColor: statIconBoxBg }]}>
                 <MaterialCommunityIcons
                   name="cash-multiple"
                   size={18}
                   color={theme.colors.primary}
                 />
               </View>
-              <Text
-                variant="labelSmall"
-                style={[styles.statLabelBold, { color: statLabelColor }]}
-              >
+              <Text variant="labelSmall" style={[styles.statLabelBold, { color: statLabelColor }]}>
                 VOL. BS
               </Text>
             </View>
             <View style={styles.statValueRow}>
-              <Text
-                variant="titleMedium"
-                style={[styles.statValueBold, { color: statValueColor }]}
-              >
-                {stock.volumeAmount
-                  ? formatCompactNumber(stock.volumeAmount, true)
-                  : '-'}
+              <Text variant="titleMedium" style={[styles.statValueBold, { color: statValueColor }]}>
+                {stock.volumeAmount ? formatCompactNumber(stock.volumeAmount, true) : '-'}
               </Text>
               <BolivarIcon size={14} color={theme.colors.onSurface} />
             </View>
@@ -523,10 +434,7 @@ const StockDetailScreen = ({ route, navigation }: any) => {
           />
           <Text
             variant="bodyMedium"
-            style={[
-              styles.chartPlaceholderText,
-              { color: chartPlaceholderTextColor },
-            ]}
+            style={[styles.chartPlaceholderText, { color: chartPlaceholderTextColor }]}
           >
             Gráfico histórico próximamente
           </Text>
@@ -555,10 +463,7 @@ const StockDetailScreen = ({ route, navigation }: any) => {
       >
         <Text
           variant="bodyMedium"
-          style={[
-            styles.shareDialogText,
-            { color: theme.colors.onSurfaceVariant },
-          ]}
+          style={[styles.shareDialogText, { color: theme.colors.onSurfaceVariant }]}
         >
           Selecciona el formato ideal para compartir los datos de {stock.symbol}
         </Text>

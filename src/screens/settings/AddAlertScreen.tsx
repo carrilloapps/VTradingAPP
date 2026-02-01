@@ -1,11 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-  Keyboard,
-  ScrollView,
-} from 'react-native';
+import { View, StyleSheet, TouchableOpacity, Keyboard, ScrollView } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { Text, ActivityIndicator, TextInput } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
@@ -27,10 +21,7 @@ import { storageService, UserAlert } from '@/services/StorageService';
 import { fcmService } from '@/services/firebase/FCMService';
 import { useToastStore } from '@/stores/toastStore';
 import { observabilityService } from '@/services/ObservabilityService';
-import {
-  analyticsService,
-  ANALYTICS_EVENTS,
-} from '@/services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '@/services/firebase/AnalyticsService';
 import { RootStackParamList } from '@/navigation/AppNavigator';
 
 interface SymbolItem {
@@ -66,11 +57,9 @@ const AddAlertScreen = ({ route }: Props) => {
   const filteredItems = useMemo(() => {
     return items.filter(item => {
       // Category Filter
-      if (selectedCategory === 'Divisas' && item.type !== 'Divisa')
-        return false;
+      if (selectedCategory === 'Divisas' && item.type !== 'Divisa') return false;
       if (selectedCategory === 'Cripto' && item.type !== 'Cripto') return false;
-      if (selectedCategory === 'Acciones' && item.type !== 'Acción')
-        return false;
+      if (selectedCategory === 'Acciones' && item.type !== 'Acción') return false;
 
       // Search Filter
       if (!searchQuery) return true;
@@ -216,10 +205,7 @@ const AddAlertScreen = ({ route }: Props) => {
   const renderEmptyList = useCallback(
     () => (
       <View style={styles.centerContainer}>
-        <Text
-          variant="bodyLarge"
-          style={{ color: theme.colors.onSurfaceVariant }}
-        >
+        <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
           No se encontraron resultados
         </Text>
       </View>
@@ -234,9 +220,7 @@ const AddAlertScreen = ({ route }: Props) => {
   // Si no tiene permisos O notificaciones deshabilitadas, mostrar estado vacío
   if (!hasPermissions || !pushEnabled) {
     return (
-      <View
-        style={[styles.container, { backgroundColor: theme.colors.background }]}
-      >
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
         <UnifiedHeader
           variant="simple"
           title={editAlert ? 'Editar alerta' : 'Nueva alerta'}
@@ -259,22 +243,14 @@ const AddAlertScreen = ({ route }: Props) => {
 
           <Text
             variant="headlineSmall"
-            style={[
-              styles.noPermissionsTitle,
-              { color: theme.colors.onSurface },
-            ]}
+            style={[styles.noPermissionsTitle, { color: theme.colors.onSurface }]}
           >
-            {!hasPermissions
-              ? 'Activa las notificaciones'
-              : 'Notificaciones pausadas'}
+            {!hasPermissions ? 'Activa las notificaciones' : 'Notificaciones pausadas'}
           </Text>
 
           <Text
             variant="bodyLarge"
-            style={[
-              styles.noPermissionsDescription,
-              { color: theme.colors.onSurfaceVariant },
-            ]}
+            style={[styles.noPermissionsDescription, { color: theme.colors.onSurfaceVariant }]}
           >
             {!hasPermissions
               ? 'Para crear alertas de precios, primero debes activar las notificaciones en tu dispositivo.'
@@ -368,22 +344,15 @@ const AddAlertScreen = ({ route }: Props) => {
       }
 
       await storageService.saveAlerts(updatedAlerts);
-      await analyticsService.setUserProperty(
-        'alert_count',
-        updatedAlerts.length.toString(),
-      );
+      await analyticsService.setUserProperty('alert_count', updatedAlerts.length.toString());
 
       // Subscribe to FCM (Always subscribe to ensure we are listening, even if already subscribed)
-      const safeSymbol = selectedItem.symbol
-        .replace(/[^a-zA-Z0-9]/g, '_')
-        .toLowerCase();
+      const safeSymbol = selectedItem.symbol.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
       const topic = `ticker_${safeSymbol}`;
       await fcmService.subscribeToTopic(topic);
 
       showToast(
-        editAlert
-          ? 'Alerta actualizada'
-          : `Alerta creada para ${selectedItem.symbol}`,
+        editAlert ? 'Alerta actualizada' : `Alerta creada para ${selectedItem.symbol}`,
         'success',
       );
       navigation.goBack();
@@ -413,19 +382,12 @@ const AddAlertScreen = ({ route }: Props) => {
       const alerts = await storageService.getAlerts();
       const updated = alerts.filter(a => a.id !== editAlert.id);
       await storageService.saveAlerts(updated);
-      await analyticsService.setUserProperty(
-        'alert_count',
-        updated.length.toString(),
-      );
+      await analyticsService.setUserProperty('alert_count', updated.length.toString());
 
       // Unsubscribe from FCM topic if no remaining alerts for symbol
-      const safeSymbol = editAlert.symbol
-        .replace(/[^a-zA-Z0-9]/g, '_')
-        .toLowerCase();
+      const safeSymbol = editAlert.symbol.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
       const topic = `ticker_${safeSymbol}`;
-      const remainingAlerts = updated.filter(
-        a => a.symbol === editAlert.symbol,
-      );
+      const remainingAlerts = updated.filter(a => a.symbol === editAlert.symbol);
 
       if (remainingAlerts.length === 0) {
         await fcmService.unsubscribeFromTopic(topic);
@@ -473,10 +435,7 @@ const AddAlertScreen = ({ route }: Props) => {
             ]}
           >
             {item.iconName === 'Bs' ? (
-              <BolivarIcon
-                color={theme.colors.onSecondaryContainer}
-                size={24}
-              />
+              <BolivarIcon color={theme.colors.onSecondaryContainer} size={24} />
             ) : (
               <MaterialCommunityIcons
                 name={item.iconName || 'currency-usd'}
@@ -489,10 +448,7 @@ const AddAlertScreen = ({ route }: Props) => {
             <Text variant="titleMedium" style={styles.fontWeightBold}>
               {item.symbol}
             </Text>
-            <Text
-              variant="bodySmall"
-              style={{ color: theme.colors.onSurfaceVariant }}
-            >
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
               {item.name}
             </Text>
           </View>
@@ -517,13 +473,7 @@ const AddAlertScreen = ({ route }: Props) => {
             ]}
           >
             <MaterialCommunityIcons
-              name={
-                isNeutral
-                  ? 'minus'
-                  : item.changePercent > 0
-                    ? 'arrow-up'
-                    : 'arrow-down'
-              }
+              name={isNeutral ? 'minus' : item.changePercent > 0 ? 'arrow-up' : 'arrow-down'}
               size={12}
               color={
                 isNeutral
@@ -554,17 +504,9 @@ const AddAlertScreen = ({ route }: Props) => {
   };
 
   return (
-    <View
-      style={[styles.container, { backgroundColor: theme.colors.background }]}
-    >
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       <UnifiedHeader
-        title={
-          selectedItem
-            ? editAlert
-              ? 'Editar alerta'
-              : 'Configurar alerta'
-            : 'Nueva alerta'
-        }
+        title={selectedItem ? (editAlert ? 'Editar alerta' : 'Configurar alerta') : 'Nueva alerta'}
         showNotification={false}
         onBackPress={() => {
           if (selectedItem && !editAlert) {
@@ -577,20 +519,12 @@ const AddAlertScreen = ({ route }: Props) => {
 
       {selectedItem ? (
         <ScrollView
-          contentContainerStyle={[
-            styles.configContainer,
-            { paddingBottom: insets.bottom + 24 },
-          ]}
+          contentContainerStyle={[styles.configContainer, { paddingBottom: insets.bottom + 24 }]}
           showsVerticalScrollIndicator={false}
         >
           {/* Symbol Header Section */}
           <View style={styles.headerSection}>
-            <View
-              style={[
-                styles.iconLarge,
-                { backgroundColor: theme.colors.elevation.level2 },
-              ]}
-            >
+            <View style={[styles.iconLarge, { backgroundColor: theme.colors.elevation.level2 }]}>
               {selectedItem.iconName === 'Bs' ? (
                 <BolivarIcon color={theme.colors.primary} size={40} />
               ) : (
@@ -605,37 +539,23 @@ const AddAlertScreen = ({ route }: Props) => {
               <Text variant="headlineMedium" style={styles.symbolHeadline}>
                 {selectedItem.symbol}
               </Text>
-              <Text
-                variant="bodyLarge"
-                style={{ color: theme.colors.onSurfaceVariant }}
-              >
+              <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant }}>
                 {selectedItem.name}
               </Text>
             </View>
           </View>
 
           {/* Current Price Section */}
-          <View
-            style={[
-              styles.priceCard,
-              { backgroundColor: theme.colors.elevation.level1 },
-            ]}
-          >
+          <View style={[styles.priceCard, { backgroundColor: theme.colors.elevation.level1 }]}>
             <Text
               variant="labelMedium"
-              style={[
-                styles.currentPriceLabel,
-                { color: theme.colors.onSurfaceVariant },
-              ]}
+              style={[styles.currentPriceLabel, { color: theme.colors.onSurfaceVariant }]}
             >
               Precio Actual
             </Text>
             <Text
               variant="displaySmall"
-              style={[
-                styles.currentPriceValue,
-                { color: theme.colors.onSurface },
-              ]}
+              style={[styles.currentPriceValue, { color: theme.colors.onSurface }]}
             >
               {selectedItem.price < 1
                 ? selectedItem.price.toFixed(4)
@@ -690,9 +610,7 @@ const AddAlertScreen = ({ route }: Props) => {
               onChangeText={setTargetPrice}
               keyboardType="numeric"
               placeholder="0.00"
-              right={
-                <TextInput.Icon icon="target" onPress={handleSetCurrentPrice} />
-              }
+              right={<TextInput.Icon icon="target" onPress={handleSetCurrentPrice} />}
               style={{ backgroundColor: theme.colors.background }}
               outlineColor={theme.colors.outline}
               activeOutlineColor={theme.colors.primary}
@@ -734,15 +652,8 @@ const AddAlertScreen = ({ route }: Props) => {
                       },
                     ]}
                   >
-                    <MaterialCommunityIcons
-                      name={icon}
-                      size={20}
-                      color={color}
-                    />
-                    <Text
-                      variant="bodyMedium"
-                      style={[styles.diffIndicatorText, { color: color }]}
-                    >
+                    <MaterialCommunityIcons name={icon} size={20} color={color} />
+                    <Text variant="bodyMedium" style={[styles.diffIndicatorText, { color: color }]}>
                       {text}
                     </Text>
                   </View>
@@ -779,9 +690,7 @@ const AddAlertScreen = ({ route }: Props) => {
                   name="arrow-top-right"
                   size={20}
                   color={
-                    condition === 'above'
-                      ? theme.colors.onPrimary
-                      : theme.colors.onSurfaceVariant
+                    condition === 'above' ? theme.colors.onPrimary : theme.colors.onSurfaceVariant
                   }
                 />
                 <Text
@@ -799,12 +708,7 @@ const AddAlertScreen = ({ route }: Props) => {
                 </Text>
               </TouchableOpacity>
 
-              <View
-                style={[
-                  styles.conditionDivider,
-                  { backgroundColor: theme.colors.outline },
-                ]}
-              />
+              <View style={[styles.conditionDivider, { backgroundColor: theme.colors.outline }]} />
 
               <TouchableOpacity
                 style={[
@@ -819,9 +723,7 @@ const AddAlertScreen = ({ route }: Props) => {
                   name="arrow-bottom-right"
                   size={20}
                   color={
-                    condition === 'below'
-                      ? theme.colors.onError
-                      : theme.colors.onSurfaceVariant
+                    condition === 'below' ? theme.colors.onError : theme.colors.onSurfaceVariant
                   }
                 />
                 <Text
@@ -841,10 +743,7 @@ const AddAlertScreen = ({ route }: Props) => {
             </View>
             <Text
               variant="bodySmall"
-              style={[
-                styles.conditionDescription,
-                { color: theme.colors.onSurfaceVariant },
-              ]}
+              style={[styles.conditionDescription, { color: theme.colors.onSurfaceVariant }]}
             >
               {condition === 'above'
                 ? `La alerta se activará cuando el precio suba a ${targetPrice || '...'}`
@@ -878,10 +777,7 @@ const AddAlertScreen = ({ route }: Props) => {
 
           {/* Disclaimer Section */}
           <View
-            style={[
-              styles.disclaimerContainer,
-              { backgroundColor: theme.colors.elevation.level1 },
-            ]}
+            style={[styles.disclaimerContainer, { backgroundColor: theme.colors.elevation.level1 }]}
           >
             <MaterialCommunityIcons
               name="information-outline"
@@ -891,14 +787,11 @@ const AddAlertScreen = ({ route }: Props) => {
             />
             <Text
               variant="bodySmall"
-              style={[
-                styles.disclaimerText,
-                { color: theme.colors.onSurfaceVariant },
-              ]}
+              style={[styles.disclaimerText, { color: theme.colors.onSurfaceVariant }]}
             >
-              Nota: Las alertas pueden tener un ligero retraso dependiendo de la
-              conectividad y las actualizaciones del mercado. Asegúrate de tener
-              las notificaciones activadas para VTradingAPP.
+              Nota: Las alertas pueden tener un ligero retraso dependiendo de la conectividad y las
+              actualizaciones del mercado. Asegúrate de tener las notificaciones activadas para
+              VTradingAPP.
             </Text>
           </View>
         </ScrollView>
@@ -932,10 +825,7 @@ const AddAlertScreen = ({ route }: Props) => {
               data={filteredItems}
               keyExtractor={item => item.id}
               renderItem={renderItem}
-              contentContainerStyle={[
-                styles.listContent,
-                { paddingBottom: insets.bottom + 16 },
-              ]}
+              contentContainerStyle={[styles.listContent, { paddingBottom: insets.bottom + 16 }]}
               showsVerticalScrollIndicator={false}
               ItemSeparatorComponent={ItemSeparator}
               ListEmptyComponent={renderEmptyList}

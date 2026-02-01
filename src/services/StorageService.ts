@@ -30,10 +30,7 @@ export const initializeStorage = async (): Promise<void> => {
       context: 'StorageService.initialize',
       action: 'createMMKV_failed',
     });
-    SafeLogger.error(
-      'Failed to create MMKV with encryption, falling back to clear storage',
-      e,
-    );
+    SafeLogger.error('Failed to create MMKV with encryption, falling back to clear storage', e);
 
     // Fallback: Try creating without encryption (if key was removed) or re-create
     _storage = createMMKV({

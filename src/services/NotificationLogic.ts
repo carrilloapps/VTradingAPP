@@ -34,9 +34,7 @@ export const handleBackgroundMessage = async (remoteMessage: any) => {
     const alerts = await storageService.getAlerts();
 
     // Filtramos alertas activas para este símbolo
-    const activeAlerts = alerts.filter(
-      (a: any) => a.isActive && a.symbol === symbol,
-    );
+    const activeAlerts = alerts.filter((a: any) => a.isActive && a.symbol === symbol);
 
     if (activeAlerts.length > 0) {
       // Trigger widget update to show latest data
@@ -64,8 +62,7 @@ export const handleBackgroundMessage = async (remoteMessage: any) => {
         const actionVerb = isUp ? 'subió' : 'bajó';
         const directionText = isUp ? 'Subida' : 'Bajada';
 
-        const formatPrice = (val: number) =>
-          val < 0.01 ? val : val.toFixed(2);
+        const formatPrice = (val: number) => (val < 0.01 ? val : val.toFixed(2));
         const currentPriceFormatted = formatPrice(currentPrice);
         const targetPriceFormatted = formatPrice(targetPrice);
 

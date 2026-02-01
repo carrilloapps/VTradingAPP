@@ -14,10 +14,7 @@ import { WordPressCategory } from '@/services/WordPressService';
 import CategoryTab from './CategoryTab';
 
 // Enable LayoutAnimation on Android
-if (
-  Platform.OS === 'android' &&
-  UIManager.setLayoutAnimationEnabledExperimental
-) {
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
@@ -48,9 +45,7 @@ const CategoryTabList: React.FC<CategoryTabListProps> = ({
     const BUTTON_WIDTH = 48; // + button width
 
     // Calculate how many tabs fit including the + button space
-    let maxTabs = Math.floor(
-      (availableWidth - BUTTON_WIDTH - GAP) / (AVERAGE_TAB_WIDTH + GAP),
-    );
+    let maxTabs = Math.floor((availableWidth - BUTTON_WIDTH - GAP) / (AVERAGE_TAB_WIDTH + GAP));
 
     // Default to 3 categories, ensure at least 2
     maxTabs = Math.max(2, Math.min(maxTabs, categories.length));
@@ -59,9 +54,7 @@ const CategoryTabList: React.FC<CategoryTabListProps> = ({
   }, [windowWidth, categories.length]);
 
   // Determine visible categories
-  const visibleCategories = showAll
-    ? categories
-    : categories.slice(0, firstRowCount);
+  const visibleCategories = showAll ? categories : categories.slice(0, firstRowCount);
 
   const hiddenCount = Math.max(0, categories.length - firstRowCount);
   const shouldShowButton = categories.length > firstRowCount;
@@ -120,9 +113,7 @@ const CategoryTabList: React.FC<CategoryTabListProps> = ({
             />
             {hiddenCount > 0 && (
               <View style={styles.badge}>
-                <Animated.Text style={styles.badgeText}>
-                  {hiddenCount}
-                </Animated.Text>
+                <Animated.Text style={styles.badgeText}>{hiddenCount}</Animated.Text>
               </View>
             )}
           </Surface>

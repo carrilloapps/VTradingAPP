@@ -5,17 +5,11 @@ import { MaterialTopTabBarProps } from '@react-navigation/material-top-tabs';
 
 import { useAppTheme } from '@/theme';
 
-const ModernTabBar: React.FC<MaterialTopTabBarProps> = ({
-  state,
-  descriptors,
-  navigation,
-}) => {
+const ModernTabBar: React.FC<MaterialTopTabBarProps> = ({ state, descriptors, navigation }) => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
   // Create animated values for each tab
-  const animatedValues = useRef(
-    state.routes.map(() => new Animated.Value(0)),
-  ).current;
+  const animatedValues = useRef(state.routes.map(() => new Animated.Value(0))).current;
 
   useEffect(() => {
     // Animate the active tab

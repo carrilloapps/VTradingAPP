@@ -9,14 +9,7 @@ import {
   Platform,
   Linking,
 } from 'react-native';
-import {
-  Text,
-  useTheme,
-  Switch,
-  Snackbar,
-  Button,
-  ActivityIndicator,
-} from 'react-native-paper';
+import { Text, useTheme, Switch, Snackbar, Button, ActivityIndicator } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DeviceInfo from 'react-native-device-info';
 
@@ -32,10 +25,7 @@ import { useToastStore } from '@/stores/toastStore';
 import { storageService, UserAlert } from '@/services/StorageService';
 import { observabilityService } from '@/services/ObservabilityService';
 import { AppConfig } from '@/constants/AppConfig';
-import {
-  analyticsService,
-  ANALYTICS_EVENTS,
-} from '@/services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '@/services/firebase/AnalyticsService';
 import UserProfileCard from '@/components/settings/UserProfileCard';
 import AlertItem from '@/components/settings/AlertItem';
 import ThemeSelector from '@/components/settings/ThemeSelector';
@@ -276,10 +266,7 @@ const SettingsScreen = () => {
       await analyticsService.logEvent(ANALYTICS_EVENTS.TOGGLE_PUSH, {
         enabled: false,
       });
-      showToast(
-        'Notificaciones deshabilitadas. Todas las alertas han sido pausadas.',
-        'info',
-      );
+      showToast('Notificaciones deshabilitadas. Todas las alertas han sido pausadas.', 'info');
     }
   };
 
@@ -312,9 +299,7 @@ const SettingsScreen = () => {
 
     // Optimistic update
     const originalAlerts = [...alerts];
-    const updated = alerts.map(a =>
-      a.id === id ? { ...a, isActive: value } : a,
-    );
+    const updated = alerts.map(a => (a.id === id ? { ...a, isActive: value } : a));
     setAlerts(updated);
 
     // Add to toggling set
@@ -403,10 +388,7 @@ const SettingsScreen = () => {
 
   const handleAddAlert = () => {
     if (alerts.length >= 5) {
-      Alert.alert(
-        'Límite Alcanzado',
-        'Solo puedes tener un máximo de 5 alertas activas.',
-      );
+      Alert.alert('Límite Alcanzado', 'Solo puedes tener un máximo de 5 alertas activas.');
       return;
     }
     (navigation as any).navigate('AddAlert');
@@ -434,11 +416,7 @@ const SettingsScreen = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: containerBgColor }]}>
-      <StatusBar
-        backgroundColor="transparent"
-        translucent
-        barStyle={statusBarStyle}
-      />
+      <StatusBar backgroundColor="transparent" translucent barStyle={statusBarStyle} />
 
       {/* Header */}
       <UnifiedHeader
@@ -459,45 +437,27 @@ const SettingsScreen = () => {
       >
         {/* User Profile */}
         <View style={styles.section}>
-          <UserProfileCard
-            user={user}
-            onEdit={handleEditProfile}
-            onRegister={handleRegister}
-          />
+          <UserProfileCard user={user} onEdit={handleEditProfile} onRegister={handleRegister} />
         </View>
 
         {/* Alerts Section */}
         <View style={styles.section}>
           <View style={styles.sectionHeaderRow}>
-            <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>
-              ALERTAS ACTIVAS
-            </Text>
+            <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>ALERTAS ACTIVAS</Text>
             <TouchableOpacity
-              style={[
-                styles.addButton,
-                alerts.length >= 5 && styles.addButtonDisabled,
-              ]}
+              style={[styles.addButton, alerts.length >= 5 && styles.addButtonDisabled]}
               onPress={handleAddAlert}
               disabled={alerts.length >= 5}
             >
-              <MaterialCommunityIcons
-                name="plus"
-                size={18}
-                color={theme.colors.primary}
-              />
-              <Text
-                style={[styles.newAlertText, { color: theme.colors.primary }]}
-              >
+              <MaterialCommunityIcons name="plus" size={18} color={theme.colors.primary} />
+              <Text style={[styles.newAlertText, { color: theme.colors.primary }]}>
                 Nueva alerta
               </Text>
             </TouchableOpacity>
           </View>
 
           <View
-            style={[
-              styles.cardContainer,
-              { borderColor: cardBorder, backgroundColor: cardBg },
-            ]}
+            style={[styles.cardContainer, { borderColor: cardBorder, backgroundColor: cardBg }]}
           >
             {alerts.length === 0 ? (
               <View style={styles.emptyStateContainer}>
@@ -507,33 +467,19 @@ const SettingsScreen = () => {
                     { backgroundColor: theme.colors.elevation.level2 },
                   ]}
                 >
-                  <MaterialCommunityIcons
-                    name="bell-plus"
-                    size={32}
-                    color={theme.colors.primary}
-                  />
+                  <MaterialCommunityIcons name="bell-plus" size={32} color={theme.colors.primary} />
                 </View>
-                <Text
-                  style={[styles.emptyTitle, { color: theme.colors.onSurface }]}
-                >
+                <Text style={[styles.emptyTitle, { color: theme.colors.onSurface }]}>
                   Crea tu primera alerta
                 </Text>
-                <Text
-                  style={[
-                    styles.emptyDescription,
-                    { color: theme.colors.onSurfaceVariant },
-                  ]}
-                >
-                  Recibe notificaciones instantáneas cuando las tasas o acciones
-                  alcancen el precio que te interesa.
+                <Text style={[styles.emptyDescription, { color: theme.colors.onSurfaceVariant }]}>
+                  Recibe notificaciones instantáneas cuando las tasas o acciones alcancen el precio
+                  que te interesa.
                 </Text>
                 <Button
                   mode="outlined"
                   onPress={handleAddAlert}
-                  style={[
-                    styles.emptyButton,
-                    { borderColor: theme.colors.outline },
-                  ]}
+                  style={[styles.emptyButton, { borderColor: theme.colors.outline }]}
                   textColor={theme.colors.primary}
                 >
                   Crear Alerta
@@ -554,12 +500,7 @@ const SettingsScreen = () => {
                     iconName={alert.iconName || 'show-chart'}
                   />
                   {index < alerts.length - 1 && (
-                    <View
-                      style={[
-                        styles.separator,
-                        { backgroundColor: separatorBg },
-                      ]}
-                    />
+                    <View style={[styles.separator, { backgroundColor: separatorBg }]} />
                   )}
                 </React.Fragment>
               ))
@@ -569,15 +510,10 @@ const SettingsScreen = () => {
 
         {/* Preferences Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>
-            PREFERENCIAS
-          </Text>
+          <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>PREFERENCIAS</Text>
 
           <View
-            style={[
-              styles.cardContainer,
-              { borderColor: cardBorder, backgroundColor: cardBg },
-            ]}
+            style={[styles.cardContainer, { borderColor: cardBorder, backgroundColor: cardBg }]}
           >
             {/* Push Notifications */}
             <View style={styles.prefRow}>
@@ -589,44 +525,28 @@ const SettingsScreen = () => {
                     color={theme.colors.onSurfaceVariant}
                   />
                 </View>
-                <Text
-                  variant="bodyLarge"
-                  style={[styles.prefText, { color: prefTextColor }]}
-                >
+                <Text variant="bodyLarge" style={[styles.prefText, { color: prefTextColor }]}>
                   Notificaciones push
                 </Text>
               </View>
-              <Switch
-                value={pushEnabled}
-                onValueChange={togglePush}
-                color={theme.colors.primary}
-              />
+              <Switch value={pushEnabled} onValueChange={togglePush} color={theme.colors.primary} />
             </View>
 
             {/* Widgets - Android Only */}
             {Platform.OS === 'android' && (
               <>
-                <View
-                  style={[styles.separator, { backgroundColor: separatorBg }]}
-                />
-                <TouchableOpacity
-                  onPress={() => navigation.navigate('Widgets' as never)}
-                >
+                <View style={[styles.separator, { backgroundColor: separatorBg }]} />
+                <TouchableOpacity onPress={() => navigation.navigate('Widgets' as never)}>
                   <View style={styles.prefRow}>
                     <View style={styles.prefLeft}>
-                      <View
-                        style={[styles.iconBox, { backgroundColor: iconBoxBg }]}
-                      >
+                      <View style={[styles.iconBox, { backgroundColor: iconBoxBg }]}>
                         <MaterialCommunityIcons
                           name="widgets"
                           size={20}
                           color={theme.colors.onSurfaceVariant}
                         />
                       </View>
-                      <Text
-                        variant="bodyLarge"
-                        style={[styles.prefText, { color: prefTextColor }]}
-                      >
+                      <Text variant="bodyLarge" style={[styles.prefText, { color: prefTextColor }]}>
                         Personalización de widgets
                       </Text>
                     </View>
@@ -640,9 +560,7 @@ const SettingsScreen = () => {
               </>
             )}
 
-            <View
-              style={[styles.separator, { backgroundColor: separatorBg }]}
-            />
+            <View style={[styles.separator, { backgroundColor: separatorBg }]} />
 
             {/* Appearance */}
             <View style={styles.prefContent}>
@@ -654,10 +572,7 @@ const SettingsScreen = () => {
                     color={theme.colors.onSurfaceVariant}
                   />
                 </View>
-                <Text
-                  variant="bodyLarge"
-                  style={[styles.prefText, { color: prefTextColor }]}
-                >
+                <Text variant="bodyLarge" style={[styles.prefText, { color: prefTextColor }]}>
                   Apariencia
                 </Text>
                 {switchingTheme && (
@@ -679,34 +594,21 @@ const SettingsScreen = () => {
 
         {/* Account Section */}
         <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>
-            CUENTA
-          </Text>
+          <Text style={[styles.sectionTitle, { color: sectionTitleColor }]}>CUENTA</Text>
           <View
-            style={[
-              styles.cardContainer,
-              { borderColor: cardBorder, backgroundColor: cardBg },
-            ]}
+            style={[styles.cardContainer, { borderColor: cardBorder, backgroundColor: cardBg }]}
           >
             <MenuButton
               icon="shield-account"
               label="Políticas de privacidad"
               onPress={() =>
-                openExternalUrl(
-                  AppConfig.PRIVACY_POLICY_URL,
-                  'Políticas de privacidad',
-                )
+                openExternalUrl(AppConfig.PRIVACY_POLICY_URL, 'Políticas de privacidad')
               }
             />
             <MenuButton
               icon="gavel"
               label="Términos y condiciones"
-              onPress={() =>
-                openExternalUrl(
-                  AppConfig.TERMS_OF_USE_URL,
-                  'Términos y condiciones',
-                )
-              }
+              onPress={() => openExternalUrl(AppConfig.TERMS_OF_USE_URL, 'Términos y condiciones')}
               hasTopBorder
             />
             <MenuButton
@@ -719,21 +621,10 @@ const SettingsScreen = () => {
           </View>
 
           <View style={styles.footer}>
-            <Text
-              style={[
-                styles.footerText,
-                { color: theme.colors.onSurfaceVariant },
-              ]}
-            >
-              {appName} v{appVersion} (BUILD {buildNumber}){' '}
-              {__DEV__ ? 'DEBUG' : ''}
+            <Text style={[styles.footerText, { color: theme.colors.onSurfaceVariant }]}>
+              {appName} v{appVersion} (BUILD {buildNumber}) {__DEV__ ? 'DEBUG' : ''}
             </Text>
-            <Text
-              style={[
-                styles.footerSubText,
-                { color: theme.colors.onSurfaceVariant },
-              ]}
-            >
+            <Text style={[styles.footerSubText, { color: theme.colors.onSurfaceVariant }]}>
               {DeviceInfo.getDeviceId()} | {DeviceInfo.getSystemName()}{' '}
               {DeviceInfo.getSystemVersion()}
             </Text>
@@ -747,9 +638,7 @@ const SettingsScreen = () => {
         duration={2000}
         style={{ backgroundColor: theme.colors.inverseSurface }}
       >
-        <Text style={{ color: theme.colors.inverseOnSurface }}>
-          {snackbarMessage}
-        </Text>
+        <Text style={{ color: theme.colors.inverseOnSurface }}>{snackbarMessage}</Text>
       </Snackbar>
 
       <LogoutDialog

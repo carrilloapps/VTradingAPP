@@ -11,8 +11,7 @@ describe('useDebounce', () => {
 
   it('should debounce the value after the specified delay', () => {
     const { result, rerender } = renderHook(
-      ({ value, delay }: { value: string; delay: number }) =>
-        useDebounce(value, delay),
+      ({ value, delay }: { value: string; delay: number }) => useDebounce(value, delay),
       { initialProps: { value: 'initial', delay: 500 } },
     );
 
@@ -64,8 +63,7 @@ describe('useDebounce', () => {
 
   it('should handle different delay times', () => {
     const { result, rerender } = renderHook(
-      ({ value, delay }: { value: string; delay: number }) =>
-        useDebounce(value, delay),
+      ({ value, delay }: { value: string; delay: number }) => useDebounce(value, delay),
       { initialProps: { value: 'test', delay: 1000 } },
     );
 

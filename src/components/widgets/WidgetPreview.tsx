@@ -40,9 +40,7 @@ const WidgetPreview: React.FC<WidgetPreviewProps> = ({
   // Colors for wallpaper are now defined inline with more complex gradients
 
   return (
-    <View
-      style={[styles.mockupContainer, { borderColor: theme.colors.outline }]}
-    >
+    <View style={[styles.mockupContainer, { borderColor: theme.colors.outline }]}>
       {/* Phone Bezel/Wallpaper */}
       <View style={styles.wallpaper}>
         <View style={StyleSheet.absoluteFill}>
@@ -73,28 +71,13 @@ const WidgetPreview: React.FC<WidgetPreviewProps> = ({
 
         {/* Status Bar Mockup */}
         <View style={styles.statusBarMockup}>
-          <Text
-            variant="labelSmall"
-            style={[styles.statusBarTime, { color: statusBarColor }]}
-          >
+          <Text variant="labelSmall" style={[styles.statusBarTime, { color: statusBarColor }]}>
             10:42
           </Text>
           <View style={styles.statusIcons}>
-            <MaterialCommunityIcons
-              name="signal-cellular-3"
-              size={14}
-              color={statusBarColor}
-            />
-            <MaterialCommunityIcons
-              name="wifi"
-              size={14}
-              color={statusBarColor}
-            />
-            <MaterialCommunityIcons
-              name="battery-50"
-              size={14}
-              color={statusBarColor}
-            />
+            <MaterialCommunityIcons name="signal-cellular-3" size={14} color={statusBarColor} />
+            <MaterialCommunityIcons name="wifi" size={14} color={statusBarColor} />
+            <MaterialCommunityIcons name="battery-50" size={14} color={statusBarColor} />
           </View>
         </View>
 
@@ -120,11 +103,7 @@ const WidgetPreview: React.FC<WidgetPreviewProps> = ({
           {/* VTrading App (Active) - Position 2 */}
           <View style={styles.appIconWrapper}>
             <View
-              style={[
-                styles.appIcon,
-                styles.vtradingAppIcon,
-                { backgroundColor: vtradingAppBg },
-              ]}
+              style={[styles.appIcon, styles.vtradingAppIcon, { backgroundColor: vtradingAppBg }]}
             >
               <FastImage
                 source={
@@ -134,40 +113,24 @@ const WidgetPreview: React.FC<WidgetPreviewProps> = ({
                 }
                 tintColor={isDark ? '#FFFFFF' : '#212121'}
                 resizeMode={FastImage.resizeMode.contain}
-                style={[
-                  styles.vtradingLogo,
-                  { tintColor: vtradingLogoTint } as any,
-                ]}
+                style={[styles.vtradingLogo, { tintColor: vtradingLogoTint } as any]}
               />
             </View>
             {/* Active Indicator dot */}
-            <View
-              style={[
-                styles.activeIndicator,
-                { backgroundColor: activeIndicatorBg },
-              ]}
-            />
+            <View style={[styles.activeIndicator, { backgroundColor: activeIndicatorBg }]} />
           </View>
 
           {/* Messages App */}
           <View style={styles.appIconWrapper}>
             <View style={[styles.appIcon, styles.messagesAppIcon]}>
-              <MaterialCommunityIcons
-                name="message-text"
-                size={24}
-                color="#FFF"
-              />
+              <MaterialCommunityIcons name="message-text" size={24} color="#FFF" />
             </View>
           </View>
 
           {/* Maps App */}
           <View style={styles.appIconWrapper}>
             <View style={[styles.appIcon, styles.mapsAppIcon]}>
-              <MaterialCommunityIcons
-                name="google-maps"
-                size={24}
-                color="#FFF"
-              />
+              <MaterialCommunityIcons name="google-maps" size={24} color="#FFF" />
             </View>
           </View>
         </View>

@@ -39,9 +39,7 @@ const NotificationController: React.FC = () => {
 
         // Check local alerts
         const alerts = await storageService.getAlerts();
-        const activeAlerts = alerts.filter(
-          (a: any) => a.isActive && a.symbol === symbol,
-        );
+        const activeAlerts = alerts.filter((a: any) => a.isActive && a.symbol === symbol);
 
         activeAlerts.forEach((alert: any) => {
           const targetPrice = parseFloat(alert.target);
@@ -49,10 +47,7 @@ const NotificationController: React.FC = () => {
 
           if (alert.condition === 'above' && currentPrice >= targetPrice) {
             triggered = true;
-          } else if (
-            alert.condition === 'below' &&
-            currentPrice <= targetPrice
-          ) {
+          } else if (alert.condition === 'below' && currentPrice <= targetPrice) {
             triggered = true;
           }
 
@@ -63,20 +58,15 @@ const NotificationController: React.FC = () => {
             const readableSymbol = symbol.replace('/', ' por ');
 
             // Smart formatting: 2 decimals for standard values, preserve precision for small crypto
-            const formatPrice = (val: number) =>
-              val < 0.01 ? val : val.toFixed(2);
+            const formatPrice = (val: number) => (val < 0.01 ? val : val.toFixed(2));
             const displayCurrent = formatPrice(currentPrice);
             const displayTarget = formatPrice(targetPrice);
 
             // Construct rich message with inline icon
             const richMessage = (
               <Text>
-                El precio {actionVerb} a {displayCurrent} {readableSymbol},
-                según tu objetivo de{' '}
-                <MaterialCommunityIcons
-                  name={isUp ? 'trending-up' : 'trending-down'}
-                  size={14}
-                />{' '}
+                El precio {actionVerb} a {displayCurrent} {readableSymbol}, según tu objetivo de{' '}
+                <MaterialCommunityIcons name={isUp ? 'trending-up' : 'trending-down'} size={14} />{' '}
                 {displayTarget} {readableSymbol}
               </Text>
             );

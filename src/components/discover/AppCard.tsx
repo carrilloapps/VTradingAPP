@@ -23,8 +23,7 @@ interface AppCardProps {
 
 const AppCard: React.FC<AppCardProps> = ({ app, onPress }) => {
   const theme = useTheme();
-  const accentColor =
-    app.color || (app.useTint ? theme.colors.primary : theme.colors.onSurface);
+  const accentColor = app.color || (app.useTint ? theme.colors.primary : theme.colors.onSurface);
 
   const renderVisual = useCallback(() => {
     if (app.logoUri) {
@@ -32,34 +31,21 @@ const AppCard: React.FC<AppCardProps> = ({ app, onPress }) => {
 
       if (isSvg) {
         return (
-          <SvgUri
-            uri={app.logoUri}
-            width={54}
-            height={54}
-            color={accentColor}
-            fill={accentColor}
-          />
+          <SvgUri uri={app.logoUri} width={54} height={54} color={accentColor} fill={accentColor} />
         );
       }
 
       return (
         <FastImage
           source={{ uri: app.logoUri }}
-          style={[
-            styles.remoteLogo,
-            app.useTint && ({ tintColor: accentColor } as any),
-          ]}
+          style={[styles.remoteLogo, app.useTint && ({ tintColor: accentColor } as any)]}
           resizeMode={FastImage.resizeMode.contain}
         />
       );
     }
 
     return (
-      <MaterialCommunityIcons
-        name={app.icon || 'star-outline'}
-        size={32}
-        color={accentColor}
-      />
+      <MaterialCommunityIcons name={app.icon || 'star-outline'} size={32} color={accentColor} />
     );
   }, [accentColor, app.icon, app.logoUri, app.useTint]);
 

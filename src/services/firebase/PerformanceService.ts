@@ -1,8 +1,4 @@
-import {
-  getPerformance,
-  trace as createTrace,
-  httpMetric,
-} from '@react-native-firebase/perf';
+import { getPerformance, trace as createTrace, httpMetric } from '@react-native-firebase/perf';
 import { FirebasePerformanceTypes } from '@react-native-firebase/perf';
 
 class PerformanceService {
@@ -36,11 +32,7 @@ class PerformanceService {
     attributes?: Record<string, string>,
   ): Promise<void> {
     const perf = getPerformance();
-    const metric = httpMetric(
-      perf,
-      url,
-      method as FirebasePerformanceTypes.HttpMethod,
-    );
+    const metric = httpMetric(perf, url, method as FirebasePerformanceTypes.HttpMethod);
     await metric.start();
 
     metric.setHttpResponseCode(responseCode);

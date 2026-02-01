@@ -5,10 +5,7 @@ import notifee, { AndroidImportance } from '@notifee/react-native';
 
 import SafeLogger from '@/utils/safeLogger';
 import { observabilityService } from '@/services/ObservabilityService';
-import {
-  analyticsService,
-  ANALYTICS_EVENTS,
-} from '@/services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '@/services/firebase/AnalyticsService';
 
 class FCMService {
   private messaging: ReturnType<typeof messaging>;
@@ -51,9 +48,7 @@ class FCMService {
         authStatus === messaging.AuthorizationStatus.PROVISIONAL
       );
     } else if (Platform.OS === 'android' && Platform.Version >= 33) {
-      return await PermissionsAndroid.check(
-        PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-      );
+      return await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS);
     }
     return true;
   }
@@ -124,9 +119,7 @@ class FCMService {
   /**
    * Background message handler (must be called outside of UI components)
    */
-  setBackgroundMessageHandler(
-    handler: (remoteMessage: any) => Promise<any>,
-  ): void {
+  setBackgroundMessageHandler(handler: (remoteMessage: any) => Promise<any>): void {
     this.messaging.setBackgroundMessageHandler(handler);
   }
 
@@ -183,10 +176,7 @@ class FCMService {
 
       const appVerTopic = `app_version_${DeviceInfo.getVersion().replace(/\./g, '_')}`;
       topics.push(appVerTopic);
-      await analyticsService.setUserProperty(
-        'app_version',
-        DeviceInfo.getVersion(),
-      );
+      await analyticsService.setUserProperty('app_version', DeviceInfo.getVersion());
 
       const buildTopic = `build_${DeviceInfo.getBuildNumber()}`;
       topics.push(buildTopic);

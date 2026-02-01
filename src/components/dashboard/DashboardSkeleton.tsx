@@ -28,11 +28,7 @@ const DashboardSkeleton = () => {
           <View style={styles.headerLeft}>
             <Skeleton width={44} height={44} borderRadius={22} />
             <View style={styles.headerText}>
-              <Skeleton
-                width={80}
-                height={12}
-                style={styles.headerTextSkeleton}
-              />
+              <Skeleton width={80} height={12} style={styles.headerTextSkeleton} />
               <Skeleton width={120} height={20} />
             </View>
           </View>
@@ -50,12 +46,7 @@ const DashboardSkeleton = () => {
 
       {/* Exchange Cards Skeleton */}
       <View style={styles.section}>
-        <Skeleton
-          width="100%"
-          height={150}
-          borderRadius={r * 6}
-          style={styles.firstCardSkeleton}
-        />
+        <Skeleton width="100%" height={150} borderRadius={r * 6} style={styles.firstCardSkeleton} />
         <Skeleton width="100%" height={150} borderRadius={r * 6} />
       </View>
 
@@ -77,20 +68,12 @@ const DashboardSkeleton = () => {
               <Skeleton width={48} height={48} borderRadius={r * 3} />
               <View style={styles.stockContent}>
                 <Skeleton width={100} height={16} />
-                <Skeleton
-                  width={60}
-                  height={12}
-                  style={styles.stockSubtitleSkeleton}
-                />
+                <Skeleton width={60} height={12} style={styles.stockSubtitleSkeleton} />
               </View>
             </View>
             <View style={styles.stockRight}>
               <Skeleton width={80} height={16} />
-              <Skeleton
-                width={50}
-                height={12}
-                style={styles.stockSubtitleSkeleton}
-              />
+              <Skeleton width={50} height={12} style={styles.stockSubtitleSkeleton} />
             </View>
           </View>
         ))}

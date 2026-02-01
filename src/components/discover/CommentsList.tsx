@@ -11,17 +11,11 @@ interface CommentsListProps {
   loading: boolean;
 }
 
-export const CommentsList: React.FC<CommentsListProps> = ({
-  comments,
-  loading,
-}) => {
+export const CommentsList: React.FC<CommentsListProps> = ({ comments, loading }) => {
   const theme = useAppTheme();
 
   if (loading) {
-    const loadingTextStyle = [
-      styles.loadingText,
-      { color: theme.colors.onSurfaceVariant },
-    ];
+    const loadingTextStyle = [styles.loadingText, { color: theme.colors.onSurfaceVariant }];
 
     return (
       <View style={styles.loadingContainer}>
@@ -39,23 +33,13 @@ export const CommentsList: React.FC<CommentsListProps> = ({
       { backgroundColor: theme.colors.elevation.level1 },
     ];
 
-    const emptyTitleStyle = [
-      styles.emptyTitle,
-      { color: theme.colors.onSurfaceVariant },
-    ];
+    const emptyTitleStyle = [styles.emptyTitle, { color: theme.colors.onSurfaceVariant }];
 
-    const emptySubtitleStyle = [
-      styles.emptySubtitle,
-      { color: theme.colors.outline },
-    ];
+    const emptySubtitleStyle = [styles.emptySubtitle, { color: theme.colors.outline }];
 
     return (
       <Surface style={emptyBoxStyle} elevation={0}>
-        <MaterialCommunityIcons
-          name="comment-outline"
-          size={48}
-          color={theme.colors.outline}
-        />
+        <MaterialCommunityIcons name="comment-outline" size={48} color={theme.colors.outline} />
         <Text variant="bodyMedium" style={emptyTitleStyle}>
           No hay comentarios aún
         </Text>
@@ -69,33 +53,21 @@ export const CommentsList: React.FC<CommentsListProps> = ({
   return (
     <>
       {comments.map(comment => {
-        const itemStyle = [
-          styles.commentItem,
-          comment.isReply && styles.replyItem,
-        ];
+        const itemStyle = [styles.commentItem, comment.isReply && styles.replyItem];
 
         return (
           <View key={comment.id} style={itemStyle}>
             <Avatar.Image size={32} source={{ uri: comment.avatar }} />
             <View style={styles.commentContent}>
               <View style={styles.commentHeader}>
-                <Text
-                  style={[styles.authorName, { color: theme.colors.onSurface }]}
-                >
+                <Text style={[styles.authorName, { color: theme.colors.onSurface }]}>
                   {comment.author}
                 </Text>
-                <Text
-                  style={[styles.commentDate, { color: theme.colors.outline }]}
-                >
+                <Text style={[styles.commentDate, { color: theme.colors.outline }]}>
                   {comment.date}
                 </Text>
               </View>
-              <Text
-                style={[
-                  styles.commentBody,
-                  { color: theme.colors.onSurfaceVariant },
-                ]}
-              >
+              <Text style={[styles.commentBody, { color: theme.colors.onSurfaceVariant }]}>
                 {comment.content}
               </Text>
             </View>

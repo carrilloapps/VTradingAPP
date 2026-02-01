@@ -114,10 +114,7 @@ Para más detalle sobre el tratamiento de datos y términos legales, consulte:
 ### Registrar un Evento
 
 ```typescript
-import {
-  analyticsService,
-  ANALYTICS_EVENTS,
-} from '../services/firebase/AnalyticsService';
+import { analyticsService, ANALYTICS_EVENTS } from '../services/firebase/AnalyticsService';
 
 // Registro simple
 analyticsService.logEvent(ANALYTICS_EVENTS.BUTTON_CLICK, {

@@ -44,16 +44,9 @@ const CategoryCard: React.FC<CategoryCardProps> = ({ category, onPress }) => {
               },
             ]}
           >
-            <MaterialCommunityIcons
-              name={icon}
-              size={24}
-              color={theme.colors.primary}
-            />
+            <MaterialCommunityIcons name={icon} size={24} color={theme.colors.primary} />
           </View>
-          <Text
-            variant="titleMedium"
-            style={[styles.title, { color: theme.colors.onSurface }]}
-          >
+          <Text variant="titleMedium" style={[styles.title, { color: theme.colors.onSurface }]}>
             {category.name}
           </Text>
         </View>

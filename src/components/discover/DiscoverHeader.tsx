@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-  Animated,
-  StatusBar,
-  useWindowDimensions,
-  Keyboard,
-} from 'react-native';
+import { View, StyleSheet, Animated, StatusBar, useWindowDimensions, Keyboard } from 'react-native';
 import { Text, useTheme, TouchableRipple } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,12 +8,7 @@ import FastImage from 'react-native-fast-image';
 
 import SearchBar from '@/components/ui/SearchBar';
 
-export type DiscoverHeaderVariant =
-  | 'main'
-  | 'detail'
-  | 'tag'
-  | 'category'
-  | 'search';
+export type DiscoverHeaderVariant = 'main' | 'detail' | 'tag' | 'category' | 'search';
 
 interface DiscoverHeaderProps {
   variant?: DiscoverHeaderVariant;
@@ -65,8 +53,7 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
     extrapolate: 'clamp',
   });
 
-  const isFadingVariant =
-    variant === 'detail' || variant === 'tag' || variant === 'category';
+  const isFadingVariant = variant === 'detail' || variant === 'tag' || variant === 'category';
 
   const solidBgOpacity =
     variant === 'main'
@@ -104,9 +91,7 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
   const isDark = theme.dark;
 
   // Button dynamic styles
-  const buttonBgColor = isDark
-    ? 'rgba(30, 35, 32, 0.7)'
-    : 'rgba(255, 255, 255, 0.85)';
+  const buttonBgColor = isDark ? 'rgba(30, 35, 32, 0.7)' : 'rgba(255, 255, 255, 0.85)';
   const buttonStyles = [
     styles.iconButton,
     {
@@ -119,8 +104,7 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
   const hitSlop = { top: 10, bottom: 10, left: 10, right: 10 };
 
   // Reading Progress calculation (only for detail)
-  const maxScroll =
-    contentHeight > windowHeight ? contentHeight - windowHeight : 1;
+  const maxScroll = contentHeight > windowHeight ? contentHeight - windowHeight : 1;
   const isDetail = variant === 'detail';
 
   const progressScaleX = scroll.interpolate({
@@ -135,8 +119,7 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
     extrapolate: 'clamp',
   });
 
-  const displayTitle =
-    variant === 'tag' && !title.startsWith('#') ? `#${title}` : title;
+  const displayTitle = variant === 'tag' && !title.startsWith('#') ? `#${title}` : title;
 
   const containerStyle = [
     styles.container,
@@ -171,43 +154,30 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
     {
       backgroundColor: theme.colors.primary,
       width: windowWidth,
-      transform: [
-        { translateX: progressTranslateX },
-        { scaleX: progressScaleX },
-      ],
+      transform: [{ translateX: progressTranslateX }, { scaleX: progressScaleX }],
     },
   ];
 
   const contentStyle = [styles.content, { paddingTop: insets.top }];
 
-  const leftContainerStyle = [
-    styles.leftContainer,
-    variant === 'main' && styles.flex1,
-  ];
+  const leftContainerStyle = [styles.leftContainer, variant === 'main' && styles.flex1];
 
   const logoWrapperStyle = { opacity: logoOpacity };
 
   const logoImageStyle = [
     styles.logoImage,
     {
-      tintColor: isDark
-        ? theme.colors.onSurface
-        : theme.colors.onPrimaryContainer,
+      tintColor: isDark ? theme.colors.onSurface : theme.colors.onPrimaryContainer,
     },
   ];
 
-  const detailLogoWrapperStyle = [
-    { opacity: logoOpacity, position: 'absolute' as const },
-  ];
+  const detailLogoWrapperStyle = [{ opacity: logoOpacity, position: 'absolute' as const }];
 
   const centerContainerStyle = [styles.centerContainer, { top: insets.top }];
 
   const titleWrapperStyle = { opacity: titleOpacity };
 
-  const headerTitleStyle = [
-    styles.headerTitle,
-    { color: theme.colors.onSurface },
-  ];
+  const headerTitleStyle = [styles.headerTitle, { color: theme.colors.onSurface }];
 
   return (
     <View style={containerStyle}>
@@ -222,10 +192,7 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
         {/* Gradient Layer (fades out on scroll for fading variants) */}
         <Animated.View style={gradientWrapperStyle}>
           <LinearGradient
-            colors={[
-              theme.dark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)',
-              'transparent',
-            ]}
+            colors={[theme.dark ? 'rgba(0,0,0,0.6)' : 'rgba(255,255,255,0.7)', 'transparent']}
             style={gradientStyle}
             pointerEvents="none"
           />
@@ -237,9 +204,7 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
         </Animated.View>
 
         {/* Progress Bar (detail only) */}
-        {isDetail && contentHeight > 0 && (
-          <Animated.View style={progressBarStyle} />
-        )}
+        {isDetail && contentHeight > 0 && <Animated.View style={progressBarStyle} />}
       </View>
 
       {/* Content Layer */}
@@ -256,11 +221,7 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
               accessibilityLabel="Volver"
               accessibilityRole="button"
             >
-              <MaterialCommunityIcons
-                name="arrow-left"
-                size={24}
-                color={theme.colors.onSurface}
-              />
+              <MaterialCommunityIcons name="arrow-left" size={24} color={theme.colors.onSurface} />
             </TouchableRipple>
           ) : (
             <Animated.View style={logoWrapperStyle}>
@@ -326,11 +287,7 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
                 accessibilityLabel="Buscar"
                 accessibilityRole="button"
               >
-                <MaterialCommunityIcons
-                  name="magnify"
-                  size={24}
-                  color={theme.colors.onSurface}
-                />
+                <MaterialCommunityIcons name="magnify" size={24} color={theme.colors.onSurface} />
               </TouchableRipple>
               <TouchableRipple
                 onPress={onNotificationsPress}

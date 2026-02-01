@@ -8,9 +8,7 @@ export type StandardTrend = 'up' | 'down' | 'neutral';
  * - < 0: 'down'
  * - 0: 'neutral'
  */
-export const getTrend = (
-  change: number | string | undefined | null,
-): StandardTrend => {
+export const getTrend = (change: number | string | undefined | null): StandardTrend => {
   if (change === undefined || change === null) return 'neutral';
 
   let numVal = 0;
@@ -32,10 +30,7 @@ export const getTrend = (
 /**
  * Returns the appropriate color for the trend.
  */
-export const getTrendColor = (
-  trend: StandardTrend,
-  theme: MD3Theme,
-): string => {
+export const getTrendColor = (trend: StandardTrend, theme: MD3Theme): string => {
   switch (trend) {
     case 'up':
       return (theme.colors as any).success || '#6EE7B7'; // Green

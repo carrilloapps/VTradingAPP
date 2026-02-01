@@ -6,11 +6,7 @@ interface XIconProps extends SvgProps {
   color?: string;
 }
 
-const XIcon: React.FC<XIconProps> = ({
-  size = 24,
-  color = '#000',
-  ...props
-}) => {
+const XIcon: React.FC<XIconProps> = ({ size = 24, color = '#000', ...props }) => {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" {...props}>
       <Path
