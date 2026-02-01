@@ -202,7 +202,7 @@ const TagDetailScreen = () => {
         await Share.open({
           url: sharePath,
           type: 'image/jpeg',
-          message: `Mira esta etiqueta #${tag?.name || 'VTrading'}`,
+          message: `🔍 Todo lo que necesitas saber sobre #${tag?.name} está en VTrading. Información clave para tu estrategia.\n\n🌐 vtrading.app`,
         });
 
         analyticsService.logShare(

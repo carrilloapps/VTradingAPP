@@ -226,7 +226,7 @@ const CategoryDetailScreen = () => {
         await Share.open({
           url: sharePath,
           type: 'image/jpeg',
-          message: `Mira lo nuevo en ${category?.name || 'VTrading'}`,
+          message: `💡 Lo último en ${category?.name}: Análisis técnicos y noticias que mueven el mercado.\n\n🌐 vtrading.app`,
         });
 
         analyticsService.logShare(

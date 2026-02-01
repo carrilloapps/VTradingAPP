@@ -97,11 +97,17 @@ describe('dateUtils', () => {
       expect(formatTimeAgo(date)).not.toContain('Hace');
     });
 
-    it('should handle future dates (inconsistency check)', () => {
+    it('should handle very recent dates', () => {
+      // 2 seconds ago
+      const date = new Date(NOW - 2 * 1000).toISOString();
+      expect(formatTimeAgo(date)).toBe('Ahora mismo');
+    });
+
+    it('should handle future dates (fixed inconsistency)', () => {
       // 10 seconds in future
       const date = new Date(NOW + 10 * 1000).toISOString();
-      // Logic: diff = -10. -10 < 60 is true. Returns "Hace -10s".
-      expect(formatTimeAgo(date)).toBe('Hace -10s');
+      // Logic: diff = -10. -10 < 5 is true. Returns "Ahora mismo".
+      expect(formatTimeAgo(date)).toBe('Ahora mismo');
     });
   });
 });

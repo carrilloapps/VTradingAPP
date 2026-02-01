@@ -77,7 +77,7 @@ const StockDetailScreen = ({ route, navigation }: any) => {
         await Share.open({
           url: sharePath,
           type: 'image/jpeg',
-          message: `Acción: ${stock.name} (${stock.symbol}) - VTrading`,
+          message: `📊 Revisa el desempeño de ${stock.name} (${stock.symbol}) en tiempo real. ¡Impulsa tus decisiones financieras! 🚀\n\n🌐 vtrading.app`,
         });
 
         analyticsService.logShare(
@@ -364,9 +364,9 @@ const StockDetailScreen = ({ route, navigation }: any) => {
               >
                 {primaryStatValue
                   ? primaryStatValue.toLocaleString('es-VE', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2,
-                    })
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })
                   : '-'}
               </Text>
               <BolivarIcon size={14} color={theme.colors.onSurface} />

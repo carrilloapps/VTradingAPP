@@ -95,91 +95,94 @@ const DiscoverScreen = () => {
     }));
   }, [promotedPosts, theme.colors]);
 
-  const fetchInitialData = useCallback(async (bypassCache = false) => {
-    try {
-      await remoteConfigService.fetchAndActivate();
+  const fetchInitialData = useCallback(
+    async (bypassCache = false) => {
+      try {
+        await remoteConfigService.fetchAndActivate();
 
-      const isEnabled = await remoteConfigService.getFeature('discover');
-      setFeatureEnabled(isEnabled);
+        const isEnabled = await remoteConfigService.getFeature('discover');
+        setFeatureEnabled(isEnabled);
 
-      if (!isEnabled) {
-        setIsLoading(false);
-        return;
-      }
-
-      const { categorySlug, tagSlug } = (route.params as any) || {};
-      let catId = selectedCategory;
-      let filterTagId: number | undefined;
-
-      // 1. Fetch Tags first to build queries
-      const [trendingTagEn, trendingTagEs, promotedTagEn, promotedTagEs] =
-        await Promise.all([
-          wordPressService.getTagBySlug('trending'),
-          wordPressService.getTagBySlug('tendencias'),
-          wordPressService.getTagBySlug('promoted'),
-          wordPressService.getTagBySlug('promocionado'),
-        ]);
-
-      const trendingTag = trendingTagEn || trendingTagEs;
-      const promotedTag = promotedTagEn || promotedTagEs;
-
-      // 2. Start fetching Posts and Trending immediately (Critical Content)
-      if (tagSlug) {
-        const tag = await wordPressService.getTagBySlug(tagSlug);
-        if (tag) filterTagId = tag.id;
-      }
-
-      const postsPromise = wordPressService.getPostsPaginated(
-        1,
-        10,
-        catId,
-        filterTagId,
-        bypassCache,
-      );
-
-      // 3. Render critical content as soon as possible
-      const [postsResult] = await Promise.all([postsPromise]);
-
-      setPosts(postsResult.data);
-      setTotalPages(postsResult.totalPages);
-      setCurrentPage(1);
-
-      // 4. Secondary Content (Categories, Trending, Promoted) - Non-blocking for initial feed
-      wordPressService.getCategories(bypassCache).then(cats => {
-        setCategories(cats);
-        if (categorySlug) {
-          const category = cats.find(c => c.slug === categorySlug);
-          if (category) {
-            setSelectedCategory(category.id);
-            // Verify if we need to reload filtering by this category if it wasn't set initially
-            // Ideally we should have waited if categorySlug was present, but for perceived performance we loaded general first?
-            // No, if categorySlug is present we probably should have waited.
-            // But let's assume standard flow.
-          }
+        if (!isEnabled) {
+          setIsLoading(false);
+          return;
         }
-      });
 
-      if (trendingTag) {
-        wordPressService
-          .getPosts(1, 4, undefined, trendingTag.id, bypassCache)
-          .then(setTrendingPosts);
-      }
+        const { categorySlug, tagSlug } = (route.params as any) || {};
+        let catId = selectedCategory;
+        let filterTagId: number | undefined;
 
-      if (promotedTag) {
-        wordPressService
-          .getPosts(1, 5, undefined, promotedTag.id, bypassCache)
-          .then(setPromotedPosts);
+        // 1. Fetch Tags first to build queries
+        const [trendingTagEn, trendingTagEs, promotedTagEn, promotedTagEs] =
+          await Promise.all([
+            wordPressService.getTagBySlug('trending'),
+            wordPressService.getTagBySlug('tendencias'),
+            wordPressService.getTagBySlug('promoted'),
+            wordPressService.getTagBySlug('promocionado'),
+          ]);
+
+        const trendingTag = trendingTagEn || trendingTagEs;
+        const promotedTag = promotedTagEn || promotedTagEs;
+
+        // 2. Start fetching Posts and Trending immediately (Critical Content)
+        if (tagSlug) {
+          const tag = await wordPressService.getTagBySlug(tagSlug);
+          if (tag) filterTagId = tag.id;
+        }
+
+        const postsPromise = wordPressService.getPostsPaginated(
+          1,
+          10,
+          catId,
+          filterTagId,
+          bypassCache,
+        );
+
+        // 3. Render critical content as soon as possible
+        const [postsResult] = await Promise.all([postsPromise]);
+
+        setPosts(postsResult.data);
+        setTotalPages(postsResult.totalPages);
+        setCurrentPage(1);
+
+        // 4. Secondary Content (Categories, Trending, Promoted) - Non-blocking for initial feed
+        wordPressService.getCategories(bypassCache).then(cats => {
+          setCategories(cats);
+          if (categorySlug) {
+            const category = cats.find(c => c.slug === categorySlug);
+            if (category) {
+              setSelectedCategory(category.id);
+              // Verify if we need to reload filtering by this category if it wasn't set initially
+              // Ideally we should have waited if categorySlug was present, but for perceived performance we loaded general first?
+              // No, if categorySlug is present we probably should have waited.
+              // But let's assume standard flow.
+            }
+          }
+        });
+
+        if (trendingTag) {
+          wordPressService
+            .getPosts(1, 4, undefined, trendingTag.id, bypassCache)
+            .then(setTrendingPosts);
+        }
+
+        if (promotedTag) {
+          wordPressService
+            .getPosts(1, 5, undefined, promotedTag.id, bypassCache)
+            .then(setPromotedPosts);
+        }
+      } catch (e) {
+        SafeLogger.error('Failed to load data', e);
+        observabilityService.captureError(e, {
+          context: 'DiscoverScreen.loadData',
+        });
+        setError('Error al cargar contenido.');
+      } finally {
+        setIsLoading(false);
       }
-    } catch (e) {
-      SafeLogger.error('Failed to load data', e);
-      observabilityService.captureError(e, {
-        context: 'DiscoverScreen.loadData',
-      });
-      setError('Error al cargar contenido.');
-    } finally {
-      setIsLoading(false);
-    }
-  }, [route.params, selectedCategory]);
+    },
+    [route.params, selectedCategory],
+  );
 
   useEffect(() => {
     fetchInitialData();

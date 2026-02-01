@@ -5,6 +5,10 @@ export const formatTimeAgo = (dateString: string): string => {
 
   if (isNaN(diffInSeconds)) return dateString;
 
+  if (diffInSeconds < 5) {
+    return 'Ahora mismo';
+  }
+
   if (diffInSeconds < 60) {
     return `Hace ${diffInSeconds}s`;
   }
