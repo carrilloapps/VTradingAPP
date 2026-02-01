@@ -28,6 +28,7 @@ import SectionHeader from '@/components/discover/SectionHeader';
 import CategoryTabList from '@/components/discover/CategoryTabList';
 import AdCard from '@/components/discover/AdCard';
 import FeaturedCarousel from '@/components/discover/FeaturedCarousel';
+import PartnersSection from '@/components/discover/PartnersSection';
 import { useToastStore } from '@/stores/toastStore';
 import { observabilityService } from '@/services/ObservabilityService';
 import { remoteConfigService } from '@/services/firebase/RemoteConfigService';
@@ -382,18 +383,21 @@ const DiscoverScreen = () => {
     [navigation],
   );
 
-  const renderFooter = () =>
-    loadingPagination ? (
-      <View style={styles.footerContainer}>
-        <ProgressBar
-          indeterminate
-          color={theme.colors.primary}
-          style={styles.footerProgressBar}
-        />
-      </View>
-    ) : (
+  const renderFooter = () => (
+    <View>
+      {loadingPagination && (
+        <View style={styles.footerContainer}>
+          <ProgressBar
+            indeterminate
+            color={theme.colors.primary}
+            style={styles.footerProgressBar}
+          />
+        </View>
+      )}
+      <PartnersSection />
       <View style={{ height: insets.bottom + 20 }} />
-    );
+    </View>
+  );
 
   if (isLoading) {
     return featureEnabled ? (
