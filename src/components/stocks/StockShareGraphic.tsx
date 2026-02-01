@@ -24,6 +24,7 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
   aspectRatio = '1:1',
 }) => {
   const theme = useTheme();
+  const isDark = theme.dark;
 
   const trend = getTrend(stock.changePercent);
   const trendColor = getTrendColor(trend, theme);
@@ -175,7 +176,9 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
           <View style={styles.templateHeader}>
             <View style={styles.logoAndBadgeRow}>
               <FastImage
-                source={require('../../assets/images/logotipo.png')}
+                source={isDark ? require('../../assets/images/logotipo.png') : require('../../assets/images/logotipo-white.png')}
+                tintColor={isDark ? '#FFFFFF' : '#212121'}
+                resizeMode={FastImage.resizeMode.contain}
                 style={[
                   styles.templateMainLogo,
                   {
@@ -184,7 +187,6 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
                     height: logoHeight,
                   } as any,
                 ]}
-                resizeMode={FastImage.resizeMode.contain}
               />
               {!isPremium && (
                 <Surface
@@ -424,8 +426,8 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
                     >
                       {averagePrice
                         ? averagePrice.toLocaleString('es-VE', {
-                            minimumFractionDigits: 2,
-                          })
+                          minimumFractionDigits: 2,
+                        })
                         : '--'}{' '}
                       <Text
                         style={[

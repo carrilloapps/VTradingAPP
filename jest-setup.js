@@ -114,7 +114,7 @@ jest.mock('react-native-reanimated', () => {
 
   // The mock for `call` immediately calls the callback which is incorrect
   // So we override it with a no-op
-  Reanimated.default.call = () => {};
+  Reanimated.default.call = () => { };
 
   return Reanimated;
 });
@@ -179,17 +179,63 @@ jest.mock('@react-native-firebase/in-app-messaging', () => {
   };
 });
 
+jest.mock('react-native-mmkv', () => ({
+  createMMKV: jest.fn(() => ({
+    set: jest.fn(),
+    getString: jest.fn(),
+    getNumber: jest.fn(),
+    getBoolean: jest.fn(),
+    delete: jest.fn(),
+    getAllKeys: jest.fn(() => []),
+    clearAll: jest.fn(),
+  })),
+  MMKV: jest.fn(),
+}));
+
+jest.mock('@notifee/react-native', () => ({
+  displayNotification: jest.fn(),
+  createChannel: jest.fn(),
+  deleteChannel: jest.fn(),
+  getChannels: jest.fn(),
+  getChannel: jest.fn(),
+  getNotificationSettings: jest.fn(),
+  requestPermission: jest.fn(),
+  onMessage: jest.fn(),
+  onBackgroundEvent: jest.fn(),
+  onForegroundEvent: jest.fn(),
+  cancelNotification: jest.fn(),
+  cancelAllNotifications: jest.fn(),
+  cancelDisplayedNotifications: jest.fn(),
+  cancelTriggerNotifications: jest.fn(),
+  getTriggerNotificationIds: jest.fn(),
+  getTriggerNotifications: jest.fn(),
+  createTriggerNotification: jest.fn(),
+  AndroidImportance: {
+    DEFAULT: 3,
+    HIGH: 4,
+    LOW: 2,
+    MIN: 1,
+    NONE: 0,
+  },
+  AndroidVisibility: {
+    PRIVATE: 0,
+    PUBLIC: 1,
+    SECRET: -1,
+  },
+}));
+
 jest.mock('@react-native-firebase/analytics', () => {
   const analyticsInstance = {
     logEvent: jest.fn(),
     logScreenView: jest.fn(),
     setUserProperty: jest.fn(),
     setUserId: jest.fn(),
+    setAnalyticsCollectionEnabled: jest.fn(),
   };
   return {
     __esModule: true,
     default: () => analyticsInstance,
-    getAnalytics: () => analyticsInstance,
+    getAnalytics: jest.fn(() => analyticsInstance),
     logEvent: jest.fn(),
     logScreenView: jest.fn(),
     setUserProperty: jest.fn(),

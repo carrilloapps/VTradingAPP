@@ -30,12 +30,12 @@ interface OnboardingItem {
   description: string;
   icon: any;
   colorType:
-    | 'primary'
-    | 'secondary'
-    | 'tertiary'
-    | 'error'
-    | 'warning'
-    | 'info';
+  | 'primary'
+  | 'secondary'
+  | 'tertiary'
+  | 'error'
+  | 'warning'
+  | 'info';
   hasAction?: boolean;
 }
 
@@ -45,6 +45,7 @@ interface OnboardingScreenProps {
 
 const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
   const theme = useAppTheme();
+  const isDark = theme.dark;
   const navigation = useNavigation();
   const showToast = useToastStore(state => state.showToast);
   const insets = useSafeAreaInsets();
@@ -68,7 +69,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
         title: 'Bienvenido/a',
         description:
           'Tu herramienta definitiva para el seguimiento financiero en Venezuela. Cotizaciones, tasas y análisis en tiempo real.',
-        icon: require('../assets/images/logo.png'),
+        icon: isDark ? require('../assets/images/logo.png') : require('../assets/images/logo-white.png'),
         colorType: 'primary',
       },
       {
@@ -391,7 +392,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
                         }
                         onPress={
                           notificationPermissionStatus === true
-                            ? () => {}
+                            ? () => { }
                             : requestNotificationPermission
                         }
                         variant="primary"

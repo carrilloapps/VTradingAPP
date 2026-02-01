@@ -29,6 +29,7 @@ const WidgetPreview: React.FC<WidgetPreviewProps> = ({
   showGraph,
 }) => {
   const theme = useAppTheme();
+  const isDark = theme.dark;
 
   // Pre-calculate dynamic styles
   const statusBarColor = isWallpaperDark ? '#FFF' : '#1A1A1A';
@@ -126,12 +127,13 @@ const WidgetPreview: React.FC<WidgetPreviewProps> = ({
               ]}
             >
               <FastImage
-                source={require('../../assets/images/logo.png')}
+                source={isDark ? require('../../assets/images/logo.png') : require('../../assets/images/logo-white.png')}
+                tintColor={isDark ? '#FFFFFF' : '#212121'}
+                resizeMode={FastImage.resizeMode.contain}
                 style={[
                   styles.vtradingLogo,
                   { tintColor: vtradingLogoTint } as any,
                 ]}
-                resizeMode={FastImage.resizeMode.contain}
               />
             </View>
             {/* Active Indicator dot */}

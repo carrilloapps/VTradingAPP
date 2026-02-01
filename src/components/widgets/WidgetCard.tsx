@@ -26,6 +26,7 @@ const WidgetCard: React.FC<WidgetCardProps> = ({
   showGraph,
 }) => {
   const theme = useAppTheme();
+  const isDark = theme.dark;
 
   // Determine gradient colors
   const getGradientColors = () => {
@@ -33,15 +34,15 @@ const WidgetCard: React.FC<WidgetCardProps> = ({
       // Transparency logic: adapt to wallpaper brightness
       return isWallpaperDark
         ? [
-            'rgba(33, 33, 33, 0.8)',
-            'rgba(45, 45, 45, 0.8)',
-            'rgba(33, 33, 33, 0.8)',
-          ]
+          'rgba(33, 33, 33, 0.8)',
+          'rgba(45, 45, 45, 0.8)',
+          'rgba(33, 33, 33, 0.8)',
+        ]
         : [
-            'rgba(255, 255, 255, 0.85)',
-            'rgba(242, 244, 246, 0.85)',
-            'rgba(255, 255, 255, 0.85)',
-          ];
+          'rgba(255, 255, 255, 0.85)',
+          'rgba(242, 244, 246, 0.85)',
+          'rgba(255, 255, 255, 0.85)',
+        ];
     }
 
     // Opaque logic - Grayscale for Dark (#212121 base), Modern Gradient for Light (#FFFFFF base)
@@ -91,7 +92,9 @@ const WidgetCard: React.FC<WidgetCardProps> = ({
       <View style={styles.widgetHeader}>
         <View style={styles.widgetTitleRow}>
           <FastImage
-            source={require('../../assets/images/logo.png')}
+            source={isDark ? require('../../assets/images/logo.png') : require('../../assets/images/logo-white.png')}
+            tintColor={isDark ? '#FFFFFF' : '#212121'}
+            resizeMode={FastImage.resizeMode.contain}
             style={[styles.widgetIcon, { tintColor: widgetIconTint } as any]}
           />
           <Text style={[styles.widgetTitleText, { color: widgetTitleColor }]}>

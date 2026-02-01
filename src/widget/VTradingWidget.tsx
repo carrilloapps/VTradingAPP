@@ -49,7 +49,7 @@ export default function VTradingWidget({
     : 'rgba(0, 0, 0, 0.1)';
 
   const limitedItems = items.slice(0, 4);
-  const logoImage = require('../assets/images/logo.png');
+  const logoImage = isWidgetDarkMode ? require('../assets/images/logo.png') : require('../assets/images/logo-white.png');
 
   return (
     <FlexWidget
@@ -58,10 +58,10 @@ export default function VTradingWidget({
         backgroundColor,
         backgroundGradient: !isTransparent
           ? {
-              from: gradientFrom,
-              to: gradientTo,
-              orientation: 'TL_BR',
-            }
+            from: gradientFrom,
+            to: gradientTo,
+            orientation: 'TL_BR',
+          }
           : undefined,
         width: 'match_parent',
         height: 'match_parent',

@@ -364,9 +364,9 @@ const StockDetailScreen = ({ route, navigation }: any) => {
               >
                 {primaryStatValue
                   ? primaryStatValue.toLocaleString('es-VE', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })
                   : '-'}
               </Text>
               <BolivarIcon size={14} color={theme.colors.onSurface} />

@@ -36,4 +36,22 @@ describe('PerformanceService', () => {
     expect(getPerformance).toHaveBeenCalled();
     expect(httpMetric).toHaveBeenCalledWith(expect.anything(), url, method);
   });
+
+  it('tracks an API call with attributes', async () => {
+    const url = 'https://api.test.com';
+    const method = 'POST';
+    const attributes = { key1: 'value1', key2: 'value2' };
+
+    await performanceService.trackApiCall(
+      url,
+      method,
+      200,
+      undefined,
+      undefined,
+      undefined,
+      attributes,
+    );
+
+    expect(httpMetric).toHaveBeenCalledWith(expect.anything(), url, method);
+  });
 });

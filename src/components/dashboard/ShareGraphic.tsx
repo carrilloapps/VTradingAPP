@@ -27,6 +27,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
   onReady,
 }) => {
   const theme = useTheme();
+  const isDark = theme.dark;
   const isVertical = aspectRatio === '16:9';
 
   // Dynamic sizes based on aspect ratio
@@ -176,8 +177,9 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
           <View style={styles.templateHeader}>
             <View style={styles.logoAndBadgeRow}>
               <FastImage
-                source={require('../../assets/images/logotipo.png')}
+                source={isDark ? require('../../assets/images/logotipo.png') : require('../../assets/images/logotipo-white.png')}
                 style={logoStyle}
+                tintColor={isDark ? '#FFFFFF' : '#212121'}
                 resizeMode={FastImage.resizeMode.cover}
               />
               {!isPremium && (

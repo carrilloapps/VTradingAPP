@@ -15,22 +15,22 @@ interface AuthLogoProps {
 const AuthLogo: React.FC<AuthLogoProps> = ({
   size = 80,
   showBadge = true,
-  tintColor,
   containerStyle,
 }) => {
   const theme = useAppTheme();
-  const resolvedTintColor = tintColor || (theme.dark ? undefined : '#212121');
+  const isDark = theme.dark;
 
   return (
     <View style={[styles.logoRow, containerStyle]}>
       <FastImage
-        source={require('../../assets/images/logo.png')}
+        source={isDark ? require('../../assets/images/logo.png') : require('../../assets/images/logo-white.png')}
+        tintColor={isDark ? '#FFFFFF' : '#212121'}
+        resizeMode="contain"
         style={[
           styles.logo,
           {
             width: size,
             height: size,
-            tintColor: resolvedTintColor || undefined,
           } as any,
         ]}
       />

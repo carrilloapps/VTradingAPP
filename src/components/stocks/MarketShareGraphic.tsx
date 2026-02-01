@@ -31,6 +31,7 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
   aspectRatio = '1:1',
 }) => {
   const theme = useTheme();
+  const isDark = theme.dark;
   const isVertical = aspectRatio === '16:9';
 
   // Dynamic sizes based on aspect ratio
@@ -152,16 +153,16 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
           <View style={styles.templateHeader}>
             <View style={styles.logoAndBadgeRow}>
               <FastImage
-                source={require('../../assets/images/logotipo.png')}
+                source={isDark ? require('../../assets/images/logotipo.png') : require('../../assets/images/logotipo-white.png')}
+                resizeMode={FastImage.resizeMode.contain}
+                tintColor={isDark ? '#FFFFFF' : '#212121'}
                 style={[
                   styles.templateMainLogo,
                   {
-                    tintColor: theme.dark ? undefined : theme.colors.primary,
                     width: logoWidth,
                     height: logoHeight,
                   } as any,
                 ]}
-                resizeMode={FastImage.resizeMode.contain}
               />
               {!isPremium && (
                 <Surface
