@@ -98,7 +98,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
     { color: theme.colors.onSurfaceVariant, fontSize: dateTextSize },
   ];
 
-  const contentStyle = [styles.templateContent, isVertical && ({ gap: 40 } as const)];
+  const contentStyle = [styles.templateContent, isVertical && styles.flexContentVertical];
 
   const footerTextStyle = [
     styles.templateFooterText,
@@ -108,23 +108,27 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
   // Notify parent when ready
   React.useEffect(() => {
     if (onReady) {
-      // Small delay to ensure layout is complete
-      const timeout = setTimeout(onReady, 100);
+      // Longer delay for Android to handle off-screen layout updates
+      const timeout = setTimeout(onReady, 500);
       return () => clearTimeout(timeout);
     }
-  }, [featuredRates, onReady]);
+  }, [featuredRates, onReady, aspectRatio]);
+
+  const targetHeight = isVertical ? 1066 : 600;
 
   return (
     <View
-      style={[styles.hiddenTemplate, { height: isVertical ? 600 * (16 / 9) : 600 }]}
+      style={[styles.hiddenTemplate, { height: targetHeight }]}
       pointerEvents="none"
       collapsable={false}
     >
       <ViewShot
+        key={aspectRatio} // Force re-mount on ratio change to clear Android cache
         ref={viewShotRef}
         options={{
           format: 'jpg',
           quality: 1.0,
+          result: 'tmpfile',
           width: 1080,
           height: isVertical ? 1920 : 1080,
         }}
@@ -163,7 +167,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
                 }
                 style={logoStyle}
                 tintColor={isDark ? '#FFFFFF' : '#212121'}
-                resizeMode={FastImage.resizeMode.cover}
+                resizeMode={FastImage.resizeMode.contain}
               />
               {!isPremium && (
                 <Surface style={freeBadgeStyle} elevation={2}>
@@ -368,7 +372,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
 const styles = StyleSheet.create({
   hiddenTemplate: {
     position: 'absolute',
-    left: -4000,
+    left: -3000,
     width: 600,
     zIndex: -1,
   },
@@ -388,10 +392,9 @@ const styles = StyleSheet.create({
   },
   shareTemplateVertical: {
     width: 600,
-    height: 600 * (16 / 9),
+    height: 1066,
     paddingVertical: 100,
     paddingHorizontal: 40,
-    justifyContent: 'space-around',
   },
   templateGlow: {
     position: 'absolute',
@@ -466,6 +469,11 @@ const styles = StyleSheet.create({
   templateContent: {
     width: '100%',
     gap: 10,
+  },
+  flexContentVertical: {
+    flex: 1,
+    justifyContent: 'center',
+    gap: 32,
   },
   templateCard: {
     padding: 16,

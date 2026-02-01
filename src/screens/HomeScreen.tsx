@@ -64,24 +64,19 @@ const HomeScreen = ({ navigation }: any) => {
     showToast('Generando imagen para compartir...', 'info');
 
     // Wait for the graphic to be ready (layout updated)
-    // We use a small polling loop as a failsafe if onReady doesn't fire instantly
-    // but primarily we rely on the component callback
     let attempts = 0;
-    while (!isReadyToCapture && attempts < 20) {
-      // Max 2s wait
+    while (!isReadyToCapture && attempts < 30) {
+      // Max 3s wait
       await new Promise<void>(resolve => setTimeout(() => resolve(), 100));
       attempts++;
     }
 
+    // Extra safety buffer for Android surface stability
+    await new Promise<void>(resolve => setTimeout(() => resolve(), 200));
+
     if (viewShotRef.current) {
       try {
-        const uri = await captureRef(viewShotRef.current, {
-          format: 'jpg',
-          quality: 1.0,
-          result: 'tmpfile',
-          width: 1080,
-          height: format === '1:1' ? 1080 : 1920,
-        });
+        const uri = await captureRef(viewShotRef.current);
 
         if (!uri) throw new Error('Failed to capture image');
         const sharePath = uri.startsWith('file://') ? uri : `file://${uri}`;
