@@ -463,7 +463,11 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
 
                 <View style={styles.brandContainer}>
                   <FastImage
-                    source={isDark ? require('../../assets/images/logotipo.png') : require('../../assets/images/logotipo-white.png')}
+                    source={
+                      isDark
+                        ? require('../../assets/images/logotipo.png')
+                        : require('../../assets/images/logotipo-white.png')
+                    }
                     style={brandLogoStyle}
                     tintColor={isDark ? '#FFFFFF' : '#212121'}
                     resizeMode={FastImage.resizeMode.contain}
@@ -837,7 +841,9 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
             source={
               image
                 ? { uri: image }
-                : isDark ? require('../../assets/images/logotipo.png') : require('../../assets/images/logotipo-white.png')
+                : isDark
+                  ? require('../../assets/images/logotipo.png')
+                  : require('../../assets/images/logotipo-white.png')
             }
             style={styles.backgroundImage}
             blurRadius={BACKGROUND_BLUR}
@@ -870,7 +876,11 @@ const ShareableDetail: React.FC<ShareableDetailProps> = ({
               {/* Brand Logo - Using Asset */}
               <View style={styles.brandContainer}>
                 <FastImage
-                  source={isDark ? require('../../assets/images/logotipo.png') : require('../../assets/images/logotipo-white.png')}
+                  source={
+                    isDark
+                      ? require('../../assets/images/logotipo.png')
+                      : require('../../assets/images/logotipo-white.png')
+                  }
                   style={topBrandLogoStyle}
                   tintColor={isDark ? '#FFFFFF' : '#212121'}
                   resizeMode={FastImage.resizeMode.contain}

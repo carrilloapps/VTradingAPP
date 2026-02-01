@@ -153,7 +153,11 @@ const MarketShareGraphic: React.FC<MarketShareGraphicProps> = ({
           <View style={styles.templateHeader}>
             <View style={styles.logoAndBadgeRow}>
               <FastImage
-                source={isDark ? require('../../assets/images/logotipo.png') : require('../../assets/images/logotipo-white.png')}
+                source={
+                  isDark
+                    ? require('../../assets/images/logotipo.png')
+                    : require('../../assets/images/logotipo-white.png')
+                }
                 resizeMode={FastImage.resizeMode.contain}
                 tintColor={isDark ? '#FFFFFF' : '#212121'}
                 style={[

@@ -23,7 +23,11 @@ const AuthLogo: React.FC<AuthLogoProps> = ({
   return (
     <View style={[styles.logoRow, containerStyle]}>
       <FastImage
-        source={isDark ? require('../../assets/images/logo.png') : require('../../assets/images/logo-white.png')}
+        source={
+          isDark
+            ? require('../../assets/images/logo.png')
+            : require('../../assets/images/logo-white.png')
+        }
         tintColor={isDark ? '#FFFFFF' : '#212121'}
         resizeMode="contain"
         style={[

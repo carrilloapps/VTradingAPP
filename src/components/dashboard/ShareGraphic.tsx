@@ -177,7 +177,11 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
           <View style={styles.templateHeader}>
             <View style={styles.logoAndBadgeRow}>
               <FastImage
-                source={isDark ? require('../../assets/images/logotipo.png') : require('../../assets/images/logotipo-white.png')}
+                source={
+                  isDark
+                    ? require('../../assets/images/logotipo.png')
+                    : require('../../assets/images/logotipo-white.png')
+                }
                 style={logoStyle}
                 tintColor={isDark ? '#FFFFFF' : '#212121'}
                 resizeMode={FastImage.resizeMode.cover}

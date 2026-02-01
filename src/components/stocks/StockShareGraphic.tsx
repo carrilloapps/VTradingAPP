@@ -176,7 +176,11 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
           <View style={styles.templateHeader}>
             <View style={styles.logoAndBadgeRow}>
               <FastImage
-                source={isDark ? require('../../assets/images/logotipo.png') : require('../../assets/images/logotipo-white.png')}
+                source={
+                  isDark
+                    ? require('../../assets/images/logotipo.png')
+                    : require('../../assets/images/logotipo-white.png')
+                }
                 tintColor={isDark ? '#FFFFFF' : '#212121'}
                 resizeMode={FastImage.resizeMode.contain}
                 style={[
@@ -426,8 +430,8 @@ const StockShareGraphic: React.FC<StockShareGraphicProps> = ({
                     >
                       {averagePrice
                         ? averagePrice.toLocaleString('es-VE', {
-                          minimumFractionDigits: 2,
-                        })
+                            minimumFractionDigits: 2,
+                          })
                         : '--'}{' '}
                       <Text
                         style={[

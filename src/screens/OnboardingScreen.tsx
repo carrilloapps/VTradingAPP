@@ -31,12 +31,12 @@ interface OnboardingItem {
   description: string;
   icon: any;
   colorType:
-  | 'primary'
-  | 'secondary'
-  | 'tertiary'
-  | 'error'
-  | 'warning'
-  | 'info';
+    | 'primary'
+    | 'secondary'
+    | 'tertiary'
+    | 'error'
+    | 'warning'
+    | 'info';
   hasAction?: boolean;
 }
 
@@ -85,7 +85,9 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
         title: 'Bienvenido/a',
         description:
           'Tu herramienta definitiva para el seguimiento financiero en Venezuela. Cotizaciones, tasas y análisis en tiempo real.',
-        icon: isDark ? require('../assets/images/logo.png') : require('../assets/images/logo-white.png'),
+        icon: isDark
+          ? require('../assets/images/logo.png')
+          : require('../assets/images/logo-white.png'),
         colorType: 'primary',
       },
       {
@@ -329,7 +331,8 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
               >
                 {/* Touch Overlays for Navigation - Internal to page to allow button interaction */}
                 {/* Touch Overlays - Disabled on Notification Page to force explicit choice */}
-                {(!isNotificationPage || notificationPermissionStatus === true) && (
+                {(!isNotificationPage ||
+                  notificationPermissionStatus === true) && (
                   <View style={styles.touchOverlay} pointerEvents="box-none">
                     <TouchableOpacity
                       style={styles.touchLeft}
@@ -405,7 +408,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
                         }
                         onPress={
                           notificationPermissionStatus === true
-                            ? () => { }
+                            ? () => {}
                             : requestNotificationPermission
                         }
                         variant="primary"

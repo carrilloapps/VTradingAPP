@@ -74,10 +74,10 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
       : variant === 'search'
         ? 1 // Search usually has a solid background for contrast
         : scroll.interpolate({
-          inputRange: [50, 200],
-          outputRange: [0, 1],
-          extrapolate: 'clamp',
-        });
+            inputRange: [50, 200],
+            outputRange: [0, 1],
+            extrapolate: 'clamp',
+          });
 
   // Logo fade-out for detail/tag/category variants
   const logoOpacity =
@@ -85,10 +85,10 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
       ? 1
       : isFadingVariant || variant === 'search'
         ? scroll.interpolate({
-          inputRange: [0, 80],
-          outputRange: [1, 0],
-          extrapolate: 'clamp',
-        })
+            inputRange: [0, 80],
+            outputRange: [1, 0],
+            extrapolate: 'clamp',
+          })
         : 1;
 
   // Title fade-in for detail/tag/category variants
@@ -96,10 +96,10 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
     variant === 'main' || variant === 'search'
       ? 0
       : scroll.interpolate({
-        inputRange: [120, 220],
-        outputRange: [0, 1],
-        extrapolate: 'clamp',
-      });
+          inputRange: [120, 220],
+          outputRange: [0, 1],
+          extrapolate: 'clamp',
+        });
 
   const isDark = theme.dark;
 
@@ -265,7 +265,11 @@ const DiscoverHeader: React.FC<DiscoverHeaderProps> = ({
           ) : (
             <Animated.View style={logoWrapperStyle}>
               <FastImage
-                source={isDark ? require('../../assets/images/logotipo.png') : require('../../assets/images/logotipo-white.png')}
+                source={
+                  isDark
+                    ? require('../../assets/images/logotipo.png')
+                    : require('../../assets/images/logotipo-white.png')
+                }
                 style={logoImageStyle as any}
                 tintColor={isDark ? '#FFFFFF' : '#212121'}
                 resizeMode={FastImage.resizeMode.contain}

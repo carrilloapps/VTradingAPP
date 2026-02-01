@@ -244,7 +244,11 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
           <View style={styles.templateHeader}>
             <View style={styles.logoAndBadgeRow}>
               <FastImage
-                source={isDark ? require('../../assets/images/logotipo.png') : require('../../assets/images/logotipo-white.png')}
+                source={
+                  isDark
+                    ? require('../../assets/images/logotipo.png')
+                    : require('../../assets/images/logotipo-white.png')
+                }
                 style={logoStyle}
                 tintColor={isDark ? '#FFFFFF' : '#212121'}
                 resizeMode={FastImage.resizeMode.cover}
@@ -331,8 +335,8 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
                     <Text style={statValueStyle}>
                       {rate.buyValue
                         ? rate.buyValue.toLocaleString('es-VE', {
-                          minimumFractionDigits: 2,
-                        })
+                            minimumFractionDigits: 2,
+                          })
                         : '--'}{' '}
                       <Text style={statCurrencyStyle}>Bs.</Text>
                     </Text>
@@ -342,8 +346,8 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
                     <Text style={statValueStyle}>
                       {rate.sellValue
                         ? rate.sellValue.toLocaleString('es-VE', {
-                          minimumFractionDigits: 2,
-                        })
+                            minimumFractionDigits: 2,
+                          })
                         : '--'}{' '}
                       <Text style={statCurrencyStyle}>Bs.</Text>
                     </Text>
