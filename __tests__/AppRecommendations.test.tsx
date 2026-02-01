@@ -95,6 +95,10 @@ describe('AppRecommendations', () => {
     expect(queryByTestId('app-recommendations-skeleton')).toBeTruthy();
 
     await waitFor(() => {
+      expect(remoteConfigService.fetchAndActivate).toHaveBeenCalledTimes(1);
+    });
+
+    await waitFor(() => {
       expect(queryByTestId('app-recommendations-skeleton')).toBeNull();
     });
 
@@ -123,11 +127,12 @@ describe('AppRecommendations', () => {
 
     const { findByText, queryByText, queryByTestId } = renderComponent();
 
+    expect(await findByText('Android App')).toBeTruthy();
+
     await waitFor(() => {
       expect(queryByTestId('app-recommendations-skeleton')).toBeNull();
     });
 
-    expect(await findByText('Android App')).toBeTruthy();
     expect(queryByText('iOS App')).toBeNull();
   });
 });

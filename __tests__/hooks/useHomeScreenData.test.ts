@@ -154,6 +154,29 @@ describe('useHomeScreenData', () => {
     expect(firstFeatured.chartPath).toContain('M0');
   });
 
+  it('calculates spread when both USD and USDT are present', async () => {
+    const rates = [baseRate, usdtRate];
+
+    mockCurrencyService.subscribe.mockImplementation((callback: (data: CurrencyRate[]) => void) => {
+      callback(rates);
+      return jest.fn();
+    });
+
+    mockStocksService.subscribe.mockImplementation((callback: (data: StockData[]) => void) => {
+      callback(sampleStocks);
+      return jest.fn();
+    });
+
+    mockCurrencyService.getRates.mockResolvedValueOnce(rates);
+    mockStocksService.getStocks.mockResolvedValueOnce(sampleStocks);
+
+    const { result } = renderHook(() => useHomeScreenData());
+
+    await waitFor(() => {
+      expect(result.current.spread).toBeCloseTo(((37 - 36.5) / 36.5) * 100, 6);
+    });
+  });
+
   it('handles manual refresh success', async () => {
     const rates = [baseRate, usdtRate];
 
