@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   StatusBar,
   useWindowDimensions,
+  Animated,
 } from 'react-native';
 import { Text, Icon } from 'react-native-paper';
 import PagerView from 'react-native-pager-view';
@@ -61,6 +62,21 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
 
   const [notificationPermissionStatus, setNotificationPermissionStatus] =
     useState<boolean | null>(null);
+
+  // Hint Animation
+  const hintOpacity = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (notificationPermissionStatus === true) {
+      Animated.timing(hintOpacity, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }).start();
+    } else {
+      hintOpacity.setValue(0);
+    }
+  }, [notificationPermissionStatus, hintOpacity]);
 
   const ONBOARDING_DATA = React.useMemo<OnboardingItem[]>(
     () => [
@@ -190,11 +206,8 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
       if (hasPermission) {
         await fcmService.getFCMToken();
         await fcmService.subscribeToDemographics(['all_users']);
-        // Auto-advance on success for better UX? Or let user click continue.
-        // User said "until activate or omit". If activated, we can auto-advance or show "Continue".
-        setTimeout(() => {
-          pagerRef.current?.setPage(currentPage + 1);
-        }, 1500);
+        // The hint will animte in via useEffect, no auto-advance here
+        // as the user wants to tap to continue professionaly
       }
     } catch (e) {
       observabilityService.captureError(e, {
@@ -316,7 +329,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
               >
                 {/* Touch Overlays for Navigation - Internal to page to allow button interaction */}
                 {/* Touch Overlays - Disabled on Notification Page to force explicit choice */}
-                {!isNotificationPage && (
+                {(!isNotificationPage || notificationPermissionStatus === true) && (
                   <View style={styles.touchOverlay} pointerEvents="box-none">
                     <TouchableOpacity
                       style={styles.touchLeft}
@@ -444,6 +457,15 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
                       labelStyle={{ color: startBtnLabelColor }}
                       fullWidth
                     />
+                  ) : isNotificationPage ? (
+                    <Animated.Text
+                      style={[
+                        styles.tapHint,
+                        { color: tapHintColor, opacity: hintOpacity },
+                      ]}
+                    >
+                      Toca para continuar
+                    </Animated.Text>
                   ) : (
                     <Text style={[styles.tapHint, { color: tapHintColor }]}>
                       Toca para continuar
