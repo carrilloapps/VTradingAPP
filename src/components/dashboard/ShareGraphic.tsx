@@ -140,7 +140,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
         ref={viewShotRef}
         options={{
           format: 'jpg',
-          quality: 0.9,
+          quality: 1.0,
           width: 1080,
           height: isVertical ? 1920 : 1080,
         }}
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
     height: 600 * (16 / 9),
     paddingVertical: 100,
     paddingHorizontal: 40,
-    justifyContent: 'space-around', // Better distribution
+    justifyContent: 'space-around',
   },
   templateGlow: {
     position: 'absolute',
