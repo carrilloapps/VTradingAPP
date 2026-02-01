@@ -34,6 +34,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
   const platformIconSize = 24;
   const platformTextSize = 12;
   const logoWidth = isVertical ? 210 : 150;
+  const logoHeight = isVertical ? 54 : 40;
   const freeBadgeTextSize = isVertical ? 10 : 7;
   const urlTextSize = isVertical ? 18 : 13;
   const dateIconSize = 18;
@@ -42,8 +43,6 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
   const cardIconSize = isVertical ? 24 : 20;
   const cardIconContainerSize = isVertical ? 38 : 24;
   const valueSize = isVertical ? 76 : 48;
-  const logoAspectRatio = 150 / 40; // 3.75
-  const logoHeightComputed = logoWidth / logoAspectRatio;
   const currencySize = isVertical ? 26 : 16;
   const trendIconSize = isVertical ? 18 : 14;
   const trendTextSize = isVertical ? 14 : 10;
@@ -78,7 +77,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
     {
       tintColor: theme.dark ? undefined : theme.colors.primary,
       width: logoWidth,
-      height: logoHeightComputed,
+      height: logoHeight,
     },
   ];
 
@@ -117,7 +116,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
 
   return (
     <View
-      style={[styles.hiddenTemplate, { height: isVertical ? 1067 : 600 }]}
+      style={[styles.hiddenTemplate, { height: isVertical ? 600 * (16 / 9) : 600 }]}
       pointerEvents="none"
       collapsable={false}
     >
@@ -126,7 +125,8 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
         options={{
           format: 'jpg',
           quality: 1.0,
-          result: 'tmpfile',
+          width: 1080,
+          height: isVertical ? 1920 : 1080,
         }}
       >
         <LinearGradient
@@ -163,7 +163,7 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
                 }
                 style={logoStyle}
                 tintColor={isDark ? '#FFFFFF' : '#212121'}
-                resizeMode={FastImage.resizeMode.contain}
+                resizeMode={FastImage.resizeMode.cover}
               />
               {!isPremium && (
                 <Surface style={freeBadgeStyle} elevation={2}>
@@ -388,10 +388,10 @@ const styles = StyleSheet.create({
   },
   shareTemplateVertical: {
     width: 600,
-    height: 1067, // Rounded from 1066.66 to avoid float artifacts
-    paddingVertical: 80,
+    height: 600 * (16 / 9),
+    paddingVertical: 100,
     paddingHorizontal: 40,
-    justifyContent: 'space-between',
+    justifyContent: 'space-around',
   },
   templateGlow: {
     position: 'absolute',
