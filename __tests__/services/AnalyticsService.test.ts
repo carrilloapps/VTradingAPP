@@ -246,7 +246,7 @@ describe('AnalyticsService', () => {
         expect.any(Error),
         expect.objectContaining({
           context: 'AnalyticsService.setUserProperty',
-          property: 'custom_property',
+          propertyName: 'Custom Property',
         }),
       );
     });
@@ -275,7 +275,7 @@ describe('AnalyticsService', () => {
 
       expect(observabilityService.captureError).toHaveBeenCalledWith(
         expect.any(Error),
-        expect.objectContaining({ context: 'AnalyticsService.setUserId', userId: 'user123' }),
+        expect.objectContaining({ context: 'AnalyticsService.setUserId', hasUserId: true }),
       );
     });
   });

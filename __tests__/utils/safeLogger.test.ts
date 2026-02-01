@@ -5,19 +5,19 @@ describe('SafeLogger', () => {
   let consoleInfoSpy: jest.SpyInstance;
   let consoleWarnSpy: jest.SpyInstance;
   let consoleErrorSpy: jest.SpyInstance;
-  const originalDev = (global as any).__DEV__;
+  const originalDev = (globalThis as any).__DEV__;
 
   beforeEach(() => {
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {});
     consoleInfoSpy = jest.spyOn(console, 'info').mockImplementation(() => {});
     consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-    (global as any).__DEV__ = true;
+    (globalThis as any).__DEV__ = true;
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-    (global as any).__DEV__ = originalDev;
+    (globalThis as any).__DEV__ = originalDev;
   });
 
   describe('sanitize', () => {
@@ -91,13 +91,13 @@ describe('SafeLogger', () => {
 
   describe('environment behavior', () => {
     it('should not log "log" level in production', () => {
-      (global as any).__DEV__ = false;
+      (globalThis as any).__DEV__ = false;
       SafeLogger.log('should not appear');
       expect(consoleLogSpy).not.toHaveBeenCalled();
     });
 
     it('should log "info", "warn", "error" in production', () => {
-      (global as any).__DEV__ = false;
+      (globalThis as any).__DEV__ = false;
       SafeLogger.info('info prod');
       SafeLogger.warn('warn prod');
       SafeLogger.error('error prod');
@@ -133,7 +133,7 @@ describe('SafeLogger', () => {
     });
 
     it('should hide completely in PROD', () => {
-      (global as any).__DEV__ = false;
+      (globalThis as any).__DEV__ = false;
       SafeLogger.sensitive('Context', 'secret');
       expect(consoleLogSpy).toHaveBeenCalledWith(
         '[Context] Sensitive data received (hidden in production)',
@@ -163,7 +163,7 @@ describe('SafeLogger', () => {
     });
 
     it('should do nothing in PROD', () => {
-      (global as any).__DEV__ = false;
+      (globalThis as any).__DEV__ = false;
       SafeLogger.safeLog('test');
       expect(consoleLogSpy).not.toHaveBeenCalled();
     });

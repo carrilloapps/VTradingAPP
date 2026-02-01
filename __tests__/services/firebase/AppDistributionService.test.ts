@@ -1,3 +1,5 @@
+export {};
+
 type AppDistributionMocks = {
   checkForUpdate: jest.Mock;
   getAppDistribution: jest.Mock;

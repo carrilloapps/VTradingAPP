@@ -65,19 +65,13 @@ jest.mock('../src/stores/authStore', () => {
 const mockShowToast = jest.fn();
 const mockHideToast = jest.fn();
 jest.mock('../src/stores/toastStore', () => {
-  type ToastState = {
-    showToast: typeof mockShowToast;
-    toasts: unknown[];
-    hideToast: typeof mockHideToast;
-  };
-
-  const state: ToastState = {
+  const state = {
     showToast: mockShowToast,
     toasts: [],
     hideToast: mockHideToast,
   };
   return {
-    useToastStore: (selector?: (state: ToastState) => any) => (selector ? selector(state) : state),
+    useToastStore: (selector?: (state: any) => any) => (selector ? selector(state) : state),
   };
 });
 
