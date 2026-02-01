@@ -61,7 +61,7 @@ describe('ForgotPasswordScreen', () => {
   });
 
   it('muestra loading durante la recuperación', async () => {
-    let resolveReset: () => void = () => {};
+    let resolveReset: () => void = () => { };
     const resetPromise = new Promise<void>(resolve => {
       resolveReset = resolve;
     });
@@ -74,7 +74,6 @@ describe('ForgotPasswordScreen', () => {
 
     const {
       getByLabelText,
-      getByText,
       getByTestId,
       queryByTestId,
       findByTestId,
