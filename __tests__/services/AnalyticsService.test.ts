@@ -8,6 +8,12 @@ import {
 import * as Clarity from '@microsoft/react-native-clarity';
 import * as Sentry from '@sentry/react-native';
 
+jest.mock('@/services/ObservabilityService', () => ({
+  observabilityService: {
+    captureError: jest.fn(),
+  },
+}));
+
 jest.mock('@microsoft/react-native-clarity', () => ({
   sendCustomEvent: jest.fn(),
   setCustomTag: jest.fn(),
@@ -21,6 +27,9 @@ jest.mock('@sentry/react-native', () => ({
 }));
 
 describe('AnalyticsService', () => {
+  const observabilityService = jest.requireMock('@/services/ObservabilityService')
+    .observabilityService as { captureError: jest.Mock };
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -50,6 +59,22 @@ describe('AnalyticsService', () => {
       await analyticsService.logEvent('test_event');
       // Should not throw
     });
+
+    it('captures errors with params metadata', async () => {
+      (logEvent as jest.Mock).mockRejectedValueOnce(new Error('Test error'));
+
+      await analyticsService.logEvent('test_event', { action: 'save' });
+
+      expect(observabilityService.captureError).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({
+          context: 'AnalyticsService.logEvent',
+          eventName: 'test_event',
+          hasParams: true,
+          paramCount: 1,
+        }),
+      );
+    });
   });
 
   describe('logScreenView', () => {
@@ -68,6 +93,20 @@ describe('AnalyticsService', () => {
         screen_name: 'SettingsScreen',
         screen_class: 'SettingsScreen',
       });
+    });
+
+    it('captures errors when screen view logging fails', async () => {
+      (logEvent as jest.Mock).mockRejectedValueOnce(new Error('Test error'));
+
+      await analyticsService.logScreenView('HomeScreen');
+
+      expect(observabilityService.captureError).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({
+          context: 'AnalyticsService.logScreenView',
+          screenName: 'HomeScreen',
+        }),
+      );
     });
   });
 
@@ -198,6 +237,20 @@ describe('AnalyticsService', () => {
       expect(Clarity.setCustomTag).toHaveBeenCalledWith('custom_property', 'value');
     });
 
+    it('captures errors when setting user property fails', async () => {
+      (setUserProperty as jest.Mock).mockRejectedValueOnce(new Error('Test error'));
+
+      await analyticsService.setUserProperty('Custom Property', 'value');
+
+      expect(observabilityService.captureError).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({
+          context: 'AnalyticsService.setUserProperty',
+          property: 'custom_property',
+        }),
+      );
+    });
+
     it('sets multiple user properties', async () => {
       await analyticsService.setUserProperties({ prop1: 'v1', prop2: 'v2' });
       expect(setUserProperty).toHaveBeenCalledTimes(2);
@@ -213,6 +266,17 @@ describe('AnalyticsService', () => {
       await analyticsService.setUserId(null);
       expect(setUserId).toHaveBeenCalledWith(expect.anything(), null);
       expect(Clarity.setCustomUserId).not.toHaveBeenCalled();
+    });
+
+    it('captures errors when setting user ID fails', async () => {
+      (setUserId as jest.Mock).mockRejectedValueOnce(new Error('Test error'));
+
+      await analyticsService.setUserId('user123');
+
+      expect(observabilityService.captureError).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({ context: 'AnalyticsService.setUserId', userId: 'user123' }),
+      );
     });
   });
 
@@ -230,6 +294,23 @@ describe('AnalyticsService', () => {
       await analyticsService.setAnalyticsCollectionEnabled(false);
       expect(mockSetEnabled).toHaveBeenCalledWith(false);
       expect(Clarity.pause).toHaveBeenCalled();
+    });
+
+    it('captures errors when analytics collection toggle fails', async () => {
+      const mockSetEnabled = jest.fn().mockRejectedValueOnce(new Error('Test error'));
+      (getAnalytics as jest.Mock).mockReturnValue({
+        setAnalyticsCollectionEnabled: mockSetEnabled,
+      });
+
+      await analyticsService.setAnalyticsCollectionEnabled(true);
+
+      expect(observabilityService.captureError).toHaveBeenCalledWith(
+        expect.any(Error),
+        expect.objectContaining({
+          context: 'AnalyticsService.setAnalyticsCollectionEnabled',
+          enabled: true,
+        }),
+      );
     });
   });
 });
