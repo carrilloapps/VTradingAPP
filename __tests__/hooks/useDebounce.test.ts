@@ -78,6 +78,20 @@ describe('useDebounce', () => {
     expect(result.current).toBe('new');
   });
 
+  it('should use the default delay when none is provided', () => {
+    const { result, rerender } = renderHook(({ value }: { value: string }) => useDebounce(value), {
+      initialProps: { value: 'initial' },
+    });
+
+    rerender({ value: 'updated' });
+
+    act(() => jest.advanceTimersByTime(499));
+    expect(result.current).toBe('initial');
+
+    act(() => jest.advanceTimersByTime(1));
+    expect(result.current).toBe('updated');
+  });
+
   it('should cleanup timeout on unmount', () => {
     const clearTimeoutSpy = jest.spyOn(globalThis, 'clearTimeout');
 

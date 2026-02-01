@@ -330,6 +330,38 @@ describe('useHomeScreenData', () => {
     });
   });
 
+  it('handles null change percent values', async () => {
+    const nullRate: CurrencyRate = {
+      ...baseRate,
+      changePercent: null,
+    };
+    const zeroRate: CurrencyRate = {
+      ...usdtRate,
+      changePercent: 0,
+    };
+
+    mockCurrencyService.subscribe.mockImplementation((callback: (data: CurrencyRate[]) => void) => {
+      callback([nullRate, zeroRate]);
+      return jest.fn();
+    });
+
+    mockStocksService.subscribe.mockImplementation((callback: (data: StockData[]) => void) => {
+      callback(sampleStocks);
+      return jest.fn();
+    });
+
+    mockCurrencyService.getRates.mockResolvedValueOnce([nullRate, zeroRate]);
+    mockStocksService.getStocks.mockResolvedValueOnce(sampleStocks);
+
+    const { result } = renderHook(() => useHomeScreenData());
+
+    await waitFor(() => {
+      expect(result.current.featuredRates[0].changePercent).toBe('0.00%');
+      expect(result.current.featuredRates[0].chartPath).toBe('M0 20 L 100 20');
+      expect(result.current.featuredRates[1].changePercent).toBe('0.00%');
+    });
+  });
+
   it('falls back to rate name when type is unexpected', async () => {
     const oddRate = {
       ...baseRate,
