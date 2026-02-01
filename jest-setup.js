@@ -56,6 +56,16 @@ jest.mock('react-native-config', () => ({
   ENV: 'test',
 }));
 
+jest.mock('./src/services/ObservabilityService', () => ({
+  observabilityService: {
+    captureError: jest.fn(),
+    log: jest.fn(),
+    startTransaction: jest.fn(() => null),
+    finishTransaction: jest.fn(),
+    setTransactionAttribute: jest.fn(),
+  },
+}));
+
 jest.mock('@react-navigation/native', () => {
   const actualNav = jest.requireActual('@react-navigation/native');
   return {

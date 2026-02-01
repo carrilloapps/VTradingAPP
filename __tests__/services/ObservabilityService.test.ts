@@ -1,4 +1,6 @@
-import { observabilityService } from '../../src/services/ObservabilityService';
+const { observabilityService } = jest.requireActual(
+  '../../src/services/ObservabilityService',
+) as typeof import('../../src/services/ObservabilityService');
 
 jest.mock('@sentry/react-native', () => ({
   captureException: jest.fn(),
@@ -57,8 +59,11 @@ const loadServiceWithSentry = (sentryOverrides: Record<string, unknown>) => {
     default: SafeLogger,
   }));
 
-  return require('../../src/services/ObservabilityService')
-    .observabilityService as typeof observabilityService;
+  return (
+    jest.requireActual(
+      '../../src/services/ObservabilityService',
+    ) as typeof import('../../src/services/ObservabilityService')
+  ).observabilityService;
 };
 
 describe('ObservabilityService', () => {
