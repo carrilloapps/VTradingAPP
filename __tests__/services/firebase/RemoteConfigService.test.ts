@@ -1,5 +1,4 @@
 export {};
-declare const global: any;
 
 type RemoteConfigMocks = {
   remoteConfig: { setConfigSettings: jest.Mock };
