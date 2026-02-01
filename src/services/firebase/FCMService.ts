@@ -5,7 +5,10 @@ import notifee, { AndroidImportance } from '@notifee/react-native';
 
 import SafeLogger from '@/utils/safeLogger';
 import { observabilityService } from '@/services/ObservabilityService';
-import { analyticsService, ANALYTICS_EVENTS } from '@/services/firebase/AnalyticsService';
+import {
+  analyticsService,
+  ANALYTICS_EVENTS,
+} from '@/services/firebase/AnalyticsService';
 
 class FCMService {
   private messaging: ReturnType<typeof messaging>;
