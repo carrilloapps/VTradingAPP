@@ -3,8 +3,9 @@ import { View, StyleSheet, ImageBackground } from 'react-native';
 import { Text } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useAppTheme } from '../../theme/theme';
-import { observabilityService } from '../../services/ObservabilityService';
+
+import { useAppTheme } from '@/theme';
+import { observabilityService } from '@/services/ObservabilityService';
 
 interface DetailHeroHeaderProps {
   image?: string | null;

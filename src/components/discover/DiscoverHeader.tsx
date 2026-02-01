@@ -11,8 +11,9 @@ import { Text, useTheme, TouchableRipple } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import SearchBar from '../ui/SearchBar';
 import FastImage from 'react-native-fast-image';
+
+import SearchBar from '@/components/ui/SearchBar';
 
 export type DiscoverHeaderVariant =
   | 'main'

@@ -5,8 +5,8 @@ import LinearGradient from 'react-native-linear-gradient';
 import ViewShot from 'react-native-view-shot';
 import FastImage from 'react-native-fast-image';
 
-import { StockData } from '../../services/StocksService';
-import { getTrend, getTrendColor, getTrendIcon } from '../../utils/trendUtils';
+import { StockData } from '@/services/StocksService';
+import { getTrend, getTrendColor, getTrendIcon } from '@/utils/trendUtils';
 
 interface StockShareGraphicProps {
   viewShotRef: React.RefObject<any>;

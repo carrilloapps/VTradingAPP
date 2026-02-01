@@ -3,14 +3,15 @@ import { View, StyleSheet, ActivityIndicator, StatusBar } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { Text, useTheme, Appbar } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+
 import {
   wordPressService,
   FormattedPost,
-} from '../../services/WordPressService';
-import { observabilityService } from '../../services/ObservabilityService';
-import ArticleCard from '../../components/discover/ArticleCard';
-import ArticleSkeleton from '../../components/discover/ArticleSkeleton';
-import DiscoverEmptyView from '../../components/discover/DiscoverEmptyView';
+} from '@/services/WordPressService';
+import { observabilityService } from '@/services/ObservabilityService';
+import ArticleCard from '@/components/discover/ArticleCard';
+import ArticleSkeleton from '@/components/discover/ArticleSkeleton';
+import DiscoverEmptyView from '@/components/discover/DiscoverEmptyView';
 
 const ListFooter = ({
   hasMore,

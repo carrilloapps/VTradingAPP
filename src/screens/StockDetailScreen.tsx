@@ -4,17 +4,18 @@ import Share from 'react-native-share';
 import { Surface, Text, Chip } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { captureRef } from 'react-native-view-shot';
-import UnifiedHeader from '../components/ui/UnifiedHeader';
-import { useAppTheme } from '../theme/theme';
-import { BolivarIcon } from '../components/ui/BolivarIcon';
-import { useAuthStore } from '../stores/authStore';
-import { useToastStore } from '../stores/toastStore';
-import CustomDialog from '../components/ui/CustomDialog';
-import CustomButton from '../components/ui/CustomButton';
-import StockShareGraphic from '../components/stocks/StockShareGraphic';
-import { observabilityService } from '../services/ObservabilityService';
-import { analyticsService } from '../services/firebase/AnalyticsService';
 import FastImage from 'react-native-fast-image';
+
+import UnifiedHeader from '@/components/ui/UnifiedHeader';
+import { useAppTheme } from '@/theme';
+import { BolivarIcon } from '@/components/ui/BolivarIcon';
+import { useAuthStore } from '@/stores/authStore';
+import { useToastStore } from '@/stores/toastStore';
+import CustomDialog from '@/components/ui/CustomDialog';
+import CustomButton from '@/components/ui/CustomButton';
+import StockShareGraphic from '@/components/stocks/StockShareGraphic';
+import { observabilityService } from '@/services/ObservabilityService';
+import { analyticsService } from '@/services/firebase/AnalyticsService';
 
 const StockDetailScreen = ({ route, navigation }: any) => {
   const theme = useAppTheme();

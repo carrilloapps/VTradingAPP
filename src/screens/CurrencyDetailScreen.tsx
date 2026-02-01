@@ -5,17 +5,17 @@ import { Surface, Text, Icon } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { captureRef } from 'react-native-view-shot';
 
-import UnifiedHeader from '../components/ui/UnifiedHeader';
-import { useAppTheme } from '../theme/theme';
-import { BolivarIcon } from '../components/ui/BolivarIcon';
-import { useAuthStore } from '../stores/authStore';
-import { useToastStore } from '../stores/toastStore';
-import CustomDialog from '../components/ui/CustomDialog';
-import CustomButton from '../components/ui/CustomButton';
-import CurrencyShareGraphic from '../components/dashboard/CurrencyShareGraphic';
-import { observabilityService } from '../services/ObservabilityService';
-import { analyticsService } from '../services/firebase/AnalyticsService';
-import { StocksService } from '../services/StocksService';
+import UnifiedHeader from '@/components/ui/UnifiedHeader';
+import { useAppTheme } from '@/theme/theme';
+import { BolivarIcon } from '@/components/ui/BolivarIcon';
+import { useAuthStore } from '@/stores/authStore';
+import { useToastStore } from '@/stores/toastStore';
+import CustomDialog from '@/components/ui/CustomDialog';
+import CustomButton from '@/components/ui/CustomButton';
+import CurrencyShareGraphic from '@/components/dashboard/CurrencyShareGraphic';
+import { observabilityService } from '@/services/ObservabilityService';
+import { analyticsService } from '@/services/firebase/AnalyticsService';
+import { StocksService } from '@/services/StocksService';
 
 const CurrencyDetailScreen = ({ route, navigation }: any) => {
   const theme = useAppTheme();

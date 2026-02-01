@@ -1,4 +1,4 @@
-import { WordPressCategory } from '../services/WordPressService';
+import { WordPressCategory } from '@/services/WordPressService';
 
 /**
  * Extracts a displayable image URL from a WordPress Category.

@@ -3,9 +3,10 @@ import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
-import { WidgetItem } from './WidgetPreview';
-import { useAppTheme } from '../../theme/theme';
 import FastImage from 'react-native-fast-image';
+
+import { WidgetItem } from './WidgetPreview';
+import { useAppTheme } from '@/theme';
 
 interface WidgetCardProps {
   items: WidgetItem[];

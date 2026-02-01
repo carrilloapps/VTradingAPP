@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Surface, Divider } from 'react-native-paper';
-import { useAppTheme } from '../../theme/theme';
-import Skeleton from '../ui/Skeleton';
+
+import { useAppTheme } from '@/theme';
+import Skeleton from '@/components/ui/Skeleton';
 
 interface ArticleSkeletonProps {
   variant?: 'compact' | 'featured' | 'detail';

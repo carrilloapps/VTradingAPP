@@ -8,12 +8,12 @@ import {
 } from '@react-native-firebase/crashlytics';
 import * as Clarity from '@microsoft/react-native-clarity';
 
-import { authService } from '../services/firebase/AuthService';
-import { observabilityService } from '../services/ObservabilityService';
+import { authService } from '@/services/firebase/AuthService';
+import { observabilityService } from '@/services/ObservabilityService';
 import {
   analyticsService,
   ANALYTICS_EVENTS,
-} from '../services/firebase/AnalyticsService';
+} from '@/services/firebase/AnalyticsService';
 import { ToastType } from './toastStore';
 
 interface AuthState {

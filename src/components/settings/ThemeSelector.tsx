@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from 'react-native-paper';
-import { useAppTheme, LightTheme, DarkTheme } from '../../theme/theme';
+
+import { useAppTheme, LightTheme, DarkTheme } from '@/theme';
 
 interface ThemeSelectorProps {
   currentTheme: 'light' | 'dark' | 'system';

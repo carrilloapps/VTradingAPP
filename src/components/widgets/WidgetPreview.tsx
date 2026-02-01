@@ -3,10 +3,11 @@ import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useAppTheme } from '../../theme/theme';
-import WidgetCard from './WidgetCard';
-import { WidgetItem } from '../../widget/types';
 import FastImage from 'react-native-fast-image';
+
+import WidgetCard from './WidgetCard';
+import { useAppTheme } from '@/theme';
+import { WidgetItem } from '@/widget/types';
 
 export type { WidgetItem };
 

@@ -2,15 +2,16 @@ import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useAppTheme } from '../../theme/theme';
-import { analyticsService } from '../../services/firebase/AnalyticsService';
+
 import { NotificationData } from './NotificationCard';
 import NotificationIcon, {
   getNotificationIconConfig,
 } from './NotificationIcon';
-import { formatTimeAgo } from '../../utils/dateUtils';
-import { BottomSheetModal } from '../ui/BottomSheetModal';
-import CustomButton from '../ui/CustomButton';
+import { formatTimeAgo } from '@/utils/dateUtils';
+import { BottomSheetModal } from '@/components/ui/BottomSheetModal';
+import CustomButton from '@/components/ui/CustomButton';
+import { useAppTheme } from '@/theme';
+import { analyticsService } from '@/services/firebase/AnalyticsService';
 
 interface NotificationDetailModalProps {
   visible: boolean;

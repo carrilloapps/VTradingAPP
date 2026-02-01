@@ -4,8 +4,9 @@ import { useTheme, Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
 import CurrencyConverter from './CurrencyConverter';
-import { RootStackParamList } from '../../navigation/AppNavigator';
+import { RootStackParamList } from '@/navigation/AppNavigator';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 

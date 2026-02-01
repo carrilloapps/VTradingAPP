@@ -7,9 +7,10 @@ import React, {
 } from 'react';
 import { useColorScheme } from 'react-native';
 import { Provider as PaperProvider } from 'react-native-paper';
+
 import { LightTheme, DarkTheme } from './theme';
-import { mmkvStorage } from '../services/StorageService';
-import { observabilityService } from '../services/ObservabilityService';
+import { mmkvStorage } from '@/services/StorageService';
+import { observabilityService } from '@/services/ObservabilityService';
 
 export type ThemeType = 'light' | 'dark' | 'system';
 

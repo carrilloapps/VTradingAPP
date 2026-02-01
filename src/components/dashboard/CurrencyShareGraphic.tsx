@@ -5,8 +5,8 @@ import LinearGradient from 'react-native-linear-gradient';
 import ViewShot from 'react-native-view-shot';
 import FastImage from 'react-native-fast-image';
 
-import { CurrencyRate } from '../../services/CurrencyService';
-import { BolivarIcon } from '../ui/BolivarIcon';
+import { CurrencyRate } from '@/services/CurrencyService';
+import { BolivarIcon } from '@/components/ui/BolivarIcon';
 
 interface CurrencyShareGraphicProps {
   viewShotRef: React.RefObject<any>;

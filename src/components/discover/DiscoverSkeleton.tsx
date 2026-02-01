@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
-import { useAppTheme } from '../../theme/theme';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Skeleton from '../ui/Skeleton';
+
+import { useAppTheme } from '@/theme';
+import Skeleton from '@/components/ui/Skeleton';
 
 /**
  * Specialized skeleton for the Discover screen when feature is disabled (Construction view)

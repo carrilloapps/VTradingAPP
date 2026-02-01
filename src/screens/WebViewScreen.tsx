@@ -3,9 +3,10 @@ import { View, StyleSheet, StatusBar } from 'react-native';
 import { useTheme, ActivityIndicator } from 'react-native-paper';
 import { WebView } from 'react-native-webview';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
-import UnifiedHeader from '../components/ui/UnifiedHeader';
-import { analyticsService } from '../services/firebase/AnalyticsService';
-import SafeLogger from '../utils/safeLogger';
+
+import UnifiedHeader from '@/components/ui/UnifiedHeader';
+import { analyticsService } from '@/services/firebase/AnalyticsService';
+import SafeLogger from '@/utils/safeLogger';
 
 type RootStackParamList = {
   WebView: { url: string; title?: string };

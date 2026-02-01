@@ -6,7 +6,8 @@ import {
   Surface,
   ActivityIndicator,
 } from 'react-native-paper';
-import { useAppTheme } from '../../theme/theme';
+
+import { useAppTheme } from '@/theme';
 
 interface PaginationControlsProps {
   currentPage: number;

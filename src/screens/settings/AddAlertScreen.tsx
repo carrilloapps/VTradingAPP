@@ -11,26 +11,27 @@ import { Text, ActivityIndicator, TextInput } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import UnifiedHeader from '../../components/ui/UnifiedHeader';
-import { BolivarIcon } from '../../components/ui/BolivarIcon';
-import SearchBar from '../../components/ui/SearchBar';
-import FilterSection from '../../components/ui/FilterSection';
-import CustomButton from '../../components/ui/CustomButton';
-import CustomDialog from '../../components/ui/CustomDialog';
-import AddAlertSkeleton from '../../components/settings/AddAlertSkeleton';
-import { useAppTheme } from '../../theme/theme';
-import { CurrencyService } from '../../services/CurrencyService';
-import { StocksService } from '../../services/StocksService';
-import { storageService, UserAlert } from '../../services/StorageService';
-import { fcmService } from '../../services/firebase/FCMService';
-import { useToastStore } from '../../stores/toastStore';
-import { observabilityService } from '../../services/ObservabilityService';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+
+import UnifiedHeader from '@/components/ui/UnifiedHeader';
+import { BolivarIcon } from '@/components/ui/BolivarIcon';
+import SearchBar from '@/components/ui/SearchBar';
+import FilterSection from '@/components/ui/FilterSection';
+import CustomButton from '@/components/ui/CustomButton';
+import CustomDialog from '@/components/ui/CustomDialog';
+import AddAlertSkeleton from '@/components/settings/AddAlertSkeleton';
+import { useAppTheme } from '@/theme';
+import { CurrencyService } from '@/services/CurrencyService';
+import { StocksService } from '@/services/StocksService';
+import { storageService, UserAlert } from '@/services/StorageService';
+import { fcmService } from '@/services/firebase/FCMService';
+import { useToastStore } from '@/stores/toastStore';
+import { observabilityService } from '@/services/ObservabilityService';
 import {
   analyticsService,
   ANALYTICS_EVENTS,
-} from '../../services/firebase/AnalyticsService';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../../navigation/AppNavigator';
+} from '@/services/firebase/AnalyticsService';
+import { RootStackParamList } from '@/navigation/AppNavigator';
 
 interface SymbolItem {
   id: string;

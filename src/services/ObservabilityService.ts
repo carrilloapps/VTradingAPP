@@ -1,6 +1,7 @@
 import * as Sentry from '@sentry/react-native';
 import { getCrashlytics } from '@react-native-firebase/crashlytics';
-import SafeLogger from '../utils/safeLogger';
+
+import SafeLogger from '@/utils/safeLogger';
 
 class ObservabilityService {
   /**

@@ -6,9 +6,10 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import { observabilityService } from '../services/ObservabilityService';
 import * as Sentry from '@sentry/react-native';
-import SafeLogger from '../utils/safeLogger';
+
+import { observabilityService } from '@/services/ObservabilityService';
+import SafeLogger from '@/utils/safeLogger';
 
 interface Props {
   children?: ReactNode;

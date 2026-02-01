@@ -18,30 +18,30 @@ import { Text } from 'react-native-paper';
 import { useIsFocused } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { captureRef } from 'react-native-view-shot';
+import Share from 'react-native-share';
 
-import UnifiedHeader from '../components/ui/UnifiedHeader';
-import MarketStatus from '../components/ui/MarketStatus';
-import IndexHero from '../components/stocks/IndexHero';
-import StockItem from '../components/stocks/StockItem';
-import SearchBar from '../components/ui/SearchBar';
-import FilterSection from '../components/ui/FilterSection';
-import { useFilterStore } from '../stores/filterStore';
-import { StocksService, StockData } from '../services/StocksService';
-import { useToastStore } from '../stores/toastStore';
-import StocksSkeleton from '../components/stocks/StocksSkeleton';
-import ErrorState from '../components/ui/ErrorState';
-import { observabilityService } from '../services/ObservabilityService';
+import UnifiedHeader from '@/components/ui/UnifiedHeader';
+import MarketStatus from '@/components/ui/MarketStatus';
+import IndexHero from '@/components/stocks/IndexHero';
+import StockItem from '@/components/stocks/StockItem';
+import SearchBar from '@/components/ui/SearchBar';
+import FilterSection from '@/components/ui/FilterSection';
+import { useFilterStore } from '@/stores/filterStore';
+import { StocksService, StockData } from '@/services/StocksService';
+import { useToastStore } from '@/stores/toastStore';
+import StocksSkeleton from '@/components/stocks/StocksSkeleton';
+import ErrorState from '@/components/ui/ErrorState';
+import { observabilityService } from '@/services/ObservabilityService';
 import {
   analyticsService,
   ANALYTICS_EVENTS,
-} from '../services/firebase/AnalyticsService';
-import { useAuthStore } from '../stores/authStore';
-import CustomDialog from '../components/ui/CustomDialog';
-import CustomButton from '../components/ui/CustomButton';
-import { captureRef } from 'react-native-view-shot';
-import Share from 'react-native-share';
-import MarketShareGraphic from '../components/stocks/MarketShareGraphic';
-import { useAppTheme } from '../theme/theme';
+} from '@/services/firebase/AnalyticsService';
+import { useAuthStore } from '@/stores/authStore';
+import CustomDialog from '@/components/ui/CustomDialog';
+import CustomButton from '@/components/ui/CustomButton';
+import MarketShareGraphic from '@/components/stocks/MarketShareGraphic';
+import { useAppTheme } from '@/theme';
 
 interface MarketIndexData {
   value: string;

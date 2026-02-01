@@ -11,17 +11,18 @@ import PagerView from 'react-native-pager-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
-import { storageService } from '../services/StorageService';
-import { fcmService } from '../services/firebase/FCMService';
+
+import { storageService } from '@/services/StorageService';
+import { fcmService } from '@/services/firebase/FCMService';
 import {
   analyticsService,
   ANALYTICS_EVENTS,
-} from '../services/firebase/AnalyticsService';
-import { useAppTheme } from '../theme/theme';
-import { useToastStore } from '../stores/toastStore';
-import { observabilityService } from '../services/ObservabilityService';
-import CustomButton from '../components/ui/CustomButton';
-import SafeLogger from '../utils/safeLogger';
+} from '@/services/firebase/AnalyticsService';
+import { useAppTheme } from '@/theme';
+import { useToastStore } from '@/stores/toastStore';
+import { observabilityService } from '@/services/ObservabilityService';
+import CustomButton from '@/components/ui/CustomButton';
+import SafeLogger from '@/utils/safeLogger';
 
 interface OnboardingItem {
   key: string;

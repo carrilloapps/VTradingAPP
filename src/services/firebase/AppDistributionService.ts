@@ -4,9 +4,10 @@ import {
 } from '@react-native-firebase/app-distribution';
 import { Platform } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
-import { observabilityService } from '../ObservabilityService';
-import { AppConfig } from '../../constants/AppConfig';
-import SafeLogger from '../../utils/safeLogger';
+
+import { observabilityService } from '@/services/ObservabilityService';
+import { AppConfig } from '@/constants/AppConfig';
+import SafeLogger from '@/utils/safeLogger';
 
 class AppDistributionService {
   /**

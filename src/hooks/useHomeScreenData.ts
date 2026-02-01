@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
-import { StocksService, StockData } from '../services/StocksService';
-import { useToastStore } from '../stores/toastStore';
-import { observabilityService } from '../services/ObservabilityService';
-import { analyticsService } from '../services/firebase/AnalyticsService';
-import { AppConfig } from '../constants/AppConfig';
-import { ExchangeCardProps } from '../components/dashboard/ExchangeCard';
+
+import { CurrencyService, CurrencyRate } from '@/services/CurrencyService';
+import { StocksService, StockData } from '@/services/StocksService';
+import { useToastStore } from '@/stores/toastStore';
+import { observabilityService } from '@/services/ObservabilityService';
+import { analyticsService } from '@/services/firebase/AnalyticsService';
+import { AppConfig } from '@/constants/AppConfig';
+import { ExchangeCardProps } from '@/components/dashboard/ExchangeCard';
 
 // Utility for path calculation - Moved outside for performance
 const getPath = (percent: number | null | undefined) => {

@@ -2,9 +2,10 @@ import messaging from '@react-native-firebase/messaging';
 import { PermissionsAndroid, Platform } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 import notifee, { AndroidImportance } from '@notifee/react-native';
-import SafeLogger from '../../utils/safeLogger';
-import { observabilityService } from '../ObservabilityService';
-import { analyticsService, ANALYTICS_EVENTS } from './AnalyticsService';
+
+import SafeLogger from '@/utils/safeLogger';
+import { observabilityService } from '@/services/ObservabilityService';
+import { analyticsService, ANALYTICS_EVENTS } from '@/services/firebase/AnalyticsService';
 
 class FCMService {
   private messaging: ReturnType<typeof messaging>;

@@ -19,21 +19,21 @@ import { Text, Icon, Button } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import PagerView from 'react-native-pager-view';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-import UnifiedHeader from '../components/ui/UnifiedHeader';
-import { useAppTheme } from '../theme/theme';
-import SearchBar from '../components/ui/SearchBar';
-import FilterSection, { FilterOption } from '../components/ui/FilterSection';
+import UnifiedHeader from '@/components/ui/UnifiedHeader';
+import { useAppTheme } from '@/theme';
+import SearchBar from '@/components/ui/SearchBar';
+import FilterSection, { FilterOption } from '@/components/ui/FilterSection';
 import NotificationCard, {
   NotificationData,
-} from '../components/notifications/NotificationCard';
-import NotificationDetailModal from '../components/notifications/NotificationDetailModal';
-import NotificationsSkeleton from '../components/notifications/NotificationsSkeleton';
-import { useNotifications } from '../context/NotificationContext';
-import { fcmService } from '../services/firebase/FCMService';
-import { notificationInitService } from '../services/NotificationInitService';
-import { storageService } from '../services/StorageService';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+} from '@/components/notifications/NotificationCard';
+import NotificationDetailModal from '@/components/notifications/NotificationDetailModal';
+import NotificationsSkeleton from '@/components/notifications/NotificationsSkeleton';
+import { useNotifications } from '@/context/NotificationContext';
+import { fcmService } from '@/services/firebase/FCMService';
+import { notificationInitService } from '@/services/NotificationInitService';
+import { storageService } from '@/services/StorageService';
 
 const isFabricEnabled = !!(globalThis as any).nativeFabricUIManager;
 

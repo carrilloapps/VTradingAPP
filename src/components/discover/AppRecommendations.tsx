@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { DimensionValue, Platform, StyleSheet, View } from 'react-native';
-import AppCard, { RecommendedApp } from './AppCard';
-import AppRecommendationsSkeleton from './AppRecommendationsSkeleton';
-import { remoteConfigService } from '../../services/firebase/RemoteConfigService';
-import { observabilityService } from '../../services/ObservabilityService';
-import { analyticsService } from '../../services/firebase/AnalyticsService';
+
+import AppCard, { RecommendedApp } from '@/components/discover/AppCard';
+import AppRecommendationsSkeleton from '@/components/discover/AppRecommendationsSkeleton';
+import { remoteConfigService } from '@/services/firebase/RemoteConfigService';
+import { observabilityService } from '@/services/ObservabilityService';
+import { analyticsService } from '@/services/firebase/AnalyticsService';
 
 interface AppRecommendationsProps {
   apps?: RecommendedApp[];

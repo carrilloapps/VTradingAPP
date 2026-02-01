@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ActivityIndicator, Text } from 'react-native-paper';
-import { useAppTheme } from '../../theme/theme';
+
+import { useAppTheme } from '@/theme';
 
 interface AuthLoadingProps {
   testID?: string;

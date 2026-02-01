@@ -1,13 +1,13 @@
 import { Linking } from 'react-native';
-import { navigationRef } from '../navigation/NavigationRef';
-import { observabilityService } from './ObservabilityService';
+
+import { navigationRef } from '@/navigation/NavigationRef';
+import { observabilityService } from '@/services/ObservabilityService';
 import {
   analyticsService,
   ANALYTICS_EVENTS,
-} from './firebase/AnalyticsService';
-import SafeLogger from '../utils/safeLogger';
-
-import { AppConfig } from '../constants/AppConfig';
+} from '@/services/firebase/AnalyticsService';
+import SafeLogger from '@/utils/safeLogger';
+import { AppConfig } from '@/constants/AppConfig';
 
 export interface DeepLinkRoute {
   type: 'discover' | 'article' | 'category' | 'tag';

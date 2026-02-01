@@ -12,19 +12,20 @@ import {
 import { FlashList } from '@shopify/flash-list';
 import { Text, useTheme, TouchableRipple } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
 import { useNavigation } from '@react-navigation/native';
-import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
-import { observabilityService } from '../services/ObservabilityService';
-import { useToastStore } from '../stores/toastStore';
-import CurrencyPickerModal from '../components/dashboard/CurrencyPickerModal';
-import CurrencySelectorButton from '../components/dashboard/CurrencySelectorButton';
-import UnifiedHeader from '../components/ui/UnifiedHeader';
-import MarketStatus from '../components/ui/MarketStatus';
-import { AppConfig } from '../constants/AppConfig';
+import { CurrencyService, CurrencyRate } from '@/services/CurrencyService';
+import { observabilityService } from '@/services/ObservabilityService';
+import { useToastStore } from '@/stores/toastStore';
+import CurrencyPickerModal from '@/components/dashboard/CurrencyPickerModal';
+import CurrencySelectorButton from '@/components/dashboard/CurrencySelectorButton';
+import UnifiedHeader from '@/components/ui/UnifiedHeader';
+import MarketStatus from '@/components/ui/MarketStatus';
+import { AppConfig } from '@/constants/AppConfig';
 import {
   analyticsService,
   ANALYTICS_EVENTS,
-} from '../services/firebase/AnalyticsService';
+} from '@/services/firebase/AnalyticsService';
 
 // --- Components ---
 const KeypadButton = ({

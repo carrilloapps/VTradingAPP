@@ -1,10 +1,10 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useAppTheme } from '../../theme/theme';
-import { NotificationData } from './NotificationCard';
 
-import { BolivarIcon } from '../ui/BolivarIcon';
+import { useAppTheme } from '@/theme';
+import { BolivarIcon } from '@/components/ui/BolivarIcon';
+import { NotificationData } from './NotificationCard';
 
 interface NotificationIconProps {
   notification: NotificationData;

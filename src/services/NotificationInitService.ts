@@ -1,12 +1,13 @@
-import { fcmService } from './firebase/FCMService';
-import { storageService } from './StorageService';
-import SafeLogger from '../utils/safeLogger';
-import { observabilityService } from './ObservabilityService';
+import notifee, { AndroidImportance } from '@notifee/react-native';
+
+import { fcmService } from '@/services/firebase/FCMService';
+import { storageService } from '@/services/StorageService';
+import { observabilityService } from '@/services/ObservabilityService';
 import {
   analyticsService,
   ANALYTICS_EVENTS,
-} from './firebase/AnalyticsService';
-import notifee, { AndroidImportance } from '@notifee/react-native';
+} from '@/services/firebase/AnalyticsService';
+import SafeLogger from '@/utils/safeLogger';
 
 /**
  * Servicio para inicializar el sistema de notificaciones

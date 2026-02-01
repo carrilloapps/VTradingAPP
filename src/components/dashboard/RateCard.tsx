@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 import { Text, useTheme, Surface, TouchableRipple } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
-import { BolivarIcon } from '../ui/BolivarIcon';
+import { BolivarIcon } from '@/components/ui/BolivarIcon';
 
 interface RateCardProps {
   title: string;

@@ -9,7 +9,8 @@ import {
 } from 'react-native';
 import { Text, Surface, Icon, TouchableRipple } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
-import { useAppTheme } from '../../theme/theme';
+
+import { useAppTheme } from '@/theme';
 
 interface AdItem {
   id: string;

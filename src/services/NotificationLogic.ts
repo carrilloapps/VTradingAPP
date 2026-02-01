@@ -1,6 +1,7 @@
 import notifee from '@notifee/react-native';
-import { storageService } from './StorageService';
-import { observabilityService } from './ObservabilityService';
+
+import { storageService } from '@/services/StorageService';
+import { observabilityService } from '@/services/ObservabilityService';
 
 // Configuración visual compartida para todas las notificaciones
 const ANDROID_NOTIFICATION_DEFAULTS = {

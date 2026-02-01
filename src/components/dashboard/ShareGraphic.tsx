@@ -4,7 +4,7 @@ import { Text, Icon, Surface, useTheme } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import ViewShot from 'react-native-view-shot';
 
-import { ExchangeCardProps } from './ExchangeCard';
+import { ExchangeCardProps } from '@/components/dashboard/ExchangeCard';
 
 interface ShareGraphicProps {
   viewShotRef: React.RefObject<any>;

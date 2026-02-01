@@ -20,21 +20,22 @@ import { FlashList } from '@shopify/flash-list';
 import { Text, useTheme } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import UnifiedHeader from '../components/ui/UnifiedHeader';
-import BankRateCard from '../components/dashboard/BankRateCard';
-import BankRatesSkeleton from '../components/dashboard/BankRatesSkeleton';
-import SearchBar from '../components/ui/SearchBar';
-import FilterSection from '../components/ui/FilterSection';
-import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
-import { useToastStore } from '../stores/toastStore';
-import { AppTheme } from '../theme/theme';
+
+import UnifiedHeader from '@/components/ui/UnifiedHeader';
+import BankRateCard from '@/components/dashboard/BankRateCard';
+import BankRatesSkeleton from '@/components/dashboard/BankRatesSkeleton';
+import SearchBar from '@/components/ui/SearchBar';
+import FilterSection from '@/components/ui/FilterSection';
+import { CurrencyService, CurrencyRate } from '@/services/CurrencyService';
+import { useToastStore } from '@/stores/toastStore';
+import { AppTheme } from '@/theme';
 import { useNavigation } from '@react-navigation/native';
-import { observabilityService } from '../services/ObservabilityService';
+import { observabilityService } from '@/services/ObservabilityService';
 import {
   analyticsService,
   ANALYTICS_EVENTS,
-} from '../services/firebase/AnalyticsService';
-import { BolivarIcon } from '../components/ui/BolivarIcon';
+} from '@/services/firebase/AnalyticsService';
+import { BolivarIcon } from '@/components/ui/BolivarIcon';
 
 const isFabricEnabled = !!(globalThis as any).nativeFabricUIManager;
 

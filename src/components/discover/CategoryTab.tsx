@@ -2,9 +2,10 @@ import React, { useRef } from 'react';
 import { StyleSheet, Animated, View } from 'react-native';
 import { Text, Surface, TouchableRipple } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useAppTheme } from '../../theme/theme';
-import { getCategoryIcon } from '../../utils/categoryIcons';
 import FastImage from 'react-native-fast-image';
+
+import { useAppTheme } from '@/theme';
+import { getCategoryIcon } from '@/utils/categoryIcons';
 
 interface CategoryTabProps {
   name: string;

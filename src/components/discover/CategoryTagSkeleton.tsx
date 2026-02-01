@@ -1,9 +1,10 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
-import { useAppTheme } from '../../theme/theme';
-import Skeleton from '../ui/Skeleton';
+
 import ArticleSkeleton from './ArticleSkeleton';
+import { useAppTheme } from '@/theme';
+import Skeleton from '@/components/ui/Skeleton';
 
 const CategoryTagSkeleton = () => {
   const theme = useAppTheme();

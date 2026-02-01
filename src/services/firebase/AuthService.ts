@@ -14,9 +14,10 @@ import {
   GoogleSignin,
   statusCodes,
 } from '@react-native-google-signin/google-signin';
-import { AppConfig } from '../../constants/AppConfig';
-import { observabilityService } from '../ObservabilityService';
-import SafeLogger from '../../utils/safeLogger';
+
+import { AppConfig } from '@/constants/AppConfig';
+import { observabilityService } from '@/services/ObservabilityService';
+import SafeLogger from '@/utils/safeLogger';
 
 class AuthService {
   private googleWebClientId: string | null;

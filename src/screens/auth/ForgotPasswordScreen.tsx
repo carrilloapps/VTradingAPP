@@ -9,18 +9,19 @@ import {
 } from 'react-native';
 import { Text, TextInput, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAuthStore } from '../../stores/authStore';
-import { useToastStore } from '../../stores/toastStore';
+
+import { useAuthStore } from '@/stores/authStore';
+import { useToastStore } from '@/stores/toastStore';
 import {
   analyticsService,
   ANALYTICS_EVENTS,
-} from '../../services/firebase/AnalyticsService';
-import AuthLoading from '../../components/auth/AuthLoading';
-import CustomButton from '../../components/ui/CustomButton';
-import UnifiedHeader from '../../components/ui/UnifiedHeader';
-import { useAppTheme } from '../../theme/theme';
-import AuthLogo from '../../components/ui/AuthLogo';
-import { observabilityService } from '../../services/ObservabilityService';
+} from '@/services/firebase/AnalyticsService';
+import AuthLoading from '@/components/auth/AuthLoading';
+import CustomButton from '@/components/ui/CustomButton';
+import UnifiedHeader from '@/components/ui/UnifiedHeader';
+import { useAppTheme } from '@/theme';
+import AuthLogo from '@/components/ui/AuthLogo';
+import { observabilityService } from '@/services/ObservabilityService';
 
 const ForgotPasswordScreen = ({ navigation }: any) => {
   const theme = useAppTheme();

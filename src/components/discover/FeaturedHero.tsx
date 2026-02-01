@@ -8,9 +8,10 @@ import {
 import { Text, Surface } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
-import { useAppTheme } from '../../theme/theme';
-import { FormattedPost } from '../../services/WordPressService';
 import FastImage from 'react-native-fast-image';
+
+import { useAppTheme } from '@/theme';
+import { FormattedPost } from '@/services/WordPressService';
 
 interface FeaturedHeroProps {
   item: FormattedPost;

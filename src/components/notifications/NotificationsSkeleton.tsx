@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { useTheme } from 'react-native-paper';
-import Skeleton from '../ui/Skeleton';
+
+import Skeleton from '@/components/ui/Skeleton';
 
 const NotificationsSkeleton = () => {
   const theme = useTheme();

@@ -6,7 +6,8 @@ import {
 } from '@react-native-firebase/analytics';
 import * as Clarity from '@microsoft/react-native-clarity';
 import * as Sentry from '@sentry/react-native';
-import { observabilityService } from '../ObservabilityService';
+
+import { observabilityService } from '@/services/ObservabilityService';
 
 /**
  * Standard event names - Use these constants for consistency

@@ -2,8 +2,9 @@ import React from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { Text, Avatar, Surface } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useAppTheme } from '../../theme/theme';
-import { FormattedComment } from '../../services/WordPressService';
+
+import { useAppTheme } from '@/theme';
+import { FormattedComment } from '@/services/WordPressService';
 
 interface CommentsListProps {
   comments: FormattedComment[];

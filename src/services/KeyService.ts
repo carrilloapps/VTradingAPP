@@ -1,5 +1,5 @@
-import { AppConfig } from '../constants/AppConfig';
-import SafeLogger from '../utils/safeLogger';
+import { AppConfig } from '@/constants/AppConfig';
+import SafeLogger from '@/utils/safeLogger';
 
 export const KeyService = {
   /**

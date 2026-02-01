@@ -1,5 +1,6 @@
 import React from 'react';
-import CustomDialog from '../ui/CustomDialog';
+
+import CustomDialog from '@/components/ui/CustomDialog';
 
 interface LogoutDialogProps {
   visible: boolean;

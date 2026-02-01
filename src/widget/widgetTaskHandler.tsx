@@ -3,17 +3,18 @@ import {
   WidgetInfo,
   WidgetTaskHandlerProps,
 } from 'react-native-android-widget';
-import { storageService } from '../services/StorageService';
-import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
+
 import VTradingWidget from './VTradingWidget';
 import { WidgetItem } from './types';
-import { observabilityService } from '../services/ObservabilityService';
-import { getTrend } from '../utils/trendUtils';
+import { observabilityService } from '@/services/ObservabilityService';
+import { getTrend } from '@/utils/trendUtils';
 import {
   analyticsService,
   ANALYTICS_EVENTS,
-} from '../services/firebase/AnalyticsService';
-import SafeLogger from '../utils/safeLogger';
+} from '@/services/firebase/AnalyticsService';
+import SafeLogger from '@/utils/safeLogger';
+import { storageService } from '@/services/StorageService';
+import { CurrencyService, CurrencyRate } from '@/services/CurrencyService';
 
 export async function buildWidgetElement(
   info?: WidgetInfo,

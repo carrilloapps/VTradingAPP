@@ -3,8 +3,9 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, Avatar, Button } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { FirebaseAuthTypes } from '@react-native-firebase/auth';
-import { md5 } from '../../utils/md5';
-import { useAppTheme } from '../../theme/theme';
+
+import { md5 } from '@/utils/md5';  
+import { useAppTheme } from '@/theme';
 
 interface UserProfileCardProps {
   user: FirebaseAuthTypes.User | null;

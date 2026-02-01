@@ -17,20 +17,20 @@ import {
   FormattedPost,
   WordPressCategory,
   WordPressTag,
-} from '../../services/WordPressService';
-import { observabilityService } from '../../services/ObservabilityService';
-import SafeLogger from '../../utils/safeLogger';
-import ArticleCard from '../../components/discover/ArticleCard';
-import ArticleSkeleton from '../../components/discover/ArticleSkeleton';
-import DiscoverEmptyView from '../../components/discover/DiscoverEmptyView';
-import Skeleton from '../../components/ui/Skeleton';
-import { useDebounce } from '../../hooks/useDebounce';
-import CategoryCard from '../../components/discover/CategoryCard';
-import TagCloud from '../../components/discover/TagCloud';
-import AppRecommendations from '../../components/discover/AppRecommendations';
-import SectionHeader from '../../components/discover/SectionHeader';
-import DiscoverHeader from '../../components/discover/DiscoverHeader';
-import { useAppTheme } from '../../theme/theme';
+} from '@/services/WordPressService';
+import { observabilityService } from '@/services/ObservabilityService';
+import SafeLogger from '@/utils/safeLogger';
+import ArticleCard from '@/components/discover/ArticleCard';
+import ArticleSkeleton from '@/components/discover/ArticleSkeleton';
+import DiscoverEmptyView from '@/components/discover/DiscoverEmptyView';
+import Skeleton from '@/components/ui/Skeleton';
+import { useDebounce } from '@/hooks/useDebounce';
+import CategoryCard from '@/components/discover/CategoryCard';
+import TagCloud from '@/components/discover/TagCloud';
+import AppRecommendations from '@/components/discover/AppRecommendations';
+import SectionHeader from '@/components/discover/SectionHeader';
+import DiscoverHeader from '@/components/discover/DiscoverHeader';
+import { useAppTheme } from '@/theme';
 
 type SearchState = 'idle' | 'searching' | 'success' | 'error' | 'too_short';
 

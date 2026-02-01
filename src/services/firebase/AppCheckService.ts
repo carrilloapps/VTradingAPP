@@ -4,8 +4,9 @@ import {
   AppCheck,
 } from '@react-native-firebase/app-check';
 import { getApp } from '@react-native-firebase/app';
-import { observabilityService } from '../ObservabilityService';
-import SafeLogger from '../../utils/safeLogger';
+
+import { observabilityService } from '@/services/ObservabilityService';
+import SafeLogger from '@/utils/safeLogger';
 
 class AppCheckService {
   private appCheckInstance: AppCheck | null = null;

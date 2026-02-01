@@ -19,30 +19,30 @@ import {
 } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DeviceInfo from 'react-native-device-info';
-import { fcmService } from '../services/firebase/FCMService';
-import { notificationInitService } from '../services/NotificationInitService';
+
+import { fcmService } from '@/services/firebase/FCMService';
+import { notificationInitService } from '@/services/NotificationInitService';
 import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import UnifiedHeader from '../components/ui/UnifiedHeader';
-import CustomDialog from '../components/ui/CustomDialog';
-import AboutDialog from '../components/ui/AboutDialog';
-import { useThemeContext } from '../theme/ThemeContext';
-import { useAuthStore } from '../stores/authStore';
-import { useToastStore } from '../stores/toastStore';
-import { storageService, UserAlert } from '../services/StorageService';
-import { observabilityService } from '../services/ObservabilityService';
-import { AppConfig } from '../constants/AppConfig';
+import UnifiedHeader from '@/components/ui/UnifiedHeader';
+import CustomDialog from '@/components/ui/CustomDialog';
+import AboutDialog from '@/components/ui/AboutDialog';
+import { useThemeContext } from '@/theme/ThemeContext';
+import { useAuthStore } from '@/stores/authStore';
+import { useToastStore } from '@/stores/toastStore';
+import { storageService, UserAlert } from '@/services/StorageService';
+import { observabilityService } from '@/services/ObservabilityService';
+import { AppConfig } from '@/constants/AppConfig';
 import {
   analyticsService,
   ANALYTICS_EVENTS,
-} from '../services/firebase/AnalyticsService';
-
-import UserProfileCard from '../components/settings/UserProfileCard';
-import AlertItem from '../components/settings/AlertItem';
-import ThemeSelector from '../components/settings/ThemeSelector';
-import MenuButton from '../components/settings/MenuButton';
-import ProfileEditDialog from '../components/settings/ProfileEditDialog';
-import LogoutDialog from '../components/settings/LogoutDialog';
-import SettingsSkeleton from '../components/settings/SettingsSkeleton';
+} from '@/services/firebase/AnalyticsService';
+import UserProfileCard from '@/components/settings/UserProfileCard';
+import AlertItem from '@/components/settings/AlertItem';
+import ThemeSelector from '@/components/settings/ThemeSelector';
+import MenuButton from '@/components/settings/MenuButton';
+import ProfileEditDialog from '@/components/settings/ProfileEditDialog';
+import LogoutDialog from '@/components/settings/LogoutDialog';
+import SettingsSkeleton from '@/components/settings/SettingsSkeleton';
 
 const SettingsScreen = () => {
   const theme = useTheme();

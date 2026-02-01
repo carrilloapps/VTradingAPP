@@ -4,10 +4,11 @@ import {
   fetchAndActivate,
   getValue,
 } from '@react-native-firebase/remote-config';
-import { observabilityService } from '../ObservabilityService';
-import { featureFlagService, RemoteConfigSchema } from '../FeatureFlagService';
-import { analyticsService } from './AnalyticsService';
-import SafeLogger from '../../utils/safeLogger';
+
+import { observabilityService } from '@/services/ObservabilityService';
+import { featureFlagService, RemoteConfigSchema } from '@/services/FeatureFlagService';
+import { analyticsService } from '@/services/firebase/AnalyticsService';
+import SafeLogger from '@/utils/safeLogger';
 
 class RemoteConfigService {
   private remoteConfig = getRemoteConfig();

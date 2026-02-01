@@ -5,10 +5,11 @@ import React, {
   useEffect,
   useCallback,
 } from 'react';
-import { storageService, StoredNotification } from '../services/StorageService';
-import { fcmService } from '../services/firebase/FCMService';
-import { navigationRef } from '../navigation/NavigationRef';
-import { observabilityService } from '../services/ObservabilityService';
+
+import { storageService, StoredNotification } from '@/services/StorageService';
+import { fcmService } from '@/services/firebase/FCMService';
+import { navigationRef } from '@/navigation/NavigationRef';
+import { observabilityService } from '@/services/ObservabilityService';
 
 interface NotificationContextType {
   notifications: StoredNotification[];

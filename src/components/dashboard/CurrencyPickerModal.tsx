@@ -2,10 +2,11 @@ import React, { useState, useMemo } from 'react';
 import { View, StyleSheet, TouchableOpacity, SectionList } from 'react-native';
 import { Text, useTheme, Searchbar, Button, Icon } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { CurrencyRate } from '../../services/CurrencyService';
-import { BottomSheetModal } from '../ui/BottomSheetModal';
-import { AppConfig } from '../../constants/AppConfig';
-import { BolivarIcon } from '../ui/BolivarIcon';
+
+import { CurrencyRate } from '@/services/CurrencyService';
+import { BottomSheetModal } from '@/components/ui/BottomSheetModal';
+import { AppConfig } from '@/constants/AppConfig';
+import { BolivarIcon } from '@/components/ui/BolivarIcon';
 
 export interface CurrencyPickerModalProps {
   visible: boolean;

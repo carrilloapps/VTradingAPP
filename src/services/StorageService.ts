@@ -1,8 +1,9 @@
 import { createMMKV, MMKV } from 'react-native-mmkv';
-import { observabilityService } from './ObservabilityService';
+
+import { observabilityService } from '@/services/ObservabilityService';
 import { InteractionManager } from 'react-native';
-import { KeyService } from './KeyService';
-import SafeLogger from '../utils/safeLogger';
+import { KeyService } from '@/services/KeyService';
+import SafeLogger from '@/utils/safeLogger';
 
 // Lazy initialized MMKV instance
 let _storage: MMKV | undefined;

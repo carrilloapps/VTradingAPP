@@ -12,48 +12,48 @@ import {
 } from '@react-navigation/material-top-tabs';
 import { useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import SafeLogger from '../utils/safeLogger';
-
-import HomeScreen from '../screens/HomeScreen';
-import SettingsScreen from '../screens/SettingsScreen';
-import WidgetsScreen from '../screens/WidgetsScreen';
-import ExchangeRatesScreen from '../screens/ExchangeRatesScreen';
-import StocksScreen from '../screens/StocksScreen';
-import AdvancedCalculatorScreen from '../screens/AdvancedCalculatorScreen';
-import NotificationsScreen from '../screens/NotificationsScreen';
-import BankRatesScreen from '../screens/BankRatesScreen';
-import CurrencyDetailScreen from '../screens/CurrencyDetailScreen';
-import { useThemeContext } from '../theme/ThemeContext';
-import { analyticsService } from '../services/firebase/AnalyticsService';
-import { useAuthStore } from '../stores/authStore';
-import LoginScreen from '../screens/auth/LoginScreen';
-import RegisterScreen from '../screens/auth/RegisterScreen';
-import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
-import WebViewScreen from '../screens/WebViewScreen';
-import OnboardingScreen from '../screens/OnboardingScreen';
-import ModernTabBar from '../components/navigation/ModernTabBar';
-import { navigationRef } from './NavigationRef';
-import { storageService } from '../services/StorageService';
-import DiscoverScreen from '../screens/discover/DiscoverScreen';
-import AddAlertScreen from '../screens/settings/AddAlertScreen';
-import { UserAlert } from '../services/StorageService';
-import AuthLoading from '../components/auth/AuthLoading';
-import StockDetailScreen from '../screens/StockDetailScreen';
-import { StockData } from '../services/StocksService';
-import { CurrencyRate } from '../services/CurrencyService';
 import DeviceInfo from 'react-native-device-info';
-import { remoteConfigService } from '../services/firebase/RemoteConfigService';
-import ForceUpdateModal from '../components/ui/ForceUpdateModal';
-import ArticleDetailScreen from '../screens/discover/ArticleDetailScreen';
-import CategoryDetailScreen from '../screens/discover/CategoryDetailScreen';
-import TagDetailScreen from '../screens/discover/TagDetailScreen';
-import AllArticlesScreen from '../screens/discover/AllArticlesScreen';
-import SearchResultsScreen from '../screens/discover/SearchResultsScreen';
+
+import SafeLogger from '@/utils/safeLogger';
+import HomeScreen from '@/screens/HomeScreen';
+import SettingsScreen from '@/screens/SettingsScreen';
+import WidgetsScreen from '@/screens/WidgetsScreen';
+import ExchangeRatesScreen from '@/screens/ExchangeRatesScreen';
+import StocksScreen from '@/screens/StocksScreen';
+import AdvancedCalculatorScreen from '@/screens/AdvancedCalculatorScreen';
+import NotificationsScreen from '@/screens/NotificationsScreen';
+import BankRatesScreen from '@/screens/BankRatesScreen';
+import CurrencyDetailScreen from '@/screens/CurrencyDetailScreen';
+import { useThemeContext } from '@/theme/ThemeContext';
+import { analyticsService } from '@/services/firebase/AnalyticsService';
+import { useAuthStore } from '@/stores/authStore';
+import LoginScreen from '@/screens/auth/LoginScreen';
+import RegisterScreen from '@/screens/auth/RegisterScreen';
+import ForgotPasswordScreen from '@/screens/auth/ForgotPasswordScreen';
+import WebViewScreen from '@/screens/WebViewScreen';
+import OnboardingScreen from '@/screens/OnboardingScreen';
+import ModernTabBar from '@/components/navigation/ModernTabBar';
+import { navigationRef } from './NavigationRef';
+import { storageService } from '@/services/StorageService';
+import DiscoverScreen from '@/screens/discover/DiscoverScreen';
+import AddAlertScreen from '@/screens/settings/AddAlertScreen';
+import { UserAlert } from '@/services/StorageService';
+import AuthLoading from '@/components/auth/AuthLoading';
+import StockDetailScreen from '@/screens/StockDetailScreen';
+import { StockData } from '@/services/StocksService';
+import { CurrencyRate } from '@/services/CurrencyService';
+import { remoteConfigService } from '@/services/firebase/RemoteConfigService';
+import ForceUpdateModal from '@/components/ui/ForceUpdateModal';
+import ArticleDetailScreen from '@/screens/discover/ArticleDetailScreen';
+import CategoryDetailScreen from '@/screens/discover/CategoryDetailScreen';
+import TagDetailScreen from '@/screens/discover/TagDetailScreen';
+import AllArticlesScreen from '@/screens/discover/AllArticlesScreen';
+import SearchResultsScreen from '@/screens/discover/SearchResultsScreen';
 import {
   WordPressCategory,
   WordPressTag,
   FormattedPost,
-} from '../services/WordPressService';
+} from '@/services/WordPressService';
 
 export type RootStackParamList = {
   Onboarding: undefined;

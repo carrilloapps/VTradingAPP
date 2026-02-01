@@ -8,12 +8,13 @@ import {
   IconButton,
 } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { CurrencyService, CurrencyRate } from '../../services/CurrencyService';
-import { useToastStore } from '../../stores/toastStore';
+
 import CurrencyPickerModal from './CurrencyPickerModal';
 import CurrencySelectorButton from './CurrencySelectorButton';
-import { AppConfig } from '../../constants/AppConfig';
-import { observabilityService } from '../../services/ObservabilityService';
+import { AppConfig } from '@/constants/AppConfig';
+import { observabilityService } from '@/services/ObservabilityService';
+import { CurrencyService, CurrencyRate } from '@/services/CurrencyService';
+import { useToastStore } from '@/stores/toastStore';
 
 const CurrencyConverter: React.FC = () => {
   const theme = useTheme();

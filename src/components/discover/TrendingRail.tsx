@@ -3,8 +3,9 @@ import { View, StyleSheet } from 'react-native';
 import { FlashList } from '@shopify/flash-list';
 import { Text, TouchableRipple, useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { FormattedPost } from '../../services/WordPressService';
 import FastImage from 'react-native-fast-image';
+
+import { FormattedPost } from '@/services/WordPressService';
 
 interface TrendingRailProps {
   items: FormattedPost[];

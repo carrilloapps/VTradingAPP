@@ -17,31 +17,31 @@ import { Text, Surface, ProgressBar } from 'react-native-paper';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import CustomButton from '../../components/ui/CustomButton';
 
-import DiscoverHeader from '../../components/discover/DiscoverHeader';
-import DiscoverConstructionSkeleton from '../../components/discover/DiscoverSkeleton';
-import DiscoverFeedSkeleton from '../../components/discover/DiscoverFeedSkeleton';
-import DiscoverErrorView from '../../components/discover/DiscoverErrorView';
-import ArticleCard from '../../components/discover/ArticleCard';
-import SectionHeader from '../../components/discover/SectionHeader';
-import CategoryTabList from '../../components/discover/CategoryTabList';
-import AdCard from '../../components/discover/AdCard';
-import FeaturedCarousel from '../../components/discover/FeaturedCarousel';
-import { useToastStore } from '../../stores/toastStore';
-import { observabilityService } from '../../services/ObservabilityService';
-import { remoteConfigService } from '../../services/firebase/RemoteConfigService';
+import CustomButton from '@/components/ui/CustomButton';
+import DiscoverHeader from '@/components/discover/DiscoverHeader';
+import DiscoverConstructionSkeleton from '@/components/discover/DiscoverSkeleton';
+import DiscoverFeedSkeleton from '@/components/discover/DiscoverFeedSkeleton';
+import DiscoverErrorView from '@/components/discover/DiscoverErrorView';
+import ArticleCard from '@/components/discover/ArticleCard';
+import SectionHeader from '@/components/discover/SectionHeader';
+import CategoryTabList from '@/components/discover/CategoryTabList';
+import AdCard from '@/components/discover/AdCard';
+import FeaturedCarousel from '@/components/discover/FeaturedCarousel';
+import { useToastStore } from '@/stores/toastStore';
+import { observabilityService } from '@/services/ObservabilityService';
+import { remoteConfigService } from '@/services/firebase/RemoteConfigService';
 import {
   wordPressService,
   FormattedPost,
   WordPressCategory,
-} from '../../services/WordPressService';
-import { fcmService } from '../../services/firebase/FCMService';
-import { storageService } from '../../services/StorageService';
-import { analyticsService } from '../../services/firebase/AnalyticsService';
-import { getCategoryImage } from '../../utils/WordPressUtils';
-import SafeLogger from '../../utils/safeLogger';
-import { useAppTheme } from '../../theme/theme';
+} from '@/services/WordPressService';
+import { fcmService } from '@/services/firebase/FCMService';
+import { storageService } from '@/services/StorageService';
+import { analyticsService } from '@/services/firebase/AnalyticsService';
+import { getCategoryImage } from '@/utils/WordPressUtils';
+import SafeLogger from '@/utils/safeLogger';
+import { useAppTheme } from '@/theme';
 
 const FlashListTyped = FlashList as React.ComponentType<any>;
 

@@ -11,25 +11,25 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-
-import UnifiedHeader from '../components/ui/UnifiedHeader';
-import { useAppTheme } from '../theme/theme';
-import CustomButton from '../components/ui/CustomButton';
 import DeviceInfo from 'react-native-device-info';
-import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
-import WidgetPreview from '../components/widgets/WidgetPreview';
-import { WidgetItem } from '../widget/types';
-import CurrencyPickerModal from '../components/dashboard/CurrencyPickerModal';
-import { storageService, WidgetConfig } from '../services/StorageService';
-import { useToastStore } from '../stores/toastStore';
+import { requestWidgetUpdate } from 'react-native-android-widget';
+
+import UnifiedHeader from '@/components/ui/UnifiedHeader';
+import { useAppTheme } from '@/theme/theme';
+import CustomButton from '@/components/ui/CustomButton';
+import { CurrencyService, CurrencyRate } from '@/services/CurrencyService';
+import WidgetPreview from '@/components/widgets/WidgetPreview';
+import { WidgetItem } from '@/widget/types';
+import CurrencyPickerModal from '@/components/dashboard/CurrencyPickerModal';
+import { storageService, WidgetConfig } from '@/services/StorageService';
+import { useToastStore } from '@/stores/toastStore';
 import {
   analyticsService,
   ANALYTICS_EVENTS,
-} from '../services/firebase/AnalyticsService';
-import { observabilityService } from '../services/ObservabilityService';
-import { requestWidgetUpdate } from 'react-native-android-widget';
-import { buildWidgetElement } from '../widget/widgetTaskHandler';
-import { BolivarIcon } from '../components/ui/BolivarIcon';
+} from '@/services/firebase/AnalyticsService';
+import { observabilityService } from '@/services/ObservabilityService';
+import { buildWidgetElement } from '@/widget/widgetTaskHandler';
+import { BolivarIcon } from '@/components/ui/BolivarIcon';
 
 const APP_VERSION = DeviceInfo.getVersion();
 

@@ -11,8 +11,9 @@ import { Text, Surface, TouchableRipple, useTheme } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import LinearGradient from 'react-native-linear-gradient';
-import { FormattedPost } from '../../services/WordPressService';
 import FastImage from 'react-native-fast-image';
+
+import { FormattedPost } from '@/services/WordPressService';
 
 interface FeaturedCarouselProps {
   items: FormattedPost[];

@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAppTheme } from '../../theme/theme';
-import Skeleton from '../ui/Skeleton';
+
+import { useAppTheme } from '@/theme';
+import Skeleton from '@/components/ui/Skeleton';
 import ArticleSkeleton from './ArticleSkeleton';
 
 const DiscoverFeedSkeleton = () => {

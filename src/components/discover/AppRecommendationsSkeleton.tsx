@@ -1,8 +1,9 @@
 import React, { useMemo } from 'react';
 import { DimensionValue, StyleSheet, View } from 'react-native';
 import { Surface } from 'react-native-paper';
-import { useAppTheme } from '../../theme/theme';
-import Skeleton from '../ui/Skeleton';
+
+import { useAppTheme } from '@/theme';
+import Skeleton from '@/components/ui/Skeleton';
 
 interface AppRecommendationsSkeletonProps {
   columns?: number;

@@ -1,8 +1,9 @@
 import React from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { Text, Surface, TouchableRipple, useTheme } from 'react-native-paper';
-import { FormattedPost } from '../../services/WordPressService';
 import FastImage from 'react-native-fast-image';
+
+import { FormattedPost } from '@/services/WordPressService';
 
 interface ArticleCardProps {
   article: FormattedPost;

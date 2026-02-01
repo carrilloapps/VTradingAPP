@@ -2,7 +2,8 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, Icon, Surface } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
-import { useAppTheme } from '../../theme/theme';
+
+import { useAppTheme } from '@/theme';
 
 interface AdvancedCalculatorCTAProps {
   spread: number | null;

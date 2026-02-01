@@ -2,8 +2,9 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, useTheme, Surface, TouchableRipple } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { WordPressCategory } from '../../services/WordPressService';
-import { getCategoryIcon } from '../../utils/categoryIcons';
+
+import { WordPressCategory } from '@/services/WordPressService';
+import { getCategoryIcon } from '@/utils/categoryIcons';
 
 interface CategoryCardProps {
   category: WordPressCategory;

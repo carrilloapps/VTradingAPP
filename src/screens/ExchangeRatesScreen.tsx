@@ -15,17 +15,17 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import { FlashList } from '@shopify/flash-list';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
-import RateCard from '../components/dashboard/RateCard';
-import UnifiedHeader from '../components/ui/UnifiedHeader';
-import SearchBar from '../components/ui/SearchBar';
-import FilterSection from '../components/ui/FilterSection';
-import ExchangeRatesSkeleton from '../components/dashboard/ExchangeRatesSkeleton';
-import { CurrencyService, CurrencyRate } from '../services/CurrencyService';
-import { StocksService } from '../services/StocksService';
-import { observabilityService } from '../services/ObservabilityService';
-import { useFilterStore } from '../stores/filterStore';
-import { useToastStore } from '../stores/toastStore';
-import { useAppTheme } from '../theme/theme';
+import RateCard from '@/components/dashboard/RateCard';
+import UnifiedHeader from '@/components/ui/UnifiedHeader';
+import SearchBar from '@/components/ui/SearchBar';
+import FilterSection from '@/components/ui/FilterSection';
+import ExchangeRatesSkeleton from '@/components/dashboard/ExchangeRatesSkeleton';
+import { CurrencyService, CurrencyRate } from '@/services/CurrencyService';
+import { StocksService } from '@/services/StocksService';
+import { observabilityService } from '@/services/ObservabilityService';
+import { useFilterStore } from '@/stores/filterStore';
+import { useToastStore } from '@/stores/toastStore';
+import { useAppTheme } from '@/theme';
 
 const isFabricEnabled = !!(globalThis as any).nativeFabricUIManager;
 

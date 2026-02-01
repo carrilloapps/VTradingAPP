@@ -1,7 +1,8 @@
-import { ApiClient } from './ApiClient';
-import { observabilityService } from './ObservabilityService';
 import Config from 'react-native-config';
-import SafeLogger from '../utils/safeLogger';
+
+import { ApiClient } from '@/services/ApiClient';
+import { observabilityService } from '@/services/ObservabilityService';
+import SafeLogger from '@/utils/safeLogger';
 
 // WordPress API Interfaces
 export interface WordPressCategory {

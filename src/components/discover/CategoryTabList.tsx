@@ -9,7 +9,8 @@ import {
   useWindowDimensions,
 } from 'react-native';
 import { IconButton, useTheme, Surface } from 'react-native-paper';
-import { WordPressCategory } from '../../services/WordPressService';
+
+import { WordPressCategory } from '@/services/WordPressService';
 import CategoryTab from './CategoryTab';
 
 // Enable LayoutAnimation on Android

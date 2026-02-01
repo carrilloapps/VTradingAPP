@@ -2,12 +2,13 @@ import React, { useMemo } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 import { FlashList } from '@shopify/flash-list';
-import ExchangeCard, { ExchangeCardProps } from './ExchangeCard';
-import { CurrencyRate } from '../../services/CurrencyService';
-import { AppConfig } from '../../constants/AppConfig';
-import { TetherIcon } from '../ui/TetherIcon';
-import { observabilityService } from '../../services/ObservabilityService';
-import { analyticsService } from '../../services/firebase/AnalyticsService';
+
+import ExchangeCard, { ExchangeCardProps } from '@/components/dashboard/ExchangeCard';
+import { CurrencyRate } from '@/services/CurrencyService';
+import { AppConfig } from '@/constants/AppConfig';
+import { TetherIcon } from '@/components/ui/TetherIcon';
+import { observabilityService } from '@/services/ObservabilityService';
+import { analyticsService } from '@/services/firebase/AnalyticsService';
 
 interface RatesSectionProps {
   rates: CurrencyRate[];

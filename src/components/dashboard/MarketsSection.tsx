@@ -2,10 +2,11 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
 import { FlashList } from '@shopify/flash-list';
-import StockItem from '../stocks/StockItem';
-import { StockData } from '../../services/StocksService';
-import { AppConfig } from '../../constants/AppConfig';
-import { analyticsService } from '../../services/firebase/AnalyticsService';
+
+import StockItem from '@/components/stocks/StockItem';
+import { StockData } from '@/services/StocksService';
+import { AppConfig } from '@/constants/AppConfig';
+import { analyticsService } from '@/services/firebase/AnalyticsService';
 
 interface MarketsSectionProps {
   stocks: StockData[];

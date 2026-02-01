@@ -11,9 +11,9 @@ import ViewShot from 'react-native-view-shot';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FastImage from 'react-native-fast-image';
 
-import { useAppTheme } from '../../theme/theme';
-import XIcon from '../common/XIcon';
-import FacebookIcon from '../common/FacebookIcon';
+import { useAppTheme } from '@/theme';
+import XIcon from '@/components/common/XIcon';
+import FacebookIcon from '@/components/common/FacebookIcon';
 
 // Helper to convert hex to rgba
 const hexToRgba = (hex: string, alpha: number) => {

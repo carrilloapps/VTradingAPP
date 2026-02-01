@@ -25,34 +25,35 @@ import { WebView } from 'react-native-webview';
 import LinearGradient from 'react-native-linear-gradient';
 import Share from 'react-native-share';
 import { captureRef } from 'react-native-view-shot';
-import CustomDialog from '../../components/ui/CustomDialog';
-import CustomButton from '../../components/ui/CustomButton';
-import ShareableDetail from '../../components/discover/ShareableDetail';
-import { deepLinkService } from '../../services/DeepLinkService';
-import { useToastStore } from '../../stores/toastStore';
-import { useAppTheme } from '../../theme/theme';
+import FastImage from 'react-native-fast-image';
+
+import CustomDialog from '@/components/ui/CustomDialog';
+import CustomButton from '@/components/ui/CustomButton';
+import ShareableDetail from '@/components/discover/ShareableDetail';
+import { deepLinkService } from '@/services/DeepLinkService';
+import { useToastStore } from '@/stores/toastStore';
+import { useAppTheme } from '@/theme';
 import {
   analyticsService,
   ANALYTICS_EVENTS,
-} from '../../services/firebase/AnalyticsService';
+} from '@/services/firebase/AnalyticsService';
 import {
   wordPressService,
   FormattedComment,
   FormattedPost,
-} from '../../services/WordPressService';
-import { remoteConfigService } from '../../services/firebase/RemoteConfigService';
-import { observabilityService } from '../../services/ObservabilityService';
-import { CommentsList } from '../../components/discover/CommentsList';
-import ArticleCard from '../../components/discover/ArticleCard';
-import ArticleDetailSkeleton from '../../components/discover/ArticleDetailSkeleton';
-import AuthorCard from '../../components/discover/AuthorCard';
-import DiscoverErrorView from '../../components/discover/DiscoverErrorView';
-import XIcon from '../../components/common/XIcon';
-import FacebookIcon from '../../components/common/FacebookIcon';
-import { shareTextContent } from '../../utils/ShareUtils';
-import DiscoverHeader from '../../components/discover/DiscoverHeader';
-import SafeLogger from '../../utils/safeLogger';
-import FastImage from 'react-native-fast-image';
+} from '@/services/WordPressService';
+import { remoteConfigService } from '@/services/firebase/RemoteConfigService';
+import { observabilityService } from '@/services/ObservabilityService';
+import { CommentsList } from '@/components/discover/CommentsList';
+import ArticleCard from '@/components/discover/ArticleCard';
+import ArticleDetailSkeleton from '@/components/discover/ArticleDetailSkeleton';
+import AuthorCard from '@/components/discover/AuthorCard';
+import DiscoverErrorView from '@/components/discover/DiscoverErrorView';
+import XIcon from '@/components/common/XIcon';
+import FacebookIcon from '@/components/common/FacebookIcon';
+import { shareTextContent } from '@/utils/ShareUtils';
+import DiscoverHeader from '@/components/discover/DiscoverHeader';
+import SafeLogger from '@/utils/safeLogger';
 
 const BlockParagraph = ({ text, theme }: any) => {
   const paragraphStyle = [styles.paragraph, { color: theme.colors.onSurface }];

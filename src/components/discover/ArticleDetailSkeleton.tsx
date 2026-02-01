@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet, StatusBar } from 'react-native';
-import { useAppTheme } from '../../theme/theme';
-import ArticleSkeleton from './ArticleSkeleton';
+
+import { useAppTheme } from '@/theme';
+import ArticleSkeleton from '@/components/discover/ArticleSkeleton';
 
 const ArticleDetailSkeleton = () => {
   const theme = useAppTheme();

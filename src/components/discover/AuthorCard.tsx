@@ -2,10 +2,11 @@ import React from 'react';
 import { View, StyleSheet, Linking } from 'react-native';
 import { Text, Surface, IconButton } from 'react-native-paper';
 import FastImage from 'react-native-fast-image';
-import { useAppTheme } from '../../theme/theme';
-import { observabilityService } from '../../services/ObservabilityService';
-import XIcon from '../common/XIcon';
-import FacebookIcon from '../common/FacebookIcon';
+
+import { useAppTheme } from '@/theme';
+import { observabilityService } from '@/services/ObservabilityService';
+import XIcon from '@/components/common/XIcon';
+import FacebookIcon from '@/components/common/FacebookIcon';
 
 interface AuthorCardProps {
   author: any;

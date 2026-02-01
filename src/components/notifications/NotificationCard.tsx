@@ -3,7 +3,8 @@ import { View, StyleSheet, Animated } from 'react-native';
 import { Text, TouchableRipple } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Swipeable from 'react-native-gesture-handler/Swipeable';
-import { useAppTheme } from '../../theme/theme';
+
+import { useAppTheme } from '@/theme';
 
 export type NotificationType = 'price_alert' | 'market_news' | 'system';
 

@@ -2,7 +2,8 @@ import React from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import Skeleton from '../ui/Skeleton';
+
+import Skeleton from '@/components/ui/Skeleton';
 
 const SettingsSkeleton = () => {
   const theme = useTheme();

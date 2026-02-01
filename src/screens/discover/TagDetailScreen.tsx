@@ -9,27 +9,27 @@ import {
 import { Text } from 'react-native-paper';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { FlashList } from '@shopify/flash-list';
+import Share from 'react-native-share';
+import { captureRef } from 'react-native-view-shot';
 
 import {
   wordPressService,
   FormattedPost,
   WordPressTag,
-} from '../../services/WordPressService';
-import { observabilityService } from '../../services/ObservabilityService';
-import { useAppTheme } from '../../theme/theme';
-import ArticleCard from '../../components/discover/ArticleCard';
-import CategoryTagSkeleton from '../../components/discover/CategoryTagSkeleton';
-import DiscoverEmptyView from '../../components/discover/DiscoverEmptyView';
-import DiscoverHeader from '../../components/discover/DiscoverHeader';
-import DetailHeroHeader from '../../components/discover/DetailHeroHeader';
-import Share from 'react-native-share';
-import { captureRef } from 'react-native-view-shot';
-import CustomDialog from '../../components/ui/CustomDialog';
-import CustomButton from '../../components/ui/CustomButton';
-import ShareableDetail from '../../components/discover/ShareableDetail';
-import { analyticsService } from '../../services/firebase/AnalyticsService';
-import { useToastStore } from '../../stores/toastStore';
-import { shareTextContent } from '../../utils/ShareUtils';
+} from '@/services/WordPressService';
+import { observabilityService } from '@/services/ObservabilityService';
+import { useAppTheme } from '@/theme';
+import ArticleCard from '@/components/discover/ArticleCard';
+import CategoryTagSkeleton from '@/components/discover/CategoryTagSkeleton';
+import DiscoverEmptyView from '@/components/discover/DiscoverEmptyView';
+import DiscoverHeader from '@/components/discover/DiscoverHeader';
+import DetailHeroHeader from '@/components/discover/DetailHeroHeader';
+import CustomDialog from '@/components/ui/CustomDialog';
+import CustomButton from '@/components/ui/CustomButton';
+import ShareableDetail from '@/components/discover/ShareableDetail';
+import { analyticsService } from '@/services/firebase/AnalyticsService';
+import { useToastStore } from '@/stores/toastStore';
+import { shareTextContent } from '@/utils/ShareUtils';
 
 const AnimatedFlashList = Animated.createAnimatedComponent(FlashList) as any;
 

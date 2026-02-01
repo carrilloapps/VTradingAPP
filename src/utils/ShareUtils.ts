@@ -1,6 +1,7 @@
 import Share from 'react-native-share';
-import { observabilityService } from '../services/ObservabilityService';
-import SafeLogger from './safeLogger';
+
+import { observabilityService } from '@/services/ObservabilityService';
+import SafeLogger from '@/utils/safeLogger';
 
 interface ShareTextOptions {
   title: string;

@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text, Divider } from 'react-native-paper';
-import { useAppTheme } from '../../theme/theme';
+
+import { useAppTheme } from '@/theme';
 import SectionHeader from './SectionHeader';
 import AppRecommendations from './AppRecommendations';
 

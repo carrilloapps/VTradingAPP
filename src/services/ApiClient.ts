@@ -1,14 +1,15 @@
-import { appCheckService } from './firebase/AppCheckService';
 import {
   getPerformance,
   httpMetric,
   initializePerformance,
   FirebasePerformanceTypes,
 } from '@react-native-firebase/perf';
-import { mmkvStorage } from './StorageService';
-import { AppConfig } from '../constants/AppConfig';
-import { observabilityService } from './ObservabilityService';
-import SafeLogger from '../utils/safeLogger';
+
+import { appCheckService } from '@/services/firebase/AppCheckService';
+import { mmkvStorage } from '@/services/StorageService';
+import { observabilityService } from '@/services/ObservabilityService';
+import { AppConfig } from '@/constants/AppConfig';
+import SafeLogger from '@/utils/safeLogger';
 
 interface CacheItem<T> {
   data: T;

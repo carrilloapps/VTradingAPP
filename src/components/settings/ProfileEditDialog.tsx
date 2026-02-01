@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { TextInput, useTheme } from 'react-native-paper';
 import { StyleSheet } from 'react-native';
-import CustomDialog from '../ui/CustomDialog';
-import { useToastStore } from '../../stores/toastStore';
-import { observabilityService } from '../../services/ObservabilityService';
-import { analyticsService } from '../../services/firebase/AnalyticsService';
+
+import CustomDialog from '@/components/ui/CustomDialog';
+import { useToastStore } from '@/stores/toastStore';
+import { observabilityService } from '@/services/ObservabilityService';
+import { analyticsService } from '@/services/firebase/AnalyticsService';
 
 interface ProfileEditDialogProps {
   visible: boolean;

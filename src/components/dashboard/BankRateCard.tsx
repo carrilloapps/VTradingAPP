@@ -2,9 +2,10 @@ import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text, Surface, Tooltip, TouchableRipple } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useAppTheme } from '../../theme/theme';
-import { useToastStore } from '../../stores/toastStore';
-import { BolivarIcon } from '../ui/BolivarIcon';
+
+import { useAppTheme } from '@/theme';
+import { useToastStore } from '@/stores/toastStore';
+import { BolivarIcon } from '@/components/ui/BolivarIcon';
 
 interface BankRateCardProps {
   bankName: string;

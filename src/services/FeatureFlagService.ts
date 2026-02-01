@@ -1,10 +1,11 @@
 import { Platform } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
-import { mmkvStorage } from './StorageService';
-import { fcmService } from './firebase/FCMService';
-import { authService } from './firebase/AuthService';
 
-import SafeLogger from '../utils/safeLogger';
+import { mmkvStorage } from '@/services/StorageService';
+import { fcmService } from '@/services/firebase/FCMService';
+import { authService } from '@/services/firebase/AuthService';
+
+import SafeLogger from '@/utils/safeLogger';
 
 /**
  * @description FeatureFlagService

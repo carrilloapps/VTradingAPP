@@ -11,21 +11,21 @@ import { Text, TextInput, HelperText } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import DeviceInfo from 'react-native-device-info';
 
-import { useAuthStore } from '../../stores/authStore';
-import { useToastStore } from '../../stores/toastStore';
+import { useAuthStore } from '@/stores/authStore';
+import { useToastStore } from '@/stores/toastStore';
 import {
   analyticsService,
   ANALYTICS_EVENTS,
-} from '../../services/firebase/AnalyticsService';
-import { observabilityService } from '../../services/ObservabilityService';
-import { useAppTheme } from '../../theme/theme';
-import { AppConfig } from '../../constants/AppConfig';
-import AuthLoading from '../../components/auth/AuthLoading';
-import CustomButton from '../../components/ui/CustomButton';
-import UnifiedHeader from '../../components/ui/UnifiedHeader';
-import AboutDialog from '../../components/ui/AboutDialog';
-import AuthLogo from '../../components/ui/AuthLogo';
-import { hashPII } from '../../utils/security';
+} from '@/services/firebase/AnalyticsService';
+import { observabilityService } from '@/services/ObservabilityService';
+import { useAppTheme } from '@/theme';
+import { AppConfig } from '@/constants/AppConfig';
+import AuthLoading from '@/components/auth/AuthLoading';
+import CustomButton from '@/components/ui/CustomButton';
+import UnifiedHeader from '@/components/ui/UnifiedHeader';
+import AboutDialog from '@/components/ui/AboutDialog';
+import AuthLogo from '@/components/ui/AuthLogo';
+import { hashPII } from '@/utils/security';
 
 const LoginScreen = ({ navigation }: any) => {
   const theme = useAppTheme();

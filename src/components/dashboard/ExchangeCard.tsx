@@ -5,9 +5,10 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import Svg, { Path } from 'react-native-svg';
 import LinearGradient from 'react-native-linear-gradient';
 import Animated, { FadeInRight } from 'react-native-reanimated';
-import { useAppTheme } from '../../theme/theme';
-import { BolivarIcon } from '../ui/BolivarIcon';
 import FastImage from 'react-native-fast-image';
+
+import { useAppTheme } from '@/theme';
+import { BolivarIcon } from '@/components/ui/BolivarIcon';
 
 export interface ExchangeCardProps {
   title: string;

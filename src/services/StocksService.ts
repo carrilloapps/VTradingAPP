@@ -1,6 +1,6 @@
-import { apiClient } from './ApiClient';
-import { performanceService } from './firebase/PerformanceService';
-import { observabilityService } from './ObservabilityService';
+import { apiClient } from '@/services/ApiClient';
+import { performanceService } from '@/services/firebase/PerformanceService';
+import { observabilityService } from '@/services/ObservabilityService';
 
 export interface StockData {
   id: string;
