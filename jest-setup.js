@@ -51,9 +51,10 @@ jest.mock('react-native-device-info', () => {
   };
 });
 
-jest.mock('@react-native-async-storage/async-storage', () =>
-  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
-);
+jest.mock('react-native-config', () => ({
+  API_BASE_URL: 'https://api.vtrading.app',
+  ENV: 'test',
+}));
 
 jest.mock('@react-navigation/native', () => {
   const actualNav = jest.requireActual('@react-navigation/native');
