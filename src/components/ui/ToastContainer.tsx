@@ -1,9 +1,10 @@
 import React from 'react';
 import { View, StyleSheet, Text } from 'react-native';
 import { Portal, Snackbar, IconButton } from 'react-native-paper';
-import { useAppTheme } from '../../theme/theme';
-import { useToastStore } from '../../stores/toastStore';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
+import { useAppTheme } from '@/theme';
+import { useToastStore } from '@/stores/toastStore';
 
 const ToastContainer = () => {
   const theme = useAppTheme();

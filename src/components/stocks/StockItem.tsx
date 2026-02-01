@@ -3,8 +3,9 @@ import { View, StyleSheet, TouchableOpacity } from 'react-native';
 import { Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Animated, { FadeInDown } from 'react-native-reanimated';
-import { useAppTheme } from '../../theme/theme';
 import FastImage from 'react-native-fast-image';
+
+import { useAppTheme } from '@/theme';
 
 export interface StockData {
   id: string;

@@ -9,7 +9,8 @@ import {
 } from 'react-native';
 import { Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useAppTheme } from '../../theme/theme';
+
+import { useAppTheme } from '@/theme';
 
 export interface MarketStatusProps {
   isOpen: boolean;

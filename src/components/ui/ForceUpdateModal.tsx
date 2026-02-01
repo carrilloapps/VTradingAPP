@@ -10,10 +10,11 @@ import {
 import { Surface, Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
-import { useAppTheme } from '../../theme/theme';
-import { observabilityService } from '../../services/ObservabilityService';
+
 import CustomButton from './CustomButton';
-import SafeLogger from '../../utils/safeLogger';
+import { useAppTheme } from '@/theme';
+import { observabilityService } from '@/services/ObservabilityService';
+import SafeLogger from '@/utils/safeLogger';
 
 interface ForceUpdateModalProps {
   visible: boolean;

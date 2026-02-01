@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react';
 import { Text } from 'react-native';
-import { fcmService } from '../../services/firebase/FCMService';
-import { useToastStore } from '../../stores/toastStore';
-import { storageService } from '../../services/StorageService';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+
+import { fcmService } from '@/services/firebase/FCMService';
+import { useToastStore } from '@/stores/toastStore';
+import { storageService } from '@/services/StorageService';
 
 /**
  * Controller to handle foreground FCM messages and display UI feedback

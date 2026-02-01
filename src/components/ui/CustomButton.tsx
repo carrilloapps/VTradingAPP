@@ -1,7 +1,8 @@
 import React from 'react';
 import { StyleSheet, ViewStyle, TextStyle, StyleProp } from 'react-native';
 import { Button, useTheme } from 'react-native-paper';
-import { AppTheme } from '../../theme/theme';
+
+import { AppTheme } from '@/theme';
 
 export type ButtonVariant =
   | 'primary' // Contained, Primary Color (Default)

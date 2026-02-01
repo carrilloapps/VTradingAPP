@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet } from 'react-native';
 import { Dialog, Portal, Text, useTheme } from 'react-native-paper';
+
 import CustomButton, { ButtonVariant } from './CustomButton';
 
 interface CustomDialogProps {

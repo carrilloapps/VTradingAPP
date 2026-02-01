@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, StyleSheet, ViewStyle, ImageStyle } from 'react-native';
+import { View, StyleSheet, ViewStyle } from 'react-native';
 import { Text } from 'react-native-paper';
-import { useAppTheme } from '../../theme/theme';
 import FastImage from 'react-native-fast-image';
+
+import { useAppTheme } from '@/theme';
 
 interface AuthLogoProps {
   size?: number;

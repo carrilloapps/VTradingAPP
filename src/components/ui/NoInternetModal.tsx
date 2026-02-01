@@ -4,8 +4,9 @@ import { Surface, Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import LinearGradient from 'react-native-linear-gradient';
 import NetInfo from '@react-native-community/netinfo';
-import { useAppTheme } from '../../theme/theme';
-import { useNetworkStore } from '../../stores/networkStore';
+
+import { useAppTheme } from '@/theme';
+import { useNetworkStore } from '@/stores/networkStore';
 import CustomButton from './CustomButton';
 
 const NoInternetModal = () => {

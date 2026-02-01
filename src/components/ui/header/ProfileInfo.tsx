@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, View, StyleSheet } from 'react-native';
 import { Text, useTheme } from 'react-native-paper';
+
 import HeaderAvatar from './HeaderAvatar';
 
 interface ProfileInfoProps {

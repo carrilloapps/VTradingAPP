@@ -3,7 +3,8 @@ import { View, StyleSheet, Animated } from 'react-native';
 import { TouchableRipple, useTheme, Text } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
-import { useNotifications } from '../../context/NotificationContext';
+
+import { useNotifications } from '@/context/NotificationContext';
 
 interface NotificationButtonProps {
   icon?: string;

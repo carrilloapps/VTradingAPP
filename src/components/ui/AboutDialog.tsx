@@ -2,12 +2,13 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import DeviceInfo from 'react-native-device-info';
-import CustomDialog from './CustomDialog';
-import { useAppTheme } from '../../theme/theme';
-import MenuButton from '../settings/MenuButton';
-import AuthLogo from './AuthLogo';
-import { AppConfig } from '../../constants/AppConfig';
 import { useNavigation } from '@react-navigation/native';
+
+import CustomDialog from './CustomDialog';
+import AuthLogo from './AuthLogo';
+import { AppConfig } from '@/constants/AppConfig';
+import { useAppTheme } from '@/theme';
+import MenuButton from '@/components/settings/MenuButton';
 
 interface AboutDialogProps {
   visible: boolean;

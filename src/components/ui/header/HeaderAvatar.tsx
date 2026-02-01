@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Avatar, useTheme } from 'react-native-paper';
-import { md5 } from '../../../utils/md5';
+
+import { md5 } from '@/utils/md5';
 
 interface HeaderAvatarProps {
   avatarUrl?: string | null;

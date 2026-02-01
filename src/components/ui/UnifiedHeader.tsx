@@ -3,15 +3,16 @@ import { View, StyleSheet, ViewStyle, Platform } from 'react-native';
 import { Text, useTheme, TouchableRipple } from 'react-native-paper';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { AppConfig } from '../../constants/AppConfig';
 import {
   BannerAd,
   BannerAdSize,
   TestIds,
 } from 'react-native-google-mobile-ads';
-import { useAuthStore } from '../../stores/authStore';
+
 import ProfileInfo from './header/ProfileInfo';
 import HeaderActions from './header/HeaderActions';
+import { AppConfig } from '@/constants/AppConfig';
+import { useAuthStore } from '@/stores/authStore';
 
 export type HeaderVariant = 'profile' | 'section' | 'simple';
 

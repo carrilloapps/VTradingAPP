@@ -3,7 +3,8 @@ import { View, StyleSheet } from 'react-native';
 import { Text } from 'react-native-paper';
 import LinearGradient from 'react-native-linear-gradient';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { getTrend, getTrendIcon } from '../../utils/trendUtils';
+
+import { getTrend, getTrendIcon } from '@/utils/trendUtils';
 
 interface IndexHeroStats {
   titlesUp: number;

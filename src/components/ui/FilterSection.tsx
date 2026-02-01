@@ -8,7 +8,8 @@ import {
 } from 'react-native';
 import { Chip } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { useAppTheme } from '../../theme/theme';
+
+import { useAppTheme } from '@/theme';
 
 export interface FilterOption {
   label: string;
