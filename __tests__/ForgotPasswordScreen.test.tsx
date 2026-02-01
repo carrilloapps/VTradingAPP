@@ -61,7 +61,7 @@ describe('ForgotPasswordScreen', () => {
   });
 
   it('muestra loading durante la recuperación', async () => {
-    let resolveReset: () => void = () => { };
+    let resolveReset: () => void = () => {};
     const resetPromise = new Promise<void>(resolve => {
       resolveReset = resolve;
     });
@@ -72,12 +72,8 @@ describe('ForgotPasswordScreen', () => {
       isLoading: false,
     } as any);
 
-    const {
-      getByLabelText,
-      getByTestId,
-      queryByTestId,
-      findByTestId,
-    } = renderScreen();
+    const { getByLabelText, getByTestId, queryByTestId, findByTestId } =
+      renderScreen();
 
     act(() => {
       fireEvent.changeText(
