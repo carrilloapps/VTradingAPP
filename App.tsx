@@ -12,16 +12,6 @@ if (Platform.OS === 'android' && !(globalThis as any).nativeFabricUIManager) {
   }
 }
 
-import { NotificationProvider } from './src/context/NotificationContext';
-import AppNavigator from './src/navigation/AppNavigator';
-import { inAppMessagingService } from './src/services/firebase/InAppMessagingService';
-import { appCheckService } from './src/services/firebase/AppCheckService';
-import { remoteConfigService } from './src/services/firebase/RemoteConfigService';
-import { appDistributionService } from './src/services/firebase/AppDistributionService';
-import NotificationController from './src/components/ui/NotificationController';
-import NoInternetModal from './src/components/ui/NoInternetModal';
-import { QueryClientProvider } from '@tanstack/react-query';
-import { queryClient } from './src/config/queryClient';
 import mobileAds from 'react-native-google-mobile-ads';
 import {
   getCrashlytics,
@@ -30,12 +20,23 @@ import {
 } from '@react-native-firebase/crashlytics';
 import { getPerformance, trace, initializePerformance } from '@react-native-firebase/perf';
 import * as Sentry from '@sentry/react-native';
-import { AppConfig } from './src/constants/AppConfig';
-import { deepLinkService } from './src/services/DeepLinkService';
-import { notificationInitService } from './src/services/NotificationInitService';
-import { analyticsService } from './src/services/firebase/AnalyticsService';
-import { useNetworkStore } from './src/stores/networkStore';
-import { initializeStorage } from './src/services/StorageService';
+import { AppConfig } from '@/constants/AppConfig';
+import { QueryClientProvider } from '@tanstack/react-query';
+
+import { NotificationProvider } from '@/context/NotificationContext';
+import AppNavigator from '@/navigation/AppNavigator';
+import { inAppMessagingService } from '@/services/firebase/InAppMessagingService';
+import { appCheckService } from '@/services/firebase/AppCheckService';
+import { remoteConfigService } from '@/services/firebase/RemoteConfigService';
+import { appDistributionService } from '@/services/firebase/AppDistributionService';
+import NotificationController from '@/components/ui/NotificationController';
+import NoInternetModal from '@/components/ui/NoInternetModal';
+import { queryClient } from '@/config/queryClient';
+import { deepLinkService } from '@/services/DeepLinkService';
+import { notificationInitService } from '@/services/NotificationInitService';
+import { analyticsService } from '@/services/firebase/AnalyticsService';
+import { useNetworkStore } from '@/stores/networkStore';
+import { initializeStorage } from '@/services/StorageService';
 
 // Silence Firebase modular deprecation warnings
 // @ts-ignore
@@ -58,10 +59,18 @@ Sentry.init({
   enableLogs: !isProd,
 
   // Configure Session Replay
-  replaysSessionSampleRate: isProd ? 0.0 : 0.1,
-  replaysOnErrorSampleRate: isProd ? 0.1 : 1,
-  tracesSampleRate: isProd ? 0.1 : 1,
-  integrations: [Sentry.mobileReplayIntegration(), Sentry.feedbackIntegration()],
+  replaysSessionSampleRate: isProd ? 0.0 : 0.05,
+  replaysOnErrorSampleRate: isProd ? 0.05 : 1,
+  tracesSampleRate: isProd ? 0.05 : 0.5,
+  integrations: [
+    Sentry.mobileReplayIntegration({
+      // Disable screenshotting on Android to mitigate ANRs (VTRADING-APP-4)
+      // while keeping the rest of the replay functionality if possible
+      maskAllText: true,
+      maskAllImages: true,
+    }),
+    Sentry.feedbackIntegration(),
+  ],
 
   // uncomment the line below to enable Spotlight (https://spotlightjs.com)
   // spotlight: __DEV__,

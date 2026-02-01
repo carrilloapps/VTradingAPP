@@ -35,6 +35,10 @@ class ObservabilityService {
       errorMsg.includes('fetch() operation') || // Remote Config noise
       errorMsg.includes('internal_error') || // GMS/Firebase base noise
       errorMsg.includes('too_many_registrations') || // FCM registration limit
+      errorMsg.includes('missing_instanceid_service') || // FCM noise
+      errorMsg.includes('invalid-credential') || // Auth noise (wrong password/user)
+      errorMsg.includes('user-not-found') ||
+      errorMsg.includes('wrong-password') ||
       errorMsg.includes('google sign-in was cancelled') || // Auth cancellation
       errorMsg.includes('sign_in_cancelled');
 

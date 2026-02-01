@@ -83,14 +83,15 @@ class FCMService {
     } catch (e: any) {
       const errorMsg = String(e?.message || e || '').toLowerCase();
       const isRegistrationLimit = errorMsg.includes('too_many_registrations');
+      const isMissingService = errorMsg.includes('missing_instanceid_service');
 
-      if (!isRegistrationLimit) {
+      if (!isRegistrationLimit && !isMissingService) {
         observabilityService.captureError(e, {
           context: 'FCMService.getFCMToken',
           action: 'get_fcm_token',
         });
       } else {
-        SafeLogger.warn('[FCM] Registration limit reached (Safe Skip)');
+        SafeLogger.warn(`[FCM] Token acquisition skipped: ${errorMsg}`);
       }
       return null;
     }
