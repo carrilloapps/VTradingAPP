@@ -10,6 +10,10 @@ jest.mock('../../src/services/firebase/AnalyticsService');
 describe('NotificationInitService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (notificationInitService as any).isInitialized = false;
+    (storageService.getSettings as jest.Mock).mockResolvedValue({
+      pushEnabled: true,
+    });
   });
 
   it('should initialize notification system when permission is granted', async () => {

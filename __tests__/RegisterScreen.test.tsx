@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import { Provider as PaperProvider, MD3LightTheme } from 'react-native-paper';
 import RegisterScreen from '../src/screens/auth/RegisterScreen';
 import * as AuthStore from '../src/stores/authStore';
@@ -39,9 +39,17 @@ jest.mock('../src/services/firebase/AnalyticsService', () => ({
   analyticsService: {
     logEvent: jest.fn(),
     logScreenView: jest.fn(),
+    logError: jest.fn(),
   },
-  // Ensure we also mock other methods if used
+  ANALYTICS_EVENTS: {
+    SIGN_UP_ATTEMPT: 'sign_up_attempt',
+  },
 }));
+
+jest.mock('../src/components/auth/AuthLoading', () => {
+  const { View } = require('react-native');
+  return (props: any) => <View testID={props.testID || 'auth-loading'} />;
+});
 
 jest.mock('../src/services/ObservabilityService', () => ({
   observabilityService: {
@@ -84,7 +92,12 @@ describe('RegisterScreen', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(ToastStore, 'useToastStore').mockReturnValue(jest.fn());
+    jest
+      .spyOn(ToastStore, 'useToastStore')
+      .mockImplementation((selector: any) => {
+        const state = { showToast: jest.fn() };
+        return selector ? selector(state) : state;
+      });
   });
 
   it('muestra loading durante el registro', async () => {
@@ -103,12 +116,14 @@ describe('RegisterScreen', () => {
     const { getByLabelText, getByText, getByTestId, queryByTestId } =
       renderScreen();
 
-    fireEvent.changeText(
-      getByLabelText('Correo electrónico'),
-      'test@example.com',
-    );
-    fireEvent.changeText(getByLabelText('Contraseña'), '123456');
-    fireEvent.changeText(getByLabelText('Confirmar contraseña'), '123456');
+    act(() => {
+      fireEvent.changeText(
+        getByLabelText('Correo electrónico'),
+        'test@example.com',
+      );
+      fireEvent.changeText(getByLabelText('Contraseña'), '123456');
+      fireEvent.changeText(getByLabelText('Confirmar contraseña'), '123456');
+    });
 
     fireEvent.press(getByText('Registrarse'));
 

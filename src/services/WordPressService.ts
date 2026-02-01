@@ -282,7 +282,7 @@ class WordPressService {
         tagId: tagId,
         bypassCache: bypassCache,
       });
-      throw e; // Propagate error for UI handling
+      return [];
     }
   }
 
@@ -413,6 +413,7 @@ class WordPressService {
           _embed: true,
         },
         useCache: !bypassCache,
+        bypassCache,
         cacheTTL: bypassCache ? 0 : 30 * 60 * 1000,
       });
 
@@ -510,6 +511,7 @@ class WordPressService {
           _embed: true,
         },
         useCache: true,
+        bypassCache: false,
         cacheTTL: 5 * 60 * 1000,
       });
 

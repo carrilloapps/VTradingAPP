@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react-native';
+import { render, fireEvent, waitFor, act } from '@testing-library/react-native';
 import { Provider as PaperProvider, MD3LightTheme } from 'react-native-paper';
 import ForgotPasswordScreen from '../src/screens/auth/ForgotPasswordScreen';
 import * as AuthStore from '../src/stores/authStore';
@@ -22,8 +22,17 @@ jest.mock('../src/services/firebase/AnalyticsService', () => ({
   analyticsService: {
     logEvent: jest.fn(),
     logScreenView: jest.fn(),
+    logError: jest.fn(),
+  },
+  ANALYTICS_EVENTS: {
+    PASSWORD_RESET_ATTEMPT: 'password_reset_attempt',
   },
 }));
+
+jest.mock('../src/components/auth/AuthLoading', () => {
+  const { View } = require('react-native');
+  return (props: any) => <View testID={props.testID || 'auth-loading'} />;
+});
 
 jest.mock('../src/services/ObservabilityService', () => ({
   observabilityService: {
@@ -43,7 +52,12 @@ describe('ForgotPasswordScreen', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(ToastStore, 'useToastStore').mockReturnValue(jest.fn());
+    jest
+      .spyOn(ToastStore, 'useToastStore')
+      .mockImplementation((selector: any) => {
+        const state = { showToast: jest.fn() };
+        return selector ? selector(state) : state;
+      });
   });
 
   it('muestra loading durante la recuperación', async () => {
@@ -58,20 +72,28 @@ describe('ForgotPasswordScreen', () => {
       isLoading: false,
     } as any);
 
-    const { getByLabelText, getByText, getByTestId, queryByTestId } =
-      renderScreen();
+    const {
+      getByLabelText,
+      getByText,
+      getByTestId,
+      queryByTestId,
+      findByTestId,
+    } = renderScreen();
 
-    fireEvent.changeText(
-      getByLabelText('Correo electrónico'),
-      'test@example.com',
-    );
-    fireEvent.press(getByText('Enviar enlace'));
-
-    await waitFor(() => {
-      expect(getByTestId('auth-loading')).toBeTruthy();
+    act(() => {
+      fireEvent.changeText(
+        getByLabelText('Correo electrónico'),
+        'test@example.com',
+      );
     });
 
-    resolveReset();
+    fireEvent.press(getByTestId('forgot-password-submit'));
+
+    expect(await findByTestId('auth-loading')).toBeTruthy();
+
+    await act(async () => {
+      resolveReset();
+    });
 
     await waitFor(() => {
       expect(queryByTestId('auth-loading')).toBeNull();

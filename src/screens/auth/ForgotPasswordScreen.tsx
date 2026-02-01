@@ -207,6 +207,7 @@ const ForgotPasswordScreen = ({ navigation }: any) => {
               loading={isBusy}
               disabled={isBusy}
               fullWidth
+              testID="forgot-password-submit"
             />
           </View>
 

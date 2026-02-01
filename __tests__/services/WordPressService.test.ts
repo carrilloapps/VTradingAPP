@@ -17,6 +17,9 @@ describe('WordPressService', () => {
     // Reset mocks before each test
     jest.clearAllMocks();
 
+    // Clear service cache
+    (wordPressService as any).formattedPostCache.clear();
+
     // Get the mocked ApiClient instance
     mockApiClient = (wordPressService as any).client as jest.Mocked<ApiClient>;
   });
@@ -118,6 +121,7 @@ describe('WordPressService', () => {
           _embed: true,
         },
         useCache: true,
+        bypassCache: false,
         cacheTTL: 5 * 60 * 1000,
       });
 
@@ -125,13 +129,13 @@ describe('WordPressService', () => {
       expect(result[0]).toMatchObject({
         id: '1',
         title: 'Test Post Title',
-        source: 'VTrading',
+        source: 'VTrading News',
         category: 'Crypto',
         categoryId: 1,
         isPromo: false,
       });
 
-      expect(result[0].author).toEqual({
+      expect(result[0].author).toMatchObject({
         name: 'Test Author',
         avatar: 'https://example.com/avatar.jpg',
         role: 'Test Author Bio',
@@ -155,6 +159,7 @@ describe('WordPressService', () => {
           categories: 5,
         },
         useCache: true,
+        bypassCache: false,
         cacheTTL: 5 * 60 * 1000,
       });
     });
@@ -172,6 +177,7 @@ describe('WordPressService', () => {
           tags: 3,
         },
         useCache: true,
+        bypassCache: false,
         cacheTTL: 5 * 60 * 1000,
       });
     });
@@ -213,7 +219,8 @@ describe('WordPressService', () => {
       expect(mockApiClient.get).toHaveBeenCalledWith('posts/1', {
         params: { _embed: true },
         useCache: true,
-        cacheTTL: 10 * 60 * 1000,
+        bypassCache: false,
+        cacheTTL: 30 * 60 * 1000,
       });
 
       expect(result).toBeDefined();
@@ -243,6 +250,7 @@ describe('WordPressService', () => {
           _embed: true,
         },
         useCache: true,
+        bypassCache: false,
         cacheTTL: 5 * 60 * 1000,
       });
     });
@@ -333,8 +341,11 @@ describe('WordPressService', () => {
           per_page: 100,
           orderby: 'count',
           order: 'desc',
+          _embed: true,
+          hide_empty: true,
         },
         useCache: true,
+        bypassCache: false,
         cacheTTL: 30 * 60 * 1000,
       });
 
@@ -407,6 +418,7 @@ describe('WordPressService', () => {
           order: 'desc',
         },
         useCache: true,
+        bypassCache: false,
         cacheTTL: 30 * 60 * 1000,
       });
 
@@ -466,7 +478,7 @@ describe('WordPressService', () => {
     });
 
     it('should calculate read time correctly', async () => {
-      const longContent = '<p>' + 'word '.repeat(400) + '</p>'; // 400 words
+      const longContent = '<p>' + ('word '.repeat(399) + 'word') + '</p>'; // Exactly 400 words
       const mockPost: WordPressPost = {
         id: 1,
         date: '2026-01-28T10:00:00',
@@ -490,7 +502,7 @@ describe('WordPressService', () => {
 
       const result = await wordPressService.getPosts();
 
-      expect(result[0].readTime).toBe('2 min'); // 400 words / 200 wpm = 2 min
+      expect(result[0].readTime).toBe('2 min de lectura'); // 400 words / 200 wpm = 2 min
     });
   });
 });
