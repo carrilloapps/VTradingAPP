@@ -259,7 +259,7 @@ const AddAlertScreen = ({ route }: Props) => {
 
           <CustomButton
             variant="primary"
-            onPress={() => navigation.navigate('Settings' as never)}
+            onPress={() => (navigation as any).navigate('Settings')}
             icon="cog"
             label="Ir a Ajustes"
           />

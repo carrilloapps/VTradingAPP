@@ -199,7 +199,7 @@ const HomeScreen = ({ navigation }: any) => {
         email={userData.email}
         notificationCount={userData.notificationCount}
         isPremium={userData.isPremium}
-        onProfilePress={() => navigation.navigate('Settings')}
+        onProfilePress={() => (navigation as any).navigate('Settings')}
         onNotificationPress={() => navigation.navigate('Notifications')}
         showSecondaryAction
         onSecondaryActionPress={handleShareImage}

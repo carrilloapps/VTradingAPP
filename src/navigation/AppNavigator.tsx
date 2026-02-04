@@ -56,6 +56,7 @@ export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;
   Notifications: undefined;
+  Settings: undefined;
   Widgets: undefined;
   AdvancedCalculator: undefined;
   BankRates: undefined;
@@ -75,7 +76,7 @@ export type MainTabParamList = {
   Rates: undefined;
   Home: undefined;
   Discover: { categorySlug?: string; tagSlug?: string }; // Updated with slugs
-  Settings: undefined;
+  Calculator: undefined;
 };
 
 // Root Stack that includes Splash
@@ -146,9 +147,9 @@ const DiscoverIcon = ({ color }: { color: string }) => (
   </View>
 );
 
-const SettingsIcon = ({ color }: { color: string }) => (
+const CalculatorIcon = ({ color }: { color: string }) => (
   <View style={tabStyles.iconContainer24}>
-    <MaterialCommunityIcons name="cog" size={24} color={color} />
+    <MaterialCommunityIcons name="calculator" size={24} color={color} />
   </View>
 );
 
@@ -207,11 +208,11 @@ function MainTabNavigator() {
         }}
       />
       <Tab.Screen
-        name="Settings"
-        component={SettingsScreen}
+        name="Calculator"
+        component={AdvancedCalculatorScreen}
         options={{
-          title: 'Configuración',
-          tabBarIcon: SettingsIcon,
+          title: 'Calculadora',
+          tabBarIcon: CalculatorIcon,
         }}
       />
     </Tab.Navigator>
@@ -397,6 +398,14 @@ const AppNavigator = () => {
               <RootStack.Screen
                 name="Notifications"
                 component={NotificationsScreen}
+                options={{
+                  headerShown: false,
+                  animation: 'default',
+                }}
+              />
+              <RootStack.Screen
+                name="Settings"
+                component={SettingsScreen}
                 options={{
                   headerShown: false,
                   animation: 'default',

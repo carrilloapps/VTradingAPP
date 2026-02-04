@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView } from 'react-native';
 import Share from 'react-native-share';
 import { Surface, Text, Chip } from 'react-native-paper';
@@ -16,14 +16,44 @@ import CustomButton from '@/components/ui/CustomButton';
 import StockShareGraphic from '@/components/stocks/StockShareGraphic';
 import { observabilityService } from '@/services/ObservabilityService';
 import { analyticsService } from '@/services/firebase/AnalyticsService';
+import { StocksService, StockData } from '@/services/StocksService';
 
 const StockDetailScreen = ({ route, navigation }: any) => {
   const theme = useAppTheme();
-  const { stock } = route.params; // Get stock object from navigation params
+  const { stock: initialStock } = route.params; // Get stock object from navigation params
+
+  // State para el stock con datos completos
+  const [stock, setStock] = useState<StockData>(initialStock);
+  const [loadingDetails, setLoadingDetails] = useState(false);
 
   useEffect(() => {
     analyticsService.logScreenView('StockDetail', stock.id);
-  }, [stock.id]);
+
+    // Si el stock no tiene orderBook, intentar obtenerlo del servicio
+    const fetchCompleteStockData = async () => {
+      if (!initialStock.orderBook) {
+        setLoadingDetails(true);
+        try {
+          // Obtener todos los stocks y buscar este específico
+          const allStocks = await StocksService.getAllStocks();
+          const completeStock = allStocks.find(s => s.symbol === initialStock.symbol);
+
+          if (completeStock && completeStock.orderBook) {
+            setStock(completeStock);
+          }
+        } catch (error) {
+          observabilityService.captureError(error, {
+            context: 'StockDetailScreen.fetchCompleteStockData',
+            symbol: initialStock.symbol,
+          });
+        } finally {
+          setLoadingDetails(false);
+        }
+      }
+    };
+
+    fetchCompleteStockData();
+  }, [stock.id, initialStock]);
 
   // Zustand store selector
   const user = useAuthStore(state => state.user);

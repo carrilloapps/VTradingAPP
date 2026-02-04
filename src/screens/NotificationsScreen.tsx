@@ -135,7 +135,7 @@ const NotificationsScreen: React.FC = () => {
   };
 
   const handleGoToSettings = () => {
-    navigation.navigate('Settings' as never);
+    (navigation as any).navigate('Settings');
   };
 
   // Actions
@@ -293,7 +293,7 @@ const NotificationsScreen: React.FC = () => {
           title="Notificaciones"
           subtitle="Tus alertas y avisos recientes"
           onBackPress={() => navigation.goBack()}
-          onActionPress={() => (navigation.navigate as any)('Main', { screen: 'Settings' })}
+          onActionPress={() => (navigation as any).navigate('Settings')}
           rightActionIcon="cog"
           showNotification={false}
           style={styles.headerStyle}
