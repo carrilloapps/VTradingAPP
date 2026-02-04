@@ -583,10 +583,15 @@ export class CurrencyService {
     // Rule 1: VES -> All
     if (source.code === 'VES' || source.code === 'Bs') return allRates;
 
-    // Rule 2: BCV (Fiat) -> VES, Crypto or Border
+    // Rule 2: BCV (Fiat) -> VES, Crypto, Border or Other Fiat
     if (source.type === 'fiat') {
       return allRates.filter(
-        r => r.code === 'VES' || r.code === 'Bs' || r.type === 'crypto' || r.type === 'border',
+        r =>
+          r.code === 'VES' ||
+          r.code === 'Bs' ||
+          r.type === 'crypto' ||
+          r.type === 'border' ||
+          r.type === 'fiat',
       );
     }
 
