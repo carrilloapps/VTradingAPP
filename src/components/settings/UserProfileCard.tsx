@@ -6,6 +6,7 @@ import { FirebaseAuthTypes } from '@react-native-firebase/auth';
 
 import { md5 } from '@/utils/md5';
 import { useAppTheme } from '@/theme';
+import { anonymousIdentityService } from '@/services/AnonymousIdentityService';
 
 interface UserProfileCardProps {
   user: FirebaseAuthTypes.User | null;
@@ -17,8 +18,19 @@ const UserProfileCard = ({ user, onEdit, onRegister }: UserProfileCardProps) => 
   const theme = useAppTheme();
   const [imageError, setImageError] = useState(false);
 
-  const displayName = user?.displayName || (user?.isAnonymous ? 'Invitado' : 'Usuario');
-  const email = user?.email || (user?.isAnonymous ? 'Sesión anónima' : 'Sin correo');
+  // ═══════════════════════════════════════════════════════════
+  // NUEVO: Obtener UUID si no hay user
+  // ═══════════════════════════════════════════════════════════
+  const anonymousId = user ? null : anonymousIdentityService.getAnonymousId();
+
+  const displayName = user?.displayName || (user?.isAnonymous ? 'Invitado' : 'Usuario Anónimo');
+  const email = user?.email
+    ? user.email
+    : user?.isAnonymous
+      ? 'Sesión anónima'
+      : anonymousId
+        ? `ID: ${anonymousId.substring(0, 20)}...`
+        : 'Sin cuenta';
   const isPro = !!user && !user.isAnonymous;
 
   // Reset error state when user changes

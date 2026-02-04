@@ -3,10 +3,14 @@ import { devtools } from 'zustand/middleware';
 import { FirebaseAuthTypes } from '@react-native-firebase/auth';
 import { getCrashlytics, setUserId, setAttributes } from '@react-native-firebase/crashlytics';
 import * as Clarity from '@microsoft/react-native-clarity';
+import * as Sentry from '@sentry/react-native';
 
 import { authService } from '@/services/firebase/AuthService';
 import { observabilityService } from '@/services/ObservabilityService';
 import { analyticsService, ANALYTICS_EVENTS } from '@/services/firebase/AnalyticsService';
+import { storageService } from '@/services/StorageService';
+import { anonymousIdentityService } from '@/services/AnonymousIdentityService';
+import SafeLogger from '@/utils/safeLogger';
 import { ToastType } from './toastStore';
 
 interface AuthState {
@@ -55,22 +59,136 @@ export const useAuthStore = create<AuthState>()(
       // Mutations
       setUser: user => {
         const crashlytics = getCrashlytics();
+
         if (user) {
+          // ════════════════════════════════════════════════════
+          // FASE 1: CAPTURAR UUID PREVIO
+          // ════════════════════════════════════════════════════
+
+          const previousAnonymousId = storageService.getString('anonymous_user_id');
+          const hasAnonymousHistory = previousAnonymousId?.startsWith('anon_');
+
+          SafeLogger.info('[Auth] Setting user:', {
+            uid: user.uid,
+            email: user.email,
+            hasAnonymousHistory,
+            previousAnonymousId: previousAnonymousId?.substring(0, 25) + '...',
+          });
+
+          // ════════════════════════════════════════════════════
+          // FASE 2: PROCESO DE MIGRACIÓN
+          // ════════════════════════════════════════════════════
+
+          if (hasAnonymousHistory) {
+            SafeLogger.info('[Auth] 🔄 Initiating UUID → Firebase UID migration');
+
+            const loginMethod = user.providerData[0]?.providerId || 'unknown';
+            const isNewUser = user.metadata.creationTime === user.metadata.lastSignInTime;
+
+            // 2.1 Firebase Analytics - User Properties
+            analyticsService.setUserProperty('original_anonymous_id', previousAnonymousId!);
+            analyticsService.setUserProperty('account_linked_at', new Date().toISOString());
+            analyticsService.setUserProperty('conversion_method', loginMethod.replace('.com', ''));
+
+            // 2.2 Firebase Analytics - Evento de Conversión
+            analyticsService.logEvent('user_account_linked', {
+              method: loginMethod.replace('.com', ''),
+              previous_anonymous_id: previousAnonymousId!,
+              firebase_uid: user.uid,
+              is_new_user: isNewUser,
+              timestamp: Date.now(),
+            });
+
+            SafeLogger.info('[Auth] ✅ Conversion event logged:', {
+              method: loginMethod,
+              isNewUser,
+            });
+
+            // 2.3 Crashlytics - Atributos personalizados
+            setAttributes(crashlytics, {
+              original_anonymous_id: previousAnonymousId!,
+              conversion_method: loginMethod,
+            });
+
+            // 2.4 Clarity - Tag personalizado
+            Clarity.setCustomTag('prev_anon_id', previousAnonymousId!);
+
+            // 2.5 Sentry - Contexto de usuario
+            Sentry.setUser({
+              id: user.uid,
+              email: user.email || undefined,
+              username: user.displayName || undefined,
+              anonymous_id_legacy: previousAnonymousId!,
+            });
+
+            // 2.6 Guardar mapeo en MMKV (para debugging)
+            try {
+              const mapping = {
+                uuid: previousAnonymousId,
+                firebaseUid: user.uid,
+                linkedAt: Date.now(),
+                loginMethod,
+                isNewUser,
+              };
+              storageService.setString('uuid_to_firebase_map', JSON.stringify(mapping));
+
+              SafeLogger.info('[Auth] 💾 Migration mapping saved');
+            } catch (error) {
+              SafeLogger.error('[Auth] Failed to save mapping:', error);
+            }
+          }
+
+          // ════════════════════════════════════════════════════
+          // FASE 3: ACTUALIZAR userId EN TODOS LOS SERVICIOS
+          // ════════════════════════════════════════════════════
+
+          // Firebase Analytics
+          analyticsService.setUserId(user.uid || null);
+
+          // Crashlytics
           setUserId(crashlytics, user.uid || 'unknown');
           setAttributes(crashlytics, {
             user_name: user.displayName || '',
             user_email: user.email || '',
+            provider: user.providerData[0]?.providerId || '',
           });
+
+          // Clarity
           Clarity.setCustomUserId(user.uid || 'unknown');
-          analyticsService.setUserId(user.uid || null);
+
+          // Sentry (si no se hizo en migración)
+          if (!hasAnonymousHistory) {
+            Sentry.setUser({
+              id: user.uid,
+              email: user.email || undefined,
+              username: user.displayName || undefined,
+            });
+          }
+
+          SafeLogger.info('[Auth] ✅ User ID updated in all analytics services');
         } else {
+          // ════════════════════════════════════════════════════
+          // LOGOUT: Limpiar servicios y regenerar UUID
+          // ════════════════════════════════════════════════════
+
+          SafeLogger.info('[Auth] 🚪 User logout - clearing data');
+
+          // Limpiar servicios
           setUserId(crashlytics, '');
-          setAttributes(crashlytics, {
-            user_name: '',
-            user_email: '',
-          });
+          setAttributes(crashlytics, { user_name: '', user_email: '' });
           analyticsService.setUserId(null);
+          Sentry.setUser(null);
+
+          // Regenerar UUID anónimo
+          const newAnonymousId = anonymousIdentityService.resetAnonymousId();
+
+          // Configurar nuevo UUID en servicios
+          analyticsService.setUserId(newAnonymousId);
+          Clarity.setCustomUserId(newAnonymousId);
+
+          SafeLogger.info('[Auth] ✅ New anonymous session started:', newAnonymousId);
         }
+
         set({ user });
       },
 

@@ -234,6 +234,22 @@ class StorageService {
   delete(key: string): void {
     getStorage().remove(key);
   }
+
+  // ═══════════════════════════════════════════════════════════
+  // NUEVOS MÉTODOS: Wrappers para acceso directo a MMKV
+  // ═══════════════════════════════════════════════════════════
+
+  getString(key: string): string | undefined {
+    return getStorage().getString(key);
+  }
+
+  setString(key: string, value: string): void {
+    getStorage().set(key, value);
+  }
+
+  deleteKey(key: string): void {
+    getStorage().remove(key);
+  }
 }
 
 export const storageService = new StorageService();

@@ -291,7 +291,6 @@ const AppNavigator = () => {
   const { isDark } = useThemeContext();
 
   // Zustand store selectors
-  const user = useAuthStore(state => state.user);
   const authLoading = useAuthStore(state => state.isLoading);
   const [isReady, setIsReady] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
@@ -392,7 +391,7 @@ const AppNavigator = () => {
             <RootStack.Screen name="Onboarding">
               {props => <OnboardingScreen {...props} onFinish={() => setShowOnboarding(false)} />}
             </RootStack.Screen>
-          ) : user ? (
+          ) : (
             <>
               <RootStack.Screen name="Main" component={MainTabNavigator} />
               <RootStack.Screen
@@ -501,9 +500,9 @@ const AppNavigator = () => {
                   animation: 'default',
                 }}
               />
+              {/* Auth Navigator sigue disponible, pero se accede desde Settings */}
+              <RootStack.Screen name="Auth" component={AuthNavigator} />
             </>
-          ) : (
-            <RootStack.Screen name="Auth" component={AuthNavigator} />
           )}
         </RootStack.Navigator>
       </NavigationContainer>

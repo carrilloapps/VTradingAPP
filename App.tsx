@@ -36,7 +36,10 @@ import { deepLinkService } from '@/services/DeepLinkService';
 import { notificationInitService } from '@/services/NotificationInitService';
 import { analyticsService } from '@/services/firebase/AnalyticsService';
 import { useNetworkStore } from '@/stores/networkStore';
+import { useAuthStore } from '@/stores/authStore';
+import { anonymousIdentityService } from '@/services/AnonymousIdentityService';
 import { initializeStorage } from '@/services/StorageService';
+import SafeLogger from '@/utils/safeLogger';
 
 // Silence Firebase modular deprecation warnings
 // @ts-ignore
@@ -111,6 +114,21 @@ function App(): React.JSX.Element {
           notificationInitService.initialize(),
           initializeStorage(),
         ]);
+
+        // ═══════════════════════════════════════════════════════════
+        // NUEVO: Inicializar UUID si no hay usuario autenticado
+        // ═══════════════════════════════════════════════════════════
+
+        const user = useAuthStore.getState().user;
+
+        if (!user) {
+          const anonymousId = anonymousIdentityService.getAnonymousId();
+          SafeLogger.info('[App] Anonymous ID initialized on startup:', anonymousId);
+
+          // Configurar en servicios
+          analyticsService.setUserId(anonymousId);
+          Clarity.setCustomUserId(anonymousId);
+        }
       } catch (e) {
         // Safe catch to ensure app continues even if initialization fails
         console.error('Firebase initialization error:', e);
