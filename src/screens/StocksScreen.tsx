@@ -352,27 +352,8 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
         {indexData &&
           (() => {
             const stats = indexData.stats;
-            const hasValidStats =
-              stats &&
-              stats.titlesUp !== 0 &&
-              stats.titlesDown !== 0 &&
-              stats.titlesUnchanged !== 0;
-
-            let labelOverride;
-            let fallbackValue;
-            let statsToPass;
-
-            if (hasValidStats) {
-              statsToPass = stats;
-            } else {
-              if (indexData.statusState && indexData.statusState !== 'ABIERTO') {
-                labelOverride = 'ESTADO DEL MERCADO';
-                fallbackValue = indexData.statusState;
-              } else {
-                labelOverride = 'FECHA';
-                fallbackValue = indexData.updateDate;
-              }
-            }
+            // Siempre mostrar títulos si existen las propiedades stats
+            const hasStats = stats && typeof stats.titlesUp === 'number';
 
             return (
               <IndexHero
@@ -380,9 +361,7 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
                 changePercent={indexData.changePercent}
                 isPositive={indexData.isPositive}
                 volume={indexData.volume}
-                stats={statsToPass}
-                labelOverride={labelOverride}
-                fallbackValue={fallbackValue}
+                stats={hasStats ? stats : undefined}
               />
             );
           })()}

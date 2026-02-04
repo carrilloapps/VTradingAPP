@@ -114,7 +114,7 @@ function AuthNavigator() {
 // Tab Icon Components (extracted to avoid re-creation on each render)
 const MarketsIcon = ({ color }: { color: string }) => (
   <View style={tabStyles.iconContainer24}>
-    <MaterialCommunityIcons name="chart-line" size={24} color={color} />
+    <MaterialCommunityIcons name="bank" size={24} color={color} />
   </View>
 );
 
