@@ -354,6 +354,12 @@ const AppNavigator = () => {
     },
   };
 
+  // Helper to detect if we're in tab navigation
+  const isTabNavigationScreen = (routeName?: string) => {
+    const tabScreens = ['Markets', 'Rates', 'Home', 'HomeMain', 'Discover', 'Calculator'];
+    return routeName ? tabScreens.includes(routeName) : false;
+  };
+
   if (authLoading || !isReady) {
     return <AuthLoading />;
   }
@@ -383,6 +389,31 @@ const AppNavigator = () => {
 
           if (previousRouteName !== currentRouteName && currentRouteName) {
             await analyticsService.logScreenView(currentRouteName, currentRouteName);
+
+            // Log custom events for tab navigation vs stack screens
+            const isCurrentTab = isTabNavigationScreen(currentRouteName);
+            const wasPreviousTab = isTabNavigationScreen(previousRouteName);
+
+            if (isCurrentTab && !wasPreviousTab) {
+              // Entering tab navigation from a stack screen
+              await analyticsService.logEvent('tab_navigation_enter', {
+                tab_name: currentRouteName,
+                from_screen: previousRouteName || 'unknown',
+              });
+            } else if (!isCurrentTab && wasPreviousTab) {
+              // Entering a stack screen from tab navigation
+              await analyticsService.logEvent('stack_screen_enter', {
+                screen_name: currentRouteName,
+                from_tab: previousRouteName || 'unknown',
+              });
+            } else if (!isCurrentTab && !wasPreviousTab) {
+              // Moving between stack screens
+              await analyticsService.logEvent('stack_screen_enter', {
+                screen_name: currentRouteName,
+                from_screen: previousRouteName || 'unknown',
+              });
+            }
+            // If both are tabs, we're just switching tabs (already handled by screen_view)
           }
           routeNameRef.current = currentRouteName;
         }}

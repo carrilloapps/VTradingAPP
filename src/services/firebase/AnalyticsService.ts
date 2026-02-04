@@ -15,6 +15,8 @@ import { observabilityService } from '@/services/ObservabilityService';
 export const ANALYTICS_EVENTS = {
   // Screen Views
   SCREEN_VIEW: 'screen_view',
+  TAB_NAVIGATION_ENTER: 'tab_navigation_enter',
+  STACK_SCREEN_ENTER: 'stack_screen_enter',
 
   // User Actions
   LOGIN: 'login',
