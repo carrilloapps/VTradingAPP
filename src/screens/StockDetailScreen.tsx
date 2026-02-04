@@ -396,6 +396,168 @@ const StockDetailScreen = ({ route, navigation }: any) => {
         </View>
 
         {/* Additional Info / Placeholder for Chart */}
+        {stock.orderBook && (
+          <>
+            <View style={styles.sectionHeader}>
+              <Text
+                variant="titleSmall"
+                style={[
+                  styles.sectionTitle,
+                  styles.sectionTitleLetterSpacing,
+                  { color: sectionTitleColor },
+                ]}
+              >
+                LIBRO DE ÓRDENES
+              </Text>
+            </View>
+
+            <View style={styles.statsGrid}>
+              <Surface
+                style={[
+                  styles.statCard,
+                  { backgroundColor: statCardBg, borderColor: statCardBorder },
+                ]}
+                elevation={0}
+              >
+                <View style={styles.statHeader}>
+                  <View
+                    style={[styles.statIconBox, { backgroundColor: theme.colors.trendUp + '20' }]}
+                  >
+                    <MaterialCommunityIcons
+                      name="arrow-up-bold"
+                      size={18}
+                      color={theme.colors.trendUp}
+                    />
+                  </View>
+                  <Text
+                    variant="labelSmall"
+                    style={[styles.statLabelBold, { color: statLabelColor }]}
+                  >
+                    COMPRA
+                  </Text>
+                </View>
+                {stock.orderBook.bid && stock.orderBook.bid.price > 0 ? (
+                  <>
+                    <View style={styles.statValueRow}>
+                      <Text
+                        variant="titleMedium"
+                        style={[styles.statValueBold, { color: statValueColor }]}
+                      >
+                        {stock.orderBook.bid.price.toLocaleString('es-VE', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </Text>
+                      <BolivarIcon size={14} color={theme.colors.onSurface} />
+                    </View>
+                    <Text
+                      variant="labelSmall"
+                      style={[styles.orderBookVolume, { color: theme.colors.onSurfaceVariant }]}
+                    >
+                      Vol: {formatCompactNumber(stock.orderBook.bid.volume)}
+                    </Text>
+                  </>
+                ) : (
+                  <Text
+                    variant="titleMedium"
+                    style={[styles.statValueBold, { color: statValueColor }]}
+                  >
+                    -
+                  </Text>
+                )}
+              </Surface>
+
+              <Surface
+                style={[
+                  styles.statCard,
+                  { backgroundColor: statCardBg, borderColor: statCardBorder },
+                ]}
+                elevation={0}
+              >
+                <View style={styles.statHeader}>
+                  <View
+                    style={[styles.statIconBox, { backgroundColor: theme.colors.trendDown + '20' }]}
+                  >
+                    <MaterialCommunityIcons
+                      name="arrow-down-bold"
+                      size={18}
+                      color={theme.colors.trendDown}
+                    />
+                  </View>
+                  <Text
+                    variant="labelSmall"
+                    style={[styles.statLabelBold, { color: statLabelColor }]}
+                  >
+                    VENTA
+                  </Text>
+                </View>
+                {stock.orderBook.ask && stock.orderBook.ask.price > 0 ? (
+                  <>
+                    <View style={styles.statValueRow}>
+                      <Text
+                        variant="titleMedium"
+                        style={[styles.statValueBold, { color: statValueColor }]}
+                      >
+                        {stock.orderBook.ask.price.toLocaleString('es-VE', {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                      </Text>
+                      <BolivarIcon size={14} color={theme.colors.onSurface} />
+                    </View>
+                    <Text
+                      variant="labelSmall"
+                      style={[styles.orderBookVolume, { color: theme.colors.onSurfaceVariant }]}
+                    >
+                      Vol: {formatCompactNumber(stock.orderBook.ask.volume)}
+                    </Text>
+                  </>
+                ) : (
+                  <Text
+                    variant="titleMedium"
+                    style={[styles.statValueBold, { color: statValueColor }]}
+                  >
+                    -
+                  </Text>
+                )}
+              </Surface>
+            </View>
+
+            {stock.orderBook.negotiated !== undefined && stock.orderBook.negotiated > 0 && (
+              <Surface
+                style={[
+                  styles.negotiatedCard,
+                  { backgroundColor: statCardBg, borderColor: statCardBorder },
+                ]}
+                elevation={0}
+              >
+                <View style={styles.statHeader}>
+                  <View style={[styles.statIconBox, { backgroundColor: statIconBoxBg }]}>
+                    <MaterialCommunityIcons
+                      name="handshake"
+                      size={18}
+                      color={theme.colors.primary}
+                    />
+                  </View>
+                  <Text
+                    variant="labelSmall"
+                    style={[styles.statLabelBold, { color: statLabelColor }]}
+                  >
+                    NEGOCIADOS
+                  </Text>
+                </View>
+                <Text
+                  variant="titleMedium"
+                  style={[styles.statValueBold, { color: statValueColor }]}
+                >
+                  {formatCompactNumber(stock.orderBook.negotiated)}
+                </Text>
+              </Surface>
+            )}
+          </>
+        )}
+
+        {/* Additional Info / Placeholder for Chart */}
         <View style={styles.sectionHeader}>
           <Text
             variant="titleSmall"
@@ -672,6 +834,16 @@ const styles = StyleSheet.create({
   },
   shareButtonsGap: {
     gap: 12,
+  },
+  orderBookVolume: {
+    marginTop: 4,
+    fontWeight: '600',
+  },
+  negotiatedCard: {
+    padding: 16,
+    borderRadius: 24,
+    borderWidth: 1,
+    marginBottom: 16,
   },
 });
 
