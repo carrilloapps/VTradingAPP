@@ -6,32 +6,34 @@ import { FirebaseAuthTypes } from '@react-native-firebase/auth';
 
 import { md5 } from '@/utils/md5';
 import { useAppTheme } from '@/theme';
-import { anonymousIdentityService } from '@/services/AnonymousIdentityService';
+import { useToastStore } from '@/stores/toastStore';
 
 interface UserProfileCardProps {
   user: FirebaseAuthTypes.User | null;
   onEdit?: () => void;
   onRegister?: () => void;
+  onLogin?: () => void;
 }
 
-const UserProfileCard = ({ user, onEdit, onRegister }: UserProfileCardProps) => {
+const UserProfileCard = ({ user, onEdit, onRegister, onLogin }: UserProfileCardProps) => {
   const theme = useAppTheme();
   const [imageError, setImageError] = useState(false);
+  const showToast = useToastStore(state => state.showToast);
 
-  // ═══════════════════════════════════════════════════════════
-  // NUEVO: Obtener UUID si no hay user
-  // ═══════════════════════════════════════════════════════════
-  const anonymousId = user ? null : anonymousIdentityService.getAnonymousId();
-
-  const displayName = user?.displayName || (user?.isAnonymous ? 'Invitado' : 'Usuario Anónimo');
-  const email = user?.email
-    ? user.email
-    : user?.isAnonymous
-      ? 'Sesión anónima'
-      : anonymousId
-        ? `ID: ${anonymousId.substring(0, 20)}...`
-        : 'Sin cuenta';
+  const displayName = user?.displayName || user?.email?.split('@')[0] || 'Usuario';
+  const email = user?.email || 'Inicia sesión presionando aquí';
   const isPro = !!user && !user.isAnonymous;
+  const hasUser = !!user;
+
+  const handlePremiumAction = () => {
+    if (!hasUser) {
+      // Usuario anónimo -> ir a registro
+      onRegister?.();
+    } else {
+      // Usuario logeado -> mostrar toast
+      showToast('Muy pronto estará disponible el Plan Premium', 'info');
+    }
+  };
 
   // Reset error state when user changes
   useEffect(() => {
@@ -83,7 +85,7 @@ const UserProfileCard = ({ user, onEdit, onRegister }: UserProfileCardProps) => 
 
   return (
     <View style={styles.wrapper}>
-      <View
+      <TouchableOpacity
         style={[
           styles.container,
           {
@@ -91,6 +93,9 @@ const UserProfileCard = ({ user, onEdit, onRegister }: UserProfileCardProps) => 
             borderColor: theme.colors.outline,
           },
         ]}
+        onPress={!hasUser ? onLogin : undefined}
+        disabled={hasUser}
+        activeOpacity={!hasUser ? 0.7 : 1}
       >
         <View style={styles.avatarContainer}>
           <View style={[styles.avatarWrapper, { borderColor: theme.colors.primary + '33' }]}>
@@ -129,6 +134,8 @@ const UserProfileCard = ({ user, onEdit, onRegister }: UserProfileCardProps) => 
           <Text
             variant="bodySmall"
             style={[styles.userEmail, { color: theme.colors.onSurfaceVariant }]}
+            numberOfLines={1}
+            ellipsizeMode="tail"
           >
             {email}
           </Text>
@@ -139,7 +146,7 @@ const UserProfileCard = ({ user, onEdit, onRegister }: UserProfileCardProps) => 
             <MaterialCommunityIcons name="pencil" size={20} color={theme.colors.onSurfaceVariant} />
           </TouchableOpacity>
         )}
-      </View>
+      </TouchableOpacity>
 
       {!isPro && (
         <View
@@ -167,18 +174,19 @@ const UserProfileCard = ({ user, onEdit, onRegister }: UserProfileCardProps) => 
                 variant="bodySmall"
                 style={[styles.premiumSubtitle, { color: theme.colors.onPrimaryContainer }]}
               >
-                Gratis durante el periodo de pruebas. Solo necesitas registrarte presionando el
-                boton "Registrarse gratis".
+                {hasUser
+                  ? 'Accede a funcionalidades exclusivas y mejora tu experiencia de trading.'
+                  : 'Gratis durante el periodo de pruebas. Solo necesitas registrarte presionando el boton "Registrarse gratis".'}
               </Text>
             </View>
           </View>
           <Button
             mode="contained"
-            onPress={onRegister}
+            onPress={handlePremiumAction}
             style={[styles.registerButton, { backgroundColor: theme.colors.primary }]}
             textColor={theme.colors.onPrimary}
           >
-            Registrarse gratis
+            {hasUser ? 'Adquirir Plan Premium' : 'Registrarse gratis'}
           </Button>
         </View>
       )}

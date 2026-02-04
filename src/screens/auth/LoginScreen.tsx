@@ -130,6 +130,10 @@ const LoginScreen = ({ navigation }: any) => {
           method: 'password',
         });
         await signIn(email, password, showToast);
+        // Login exitoso -> regresar a la pantalla anterior
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        }
       } catch (e: any) {
         // Obfuscate error for security
         if (!e.message?.includes('CANCELLED')) {
@@ -157,6 +161,10 @@ const LoginScreen = ({ navigation }: any) => {
         method: 'google',
       });
       await googleSignIn(showToast);
+      // Login exitoso -> regresar a la pantalla anterior
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+      }
     } catch (e: any) {
       if (
         e.message !== 'SIGN_IN_CANCELLED' &&
@@ -206,6 +214,7 @@ const LoginScreen = ({ navigation }: any) => {
       <UnifiedHeader
         variant="section"
         title=""
+        onBackPress={() => navigation.canGoBack() && navigation.goBack()}
         rightActionIcon="information-outline"
         onActionPress={() => setAboutVisible(true)}
         showNotification={false}

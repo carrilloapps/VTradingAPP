@@ -122,8 +122,15 @@ const SettingsScreen = () => {
     setSnackbarVisible(true);
   };
 
-  const handleLogout = () => {
-    setShowLogoutDialog(true);
+  const handleLoginOrLogout = () => {
+    if (!user || user.isAnonymous) {
+      // Usuario anónimo -> navegar a inicio de sesión
+      (navigation as any).navigate('Auth', { screen: 'Login' });
+      analyticsService.logEvent(ANALYTICS_EVENTS.LOGIN_ATTEMPT);
+    } else {
+      // Usuario logeado -> mostrar diálogo de confirmación
+      setShowLogoutDialog(true);
+    }
   };
 
   const confirmLogout = async () => {
@@ -400,8 +407,16 @@ const SettingsScreen = () => {
   }
 
   const handleRegister = () => {
-    // For anonymous users, signing out redirects to the Auth flow where they can register
-    handleLogout();
+    // Navigate to Auth screen for registration
+    // @ts-ignore
+    navigation.navigate('Auth', { screen: 'Register' });
+    analyticsService.logEvent(ANALYTICS_EVENTS.SIGN_UP_ATTEMPT);
+  };
+
+  const handleLogin = () => {
+    // Navigate to Auth screen for login
+    (navigation as any).navigate('Auth', { screen: 'Login' });
+    analyticsService.logEvent(ANALYTICS_EVENTS.LOGIN_ATTEMPT);
   };
 
   // Pre-calculate dynamic styles
@@ -437,7 +452,12 @@ const SettingsScreen = () => {
       >
         {/* User Profile */}
         <View style={styles.section}>
-          <UserProfileCard user={user} onEdit={handleEditProfile} onRegister={handleRegister} />
+          <UserProfileCard
+            user={user}
+            onEdit={handleEditProfile}
+            onRegister={handleRegister}
+            onLogin={handleLogin}
+          />
         </View>
 
         {/* Alerts Section */}
@@ -612,10 +632,10 @@ const SettingsScreen = () => {
               hasTopBorder
             />
             <MenuButton
-              icon="logout"
-              label="Cerrar sesión"
-              onPress={handleLogout}
-              isDanger
+              icon={user && !user.isAnonymous ? 'logout' : 'login'}
+              label={user && !user.isAnonymous ? 'Cerrar sesión' : 'Iniciar sesión'}
+              onPress={handleLoginOrLogout}
+              isDanger={!!(user && !user.isAnonymous)}
               hasTopBorder
             />
           </View>

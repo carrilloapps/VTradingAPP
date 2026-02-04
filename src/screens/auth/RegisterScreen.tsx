@@ -125,7 +125,10 @@ const RegisterScreen = ({ navigation }: any) => {
           method: 'password',
         });
         await signUp(email, password, showToast);
-        // Sign up exitoso ya se trackea en authStore con logLogin
+        // Sign up exitoso -> regresar a la pantalla anterior
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        }
       } catch (e) {
         observabilityService.captureError(e, {
           context: 'RegisterScreen.handleRegister',
@@ -147,7 +150,10 @@ const RegisterScreen = ({ navigation }: any) => {
         method: 'google',
       });
       await googleSignIn(showToast);
-      // Sign up exitoso ya se trackea en authStore
+      // Sign up exitoso -> regresar a la pantalla anterior
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+      }
     } catch (e) {
       observabilityService.captureError(e, {
         context: 'RegisterScreen.handleGoogleRegister',

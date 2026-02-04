@@ -162,7 +162,7 @@ const HomeScreen = ({ navigation }: any) => {
 
   const userData = useMemo(
     () => ({
-      name: user?.displayName || user?.email?.split('@')[0] || 'Invitado',
+      name: user?.displayName || user?.email?.split('@')[0] || 'Usuario',
       avatarUrl: user?.photoURL,
       email: user?.email,
       notificationCount: 3,
