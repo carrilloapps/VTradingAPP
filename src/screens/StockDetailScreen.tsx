@@ -14,6 +14,7 @@ import { useToastStore } from '@/stores/toastStore';
 import CustomDialog from '@/components/ui/CustomDialog';
 import CustomButton from '@/components/ui/CustomButton';
 import StockShareGraphic from '@/components/stocks/StockShareGraphic';
+import StockDetailSkeleton from '@/components/stocks/StockDetailSkeleton';
 import { observabilityService } from '@/services/ObservabilityService';
 import { analyticsService } from '@/services/firebase/AnalyticsService';
 import { StocksService, StockData } from '@/services/StocksService';
@@ -24,7 +25,8 @@ const StockDetailScreen = ({ route, navigation }: any) => {
 
   // State para el stock con datos completos
   const [stock, setStock] = useState<StockData>(initialStock);
-  const [loadingDetails, setLoadingDetails] = useState(false);
+  // Iniciar con loading true si no hay orderBook
+  const [loadingDetails, setLoadingDetails] = useState(!initialStock.orderBook);
 
   useEffect(() => {
     analyticsService.logScreenView('StockDetail', stock.id);
@@ -32,7 +34,6 @@ const StockDetailScreen = ({ route, navigation }: any) => {
     // Si el stock no tiene orderBook, intentar obtenerlo del servicio
     const fetchCompleteStockData = async () => {
       if (!initialStock.orderBook) {
-        setLoadingDetails(true);
         try {
           // Obtener todos los stocks y buscar este específico
           const allStocks = await StocksService.getAllStocks();
@@ -219,6 +220,11 @@ const StockDetailScreen = ({ route, navigation }: any) => {
   const chartPlaceholderBorder = theme.colors.outline;
   const chartIconGlowOpacity = 0.05;
   const chartPlaceholderTextColor = theme.colors.onSurfaceVariant;
+
+  // Mostrar skeleton mientras se cargan los datos completos
+  if (loadingDetails) {
+    return <StockDetailSkeleton onBackPress={() => navigation.goBack()} />;
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: containerBgColor }]}>
