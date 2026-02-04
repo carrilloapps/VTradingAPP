@@ -409,6 +409,12 @@ const AdvancedCalculatorScreen = () => {
 
     storageService.saveCalculatorConfig(currentConfig);
     showToast('Configuración guardada', 'success');
+
+    // Show hint about long press functionality
+    setTimeout(() => {
+      showToast('Mantén presionado el botón de guardar para volver a esta configuración', 'info');
+    }, 1500);
+
     analyticsService.logEvent(ANALYTICS_EVENTS.CALCULATOR_SAVE_CONFIG, {
       baseCurrency: baseCurrencyCode,
       targetCount: targetCodes.length,
