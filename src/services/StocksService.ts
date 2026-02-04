@@ -54,7 +54,7 @@ interface ApiStocksResponse {
     isOpen: boolean;
   };
   status?: {
-    state: string; // "ABIERTO" | "CERRADO"
+    state: 'ABIERTO' | 'CERRADO' | 'PRE-APERTURA';
     date: string;
     lastUpdate: string;
   };

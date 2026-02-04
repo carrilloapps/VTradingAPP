@@ -237,7 +237,7 @@ const HomeScreen = ({ navigation }: any) => {
         >
           <MarketStatus
             style={styles.marketStatus}
-            isOpen={isMarketOpen}
+            status={isMarketOpen ? 'ABIERTO' : 'CERRADO'}
             updatedAt={lastUpdated}
             onRefresh={onRefresh}
           />

@@ -16,7 +16,7 @@ import { captureRef } from 'react-native-view-shot';
 import Share from 'react-native-share';
 
 import UnifiedHeader from '@/components/ui/UnifiedHeader';
-import MarketStatus from '@/components/ui/MarketStatus';
+import MarketStatus, { MarketState } from '@/components/ui/MarketStatus';
 import IndexHero from '@/components/stocks/IndexHero';
 import StockItem from '@/components/stocks/StockItem';
 import SearchBar from '@/components/ui/SearchBar';
@@ -46,7 +46,7 @@ interface MarketIndexData {
     totalVolume: number;
     totalAmount: number;
   };
-  statusState?: string;
+  statusState?: MarketState;
   updateDate?: string;
 }
 
@@ -339,7 +339,7 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
       <View style={styles.headerContainer}>
         {/* Market Status */}
         <MarketStatus
-          isOpen={isMarketOpen}
+          status={indexData?.statusState || (isMarketOpen ? 'ABIERTO' : 'CERRADO')}
           updatedAt={new Date().toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit',

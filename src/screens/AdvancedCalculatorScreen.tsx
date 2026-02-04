@@ -531,7 +531,7 @@ const AdvancedCalculatorScreen = () => {
             />
           </View>
           <MarketStatus
-            isOpen={true}
+            status="ABIERTO"
             updatedAt={
               lastRefreshTime
                 ? lastRefreshTime.toLocaleTimeString([], {
