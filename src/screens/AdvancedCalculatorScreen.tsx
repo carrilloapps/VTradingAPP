@@ -17,6 +17,7 @@ import { useNavigation } from '@react-navigation/native';
 import { CurrencyService, CurrencyRate } from '@/services/CurrencyService';
 import { observabilityService } from '@/services/ObservabilityService';
 import { useToastStore } from '@/stores/toastStore';
+import { storageService, CalculatorConfig } from '@/services/StorageService';
 import CurrencyPickerModal from '@/components/dashboard/CurrencyPickerModal';
 import CurrencySelectorButton from '@/components/dashboard/CurrencySelectorButton';
 import UnifiedHeader from '@/components/ui/UnifiedHeader';
@@ -152,6 +153,9 @@ const AdvancedCalculatorScreen = () => {
   // Target Currencies List (Codes)
   const [targetCodes, setTargetCodes] = useState<string[]>(['VES', 'USDT']);
 
+  // Previous config for revert
+  const [previousConfig, setPreviousConfig] = useState<CalculatorConfig | null>(null);
+
   // Picker State
   const [pickerVisible, setPickerVisible] = useState(false);
   const [pickerMode, setPickerMode] = useState<'base' | 'add'>('base');
@@ -161,6 +165,14 @@ const AdvancedCalculatorScreen = () => {
 
   // --- Data Loading ---
   useEffect(() => {
+    // Load saved calculator config
+    const savedConfig = storageService.getCalculatorConfig();
+    if (savedConfig) {
+      setBaseCurrencyCode(savedConfig.baseCurrencyCode);
+      setTargetCodes(savedConfig.targetCodes);
+      setPreviousConfig(savedConfig);
+    }
+
     const unsubscribe = CurrencyService.subscribe(data => {
       setRates(data);
       setRefreshing(false);
@@ -383,6 +395,37 @@ const AdvancedCalculatorScreen = () => {
     }
   };
 
+  const handleSaveConfig = () => {
+    const currentConfig: CalculatorConfig = {
+      baseCurrencyCode,
+      targetCodes,
+    };
+
+    // Save current as previous before saving new
+    const existingConfig = storageService.getCalculatorConfig();
+    if (existingConfig) {
+      setPreviousConfig(existingConfig);
+    }
+
+    storageService.saveCalculatorConfig(currentConfig);
+    showToast('Configuración guardada', 'success');
+    analyticsService.logEvent(ANALYTICS_EVENTS.CALCULATOR_SAVE_CONFIG, {
+      baseCurrency: baseCurrencyCode,
+      targetCount: targetCodes.length,
+    });
+  };
+
+  const handleRevertConfig = () => {
+    if (previousConfig) {
+      setBaseCurrencyCode(previousConfig.baseCurrencyCode);
+      setTargetCodes(previousConfig.targetCodes);
+      showToast('Configuración revertida', 'info');
+      analyticsService.logEvent(ANALYTICS_EVENTS.CALCULATOR_REVERT_CONFIG);
+    } else {
+      showToast('No hay configuración previa', 'info');
+    }
+  };
+
   // --- Helpers for Responsive Text ---
   const getInputFontSize = () => {
     const len = baseAmount.length;
@@ -459,9 +502,9 @@ const AdvancedCalculatorScreen = () => {
         variant="simple"
         title="Calculadora"
         style={styles.header}
-        onBackPress={() => navigation.goBack()}
-        onActionPress={onRefresh}
-        rightActionIcon="refresh"
+        onActionPress={handleSaveConfig}
+        onActionLongPress={handleRevertConfig}
+        rightActionIcon="content-save"
         notificationIcon="bell-outline"
         onNotificationPress={() => navigation.navigate('Notifications')}
         showNotification={true}

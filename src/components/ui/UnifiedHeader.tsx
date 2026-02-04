@@ -22,6 +22,7 @@ interface UnifiedHeaderProps {
   isPremium?: boolean;
   notificationCount?: number;
   onActionPress?: () => void;
+  onActionLongPress?: () => void;
   onSecondaryActionPress?: () => void;
   onNotificationPress?: () => void;
   onBackPress?: () => void;
@@ -48,6 +49,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   notificationCount: _notificationCount = 0,
   isPremium,
   onActionPress,
+  onActionLongPress,
   onSecondaryActionPress,
   onNotificationPress: _onNotificationPress,
   onBackPress,
@@ -182,6 +184,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
         {(variant !== 'simple' || onActionPress || showNotification) && (
           <HeaderActions
             onActionPress={onActionPress}
+            onActionLongPress={onActionLongPress}
             onSecondaryActionPress={onSecondaryActionPress}
             rightActionIcon={rightActionIcon}
             secondaryActionIcon={secondaryActionIcon}

@@ -437,6 +437,7 @@ const SettingsScreen = () => {
       <UnifiedHeader
         variant="section"
         title="Configuración"
+        onBackPress={() => navigation.goBack()}
         rightActionIcon="information-outline"
         onActionPress={() => {
           setShowAboutDialog(true);

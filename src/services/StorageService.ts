@@ -62,6 +62,7 @@ const KEYS = {
   WIDGET_CONFIG: 'widget_config',
   WIDGET_REFRESH_META: 'widget_refresh_meta',
   HAS_SEEN_ONBOARDING: 'has_seen_onboarding',
+  CALCULATOR_CONFIG: 'calculator_config',
 };
 
 export interface StoredNotification {
@@ -103,6 +104,11 @@ export interface UserAlert {
   condition: 'above' | 'below';
   isActive: boolean;
   iconName?: string;
+}
+
+export interface CalculatorConfig {
+  baseCurrencyCode: string;
+  targetCodes: string[];
 }
 
 class StorageService {
@@ -213,6 +219,15 @@ class StorageService {
 
   setHasSeenOnboarding(value: boolean): void {
     getStorage().set(KEYS.HAS_SEEN_ONBOARDING, value);
+  }
+
+  // Calculator Config
+  getCalculatorConfig(): CalculatorConfig | null {
+    return this.getJSON<CalculatorConfig | null>(KEYS.CALCULATOR_CONFIG, null);
+  }
+
+  saveCalculatorConfig(config: CalculatorConfig): void {
+    this.setJSON(KEYS.CALCULATOR_CONFIG, config);
   }
 
   // Utility methods
