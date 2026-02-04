@@ -34,7 +34,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
   const [sharing, setSharing] = useState(false);
   const viewShotRef = useRef<any>(null);
 
-  const isPremium = !!(user && !user.isAnonymous);
+  const isPremium = !!user; // Usuario logueado = Premium
 
   const isPositive = (rate.changePercent || 0) > 0;
   const isNegative = (rate.changePercent || 0) < 0;

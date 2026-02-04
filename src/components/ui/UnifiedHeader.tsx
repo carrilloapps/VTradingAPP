@@ -66,8 +66,7 @@ const UnifiedHeader: React.FC<UnifiedHeaderProps> = ({
   const theme = useTheme();
   const insets = useSafeAreaInsets();
   const user = useAuthStore(state => state.user);
-  const resolvedIsPremium =
-    typeof isPremium === 'boolean' ? isPremium : !!(user && !user.isAnonymous);
+  const resolvedIsPremium = typeof isPremium === 'boolean' ? isPremium : !!user; // Logueado = Premium
   const adUnitId =
     Platform.OS === 'ios' ? AppConfig.ADMOB_BANNER_ID_IOS : AppConfig.ADMOB_BANNER_ID_ANDROID;
   // Use TestIds.BANNER in dev, or real ID in prod (if configured)

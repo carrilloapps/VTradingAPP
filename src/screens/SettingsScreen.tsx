@@ -123,8 +123,8 @@ const SettingsScreen = () => {
   };
 
   const handleLoginOrLogout = () => {
-    if (!user || user.isAnonymous) {
-      // Usuario anónimo -> navegar a inicio de sesión
+    if (!user) {
+      // Usuario sin loguear -> navegar a inicio de sesión
       (navigation as any).navigate('Auth', { screen: 'Login' });
       analyticsService.logEvent(ANALYTICS_EVENTS.LOGIN_ATTEMPT);
     } else {
@@ -632,10 +632,10 @@ const SettingsScreen = () => {
               hasTopBorder
             />
             <MenuButton
-              icon={user && !user.isAnonymous ? 'logout' : 'login'}
-              label={user && !user.isAnonymous ? 'Cerrar sesión' : 'Iniciar sesión'}
+              icon={user ? 'logout' : 'login'}
+              label={user ? 'Cerrar sesión' : 'Iniciar sesión'}
               onPress={handleLoginOrLogout}
-              isDanger={!!(user && !user.isAnonymous)}
+              isDanger={!!user}
               hasTopBorder
             />
           </View>

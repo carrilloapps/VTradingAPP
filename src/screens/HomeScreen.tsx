@@ -166,7 +166,7 @@ const HomeScreen = ({ navigation }: any) => {
       avatarUrl: user?.photoURL,
       email: user?.email,
       notificationCount: 3,
-      isPremium: !!(user && !user.isAnonymous),
+      isPremium: !!user, // Usuario logueado = Premium
     }),
     [user],
   );

@@ -18,6 +18,10 @@ interface AuthState {
   user: FirebaseAuthTypes.User | null;
   isLoading: boolean;
 
+  // Computed getters
+  isGuest: () => boolean; // Usuario sin loguear (null user)
+  isPremium: () => boolean; // Usuario logueado y no anónimo
+
   // Actions
   setUser: (user: FirebaseAuthTypes.User | null) => void;
   setLoading: (isLoading: boolean) => void;
@@ -38,7 +42,7 @@ interface AuthState {
     email: string,
     showToast: (msg: string, type: ToastType) => void,
   ) => Promise<void>;
-  signInAnonymously: (showToast: (msg: string, type: ToastType) => void) => Promise<void>;
+  // signInAnonymously removed - anonymous auth handled by AnonymousIdentityService
   updateProfileName: (
     newName: string,
     showToast: (msg: string, type: ToastType) => void,
@@ -51,13 +55,21 @@ interface AuthState {
  */
 export const useAuthStore = create<AuthState>()(
   devtools(
-    set => ({
+    (set, get) => ({
       // Initial state
       user: null,
       isLoading: true,
 
+      // Computed getters
+      isGuest: () => {
+        return !get().user;
+      },
+      isPremium: () => {
+        return !!get().user;
+      },
+
       // Mutations
-      setUser: user => {
+      setUser: (user: FirebaseAuthTypes.User | null) => {
         const crashlytics = getCrashlytics();
 
         if (user) {
@@ -192,10 +204,14 @@ export const useAuthStore = create<AuthState>()(
         set({ user });
       },
 
-      setLoading: isLoading => set({ isLoading }),
+      setLoading: (isLoading: boolean) => set({ isLoading }),
 
       // Actions
-      signIn: async (email, password, showToast) => {
+      signIn: async (
+        email: string,
+        password: string,
+        showToast: (msg: string, type: ToastType) => void,
+      ) => {
         try {
           await authService.signInWithEmail(email, password);
           await analyticsService.logLogin('email');
@@ -213,7 +229,11 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      signUp: async (email, password, showToast) => {
+      signUp: async (
+        email: string,
+        password: string,
+        showToast: (msg: string, type: ToastType) => void,
+      ) => {
         try {
           await authService.signUpWithEmail(email, password);
           await analyticsService.logSignUp('email');
@@ -231,7 +251,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      signOut: async showToast => {
+      signOut: async (showToast: (msg: string, type: ToastType) => void) => {
         try {
           await authService.signOut();
           await analyticsService.logEvent(ANALYTICS_EVENTS.LOGOUT);
@@ -248,7 +268,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      deleteAccount: async showToast => {
+      deleteAccount: async (showToast: (msg: string, type: ToastType) => void) => {
         try {
           await authService.deleteAccount();
           await analyticsService.logEvent(ANALYTICS_EVENTS.DELETE_ACCOUNT);
@@ -266,7 +286,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      googleSignIn: async showToast => {
+      googleSignIn: async (showToast: (msg: string, type: ToastType) => void) => {
         try {
           await authService.signInWithGoogle();
           await analyticsService.logLogin('google');
@@ -291,7 +311,7 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      resetPassword: async (email, showToast) => {
+      resetPassword: async (email: string, showToast: (msg: string, type: ToastType) => void) => {
         try {
           await authService.sendPasswordResetEmail(email);
           await analyticsService.logEvent(ANALYTICS_EVENTS.RESET_PASSWORD_REQUEST);
@@ -310,24 +330,14 @@ export const useAuthStore = create<AuthState>()(
         }
       },
 
-      signInAnonymously: async showToast => {
-        try {
-          await authService.signInAnonymously();
-          await analyticsService.logLogin('anonymous');
-          showToast('Ingresaste como invitado', 'warning');
-        } catch (e) {
-          observabilityService.captureError(e, {
-            context: 'authStore.signInAnonymously',
-            method: 'anonymous',
-            errorMessage: (e as Error).message,
-          });
-          await analyticsService.logError('anonymous_sign_in');
-          showToast((e as Error).message, 'error');
-          throw e;
-        }
-      },
+      // signInAnonymously removed - anonymous auth handled by AnonymousIdentityService
+      // Users automatically get an anonymous UUID on app start via App.tsx
+      // No Firebase anonymous auth needed
 
-      updateProfileName: async (newName, showToast) => {
+      updateProfileName: async (
+        newName: string,
+        showToast: (msg: string, type: ToastType) => void,
+      ) => {
         try {
           const updatedUser = await authService.updateProfileName(newName);
           set({ user: updatedUser });

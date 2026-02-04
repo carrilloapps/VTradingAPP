@@ -22,7 +22,7 @@ const UserProfileCard = ({ user, onEdit, onRegister, onLogin }: UserProfileCardP
 
   const displayName = user?.displayName || user?.email?.split('@')[0] || 'Usuario';
   const email = user?.email || 'Inicia sesión presionando aquí';
-  const isPro = !!user && !user.isAnonymous;
+  const isPro = !!user; // Usuario logueado = Premium (no más Firebase anonymous)
   const hasUser = !!user;
 
   const handlePremiumAction = () => {

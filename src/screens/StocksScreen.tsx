@@ -81,7 +81,7 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
   const [, setSharing] = useState(false);
   const viewShotRef = React.useRef<any>(null);
 
-  const isPremium = !!(user && !user.isAnonymous);
+  const isPremium = !!user; // Usuario logueado = Premium
 
   useEffect(() => {
     if (isFocused) {

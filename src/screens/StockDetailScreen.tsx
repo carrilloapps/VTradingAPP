@@ -34,7 +34,7 @@ const StockDetailScreen = ({ route, navigation }: any) => {
   const [_sharing, setSharing] = React.useState(false);
   const viewShotRef = React.useRef<any>(null);
 
-  const isPremium = !!(user && !user.isAnonymous);
+  const isPremium = !!user; // Usuario logueado = Premium
 
   const isPositive = stock.changePercent > 0;
   const isNegative = stock.changePercent < 0;

@@ -33,7 +33,6 @@ describe('stores index hooks', () => {
       deleteAccount: jest.fn(),
       googleSignIn: jest.fn(),
       resetPassword: jest.fn(),
-      signInAnonymously: jest.fn(),
       updateProfileName: jest.fn(),
     };
 

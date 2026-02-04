@@ -13,6 +13,8 @@ Esta carpeta contiene la documentación completa para la implementación del nue
 5. **[Integración Analytics](./05-analytics-integration.md)** - Configuración de servicios
 6. **[Estrategia de Testing](./06-testing-strategy.md)** - Tests y validación
 7. **[Troubleshooting](./07-troubleshooting.md)** - Solución de problemas comunes
+8. **[Detección de Usuario Invitado](./08-guest-detection.md)** - Helpers isGuest() e isPremium()
+9. **[Ejemplos de Migración](./09-migration-examples.md)** - Refactorización de código existente
 
 ---
 
