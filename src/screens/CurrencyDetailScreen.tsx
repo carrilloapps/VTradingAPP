@@ -47,10 +47,13 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
   // Calculate display values based on showInverse toggle
   const displayValue = showInverse && rate.value !== 0 ? 1 / rate.value : rate.value;
 
-  // For border rates, value = Foreign/VES (e.g., 1 VES = 6.72 COP)
-  // Without inversion: Shows Foreign/VES (e.g., "1 VES = 6.72 COP")
-  // With inversion: Shows VES/Foreign (e.g., "1 COP = 0.149 VES")
-  const displayPair = showInverse ? `VES/${rate.code}` : `${rate.code}/VES`;
+  // For border rates, value represents VES/Foreign (e.g., 1 VES = 6.72 COP)
+  // Without inversion: Shows VES/COP = 6.72 COP ("1 VES = 6.72 COP")
+  // With inversion: Shows COP/VES = 0.149 VES ("1 COP = 0.149 VES")
+  // For PEN where value = 0.00628: VES/PEN = 0.00628 means "1 VES = 0.00628 PEN"
+  // Inverted: PEN/VES = 159.24 means "1 PEN = 159.24 VES"
+  const displayPair = showInverse ? `${rate.code}/VES` : `VES/${rate.code}`;
+  // The displayCurrency is always the denominator (right side) of the pair
   const displayCurrency = showInverse ? 'VES' : rate.code;
 
   const isPositive = (rate.changePercent || 0) > 0;
@@ -306,12 +309,18 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
               <Text variant="headlineLarge" style={[styles.priceLarge, { color: priceLargeColor }]}>
                 {displayValue.toLocaleString('es-VE', {
                   minimumFractionDigits: 2,
-                  maximumFractionDigits: showInverse ? 6 : 2,
+                  maximumFractionDigits: displayValue < 0.01 ? 6 : displayValue < 1 ? 4 : 2,
                 })}
               </Text>
               <View style={styles.bolivarIcon}>
                 {displayCurrency === 'VES' ? (
                   <BolivarIcon size={28} color={theme.colors.onSurface} />
+                ) : isCustomSymbol ? (
+                  <CurrencyCodeIcon
+                    code={customSymbol!}
+                    size={28}
+                    color={theme.colors.onSurface}
+                  />
                 ) : (
                   <Text style={[styles.currencyCode, { color: theme.colors.onSurface }]}>
                     {displayCurrency}
@@ -342,7 +351,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
                   color={theme.colors.primary}
                 />
                 <Text style={[styles.inverseButtonText, { color: theme.colors.primary }]}>
-                  Ver {showInverse ? `${rate.code}/VES` : `VES/${rate.code}`}
+                  Ver {showInverse ? `VES/${rate.code}` : `${rate.code}/VES`}
                 </Text>
               </TouchableOpacity>
             )}

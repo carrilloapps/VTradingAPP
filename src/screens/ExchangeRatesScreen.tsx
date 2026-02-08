@@ -247,8 +247,10 @@ const ExchangeRatesScreen = () => {
           return r.name;
         };
 
-        // Border rates now come correctly calculated as Foreign/VES
-        // For very small values (< 1), we can invert for better readability
+        // Border rates: value represents VES/Foreign (e.g., 1 VES = 6.72 COP)
+        // For very small values (< 1), we invert for better readability:
+        // Example: PEN with value = 0.00628 (1 VES = 0.00628 PEN)
+        // Inverted: displays as "PEN/VES = 159.24 VES" (1 PEN = 159.24 VES)
         const shouldInvertDisplay = rate.type === 'border' && rate.value < 1;
         const displayValue = shouldInvertDisplay
           ? (1 / rate.value).toLocaleString('es-VE', {
@@ -262,20 +264,10 @@ const ExchangeRatesScreen = () => {
 
         const displayTitle = shouldInvertDisplay ? `${rate.code} / VES` : `VES / ${rate.code}`;
 
-        // When not inverted: VES/COP = 6.71 COP (show foreign currency)
-        // When inverted: PEN/VES = 159.09 VES (show VES because value is in VES)
+        // displayCurrency is always the denominator (right side) of the pair
+        // Not inverted: VES/COP = 6.71 COP (shows foreign currency)
+        // Inverted: PEN/VES = 159.09 VES (shows VES because value is in VES)
         const displayCurrency = shouldInvertDisplay ? 'VES' : rate.code;
-
-        // Debug: Log CNY specifically
-        if (rate.code === 'CNY') {
-          console.log('[ExchangeRatesScreen] CNY Debug:', {
-            code: rate.code,
-            type: rate.type,
-            shouldInvert: shouldInvertDisplay,
-            displayCurrency,
-            fullValue: `${displayValue} ${displayCurrency}`,
-          });
-        }
 
         return (
           <RateCard

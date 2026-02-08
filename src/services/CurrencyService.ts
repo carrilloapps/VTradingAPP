@@ -356,16 +356,18 @@ export class CurrencyService {
               ? CurrencyService.parseRate(apiRate.rate.average)
               : (buy + sell) / 2;
 
-            // Border rates from API come as Foreign/USDT (e.g., 3660 COP per 1 USDT)
-            // We need to convert to Foreign/VES using USDT as bridge:
-            // If 1 USDT = 544.83 VES and 1 USDT = 3660.306 COP
-            // Then: 1 VES = 3660.306 / 544.83 = 6.72 COP per VES
+            // Border rates from API come as Foreign/USDT (e.g., 3660 COP per 1 USDT, 3.42 PEN per 1 USDT)
+            // We need to convert to VES/Foreign using USDT as bridge:
+            // Example: If 1 USDT = 544.83 VES and 1 USDT = 3660.306 COP
+            // Then: 1 VES = 3660.306 / 544.83 = 6.72 COP (finalValue represents Foreign per VES)
+            // For PEN: 1 USDT = 3.42 PEN → 1 VES = 3.42 / 544.83 = 0.00628 PEN
             let finalValue = 0;
             let finalBuy = 0;
             let finalSell = 0;
 
             if (usdtInVes && usdtInVes > 0) {
-              // Calculate Foreign/VES = (Foreign/USDT) / (VES/USDT) = Foreign per VES
+              // Calculate VES/Foreign ratio: How many Foreign currency units per 1 VES
+              // finalValue = (Foreign/USDT) / (VES/USDT) = Foreign per VES
               finalValue = foreignPerUsdt / usdtInVes;
               if (buy > 0) finalBuy = buy / usdtInVes;
               if (sell > 0) finalSell = sell / usdtInVes;
