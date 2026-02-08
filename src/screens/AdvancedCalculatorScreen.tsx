@@ -141,33 +141,27 @@ interface CurrencyRow {
 const formatLargeNumber = (value: number, locale: string = 'es-CO'): string => {
   const absValue = Math.abs(value);
 
-  if (absValue >= 1_000_000_000) {
-    // Billones (Billions)
+  if (absValue >= 1_000_000_000_000) {
+    // Billones (un millón de millones): mostrar como 1,5B, 2,325B, etc.
+    // Usar hasta 3 decimales para mayor precisión
     return (
-      (value / 1_000_000_000).toLocaleString(locale, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
+      (value / 1_000_000_000_000).toLocaleString(locale, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 3,
       }) + 'B'
     );
   } else if (absValue >= 1_000_000) {
-    // Millones (Millions)
+    // Millones: mostrar como 36.508,5M, 7,07M, etc.
+    // Usar hasta 3 decimales para mayor precisión
     return (
       (value / 1_000_000).toLocaleString(locale, {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 3,
       }) + 'M'
-    );
-  } else if (absValue >= 10_000) {
-    // Miles (Thousands) - solo para valores >= 10,000
-    return (
-      (value / 1_000).toLocaleString(locale, {
-        minimumFractionDigits: 1,
-        maximumFractionDigits: 1,
-      }) + 'K'
     );
   }
 
-  // Formato normal para valores menores
+  // Formato normal para valores menores a 1 millón
   return value.toLocaleString(locale, {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,

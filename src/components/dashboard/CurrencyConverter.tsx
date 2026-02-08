@@ -10,6 +10,37 @@ import { observabilityService } from '@/services/ObservabilityService';
 import { CurrencyService, CurrencyRate } from '@/services/CurrencyService';
 import { useToastStore } from '@/stores/toastStore';
 
+// --- Helper Functions ---
+const formatLargeNumber = (value: number, locale: string = 'es-CO'): string => {
+  const absValue = Math.abs(value);
+
+  if (absValue >= 1_000_000_000_000) {
+    // Billones (un millón de millones): mostrar como 1,5B, 2,325B, etc.
+    // Usar hasta 3 decimales para mayor precisión
+    return (
+      (value / 1_000_000_000_000).toLocaleString(locale, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 3,
+      }) + 'B'
+    );
+  } else if (absValue >= 1_000_000) {
+    // Millones: mostrar como 36.508,5M, 7,07M, etc.
+    // Usar hasta 3 decimales para mayor precisión
+    return (
+      (value / 1_000_000).toLocaleString(locale, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 3,
+      }) + 'M'
+    );
+  }
+
+  // Formato normal para valores menores a 1 millón
+  return value.toLocaleString(locale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
+
 const CurrencyConverter: React.FC = () => {
   const theme = useTheme();
   const navigation = useNavigation();
@@ -220,10 +251,7 @@ const CurrencyConverter: React.FC = () => {
       result = CurrencyService.convertCrossRate(val, fromRateValue, toRateValue);
     }
 
-    return result.toLocaleString(AppConfig.DEFAULT_LOCALE, {
-      minimumFractionDigits: AppConfig.DECIMAL_PLACES,
-      maximumFractionDigits: AppConfig.DECIMAL_PLACES,
-    });
+    return formatLargeNumber(result, AppConfig.DEFAULT_LOCALE);
   }, [amount, fromCurrency, toCurrency, rates]);
 
   const exchangeRate = useMemo(() => {
@@ -268,10 +296,7 @@ const CurrencyConverter: React.FC = () => {
       rate = fromRateValue / toRateValue;
     }
 
-    return rate.toLocaleString(AppConfig.DEFAULT_LOCALE, {
-      minimumFractionDigits: AppConfig.DECIMAL_PLACES,
-      maximumFractionDigits: AppConfig.DECIMAL_PLACES,
-    });
+    return formatLargeNumber(rate, AppConfig.DEFAULT_LOCALE);
   }, [fromCurrency, toCurrency, rates]);
 
   const handleSwap = () => {
