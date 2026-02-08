@@ -9,6 +9,11 @@ jest.mock('../../src/services/firebase/PerformanceService');
 describe('CurrencyService', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.restoreAllMocks(); // Restore any spies created
+    // Clear internal cache to prevent test interference
+    (CurrencyService as any).currentRates = [];
+    (CurrencyService as any).lastFetch = 0;
+    (CurrencyService as any).fetchPromise = null;
   });
 
   const mockApiResponse = {
@@ -54,7 +59,7 @@ describe('CurrencyService', () => {
     const traceMock = { putAttribute: jest.fn(), stop: jest.fn() };
     (performanceService.startTrace as jest.Mock).mockResolvedValue(traceMock);
 
-    const rates = await CurrencyService.getRates();
+    const rates = await CurrencyService.getRates(true);
 
     expect(apiClient.get).toHaveBeenCalledWith(
       'api/rates',
@@ -83,17 +88,21 @@ describe('CurrencyService', () => {
     expect(performanceService.stopTrace).toHaveBeenCalledWith(traceMock);
   });
 
-  it('returns mock data on error', async () => {
-    (apiClient.get as jest.Mock).mockRejectedValue(new Error('Network error'));
-
+  it('returns cached data on error if available', async () => {
     const traceMock = { putAttribute: jest.fn(), stop: jest.fn() };
     (performanceService.startTrace as jest.Mock).mockResolvedValue(traceMock);
 
-    // Force refresh to bypass in-memory cache and trigger error
+    // First, populate the cache with valid data
+    (apiClient.get as jest.Mock).mockResolvedValueOnce(mockApiResponse);
+    await CurrencyService.getRates();
+
+    // Now simulate an error, but cache should be returned
+    (apiClient.get as jest.Mock).mockRejectedValueOnce(new Error('Network error'));
+
     const rates = await CurrencyService.getRates(true);
 
     expect(rates).toBeDefined();
-    expect(rates.length).toBeGreaterThan(0); // Should return mock rates
+    expect(rates.length).toBeGreaterThan(0); // Should return cached rates
     expect(traceMock.putAttribute).toHaveBeenCalledWith('error', 'true');
   });
 
@@ -130,5 +139,113 @@ describe('CurrencyService', () => {
     const rate = 36.5;
     const result = CurrencyService.convert(amount, rate);
     expect(result).toBe(3650);
+  });
+
+  it('calculates border rates using USDT bridge correctly', async () => {
+    const mockResponseWithBorder = {
+      status: {
+        status: 'ABIERTO',
+        date: '2024-01-16T00:00:00.000Z',
+        lastUpdate: '2024-01-16T12:00:00.000Z',
+      },
+      rates: [
+        {
+          currency: 'USD',
+          source: 'BCV',
+          rate: { average: 36.58 },
+          date: '2024-01-16T00:00:00.000Z',
+          previousDate: null,
+          change: { average: { value: 0, percent: 0, direction: 'stable' } },
+        },
+      ],
+      crypto: [
+        {
+          currency: 'USDT',
+          source: 'P2P',
+          rate: { average: 544.83, buy: 544.0, sell: 545.66 },
+          date: '2024-01-16T12:00:00.000Z',
+          previousDate: null,
+          change: { average: { value: 0, percent: 0, direction: 'stable' } },
+        },
+      ],
+      border: [
+        {
+          currency: 'COP',
+          source: 'P2P',
+          rate: { average: 3660.306, buy: 3650.0, sell: 3670.61 },
+          date: '2024-01-16T12:00:00.000Z',
+          previousDate: null,
+          change: { average: { value: 0, percent: 0, direction: 'stable' } },
+        },
+        {
+          currency: 'PEN',
+          source: 'P2P',
+          rate: { average: 3.42, buy: 3.4, sell: 3.44 },
+          date: '2024-01-16T12:00:00.000Z',
+          previousDate: null,
+          change: { average: { value: 0, percent: 0, direction: 'stable' } },
+        },
+      ],
+    };
+
+    (apiClient.get as jest.Mock).mockResolvedValue(mockResponseWithBorder);
+
+    const traceMock = { putAttribute: jest.fn(), stop: jest.fn() };
+    (performanceService.startTrace as jest.Mock).mockResolvedValue(traceMock);
+
+    // Force refresh to bypass cache
+    const rates = await CurrencyService.getRates(true);
+
+    // Find the COP rate
+    const copRate = rates.find(r => r.code === 'COP');
+    expect(copRate).toBeDefined();
+
+    // COP/VES should be calculated as: (COP/USDT) / (USDT/VES)
+    // 3660.306 / 544.83 = ~6.72
+    expect(copRate?.value).toBeCloseTo(6.72, 1);
+    expect(copRate?.type).toBe('border');
+    expect(copRate?.name).toBe('COP/VES • P2P');
+    // Original Foreign/USD rate should be preserved for calculator
+    expect(copRate?.usdRate).toBeCloseTo(3660.306, 1);
+
+    // Find the PEN rate
+    const penRate = rates.find(r => r.code === 'PEN');
+    expect(penRate).toBeDefined();
+
+    // PEN/VES should be calculated as: (PEN/USDT) / (USDT/VES)
+    // 3.42 / 544.83 = ~0.00628
+    expect(penRate?.value).toBeCloseTo(0.00628, 4);
+    expect(penRate?.type).toBe('border');
+    // Original Foreign/USD rate should be preserved
+    expect(penRate?.usdRate).toBeCloseTo(3.42, 2);
+  });
+
+  it('getCalculatorRate returns correct value for border currencies', () => {
+    const borderRate = {
+      id: 'border_1',
+      code: 'COP',
+      name: 'COP/VES • P2P',
+      value: 6.72, // Display value (Foreign/VES)
+      usdRate: 3660.306, // Original Foreign/USD
+      changePercent: 0,
+      type: 'border' as const,
+      lastUpdated: '2024-01-16T12:00:00.000Z',
+    };
+
+    const fiatRate = {
+      id: 'fiat_1',
+      code: 'USD',
+      name: 'USD/VES • BCV',
+      value: 36.58,
+      changePercent: 0,
+      type: 'fiat' as const,
+      lastUpdated: '2024-01-16T12:00:00.000Z',
+    };
+
+    // For border rates, should return usdRate
+    expect(CurrencyService.getCalculatorRate(borderRate)).toBe(3660.306);
+
+    // For fiat rates, should return value
+    expect(CurrencyService.getCalculatorRate(fiatRate)).toBe(36.58);
   });
 });

@@ -247,11 +247,28 @@ const ExchangeRatesScreen = () => {
           return r.name;
         };
 
+        // Border rates now come correctly calculated as Foreign/VES
+        // For very small values (< 1), we can invert for better readability
+        const shouldInvertDisplay = rate.type === 'border' && rate.value < 1;
+        const displayValue = shouldInvertDisplay
+          ? (1 / rate.value).toLocaleString('es-VE', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })
+          : rate.value.toLocaleString('es-VE', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            });
+
+        const displayTitle = shouldInvertDisplay ? `${rate.code} / VES` : `VES / ${rate.code}`;
+
+        const displayCurrency = shouldInvertDisplay ? 'Bs' : rate.code;
+
         return (
           <RateCard
-            title={`${rate.code} / VES`}
+            title={displayTitle}
             subtitle={getDescriptiveSubtitle(rate)}
-            value={`${rate.value.toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Bs`}
+            value={`${displayValue} ${displayCurrency}`}
             changePercent={
               rate.changePercent !== null ? `${Math.abs(rate.changePercent).toFixed(2)}%` : ''
             }

@@ -19,6 +19,7 @@ export interface CurrencyRate {
   buyChangePercent?: number;
   sellChangePercent?: number;
   spreadPercentage?: number; // Spread vs USDT P2P (only for USD from BCV)
+  usdRate?: number; // For border rates: original Foreign/USD rate from API (for calculator)
 }
 
 // API Response Interfaces
@@ -289,6 +290,10 @@ export class CurrencyService {
 
         // 1.5 Process Border Rates
         if (response.border && Array.isArray(response.border)) {
+          // Get USDT rate to calculate border rates correctly
+          const usdtRate = response.crypto?.find(c => c.currency === 'USDT');
+          const usdtInVes = usdtRate ? (usdtRate.rate.buy + usdtRate.rate.sell) / 2 : null;
+
           response.border.forEach((apiRate, index) => {
             let name = apiRate.currency;
             let iconName = 'currency-usd';
@@ -338,20 +343,33 @@ export class CurrencyService {
             // Calculate values if average is missing (common in P2P/Border rates)
             const buy = CurrencyService.parseRate(apiRate.rate?.buy);
             const sell = CurrencyService.parseRate(apiRate.rate?.sell);
-            const avgValue = apiRate.rate?.average
+            const foreignPerUsdt = apiRate.rate?.average
               ? CurrencyService.parseRate(apiRate.rate.average)
               : (buy + sell) / 2;
 
-            // Handle Border Rate Inversion (Tasas Fronterizas are usually Foreign/VES)
-            // We need value in VES (Price of 1 Unit of Foreign Currency in VES) for the calculator logic.
-            // All border rates from API seem to be based on VES (Foreign/VES).
-            let finalValue = avgValue;
-            let finalBuy = buy;
-            let finalSell = sell;
+            // Border rates from API come as Foreign/USDT (e.g., 3660 COP per 1 USDT)
+            // We need to convert to Foreign/VES using USDT as bridge:
+            // If 1 USDT = 544.83 VES and 1 USDT = 3660.306 COP
+            // Then: 1 VES = 3660.306 / 544.83 = 6.72 COP per VES
+            let finalValue = 0;
+            let finalBuy = 0;
+            let finalSell = 0;
 
-            if (avgValue > 0) finalValue = 1 / avgValue;
-            if (buy > 0) finalBuy = 1 / buy;
-            if (sell > 0) finalSell = 1 / sell;
+            if (usdtInVes && usdtInVes > 0) {
+              // Calculate Foreign/VES = (Foreign/USDT) / (VES/USDT) = Foreign per VES
+              finalValue = foreignPerUsdt / usdtInVes;
+              if (buy > 0) finalBuy = buy / usdtInVes;
+              if (sell > 0) finalSell = sell / usdtInVes;
+            } else {
+              // Fallback: if no USDT data, use direct inversion (old method)
+              finalValue = foreignPerUsdt > 0 ? 1 / foreignPerUsdt : 0;
+              finalBuy = buy > 0 ? 1 / buy : 0;
+              finalSell = sell > 0 ? 1 / sell : 0;
+            }
+
+            // Store original Foreign/USDT rate for calculator (USDT ≈ USD for calculations)
+            // This allows proper conversions in the calculator while displaying Foreign/VES in UI
+            const usdRate = foreignPerUsdt;
 
             // Calculate change percent
             let changePercent = 0;
@@ -381,6 +399,7 @@ export class CurrencyService {
               sellChangePercent: apiRate.change?.sell?.percent
                 ? CurrencyService.parsePercentage(apiRate.change.sell.percent)
                 : undefined,
+              usdRate: usdRate, // Original Foreign/USD rate for calculator
             });
           });
         }
@@ -606,11 +625,26 @@ export class CurrencyService {
   /**
    * Safe cross-rate conversion: (Amount * FromRate) / ToRate
    * Reduces floating point errors by multiplying before dividing.
+   * Uses usdRate for border currencies when available for accurate calculator conversions.
    */
   static convertCrossRate(amount: number, fromRate: number, toRate: number): number {
     if (amount < 0) return 0;
     if (toRate === 0) return 0;
     return (amount * fromRate) / toRate;
+  }
+
+  /**
+   * Returns the appropriate rate to use for calculator conversions.
+   * For border rates, returns usdRate (Foreign/USD) if available,
+   * otherwise returns the display value (Foreign/VES).
+   */
+  static getCalculatorRate(rate: CurrencyRate): number {
+    // For border rates, prefer usdRate (original Foreign/USD from API)
+    if (rate.type === 'border' && rate.usdRate !== undefined) {
+      return rate.usdRate;
+    }
+    // For all other rates, use display value
+    return rate.value;
   }
 
   /**

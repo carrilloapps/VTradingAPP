@@ -132,6 +132,7 @@ const Keypad = ({
 interface CurrencyRow {
   code: string;
   value: number;
+  exchangeRate: number;
 }
 
 const AdvancedCalculatorScreen = () => {
@@ -220,23 +221,45 @@ const AdvancedCalculatorScreen = () => {
         const rateObj = rates.find(r => r.code === code);
         if (!rateObj) return null;
 
-        // Logic fixed: Rates are "Price in Base Currency (VES)"
-        // Formula: Amount * (BaseValue / TargetValue) -> (Amount * BaseValue) / TargetValue
-        // Handled safely by CurrencyService
-        const targetValue = CurrencyService.convertCrossRate(
-          amountVal,
-          baseCurrency.value,
-          rateObj.value,
-        );
+        let targetValue = 0;
+        let exchangeRate = 0;
+
+        // Special handling for border currencies with usdRate
+        const baseIsBorder = baseCurrency.type === 'border' && baseCurrency.usdRate;
+        const targetIsBorder = rateObj.type === 'border' && rateObj.usdRate;
+        const baseIsUSD = baseCurrency.code === 'USD';
+        const targetIsUSD = rateObj.code === 'USD';
+
+        if (baseIsUSD && targetIsBorder) {
+          // USD to Border: direct multiplication by usdRate
+          targetValue = amountVal * rateObj.usdRate!;
+          exchangeRate = rateObj.usdRate!;
+        } else if (baseIsBorder && targetIsUSD) {
+          // Border to USD: direct division by usdRate
+          targetValue = amountVal / baseCurrency.usdRate!;
+          exchangeRate = 1 / baseCurrency.usdRate!;
+        } else if (baseIsBorder && targetIsBorder) {
+          // Border to Border: cross rate using usdRates
+          targetValue = amountVal * (baseCurrency.usdRate! / rateObj.usdRate!);
+          exchangeRate = baseCurrency.usdRate! / rateObj.usdRate!;
+        } else {
+          // Standard conversion using VES-based values
+          const baseRateValue = CurrencyService.getCalculatorRate(baseCurrency);
+          const targetRateValue = CurrencyService.getCalculatorRate(rateObj);
+          targetValue = CurrencyService.convertCrossRate(amountVal, baseRateValue, targetRateValue);
+          exchangeRate = baseRateValue / targetRateValue;
+        }
 
         return {
           code,
           value: targetValue,
+          exchangeRate,
           name: rateObj.name,
           rateObj,
         };
       })
       .filter(Boolean) as (CurrencyRow & {
+      exchangeRate: number;
       name: string;
       rateObj: CurrencyRate;
     })[];
@@ -641,13 +664,10 @@ const AdvancedCalculatorScreen = () => {
                 </View>
                 <Text variant="bodySmall" style={themeStyles.textSecondary}>
                   1 {baseCurrency.code} ={' '}
-                  {(baseCurrency.value / item.rateObj.value).toLocaleString(
-                    AppConfig.DEFAULT_LOCALE,
-                    {
-                      minimumFractionDigits: AppConfig.DECIMAL_PLACES,
-                      maximumFractionDigits: AppConfig.DECIMAL_PLACES,
-                    },
-                  )}{' '}
+                  {item.exchangeRate.toLocaleString(AppConfig.DEFAULT_LOCALE, {
+                    minimumFractionDigits: AppConfig.DECIMAL_PLACES,
+                    maximumFractionDigits: AppConfig.DECIMAL_PLACES,
+                  })}{' '}
                   {item.code}
                 </Text>
               </View>

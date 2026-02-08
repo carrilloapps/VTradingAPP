@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, InteractionManager } from 'react-native';
+import { View, StyleSheet, ScrollView, InteractionManager, TouchableOpacity } from 'react-native';
 import Share from 'react-native-share';
 import { Surface, Text, Icon } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -35,6 +35,20 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
   const viewShotRef = useRef<any>(null);
 
   const isPremium = !!user; // Usuario logueado = Premium
+
+  // Determine if we should auto-invert for border rates with small values
+  const isBorderRateWithSmallValue = rate.type === 'border' && rate.value < 1;
+  const defaultShowInverse = isBorderRateWithSmallValue;
+
+  // Use showInverse state or default behavior
+  const [showInverse, setShowInverse] = useState(defaultShowInverse);
+
+  // Calculate display values based on showInverse toggle
+  const displayValue = showInverse && rate.value !== 0 ? 1 / rate.value : rate.value;
+
+  const displayPair = showInverse ? `VES/${rate.code}` : `${rate.code}/VES`;
+
+  const displayCurrency = showInverse ? rate.code : 'Bs';
 
   const isPositive = (rate.changePercent || 0) > 0;
   const isNegative = (rate.changePercent || 0) < 0;
@@ -215,7 +229,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
   return (
     <View style={[styles.container, { backgroundColor: containerBgColor }]}>
       <UnifiedHeader
-        title={`${rate.code}/VES`}
+        title={displayPair}
         onBackPress={() => navigation.goBack()}
         rightActionIcon="share-variant"
         onActionPress={handleShare}
@@ -281,13 +295,19 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
           <View style={styles.priceContainer}>
             <View style={styles.currencyRow}>
               <Text variant="headlineLarge" style={[styles.priceLarge, { color: priceLargeColor }]}>
-                {rate.value.toLocaleString('es-VE', {
+                {displayValue.toLocaleString('es-VE', {
                   minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
+                  maximumFractionDigits: showInverse ? 6 : 2,
                 })}
               </Text>
               <View style={styles.bolivarIcon}>
-                <BolivarIcon size={28} color={theme.colors.onSurface} />
+                {showInverse ? (
+                  <Text style={[styles.currencyCode, { color: theme.colors.onSurface }]}>
+                    {displayCurrency}
+                  </Text>
+                ) : (
+                  <BolivarIcon size={28} color={theme.colors.onSurface} />
+                )}
               </View>
             </View>
 
@@ -299,6 +319,24 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
                   : '0.00%'}
               </Text>
             </View>
+
+            {/* Toggle button for border rates */}
+            {(rate.type === 'border' || isBorderRateWithSmallValue) && (
+              <TouchableOpacity
+                style={[styles.inverseButton, { backgroundColor: theme.colors.elevation.level2 }]}
+                onPress={() => setShowInverse(!showInverse)}
+                activeOpacity={0.7}
+              >
+                <MaterialCommunityIcons
+                  name="swap-vertical"
+                  size={16}
+                  color={theme.colors.primary}
+                />
+                <Text style={[styles.inverseButtonText, { color: theme.colors.primary }]}>
+                  Ver {showInverse ? `${rate.code}/VES` : `VES/${rate.code}`}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
@@ -597,6 +635,23 @@ const styles = StyleSheet.create({
   trendText: {
     fontWeight: '900',
     fontSize: 18,
+  },
+  inverseButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    marginTop: 8,
+    gap: 6,
+  },
+  inverseButtonText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  currencyCode: {
+    fontSize: 18,
+    fontWeight: '700',
   },
   sectionHeader: {
     marginTop: 24,
