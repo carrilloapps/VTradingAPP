@@ -47,6 +47,21 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
   // Calculate display values based on showInverse toggle
   const displayValue = showInverse && rate.value !== 0 ? 1 / rate.value : rate.value;
 
+  // Determine decimal places based on the ORIGINAL value (not inverted)
+  // This ensures consistency: small original values get more decimals
+  // For border rates, we always show more precision to reflect market volatility
+  const getDecimalPlaces = () => {
+    // Border rates always get more precision due to P2P market volatility
+    if (rate.type === 'border') {
+      const baseValue = rate.value; // Always use the original value
+      if (baseValue < 0.01) return 6; // Very small values (e.g., PEN: 0.006313)
+      if (baseValue < 1) return 4; // Values between 0.01 and 1
+      return 4; // Even large values get 4 decimals (e.g., COP: 6.7234)
+    }
+    // Non-border rates use standard precision
+    return 2;
+  };
+
   // For border rates, value represents VES/Foreign (e.g., 1 VES = 6.72 COP)
   // Without inversion: Shows VES/COP = 6.72 COP ("1 VES = 6.72 COP")
   // With inversion: Shows COP/VES = 0.149 VES ("1 COP = 0.149 VES")
@@ -309,18 +324,16 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
               <Text variant="headlineLarge" style={[styles.priceLarge, { color: priceLargeColor }]}>
                 {displayValue.toLocaleString('es-VE', {
                   minimumFractionDigits: 2,
-                  maximumFractionDigits: displayValue < 0.01 ? 6 : displayValue < 1 ? 4 : 2,
+                  maximumFractionDigits: getDecimalPlaces(),
                 })}
               </Text>
               <View style={styles.bolivarIcon}>
                 {displayCurrency === 'VES' ? (
                   <BolivarIcon size={28} color={theme.colors.onSurface} />
                 ) : isCustomSymbol ? (
-                  <CurrencyCodeIcon
-                    code={customSymbol!}
-                    size={28}
-                    color={theme.colors.onSurface}
-                  />
+                  <CurrencyCodeIcon code={customSymbol!} size={28} color={theme.colors.onSurface} />
+                ) : rate.iconName === 'currency-usd' && displayCurrency !== 'USD' ? (
+                  <Icon source="currency-usd" size={28} color={theme.colors.onSurface} />
                 ) : (
                   <Text style={[styles.currencyCode, { color: theme.colors.onSurface }]}>
                     {displayCurrency}
