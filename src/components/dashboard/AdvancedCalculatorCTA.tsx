@@ -14,7 +14,7 @@ const AdvancedCalculatorCTA: React.FC<AdvancedCalculatorCTAProps> = ({ spread })
   const navigation = useNavigation<any>();
 
   const handlePress = () => {
-    navigation.navigate('AdvancedCalculator');
+    navigation.navigate('AdvancedCalculator', { showBackButton: true });
   };
 
   // Get spread description based on sign

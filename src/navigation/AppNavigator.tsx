@@ -58,7 +58,7 @@ export type RootStackParamList = {
   Notifications: undefined;
   Settings: undefined;
   Widgets: undefined;
-  AdvancedCalculator: undefined;
+  AdvancedCalculator: { showBackButton?: boolean };
   BankRates: undefined;
   WebView: { url: string; title?: string };
   AddAlert: { editAlert?: UserAlert };

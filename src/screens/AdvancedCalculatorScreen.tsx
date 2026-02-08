@@ -137,10 +137,13 @@ interface CurrencyRow {
   exchangeRate: number;
 }
 
-const AdvancedCalculatorScreen = () => {
+const AdvancedCalculatorScreen = ({ route }: any) => {
   const theme = useTheme();
   const navigation = useNavigation<any>();
   const showToast = useToastStore(state => state.showToast);
+
+  // Get showBackButton parameter from route (only true when navigating from Home)
+  const showBackButton = route?.params?.showBackButton ?? false;
 
   // --- State ---
   const [rates, setRates] = useState<CurrencyRate[]>([]);
@@ -561,6 +564,7 @@ const AdvancedCalculatorScreen = () => {
         variant="simple"
         title="Calculadora"
         style={styles.header}
+        onBackPress={showBackButton ? () => navigation.goBack() : undefined}
         onActionPress={handleSaveConfig}
         onActionLongPress={handleRevertConfig}
         rightActionIcon="content-save"

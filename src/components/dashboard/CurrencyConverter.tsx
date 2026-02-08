@@ -71,7 +71,8 @@ const CurrencyConverter: React.FC = () => {
           type: 'info',
           action: {
             label: 'Ir a Avanzada',
-            onPress: () => navigation.navigate('AdvancedCalculator' as never),
+            onPress: () =>
+              (navigation as any).navigate('AdvancedCalculator', { showBackButton: true }),
           },
         },
       );
