@@ -137,6 +137,37 @@ interface CurrencyRow {
   exchangeRate: number;
 }
 
+// --- Helper Functions ---
+const formatLargeNumber = (value: number, locale: string = 'es-CO'): string => {
+  const absValue = Math.abs(value);
+  
+  if (absValue >= 1_000_000_000) {
+    // Billones (Billions)
+    return (value / 1_000_000_000).toLocaleString(locale, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }) + 'B';
+  } else if (absValue >= 1_000_000) {
+    // Millones (Millions)
+    return (value / 1_000_000).toLocaleString(locale, {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }) + 'M';
+  } else if (absValue >= 10_000) {
+    // Miles (Thousands) - solo para valores >= 10,000
+    return (value / 1_000).toLocaleString(locale, {
+      minimumFractionDigits: 1,
+      maximumFractionDigits: 1,
+    }) + 'K';
+  }
+  
+  // Formato normal para valores menores
+  return value.toLocaleString(locale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
+
 const AdvancedCalculatorScreen = ({ route }: any) => {
   const theme = useTheme();
   const navigation = useNavigation<any>();
@@ -262,19 +293,29 @@ const AdvancedCalculatorScreen = ({ route }: any) => {
           // Any fiat to Border: use USDT bridge
           // Get base rate in USDT terms
           const baseRateInVes = CurrencyService.getCalculatorRate(baseCurrency);
-          // Base/USDT = Base/VES × VES/USDT
-          const baseRateInUsdt = baseRateInVes * usdtInVes;
+          // Base/USDT = Base/VES ÷ VES/USDT
+          // Example: 1 EUR = 40 VES, 1 USDT = 544.83 VES → 1 EUR = 40/544.83 USDT
+          const baseRateInUsdt = baseRateInVes / usdtInVes;
           // 1 Base = (Target/USDT) / (Base/USDT)
           targetValue = amountVal * (rateObj.usdRate! / baseRateInUsdt);
           exchangeRate = rateObj.usdRate! / baseRateInUsdt;
         } else if (baseIsBorder && usdtInVes) {
           // Border to any fiat: use USDT bridge
-          const targetRateInVes = CurrencyService.getCalculatorRate(rateObj);
-          // Target/USDT = Target/VES × VES/USDT
-          const targetRateInUsdt = targetRateInVes * usdtInVes;
-          // 1 Base = (Target/USDT) / (Base/USDT)
-          targetValue = amountVal * (targetRateInUsdt / baseCurrency.usdRate!);
-          exchangeRate = targetRateInUsdt / baseCurrency.usdRate!;
+          // Special case for VES: it's the base currency of the system
+          if (rateObj.code === 'VES') {
+            // Direct conversion: 1 Border = VES/USDT ÷ Border/USDT
+            // Example: 1 COP = 544.83 VES/USDT ÷ 3660.306 COP/USDT = 0.1488 VES
+            targetValue = amountVal * (usdtInVes / baseCurrency.usdRate!);
+            exchangeRate = usdtInVes / baseCurrency.usdRate!;
+          } else {
+            const targetRateInVes = CurrencyService.getCalculatorRate(rateObj);
+            // Target/USDT = Target/VES ÷ VES/USDT
+            // Example: 1 EUR = 40 VES, 1 USDT = 544.83 VES → 1 EUR = 40/544.83 USDT
+            const targetRateInUsdt = targetRateInVes / usdtInVes;
+            // 1 Base = (Target/USDT) / (Base/USDT)
+            targetValue = amountVal * (targetRateInUsdt / baseCurrency.usdRate!);
+            exchangeRate = targetRateInUsdt / baseCurrency.usdRate!;
+          }
         } else {
           // Standard conversion using VES-based values (no border currencies involved)
           const baseRateValue = CurrencyService.getCalculatorRate(baseCurrency);
@@ -706,12 +747,7 @@ const AdvancedCalculatorScreen = ({ route }: any) => {
                     </View>
                   </View>
                   <Text variant="bodySmall" style={themeStyles.textSecondary}>
-                    1 {baseCurrency.code} ={' '}
-                    {item.exchangeRate.toLocaleString(AppConfig.DEFAULT_LOCALE, {
-                      minimumFractionDigits: AppConfig.DECIMAL_PLACES,
-                      maximumFractionDigits: AppConfig.DECIMAL_PLACES,
-                    })}{' '}
-                    {item.code}
+                    1 {baseCurrency.code} = {formatLargeNumber(item.exchangeRate, AppConfig.DEFAULT_LOCALE)} {item.code}
                   </Text>
                 </View>
 
@@ -723,10 +759,7 @@ const AdvancedCalculatorScreen = ({ route }: any) => {
                     numberOfLines={1}
                     adjustsFontSizeToFit
                   >
-                    {item.value.toLocaleString(AppConfig.DEFAULT_LOCALE, {
-                      minimumFractionDigits: AppConfig.DECIMAL_PLACES,
-                      maximumFractionDigits: AppConfig.DECIMAL_PLACES,
-                    })}
+                    {formatLargeNumber(item.value, AppConfig.DEFAULT_LOCALE)}
                   </Text>
                   <Text
                     variant="labelSmall"

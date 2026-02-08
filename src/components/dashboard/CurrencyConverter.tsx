@@ -198,13 +198,21 @@ const CurrencyConverter: React.FC = () => {
     } else if (toIsBorder && usdtInVes) {
       // Any fiat to Border: use USDT bridge
       const fromRateInVes = CurrencyService.getCalculatorRate(fromCurrency);
-      const fromRateInUsdt = fromRateInVes * usdtInVes;
+      // From/USDT = From/VES ÷ VES/USDT
+      const fromRateInUsdt = fromRateInVes / usdtInVes;
       result = val * (toCurrency.usdRate! / fromRateInUsdt);
     } else if (fromIsBorder && usdtInVes) {
       // Border to any fiat: use USDT bridge
-      const toRateInVes = CurrencyService.getCalculatorRate(toCurrency);
-      const toRateInUsdt = toRateInVes * usdtInVes;
-      result = val * (toRateInUsdt / fromCurrency.usdRate!);
+      // Special case for VES: it's the base currency of the system
+      if (toCurrency.code === 'VES') {
+        // Direct conversion: 1 Border = VES/USDT ÷ Border/USDT
+        result = val * (usdtInVes / fromCurrency.usdRate!);
+      } else {
+        const toRateInVes = CurrencyService.getCalculatorRate(toCurrency);
+        // To/USDT = To/VES ÷ VES/USDT
+        const toRateInUsdt = toRateInVes / usdtInVes;
+        result = val * (toRateInUsdt / fromCurrency.usdRate!);
+      }
     } else {
       // Standard conversion using VES-based values (no border currencies involved)
       const fromRateValue = CurrencyService.getCalculatorRate(fromCurrency);
@@ -242,12 +250,17 @@ const CurrencyConverter: React.FC = () => {
       rate = toCurrency.usdRate! / fromCurrency.usdRate!;
     } else if (toIsBorder && usdtInVes) {
       const fromRateInVes = CurrencyService.getCalculatorRate(fromCurrency);
-      const fromRateInUsdt = fromRateInVes * usdtInVes;
+      const fromRateInUsdt = fromRateInVes / usdtInVes;
       rate = toCurrency.usdRate! / fromRateInUsdt;
     } else if (fromIsBorder && usdtInVes) {
-      const toRateInVes = CurrencyService.getCalculatorRate(toCurrency);
-      const toRateInUsdt = toRateInVes * usdtInVes;
-      rate = toRateInUsdt / fromCurrency.usdRate!;
+      // Special case for VES
+      if (toCurrency.code === 'VES') {
+        rate = usdtInVes / fromCurrency.usdRate!;
+      } else {
+        const toRateInVes = CurrencyService.getCalculatorRate(toCurrency);
+        const toRateInUsdt = toRateInVes / usdtInVes;
+        rate = toRateInUsdt / fromCurrency.usdRate!;
+      }
     } else {
       // Standard calculation
       const fromRateValue = CurrencyService.getCalculatorRate(fromCurrency);
