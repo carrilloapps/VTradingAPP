@@ -18,6 +18,7 @@ export interface CurrencyRate {
   sellValue?: number;
   buyChangePercent?: number;
   sellChangePercent?: number;
+  spreadPercentage?: number; // Spread vs USDT P2P (only for USD from BCV)
 }
 
 // API Response Interfaces
@@ -51,6 +52,27 @@ interface ApiRateItem {
       direction: string;
     };
   };
+  spread?: {
+    value: number;
+    percentage: number;
+    p2p: {
+      average: {
+        value: number;
+        percentage: number;
+        usdtPrice: number;
+      };
+      buy: {
+        value: number;
+        percentage: number;
+        usdtPrice: number;
+      };
+      sell: {
+        value: number;
+        percentage: number;
+        usdtPrice: number;
+      };
+    };
+  };
 }
 
 interface ApiCryptoItem {
@@ -77,9 +99,20 @@ interface ApiCryptoItem {
 }
 
 interface ApiRatesResponse {
+  status: {
+    status: string;
+    date: string;
+    lastUpdate: string;
+  };
   rates: ApiRateItem[];
   crypto: ApiCryptoItem[];
   border: ApiRateItem[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 interface ApiBankRate {
@@ -225,7 +258,7 @@ export class CurrencyService {
                 iconName = 'currency-usd';
             }
 
-            rates.push({
+            const rateData: CurrencyRate = {
               id: String(index),
               code: apiRate.currency,
               name: name,
@@ -241,7 +274,16 @@ export class CurrencyService {
               sellValue: CurrencyService.parseRate(apiRate.rate?.sell),
               buyChangePercent: CurrencyService.parsePercentage(apiRate.change?.buy?.percent),
               sellChangePercent: CurrencyService.parsePercentage(apiRate.change?.sell?.percent),
-            });
+            };
+
+            // Add spread percentage if available (usually only for USD)
+            if (apiRate.spread?.p2p?.average?.percentage !== undefined) {
+              rateData.spreadPercentage = CurrencyService.parsePercentage(
+                apiRate.spread.p2p.average.percentage,
+              );
+            }
+
+            rates.push(rateData);
           });
         }
 

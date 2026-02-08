@@ -12,13 +12,40 @@ describe('CurrencyService', () => {
   });
 
   const mockApiResponse = {
-    source: 'BCV',
+    status: {
+      status: 'ABIERTO',
+      date: '2024-01-16T00:00:00.000Z',
+      lastUpdate: '2024-01-16T12:00:00.000Z',
+    },
     rates: [
-      { currency: 'EUR', rate: { average: 55.45 } },
-      { currency: 'USD', rate: { average: 36.58 } },
+      {
+        currency: 'EUR',
+        source: 'BCV',
+        rate: { average: 55.45 },
+        date: '2024-01-16T00:00:00.000Z',
+        previousDate: null,
+        change: { average: { value: 0, percent: 0, direction: 'stable' } },
+      },
+      {
+        currency: 'USD',
+        source: 'BCV',
+        rate: { average: 36.58, buy: 36.5, sell: 36.66 },
+        date: '2024-01-16T00:00:00.000Z',
+        previousDate: null,
+        change: { average: { value: 0, percent: 0, direction: 'stable' } },
+        spread: {
+          value: 0.5,
+          percentage: 1.37,
+          p2p: {
+            average: { value: 0.5, percentage: 1.37, usdtPrice: 37.08 },
+            buy: { value: 0.48, percentage: 1.31, usdtPrice: 36.98 },
+            sell: { value: 0.52, percentage: 1.42, usdtPrice: 37.18 },
+          },
+        },
+      },
     ],
-    publicationDate: '2024-01-16T00:00:00.000Z',
-    timestamp: 'string',
+    crypto: [],
+    border: [],
   };
 
   it('fetches and maps rates correctly', async () => {
@@ -50,6 +77,7 @@ describe('CurrencyService', () => {
     expect(rates[2].code).toBe('USD');
     expect(rates[2].value).toBe(36.58);
     expect(rates[2].name).toBe('USD/VES • BCV');
+    expect(rates[2].spreadPercentage).toBe(1.37); // New field from API
 
     expect(performanceService.startTrace).toHaveBeenCalledWith('get_currency_rates_service');
     expect(performanceService.stopTrace).toHaveBeenCalledWith(traceMock);

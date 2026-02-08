@@ -40,6 +40,13 @@ export const useHomeScreenData = () => {
   });
 
   const calculateSpread = useCallback((data: CurrencyRate[]): number | null => {
+    // Try to get spread from API first (USD from BCV should have it)
+    const usdRate = data.find(r => r.code === 'USD' && r.type === 'fiat' && r.source === 'BCV');
+    if (usdRate?.spreadPercentage !== undefined) {
+      return usdRate.spreadPercentage;
+    }
+
+    // Fallback: Calculate manually if not provided by API
     const usdRates = data.filter(r => (r.code === 'USD' || r.code === 'USDT') && r.value > 0);
 
     if (usdRates.length >= 2) {

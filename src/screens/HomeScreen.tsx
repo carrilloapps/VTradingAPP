@@ -89,12 +89,18 @@ const HomeScreen = ({ navigation }: any) => {
           })
           .join('\n');
 
+        const spreadText = spread
+          ? spread === 0
+            ? `⚖️ *Spread:* ${spread.toFixed(2)}% _(USDT es igual a USD en VES)_\n`
+            : spread < 0
+              ? `⚖️ *Spread:* ${Math.abs(spread).toFixed(2)}% _(USDT es mayor a USD en VES)_\n`
+              : `⚖️ *Spread:* ${Math.abs(spread).toFixed(2)}% _(USD es mayor a USDT en VES)_\n`
+          : '';
+
         const message =
           `📊 *VTrading - Reporte Diario*\n\n` +
           `${ratesDetails}\n` +
-          (spread
-            ? `⚖️ *Spread:* ${spread.toFixed(2)}% _(Diferencia USD vs USDT contra el VES)_\n`
-            : '') +
+          spreadText +
           `⏱️ _Act: ${lastUpdated}_\n\n` +
           `🌐 vtrading.app`;
 
@@ -139,11 +145,19 @@ const HomeScreen = ({ navigation }: any) => {
       const bcvVal = bcv?.value ? Number(bcv.value).toFixed(2) : 'N/A';
       const p2pVal = p2p?.value ? Number(p2p.value).toFixed(2) : 'N/A';
 
+      const spreadText = spread
+        ? spread === 0
+          ? `⚖️ *Spread:* ${spread.toFixed(2)}% (USDT es igual a USD en VES)\n`
+          : spread < 0
+            ? `⚖️ *Spread:* ${Math.abs(spread).toFixed(2)}% (USDT es mayor a USD en VES)\n`
+            : `⚖️ *Spread:* ${Math.abs(spread).toFixed(2)}% (USD es mayor a USDT en VES)\n`
+        : '';
+
       const message =
         `📊 *VTrading - Reporte Diario*\n\n` +
         (bcv ? `💵 *USD BCV:* ${bcvVal} Bs\n` : '') +
         (p2p ? `🔶 *USDT P2P:* ${p2pVal} Bs\n` : '') +
-        (spread ? `⚖️ *Spread:* ${spread.toFixed(2)}%\n` : '') +
+        spreadText +
         `⏱️ _Act: ${lastUpdated}_\n\n` +
         `🌐 vtrading.app`;
 
