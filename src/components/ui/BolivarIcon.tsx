@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { Text, StyleSheet } from 'react-native';
 
 interface BolivarIconProps {
   size?: number;
@@ -9,47 +9,24 @@ interface BolivarIconProps {
 
 export const BolivarIcon: React.FC<BolivarIconProps> = ({ size = 24, color, style }) => {
   return (
-    <View
+    <Text
       style={[
-        styles.container,
-        styles.iconBorder,
+        styles.text,
         {
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-          borderColor: color,
+          color: color,
+          fontSize: size * 0.9, // Adjust font size relative to size
         },
         style,
       ]}
     >
-      <Text
-        style={[
-          styles.text,
-          {
-            color: color,
-            fontSize: size * 0.55, // Adjust font size relative to container
-          },
-        ]}
-      >
-        Bs
-      </Text>
-    </View>
+      Bs
+    </Text>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  iconBorder: {
-    backgroundColor: 'transparent',
-    borderWidth: 1.5,
-  },
   text: {
     fontWeight: 'bold',
     textAlign: 'center',
-    includeFontPadding: false,
-    marginBottom: 1, // Visual correction for centering
   },
 });

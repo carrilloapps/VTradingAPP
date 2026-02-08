@@ -8,6 +8,7 @@ import { captureRef } from 'react-native-view-shot';
 import UnifiedHeader from '@/components/ui/UnifiedHeader';
 import { useAppTheme } from '@/theme/theme';
 import { BolivarIcon } from '@/components/ui/BolivarIcon';
+import { CurrencyCodeIcon } from '@/components/ui/CurrencyCodeIcon';
 import { useAuthStore } from '@/stores/authStore';
 import { useToastStore } from '@/stores/toastStore';
 import CustomDialog from '@/components/ui/CustomDialog';
@@ -46,12 +47,18 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
   // Calculate display values based on showInverse toggle
   const displayValue = showInverse && rate.value !== 0 ? 1 / rate.value : rate.value;
 
+  // For border rates, value = Foreign/VES (e.g., 1 VES = 6.72 COP)
+  // Without inversion: Shows Foreign/VES (e.g., "1 VES = 6.72 COP")
+  // With inversion: Shows VES/Foreign (e.g., "1 COP = 0.149 VES")
   const displayPair = showInverse ? `VES/${rate.code}` : `${rate.code}/VES`;
-
-  const displayCurrency = showInverse ? rate.code : 'Bs';
+  const displayCurrency = showInverse ? 'VES' : rate.code;
 
   const isPositive = (rate.changePercent || 0) > 0;
   const isNegative = (rate.changePercent || 0) < 0;
+
+  // Extract custom symbol if iconName follows 'SYMBOL:X' pattern
+  const isCustomSymbol = rate.iconName?.startsWith('SYMBOL:');
+  const customSymbol = isCustomSymbol ? rate.iconName?.replace('SYMBOL:', '') : null;
 
   const trendColor = isPositive
     ? theme.colors.trendUp
@@ -267,6 +274,8 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
             >
               {rate.iconName === 'Bs' ? (
                 <BolivarIcon size={40} color={theme.colors.primary} />
+              ) : isCustomSymbol ? (
+                <CurrencyCodeIcon code={customSymbol!} size={40} color={theme.colors.primary} />
               ) : (
                 <Icon
                   source={rate.iconName || 'currency-usd'}
@@ -301,12 +310,12 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
                 })}
               </Text>
               <View style={styles.bolivarIcon}>
-                {showInverse ? (
+                {displayCurrency === 'VES' ? (
+                  <BolivarIcon size={28} color={theme.colors.onSurface} />
+                ) : (
                   <Text style={[styles.currencyCode, { color: theme.colors.onSurface }]}>
                     {displayCurrency}
                   </Text>
-                ) : (
-                  <BolivarIcon size={28} color={theme.colors.onSurface} />
                 )}
               </View>
             </View>

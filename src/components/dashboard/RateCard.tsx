@@ -4,6 +4,7 @@ import { Text, useTheme, Surface, TouchableRipple } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { BolivarIcon } from '@/components/ui/BolivarIcon';
+import { CurrencyCodeIcon } from '@/components/ui/CurrencyCodeIcon';
 
 interface RateCardProps {
   title: string;
@@ -38,6 +39,10 @@ const RateCard: React.FC<RateCardProps> = ({
     changePercent === '0%' ||
     changePercent === '+0.00%' ||
     changePercent === '0.00%';
+
+  // Extract custom symbol if iconName follows 'SYMBOL:X' pattern
+  const isCustomSymbol = iconName.startsWith('SYMBOL:');
+  const customSymbol = isCustomSymbol ? iconName.replace('SYMBOL:', '') : null;
 
   const trendColor = isNeutral
     ? theme.colors.onSurfaceVariant
@@ -76,6 +81,8 @@ const RateCard: React.FC<RateCardProps> = ({
           <View style={iconContainerStyle}>
             {iconName === 'Bs' ? (
               <BolivarIcon color={finalIconColor} size={24} />
+            ) : isCustomSymbol ? (
+              <CurrencyCodeIcon code={customSymbol!} color={finalIconColor} size={24} />
             ) : (
               <MaterialCommunityIcons name={iconName} size={24} color={finalIconColor} />
             )}

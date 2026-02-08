@@ -262,7 +262,9 @@ const ExchangeRatesScreen = () => {
 
         const displayTitle = shouldInvertDisplay ? `${rate.code} / VES` : `VES / ${rate.code}`;
 
-        const displayCurrency = shouldInvertDisplay ? 'Bs' : rate.code;
+        // When not inverted: VES/COP = 6.71 COP (show foreign currency)
+        // When inverted: PEN/VES = 159.09 VES (show VES because value is in VES)
+        const displayCurrency = shouldInvertDisplay ? 'VES' : rate.code;
 
         return (
           <RateCard

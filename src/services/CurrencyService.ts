@@ -324,8 +324,17 @@ export class CurrencyService {
               case 'JPY':
                 iconName = 'currency-jpy';
                 break;
+              case 'PEN':
+                iconName = 'SYMBOL:S/.'; // Custom symbol for Peruvian Sol
+                break;
               case 'COP':
-                iconName = 'currency-usd';
+                iconName = 'currency-usd'; // Colombia Peso uses $ symbol
+                break;
+              case 'CLP':
+                iconName = 'currency-usd'; // Chile Peso uses $ symbol
+                break;
+              case 'ARS':
+                iconName = 'currency-usd'; // Argentina Peso uses $ symbol
                 break;
               case 'BRL':
                 iconName = 'currency-brl';
@@ -337,7 +346,7 @@ export class CurrencyService {
                 iconName = 'Bs';
                 break;
               default:
-                iconName = 'currency-usd';
+                iconName = 'currency-usd'; // Default to $ symbol
             }
 
             // Calculate values if average is missing (common in P2P/Border rates)
