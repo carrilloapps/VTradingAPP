@@ -24,6 +24,8 @@ import UnifiedHeader from '@/components/ui/UnifiedHeader';
 import MarketStatus from '@/components/ui/MarketStatus';
 import { AppConfig } from '@/constants/AppConfig';
 import { analyticsService, ANALYTICS_EVENTS } from '@/services/firebase/AnalyticsService';
+import { BolivarIcon } from '@/components/ui/BolivarIcon';
+import { CurrencyCodeIcon } from '@/components/ui/CurrencyCodeIcon';
 
 // --- Components ---
 const KeypadButton = ({
@@ -227,21 +229,22 @@ const AdvancedCalculatorScreen = () => {
         // Special handling for border currencies with usdRate
         const baseIsBorder = baseCurrency.type === 'border' && baseCurrency.usdRate;
         const targetIsBorder = rateObj.type === 'border' && rateObj.usdRate;
-        const baseIsUSD = baseCurrency.code === 'USD';
-        const targetIsUSD = rateObj.code === 'USD';
+        const baseIsUSDorUSDT = baseCurrency.code === 'USD' || baseCurrency.code === 'USDT';
+        const targetIsUSDorUSDT = rateObj.code === 'USD' || rateObj.code === 'USDT';
 
-        if (baseIsUSD && targetIsBorder) {
-          // USD to Border: direct multiplication by usdRate
+        if (baseIsUSDorUSDT && targetIsBorder) {
+          // USD/USDT to Border: direct multiplication by usdRate from API
           targetValue = amountVal * rateObj.usdRate!;
           exchangeRate = rateObj.usdRate!;
-        } else if (baseIsBorder && targetIsUSD) {
-          // Border to USD: direct division by usdRate
+        } else if (baseIsBorder && targetIsUSDorUSDT) {
+          // Border to USD/USDT: direct division by usdRate from API
           targetValue = amountVal / baseCurrency.usdRate!;
           exchangeRate = 1 / baseCurrency.usdRate!;
         } else if (baseIsBorder && targetIsBorder) {
-          // Border to Border: cross rate using usdRates
-          targetValue = amountVal * (baseCurrency.usdRate! / rateObj.usdRate!);
-          exchangeRate = baseCurrency.usdRate! / rateObj.usdRate!;
+          // Border to Border: cross rate using usdRates from API
+          // Example: 1 PEN (3.42 PEN/USD) → COP = 1 * (3660.31 COP/USD) / (3.42 PEN/USD)
+          targetValue = amountVal * (rateObj.usdRate! / baseCurrency.usdRate!);
+          exchangeRate = rateObj.usdRate! / baseCurrency.usdRate!;
         } else {
           // Standard conversion using VES-based values
           const baseRateValue = CurrencyService.getCalculatorRate(baseCurrency);
@@ -637,77 +640,87 @@ const AdvancedCalculatorScreen = () => {
               progressBackgroundColor={theme.colors.elevation.level3}
             />
           }
-          renderItem={({ item }) => (
-            <View style={[styles.targetRow, themeStyles.targetRow]}>
-              {/* Left Side: Icon */}
-              <View style={[styles.iconBox, themeStyles.iconBox]}>
-                {item.rateObj.iconName === 'Bs' ? (
-                  <Text style={[styles.bsIconText, { color: theme.colors.primary }]}>Bs</Text>
-                ) : (
-                  <MaterialCommunityIcons
-                    name={item.rateObj.iconName || 'currency-usd'}
-                    size={24}
-                    color={theme.colors.primary}
-                  />
-                )}
-              </View>
+          renderItem={({ item }) => {
+            const isCustomSymbol = item.rateObj.iconName?.startsWith('SYMBOL:');
+            const customSymbol =
+              isCustomSymbol && item.rateObj.iconName
+                ? item.rateObj.iconName.replace('SYMBOL:', '')
+                : null;
 
-              {/* Middle: Code & Name */}
-              <View style={styles.middleCol}>
-                <View style={styles.codeRow}>
-                  <Text variant="titleMedium" style={[styles.codeText, themeStyles.textPrimary]}>
+            return (
+              <View style={[styles.targetRow, themeStyles.targetRow]}>
+                {/* Left Side: Icon */}
+                <View style={[styles.iconBox, themeStyles.iconBox]}>
+                  {item.rateObj.iconName === 'Bs' ? (
+                    <BolivarIcon color={theme.colors.primary} size={24} />
+                  ) : isCustomSymbol ? (
+                    <CurrencyCodeIcon code={customSymbol!} color={theme.colors.primary} size={24} />
+                  ) : (
+                    <MaterialCommunityIcons
+                      name={item.rateObj.iconName || 'currency-usd'}
+                      size={24}
+                      color={theme.colors.primary}
+                    />
+                  )}
+                </View>
+
+                {/* Middle: Code & Name */}
+                <View style={styles.middleCol}>
+                  <View style={styles.codeRow}>
+                    <Text variant="titleMedium" style={[styles.codeText, themeStyles.textPrimary]}>
+                      {item.code}
+                    </Text>
+                    <View style={[styles.nameBadge, themeStyles.nameBadge]}>
+                      <Text style={[styles.nameText, themeStyles.nameText]}>{item.name}</Text>
+                    </View>
+                  </View>
+                  <Text variant="bodySmall" style={themeStyles.textSecondary}>
+                    1 {baseCurrency.code} ={' '}
+                    {item.exchangeRate.toLocaleString(AppConfig.DEFAULT_LOCALE, {
+                      minimumFractionDigits: AppConfig.DECIMAL_PLACES,
+                      maximumFractionDigits: AppConfig.DECIMAL_PLACES,
+                    })}{' '}
                     {item.code}
                   </Text>
-                  <View style={[styles.nameBadge, themeStyles.nameBadge]}>
-                    <Text style={[styles.nameText, themeStyles.nameText]}>{item.name}</Text>
-                  </View>
                 </View>
-                <Text variant="bodySmall" style={themeStyles.textSecondary}>
-                  1 {baseCurrency.code} ={' '}
-                  {item.exchangeRate.toLocaleString(AppConfig.DEFAULT_LOCALE, {
-                    minimumFractionDigits: AppConfig.DECIMAL_PLACES,
-                    maximumFractionDigits: AppConfig.DECIMAL_PLACES,
-                  })}{' '}
-                  {item.code}
-                </Text>
-              </View>
 
-              {/* Right Side: Value & Label */}
-              <View style={styles.rightCol}>
-                <Text
-                  variant="headlineSmall"
-                  style={[styles.valueText, themeStyles.textPrimary]}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                >
-                  {item.value.toLocaleString(AppConfig.DEFAULT_LOCALE, {
-                    minimumFractionDigits: AppConfig.DECIMAL_PLACES,
-                    maximumFractionDigits: AppConfig.DECIMAL_PLACES,
-                  })}
-                </Text>
-                <Text
-                  variant="labelSmall"
-                  style={[
-                    styles.labelText,
-                    item.rateObj.type === 'crypto'
-                      ? themeStyles.warningText
-                      : themeStyles.successText,
-                  ]}
-                >
-                  {item.rateObj.type === 'crypto' ? 'Cripto activo' : 'Conversión directa'}
-                </Text>
-              </View>
+                {/* Right Side: Value & Label */}
+                <View style={styles.rightCol}>
+                  <Text
+                    variant="headlineSmall"
+                    style={[styles.valueText, themeStyles.textPrimary]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                  >
+                    {item.value.toLocaleString(AppConfig.DEFAULT_LOCALE, {
+                      minimumFractionDigits: AppConfig.DECIMAL_PLACES,
+                      maximumFractionDigits: AppConfig.DECIMAL_PLACES,
+                    })}
+                  </Text>
+                  <Text
+                    variant="labelSmall"
+                    style={[
+                      styles.labelText,
+                      item.rateObj.type === 'crypto'
+                        ? themeStyles.warningText
+                        : themeStyles.successText,
+                    ]}
+                  >
+                    {item.rateObj.type === 'crypto' ? 'Cripto activo' : 'Conversión directa'}
+                  </Text>
+                </View>
 
-              {/* Close Button (Absolute positioned) */}
-              <TouchableOpacity
-                onPress={() => removeCurrency(item.code)}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                style={[styles.closeButton, themeStyles.errorContainer]}
-              >
-                <MaterialCommunityIcons name="close" size={14} color={theme.colors.error} />
-              </TouchableOpacity>
-            </View>
-          )}
+                {/* Close Button (Absolute positioned) */}
+                <TouchableOpacity
+                  onPress={() => removeCurrency(item.code)}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  style={[styles.closeButton, themeStyles.errorContainer]}
+                >
+                  <MaterialCommunityIcons name="close" size={14} color={theme.colors.error} />
+                </TouchableOpacity>
+              </View>
+            );
+          }}
           ListFooterComponent={renderListFooter}
         />
 
