@@ -218,6 +218,10 @@ const AdvancedCalculatorScreen = () => {
   const targetRows = useMemo(() => {
     const amountVal = parseFloat(baseAmount.replace(/\./g, '').replace(',', '.')) || 0;
 
+    // Get USDT rate for bridge calculations
+    const usdtRate = rates.find(r => r.code === 'USDT');
+    const usdtInVes = usdtRate ? usdtRate.value : null; // VES per USDT
+
     return targetCodes
       .map(code => {
         const rateObj = rates.find(r => r.code === code);
@@ -226,27 +230,50 @@ const AdvancedCalculatorScreen = () => {
         let targetValue = 0;
         let exchangeRate = 0;
 
-        // Special handling for border currencies with usdRate
+        // Determine if currencies are border type with usdRate
         const baseIsBorder = baseCurrency.type === 'border' && baseCurrency.usdRate;
         const targetIsBorder = rateObj.type === 'border' && rateObj.usdRate;
         const baseIsUSDorUSDT = baseCurrency.code === 'USD' || baseCurrency.code === 'USDT';
         const targetIsUSDorUSDT = rateObj.code === 'USD' || rateObj.code === 'USDT';
 
+        // Apply USDT bridge principle for all conversions involving border currencies
+        // Formula: 1 Base = (Target/USDT) / (Base/USDT)
+        // Example: 1 VES = 3660.306 COP/USDT / 544.83 VES/USDT = 6.72 COP
+
         if (baseIsUSDorUSDT && targetIsBorder) {
           // USD/USDT to Border: direct multiplication by usdRate from API
+          // 1 USD = Target/USDT (because 1 USD ≈ 1 USDT)
           targetValue = amountVal * rateObj.usdRate!;
           exchangeRate = rateObj.usdRate!;
         } else if (baseIsBorder && targetIsUSDorUSDT) {
           // Border to USD/USDT: direct division by usdRate from API
+          // 1 Border = 1 / (Border/USDT)
           targetValue = amountVal / baseCurrency.usdRate!;
           exchangeRate = 1 / baseCurrency.usdRate!;
         } else if (baseIsBorder && targetIsBorder) {
           // Border to Border: cross rate using usdRates from API
-          // Example: 1 PEN (3.42 PEN/USD) → COP = 1 * (3660.31 COP/USD) / (3.42 PEN/USD)
+          // 1 Base = (Target/USDT) / (Base/USDT)
           targetValue = amountVal * (rateObj.usdRate! / baseCurrency.usdRate!);
           exchangeRate = rateObj.usdRate! / baseCurrency.usdRate!;
+        } else if (targetIsBorder && usdtInVes) {
+          // Any fiat to Border: use USDT bridge
+          // Get base rate in USDT terms
+          const baseRateInVes = CurrencyService.getCalculatorRate(baseCurrency);
+          // Base/USDT = Base/VES × VES/USDT
+          const baseRateInUsdt = baseRateInVes * usdtInVes;
+          // 1 Base = (Target/USDT) / (Base/USDT)
+          targetValue = amountVal * (rateObj.usdRate! / baseRateInUsdt);
+          exchangeRate = rateObj.usdRate! / baseRateInUsdt;
+        } else if (baseIsBorder && usdtInVes) {
+          // Border to any fiat: use USDT bridge
+          const targetRateInVes = CurrencyService.getCalculatorRate(rateObj);
+          // Target/USDT = Target/VES × VES/USDT
+          const targetRateInUsdt = targetRateInVes * usdtInVes;
+          // 1 Base = (Target/USDT) / (Base/USDT)
+          targetValue = amountVal * (targetRateInUsdt / baseCurrency.usdRate!);
+          exchangeRate = targetRateInUsdt / baseCurrency.usdRate!;
         } else {
-          // Standard conversion using VES-based values
+          // Standard conversion using VES-based values (no border currencies involved)
           const baseRateValue = CurrencyService.getCalculatorRate(baseCurrency);
           const targetRateValue = CurrencyService.getCalculatorRate(rateObj);
           targetValue = CurrencyService.convertCrossRate(amountVal, baseRateValue, targetRateValue);
