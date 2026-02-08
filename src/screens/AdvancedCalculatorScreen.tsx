@@ -140,27 +140,33 @@ interface CurrencyRow {
 // --- Helper Functions ---
 const formatLargeNumber = (value: number, locale: string = 'es-CO'): string => {
   const absValue = Math.abs(value);
-  
+
   if (absValue >= 1_000_000_000) {
     // Billones (Billions)
-    return (value / 1_000_000_000).toLocaleString(locale, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }) + 'B';
+    return (
+      (value / 1_000_000_000).toLocaleString(locale, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }) + 'B'
+    );
   } else if (absValue >= 1_000_000) {
     // Millones (Millions)
-    return (value / 1_000_000).toLocaleString(locale, {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
-    }) + 'M';
+    return (
+      (value / 1_000_000).toLocaleString(locale, {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }) + 'M'
+    );
   } else if (absValue >= 10_000) {
     // Miles (Thousands) - solo para valores >= 10,000
-    return (value / 1_000).toLocaleString(locale, {
-      minimumFractionDigits: 1,
-      maximumFractionDigits: 1,
-    }) + 'K';
+    return (
+      (value / 1_000).toLocaleString(locale, {
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1,
+      }) + 'K'
+    );
   }
-  
+
   // Formato normal para valores menores
   return value.toLocaleString(locale, {
     minimumFractionDigits: 2,
@@ -747,7 +753,8 @@ const AdvancedCalculatorScreen = ({ route }: any) => {
                     </View>
                   </View>
                   <Text variant="bodySmall" style={themeStyles.textSecondary}>
-                    1 {baseCurrency.code} = {formatLargeNumber(item.exchangeRate, AppConfig.DEFAULT_LOCALE)} {item.code}
+                    1 {baseCurrency.code} ={' '}
+                    {formatLargeNumber(item.exchangeRate, AppConfig.DEFAULT_LOCALE)} {item.code}
                   </Text>
                 </View>
 
