@@ -266,6 +266,17 @@ const ExchangeRatesScreen = () => {
         // When inverted: PEN/VES = 159.09 VES (show VES because value is in VES)
         const displayCurrency = shouldInvertDisplay ? 'VES' : rate.code;
 
+        // Debug: Log CNY specifically
+        if (rate.code === 'CNY') {
+          console.log('[ExchangeRatesScreen] CNY Debug:', {
+            code: rate.code,
+            type: rate.type,
+            shouldInvert: shouldInvertDisplay,
+            displayCurrency,
+            fullValue: `${displayValue} ${displayCurrency}`,
+          });
+        }
+
         return (
           <RateCard
             title={displayTitle}
