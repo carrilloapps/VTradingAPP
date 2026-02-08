@@ -159,7 +159,7 @@ const CurrencyConverter: React.FC = () => {
     }
   }, [availableToRates, fromCurrency, toCurrency]);
 
-  // Conversion Logic
+  // Conversion Logic with USDT bridge for border currencies
   const convertedValue = useMemo(() => {
     if (!fromCurrency || !toCurrency || !amount) return '0,00';
 
@@ -169,31 +169,96 @@ const CurrencyConverter: React.FC = () => {
 
     if (isNaN(val)) return '0,00';
 
-    // Logic: Convert FROM -> VES -> TO
-    // Important: rates are price in VES.
-    // 1 USD = 36.5 VES (value = 36.5)
-    // 1 EUR = 40.0 VES (value = 40.0)
-    // To convert USD -> EUR:
-    // USD amount * USD rate / EUR rate
-    // 100 * 36.5 / 40.0 = 91.25 EUR
-    const amountInVES = val * fromCurrency.value;
-    const result = amountInVES / toCurrency.value;
+    // Get USDT rate for bridge calculations
+    const usdtRate = rates.find(r => r.code === 'USDT');
+    const usdtInVes = usdtRate ? usdtRate.value : null; // VES per USDT
+
+    let result = 0;
+
+    // Determine if currencies are border type with usdRate
+    const fromIsBorder = fromCurrency.type === 'border' && fromCurrency.usdRate;
+    const toIsBorder = toCurrency.type === 'border' && toCurrency.usdRate;
+    const fromIsUSDorUSDT = fromCurrency.code === 'USD' || fromCurrency.code === 'USDT';
+    const toIsUSDorUSDT = toCurrency.code === 'USD' || toCurrency.code === 'USDT';
+
+    // Apply USDT bridge principle for all conversions involving border currencies
+    // Formula: 1 From = (To/USDT) / (From/USDT)
+    // Example: 1 VES = 3660.306 COP/USDT / 544.83 VES/USDT = 6.72 COP
+
+    if (fromIsUSDorUSDT && toIsBorder) {
+      // USD/USDT to Border: direct multiplication by usdRate from API
+      result = val * toCurrency.usdRate!;
+    } else if (fromIsBorder && toIsUSDorUSDT) {
+      // Border to USD/USDT: direct division by usdRate from API
+      result = val / fromCurrency.usdRate!;
+    } else if (fromIsBorder && toIsBorder) {
+      // Border to Border: cross rate using usdRates from API
+      result = val * (toCurrency.usdRate! / fromCurrency.usdRate!);
+    } else if (toIsBorder && usdtInVes) {
+      // Any fiat to Border: use USDT bridge
+      const fromRateInVes = CurrencyService.getCalculatorRate(fromCurrency);
+      const fromRateInUsdt = fromRateInVes * usdtInVes;
+      result = val * (toCurrency.usdRate! / fromRateInUsdt);
+    } else if (fromIsBorder && usdtInVes) {
+      // Border to any fiat: use USDT bridge
+      const toRateInVes = CurrencyService.getCalculatorRate(toCurrency);
+      const toRateInUsdt = toRateInVes * usdtInVes;
+      result = val * (toRateInUsdt / fromCurrency.usdRate!);
+    } else {
+      // Standard conversion using VES-based values (no border currencies involved)
+      const fromRateValue = CurrencyService.getCalculatorRate(fromCurrency);
+      const toRateValue = CurrencyService.getCalculatorRate(toCurrency);
+      result = CurrencyService.convertCrossRate(val, fromRateValue, toRateValue);
+    }
 
     return result.toLocaleString(AppConfig.DEFAULT_LOCALE, {
       minimumFractionDigits: AppConfig.DECIMAL_PLACES,
       maximumFractionDigits: AppConfig.DECIMAL_PLACES,
     });
-  }, [amount, fromCurrency, toCurrency]);
+  }, [amount, fromCurrency, toCurrency, rates]);
 
   const exchangeRate = useMemo(() => {
     if (!fromCurrency || !toCurrency) return '0.00';
-    // Calculate rate: 1 FROM = X TO
-    const rate = fromCurrency.value / toCurrency.value;
+
+    // Get USDT rate for bridge calculations
+    const usdtRate = rates.find(r => r.code === 'USDT');
+    const usdtInVes = usdtRate ? usdtRate.value : null;
+
+    let rate = 0;
+
+    // Determine if currencies are border type with usdRate
+    const fromIsBorder = fromCurrency.type === 'border' && fromCurrency.usdRate;
+    const toIsBorder = toCurrency.type === 'border' && toCurrency.usdRate;
+    const fromIsUSDorUSDT = fromCurrency.code === 'USD' || fromCurrency.code === 'USDT';
+    const toIsUSDorUSDT = toCurrency.code === 'USD' || toCurrency.code === 'USDT';
+
+    // Calculate rate: 1 FROM = X TO using same logic as conversion
+    if (fromIsUSDorUSDT && toIsBorder) {
+      rate = toCurrency.usdRate!;
+    } else if (fromIsBorder && toIsUSDorUSDT) {
+      rate = 1 / fromCurrency.usdRate!;
+    } else if (fromIsBorder && toIsBorder) {
+      rate = toCurrency.usdRate! / fromCurrency.usdRate!;
+    } else if (toIsBorder && usdtInVes) {
+      const fromRateInVes = CurrencyService.getCalculatorRate(fromCurrency);
+      const fromRateInUsdt = fromRateInVes * usdtInVes;
+      rate = toCurrency.usdRate! / fromRateInUsdt;
+    } else if (fromIsBorder && usdtInVes) {
+      const toRateInVes = CurrencyService.getCalculatorRate(toCurrency);
+      const toRateInUsdt = toRateInVes * usdtInVes;
+      rate = toRateInUsdt / fromCurrency.usdRate!;
+    } else {
+      // Standard calculation
+      const fromRateValue = CurrencyService.getCalculatorRate(fromCurrency);
+      const toRateValue = CurrencyService.getCalculatorRate(toCurrency);
+      rate = fromRateValue / toRateValue;
+    }
+
     return rate.toLocaleString(AppConfig.DEFAULT_LOCALE, {
       minimumFractionDigits: AppConfig.DECIMAL_PLACES,
       maximumFractionDigits: AppConfig.DECIMAL_PLACES,
     });
-  }, [fromCurrency, toCurrency]);
+  }, [fromCurrency, toCurrency, rates]);
 
   const handleSwap = () => {
     setFromCurrency(toCurrency);
