@@ -9,6 +9,7 @@ import { AppConfig } from '@/constants/AppConfig';
 export interface DeepLinkRoute {
   type: 'discover' | 'article' | 'category' | 'tag';
   slug?: string;
+  id?: string;
   originalUrl: string;
 }
 
@@ -76,6 +77,17 @@ class DeepLinkService {
 
       // Cleanup path (remove leading/trailing slashes)
       path = path.replace(/^\/+|\/+$/g, '');
+
+      // Handle query parameters (like WordPress shortlinks ?p=ID)
+      const [pathOnly, queryString] = path.split('?');
+      if (queryString) {
+        const pMatch = queryString.match(/(?:^|&)p=([0-9]+)(?:&|$)/);
+        if (pMatch && pMatch[1]) {
+          return { type: 'article', id: pMatch[1], originalUrl: url };
+        }
+      }
+
+      path = pathOnly;
 
       // Strict validation: Only allow alphanumeric, hyphens, and slashes for basic routing
       // Prevents complex injections, parent directory traversal (..), and special chars
@@ -164,7 +176,10 @@ class DeepLinkService {
 
     switch (route.type) {
       case 'article':
-        navigationRef.navigate('ArticleDetail', { slug: route.slug });
+        navigationRef.navigate('ArticleDetail', {
+          slug: route.slug,
+          id: route.id,
+        });
         break;
       case 'category':
         navigationRef.navigate('Main', {

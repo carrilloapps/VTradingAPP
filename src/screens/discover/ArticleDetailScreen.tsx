@@ -163,9 +163,10 @@ const ArticleDetailScreen = () => {
   // Safe width calculation for header content
   // Logic to merge incoming params or fetched data
   // Logic to prioritize fetched data (full article) over incoming params (partial article)
-  const params = route.params as { article?: FormattedPost; slug?: string };
+  const params = route.params as { article?: FormattedPost; slug?: string; id?: string };
   const incomingArticle = articleData || params?.article;
   const slug = params?.slug;
+  const articleId = params?.id;
 
   const article = incomingArticle
     ? {
@@ -199,13 +200,13 @@ const ArticleDetailScreen = () => {
 
       // Always fetch full article data to ensure we have the complete content,
       // as list views might only contain excerpts or truncated content.
-      if (slug || currentArticle?.id) {
+      if (slug || articleId || currentArticle?.id) {
         setIsLoading(true); // Always show skeleton while fetching full data
         setError(null);
         try {
           const fetchedArticle = slug
             ? await wordPressService.getPostBySlug(slug)
-            : await wordPressService.getPostById(Number(currentArticle?.id), true); // Force bypass cache for detail
+            : await wordPressService.getPostById(Number(articleId || currentArticle?.id), true); // Force bypass cache for detail
 
           if (fetchedArticle) {
             setArticleData(fetchedArticle);
