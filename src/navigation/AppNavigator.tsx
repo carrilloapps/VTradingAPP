@@ -322,24 +322,55 @@ const AppNavigator = () => {
           };
         }
 
-        const config = remoteConfigService.getJson<RemoteConfigStrings>('strings');
+        // Try to get from 'settings' first as requested, fallback to 'strings'
+        const settingsJson = remoteConfigService.getJson<any>('settings');
+        const stringsJson = remoteConfigService.getJson<any>('strings');
 
-        if (config && config.forceUpdate) {
+        // Strategy: find an object that has either 'forceUpdate' OR 'build'
+        const rawConfig = settingsJson || stringsJson;
+
+        SafeLogger.info('[ForceUpdate] Raw config received:', {
+          hasSettings: !!settingsJson,
+          hasStrings: !!stringsJson,
+          keys: rawConfig ? Object.keys(rawConfig) : []
+        });
+
+        // Normalize config to extract forceUpdate data
+        let updateData = null;
+        if (rawConfig) {
+          if (rawConfig.forceUpdate) {
+            updateData = rawConfig.forceUpdate;
+          } else if (rawConfig.build !== undefined) {
+            // Flat structure
+            updateData = rawConfig;
+          }
+        }
+
+        if (updateData) {
           const currentBuild = parseInt(DeviceInfo.getBuildNumber(), 10);
           const currentVersion = DeviceInfo.getVersion();
-          const { build: requiredBuild, minVersion, storeUrl } = config.forceUpdate;
+          const requiredBuild = parseInt(updateData.build || '0', 10);
+          const minVersion = updateData.minVersion;
+          const storeUrl = updateData.storeUrl;
+
+          SafeLogger.info('[ForceUpdate] Comparing:', {
+            current: { build: currentBuild, version: currentVersion },
+            required: { build: requiredBuild, minVersion: minVersion }
+          });
 
           let updateRequired = false;
 
-          // 1. Check build number (Integer comparison)
+          // 1. Build check
           if (currentBuild < requiredBuild) {
             updateRequired = true;
+            SafeLogger.info('[ForceUpdate] Build too old');
           }
 
-          // 2. Check semantic version (Version string comparison)
+          // 2. Version check
           if (!updateRequired && minVersion) {
             if (VersionUtils.isLower(currentVersion, minVersion)) {
               updateRequired = true;
+              SafeLogger.info('[ForceUpdate] Version too old');
             }
           }
 
@@ -347,6 +378,8 @@ const AppNavigator = () => {
             setShowForceUpdate(true);
             setForceUpdateUrl(storeUrl);
           }
+        } else {
+          SafeLogger.info('[ForceUpdate] No valid update data found in settings/strings');
         }
       } catch (e) {
         // Fail silently on config check, don't block app unless confirmed
