@@ -14,6 +14,7 @@ import { useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DeviceInfo from 'react-native-device-info';
 
+import { VersionUtils } from '@/utils/VersionUtils';
 import SafeLogger from '@/utils/safeLogger';
 import HomeScreen from '@/screens/HomeScreen';
 import SettingsScreen from '@/screens/SettingsScreen';
@@ -296,6 +297,7 @@ const AppNavigator = () => {
   const [isReady, setIsReady] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showForceUpdate, setShowForceUpdate] = useState(false);
+  const [forceUpdateUrl, setForceUpdateUrl] = useState<string | undefined>(undefined);
   const routeNameRef = React.useRef<string | undefined>(undefined);
 
   React.useEffect(() => {
@@ -316,6 +318,7 @@ const AppNavigator = () => {
           forceUpdate?: {
             build: number;
             minVersion?: string;
+            storeUrl?: string;
           };
         }
 
@@ -323,10 +326,26 @@ const AppNavigator = () => {
 
         if (config && config.forceUpdate) {
           const currentBuild = parseInt(DeviceInfo.getBuildNumber(), 10);
-          const requiredBuild = config.forceUpdate.build;
+          const currentVersion = DeviceInfo.getVersion();
+          const { build: requiredBuild, minVersion, storeUrl } = config.forceUpdate;
 
+          let updateRequired = false;
+
+          // 1. Check build number (Integer comparison)
           if (currentBuild < requiredBuild) {
+            updateRequired = true;
+          }
+
+          // 2. Check semantic version (Version string comparison)
+          if (!updateRequired && minVersion) {
+            if (VersionUtils.isLower(currentVersion, minVersion)) {
+              updateRequired = true;
+            }
+          }
+
+          if (updateRequired) {
             setShowForceUpdate(true);
+            setForceUpdateUrl(storeUrl);
           }
         }
       } catch (e) {
@@ -368,7 +387,7 @@ const AppNavigator = () => {
     return (
       <React.Fragment>
         <StatusBar backgroundColor="transparent" translucent barStyle="light-content" />
-        <ForceUpdateModal visible={true} />
+        <ForceUpdateModal visible={true} storeUrl={forceUpdateUrl} />
       </React.Fragment>
     );
   }
