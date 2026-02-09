@@ -440,7 +440,7 @@ const ArticleDetailScreen = () => {
     }
   };
 
-  /* 
+  /*
   const headerOpacity = scrollY.interpolate({
     inputRange: [0, 200],
     outputRange: [0, 1],
@@ -458,11 +458,11 @@ const ArticleDetailScreen = () => {
           <head>
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             <style>
-              body { 
-                font-family: -apple-system, Roboto, sans-serif; 
-                font-size: 17px; 
-                line-height: 1.6; 
-                color: ${textColor}; 
+              body {
+                font-family: -apple-system, Roboto, sans-serif;
+                font-size: 17px;
+                line-height: 1.6;
+                color: ${textColor};
                 background-color: transparent;
                 margin: 0;
                 padding: 0;
@@ -471,7 +471,7 @@ const ArticleDetailScreen = () => {
               p { margin-bottom: 16px; font-size: 17px; }
               a { color: ${linkColor}; text-decoration: none; font-weight: 600; }
               img { max-width: 100%; height: auto; border-radius: ${theme.roundness * 3}px; margin: 16px 0; background-color: ${theme.colors.surfaceVariant}; }
-              blockquote { 
+              blockquote {
                 border-left: 4px solid ${theme.colors.primary};
                 padding: 4px 0 4px 16px;
                 margin: 20px 0;
@@ -909,43 +909,6 @@ const ArticleDetailScreen = () => {
                   )
                 : null}
           </View>
-
-          {/* Summary / Lead Paragraph Section */}
-          {article.seoDescription && (
-            <View
-              style={[
-                styles.summaryBox,
-                {
-                  backgroundColor: theme.colors.elevation.level1,
-                  borderColor: theme.colors.outlineVariant,
-                  borderRadius: theme.roundness * 4,
-                },
-              ]}
-            >
-              <View
-                style={[
-                  styles.summaryLabel,
-                  {
-                    backgroundColor: theme.colors.primary,
-                    borderRadius: theme.roundness,
-                  },
-                ]}
-              >
-                <Text
-                  variant="labelSmall"
-                  style={[styles.summaryLabelText, { color: theme.colors.onPrimary }]}
-                >
-                  IMPORTANTE
-                </Text>
-              </View>
-              <Text
-                variant="bodyMedium"
-                style={[styles.summaryText, { color: theme.colors.onSurfaceVariant }]}
-              >
-                {article.seoDescription}
-              </Text>
-            </View>
-          )}
 
           {/* SEO/Tags */}
           {article.tags && article.tags.length > 0 && (

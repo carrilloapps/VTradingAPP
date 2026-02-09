@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { View, StyleSheet, ScrollView, InteractionManager, TouchableOpacity } from 'react-native';
 import Share from 'react-native-share';
 import { Surface, Text, Icon } from 'react-native-paper';
@@ -29,25 +29,29 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
     analyticsService.logScreenView('CurrencyDetail', currencyId);
   }, [currencyId]);
 
+  // Extract a safe currency code for display and logic
+  const safeCode = useMemo(() => {
+    const rawCode = (rate.code || '').trim();
+    if (rawCode) return rawCode.toUpperCase();
+
+    // Fallback: extract from name (e.g., "USDT • P2P" or "COP/VES • BCV")
+    const fromName = rate.name?.split(/[•/]/)[0]?.trim();
+    return fromName ? fromName.toUpperCase() : 'USD';
+  }, [rate.code, rate.name]);
+
   // Load currency history
   useEffect(() => {
     const loadHistory = async () => {
-      if (!rate.code) {
-        setHistoryError('Código de moneda no disponible');
-        setHistoryLoading(false);
-        return;
-      }
-
       try {
         setHistoryLoading(true);
         setHistoryError(null);
 
-        const history = await rateHistoryService.getCurrencyHistory(rate.code, 1, 30);
+        const history = await rateHistoryService.getCurrencyHistory(safeCode, 1, 30);
         setHistoryData(history.history);
       } catch (error) {
         observabilityService.captureError(error, {
           context: 'CurrencyDetailScreen.loadHistory',
-          currencyCode: rate.code,
+          currencyCode: safeCode,
         });
         setHistoryError('No se pudo cargar el historial');
       } finally {
@@ -58,7 +62,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
     InteractionManager.runAfterInteractions(() => {
       loadHistory();
     });
-  }, [rate.code]);
+  }, [safeCode]);
 
   // Zustand store selector
   const user = useAuthStore(state => state.user); // Changed from useAuth
@@ -106,9 +110,9 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
   // With inversion: Shows COP/VES = 0.149 VES ("1 COP = 0.149 VES")
   // For PEN where value = 0.00628: VES/PEN = 0.00628 means "1 VES = 0.00628 PEN"
   // Inverted: PEN/VES = 159.24 means "1 PEN = 159.24 VES"
-  const displayPair = showInverse ? `${rate.code}/VES` : `VES/${rate.code}`;
+  const displayPair = showInverse ? `${safeCode}/VES` : `VES/${safeCode}`;
   // The displayCurrency is always the denominator (right side) of the pair
-  const displayCurrency = showInverse ? 'VES' : rate.code;
+  const displayCurrency = showInverse ? 'VES' : safeCode;
 
   const isPositive = (rate.changePercent || 0) > 0;
   const isNegative = (rate.changePercent || 0) < 0;
@@ -130,15 +134,21 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
 
   const trendIcon = isPositive ? 'trending-up' : isNegative ? 'trending-down' : 'minus';
 
+  const marketStatus = useMemo(() => {
+    if (rate.type === 'crypto' || rate.type === 'border') {
+      return 'P2P ACTIVO';
+    }
+    return StocksService.isMarketOpen() ? 'ABIERTO' : 'CERRADO';
+  }, [rate.type]);
+
   const getDynamicShareMessage = useCallback(
     (format: '1:1' | '16:9' | 'text' = '1:1') => {
-      const pair = rate.name.split(' • ')[0] || `${rate.code}/VES`;
+      const pair = rate.name.split(' • ')[0] || `${safeCode}/VES`;
       const changeSign =
         (rate.changePercent || 0) > 0 ? '📈' : (rate.changePercent || 0) < 0 ? '📉' : '📊';
       const changeText = rate.changePercent
         ? (rate.changePercent > 0 ? '+' : '') + rate.changePercent.toFixed(2) + '%'
         : '0.00%';
-      const marketStatus = StocksService.isMarketOpen() ? 'ABIERTO' : 'CERRADO';
 
       if (format === '16:9') {
         // Optimized for Stories: Punchy, direct, optimized for visual overlays
@@ -169,7 +179,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
       }
 
       message +=
-        `🕒 *Estado del mercado:* ${rate.source !== 'P2P' ? marketStatus : 'ABIERTO'}\n` +
+        `🕒 *Estado del mercado:* ${marketStatus}\n` +
         `📍 *Act:* ${new Date(rate.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}\n\n` +
         `🌐 vtrading.app`;
       return message;
@@ -202,7 +212,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
 
       analyticsService.logShare(
         'currency',
-        rate.code,
+        safeCode,
         shareFormat === '1:1' ? 'image_square' : 'image_story',
       );
     } catch (e) {
@@ -210,7 +220,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
         observabilityService.captureError(e, {
           context: 'CurrencyDetailScreen.handleShareImage',
           action: 'share_currency_image',
-          currencyCode: rate.code,
+          currencyCode: safeCode,
           format: shareFormat,
           errorMessage: (e as any).message,
         });
@@ -245,13 +255,13 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
       const message = getDynamicShareMessage('text');
 
       await Share.open({ message });
-      analyticsService.logShare('currency', rate.code, 'text');
+      analyticsService.logShare('currency', safeCode, 'text');
     } catch (e) {
       if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
         observabilityService.captureError(e, {
           context: 'CurrencyDetailScreen.handleShareText',
           action: 'share_currency_text',
-          currencyCode: rate.code,
+          currencyCode: safeCode,
           errorMessage: (e as any).message,
         });
         showToast('Error al compartir texto', 'error');
@@ -400,7 +410,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
                   color={theme.colors.primary}
                 />
                 <Text style={[styles.inverseButtonText, { color: theme.colors.primary }]}>
-                  Ver {showInverse ? `VES/${rate.code}` : `${rate.code}/VES`}
+                  Ver {showInverse ? `VES/${safeCode}` : `${safeCode}/VES`}
                 </Text>
               </TouchableOpacity>
             )}
@@ -505,19 +515,16 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
             style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]}
             elevation={0}
             accessible={true}
-            accessibilityLabel={`Última actualización: ${new Date(rate.lastUpdated).toLocaleTimeString()}`}
+            accessibilityLabel={`Estado del mercado: ${marketStatus}`}
           >
             <View style={styles.statHeader}>
-              <MaterialCommunityIcons name="clock-outline" size={18} color={theme.colors.primary} />
+              <MaterialCommunityIcons name="store-outline" size={18} color={theme.colors.primary} />
               <Text variant="labelSmall" style={[styles.statLabelBold, { color: statLabelColor }]}>
-                ÚLT. ACT.
+                ESTADO MERCADO
               </Text>
             </View>
             <Text variant="titleMedium" style={[styles.statValueBold, { color: statValueColor }]}>
-              {new Date(rate.lastUpdated).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
+              {marketStatus}
             </Text>
           </Surface>
         </View>
@@ -539,7 +546,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
           data={historyData}
           loading={historyLoading}
           error={historyError}
-          currencyCode={rate.code}
+          currencyCode={safeCode}
         />
       </ScrollView>
 
@@ -553,7 +560,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
         })}
         isPremium={isPremium}
         aspectRatio={shareFormat}
-        status={StocksService.isMarketOpen() ? 'ABIERTO' : 'CERRADO'}
+        status={marketStatus}
       />
 
       <CustomDialog
@@ -568,7 +575,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
           variant="bodyMedium"
           style={[styles.shareDialogText, { color: shareDialogTextColor }]}
         >
-          Comparte el valor de {rate.code} en tus redes sociales
+          Comparte el valor de {safeCode} en tus redes sociales
         </Text>
 
         <View style={styles.shareButtonsGap}>
