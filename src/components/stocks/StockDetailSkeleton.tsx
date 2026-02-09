@@ -7,7 +7,6 @@ import UnifiedHeader from '@/components/ui/UnifiedHeader';
 
 const StockDetailSkeleton = ({ onBackPress }: { onBackPress: () => void }) => {
   const theme = useTheme();
-  const r = theme.roundness;
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>

@@ -87,7 +87,7 @@ const RateCard: React.FC<RateCardProps> = ({
               <MaterialCommunityIcons name={iconName} size={24} color={finalIconColor} />
             )}
           </View>
-          <View>
+          <View style={styles.textContainer}>
             <Text variant="titleMedium" style={[styles.titleText, textPrimaryStyle]}>
               {title}
             </Text>
@@ -139,6 +139,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
+    flex: 1,
+    flexShrink: 1,
   },
   iconContainer: {
     width: 48,
@@ -146,9 +148,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 16,
+    flexShrink: 0,
+  },
+  textContainer: {
+    flex: 1,
+    flexShrink: 1,
   },
   rightContent: {
     alignItems: 'flex-end',
+    flexShrink: 0,
   },
   titleText: {
     fontWeight: 'bold',

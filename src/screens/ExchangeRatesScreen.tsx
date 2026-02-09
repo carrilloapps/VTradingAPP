@@ -252,6 +252,12 @@ const ExchangeRatesScreen = () => {
         // Example: PEN with value = 0.00628 (1 VES = 0.00628 PEN)
         // Inverted: displays as "PEN/VES = 159.24 VES" (1 PEN = 159.24 VES)
         const shouldInvertDisplay = rate.type === 'border' && rate.value < 1;
+
+        // Ensure rate.code is not empty, undefined, or whitespace-only
+        const rawCode = rate.code || '';
+        const trimmedCode = rawCode.trim();
+        const safeCode = trimmedCode || rate.name?.split(/[•/]/)[0]?.trim() || 'UNKNOWN';
+
         const displayValue = shouldInvertDisplay
           ? (1 / rate.value).toLocaleString('es-VE', {
               minimumFractionDigits: 2,
@@ -262,12 +268,12 @@ const ExchangeRatesScreen = () => {
               maximumFractionDigits: 2,
             });
 
-        const displayTitle = shouldInvertDisplay ? `${rate.code} / VES` : `VES / ${rate.code}`;
+        const displayTitle = shouldInvertDisplay ? `${safeCode} / VES` : `VES / ${safeCode}`;
 
         // displayCurrency is always the denominator (right side) of the pair
         // Not inverted: VES/COP = 6.71 COP (shows foreign currency)
         // Inverted: PEN/VES = 159.09 VES (shows VES because value is in VES)
-        const displayCurrency = shouldInvertDisplay ? 'VES' : rate.code;
+        const displayCurrency = shouldInvertDisplay ? 'VES' : safeCode;
 
         return (
           <RateCard

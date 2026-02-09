@@ -259,9 +259,21 @@ export class CurrencyService {
                 iconName = 'currency-usd';
             }
 
+            // Validate currency code
+            const validCode = apiRate.currency?.trim();
+            if (!validCode) {
+              SafeLogger.error(`[CurrencyService] Skipping fiat rate with empty code:`, {
+                index,
+                currency: apiRate.currency,
+                name,
+                apiRateData: apiRate,
+              });
+              return;
+            }
+
             const rateData: CurrencyRate = {
               id: String(index),
-              code: apiRate.currency,
+              code: validCode.toUpperCase(),
               name: name,
               value: CurrencyService.parseRate(apiRate.rate?.average),
               changePercent: CurrencyService.parsePercentage(
@@ -392,9 +404,21 @@ export class CurrencyService {
               changePercent = CurrencyService.parsePercentage((buyPercent + sellPercent) / 2);
             }
 
+            // Validate currency code
+            const validCode = apiRate.currency?.trim();
+            if (!validCode) {
+              SafeLogger.error(`[CurrencyService] Skipping border rate with empty code:`, {
+                index,
+                currency: apiRate.currency,
+                name,
+                apiRateData: apiRate,
+              });
+              return;
+            }
+
             rates.push({
               id: `border_${index}`,
-              code: apiRate.currency,
+              code: validCode.toUpperCase(),
               name: name,
               value: finalValue,
               changePercent: changePercent,
@@ -417,8 +441,25 @@ export class CurrencyService {
 
         // 2. Process Crypto Rates
         if (response.crypto && Array.isArray(response.crypto)) {
-          response.crypto.forEach(cryptoItem => {
-            const currencyCode = cryptoItem.currency.toUpperCase();
+          response.crypto.forEach((cryptoItem, cryptoIndex) => {
+            // EARLY VALIDATION: Check currency before ANY processing
+            const rawCurrency = cryptoItem.currency;
+            if (!rawCurrency || typeof rawCurrency !== 'string' || rawCurrency.trim() === '') {
+              SafeLogger.error(
+                `[CurrencyService] EARLY SKIP - Empty/invalid currency at index ${cryptoIndex}:`,
+                {
+                  cryptoIndex,
+                  rawCurrency,
+                  typeOf: typeof rawCurrency,
+                  cryptoItemKeys: Object.keys(cryptoItem),
+                  source: cryptoItem.source,
+                  rate: cryptoItem.rate,
+                },
+              );
+              return; // Skip this item immediately
+            }
+
+            const currencyCode = rawCurrency.toUpperCase();
             let name = currencyCode;
             let iconName = 'currency-bitcoin';
 
@@ -488,8 +529,8 @@ export class CurrencyService {
             const avgChange = (buyPercent + sellPercent) / 2;
 
             rates.push({
-              id: `${cryptoItem.currency.toLowerCase()}_p2p`,
-              code: cryptoItem.currency,
+              id: `${currencyCode.toLowerCase()}_p2p`,
+              code: currencyCode,
               name: name,
               value: CurrencyService.parseRate(avgValue),
               changePercent: CurrencyService.parsePercentage(avgChange),
