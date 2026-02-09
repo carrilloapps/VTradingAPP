@@ -80,7 +80,7 @@ class DeepLinkService {
       // Strict validation: Only allow alphanumeric, hyphens, and slashes for basic routing
       // Prevents complex injections, parent directory traversal (..), and special chars
       // Allow alphanumeric, -, _, /
-      if (!/^[a-zA-Z0-9\-_/]+$/.test(path)) {
+      if (path && !/^[a-zA-Z0-9\-_/]+$/.test(path)) {
         // Suspicious path detected
         observabilityService.captureError(new Error('Invalid DeepLink characters'), {
           context: 'DeepLinkService.parseDeepLink',

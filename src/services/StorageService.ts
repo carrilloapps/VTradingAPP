@@ -1,7 +1,7 @@
 import { createMMKV, MMKV } from 'react-native-mmkv';
 
 import { observabilityService } from '@/services/ObservabilityService';
-import { InteractionManager } from 'react-native';
+import { runAfterInteractions } from '@/utils/TaskUtils';
 import { KeyService } from '@/services/KeyService';
 import SafeLogger from '@/utils/safeLogger';
 
@@ -137,8 +137,7 @@ class StorageService {
   }
 
   private setJSON<T>(key: string, value: T): void {
-    // Use InteractionManager to defer heavy serialization/writes
-    InteractionManager.runAfterInteractions(() => {
+    runAfterInteractions(() => {
       try {
         getStorage().set(key, JSON.stringify(value));
       } catch (e) {

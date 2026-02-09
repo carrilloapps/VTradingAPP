@@ -1,9 +1,10 @@
 import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
-import { View, StyleSheet, ScrollView, InteractionManager, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import Share from 'react-native-share';
 import { Surface, Text, Icon } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { captureRef } from 'react-native-view-shot';
+import { runAfterInteractions } from '@/utils/TaskUtils';
 
 import UnifiedHeader from '@/components/ui/UnifiedHeader';
 import { useAppTheme } from '@/theme/theme';
@@ -53,7 +54,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
       }
     };
 
-    InteractionManager.runAfterInteractions(() => {
+    runAfterInteractions(() => {
       loadHistory();
     });
   }, [safeCode]);
@@ -230,7 +231,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
   useEffect(() => {
     if (sharing && viewShotRef.current) {
       // Wait for next frame/interaction to ensure layout is updated
-      const task = InteractionManager.runAfterInteractions(() => {
+      const task = runAfterInteractions(() => {
         captureShareImage();
       });
       return () => task.cancel();
