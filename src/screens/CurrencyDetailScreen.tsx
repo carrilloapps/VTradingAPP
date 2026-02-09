@@ -14,9 +14,12 @@ import { useToastStore } from '@/stores/toastStore';
 import CustomDialog from '@/components/ui/CustomDialog';
 import CustomButton from '@/components/ui/CustomButton';
 import CurrencyShareGraphic from '@/components/dashboard/CurrencyShareGraphic';
+import CurrencyHistoryChart from '@/components/dashboard/CurrencyHistoryChart';
 import { observabilityService } from '@/services/ObservabilityService';
 import { analyticsService } from '@/services/firebase/AnalyticsService';
 import { StocksService } from '@/services/StocksService';
+import { rateHistoryService } from '@/services/RateHistoryService';
+import type { HistoryDataPoint } from '@/services/RateHistoryService';
 
 const CurrencyDetailScreen = ({ route, navigation }: any) => {
   const theme = useAppTheme();
@@ -26,6 +29,37 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
     analyticsService.logScreenView('CurrencyDetail', currencyId);
   }, [currencyId]);
 
+  // Load currency history
+  useEffect(() => {
+    const loadHistory = async () => {
+      if (!rate.code) {
+        setHistoryError('Código de moneda no disponible');
+        setHistoryLoading(false);
+        return;
+      }
+
+      try {
+        setHistoryLoading(true);
+        setHistoryError(null);
+
+        const history = await rateHistoryService.getCurrencyHistory(rate.code, 1, 30);
+        setHistoryData(history.history);
+      } catch (error) {
+        observabilityService.captureError(error, {
+          context: 'CurrencyDetailScreen.loadHistory',
+          currencyCode: rate.code,
+        });
+        setHistoryError('No se pudo cargar el historial');
+      } finally {
+        setHistoryLoading(false);
+      }
+    };
+
+    InteractionManager.runAfterInteractions(() => {
+      loadHistory();
+    });
+  }, [rate.code]);
+
   // Zustand store selector
   const user = useAuthStore(state => state.user); // Changed from useAuth
   const showToast = useToastStore(state => state.showToast);
@@ -34,6 +68,11 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
   const [shareFormat, setShareFormat] = useState<'1:1' | '16:9'>('1:1');
   const [sharing, setSharing] = useState(false);
   const viewShotRef = useRef<any>(null);
+
+  // History data state
+  const [historyData, setHistoryData] = useState<HistoryDataPoint[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyError, setHistoryError] = useState<string | null>(null);
 
   const isPremium = !!user; // Usuario logueado = Premium
 
@@ -241,9 +280,6 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
   const statCardBorder = theme.colors.outlineVariant;
   const statLabelColor = theme.colors.onSurfaceVariant;
   const statValueColor = theme.colors.onSurface;
-  const chartPlaceholderBg = theme.colors.elevation.level1;
-  const chartPlaceholderBorder = theme.colors.outlineVariant;
-  const chartPlaceholderTextColor = theme.colors.onSurfaceVariant;
   const shareDialogTextColor = theme.colors.onSurfaceVariant;
 
   const a11yPriceLabel =
@@ -499,28 +535,12 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
             EVOLUCIÓN TEMPORAL
           </Text>
         </View>
-        <Surface
-          style={[
-            styles.chartPlaceholder,
-            {
-              backgroundColor: chartPlaceholderBg,
-              borderColor: chartPlaceholderBorder,
-            },
-          ]}
-          elevation={0}
-        >
-          <MaterialCommunityIcons
-            name="chart-bell-curve-cumulative"
-            size={48}
-            color={theme.colors.outline}
-          />
-          <Text
-            variant="bodyMedium"
-            style={[styles.chartPlaceholderText, { color: chartPlaceholderTextColor }]}
-          >
-            Gráfico detallado próximamente
-          </Text>
-        </Surface>
+        <CurrencyHistoryChart
+          data={historyData}
+          loading={historyLoading}
+          error={historyError}
+          currencyCode={rate.code}
+        />
       </ScrollView>
 
       {/* Sharing Assets */}
@@ -715,14 +735,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
   },
-  chartPlaceholder: {
-    height: 200,
-    borderRadius: 24,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-  },
   priceLarge: {
     fontWeight: '900',
     letterSpacing: -1,
@@ -736,10 +748,6 @@ const styles = StyleSheet.create({
   },
   statValueBold: {
     fontWeight: '800',
-  },
-  chartPlaceholderText: {
-    marginTop: 12,
-    fontWeight: '600',
   },
   shareDialogText: {
     textAlign: 'center',
