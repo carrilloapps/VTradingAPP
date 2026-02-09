@@ -52,7 +52,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	
+
 	<!-- Deep Link Support for Article Sharing -->
 	<key>CFBundleURLTypes</key>
 	<array>
@@ -65,11 +65,12 @@
 			<string>com.vtrading.app</string>
 		</dict>
 	</array>
-	
+
 	<!-- Universal Links Support -->
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:discover.vtrading.app</string>
+		<string>applinks:vtrading.app</string>
 	</array>
 </dict>
 </plist>

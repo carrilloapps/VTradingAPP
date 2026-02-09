@@ -1,0 +1,14 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.vtradingapp",
+      "sha256_cert_fingerprints": [
+        "FA:C6:17:45:DC:09:03:78:6F:B9:ED:E6:2A:96:2B:39:9F:73:48:F0:BB:6F:89:9B:83:32:66:75:91:03:3B:9C",
+        "E2:A1:67:AF:6E:CD:74:08:09:52:B7:0F:82:AF:9D:C7:6A:85:43:7E:A2:0B:77:3A:B3:6D:EF:95:2C:40:8E:02",
+        "30:28:CC:D3:02:59:10:FB:76:7A:18:19:1D:56:40:3A:9B:BF:E2:4D:EC:06:76:3F:9F:9E:ED:0B:99:90:F7:DC"
+      ]
+    }
+  }
+]

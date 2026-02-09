@@ -18,6 +18,9 @@ class DeepLinkService {
   private readonly HOST = AppConfig.DEEP_LINK_HOST || 'discover.vtrading.app';
   private readonly BASE_URL = `https://${this.HOST}`;
 
+  // List of all valid hosts for deep linking
+  private readonly VALID_HOSTS = ['vtrading.app', 'discover.vtrading.app'];
+
   /**
    * Generate a deep link URL for an article
    */
@@ -49,12 +52,26 @@ class DeepLinkService {
       if (!url) return null;
 
       let path = '';
+
+      // Handle custom scheme: vtrading://
       if (url.startsWith(this.SCHEME)) {
         path = url.replace(this.SCHEME, '');
-      } else if (url.startsWith(this.BASE_URL)) {
-        path = url.replace(this.BASE_URL, '');
       } else {
-        return null;
+        // Handle HTTPS URLs from any valid host
+        let matchedHost = false;
+        for (const host of this.VALID_HOSTS) {
+          const hostUrl = `https://${host}`;
+          if (url.startsWith(hostUrl)) {
+            path = url.replace(hostUrl, '');
+            matchedHost = true;
+            break;
+          }
+        }
+
+        // If no valid host matched, return null
+        if (!matchedHost) {
+          return null;
+        }
       }
 
       // Cleanup path (remove leading/trailing slashes)
