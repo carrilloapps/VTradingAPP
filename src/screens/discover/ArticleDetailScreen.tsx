@@ -139,6 +139,7 @@ const ArticleDetailScreen = () => {
   const route = useRoute();
   const insets = useSafeAreaInsets();
   const [webViewHeight, setWebViewHeight] = React.useState(100);
+  SafeLogger.info('[ArticleDetailScreen] Route params:', route.params);
   const [comments, setComments] = React.useState<FormattedComment[]>([]);
   const [commentsLoading, setCommentsLoading] = React.useState(false);
   const [commentsEnabled, setCommentsEnabled] = React.useState(false);
@@ -256,7 +257,7 @@ const ArticleDetailScreen = () => {
       }
     };
     loadArticleAndRelated();
-  }, [slug, params?.article?.id, params?.article]); // Depend on id to refetch if switching articles via related section
+  }, [slug, articleId, params?.article?.id, params?.article]); // Depend on id to refetch if switching articles via related section
 
   React.useEffect(() => {
     if (article?.id) {
