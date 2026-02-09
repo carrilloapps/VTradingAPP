@@ -10,12 +10,13 @@ import {
 import { Text, Icon } from 'react-native-paper';
 import PagerView from 'react-native-pager-view';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
 import LinearGradient from 'react-native-linear-gradient';
+import * as Clarity from '@microsoft/react-native-clarity';
 
 import { storageService } from '@/services/StorageService';
 import { fcmService } from '@/services/firebase/FCMService';
 import { analyticsService, ANALYTICS_EVENTS } from '@/services/firebase/AnalyticsService';
+import { anonymousIdentityService } from '@/services/AnonymousIdentityService';
 import { useAppTheme } from '@/theme';
 import { useToastStore } from '@/stores/toastStore';
 import { observabilityService } from '@/services/ObservabilityService';
@@ -38,7 +39,6 @@ interface OnboardingScreenProps {
 const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
   const theme = useAppTheme();
   const isDark = theme.dark;
-  const navigation = useNavigation();
   const showToast = useToastStore(state => state.showToast);
   const insets = useSafeAreaInsets();
   const { width, height } = useWindowDimensions();
@@ -214,17 +214,35 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ onFinish }) => {
   };
 
   const finishOnboarding = async () => {
-    SafeLogger.log('[Onboarding] Finishing onboarding...');
-    analyticsService.logEvent(ANALYTICS_EVENTS.ONBOARDING_COMPLETE);
-    await storageService.setHasSeenOnboarding(true);
-    if (onFinish) {
-      onFinish();
-    } else {
-      // Fallback if no callback provided (should not happen in current flow)
-      navigation.reset({
-        index: 0,
-        routes: [{ name: 'Auth' as never }],
+    try {
+      SafeLogger.log('[Onboarding] Finishing onboarding...');
+
+      // ═══════════════════════════════════════════════════════════
+      // NUEVO: Inicializar UUID anónimo
+      // ═══════════════════════════════════════════════════════════
+
+      const anonymousId = anonymousIdentityService.getAnonymousId();
+      SafeLogger.info('[Onboarding] Anonymous ID initialized:', anonymousId);
+
+      // Configurar UUID en servicios de analytics
+      analyticsService.setUserId(anonymousId);
+      Clarity.setCustomUserId(anonymousId);
+
+      // Registrar evento de onboarding completado con UUID
+      analyticsService.logEvent(ANALYTICS_EVENTS.ONBOARDING_COMPLETE, {
+        user_id: anonymousId,
+        completed_at: Date.now(),
       });
+
+      await storageService.setHasSeenOnboarding(true);
+      SafeLogger.log('[Onboarding] Onboarding completed');
+
+      if (onFinish) {
+        onFinish();
+      }
+    } catch (error) {
+      SafeLogger.error('[Onboarding] Error finishing onboarding:', error);
+      showToast('Hubo un problema al iniciar. Por favor, reinicia la app.', 'error');
     }
   };
 

@@ -122,6 +122,31 @@ describe('DeepLinkService', () => {
     });
   });
 
+  it('parses links from main domain (vtrading.app)', () => {
+    expect(deepLinkService.parseDeepLink('https://vtrading.app/categoria/tech')).toEqual({
+      type: 'category',
+      slug: 'tech',
+      originalUrl: 'https://vtrading.app/categoria/tech',
+    });
+
+    expect(deepLinkService.parseDeepLink('https://vtrading.app/tag/bitcoin')).toEqual({
+      type: 'tag',
+      slug: 'bitcoin',
+      originalUrl: 'https://vtrading.app/tag/bitcoin',
+    });
+
+    expect(deepLinkService.parseDeepLink('https://vtrading.app/my-article-slug')).toEqual({
+      type: 'article',
+      slug: 'my-article-slug',
+      originalUrl: 'https://vtrading.app/my-article-slug',
+    });
+
+    expect(deepLinkService.parseDeepLink('https://vtrading.app/discover')).toEqual({
+      type: 'discover',
+      originalUrl: 'https://vtrading.app/discover',
+    });
+  });
+
   it('rejects invalid deep links', () => {
     expect(deepLinkService.parseDeepLink('https://evil.com/slug')).toBeNull();
     expect(deepLinkService.parseDeepLink('vtrading://bad path')).toBeNull();

@@ -78,9 +78,11 @@ describe('useHomeScreenData', () => {
     value: 36.5,
     changePercent: 0.5,
     type: 'fiat',
+    source: 'BCV',
     lastUpdated: '2024-01-01T00:00:00Z',
     buyValue: 35.5,
     sellValue: 37.5,
+    spreadPercentage: -29.798, // Spread from API
   };
 
   const usdtRate: CurrencyRate = {
@@ -144,7 +146,8 @@ describe('useHomeScreenData', () => {
     await waitFor(() => {
       expect(result.current.rates.length).toBe(2);
       expect(result.current.featuredRates.length).toBe(2);
-      expect(result.current.spread).toBeGreaterThan(0);
+      expect(result.current.spread).toBeDefined();
+      expect(typeof result.current.spread).toBe('number');
       expect(result.current.isMarketOpen).toBe(true);
     });
 
@@ -154,7 +157,8 @@ describe('useHomeScreenData', () => {
     expect(firstFeatured.chartPath).toContain('M0');
   });
 
-  it('calculates spread when both USD and USDT are present', async () => {
+  it('uses spread from API when available', async () => {
+    // Base rate has spreadPercentage from API (negative value)
     const rates = [baseRate, usdtRate];
 
     mockCurrencyService.subscribe.mockImplementation((callback: (data: CurrencyRate[]) => void) => {
@@ -173,6 +177,37 @@ describe('useHomeScreenData', () => {
     const { result } = renderHook(() => useHomeScreenData());
 
     await waitFor(() => {
+      // Should use the API spread value directly (can be negative)
+      expect(result.current.spread).toBe(-29.798);
+      // The UI components will handle Math.abs() for display
+    });
+  });
+
+  it('calculates spread when both USD and USDT are present (fallback)', async () => {
+    // Create USD without spreadPercentage to test fallback
+    const usdWithoutSpread: CurrencyRate = {
+      ...baseRate,
+      spreadPercentage: undefined,
+    };
+    const rates = [usdWithoutSpread, usdtRate];
+
+    mockCurrencyService.subscribe.mockImplementation((callback: (data: CurrencyRate[]) => void) => {
+      callback(rates);
+      return jest.fn();
+    });
+
+    mockStocksService.subscribe.mockImplementation((callback: (data: StockData[]) => void) => {
+      callback(sampleStocks);
+      return jest.fn();
+    });
+
+    mockCurrencyService.getRates.mockResolvedValueOnce(rates);
+    mockStocksService.getStocks.mockResolvedValueOnce(sampleStocks);
+
+    const { result } = renderHook(() => useHomeScreenData());
+
+    await waitFor(() => {
+      // Should calculate manually: ((37 - 36.5) / 36.5) * 100
       expect(result.current.spread).toBeCloseTo(((37 - 36.5) / 36.5) * 100, 6);
     });
   });

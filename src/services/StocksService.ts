@@ -12,11 +12,23 @@ export interface StockData {
   color: string;
   volume?: string;
   opening?: number;
-  iconUrl?: string; // Add iconUrl support
+  iconUrl?: string;
   category: string;
   changeAmount?: number;
   volumeShares?: number;
   volumeAmount?: number;
+  orderBook?: {
+    bid?: {
+      price: number;
+      volume: number;
+    };
+    ask?: {
+      price: number;
+      volume: number;
+    };
+    negotiated?: number;
+  };
+  lastUpdate?: string;
 }
 
 interface ApiStock {
@@ -35,9 +47,21 @@ interface ApiStock {
         amount: number;
       };
   openingPrice?: number;
-  category?: string; // Changed from sector to category
+  category?: string;
+  orderBook?: {
+    bid?: {
+      price: number;
+      volume: number;
+    };
+    ask?: {
+      price: number;
+      volume: number;
+    };
+    negotiated?: number;
+  };
   meta?: {
     iconUrl?: string;
+    lastUpdate?: string;
   };
 }
 
@@ -54,7 +78,7 @@ interface ApiStocksResponse {
     isOpen: boolean;
   };
   status?: {
-    state: string; // "ABIERTO" | "CERRADO"
+    state: 'ABIERTO' | 'CERRADO' | 'PRE-APERTURA';
     date: string;
     lastUpdate: string;
   };
@@ -213,6 +237,8 @@ export class StocksService {
       opening: this.parsePrice(item.openingPrice),
       iconUrl: item.meta?.iconUrl,
       category: item.category || 'Otros',
+      orderBook: item.orderBook,
+      lastUpdate: item.meta?.lastUpdate,
     };
   }
 

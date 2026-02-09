@@ -14,9 +14,9 @@ import { WordPressCategory } from '@/services/WordPressService';
 import CategoryTab from './CategoryTab';
 
 // Enable LayoutAnimation on Android
-if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
+// setLayoutAnimationEnabledExperimental is a no-op in New Architecture
+// and handled automatically by Fabric if supported.
+
 
 interface CategoryTabListProps {
   categories: WordPressCategory[];

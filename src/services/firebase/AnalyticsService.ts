@@ -15,6 +15,8 @@ import { observabilityService } from '@/services/ObservabilityService';
 export const ANALYTICS_EVENTS = {
   // Screen Views
   SCREEN_VIEW: 'screen_view',
+  TAB_NAVIGATION_ENTER: 'tab_navigation_enter',
+  STACK_SCREEN_ENTER: 'stack_screen_enter',
 
   // User Actions
   LOGIN: 'login',
@@ -77,6 +79,8 @@ export const ANALYTICS_EVENTS = {
   CALCULATOR_ADD_CURRENCY_PRESSED: 'calculator_add_currency_pressed',
   CALCULATOR_SET_BASE: 'calculator_set_base',
   CALCULATOR_CLEAR: 'calculator_clear',
+  CALCULATOR_SAVE_CONFIG: 'calculator_save_config',
+  CALCULATOR_REVERT_CONFIG: 'calculator_revert_config',
 
   // Alerts
   CREATE_ALERT: 'create_alert',

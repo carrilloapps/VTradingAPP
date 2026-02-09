@@ -331,12 +331,19 @@ const ShareGraphic: React.FC<ShareGraphicProps> = ({
                   { color: warningColor, fontSize: spreadTextSize },
                 ];
 
+                // Dynamic spread description
+                const getSpreadDescription = () => {
+                  if (spread === 0) return 'SPREAD: USDT es igual a USD en VES';
+                  if (spread < 0) return 'SPREAD: USDT es mayor a USD en VES';
+                  return 'SPREAD: USD es mayor a USDT en VES';
+                };
+
                 return (
                   <View style={spreadBoxStyle}>
                     <Icon source="swap-horizontal" size={spreadIconSize} color={warningColor} />
                     <Text style={spreadTextStyle}>
-                      SPREAD (Diferencia USD vs USDT):{' '}
-                      <Text style={styles.bold900}>{spread.toFixed(2)}%</Text>
+                      {getSpreadDescription()}{' '}
+                      <Text style={styles.bold900}>{Math.abs(spread).toFixed(2)}%</Text>
                     </Text>
                   </View>
                 );

@@ -14,7 +14,15 @@ const AdvancedCalculatorCTA: React.FC<AdvancedCalculatorCTAProps> = ({ spread })
   const navigation = useNavigation<any>();
 
   const handlePress = () => {
-    navigation.navigate('AdvancedCalculator');
+    navigation.navigate('AdvancedCalculator', { showBackButton: true });
+  };
+
+  // Get spread description based on sign
+  const getSpreadDescription = () => {
+    if (spread === null) return 'Spread: Brecha de precio entre USD y USDT';
+    if (spread === 0) return 'Spread: USDT es igual a USD en VES';
+    if (spread < 0) return 'Spread: USDT es mayor a USD en VES';
+    return 'Spread: USD es mayor a USDT en VES';
   };
 
   // Determine colors based on the "Warning/Gold" aesthetic requested
@@ -57,7 +65,7 @@ const AdvancedCalculatorCTA: React.FC<AdvancedCalculatorCTAProps> = ({ spread })
             <View style={styles.noteContainer}>
               <Icon source="information-outline" size={12} color={theme.colors.onSurfaceVariant} />
               <Text style={[styles.noteText, { color: theme.colors.onSurfaceVariant }]}>
-                Spread: Diferencia USD vs USDT
+                {getSpreadDescription()}
               </Text>
             </View>
           </View>
@@ -67,7 +75,7 @@ const AdvancedCalculatorCTA: React.FC<AdvancedCalculatorCTAProps> = ({ spread })
               <View style={[styles.badge, { backgroundColor: accentColor }]}>
                 <Text style={[styles.badgeLabel, { color: badgeTextColor }]}>SPREAD</Text>
                 <Text style={[styles.badgeValue, { color: badgeTextColor }]}>
-                  {spread.toFixed(2)}%
+                  {Math.abs(spread).toFixed(2)}%
                 </Text>
               </View>
               <Icon source="chevron-right" size={24} color={theme.colors.onSurfaceVariant} />

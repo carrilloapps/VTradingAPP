@@ -9,6 +9,7 @@ import { AppConfig } from '@/constants/AppConfig';
 export interface DeepLinkRoute {
   type: 'discover' | 'article' | 'category' | 'tag';
   slug?: string;
+  id?: string;
   originalUrl: string;
 }
 
@@ -17,6 +18,14 @@ class DeepLinkService {
   private readonly SCHEME = AppConfig.DEEP_LINK_SCHEME || 'vtrading://';
   private readonly HOST = AppConfig.DEEP_LINK_HOST || 'discover.vtrading.app';
   private readonly BASE_URL = `https://${this.HOST}`;
+
+  // List of all valid hosts for deep linking
+  private readonly VALID_HOSTS = [
+    'vtrading.app',
+    'www.vtrading.app',
+    'discover.vtrading.app',
+    'www.discover.vtrading.app',
+  ];
 
   /**
    * Generate a deep link URL for an article
@@ -47,24 +56,62 @@ class DeepLinkService {
   parseDeepLink(url: string): DeepLinkRoute | null {
     try {
       if (!url) return null;
+      SafeLogger.info('[DeepLinkService] Parsing URL:', url);
 
       let path = '';
+
+      // Handle custom scheme: vtrading://
       if (url.startsWith(this.SCHEME)) {
         path = url.replace(this.SCHEME, '');
-      } else if (url.startsWith(this.BASE_URL)) {
-        path = url.replace(this.BASE_URL, '');
       } else {
-        return null;
+        // Handle HTTP/HTTPS URLs from any valid host
+        let matchedHost = false;
+        for (const host of this.VALID_HOSTS) {
+          const httpsHost = `https://${host}`;
+          const httpHost = `http://${host}`;
+
+          if (url.startsWith(httpsHost)) {
+            path = url.replace(httpsHost, '');
+            matchedHost = true;
+            break;
+          } else if (url.startsWith(httpHost)) {
+            path = url.replace(httpHost, '');
+            matchedHost = true;
+            break;
+          }
+        }
+
+        if (!matchedHost) {
+          SafeLogger.warn('[DeepLinkService] Host not recognized for URL:', url);
+          return null;
+        }
       }
 
-      // Cleanup path (remove leading/trailing slashes)
+      // Cleanup path (remove leading/trailing slashes but keep parameters for now)
       path = path.replace(/^\/+|\/+$/g, '');
+      SafeLogger.info('[DeepLinkService] Cleaned path:', path);
+
+      // Handle query parameters (like WordPress shortlinks ?p=ID)
+      // This MUST happen before validation because '?' and '=' are not in the valid path regex
+      if (path.includes('?')) {
+        const parts = path.split('?');
+        const queryString = parts[1];
+        const pathOnly = parts[0].replace(/\/+$/, ''); // clean trailing slash from path part
+
+        if (queryString) {
+          const pMatch = queryString.match(/(?:^|&)p=([0-9]+)(?:&|$)/);
+          if (pMatch && pMatch[1]) {
+            SafeLogger.info('[DeepLinkService] Detected WordPress ID via query:', pMatch[1]);
+            return { type: 'article', id: pMatch[1], originalUrl: url };
+          }
+        }
+
+        path = pathOnly;
+      }
 
       // Strict validation: Only allow alphanumeric, hyphens, and slashes for basic routing
-      // Prevents complex injections, parent directory traversal (..), and special chars
-      // Allow alphanumeric, -, _, /
-      if (!/^[a-zA-Z0-9\-_/]+$/.test(path)) {
-        // Suspicious path detected
+      if (path && !/^[a-zA-Z0-9\-_/]+$/.test(path)) {
+        SafeLogger.warn('[DeepLinkService] Path failed validation regex:', path);
         observabilityService.captureError(new Error('Invalid DeepLink characters'), {
           context: 'DeepLinkService.parseDeepLink',
           url,
@@ -73,7 +120,7 @@ class DeepLinkService {
         return null;
       }
 
-      // Prevent path traversal attempts explicitly (though regex covers it, double check)
+      // Prevent path traversal attempts explicitly
       if (path.includes('..') || path.includes('//')) {
         return null;
       }
@@ -82,32 +129,27 @@ class DeepLinkService {
         return { type: 'discover', originalUrl: url };
       }
 
-      const parts = path.split('/');
+      const pathParts = path.split('/');
+      SafeLogger.info('[DeepLinkService] Path parts:', pathParts);
 
-      // Pattern: discover.vtrading.app/categoria/{slug}
-      if (parts[0] === 'categoria' && parts[1]) {
-        return { type: 'category', slug: parts[1], originalUrl: url };
+      // Pattern: /categoria/{slug}
+      if (pathParts[0] === 'categoria' && pathParts[1]) {
+        return { type: 'category', slug: pathParts[1], originalUrl: url };
       }
 
-      // Pattern: vtrading://categoria/{slug}
-      if (parts[0] === 'categoria' && parts[1]) {
-        return { type: 'category', slug: parts[1], originalUrl: url };
+      // Pattern: /tag/{slug}
+      if (pathParts[0] === 'tag' && pathParts[1]) {
+        return { type: 'tag', slug: pathParts[1], originalUrl: url };
       }
 
-      // Pattern: discover.vtrading.app/tag/{slug}
-      if (parts[0] === 'tag' && parts[1]) {
-        return { type: 'tag', slug: parts[1], originalUrl: url };
+      // Pattern: /article/{slug}
+      if (pathParts[0] === 'article' && pathParts[1]) {
+        return { type: 'article', slug: pathParts[1], originalUrl: url };
       }
 
-      // Pattern: discover.vtrading.app/{article-slug}
-      // Or vtrading://article/{slug}
-      if (parts[0] === 'article' && parts[1]) {
-        return { type: 'article', slug: parts[1], originalUrl: url };
-      }
-
-      // Fallback for direct slug: discover.vtrading.app/some-slug
-      if (parts.length === 1) {
-        return { type: 'article', slug: parts[0], originalUrl: url };
+      // Fallback for direct slug: vtrading.app/some-slug
+      if (pathParts.length === 1) {
+        return { type: 'article', slug: pathParts[0], originalUrl: url };
       }
 
       return { type: 'discover', originalUrl: url };
@@ -145,9 +187,14 @@ class DeepLinkService {
       return false;
     }
 
+    SafeLogger.info('[DeepLinkService] Handling route:', route);
+
     switch (route.type) {
       case 'article':
-        navigationRef.navigate('ArticleDetail', { slug: route.slug });
+        navigationRef.navigate('ArticleDetail', {
+          slug: route.slug || undefined,
+          id: route.id,
+        });
         break;
       case 'category':
         navigationRef.navigate('Main', {

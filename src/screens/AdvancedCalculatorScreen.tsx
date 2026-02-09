@@ -17,12 +17,15 @@ import { useNavigation } from '@react-navigation/native';
 import { CurrencyService, CurrencyRate } from '@/services/CurrencyService';
 import { observabilityService } from '@/services/ObservabilityService';
 import { useToastStore } from '@/stores/toastStore';
+import { storageService, CalculatorConfig } from '@/services/StorageService';
 import CurrencyPickerModal from '@/components/dashboard/CurrencyPickerModal';
 import CurrencySelectorButton from '@/components/dashboard/CurrencySelectorButton';
 import UnifiedHeader from '@/components/ui/UnifiedHeader';
 import MarketStatus from '@/components/ui/MarketStatus';
 import { AppConfig } from '@/constants/AppConfig';
 import { analyticsService, ANALYTICS_EVENTS } from '@/services/firebase/AnalyticsService';
+import { BolivarIcon } from '@/components/ui/BolivarIcon';
+import { CurrencyCodeIcon } from '@/components/ui/CurrencyCodeIcon';
 
 // --- Components ---
 const KeypadButton = ({
@@ -131,12 +134,47 @@ const Keypad = ({
 interface CurrencyRow {
   code: string;
   value: number;
+  exchangeRate: number;
 }
 
-const AdvancedCalculatorScreen = () => {
+// --- Helper Functions ---
+const formatLargeNumber = (value: number, locale: string = 'es-CO'): string => {
+  const absValue = Math.abs(value);
+
+  if (absValue >= 1_000_000_000_000) {
+    // Billones (un millón de millones): mostrar como 1,5B, 2,325B, etc.
+    // Usar hasta 3 decimales para mayor precisión
+    return (
+      (value / 1_000_000_000_000).toLocaleString(locale, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 3,
+      }) + 'B'
+    );
+  } else if (absValue >= 1_000_000) {
+    // Millones: mostrar como 36.508,5M, 7,07M, etc.
+    // Usar hasta 3 decimales para mayor precisión
+    return (
+      (value / 1_000_000).toLocaleString(locale, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 3,
+      }) + 'M'
+    );
+  }
+
+  // Formato normal para valores menores a 1 millón
+  return value.toLocaleString(locale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
+
+const AdvancedCalculatorScreen = ({ route }: any) => {
   const theme = useTheme();
   const navigation = useNavigation<any>();
   const showToast = useToastStore(state => state.showToast);
+
+  // Get showBackButton parameter from route (only true when navigating from Home)
+  const showBackButton = route?.params?.showBackButton ?? false;
 
   // --- State ---
   const [rates, setRates] = useState<CurrencyRate[]>([]);
@@ -152,6 +190,9 @@ const AdvancedCalculatorScreen = () => {
   // Target Currencies List (Codes)
   const [targetCodes, setTargetCodes] = useState<string[]>(['VES', 'USDT']);
 
+  // Previous config for revert
+  const [previousConfig, setPreviousConfig] = useState<CalculatorConfig | null>(null);
+
   // Picker State
   const [pickerVisible, setPickerVisible] = useState(false);
   const [pickerMode, setPickerMode] = useState<'base' | 'add'>('base');
@@ -161,6 +202,14 @@ const AdvancedCalculatorScreen = () => {
 
   // --- Data Loading ---
   useEffect(() => {
+    // Load saved calculator config
+    const savedConfig = storageService.getCalculatorConfig();
+    if (savedConfig) {
+      setBaseCurrencyCode(savedConfig.baseCurrencyCode);
+      setTargetCodes(savedConfig.targetCodes);
+      setPreviousConfig(savedConfig);
+    }
+
     const unsubscribe = CurrencyService.subscribe(data => {
       setRates(data);
       setRefreshing(false);
@@ -203,28 +252,88 @@ const AdvancedCalculatorScreen = () => {
   const targetRows = useMemo(() => {
     const amountVal = parseFloat(baseAmount.replace(/\./g, '').replace(',', '.')) || 0;
 
+    // Get USDT rate for bridge calculations
+    const usdtRate = rates.find(r => r.code === 'USDT');
+    const usdtInVes = usdtRate ? usdtRate.value : null; // VES per USDT
+
     return targetCodes
       .map(code => {
         const rateObj = rates.find(r => r.code === code);
         if (!rateObj) return null;
 
-        // Logic fixed: Rates are "Price in Base Currency (VES)"
-        // Formula: Amount * (BaseValue / TargetValue) -> (Amount * BaseValue) / TargetValue
-        // Handled safely by CurrencyService
-        const targetValue = CurrencyService.convertCrossRate(
-          amountVal,
-          baseCurrency.value,
-          rateObj.value,
-        );
+        let targetValue = 0;
+        let exchangeRate = 0;
+
+        // Determine if currencies are border type with usdRate
+        const baseIsBorder = baseCurrency.type === 'border' && baseCurrency.usdRate;
+        const targetIsBorder = rateObj.type === 'border' && rateObj.usdRate;
+        const baseIsUSDorUSDT = baseCurrency.code === 'USD' || baseCurrency.code === 'USDT';
+        const targetIsUSDorUSDT = rateObj.code === 'USD' || rateObj.code === 'USDT';
+
+        // Apply USDT bridge principle for all conversions involving border currencies
+        // Formula: 1 Base = (Target/USDT) / (Base/USDT)
+        // Example: 1 VES = 3660.306 COP/USDT / 544.83 VES/USDT = 6.72 COP
+
+        if (baseIsUSDorUSDT && targetIsBorder) {
+          // USD/USDT to Border: direct multiplication by usdRate from API
+          // 1 USD = Target/USDT (because 1 USD ≈ 1 USDT)
+          targetValue = amountVal * rateObj.usdRate!;
+          exchangeRate = rateObj.usdRate!;
+        } else if (baseIsBorder && targetIsUSDorUSDT) {
+          // Border to USD/USDT: direct division by usdRate from API
+          // 1 Border = 1 / (Border/USDT)
+          targetValue = amountVal / baseCurrency.usdRate!;
+          exchangeRate = 1 / baseCurrency.usdRate!;
+        } else if (baseIsBorder && targetIsBorder) {
+          // Border to Border: cross rate using usdRates from API
+          // 1 Base = (Target/USDT) / (Base/USDT)
+          targetValue = amountVal * (rateObj.usdRate! / baseCurrency.usdRate!);
+          exchangeRate = rateObj.usdRate! / baseCurrency.usdRate!;
+        } else if (targetIsBorder && usdtInVes) {
+          // Any fiat to Border: use USDT bridge
+          // Get base rate in USDT terms
+          const baseRateInVes = CurrencyService.getCalculatorRate(baseCurrency);
+          // Base/USDT = Base/VES ÷ VES/USDT
+          // Example: 1 EUR = 40 VES, 1 USDT = 544.83 VES → 1 EUR = 40/544.83 USDT
+          const baseRateInUsdt = baseRateInVes / usdtInVes;
+          // 1 Base = (Target/USDT) / (Base/USDT)
+          targetValue = amountVal * (rateObj.usdRate! / baseRateInUsdt);
+          exchangeRate = rateObj.usdRate! / baseRateInUsdt;
+        } else if (baseIsBorder && usdtInVes) {
+          // Border to any fiat: use USDT bridge
+          // Special case for VES: it's the base currency of the system
+          if (rateObj.code === 'VES') {
+            // Direct conversion: 1 Border = VES/USDT ÷ Border/USDT
+            // Example: 1 COP = 544.83 VES/USDT ÷ 3660.306 COP/USDT = 0.1488 VES
+            targetValue = amountVal * (usdtInVes / baseCurrency.usdRate!);
+            exchangeRate = usdtInVes / baseCurrency.usdRate!;
+          } else {
+            const targetRateInVes = CurrencyService.getCalculatorRate(rateObj);
+            // Target/USDT = Target/VES ÷ VES/USDT
+            // Example: 1 EUR = 40 VES, 1 USDT = 544.83 VES → 1 EUR = 40/544.83 USDT
+            const targetRateInUsdt = targetRateInVes / usdtInVes;
+            // 1 Base = (Target/USDT) / (Base/USDT)
+            targetValue = amountVal * (targetRateInUsdt / baseCurrency.usdRate!);
+            exchangeRate = targetRateInUsdt / baseCurrency.usdRate!;
+          }
+        } else {
+          // Standard conversion using VES-based values (no border currencies involved)
+          const baseRateValue = CurrencyService.getCalculatorRate(baseCurrency);
+          const targetRateValue = CurrencyService.getCalculatorRate(rateObj);
+          targetValue = CurrencyService.convertCrossRate(amountVal, baseRateValue, targetRateValue);
+          exchangeRate = baseRateValue / targetRateValue;
+        }
 
         return {
           code,
           value: targetValue,
+          exchangeRate,
           name: rateObj.name,
           rateObj,
         };
       })
       .filter(Boolean) as (CurrencyRow & {
+      exchangeRate: number;
       name: string;
       rateObj: CurrencyRate;
     })[];
@@ -383,6 +492,43 @@ const AdvancedCalculatorScreen = () => {
     }
   };
 
+  const handleSaveConfig = () => {
+    const currentConfig: CalculatorConfig = {
+      baseCurrencyCode,
+      targetCodes,
+    };
+
+    // Save current as previous before saving new
+    const existingConfig = storageService.getCalculatorConfig();
+    if (existingConfig) {
+      setPreviousConfig(existingConfig);
+    }
+
+    storageService.saveCalculatorConfig(currentConfig);
+    showToast('Configuración guardada', 'success');
+
+    // Show hint about long press functionality
+    setTimeout(() => {
+      showToast('Mantén presionado el botón de guardar para volver a esta configuración', 'info');
+    }, 1500);
+
+    analyticsService.logEvent(ANALYTICS_EVENTS.CALCULATOR_SAVE_CONFIG, {
+      baseCurrency: baseCurrencyCode,
+      targetCount: targetCodes.length,
+    });
+  };
+
+  const handleRevertConfig = () => {
+    if (previousConfig) {
+      setBaseCurrencyCode(previousConfig.baseCurrencyCode);
+      setTargetCodes(previousConfig.targetCodes);
+      showToast('Configuración revertida', 'info');
+      analyticsService.logEvent(ANALYTICS_EVENTS.CALCULATOR_REVERT_CONFIG);
+    } else {
+      showToast('No hay configuración previa', 'info');
+    }
+  };
+
   // --- Helpers for Responsive Text ---
   const getInputFontSize = () => {
     const len = baseAmount.length;
@@ -459,9 +605,10 @@ const AdvancedCalculatorScreen = () => {
         variant="simple"
         title="Calculadora"
         style={styles.header}
-        onBackPress={() => navigation.goBack()}
-        onActionPress={onRefresh}
-        rightActionIcon="refresh"
+        onBackPress={showBackButton ? () => navigation.goBack() : undefined}
+        onActionPress={handleSaveConfig}
+        onActionLongPress={handleRevertConfig}
+        rightActionIcon="content-save"
         notificationIcon="bell-outline"
         onNotificationPress={() => navigation.navigate('Notifications')}
         showNotification={true}
@@ -531,7 +678,7 @@ const AdvancedCalculatorScreen = () => {
             />
           </View>
           <MarketStatus
-            isOpen={true}
+            status="ABIERTO"
             updatedAt={
               lastRefreshTime
                 ? lastRefreshTime.toLocaleTimeString([], {
@@ -565,80 +712,80 @@ const AdvancedCalculatorScreen = () => {
               progressBackgroundColor={theme.colors.elevation.level3}
             />
           }
-          renderItem={({ item }) => (
-            <View style={[styles.targetRow, themeStyles.targetRow]}>
-              {/* Left Side: Icon */}
-              <View style={[styles.iconBox, themeStyles.iconBox]}>
-                {item.rateObj.iconName === 'Bs' ? (
-                  <Text style={[styles.bsIconText, { color: theme.colors.primary }]}>Bs</Text>
-                ) : (
-                  <MaterialCommunityIcons
-                    name={item.rateObj.iconName || 'currency-usd'}
-                    size={24}
-                    color={theme.colors.primary}
-                  />
-                )}
-              </View>
+          renderItem={({ item }) => {
+            const isCustomSymbol = item.rateObj.iconName?.startsWith('SYMBOL:');
+            const customSymbol =
+              isCustomSymbol && item.rateObj.iconName
+                ? item.rateObj.iconName.replace('SYMBOL:', '')
+                : null;
 
-              {/* Middle: Code & Name */}
-              <View style={styles.middleCol}>
-                <View style={styles.codeRow}>
-                  <Text variant="titleMedium" style={[styles.codeText, themeStyles.textPrimary]}>
-                    {item.code}
-                  </Text>
-                  <View style={[styles.nameBadge, themeStyles.nameBadge]}>
-                    <Text style={[styles.nameText, themeStyles.nameText]}>{item.name}</Text>
-                  </View>
+            return (
+              <View style={[styles.targetRow, themeStyles.targetRow]}>
+                {/* Left Side: Icon */}
+                <View style={[styles.iconBox, themeStyles.iconBox]}>
+                  {item.rateObj.iconName === 'Bs' ? (
+                    <BolivarIcon color={theme.colors.primary} size={24} />
+                  ) : isCustomSymbol ? (
+                    <CurrencyCodeIcon code={customSymbol!} color={theme.colors.primary} size={24} />
+                  ) : (
+                    <MaterialCommunityIcons
+                      name={item.rateObj.iconName || 'currency-usd'}
+                      size={24}
+                      color={theme.colors.primary}
+                    />
+                  )}
                 </View>
-                <Text variant="bodySmall" style={themeStyles.textSecondary}>
-                  1 {baseCurrency.code} ={' '}
-                  {(baseCurrency.value / item.rateObj.value).toLocaleString(
-                    AppConfig.DEFAULT_LOCALE,
-                    {
-                      minimumFractionDigits: AppConfig.DECIMAL_PLACES,
-                      maximumFractionDigits: AppConfig.DECIMAL_PLACES,
-                    },
-                  )}{' '}
-                  {item.code}
-                </Text>
-              </View>
 
-              {/* Right Side: Value & Label */}
-              <View style={styles.rightCol}>
-                <Text
-                  variant="headlineSmall"
-                  style={[styles.valueText, themeStyles.textPrimary]}
-                  numberOfLines={1}
-                  adjustsFontSizeToFit
-                >
-                  {item.value.toLocaleString(AppConfig.DEFAULT_LOCALE, {
-                    minimumFractionDigits: AppConfig.DECIMAL_PLACES,
-                    maximumFractionDigits: AppConfig.DECIMAL_PLACES,
-                  })}
-                </Text>
-                <Text
-                  variant="labelSmall"
-                  style={[
-                    styles.labelText,
-                    item.rateObj.type === 'crypto'
-                      ? themeStyles.warningText
-                      : themeStyles.successText,
-                  ]}
-                >
-                  {item.rateObj.type === 'crypto' ? 'Cripto activo' : 'Conversión directa'}
-                </Text>
-              </View>
+                {/* Middle: Code & Name */}
+                <View style={styles.middleCol}>
+                  <View style={styles.codeRow}>
+                    <Text variant="titleMedium" style={[styles.codeText, themeStyles.textPrimary]}>
+                      {item.code}
+                    </Text>
+                    <View style={[styles.nameBadge, themeStyles.nameBadge]}>
+                      <Text style={[styles.nameText, themeStyles.nameText]}>{item.name}</Text>
+                    </View>
+                  </View>
+                  <Text variant="bodySmall" style={themeStyles.textSecondary}>
+                    1 {baseCurrency.code} ={' '}
+                    {formatLargeNumber(item.exchangeRate, AppConfig.DEFAULT_LOCALE)} {item.code}
+                  </Text>
+                </View>
 
-              {/* Close Button (Absolute positioned) */}
-              <TouchableOpacity
-                onPress={() => removeCurrency(item.code)}
-                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-                style={[styles.closeButton, themeStyles.errorContainer]}
-              >
-                <MaterialCommunityIcons name="close" size={14} color={theme.colors.error} />
-              </TouchableOpacity>
-            </View>
-          )}
+                {/* Right Side: Value & Label */}
+                <View style={styles.rightCol}>
+                  <Text
+                    variant="headlineSmall"
+                    style={[styles.valueText, themeStyles.textPrimary]}
+                    numberOfLines={1}
+                    adjustsFontSizeToFit
+                  >
+                    {formatLargeNumber(item.value, AppConfig.DEFAULT_LOCALE)}
+                  </Text>
+                  <Text
+                    variant="labelSmall"
+                    style={[
+                      styles.labelText,
+                      item.rateObj.type === 'crypto'
+                        ? themeStyles.warningText
+                        : themeStyles.successText,
+                    ]}
+                  >
+                    {item.rateObj.type === 'crypto' ? 'Cripto activo' : 'Conversión directa'}
+                  </Text>
+                </View>
+
+                {/* Close Button (Absolute positioned) */}
+                <TouchableOpacity
+                  onPress={() => removeCurrency(item.code)}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  style={[styles.closeButton, themeStyles.errorContainer]}
+                >
+                  <MaterialCommunityIcons name="close" size={14} color={theme.colors.error} />
+                </TouchableOpacity>
+              </View>
+            );
+          }}
           ListFooterComponent={renderListFooter}
         />
 

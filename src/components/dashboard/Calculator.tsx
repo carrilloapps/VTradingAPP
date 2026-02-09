@@ -52,7 +52,7 @@ const Calculator: React.FC = () => {
           Calculadora Rápida
         </Text>
         <TouchableOpacity
-          onPress={() => navigation.navigate('AdvancedCalculator')}
+          onPress={() => navigation.navigate('AdvancedCalculator', { showBackButton: true })}
           style={[styles.expandButton, themeStyles.button]}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
           accessibilityLabel="Abrir calculadora avanzada"

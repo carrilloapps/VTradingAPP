@@ -7,6 +7,7 @@ import NotificationButton from '../NotificationButton';
 
 interface HeaderActionsProps {
   onActionPress?: () => void;
+  onActionLongPress?: () => void;
   onSecondaryActionPress?: () => void;
   rightActionIcon?: string;
   secondaryActionIcon?: string;
@@ -17,6 +18,7 @@ interface HeaderActionsProps {
 
 const HeaderActions: React.FC<HeaderActionsProps> = ({
   onActionPress,
+  onActionLongPress,
   onSecondaryActionPress,
   rightActionIcon = 'refresh',
   secondaryActionIcon = 'share-variant',
@@ -38,6 +40,7 @@ const HeaderActions: React.FC<HeaderActionsProps> = ({
       {onActionPress && (
         <TouchableRipple
           onPress={onActionPress}
+          onLongPress={onActionLongPress}
           style={[styles.iconButton, commonButtonStyle]}
           borderless
           rippleColor="rgba(0, 0, 0, .1)"

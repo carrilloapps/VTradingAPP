@@ -549,6 +549,7 @@ describe('StocksService', () => {
         titlesUnchanged: 2,
       },
       statusState: 'ABIERTO',
+      updateDate: '2025-01-01',
     });
   });
 

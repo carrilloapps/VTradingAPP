@@ -89,12 +89,18 @@ const HomeScreen = ({ navigation }: any) => {
           })
           .join('\n');
 
+        const spreadText = spread
+          ? spread === 0
+            ? `⚖️ *Spread:* ${spread.toFixed(2)}% _(USDT es igual a USD en VES)_\n`
+            : spread < 0
+              ? `⚖️ *Spread:* ${Math.abs(spread).toFixed(2)}% _(USDT es mayor a USD en VES)_\n`
+              : `⚖️ *Spread:* ${Math.abs(spread).toFixed(2)}% _(USD es mayor a USDT en VES)_\n`
+          : '';
+
         const message =
           `📊 *VTrading - Reporte Diario*\n\n` +
           `${ratesDetails}\n` +
-          (spread
-            ? `⚖️ *Spread:* ${spread.toFixed(2)}% _(Diferencia USD vs USDT contra el VES)_\n`
-            : '') +
+          spreadText +
           `⏱️ _Act: ${lastUpdated}_\n\n` +
           `🌐 vtrading.app`;
 
@@ -139,11 +145,19 @@ const HomeScreen = ({ navigation }: any) => {
       const bcvVal = bcv?.value ? Number(bcv.value).toFixed(2) : 'N/A';
       const p2pVal = p2p?.value ? Number(p2p.value).toFixed(2) : 'N/A';
 
+      const spreadText = spread
+        ? spread === 0
+          ? `⚖️ *Spread:* ${spread.toFixed(2)}% (USDT es igual a USD en VES)\n`
+          : spread < 0
+            ? `⚖️ *Spread:* ${Math.abs(spread).toFixed(2)}% (USDT es mayor a USD en VES)\n`
+            : `⚖️ *Spread:* ${Math.abs(spread).toFixed(2)}% (USD es mayor a USDT en VES)\n`
+        : '';
+
       const message =
         `📊 *VTrading - Reporte Diario*\n\n` +
         (bcv ? `💵 *USD BCV:* ${bcvVal} Bs\n` : '') +
         (p2p ? `🔶 *USDT P2P:* ${p2pVal} Bs\n` : '') +
-        (spread ? `⚖️ *Spread:* ${spread.toFixed(2)}%\n` : '') +
+        spreadText +
         `⏱️ _Act: ${lastUpdated}_\n\n` +
         `🌐 vtrading.app`;
 
@@ -162,11 +176,11 @@ const HomeScreen = ({ navigation }: any) => {
 
   const userData = useMemo(
     () => ({
-      name: user?.displayName || user?.email?.split('@')[0] || 'Invitado',
+      name: user?.displayName || user?.email?.split('@')[0] || 'Usuario',
       avatarUrl: user?.photoURL,
       email: user?.email,
       notificationCount: 3,
-      isPremium: !!(user && !user.isAnonymous),
+      isPremium: !!user, // Usuario logueado = Premium
     }),
     [user],
   );
@@ -199,7 +213,7 @@ const HomeScreen = ({ navigation }: any) => {
         email={userData.email}
         notificationCount={userData.notificationCount}
         isPremium={userData.isPremium}
-        onProfilePress={() => navigation.navigate('Settings')}
+        onProfilePress={() => (navigation as any).navigate('Settings')}
         onNotificationPress={() => navigation.navigate('Notifications')}
         showSecondaryAction
         onSecondaryActionPress={handleShareImage}
@@ -237,7 +251,7 @@ const HomeScreen = ({ navigation }: any) => {
         >
           <MarketStatus
             style={styles.marketStatus}
-            isOpen={isMarketOpen}
+            status={isMarketOpen ? 'ABIERTO' : 'CERRADO'}
             updatedAt={lastUpdated}
             onRefresh={onRefresh}
           />

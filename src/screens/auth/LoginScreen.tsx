@@ -27,7 +27,7 @@ import { hashPII } from '@/utils/security';
 const LoginScreen = ({ navigation }: any) => {
   const theme = useAppTheme();
   const insets = useSafeAreaInsets();
-  const { signIn, googleSignIn, signInAnonymously, isLoading } = useAuthStore();
+  const { signIn, googleSignIn, isLoading } = useAuthStore();
   const showToast = useToastStore(state => state.showToast);
 
   useEffect(() => {
@@ -130,6 +130,10 @@ const LoginScreen = ({ navigation }: any) => {
           method: 'password',
         });
         await signIn(email, password, showToast);
+        // Login exitoso -> regresar a la pantalla anterior
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        }
       } catch (e: any) {
         // Obfuscate error for security
         if (!e.message?.includes('CANCELLED')) {
@@ -157,6 +161,10 @@ const LoginScreen = ({ navigation }: any) => {
         method: 'google',
       });
       await googleSignIn(showToast);
+      // Login exitoso -> regresar a la pantalla anterior
+      if (navigation.canGoBack()) {
+        navigation.goBack();
+      }
     } catch (e: any) {
       if (
         e.message !== 'SIGN_IN_CANCELLED' &&
@@ -168,25 +176,6 @@ const LoginScreen = ({ navigation }: any) => {
           method: 'google',
         });
       }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleGuestLogin = async () => {
-    setIsSubmitting(true);
-    try {
-      await analyticsService.logEvent(ANALYTICS_EVENTS.LOGIN_ATTEMPT, {
-        method: 'anonymous',
-      });
-      await signInAnonymously(showToast);
-      // Login exitoso ya se trackea en authStore
-    } catch (e) {
-      observabilityService.captureError(e, {
-        context: 'LoginScreen.handleGuestLogin',
-        method: 'anonymous',
-      });
-      // Error ya se trackea en authStore
     } finally {
       setIsSubmitting(false);
     }
@@ -206,6 +195,7 @@ const LoginScreen = ({ navigation }: any) => {
       <UnifiedHeader
         variant="section"
         title=""
+        onBackPress={() => navigation.canGoBack() && navigation.goBack()}
         rightActionIcon="information-outline"
         onActionPress={() => setAboutVisible(true)}
         showNotification={false}
@@ -350,16 +340,6 @@ const LoginScreen = ({ navigation }: any) => {
               loading={isBusy}
               disabled={isBusy}
               fullWidth
-            />
-
-            <CustomButton
-              label="Continuar como invitado"
-              onPress={handleGuestLogin}
-              variant="ghost"
-              loading={isBusy}
-              disabled={isBusy}
-              fullWidth
-              style={{ marginTop: theme.spacing.m }}
             />
           </View>
 

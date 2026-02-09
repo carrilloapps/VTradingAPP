@@ -10,6 +10,37 @@ import { observabilityService } from '@/services/ObservabilityService';
 import { CurrencyService, CurrencyRate } from '@/services/CurrencyService';
 import { useToastStore } from '@/stores/toastStore';
 
+// --- Helper Functions ---
+const formatLargeNumber = (value: number, locale: string = 'es-CO'): string => {
+  const absValue = Math.abs(value);
+
+  if (absValue >= 1_000_000_000_000) {
+    // Billones (un millón de millones): mostrar como 1,5B, 2,325B, etc.
+    // Usar hasta 3 decimales para mayor precisión
+    return (
+      (value / 1_000_000_000_000).toLocaleString(locale, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 3,
+      }) + 'B'
+    );
+  } else if (absValue >= 1_000_000) {
+    // Millones: mostrar como 36.508,5M, 7,07M, etc.
+    // Usar hasta 3 decimales para mayor precisión
+    return (
+      (value / 1_000_000).toLocaleString(locale, {
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 3,
+      }) + 'M'
+    );
+  }
+
+  // Formato normal para valores menores a 1 millón
+  return value.toLocaleString(locale, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+};
+
 const CurrencyConverter: React.FC = () => {
   const theme = useTheme();
   const navigation = useNavigation();
@@ -71,7 +102,8 @@ const CurrencyConverter: React.FC = () => {
           type: 'info',
           action: {
             label: 'Ir a Avanzada',
-            onPress: () => navigation.navigate('AdvancedCalculator' as never),
+            onPress: () =>
+              (navigation as any).navigate('AdvancedCalculator', { showBackButton: true }),
           },
         },
       );
@@ -159,7 +191,7 @@ const CurrencyConverter: React.FC = () => {
     }
   }, [availableToRates, fromCurrency, toCurrency]);
 
-  // Conversion Logic
+  // Conversion Logic with USDT bridge for border currencies
   const convertedValue = useMemo(() => {
     if (!fromCurrency || !toCurrency || !amount) return '0,00';
 
@@ -169,31 +201,103 @@ const CurrencyConverter: React.FC = () => {
 
     if (isNaN(val)) return '0,00';
 
-    // Logic: Convert FROM -> VES -> TO
-    // Important: rates are price in VES.
-    // 1 USD = 36.5 VES (value = 36.5)
-    // 1 EUR = 40.0 VES (value = 40.0)
-    // To convert USD -> EUR:
-    // USD amount * USD rate / EUR rate
-    // 100 * 36.5 / 40.0 = 91.25 EUR
-    const amountInVES = val * fromCurrency.value;
-    const result = amountInVES / toCurrency.value;
+    // Get USDT rate for bridge calculations
+    const usdtRate = rates.find(r => r.code === 'USDT');
+    const usdtInVes = usdtRate ? usdtRate.value : null; // VES per USDT
 
-    return result.toLocaleString(AppConfig.DEFAULT_LOCALE, {
-      minimumFractionDigits: AppConfig.DECIMAL_PLACES,
-      maximumFractionDigits: AppConfig.DECIMAL_PLACES,
-    });
-  }, [amount, fromCurrency, toCurrency]);
+    let result = 0;
+
+    // Determine if currencies are border type with usdRate
+    const fromIsBorder = fromCurrency.type === 'border' && fromCurrency.usdRate;
+    const toIsBorder = toCurrency.type === 'border' && toCurrency.usdRate;
+    const fromIsUSDorUSDT = fromCurrency.code === 'USD' || fromCurrency.code === 'USDT';
+    const toIsUSDorUSDT = toCurrency.code === 'USD' || toCurrency.code === 'USDT';
+
+    // Apply USDT bridge principle for all conversions involving border currencies
+    // Formula: 1 From = (To/USDT) / (From/USDT)
+    // Example: 1 VES = 3660.306 COP/USDT / 544.83 VES/USDT = 6.72 COP
+
+    if (fromIsUSDorUSDT && toIsBorder) {
+      // USD/USDT to Border: direct multiplication by usdRate from API
+      result = val * toCurrency.usdRate!;
+    } else if (fromIsBorder && toIsUSDorUSDT) {
+      // Border to USD/USDT: direct division by usdRate from API
+      result = val / fromCurrency.usdRate!;
+    } else if (fromIsBorder && toIsBorder) {
+      // Border to Border: cross rate using usdRates from API
+      result = val * (toCurrency.usdRate! / fromCurrency.usdRate!);
+    } else if (toIsBorder && usdtInVes) {
+      // Any fiat to Border: use USDT bridge
+      const fromRateInVes = CurrencyService.getCalculatorRate(fromCurrency);
+      // From/USDT = From/VES ÷ VES/USDT
+      const fromRateInUsdt = fromRateInVes / usdtInVes;
+      result = val * (toCurrency.usdRate! / fromRateInUsdt);
+    } else if (fromIsBorder && usdtInVes) {
+      // Border to any fiat: use USDT bridge
+      // Special case for VES: it's the base currency of the system
+      if (toCurrency.code === 'VES') {
+        // Direct conversion: 1 Border = VES/USDT ÷ Border/USDT
+        result = val * (usdtInVes / fromCurrency.usdRate!);
+      } else {
+        const toRateInVes = CurrencyService.getCalculatorRate(toCurrency);
+        // To/USDT = To/VES ÷ VES/USDT
+        const toRateInUsdt = toRateInVes / usdtInVes;
+        result = val * (toRateInUsdt / fromCurrency.usdRate!);
+      }
+    } else {
+      // Standard conversion using VES-based values (no border currencies involved)
+      const fromRateValue = CurrencyService.getCalculatorRate(fromCurrency);
+      const toRateValue = CurrencyService.getCalculatorRate(toCurrency);
+      result = CurrencyService.convertCrossRate(val, fromRateValue, toRateValue);
+    }
+
+    return formatLargeNumber(result, AppConfig.DEFAULT_LOCALE);
+  }, [amount, fromCurrency, toCurrency, rates]);
 
   const exchangeRate = useMemo(() => {
     if (!fromCurrency || !toCurrency) return '0.00';
-    // Calculate rate: 1 FROM = X TO
-    const rate = fromCurrency.value / toCurrency.value;
-    return rate.toLocaleString(AppConfig.DEFAULT_LOCALE, {
-      minimumFractionDigits: AppConfig.DECIMAL_PLACES,
-      maximumFractionDigits: AppConfig.DECIMAL_PLACES,
-    });
-  }, [fromCurrency, toCurrency]);
+
+    // Get USDT rate for bridge calculations
+    const usdtRate = rates.find(r => r.code === 'USDT');
+    const usdtInVes = usdtRate ? usdtRate.value : null;
+
+    let rate = 0;
+
+    // Determine if currencies are border type with usdRate
+    const fromIsBorder = fromCurrency.type === 'border' && fromCurrency.usdRate;
+    const toIsBorder = toCurrency.type === 'border' && toCurrency.usdRate;
+    const fromIsUSDorUSDT = fromCurrency.code === 'USD' || fromCurrency.code === 'USDT';
+    const toIsUSDorUSDT = toCurrency.code === 'USD' || toCurrency.code === 'USDT';
+
+    // Calculate rate: 1 FROM = X TO using same logic as conversion
+    if (fromIsUSDorUSDT && toIsBorder) {
+      rate = toCurrency.usdRate!;
+    } else if (fromIsBorder && toIsUSDorUSDT) {
+      rate = 1 / fromCurrency.usdRate!;
+    } else if (fromIsBorder && toIsBorder) {
+      rate = toCurrency.usdRate! / fromCurrency.usdRate!;
+    } else if (toIsBorder && usdtInVes) {
+      const fromRateInVes = CurrencyService.getCalculatorRate(fromCurrency);
+      const fromRateInUsdt = fromRateInVes / usdtInVes;
+      rate = toCurrency.usdRate! / fromRateInUsdt;
+    } else if (fromIsBorder && usdtInVes) {
+      // Special case for VES
+      if (toCurrency.code === 'VES') {
+        rate = usdtInVes / fromCurrency.usdRate!;
+      } else {
+        const toRateInVes = CurrencyService.getCalculatorRate(toCurrency);
+        const toRateInUsdt = toRateInVes / usdtInVes;
+        rate = toRateInUsdt / fromCurrency.usdRate!;
+      }
+    } else {
+      // Standard calculation
+      const fromRateValue = CurrencyService.getCalculatorRate(fromCurrency);
+      const toRateValue = CurrencyService.getCalculatorRate(toCurrency);
+      rate = fromRateValue / toRateValue;
+    }
+
+    return formatLargeNumber(rate, AppConfig.DEFAULT_LOCALE);
+  }, [fromCurrency, toCurrency, rates]);
 
   const handleSwap = () => {
     setFromCurrency(toCurrency);

@@ -7,6 +7,7 @@ import { CurrencyRate } from '@/services/CurrencyService';
 import { BottomSheetModal } from '@/components/ui/BottomSheetModal';
 import { AppConfig } from '@/constants/AppConfig';
 import { BolivarIcon } from '@/components/ui/BolivarIcon';
+import { CurrencyCodeIcon } from '@/components/ui/CurrencyCodeIcon';
 
 export interface CurrencyPickerModalProps {
   visible: boolean;
@@ -149,6 +150,10 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
             ? selectedIds.includes(item.id)
             : selectedCurrencyCode === item.code;
 
+          const isCustomSymbol = item.iconName?.startsWith('SYMBOL:');
+          const customSymbol =
+            isCustomSymbol && item.iconName ? item.iconName.replace('SYMBOL:', '') : null;
+
           return (
             <TouchableOpacity
               onPress={() => handleItemPress(item)}
@@ -170,6 +175,12 @@ const CurrencyPickerModal: React.FC<CurrencyPickerModalProps> = ({
               >
                 {item.code === 'VES' || item.iconName === 'Bs' ? (
                   <BolivarIcon
+                    color={isSelected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant}
+                    size={24}
+                  />
+                ) : isCustomSymbol ? (
+                  <CurrencyCodeIcon
+                    code={customSymbol!}
                     color={isSelected ? theme.colors.onPrimary : theme.colors.onSurfaceVariant}
                     size={24}
                   />

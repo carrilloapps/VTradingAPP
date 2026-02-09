@@ -1,7 +1,7 @@
 import { createMMKV, MMKV } from 'react-native-mmkv';
 
 import { observabilityService } from '@/services/ObservabilityService';
-import { InteractionManager } from 'react-native';
+import { runAfterInteractions } from '@/utils/TaskUtils';
 import { KeyService } from '@/services/KeyService';
 import SafeLogger from '@/utils/safeLogger';
 
@@ -62,6 +62,7 @@ const KEYS = {
   WIDGET_CONFIG: 'widget_config',
   WIDGET_REFRESH_META: 'widget_refresh_meta',
   HAS_SEEN_ONBOARDING: 'has_seen_onboarding',
+  CALCULATOR_CONFIG: 'calculator_config',
 };
 
 export interface StoredNotification {
@@ -105,6 +106,11 @@ export interface UserAlert {
   iconName?: string;
 }
 
+export interface CalculatorConfig {
+  baseCurrencyCode: string;
+  targetCodes: string[];
+}
+
 class StorageService {
   // Cache removed in favor of direct MMKV access
   // private cache: Map<string, any> = new Map();
@@ -131,8 +137,7 @@ class StorageService {
   }
 
   private setJSON<T>(key: string, value: T): void {
-    // Use InteractionManager to defer heavy serialization/writes
-    InteractionManager.runAfterInteractions(() => {
+    runAfterInteractions(() => {
       try {
         getStorage().set(key, JSON.stringify(value));
       } catch (e) {
@@ -215,6 +220,15 @@ class StorageService {
     getStorage().set(KEYS.HAS_SEEN_ONBOARDING, value);
   }
 
+  // Calculator Config
+  getCalculatorConfig(): CalculatorConfig | null {
+    return this.getJSON<CalculatorConfig | null>(KEYS.CALCULATOR_CONFIG, null);
+  }
+
+  saveCalculatorConfig(config: CalculatorConfig): void {
+    this.setJSON(KEYS.CALCULATOR_CONFIG, config);
+  }
+
   // Utility methods
   clearAll(): void {
     try {
@@ -232,6 +246,22 @@ class StorageService {
   }
 
   delete(key: string): void {
+    getStorage().remove(key);
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // NUEVOS MÉTODOS: Wrappers para acceso directo a MMKV
+  // ═══════════════════════════════════════════════════════════
+
+  getString(key: string): string | undefined {
+    return getStorage().getString(key);
+  }
+
+  setString(key: string, value: string): void {
+    getStorage().set(key, value);
+  }
+
+  deleteKey(key: string): void {
     getStorage().remove(key);
   }
 }

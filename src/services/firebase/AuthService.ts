@@ -4,7 +4,7 @@ import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   signInWithCredential,
-  signInAnonymously,
+  // signInAnonymously, // Removed - using AnonymousIdentityService instead
   signOut,
   GoogleAuthProvider,
   FirebaseAuthTypes,
@@ -163,19 +163,21 @@ class AuthService {
   }
 
   /**
-   * Sign in anonymously
+   * Sign in anonymously - DEPRECATED
+   * Anonymous authentication is now handled by AnonymousIdentityService
+   * Users automatically get a UUID on app start
    */
-  async signInAnonymously(): Promise<FirebaseAuthTypes.UserCredential> {
-    try {
-      return await signInAnonymously(getAuth());
-    } catch (e) {
-      observabilityService.captureError(e, {
-        context: 'AuthService.signInAnonymously',
-        action: 'auth_anonymous_signin',
-      });
-      throw this.handleError(e);
-    }
-  }
+  // async signInAnonymously(): Promise<FirebaseAuthTypes.UserCredential> {
+  //   try {
+  //     return await signInAnonymously(getAuth());
+  //   } catch (e) {
+  //     observabilityService.captureError(e, {
+  //       context: 'AuthService.signInAnonymously',
+  //       action: 'auth_anonymous_signin',
+  //     });
+  //     throw this.handleError(e);
+  //   }
+  // }
 
   /**
    * Sign out

@@ -10,6 +10,8 @@ export { useAuthStore, useToastStore, useFilterStore, useNetworkStore };
 export const useAuth = () => {
   const user = useAuthStore(state => state.user);
   const isLoading = useAuthStore(state => state.isLoading);
+  const isGuest = useAuthStore(state => state.isGuest);
+  const isPremium = useAuthStore(state => state.isPremium);
   const actions = useAuthStore(state => ({
     signIn: state.signIn,
     signUp: state.signUp,
@@ -17,10 +19,9 @@ export const useAuth = () => {
     deleteAccount: state.deleteAccount,
     googleSignIn: state.googleSignIn,
     resetPassword: state.resetPassword,
-    signInAnonymously: state.signInAnonymously,
     updateProfileName: state.updateProfileName,
   }));
-  return { user, isLoading, ...actions };
+  return { user, isLoading, isGuest, isPremium, ...actions };
 };
 
 export const useToast = () => {

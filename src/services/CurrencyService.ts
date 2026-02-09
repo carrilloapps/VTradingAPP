@@ -18,6 +18,8 @@ export interface CurrencyRate {
   sellValue?: number;
   buyChangePercent?: number;
   sellChangePercent?: number;
+  spreadPercentage?: number; // Spread vs USDT P2P (only for USD from BCV)
+  usdRate?: number; // For border rates: original Foreign/USD rate from API (for calculator)
 }
 
 // API Response Interfaces
@@ -51,6 +53,27 @@ interface ApiRateItem {
       direction: string;
     };
   };
+  spread?: {
+    value: number;
+    percentage: number;
+    p2p: {
+      average: {
+        value: number;
+        percentage: number;
+        usdtPrice: number;
+      };
+      buy: {
+        value: number;
+        percentage: number;
+        usdtPrice: number;
+      };
+      sell: {
+        value: number;
+        percentage: number;
+        usdtPrice: number;
+      };
+    };
+  };
 }
 
 interface ApiCryptoItem {
@@ -77,9 +100,20 @@ interface ApiCryptoItem {
 }
 
 interface ApiRatesResponse {
+  status: {
+    status: string;
+    date: string;
+    lastUpdate: string;
+  };
   rates: ApiRateItem[];
   crypto: ApiCryptoItem[];
   border: ApiRateItem[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 interface ApiBankRate {
@@ -225,9 +259,21 @@ export class CurrencyService {
                 iconName = 'currency-usd';
             }
 
-            rates.push({
+            // Validate currency code
+            const validCode = apiRate.currency?.trim();
+            if (!validCode) {
+              SafeLogger.error(`[CurrencyService] Skipping fiat rate with empty code:`, {
+                index,
+                currency: apiRate.currency,
+                name,
+                apiRateData: apiRate,
+              });
+              return;
+            }
+
+            const rateData: CurrencyRate = {
               id: String(index),
-              code: apiRate.currency,
+              code: validCode.toUpperCase(),
               name: name,
               value: CurrencyService.parseRate(apiRate.rate?.average),
               changePercent: CurrencyService.parsePercentage(
@@ -241,12 +287,25 @@ export class CurrencyService {
               sellValue: CurrencyService.parseRate(apiRate.rate?.sell),
               buyChangePercent: CurrencyService.parsePercentage(apiRate.change?.buy?.percent),
               sellChangePercent: CurrencyService.parsePercentage(apiRate.change?.sell?.percent),
-            });
+            };
+
+            // Add spread percentage if available (usually only for USD)
+            if (apiRate.spread?.p2p?.average?.percentage !== undefined) {
+              rateData.spreadPercentage = CurrencyService.parsePercentage(
+                apiRate.spread.p2p.average.percentage,
+              );
+            }
+
+            rates.push(rateData);
           });
         }
 
         // 1.5 Process Border Rates
         if (response.border && Array.isArray(response.border)) {
+          // Get USDT rate to calculate border rates correctly
+          const usdtRate = response.crypto?.find(c => c.currency === 'USDT');
+          const usdtInVes = usdtRate ? (usdtRate.rate.buy + usdtRate.rate.sell) / 2 : null;
+
           response.border.forEach((apiRate, index) => {
             let name = apiRate.currency;
             let iconName = 'currency-usd';
@@ -277,8 +336,17 @@ export class CurrencyService {
               case 'JPY':
                 iconName = 'currency-jpy';
                 break;
+              case 'PEN':
+                iconName = 'SYMBOL:S/.'; // Custom symbol for Peruvian Sol
+                break;
               case 'COP':
-                iconName = 'currency-usd';
+                iconName = 'currency-usd'; // Colombia Peso uses $ symbol
+                break;
+              case 'CLP':
+                iconName = 'currency-usd'; // Chile Peso uses $ symbol
+                break;
+              case 'ARS':
+                iconName = 'currency-usd'; // Argentina Peso uses $ symbol
                 break;
               case 'BRL':
                 iconName = 'currency-brl';
@@ -290,26 +358,41 @@ export class CurrencyService {
                 iconName = 'Bs';
                 break;
               default:
-                iconName = 'currency-usd';
+                iconName = 'currency-usd'; // Default to $ symbol
             }
 
             // Calculate values if average is missing (common in P2P/Border rates)
             const buy = CurrencyService.parseRate(apiRate.rate?.buy);
             const sell = CurrencyService.parseRate(apiRate.rate?.sell);
-            const avgValue = apiRate.rate?.average
+            const foreignPerUsdt = apiRate.rate?.average
               ? CurrencyService.parseRate(apiRate.rate.average)
               : (buy + sell) / 2;
 
-            // Handle Border Rate Inversion (Tasas Fronterizas are usually Foreign/VES)
-            // We need value in VES (Price of 1 Unit of Foreign Currency in VES) for the calculator logic.
-            // All border rates from API seem to be based on VES (Foreign/VES).
-            let finalValue = avgValue;
-            let finalBuy = buy;
-            let finalSell = sell;
+            // Border rates from API come as Foreign/USDT (e.g., 3660 COP per 1 USDT, 3.42 PEN per 1 USDT)
+            // We need to convert to VES/Foreign using USDT as bridge:
+            // Example: If 1 USDT = 544.83 VES and 1 USDT = 3660.306 COP
+            // Then: 1 VES = 3660.306 / 544.83 = 6.72 COP (finalValue represents Foreign per VES)
+            // For PEN: 1 USDT = 3.42 PEN → 1 VES = 3.42 / 544.83 = 0.00628 PEN
+            let finalValue = 0;
+            let finalBuy = 0;
+            let finalSell = 0;
 
-            if (avgValue > 0) finalValue = 1 / avgValue;
-            if (buy > 0) finalBuy = 1 / buy;
-            if (sell > 0) finalSell = 1 / sell;
+            if (usdtInVes && usdtInVes > 0) {
+              // Calculate VES/Foreign ratio: How many Foreign currency units per 1 VES
+              // finalValue = (Foreign/USDT) / (VES/USDT) = Foreign per VES
+              finalValue = foreignPerUsdt / usdtInVes;
+              if (buy > 0) finalBuy = buy / usdtInVes;
+              if (sell > 0) finalSell = sell / usdtInVes;
+            } else {
+              // Fallback: if no USDT data, use direct inversion (old method)
+              finalValue = foreignPerUsdt > 0 ? 1 / foreignPerUsdt : 0;
+              finalBuy = buy > 0 ? 1 / buy : 0;
+              finalSell = sell > 0 ? 1 / sell : 0;
+            }
+
+            // Store original Foreign/USDT rate for calculator (USDT ≈ USD for calculations)
+            // This allows proper conversions in the calculator while displaying Foreign/VES in UI
+            const usdRate = foreignPerUsdt;
 
             // Calculate change percent
             let changePercent = 0;
@@ -321,9 +404,21 @@ export class CurrencyService {
               changePercent = CurrencyService.parsePercentage((buyPercent + sellPercent) / 2);
             }
 
+            // Validate currency code
+            const validCode = apiRate.currency?.trim();
+            if (!validCode) {
+              SafeLogger.error(`[CurrencyService] Skipping border rate with empty code:`, {
+                index,
+                currency: apiRate.currency,
+                name,
+                apiRateData: apiRate,
+              });
+              return;
+            }
+
             rates.push({
               id: `border_${index}`,
-              code: apiRate.currency,
+              code: validCode.toUpperCase(),
               name: name,
               value: finalValue,
               changePercent: changePercent,
@@ -339,14 +434,32 @@ export class CurrencyService {
               sellChangePercent: apiRate.change?.sell?.percent
                 ? CurrencyService.parsePercentage(apiRate.change.sell.percent)
                 : undefined,
+              usdRate: usdRate, // Original Foreign/USD rate for calculator
             });
           });
         }
 
         // 2. Process Crypto Rates
         if (response.crypto && Array.isArray(response.crypto)) {
-          response.crypto.forEach(cryptoItem => {
-            const currencyCode = cryptoItem.currency.toUpperCase();
+          response.crypto.forEach((cryptoItem, cryptoIndex) => {
+            // EARLY VALIDATION: Check currency before ANY processing
+            const rawCurrency = cryptoItem.currency;
+            if (!rawCurrency || typeof rawCurrency !== 'string' || rawCurrency.trim() === '') {
+              SafeLogger.error(
+                `[CurrencyService] EARLY SKIP - Empty/invalid currency at index ${cryptoIndex}:`,
+                {
+                  cryptoIndex,
+                  rawCurrency,
+                  typeOf: typeof rawCurrency,
+                  cryptoItemKeys: Object.keys(cryptoItem),
+                  source: cryptoItem.source,
+                  rate: cryptoItem.rate,
+                },
+              );
+              return; // Skip this item immediately
+            }
+
+            const currencyCode = rawCurrency.toUpperCase();
             let name = currencyCode;
             let iconName = 'currency-bitcoin';
 
@@ -416,8 +529,8 @@ export class CurrencyService {
             const avgChange = (buyPercent + sellPercent) / 2;
 
             rates.push({
-              id: `${cryptoItem.currency.toLowerCase()}_p2p`,
-              code: cryptoItem.currency,
+              id: `${currencyCode.toLowerCase()}_p2p`,
+              code: currencyCode,
               name: name,
               value: CurrencyService.parseRate(avgValue),
               changePercent: CurrencyService.parsePercentage(avgChange),
@@ -564,11 +677,26 @@ export class CurrencyService {
   /**
    * Safe cross-rate conversion: (Amount * FromRate) / ToRate
    * Reduces floating point errors by multiplying before dividing.
+   * Uses usdRate for border currencies when available for accurate calculator conversions.
    */
   static convertCrossRate(amount: number, fromRate: number, toRate: number): number {
     if (amount < 0) return 0;
     if (toRate === 0) return 0;
     return (amount * fromRate) / toRate;
+  }
+
+  /**
+   * Returns the appropriate rate to use for calculator conversions.
+   * For border rates, returns usdRate (Foreign/USD) if available,
+   * otherwise returns the display value (Foreign/VES).
+   */
+  static getCalculatorRate(rate: CurrencyRate): number {
+    // For border rates, prefer usdRate (original Foreign/USD from API)
+    if (rate.type === 'border' && rate.usdRate !== undefined) {
+      return rate.usdRate;
+    }
+    // For all other rates, use display value
+    return rate.value;
   }
 
   /**
@@ -583,10 +711,15 @@ export class CurrencyService {
     // Rule 1: VES -> All
     if (source.code === 'VES' || source.code === 'Bs') return allRates;
 
-    // Rule 2: BCV (Fiat) -> VES, Crypto or Border
+    // Rule 2: BCV (Fiat) -> VES, Crypto, Border or Other Fiat
     if (source.type === 'fiat') {
       return allRates.filter(
-        r => r.code === 'VES' || r.code === 'Bs' || r.type === 'crypto' || r.type === 'border',
+        r =>
+          r.code === 'VES' ||
+          r.code === 'Bs' ||
+          r.type === 'crypto' ||
+          r.type === 'border' ||
+          r.type === 'fiat',
       );
     }
 

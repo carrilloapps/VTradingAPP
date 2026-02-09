@@ -14,6 +14,7 @@ import { useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import DeviceInfo from 'react-native-device-info';
 
+import { VersionUtils } from '@/utils/VersionUtils';
 import SafeLogger from '@/utils/safeLogger';
 import HomeScreen from '@/screens/HomeScreen';
 import SettingsScreen from '@/screens/SettingsScreen';
@@ -56,8 +57,9 @@ export type RootStackParamList = {
   Auth: undefined;
   Main: undefined;
   Notifications: undefined;
+  Settings: undefined;
   Widgets: undefined;
-  AdvancedCalculator: undefined;
+  AdvancedCalculator: { showBackButton?: boolean };
   BankRates: undefined;
   WebView: { url: string; title?: string };
   AddAlert: { editAlert?: UserAlert };
@@ -75,7 +77,7 @@ export type MainTabParamList = {
   Rates: undefined;
   Home: undefined;
   Discover: { categorySlug?: string; tagSlug?: string }; // Updated with slugs
-  Settings: undefined;
+  Calculator: undefined;
 };
 
 // Root Stack that includes Splash
@@ -114,7 +116,7 @@ function AuthNavigator() {
 // Tab Icon Components (extracted to avoid re-creation on each render)
 const MarketsIcon = ({ color }: { color: string }) => (
   <View style={tabStyles.iconContainer24}>
-    <MaterialCommunityIcons name="chart-line" size={24} color={color} />
+    <MaterialCommunityIcons name="bank" size={24} color={color} />
   </View>
 );
 
@@ -146,9 +148,9 @@ const DiscoverIcon = ({ color }: { color: string }) => (
   </View>
 );
 
-const SettingsIcon = ({ color }: { color: string }) => (
+const CalculatorIcon = ({ color }: { color: string }) => (
   <View style={tabStyles.iconContainer24}>
-    <MaterialCommunityIcons name="cog" size={24} color={color} />
+    <MaterialCommunityIcons name="calculator" size={24} color={color} />
   </View>
 );
 
@@ -207,11 +209,11 @@ function MainTabNavigator() {
         }}
       />
       <Tab.Screen
-        name="Settings"
-        component={SettingsScreen}
+        name="Calculator"
+        component={AdvancedCalculatorScreen}
         options={{
-          title: 'Configuración',
-          tabBarIcon: SettingsIcon,
+          title: 'Calculadora',
+          tabBarIcon: CalculatorIcon,
         }}
       />
     </Tab.Navigator>
@@ -291,11 +293,11 @@ const AppNavigator = () => {
   const { isDark } = useThemeContext();
 
   // Zustand store selectors
-  const user = useAuthStore(state => state.user);
   const authLoading = useAuthStore(state => state.isLoading);
   const [isReady, setIsReady] = useState(false);
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [showForceUpdate, setShowForceUpdate] = useState(false);
+  const [forceUpdateUrl, setForceUpdateUrl] = useState<string | undefined>(undefined);
   const routeNameRef = React.useRef<string | undefined>(undefined);
 
   React.useEffect(() => {
@@ -316,18 +318,68 @@ const AppNavigator = () => {
           forceUpdate?: {
             build: number;
             minVersion?: string;
+            storeUrl?: string;
           };
         }
 
-        const config = remoteConfigService.getJson<RemoteConfigStrings>('strings');
+        // Try to get from 'settings' first as requested, fallback to 'strings'
+        const settingsJson = remoteConfigService.getJson<any>('settings');
+        const stringsJson = remoteConfigService.getJson<any>('strings');
 
-        if (config && config.forceUpdate) {
-          const currentBuild = parseInt(DeviceInfo.getBuildNumber(), 10);
-          const requiredBuild = config.forceUpdate.build;
+        // Strategy: find an object that has either 'forceUpdate' OR 'build'
+        const rawConfig = settingsJson || stringsJson;
 
-          if (currentBuild < requiredBuild) {
-            setShowForceUpdate(true);
+        SafeLogger.info('[ForceUpdate] Raw config received:', {
+          hasSettings: !!settingsJson,
+          hasStrings: !!stringsJson,
+          keys: rawConfig ? Object.keys(rawConfig) : []
+        });
+
+        // Normalize config to extract forceUpdate data
+        let updateData = null;
+        if (rawConfig) {
+          if (rawConfig.forceUpdate) {
+            updateData = rawConfig.forceUpdate;
+          } else if (rawConfig.build !== undefined) {
+            // Flat structure
+            updateData = rawConfig;
           }
+        }
+
+        if (updateData) {
+          const currentBuild = parseInt(DeviceInfo.getBuildNumber(), 10);
+          const currentVersion = DeviceInfo.getVersion();
+          const requiredBuild = parseInt(updateData.build || '0', 10);
+          const minVersion = updateData.minVersion;
+          const storeUrl = updateData.storeUrl;
+
+          SafeLogger.info('[ForceUpdate] Comparing:', {
+            current: { build: currentBuild, version: currentVersion },
+            required: { build: requiredBuild, minVersion: minVersion }
+          });
+
+          let updateRequired = false;
+
+          // 1. Build check
+          if (currentBuild < requiredBuild) {
+            updateRequired = true;
+            SafeLogger.info('[ForceUpdate] Build too old');
+          }
+
+          // 2. Version check
+          if (!updateRequired && minVersion) {
+            if (VersionUtils.isLower(currentVersion, minVersion)) {
+              updateRequired = true;
+              SafeLogger.info('[ForceUpdate] Version too old');
+            }
+          }
+
+          if (updateRequired) {
+            setShowForceUpdate(true);
+            setForceUpdateUrl(storeUrl);
+          }
+        } else {
+          SafeLogger.info('[ForceUpdate] No valid update data found in settings/strings');
         }
       } catch (e) {
         // Fail silently on config check, don't block app unless confirmed
@@ -354,6 +406,12 @@ const AppNavigator = () => {
     },
   };
 
+  // Helper to detect if we're in tab navigation
+  const isTabNavigationScreen = (routeName?: string) => {
+    const tabScreens = ['Markets', 'Rates', 'Home', 'HomeMain', 'Discover', 'Calculator'];
+    return routeName ? tabScreens.includes(routeName) : false;
+  };
+
   if (authLoading || !isReady) {
     return <AuthLoading />;
   }
@@ -362,7 +420,7 @@ const AppNavigator = () => {
     return (
       <React.Fragment>
         <StatusBar backgroundColor="transparent" translucent barStyle="light-content" />
-        <ForceUpdateModal visible={true} />
+        <ForceUpdateModal visible={true} storeUrl={forceUpdateUrl} />
       </React.Fragment>
     );
   }
@@ -383,6 +441,31 @@ const AppNavigator = () => {
 
           if (previousRouteName !== currentRouteName && currentRouteName) {
             await analyticsService.logScreenView(currentRouteName, currentRouteName);
+
+            // Log custom events for tab navigation vs stack screens
+            const isCurrentTab = isTabNavigationScreen(currentRouteName);
+            const wasPreviousTab = isTabNavigationScreen(previousRouteName);
+
+            if (isCurrentTab && !wasPreviousTab) {
+              // Entering tab navigation from a stack screen
+              await analyticsService.logEvent('tab_navigation_enter', {
+                tab_name: currentRouteName,
+                from_screen: previousRouteName || 'unknown',
+              });
+            } else if (!isCurrentTab && wasPreviousTab) {
+              // Entering a stack screen from tab navigation
+              await analyticsService.logEvent('stack_screen_enter', {
+                screen_name: currentRouteName,
+                from_tab: previousRouteName || 'unknown',
+              });
+            } else if (!isCurrentTab && !wasPreviousTab) {
+              // Moving between stack screens
+              await analyticsService.logEvent('stack_screen_enter', {
+                screen_name: currentRouteName,
+                from_screen: previousRouteName || 'unknown',
+              });
+            }
+            // If both are tabs, we're just switching tabs (already handled by screen_view)
           }
           routeNameRef.current = currentRouteName;
         }}
@@ -392,12 +475,20 @@ const AppNavigator = () => {
             <RootStack.Screen name="Onboarding">
               {props => <OnboardingScreen {...props} onFinish={() => setShowOnboarding(false)} />}
             </RootStack.Screen>
-          ) : user ? (
+          ) : (
             <>
               <RootStack.Screen name="Main" component={MainTabNavigator} />
               <RootStack.Screen
                 name="Notifications"
                 component={NotificationsScreen}
+                options={{
+                  headerShown: false,
+                  animation: 'default',
+                }}
+              />
+              <RootStack.Screen
+                name="Settings"
+                component={SettingsScreen}
                 options={{
                   headerShown: false,
                   animation: 'default',
@@ -501,9 +592,9 @@ const AppNavigator = () => {
                   animation: 'default',
                 }}
               />
+              {/* Auth Navigator sigue disponible, pero se accede desde Settings */}
+              <RootStack.Screen name="Auth" component={AuthNavigator} />
             </>
-          ) : (
-            <RootStack.Screen name="Auth" component={AuthNavigator} />
           )}
         </RootStack.Navigator>
       </NavigationContainer>

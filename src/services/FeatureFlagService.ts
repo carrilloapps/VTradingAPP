@@ -1,4 +1,4 @@
-import { Platform } from 'react-native';
+import { Platform, NativeModules } from 'react-native';
 import DeviceInfo from 'react-native-device-info';
 
 import { mmkvStorage } from '@/services/StorageService';
@@ -73,6 +73,24 @@ export interface FeatureCondition {
   models?: string[]; // e.g. "Pixel", "Samsung" (contains check)
   notificationsEnabled?: boolean;
   rolloutPercentage?: number; // 0-100
+
+  // User-based filters
+  emails?: string[]; // Filter by email address (case-insensitive)
+  authProviders?: ('password' | 'google.com' | 'apple.com')[]; // Auth provider (password = email/password)
+  planTypes?: ('free' | 'premium')[]; // User plan type
+
+  // Location & Language
+  countryCodes?: string[]; // ISO country codes (VE, US, CO, etc.)
+  deviceLanguages?: string[]; // Device language codes (en, es, pt, etc.)
+
+  // Engagement filters
+  minDaysSinceInstall?: number; // Minimum days since first install
+  maxDaysSinceInstall?: number; // Maximum days since first install
+  isFirstTimeUser?: boolean; // Target first-time users (no previous sessions)
+
+  // Registration date filters
+  minRegistrationDate?: string; // Minimum registration date (ISO format: YYYY-MM-DD)
+  maxRegistrationDate?: string; // Maximum registration date (ISO format: YYYY-MM-DD)
 }
 
 export interface FeatureRule {
@@ -93,6 +111,26 @@ export interface RemoteConfigSchema {
 
 class FeatureFlagService {
   private rolloutId: number | null = null;
+
+  /**
+   * Get device locale (language-country format: en-US, es-VE, etc.)
+   */
+  private getDeviceLocale(): string {
+    try {
+      if (Platform.OS === 'ios') {
+        return (
+          NativeModules.SettingsManager?.settings?.AppleLocale ||
+          NativeModules.SettingsManager?.settings?.AppleLanguages?.[0] ||
+          'en-US'
+        );
+      } else {
+        return NativeModules.I18nManager?.localeIdentifier || 'en-US';
+      }
+    } catch (e) {
+      SafeLogger.error('[FeatureFlag] Error getting device locale', e);
+      return 'en-US';
+    }
+  }
 
   /**
    * Get a persistent random number (0-99) for this device for percentage rollouts
@@ -223,6 +261,190 @@ class FeatureFlagService {
       // If rollout is 10%, we include IDs 0-9
       if (rolloutId >= conditions.rolloutPercentage) {
         return false;
+      }
+    }
+
+    // 9. Email Filter
+    if (conditions.emails && conditions.emails.length > 0) {
+      const user = authService.getCurrentUser();
+      if (!user?.email) {
+        SafeLogger.log('[FeatureFlag] Denied: No email found');
+        return false;
+      }
+      const normalizedUserEmail = user.email.toLowerCase();
+      const matches = conditions.emails.some(email => email.toLowerCase() === normalizedUserEmail);
+      if (!matches) {
+        SafeLogger.log(`[FeatureFlag] Denied by email: ${user.email} not in whitelist`);
+        return false;
+      }
+    }
+
+    // 10. Auth Provider Filter
+    if (conditions.authProviders && conditions.authProviders.length > 0) {
+      const user = authService.getCurrentUser();
+      if (!user) {
+        SafeLogger.log('[FeatureFlag] Denied: No authenticated user');
+        return false;
+      }
+
+      // Get provider from user's providerData
+      const userProviders = user.providerData.map(p => p.providerId);
+      const matches = conditions.authProviders.some(provider => userProviders.includes(provider));
+
+      if (!matches) {
+        SafeLogger.log(
+          `[FeatureFlag] Denied by authProvider: User providers=[${userProviders.join(', ')}], Required=[${conditions.authProviders.join(', ')}]`,
+        );
+        return false;
+      }
+    }
+
+    // 11. Plan Type Filter
+    if (conditions.planTypes && conditions.planTypes.length > 0) {
+      // Check user plan from storage (assuming a key 'user_plan_type')
+      const userPlan = (mmkvStorage.getString('user_plan_type') || 'free') as 'free' | 'premium';
+      if (!conditions.planTypes.includes(userPlan)) {
+        SafeLogger.log(
+          `[FeatureFlag] Denied by planType: User=${userPlan}, Required=[${conditions.planTypes.join(', ')}]`,
+        );
+        return false;
+      }
+    }
+
+    // 12. Country Code Filter (from device locale)
+    if (conditions.countryCodes && conditions.countryCodes.length > 0) {
+      // Get country from device locale
+      let countryCode = 'US'; // Default fallback
+      try {
+        const locales = this.getDeviceLocale();
+        // Locale format is usually "en-US" or "es-VE"
+        if (locales && locales.includes('-')) {
+          countryCode = locales.split('-')[1].toUpperCase();
+        } else if (locales && locales.includes('_')) {
+          // Some devices use underscore: en_US
+          countryCode = locales.split('_')[1].toUpperCase();
+        }
+      } catch (e) {
+        SafeLogger.error('[FeatureFlag] Error getting country code', e);
+      }
+
+      const normalizedCodes = conditions.countryCodes.map(c => c.toUpperCase());
+      if (!normalizedCodes.includes(countryCode)) {
+        SafeLogger.log(
+          `[FeatureFlag] Denied by countryCode: Device=${countryCode}, Required=[${conditions.countryCodes.join(', ')}]`,
+        );
+        return false;
+      }
+    }
+
+    // 13. Device Language Filter
+    if (conditions.deviceLanguages && conditions.deviceLanguages.length > 0) {
+      // Get language code from device ("en", "es", "pt", etc.)
+      let languageCode = 'en'; // Default fallback
+      try {
+        const locales = this.getDeviceLocale();
+        if (locales) {
+          // Extract language code (first part before '-' or '_')
+          const separator = locales.includes('-') ? '-' : '_';
+          languageCode = locales.split(separator)[0].toLowerCase();
+        }
+      } catch (e) {
+        SafeLogger.error('[FeatureFlag] Error getting device language', e);
+      }
+
+      const normalizedLangs = conditions.deviceLanguages.map(l => l.toLowerCase());
+      if (!normalizedLangs.includes(languageCode)) {
+        SafeLogger.log(
+          `[FeatureFlag] Denied by deviceLanguage: Device=${languageCode}, Required=[${conditions.deviceLanguages.join(', ')}]`,
+        );
+        return false;
+      }
+    }
+
+    // 14. Days Since Install Filter
+    if (
+      conditions.minDaysSinceInstall !== undefined ||
+      conditions.maxDaysSinceInstall !== undefined
+    ) {
+      const firstInstallTimeMs = await DeviceInfo.getFirstInstallTime();
+      const daysSinceInstall = Math.floor(
+        (Date.now() - firstInstallTimeMs) / (1000 * 60 * 60 * 24),
+      );
+
+      if (conditions.minDaysSinceInstall !== undefined) {
+        if (daysSinceInstall < conditions.minDaysSinceInstall) {
+          SafeLogger.log(
+            `[FeatureFlag] Denied by minDaysSinceInstall: Current=${daysSinceInstall}, Min=${conditions.minDaysSinceInstall}`,
+          );
+          return false;
+        }
+      }
+
+      if (conditions.maxDaysSinceInstall !== undefined) {
+        if (daysSinceInstall > conditions.maxDaysSinceInstall) {
+          SafeLogger.log(
+            `[FeatureFlag] Denied by maxDaysSinceInstall: Current=${daysSinceInstall}, Max=${conditions.maxDaysSinceInstall}`,
+          );
+          return false;
+        }
+      }
+    }
+
+    // 15. First Time User Filter
+    if (conditions.isFirstTimeUser !== undefined) {
+      // Check if user has completed onboarding or has session count
+      const hasCompletedOnboarding = mmkvStorage.getBoolean('has_completed_onboarding') || false;
+      const sessionCount = parseInt(mmkvStorage.getString('session_count') || '0', 10);
+
+      const isFirstTime = !hasCompletedOnboarding && sessionCount <= 1;
+
+      if (conditions.isFirstTimeUser !== isFirstTime) {
+        SafeLogger.log(
+          `[FeatureFlag] Denied by isFirstTimeUser: User=${isFirstTime}, Required=${conditions.isFirstTimeUser}`,
+        );
+        return false;
+      }
+    }
+
+    // 16. Registration Date Filter
+    if (conditions.minRegistrationDate || conditions.maxRegistrationDate) {
+      const user = authService.getCurrentUser();
+      if (!user || !user.metadata?.creationTime) {
+        SafeLogger.log('[FeatureFlag] Denied by registrationDate: No user or creation time');
+        return false;
+      }
+
+      // Parse user registration date (Firebase returns ISO string)
+      const userRegistrationDate = new Date(user.metadata.creationTime);
+      // Get timestamp at start of day in UTC
+      const userDateTimestamp = Date.UTC(
+        userRegistrationDate.getUTCFullYear(),
+        userRegistrationDate.getUTCMonth(),
+        userRegistrationDate.getUTCDate(),
+      );
+
+      if (conditions.minRegistrationDate) {
+        const minDateParts = conditions.minRegistrationDate.split('-').map(Number);
+        const minDateTimestamp = Date.UTC(minDateParts[0], minDateParts[1] - 1, minDateParts[2]);
+
+        if (userDateTimestamp < minDateTimestamp) {
+          SafeLogger.log(
+            `[FeatureFlag] Denied by minRegistrationDate: User=${new Date(userDateTimestamp).toISOString().split('T')[0]}, Min=${conditions.minRegistrationDate}`,
+          );
+          return false;
+        }
+      }
+
+      if (conditions.maxRegistrationDate) {
+        const maxDateParts = conditions.maxRegistrationDate.split('-').map(Number);
+        const maxDateTimestamp = Date.UTC(maxDateParts[0], maxDateParts[1] - 1, maxDateParts[2]);
+
+        if (userDateTimestamp > maxDateTimestamp) {
+          SafeLogger.log(
+            `[FeatureFlag] Denied by maxRegistrationDate: User=${new Date(userDateTimestamp).toISOString().split('T')[0]}, Max=${conditions.maxRegistrationDate}`,
+          );
+          return false;
+        }
       }
     }
 

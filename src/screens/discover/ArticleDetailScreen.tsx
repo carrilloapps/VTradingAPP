@@ -139,6 +139,7 @@ const ArticleDetailScreen = () => {
   const route = useRoute();
   const insets = useSafeAreaInsets();
   const [webViewHeight, setWebViewHeight] = React.useState(100);
+  SafeLogger.info('[ArticleDetailScreen] Route params:', route.params);
   const [comments, setComments] = React.useState<FormattedComment[]>([]);
   const [commentsLoading, setCommentsLoading] = React.useState(false);
   const [commentsEnabled, setCommentsEnabled] = React.useState(false);
@@ -163,9 +164,10 @@ const ArticleDetailScreen = () => {
   // Safe width calculation for header content
   // Logic to merge incoming params or fetched data
   // Logic to prioritize fetched data (full article) over incoming params (partial article)
-  const params = route.params as { article?: FormattedPost; slug?: string };
+  const params = route.params as { article?: FormattedPost; slug?: string; id?: string };
   const incomingArticle = articleData || params?.article;
   const slug = params?.slug;
+  const articleId = params?.id;
 
   const article = incomingArticle
     ? {
@@ -199,13 +201,13 @@ const ArticleDetailScreen = () => {
 
       // Always fetch full article data to ensure we have the complete content,
       // as list views might only contain excerpts or truncated content.
-      if (slug || currentArticle?.id) {
+      if (slug || articleId || currentArticle?.id) {
         setIsLoading(true); // Always show skeleton while fetching full data
         setError(null);
         try {
           const fetchedArticle = slug
             ? await wordPressService.getPostBySlug(slug)
-            : await wordPressService.getPostById(Number(currentArticle?.id), true); // Force bypass cache for detail
+            : await wordPressService.getPostById(Number(articleId || currentArticle?.id), true); // Force bypass cache for detail
 
           if (fetchedArticle) {
             setArticleData(fetchedArticle);
@@ -255,7 +257,7 @@ const ArticleDetailScreen = () => {
       }
     };
     loadArticleAndRelated();
-  }, [slug, params?.article?.id, params?.article]); // Depend on id to refetch if switching articles via related section
+  }, [slug, articleId, params?.article?.id, params?.article]); // Depend on id to refetch if switching articles via related section
 
   React.useEffect(() => {
     if (article?.id) {
@@ -440,7 +442,7 @@ const ArticleDetailScreen = () => {
     }
   };
 
-  /* 
+  /*
   const headerOpacity = scrollY.interpolate({
     inputRange: [0, 200],
     outputRange: [0, 1],
@@ -458,11 +460,11 @@ const ArticleDetailScreen = () => {
           <head>
             <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
             <style>
-              body { 
-                font-family: -apple-system, Roboto, sans-serif; 
-                font-size: 17px; 
-                line-height: 1.6; 
-                color: ${textColor}; 
+              body {
+                font-family: -apple-system, Roboto, sans-serif;
+                font-size: 17px;
+                line-height: 1.6;
+                color: ${textColor};
                 background-color: transparent;
                 margin: 0;
                 padding: 0;
@@ -471,7 +473,7 @@ const ArticleDetailScreen = () => {
               p { margin-bottom: 16px; font-size: 17px; }
               a { color: ${linkColor}; text-decoration: none; font-weight: 600; }
               img { max-width: 100%; height: auto; border-radius: ${theme.roundness * 3}px; margin: 16px 0; background-color: ${theme.colors.surfaceVariant}; }
-              blockquote { 
+              blockquote {
                 border-left: 4px solid ${theme.colors.primary};
                 padding: 4px 0 4px 16px;
                 margin: 20px 0;
@@ -909,43 +911,6 @@ const ArticleDetailScreen = () => {
                   )
                 : null}
           </View>
-
-          {/* Summary / Lead Paragraph Section */}
-          {article.seoDescription && (
-            <View
-              style={[
-                styles.summaryBox,
-                {
-                  backgroundColor: theme.colors.elevation.level1,
-                  borderColor: theme.colors.outlineVariant,
-                  borderRadius: theme.roundness * 4,
-                },
-              ]}
-            >
-              <View
-                style={[
-                  styles.summaryLabel,
-                  {
-                    backgroundColor: theme.colors.primary,
-                    borderRadius: theme.roundness,
-                  },
-                ]}
-              >
-                <Text
-                  variant="labelSmall"
-                  style={[styles.summaryLabelText, { color: theme.colors.onPrimary }]}
-                >
-                  IMPORTANTE
-                </Text>
-              </View>
-              <Text
-                variant="bodyMedium"
-                style={[styles.summaryText, { color: theme.colors.onSurfaceVariant }]}
-              >
-                {article.seoDescription}
-              </Text>
-            </View>
-          )}
 
           {/* SEO/Tags */}
           {article.tags && article.tags.length > 0 && (

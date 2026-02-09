@@ -1,21 +1,27 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
-import { View, StyleSheet, ScrollView, InteractionManager } from 'react-native';
+import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
+import { View, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import Share from 'react-native-share';
 import { Surface, Text, Icon } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { captureRef } from 'react-native-view-shot';
+import { runAfterInteractions } from '@/utils/TaskUtils';
 
 import UnifiedHeader from '@/components/ui/UnifiedHeader';
 import { useAppTheme } from '@/theme/theme';
 import { BolivarIcon } from '@/components/ui/BolivarIcon';
+import { CurrencyCodeIcon } from '@/components/ui/CurrencyCodeIcon';
 import { useAuthStore } from '@/stores/authStore';
 import { useToastStore } from '@/stores/toastStore';
 import CustomDialog from '@/components/ui/CustomDialog';
 import CustomButton from '@/components/ui/CustomButton';
 import CurrencyShareGraphic from '@/components/dashboard/CurrencyShareGraphic';
+import CurrencyHistoryChart from '@/components/dashboard/CurrencyHistoryChart';
 import { observabilityService } from '@/services/ObservabilityService';
 import { analyticsService } from '@/services/firebase/AnalyticsService';
 import { StocksService } from '@/services/StocksService';
+import { rateHistoryService } from '@/services/RateHistoryService';
+import type { HistoryDataPoint } from '@/services/RateHistoryService';
+import { getSafeCurrencyCode, getDisplayPair, getDisplayCurrency } from '@/utils/CurrencyUtils';
 
 const CurrencyDetailScreen = ({ route, navigation }: any) => {
   const theme = useAppTheme();
@@ -24,6 +30,34 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
   useEffect(() => {
     analyticsService.logScreenView('CurrencyDetail', currencyId);
   }, [currencyId]);
+
+  // Extract a safe currency code for display and logic
+  const safeCode = useMemo(() => getSafeCurrencyCode(rate), [rate]);
+
+  // Load currency history
+  useEffect(() => {
+    const loadHistory = async () => {
+      try {
+        setHistoryLoading(true);
+        setHistoryError(null);
+
+        const history = await rateHistoryService.getCurrencyHistory(safeCode, 1, 30);
+        setHistoryData(history.history);
+      } catch (error) {
+        observabilityService.captureError(error, {
+          context: 'CurrencyDetailScreen.loadHistory',
+          currencyCode: safeCode,
+        });
+        setHistoryError('No se pudo cargar el historial');
+      } finally {
+        setHistoryLoading(false);
+      }
+    };
+
+    runAfterInteractions(() => {
+      loadHistory();
+    });
+  }, [safeCode]);
 
   // Zustand store selector
   const user = useAuthStore(state => state.user); // Changed from useAuth
@@ -34,10 +68,54 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
   const [sharing, setSharing] = useState(false);
   const viewShotRef = useRef<any>(null);
 
-  const isPremium = !!(user && !user.isAnonymous);
+  // History data state
+  const [historyData, setHistoryData] = useState<HistoryDataPoint[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(true);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+
+  const isPremium = !!user; // Usuario logueado = Premium
+
+  // Determine if we should auto-invert for border rates with small values
+  const isBorderRateWithSmallValue = rate.type === 'border' && rate.value < 1;
+  const defaultShowInverse = isBorderRateWithSmallValue;
+
+  // Use showInverse state or default behavior
+  const [showInverse, setShowInverse] = useState(defaultShowInverse);
+
+  // Calculate display values based on showInverse toggle
+  const displayValue = showInverse && rate.value !== 0 ? 1 / rate.value : rate.value;
+
+  // Determine decimal places based on the ORIGINAL value (not inverted)
+  // This ensures consistency: small original values get more decimals
+  // For border rates, we always show more precision to reflect market volatility
+  const getDecimalPlaces = () => {
+    // Border rates always get more precision due to P2P market volatility
+    if (rate.type === 'border') {
+      const baseValue = rate.value; // Always use the original value
+      if (baseValue < 0.01) return 6; // Very small values (e.g., PEN: 0.006313)
+      if (baseValue < 1) return 4; // Values between 0.01 and 1
+      return 4; // Even large values get 4 decimals (e.g., COP: 6.7234)
+    }
+    // Non-border rates use standard precision
+    return 2;
+  };
+
+  // For border rates, value represents VES/Foreign (e.g., 1 VES = 6.72 COP)
+  // Without inversion: Shows VES/COP = 6.72 COP ("1 VES = 6.72 COP")
+  // With inversion: Shows COP/VES = 0.149 VES ("1 COP = 0.149 VES")
+  // For PEN where value = 0.00628: VES/PEN = 0.00628 means "1 VES = 0.00628 PEN"
+  // Inverted: PEN/VES = 159.24 means "1 PEN = 159.24 VES"
+  const displayPair = getDisplayPair(safeCode, showInverse);
+
+  // The displayCurrency is always the denominator (right side) of the pair
+  const displayCurrency = getDisplayCurrency(safeCode, showInverse);
 
   const isPositive = (rate.changePercent || 0) > 0;
   const isNegative = (rate.changePercent || 0) < 0;
+
+  // Extract custom symbol if iconName follows 'SYMBOL:X' pattern
+  const isCustomSymbol = rate.iconName?.startsWith('SYMBOL:');
+  const customSymbol = isCustomSymbol ? rate.iconName?.replace('SYMBOL:', '') : null;
 
   const trendColor = isPositive
     ? theme.colors.trendUp
@@ -52,15 +130,21 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
 
   const trendIcon = isPositive ? 'trending-up' : isNegative ? 'trending-down' : 'minus';
 
+  const marketStatus = useMemo(() => {
+    if (rate.type === 'crypto' || rate.type === 'border') {
+      return 'P2P ACTIVO';
+    }
+    return StocksService.isMarketOpen() ? 'ABIERTO' : 'CERRADO';
+  }, [rate.type]);
+
   const getDynamicShareMessage = useCallback(
     (format: '1:1' | '16:9' | 'text' = '1:1') => {
-      const pair = rate.name.split(' • ')[0] || `${rate.code}/VES`;
+      const pair = displayPair; // Use the already calculated safe pair
       const changeSign =
         (rate.changePercent || 0) > 0 ? '📈' : (rate.changePercent || 0) < 0 ? '📉' : '📊';
       const changeText = rate.changePercent
         ? (rate.changePercent > 0 ? '+' : '') + rate.changePercent.toFixed(2) + '%'
         : '0.00%';
-      const marketStatus = StocksService.isMarketOpen() ? 'ABIERTO' : 'CERRADO';
 
       if (format === '16:9') {
         // Optimized for Stories: Punchy, direct, optimized for visual overlays
@@ -91,7 +175,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
       }
 
       message +=
-        `🕒 *Estado del mercado:* ${rate.source !== 'P2P' ? marketStatus : 'ABIERTO'}\n` +
+        `🕒 *Estado del mercado:* ${marketStatus}\n` +
         `📍 *Act:* ${new Date(rate.lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}\n\n` +
         `🌐 vtrading.app`;
       return message;
@@ -124,7 +208,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
 
       analyticsService.logShare(
         'currency',
-        rate.code,
+        safeCode,
         shareFormat === '1:1' ? 'image_square' : 'image_story',
       );
     } catch (e) {
@@ -132,7 +216,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
         observabilityService.captureError(e, {
           context: 'CurrencyDetailScreen.handleShareImage',
           action: 'share_currency_image',
-          currencyCode: rate.code,
+          currencyCode: safeCode,
           format: shareFormat,
           errorMessage: (e as any).message,
         });
@@ -147,7 +231,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
   useEffect(() => {
     if (sharing && viewShotRef.current) {
       // Wait for next frame/interaction to ensure layout is updated
-      const task = InteractionManager.runAfterInteractions(() => {
+      const task = runAfterInteractions(() => {
         captureShareImage();
       });
       return () => task.cancel();
@@ -167,13 +251,13 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
       const message = getDynamicShareMessage('text');
 
       await Share.open({ message });
-      analyticsService.logShare('currency', rate.code, 'text');
+      analyticsService.logShare('currency', safeCode, 'text');
     } catch (e) {
       if (e && (e as any).message !== 'User did not share' && (e as any).message !== 'CANCELLED') {
         observabilityService.captureError(e, {
           context: 'CurrencyDetailScreen.handleShareText',
           action: 'share_currency_text',
-          currencyCode: rate.code,
+          currencyCode: safeCode,
           errorMessage: (e as any).message,
         });
         showToast('Error al compartir texto', 'error');
@@ -202,9 +286,6 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
   const statCardBorder = theme.colors.outlineVariant;
   const statLabelColor = theme.colors.onSurfaceVariant;
   const statValueColor = theme.colors.onSurface;
-  const chartPlaceholderBg = theme.colors.elevation.level1;
-  const chartPlaceholderBorder = theme.colors.outlineVariant;
-  const chartPlaceholderTextColor = theme.colors.onSurfaceVariant;
   const shareDialogTextColor = theme.colors.onSurfaceVariant;
 
   const a11yPriceLabel =
@@ -215,7 +296,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
   return (
     <View style={[styles.container, { backgroundColor: containerBgColor }]}>
       <UnifiedHeader
-        title={`${rate.code}/VES`}
+        title={displayPair}
         onBackPress={() => navigation.goBack()}
         rightActionIcon="share-variant"
         onActionPress={handleShare}
@@ -253,6 +334,8 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
             >
               {rate.iconName === 'Bs' ? (
                 <BolivarIcon size={40} color={theme.colors.primary} />
+              ) : isCustomSymbol ? (
+                <CurrencyCodeIcon code={customSymbol!} size={40} color={theme.colors.primary} />
               ) : (
                 <Icon
                   source={rate.iconName || 'currency-usd'}
@@ -281,13 +364,23 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
           <View style={styles.priceContainer}>
             <View style={styles.currencyRow}>
               <Text variant="headlineLarge" style={[styles.priceLarge, { color: priceLargeColor }]}>
-                {rate.value.toLocaleString('es-VE', {
+                {displayValue.toLocaleString('es-VE', {
                   minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
+                  maximumFractionDigits: getDecimalPlaces(),
                 })}
               </Text>
               <View style={styles.bolivarIcon}>
-                <BolivarIcon size={28} color={theme.colors.onSurface} />
+                {displayCurrency === 'VES' ? (
+                  <BolivarIcon size={28} color={theme.colors.onSurface} />
+                ) : isCustomSymbol ? (
+                  <CurrencyCodeIcon code={customSymbol!} size={28} color={theme.colors.onSurface} />
+                ) : rate.iconName === 'currency-usd' && displayCurrency !== 'USD' ? (
+                  <Icon source="currency-usd" size={28} color={theme.colors.onSurface} />
+                ) : (
+                  <Text style={[styles.currencyCode, { color: theme.colors.onSurface }]}>
+                    {displayCurrency}
+                  </Text>
+                )}
               </View>
             </View>
 
@@ -299,6 +392,24 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
                   : '0.00%'}
               </Text>
             </View>
+
+            {/* Toggle button for border rates */}
+            {(rate.type === 'border' || isBorderRateWithSmallValue) && (
+              <TouchableOpacity
+                style={[styles.inverseButton, { backgroundColor: theme.colors.elevation.level2 }]}
+                onPress={() => setShowInverse(!showInverse)}
+                activeOpacity={0.7}
+              >
+                <MaterialCommunityIcons
+                  name="swap-vertical"
+                  size={16}
+                  color={theme.colors.primary}
+                />
+                <Text style={[styles.inverseButtonText, { color: theme.colors.primary }]}>
+                  Ver {showInverse ? `VES/${safeCode}` : `${safeCode}/VES`}
+                </Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
 
@@ -400,19 +511,16 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
             style={[styles.statCard, { backgroundColor: statCardBg, borderColor: statCardBorder }]}
             elevation={0}
             accessible={true}
-            accessibilityLabel={`Última actualización: ${new Date(rate.lastUpdated).toLocaleTimeString()}`}
+            accessibilityLabel={`Estado del mercado: ${marketStatus}`}
           >
             <View style={styles.statHeader}>
-              <MaterialCommunityIcons name="clock-outline" size={18} color={theme.colors.primary} />
+              <MaterialCommunityIcons name="store-outline" size={18} color={theme.colors.primary} />
               <Text variant="labelSmall" style={[styles.statLabelBold, { color: statLabelColor }]}>
-                ÚLT. ACT.
+                ESTADO MERCADO
               </Text>
             </View>
             <Text variant="titleMedium" style={[styles.statValueBold, { color: statValueColor }]}>
-              {new Date(rate.lastUpdated).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit',
-              })}
+              {marketStatus}
             </Text>
           </Surface>
         </View>
@@ -430,28 +538,12 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
             EVOLUCIÓN TEMPORAL
           </Text>
         </View>
-        <Surface
-          style={[
-            styles.chartPlaceholder,
-            {
-              backgroundColor: chartPlaceholderBg,
-              borderColor: chartPlaceholderBorder,
-            },
-          ]}
-          elevation={0}
-        >
-          <MaterialCommunityIcons
-            name="chart-bell-curve-cumulative"
-            size={48}
-            color={theme.colors.outline}
-          />
-          <Text
-            variant="bodyMedium"
-            style={[styles.chartPlaceholderText, { color: chartPlaceholderTextColor }]}
-          >
-            Gráfico detallado próximamente
-          </Text>
-        </Surface>
+        <CurrencyHistoryChart
+          data={historyData}
+          loading={historyLoading}
+          error={historyError}
+          currencyCode={safeCode}
+        />
       </ScrollView>
 
       {/* Sharing Assets */}
@@ -464,7 +556,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
         })}
         isPremium={isPremium}
         aspectRatio={shareFormat}
-        status={StocksService.isMarketOpen() ? 'ABIERTO' : 'CERRADO'}
+        status={marketStatus}
       />
 
       <CustomDialog
@@ -479,7 +571,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
           variant="bodyMedium"
           style={[styles.shareDialogText, { color: shareDialogTextColor }]}
         >
-          Comparte el valor de {rate.code} en tus redes sociales
+          Comparte el valor de {safeCode} en tus redes sociales
         </Text>
 
         <View style={styles.shareButtonsGap}>
@@ -598,6 +690,23 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     fontSize: 18,
   },
+  inverseButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 12,
+    marginTop: 8,
+    gap: 6,
+  },
+  inverseButtonText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  currencyCode: {
+    fontSize: 18,
+    fontWeight: '700',
+  },
   sectionHeader: {
     marginTop: 24,
     marginBottom: 16,
@@ -629,14 +738,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
   },
-  chartPlaceholder: {
-    height: 200,
-    borderRadius: 24,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 24,
-  },
   priceLarge: {
     fontWeight: '900',
     letterSpacing: -1,
@@ -650,10 +751,6 @@ const styles = StyleSheet.create({
   },
   statValueBold: {
     fontWeight: '800',
-  },
-  chartPlaceholderText: {
-    marginTop: 12,
-    fontWeight: '600',
   },
   shareDialogText: {
     textAlign: 'center',

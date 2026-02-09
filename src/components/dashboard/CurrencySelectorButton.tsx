@@ -4,6 +4,7 @@ import { Text, useTheme } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 
 import { BolivarIcon } from '@/components/ui/BolivarIcon';
+import { CurrencyCodeIcon } from '@/components/ui/CurrencyCodeIcon';
 
 interface CurrencySelectorButtonProps {
   currencyCode: string;
@@ -19,6 +20,9 @@ const CurrencySelectorButton: React.FC<CurrencySelectorButtonProps> = ({
   style,
 }) => {
   const theme = useTheme();
+
+  const isCustomSymbol = iconName?.startsWith('SYMBOL:');
+  const customSymbol = isCustomSymbol && iconName ? iconName.replace('SYMBOL:', '') : null;
 
   const themeStyles = React.useMemo(
     () => ({
@@ -50,6 +54,8 @@ const CurrencySelectorButton: React.FC<CurrencySelectorButtonProps> = ({
       <View style={[styles.iconPlaceholder, themeStyles.iconPlaceholder]}>
         {iconName === 'Bs' || currencyCode === 'VES' ? (
           <BolivarIcon color={theme.colors.onSurface} size={18} />
+        ) : isCustomSymbol ? (
+          <CurrencyCodeIcon code={customSymbol!} color={theme.colors.onSurface} size={18} />
         ) : (
           <MaterialCommunityIcons name={iconName} size={18} color={theme.colors.onSurface} />
         )}

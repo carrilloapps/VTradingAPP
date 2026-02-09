@@ -5,8 +5,10 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 
 import { useAppTheme } from '@/theme';
 
+export type MarketState = 'ABIERTO' | 'CERRADO' | 'PRE-APERTURA';
+
 export interface MarketStatusProps {
-  isOpen: boolean;
+  status: MarketState;
   updatedAt: string;
   onRefresh?: () => void;
   showBadge?: boolean;
@@ -14,7 +16,7 @@ export interface MarketStatusProps {
 }
 
 const MarketStatus: React.FC<MarketStatusProps> = ({
-  isOpen,
+  status,
   updatedAt,
   onRefresh,
   showBadge = true,
@@ -24,7 +26,7 @@ const MarketStatus: React.FC<MarketStatusProps> = ({
   const fadeAnim = useRef(new Animated.Value(0.4)).current;
 
   useEffect(() => {
-    if (isOpen) {
+    if (status === 'ABIERTO') {
       Animated.loop(
         Animated.sequence([
           Animated.timing(fadeAnim, {
@@ -40,21 +42,48 @@ const MarketStatus: React.FC<MarketStatusProps> = ({
         ]),
       ).start();
     } else {
-      fadeAnim.setValue(0.4); // Reset if closed
+      fadeAnim.setValue(0.4); // Reset if closed or pre-opening
     }
-  }, [isOpen, fadeAnim]);
+  }, [status, fadeAnim]);
+
+  // Determinar colores según el estado
+  const getStatusColors = () => {
+    switch (status) {
+      case 'ABIERTO':
+        return {
+          bg: 'rgba(16, 185, 129, 0.1)',
+          border: theme.colors.trendUp,
+          text: theme.colors.trendUp,
+        };
+      case 'PRE-APERTURA':
+        return {
+          bg: theme.dark ? 'rgba(230, 196, 73, 0.1)' : 'rgba(230, 196, 73, 0.15)',
+          border: theme.colors.warning,
+          text: theme.colors.warning,
+        };
+      case 'CERRADO':
+      default:
+        return {
+          bg: 'rgba(239, 68, 68, 0.1)',
+          border: theme.colors.trendDown,
+          text: theme.colors.trendDown,
+        };
+    }
+  };
+
+  const statusColors = getStatusColors();
 
   const themeStyles = React.useMemo(
     () => ({
       statusBadge: {
-        backgroundColor: isOpen ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', // Keep opacity manual or use util
-        borderColor: isOpen ? theme.colors.trendUp : theme.colors.trendDown,
+        backgroundColor: statusColors.bg,
+        borderColor: statusColors.border,
       },
       dot: {
-        backgroundColor: isOpen ? theme.colors.trendUp : theme.colors.trendDown,
+        backgroundColor: statusColors.text,
       },
       statusText: {
-        color: isOpen ? theme.colors.trendUp : theme.colors.trendDown,
+        color: statusColors.text,
       },
       timeText: {
         color: theme.colors.onSurfaceVariant,
@@ -63,7 +92,7 @@ const MarketStatus: React.FC<MarketStatusProps> = ({
         marginLeft: 4,
       },
     }),
-    [theme, isOpen],
+    [theme, statusColors],
   );
 
   return (
@@ -71,7 +100,7 @@ const MarketStatus: React.FC<MarketStatusProps> = ({
       {showBadge && (
         <View style={[styles.statusBadge, themeStyles.statusBadge]}>
           <View style={styles.indicatorContainer}>
-            {isOpen && (
+            {status === 'ABIERTO' && (
               <Animated.View
                 style={[
                   styles.ping,
@@ -85,7 +114,11 @@ const MarketStatus: React.FC<MarketStatusProps> = ({
             <View style={[styles.dot, themeStyles.dot]} />
           </View>
           <Text style={[styles.statusText, themeStyles.statusText]}>
-            {isOpen ? 'MERCADO ABIERTO' : 'MERCADO CERRADO'}
+            {status === 'ABIERTO'
+              ? 'MERCADO ABIERTO'
+              : status === 'PRE-APERTURA'
+                ? 'PRE-APERTURA'
+                : 'MERCADO CERRADO'}
           </Text>
         </View>
       )}

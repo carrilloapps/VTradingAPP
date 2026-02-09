@@ -16,7 +16,7 @@ import { captureRef } from 'react-native-view-shot';
 import Share from 'react-native-share';
 
 import UnifiedHeader from '@/components/ui/UnifiedHeader';
-import MarketStatus from '@/components/ui/MarketStatus';
+import MarketStatus, { MarketState } from '@/components/ui/MarketStatus';
 import IndexHero from '@/components/stocks/IndexHero';
 import StockItem from '@/components/stocks/StockItem';
 import SearchBar from '@/components/ui/SearchBar';
@@ -46,7 +46,7 @@ interface MarketIndexData {
     totalVolume: number;
     totalAmount: number;
   };
-  statusState?: string;
+  statusState?: MarketState;
   updateDate?: string;
 }
 
@@ -81,7 +81,7 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
   const [, setSharing] = useState(false);
   const viewShotRef = React.useRef<any>(null);
 
-  const isPremium = !!(user && !user.isAnonymous);
+  const isPremium = !!user; // Usuario logueado = Premium
 
   useEffect(() => {
     if (isFocused) {
@@ -339,7 +339,7 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
       <View style={styles.headerContainer}>
         {/* Market Status */}
         <MarketStatus
-          isOpen={isMarketOpen}
+          status={indexData?.statusState || (isMarketOpen ? 'ABIERTO' : 'CERRADO')}
           updatedAt={new Date().toLocaleTimeString([], {
             hour: '2-digit',
             minute: '2-digit',
@@ -352,27 +352,8 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
         {indexData &&
           (() => {
             const stats = indexData.stats;
-            const hasValidStats =
-              stats &&
-              stats.titlesUp !== 0 &&
-              stats.titlesDown !== 0 &&
-              stats.titlesUnchanged !== 0;
-
-            let labelOverride;
-            let fallbackValue;
-            let statsToPass;
-
-            if (hasValidStats) {
-              statsToPass = stats;
-            } else {
-              if (indexData.statusState && indexData.statusState !== 'ABIERTO') {
-                labelOverride = 'ESTADO DEL MERCADO';
-                fallbackValue = indexData.statusState;
-              } else {
-                labelOverride = 'FECHA';
-                fallbackValue = indexData.updateDate;
-              }
-            }
+            // Siempre mostrar títulos si existen las propiedades stats
+            const hasStats = stats && typeof stats.titlesUp === 'number';
 
             return (
               <IndexHero
@@ -380,9 +361,7 @@ const StocksScreen = ({ navigation }: StocksScreenProps) => {
                 changePercent={indexData.changePercent}
                 isPositive={indexData.isPositive}
                 volume={indexData.volume}
-                stats={statsToPass}
-                labelOverride={labelOverride}
-                fallbackValue={fallbackValue}
+                stats={hasStats ? stats : undefined}
               />
             );
           })()}
