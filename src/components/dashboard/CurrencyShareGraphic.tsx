@@ -7,6 +7,7 @@ import FastImage from 'react-native-fast-image';
 
 import { CurrencyRate } from '@/services/CurrencyService';
 import { BolivarIcon } from '@/components/ui/BolivarIcon';
+import { getSafeCurrencyCode } from '@/utils/CurrencyUtils';
 
 interface CurrencyShareGraphicProps {
   viewShotRef: React.RefObject<any>;
@@ -46,6 +47,9 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
     rate.buyValue && rate.sellValue
       ? Math.abs(((rate.sellValue - rate.buyValue) / rate.buyValue) * 100)
       : null;
+
+  // Extract a safe currency code for display
+  const safeCode = getSafeCurrencyCode(rate);
 
   // Dynamic sizes based on aspect ratio
   const platformIconSize = 24;
@@ -264,7 +268,7 @@ const CurrencyShareGraphic: React.FC<CurrencyShareGraphicProps> = ({
                   )}
                 </View>
                 <View>
-                  <Text style={symbolTextStyle}>{rate.code} / VES</Text>
+                  <Text style={symbolTextStyle}>{safeCode} / VES</Text>
                   <Text style={nameTextStyle}>{rate.name}</Text>
                 </View>
               </View>

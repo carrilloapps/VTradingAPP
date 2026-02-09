@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Text } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import { getSafeCurrencyCode, getDisplayPair, getDisplayCurrency } from '@/utils/CurrencyUtils';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { FlashList } from '@shopify/flash-list';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -254,9 +255,7 @@ const ExchangeRatesScreen = () => {
         const shouldInvertDisplay = rate.type === 'border' && rate.value < 1;
 
         // Ensure rate.code is not empty, undefined, or whitespace-only
-        const rawCode = rate.code || '';
-        const trimmedCode = rawCode.trim();
-        const safeCode = trimmedCode || rate.name?.split(/[•/]/)[0]?.trim() || 'UNKNOWN';
+        const safeCode = getSafeCurrencyCode(rate);
 
         const displayValue = shouldInvertDisplay
           ? (1 / rate.value).toLocaleString('es-VE', {
@@ -268,12 +267,12 @@ const ExchangeRatesScreen = () => {
               maximumFractionDigits: 2,
             });
 
-        const displayTitle = shouldInvertDisplay ? `${safeCode} / VES` : `VES / ${safeCode}`;
+        const displayTitle = getDisplayPair(safeCode, shouldInvertDisplay).replace('/', ' / ');
 
         // displayCurrency is always the denominator (right side) of the pair
         // Not inverted: VES/COP = 6.71 COP (shows foreign currency)
         // Inverted: PEN/VES = 159.09 VES (shows VES because value is in VES)
-        const displayCurrency = shouldInvertDisplay ? 'VES' : safeCode;
+        const displayCurrency = getDisplayCurrency(safeCode, shouldInvertDisplay);
 
         return (
           <RateCard

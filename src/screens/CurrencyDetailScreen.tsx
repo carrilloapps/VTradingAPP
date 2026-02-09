@@ -20,6 +20,7 @@ import { analyticsService } from '@/services/firebase/AnalyticsService';
 import { StocksService } from '@/services/StocksService';
 import { rateHistoryService } from '@/services/RateHistoryService';
 import type { HistoryDataPoint } from '@/services/RateHistoryService';
+import { getSafeCurrencyCode, getDisplayPair, getDisplayCurrency } from '@/utils/CurrencyUtils';
 
 const CurrencyDetailScreen = ({ route, navigation }: any) => {
   const theme = useAppTheme();
@@ -30,14 +31,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
   }, [currencyId]);
 
   // Extract a safe currency code for display and logic
-  const safeCode = useMemo(() => {
-    const rawCode = (rate.code || '').trim();
-    if (rawCode) return rawCode.toUpperCase();
-
-    // Fallback: extract from name (e.g., "USDT • P2P" or "COP/VES • BCV")
-    const fromName = rate.name?.split(/[•/]/)[0]?.trim();
-    return fromName ? fromName.toUpperCase() : 'USD';
-  }, [rate.code, rate.name]);
+  const safeCode = useMemo(() => getSafeCurrencyCode(rate), [rate]);
 
   // Load currency history
   useEffect(() => {
@@ -110,9 +104,10 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
   // With inversion: Shows COP/VES = 0.149 VES ("1 COP = 0.149 VES")
   // For PEN where value = 0.00628: VES/PEN = 0.00628 means "1 VES = 0.00628 PEN"
   // Inverted: PEN/VES = 159.24 means "1 PEN = 159.24 VES"
-  const displayPair = showInverse ? `${safeCode}/VES` : `VES/${safeCode}`;
+  const displayPair = getDisplayPair(safeCode, showInverse);
+
   // The displayCurrency is always the denominator (right side) of the pair
-  const displayCurrency = showInverse ? 'VES' : safeCode;
+  const displayCurrency = getDisplayCurrency(safeCode, showInverse);
 
   const isPositive = (rate.changePercent || 0) > 0;
   const isNegative = (rate.changePercent || 0) < 0;
@@ -143,7 +138,7 @@ const CurrencyDetailScreen = ({ route, navigation }: any) => {
 
   const getDynamicShareMessage = useCallback(
     (format: '1:1' | '16:9' | 'text' = '1:1') => {
-      const pair = rate.name.split(' • ')[0] || `${safeCode}/VES`;
+      const pair = displayPair; // Use the already calculated safe pair
       const changeSign =
         (rate.changePercent || 0) > 0 ? '📈' : (rate.changePercent || 0) < 0 ? '📉' : '📊';
       const changeText = rate.changePercent
